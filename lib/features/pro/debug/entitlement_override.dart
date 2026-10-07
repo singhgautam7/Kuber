@@ -4,6 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../paywall/pro_state.dart';
 
+/// Whether the entitlement override can engage: debug builds, or a QA build
+/// made with `--dart-define=KUBER_QA=true` (release-mode APK for device
+/// testing). A const, so Play builds (neither) tree-shake every override path.
+const bool kEntitlementOverrideEnabled =
+    kDebugMode || bool.fromEnvironment('KUBER_QA');
+
 /// Debug-only forced entitlement tiers for local QA of the Pro gates.
 enum DebugForcedTier { free, trial, monthly, yearly, lifetime }
 
@@ -28,7 +34,8 @@ class DebugEntitlementOverride {
   static int _trialDaysLeft = 14;
 
   /// The active forced tier, or null when there is no override (or in release).
-  static DebugForcedTier? get tier => kDebugMode ? _tier : null;
+  static DebugForcedTier? get tier =>
+      kEntitlementOverrideEnabled ? _tier : null;
 
   /// Days-remaining used when forcing [DebugForcedTier.trial].
   static int get trialDaysLeft => _trialDaysLeft;
@@ -36,7 +43,7 @@ class DebugEntitlementOverride {
   /// The forced [KuberProState], or null to fall through to the real
   /// Isar-derived entitlement. Always null in release builds.
   static KuberProState? get state {
-    if (!kDebugMode || _tier == null) return null;
+    if (!kEntitlementOverrideEnabled || _tier == null) return null;
     final now = DateTime.now();
     switch (_tier!) {
       case DebugForcedTier.free:
@@ -69,7 +76,7 @@ class DebugEntitlementOverride {
   /// Loads any persisted override into memory. Called once at startup before
   /// the first `kuberProStateProvider` read. No-op in release.
   static Future<void> hydrate() async {
-    if (!kDebugMode) return;
+    if (!kEntitlementOverrideEnabled) return;
     final prefs = await SharedPreferences.getInstance();
     _trialDaysLeft = prefs.getInt(PrefsKeys.debugEntitlementTrialDays) ?? 14;
     _tier = _parse(prefs.getString(PrefsKeys.debugEntitlementOverride));
@@ -79,7 +86,7 @@ class DebugEntitlementOverride {
   /// it. Callers should `ref.invalidate(kuberProStateProvider)` afterwards so
   /// the whole app re-derives from the new state. No-op in release.
   static Future<void> set(DebugForcedTier? tier, {int? trialDaysLeft}) async {
-    if (!kDebugMode) return;
+    if (!kEntitlementOverrideEnabled) return;
     _tier = tier;
     if (trialDaysLeft != null) _trialDaysLeft = trialDaysLeft.clamp(1, 14);
     final prefs = await SharedPreferences.getInstance();
@@ -87,19 +94,16 @@ class DebugEntitlementOverride {
       await prefs.remove(PrefsKeys.debugEntitlementOverride);
     } else {
       await prefs.setString(PrefsKeys.debugEntitlementOverride, tier.name);
-      await prefs.setInt(
-        PrefsKeys.debugEntitlementTrialDays,
-        _trialDaysLeft,
-      );
+      await prefs.setInt(PrefsKeys.debugEntitlementTrialDays, _trialDaysLeft);
     }
   }
 
   static DebugForcedTier? _parse(String? raw) => switch (raw) {
-        'free' => DebugForcedTier.free,
-        'trial' => DebugForcedTier.trial,
-        'monthly' => DebugForcedTier.monthly,
-        'yearly' => DebugForcedTier.yearly,
-        'lifetime' => DebugForcedTier.lifetime,
-        _ => null,
-      };
+    'free' => DebugForcedTier.free,
+    'trial' => DebugForcedTier.trial,
+    'monthly' => DebugForcedTier.monthly,
+    'yearly' => DebugForcedTier.yearly,
+    'lifetime' => DebugForcedTier.lifetime,
+    _ => null,
+  };
 }

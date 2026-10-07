@@ -18,13 +18,17 @@ extension _LineVariant on _IncomeExpenseChartState {
             FlSpot(i.toDouble(), value(widget.points[i])),
         ],
         color: color,
-        barWidth: 2.5,
+        // 2dp, round join and cap, no dots except the selected point
+        // (radius 5, 2dp stroke in the card colour); flat area fill.
+        barWidth: 2,
         isCurved: false,
+        isStrokeCapRound: true,
+        isStrokeJoinRound: true,
         dotData: FlDotData(
           show: true,
           checkToShowDot: (spot, _) => spot.x.toInt() == _selectedIndex,
           getDotPainter: (spot, _, _, _) => FlDotCirclePainter(
-            radius: 4.5,
+            radius: 5,
             color: color,
             strokeWidth: 2,
             strokeColor: cs.surfaceContainer,
@@ -32,13 +36,8 @@ extension _LineVariant on _IncomeExpenseChartState {
         ),
         belowBarData: BarAreaData(
           show: areaFill,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              cs.tertiary.withValues(alpha: 0.18),
-              cs.tertiary.withValues(alpha: 0),
-            ],
+          color: color.withValues(
+            alpha: cs.brightness == Brightness.dark ? 0.24 : 0.16,
           ),
         ),
       );
@@ -55,14 +54,15 @@ extension _LineVariant on _IncomeExpenseChartState {
         borderData: FlBorderData(show: false),
         extraLinesData: _selectedIndex == null
             ? const ExtraLinesData()
-            : ExtraLinesData(verticalLines: [
-                VerticalLine(
-                  x: _selectedIndex!.toDouble(),
-                  color: cs.primary.withValues(alpha: 0.5),
-                  strokeWidth: 1,
-                  dashArray: [2, 3],
-                ),
-              ]),
+            : ExtraLinesData(
+                verticalLines: [
+                  VerticalLine(
+                    x: _selectedIndex!.toDouble(),
+                    color: cs.outline,
+                    strokeWidth: 1,
+                  ),
+                ],
+              ),
         lineTouchData: LineTouchData(
           enabled: true,
           handleBuiltInTouches: false,
@@ -77,9 +77,9 @@ extension _LineVariant on _IncomeExpenseChartState {
           },
         ),
         lineBarsData: [
-          // Income line gets the soft area fill in expanded mode only (4d).
-          series(cs.tertiary, (p) => p.income, areaFill: !widget.compact),
-          series(cs.error, (p) => p.expense),
+          // Income line carries the area fill (board 1g).
+          series(context.kuberMoney.income, (p) => p.income, areaFill: true),
+          series(context.kuberMoney.expense, (p) => p.expense),
         ],
       ),
     );

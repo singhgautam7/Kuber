@@ -21,7 +21,9 @@ Future<void> showLanguagePicker({
     useRootNavigator: true,
     backgroundColor: cs.surfaceContainer,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(KuberShape.extraLarge),
+      ),
     ),
     builder: (_) => _LanguagePickerSheet(
       ref: ref,
@@ -88,10 +90,7 @@ class _LanguagePickerSheetState extends State<_LanguagePickerSheet> {
             style: localeFont(fontSize: 14, color: cs.onSurface),
             decoration: InputDecoration(
               hintText: l10n.searchLanguage,
-              hintStyle: localeFont(
-                fontSize: 14,
-                color: cs.onSurfaceVariant,
-              ),
+              hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
               prefixIcon: Icon(
                 Icons.search_rounded,
                 size: 20,
@@ -101,20 +100,20 @@ class _LanguagePickerSheetState extends State<_LanguagePickerSheet> {
               fillColor: cs.surfaceContainerHigh,
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
 
           if (_filtered.isEmpty)
             Padding(
@@ -122,10 +121,7 @@ class _LanguagePickerSheetState extends State<_LanguagePickerSheet> {
               child: Center(
                 child: Text(
                   l10n.noLanguagesFound,
-                  style: localeFont(
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                 ),
               ),
             )
@@ -137,7 +133,8 @@ class _LanguagePickerSheetState extends State<_LanguagePickerSheet> {
               itemBuilder: (_, i) {
                 final lang = _filtered[i];
                 final isSelected =
-                    lang.locale.languageCode == widget.currentLocale.languageCode;
+                    lang.locale.languageCode ==
+                    widget.currentLocale.languageCode;
                 return _LanguageRow(
                   lang: lang,
                   isSelected: isSelected,
@@ -170,7 +167,7 @@ class _LanguageRow extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final nativeStyle = localeFont(
       locale: lang.locale,
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.w600,
       color: isSelected ? cs.primary : cs.onSurface,
     );
@@ -182,10 +179,10 @@ class _LanguageRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.md,
+            horizontal: KuberSpace.md,
             vertical: 14,
           ),
           child: Row(

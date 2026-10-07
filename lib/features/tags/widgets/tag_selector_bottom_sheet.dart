@@ -18,10 +18,12 @@ class TagSelectorBottomSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TagSelectorBottomSheet> createState() => _TagSelectorBottomSheetState();
+  ConsumerState<TagSelectorBottomSheet> createState() =>
+      _TagSelectorBottomSheetState();
 }
 
-class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet> {
+class _TagSelectorBottomSheetState
+    extends ConsumerState<TagSelectorBottomSheet> {
   late List<Tag> _selectedTags;
   String _searchQuery = "";
   late final TextEditingController _searchController;
@@ -95,8 +97,8 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                   Text(
                     context.l10n.selectTags,
                     style: localeFont(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
                   ),
@@ -108,7 +110,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(KuberRadius.sm),
+                        borderRadius: BorderRadius.circular(KuberShape.small),
                       ),
                     ),
                     child: Text(context.l10n.doneLabel),
@@ -129,7 +131,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                   filled: true,
                   fillColor: cs.surfaceContainerHigh,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.large),
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -141,13 +143,20 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
             Expanded(
               child: tagsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+                error: (e, _) => Center(
+                  child: Text(context.l10n.errorWithDetails(e.toString())),
+                ),
                 data: (tags) {
-                  final filteredTags = tags.where((t) => 
-                    t.name.contains(_searchQuery.toLowerCase().trim())).toList();
+                  final filteredTags = tags
+                      .where(
+                        (t) =>
+                            t.name.contains(_searchQuery.toLowerCase().trim()),
+                      )
+                      .toList();
 
-                  final queryExists = tags.any((t) => 
-                    t.name == Tag.normalize(_searchQuery));
+                  final queryExists = tags.any(
+                    (t) => t.name == Tag.normalize(_searchQuery),
+                  );
 
                   return ListView(
                     controller: scrollController,
@@ -163,12 +172,14 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                           name: _searchQuery,
                           onTap: () => _createAndSelectTag(_searchQuery),
                         ),
-                      
+
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: filteredTags.map((tag) {
-                          final isSelected = _selectedTags.any((t) => t.id == tag.id);
+                          final isSelected = _selectedTags.any(
+                            (t) => t.id == tag.id,
+                          );
                           return _TagChip(
                             tag: tag,
                             isSelected: isSelected,
@@ -178,7 +189,9 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(context.l10n.tagDisabledMessage),
+                                    content: Text(
+                                      context.l10n.tagDisabledMessage,
+                                    ),
                                     duration: const Duration(seconds: 2),
                                   ),
                                 );
@@ -214,7 +227,7 @@ class _TagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isEnabled = tag.isEnabled;
-    
+
     return FilterChip(
       label: Text("#${tag.name}"),
       selected: isSelected,
@@ -224,22 +237,22 @@ class _TagChip extends StatelessWidget {
       checkmarkColor: cs.onPrimary,
       showCheckmark: true,
       labelStyle: localeFont(
-        fontSize: 13,
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        color: !isEnabled 
-          ? cs.onSurfaceVariant.withValues(alpha: 0.3)
-          : isSelected 
-            ? cs.onPrimary 
+        fontSize: 14,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        color: !isEnabled
+            ? cs.onSurfaceVariant.withValues(alpha: 0.3)
+            : isSelected
+            ? cs.onPrimary
             : cs.onSurface,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
+        borderRadius: BorderRadius.circular(KuberShape.small),
         side: BorderSide(
           color: !isEnabled
-            ? cs.outline.withValues(alpha: 0.2)
-            : isSelected 
-              ? cs.primary 
-              : cs.outline.withValues(alpha: 0.5),
+              ? cs.outlineVariant.withValues(alpha: 0.2)
+              : isSelected
+              ? cs.primary
+              : cs.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -256,17 +269,17 @@ class _TagActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final normalized = Tag.normalize(name);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: cs.primary.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
           ),
           child: Row(

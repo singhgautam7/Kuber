@@ -24,8 +24,7 @@ class RecurringHistorySheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyAsync =
-        ref.watch(recurringRuleTransactionsProvider(rule.id));
+    final historyAsync = ref.watch(recurringRuleTransactionsProvider(rule.id));
 
     return KuberBottomSheet(
       title: context.l10n.transactionHistory,
@@ -40,9 +39,7 @@ class RecurringHistorySheet extends ConsumerWidget {
           child: Center(
             child: Text(
               context.l10n.errorLoadingHistory(err.toString()),
-              style: localeFont(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: localeFont(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ),
@@ -71,13 +68,11 @@ class RecurringHistorySheet extends ConsumerWidget {
             children: [
               for (final key in sortedKeys) ...[
                 _DateGroupHeader(dateKey: key),
-                const SizedBox(height: KuberSpacing.sm),
-                ...grouped[key]!.map(
-                  (t) => _RecurringTxnRow(transaction: t),
-                ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.sm),
+                ...grouped[key]!.map((t) => _RecurringTxnRow(transaction: t)),
+                const SizedBox(height: KuberSpace.md),
               ],
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
             ],
           );
         },
@@ -116,8 +111,8 @@ class _DateGroupHeader extends StatelessWidget {
       child: Text(
         label,
         style: localeFont(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
           color: cs.onSurfaceVariant,
           letterSpacing: 1.0,
         ),
@@ -144,7 +139,9 @@ class _RecurringTxnRow extends ConsumerWidget {
     final accountsAsync = ref.watch(accountListProvider);
 
     final catId = int.tryParse(transaction.categoryId);
-    final cat = categoryMapAsync.whenOrNull(data: (m) => catId != null ? m[catId] : null);
+    final cat = categoryMapAsync.whenOrNull(
+      data: (m) => catId != null ? m[catId] : null,
+    );
 
     final accountName = accountsAsync.whenOrNull(
       data: (accs) => accs
@@ -156,31 +153,29 @@ class _RecurringTxnRow extends ConsumerWidget {
     final iconData = cat != null
         ? IconMapper.fromString(cat.icon)
         : Icons.category_outlined;
-    final rawColor = cat != null ? Color(cat.colorValue) : cs.outline;
+    final rawColor = cat != null ? Color(cat.colorValue) : cs.outlineVariant;
     final iconColor = harmonizeCategory(context, rawColor);
 
     final isIncome = transaction.type == 'income';
-    final amountColor = isIncome ? cs.tertiary : cs.error;
+    final amountColor = isIncome
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
     final amountPrefix = isIncome ? '+' : '-';
 
     final timeStr = DateFormat('h:mm a').format(transaction.createdAt);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      margin: const EdgeInsets.only(bottom: KuberSpace.sm),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline, width: 0.5),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant, width: 0.5),
       ),
       child: Row(
         children: [
-          CategoryIcon.square(
-            icon: iconData,
-            rawColor: iconColor,
-            size: 44,
-          ),
-          const SizedBox(width: KuberSpacing.md),
+          CategoryIcon.square(icon: iconData, rawColor: iconColor, size: 44),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +202,7 @@ class _RecurringTxnRow extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           Text(
             '$amountPrefix${formatter.formatCurrency(transaction.amount)}',
             style: textTheme.bodyMedium?.copyWith(

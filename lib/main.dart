@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'features/settings/providers/theme_options_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
@@ -15,6 +16,7 @@ import 'core/database/migrations.dart';
 import 'core/database/seed_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_families.dart' show resolveVariant;
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/backups/data/backup_config.dart';
 import 'features/recurring/data/recurring_processor.dart';
@@ -120,14 +122,19 @@ Future<void> _bootstrap() async {
   // a prefs failure falls back to system mode + Signature.
   var bootTheme = (ThemeMode.system, ThemeVariant.signature);
   var onboarded = false;
+  var bootThemeOptions = const ThemeOptions();
   try {
     final prefs = await SharedPreferences.getInstance();
+    bootThemeOptions = ThemeOptions(
+      amoled: prefs.getBool(PrefsKeys.themeAmoled) ?? false,
+      dynamicColor: prefs.getBool(PrefsKeys.themeDynamicColor) ?? false,
+    );
     final modeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
     final variantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
     bootTheme = (
       ThemeMode.values[modeIndex.clamp(0, ThemeMode.values.length - 1)],
-      ThemeVariant
-          .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)],
+      resolveVariant(ThemeVariant
+          .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)]),
     );
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
   } catch (e) {
@@ -199,6 +206,7 @@ Future<void> _bootstrap() async {
         overrides: [
           isarProvider.overrideWithValue(isar),
           bootThemeProvider.overrideWithValue(bootTheme),
+          bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
           initialLocationProvider.overrideWithValue(initialLocation),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
           automaticBackupDueProvider.overrideWith((ref) => backupDue),
@@ -265,7 +273,7 @@ class KuberStartupErrorApp extends StatelessWidget {
           return Scaffold(
             body: Center(
               child: Padding(
-                padding: const EdgeInsets.all(KuberSpacing.xl),
+                padding: const EdgeInsets.all(KuberSpace.xl),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -274,7 +282,7 @@ class KuberStartupErrorApp extends StatelessWidget {
                       size: 56,
                       color: cs.error,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     Text(
                       "Couldn't open Kuber",
                       textAlign: TextAlign.center,
@@ -283,7 +291,7 @@ class KuberStartupErrorApp extends StatelessWidget {
                         color: cs.onSurface,
                       ),
                     ),
-                    const SizedBox(height: KuberSpacing.sm),
+                    const SizedBox(height: KuberSpace.sm),
                     Text(
                       'Something went wrong while loading your data. '
                       'Your data is still on this device — please try again, '
@@ -293,7 +301,7 @@ class KuberStartupErrorApp extends StatelessWidget {
                         color: cs.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: KuberSpacing.xl),
+                    const SizedBox(height: KuberSpace.xl),
                     FilledButton.icon(
                       onPressed: onRetry,
                       icon: const Icon(Icons.refresh_rounded),

@@ -16,19 +16,21 @@ class SmsBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final pill = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.25)),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.fullR,
       ),
       child: Text(
         'SMS',
         style: localeFont(
-          fontSize: 9.5,
-          fontWeight: FontWeight.w700,
-          color: cs.primary,
-          letterSpacing: 0.6,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: cs.onSecondaryContainer,
+          letterSpacing: 0.5,
+          height: 1.0,
         ),
       ),
     );
@@ -58,16 +60,16 @@ void showRawSmsSheet(
       title: 'Original SMS',
       subtitle: senderId,
       child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
+        padding: const EdgeInsets.all(KuberSpace.md),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Text(
           rawSms,
           style: monoFont(
-            fontSize: 12.5,
+            fontSize: 12,
             height: 1.55,
             color: cs.onSurface,
             letterSpacing: -0.1,

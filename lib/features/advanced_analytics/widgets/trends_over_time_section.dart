@@ -5,7 +5,10 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../charts/widgets/income_expense_chart_controls.dart'
@@ -30,14 +33,13 @@ class TrendsOverTimeSection extends ConsumerWidget {
     final result = ref.watch(trendsProvider);
     final metric = ref.watch(trendsMetricProvider);
     final formatter = ref.watch(formatterProvider);
-    final cs = Theme.of(context).colorScheme;
     final isIncome = metric == 'income';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _MetricChips(),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         result.when(
           loading: () => const AnalyticsSkeletonBlock(),
           error: (error, _) => KuberEmptyState(
@@ -67,10 +69,12 @@ class TrendsOverTimeSection extends ConsumerWidget {
             final labels = data.currentSeries
                 .map((m) => DateFormat('MMM').format(m.month))
                 .toList();
-            final currentTotal =
-                isIncome ? data.currentIncome : data.currentExpense;
-            final prevTotal =
-                isIncome ? data.previousIncome : data.previousExpense;
+            final currentTotal = isIncome
+                ? data.currentIncome
+                : data.currentExpense;
+            final prevTotal = isIncome
+                ? data.previousIncome
+                : data.previousExpense;
             final change = prevTotal <= 0
                 ? 0.0
                 : ((currentTotal - prevTotal) / prevTotal) * 100;
@@ -94,33 +98,30 @@ class TrendsOverTimeSection extends ConsumerWidget {
                   currentLabel: 'This year',
                   previousLabel: 'Last year',
                 ),
-                const SizedBox(height: KuberSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatPill(
-                        label: 'This year',
-                        value: formatter.formatCompactCurrency(currentTotal),
+                const SizedBox(height: KuberSpace.md),
+                // Board "Year over year": one card, three figures.
+                KuberCard(
+                  child: Row(
+                    children: [
+                      _Figure(
+                        'This year',
+                        formatter.formatCompactCurrency(currentTotal),
                       ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: StatPill(
-                        label: 'Last year',
-                        value: formatter.formatCompactCurrency(prevTotal),
+                      _Figure(
+                        'Last year',
+                        formatter.formatCompactCurrency(prevTotal),
                       ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: StatPill(
-                        label: 'Change',
-                        value: aaPercent(change),
-                        color: changeGood ? cs.tertiary : cs.error,
+                      _Figure(
+                        'Change',
+                        aaPercent(change),
+                        color: changeGood
+                            ? context.kuberMoney.income
+                            : context.kuberMoney.expense,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.sectionGap - 4),
                 _ByCategory(isIncome: isIncome),
               ],
             );
@@ -138,7 +139,6 @@ class _ByCategory extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final data = ref.watch(trendsProvider).valueOrNull;
     final valueMode = ref.watch(trendsCategoryValueModeProvider);
     final categories = ref.watch(categoryListProvider).valueOrNull ?? const [];
@@ -158,15 +158,7 @@ class _ByCategory extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Text(
-              'BY CATEGORY',
-              style: localeFont(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.4,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
+            Text('BY CATEGORY', style: sectionHeaderStyle(context)),
             const Spacer(),
             KuberSegmentedTabs(
               labels: const ['Percent', 'Amount'],
@@ -176,14 +168,17 @@ class _ByCategory extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: KuberSpacing.sm),
-        for (var i = 0; i < resolved.length; i++)
-          _CategoryChangeRow(
-            row: resolved[i],
-            isIncome: isIncome,
-            showAmount: valueMode == 1,
-            isLast: i == resolved.length - 1,
-          ),
+        const SizedBox(height: KuberSpace.sectionHeaderGap),
+        KuberGroup(
+          children: [
+            for (final r in resolved)
+              _CategoryChangeRow(
+                row: r,
+                isIncome: isIncome,
+                showAmount: valueMode == 1,
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -194,141 +189,80 @@ class _MetricChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final metric = ref.watch(trendsMetricProvider);
-    final cs = Theme.of(context).colorScheme;
-
-    return Row(
-      children: [
-        for (final entry in const {
-          'spending': 'Total Spending',
-          'income': 'Total Income',
-        }.entries) ...[
-          Expanded(
-            child: GestureDetector(
-              onTap: () =>
-                  ref.read(trendsMetricProvider.notifier).state = entry.key,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 9),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: metric == entry.key
-                      ? cs.primary.withValues(alpha: 0.12)
-                      : cs.surfaceContainerHigh,
-                  border: Border.all(
-                    color: metric == entry.key ? cs.primary : cs.outline,
-                  ),
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                child: Text(
-                  entry.value,
-                  style: localeFont(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: metric == entry.key
-                        ? cs.primary
-                        : cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (entry.key == 'spending') const SizedBox(width: KuberSpacing.sm),
-        ],
-      ],
+    return KuberSegmentedControl<String>(
+      values: const ['spending', 'income'],
+      labels: const ['Total spending', 'Total income'],
+      selected: ref.watch(trendsMetricProvider),
+      onSelected: (v) => ref.read(trendsMetricProvider.notifier).state = v,
     );
   }
 }
 
-class _CategoryChangeRow extends ConsumerWidget {
+/// Caption over a figure, one third of the stats card.
+class _Figure extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? color;
+  const _Figure(this.label, this.value, {this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: tt.titleMedium!.copyWith(color: color ?? cs.onSurface),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryChangeRow extends StatelessWidget {
   final dynamic row;
   final bool isIncome;
   final bool showAmount;
-  final bool isLast;
 
   const _CategoryChangeRow({
     required this.row,
     required this.isIncome,
     required this.showAmount,
-    required this.isLast,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final categories = ref.watch(categoryListProvider).valueOrNull ?? const [];
-    final id = int.tryParse(row.id as String);
-    final matches = categories.where((c) => c.id == id);
-    if (matches.isEmpty) return const SizedBox.shrink();
-    final category = matches.first;
-
+  Widget build(BuildContext context) {
     final percent = row.percent as double;
     final delta = row.delta as double;
     final rose = delta > 0;
     // A rise in income is good (green); a rise in spending is bad (red).
     final good = isIncome ? rose : !rose;
-    final color = good ? cs.tertiary : cs.error;
+    final color = good ? context.kuberMoney.income : context.kuberMoney.expense;
     final valueText = showAmount
         ? '${delta >= 0 ? '+' : ''}${aaMoney(delta)}'
         : '${percent > 0 ? '+' : ''}${percent.toStringAsFixed(0)}%';
     final caption =
-        '${isIncome ? 'Income' : 'Spending'} ${rose ? 'increased' : 'decreased'} by';
-    final catColor = Color(category.colorValue);
+        '${isIncome ? 'Income' : 'Spending'} ${rose ? 'increased' : 'decreased'}';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
-      decoration: BoxDecoration(
-        border: isLast ? null : Border(bottom: BorderSide(color: cs.outline)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: catColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(KuberRadius.sm),
-            ),
-            child: Icon(
-              IconMapper.fromString(category.icon),
-              size: 16,
-              color: catColor,
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.md),
-          Expanded(
-            child: Text(
-              category.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: localeFont(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                caption,
-                style: localeFont(fontSize: 9, color: cs.onSurfaceVariant),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                valueText,
-                style: localeFont(
-                  color: color,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13.5,
-                ),
-              ),
-            ],
-          ),
-        ],
+    return AnalyticsCategoryRow(
+      categoryId: row.id as String,
+      subtitle: caption,
+      trailing: Text(
+        valueText,
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(color: color),
       ),
     );
   }
@@ -356,80 +290,35 @@ class AaCategorySelector extends StatelessWidget {
     final matches = categories.where((c) => c.id == selectedIntId);
     final selectedCat = matches.isEmpty ? null : matches.first;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: () {
-        showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          backgroundColor: cs.surfaceContainer,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(KuberRadius.lg),
-            ),
-          ),
-          builder: (_) => CategoryPickerSheet(
-            selectedCategoryId: selectedIntId,
-            onSelected: (id) {
-              onSelected(id.toString());
-              Navigator.pop(context);
-            },
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            if (selectedCat != null) ...[
-              Container(
-                width: 28,
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Color(selectedCat.colorValue).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
-                ),
-                child: Icon(
-                  IconMapper.fromString(selectedCat.icon),
-                  size: 16,
-                  color: Color(selectedCat.colorValue),
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Expanded(
-                child: Text(
-                  selectedCat.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-            ] else
-              Expanded(
-                child: Text(
-                  'Select a category',
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            Icon(Icons.expand_more_rounded, color: cs.onSurfaceVariant),
-          ],
+    void open() => showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: cs.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
         ),
       ),
+      builder: (_) => CategoryPickerSheet(
+        selectedCategoryId: selectedIntId,
+        onSelected: (id) {
+          onSelected(id.toString());
+          Navigator.pop(context);
+        },
+      ),
+    );
+
+    // Board "Category deep-dive": a selected dropdown chip.
+    return KuberChip(
+      label: selectedCat?.name ?? 'Select a category',
+      icon: selectedCat == null
+          ? Icons.category_outlined
+          : IconMapper.fromString(selectedCat.icon),
+      selected: selectedCat != null,
+      showCheck: false,
+      dropdown: true,
+      onTap: open,
     );
   }
 }

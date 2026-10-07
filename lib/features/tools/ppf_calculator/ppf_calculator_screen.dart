@@ -58,10 +58,10 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'deposit': _depositCtrl.text,
-        'tenure': _tenureCtrl.text,
-        'rate': _rateCtrl.text,
-      };
+    'deposit': _depositCtrl.text,
+    'tenure': _tenureCtrl.text,
+    'rate': _rateCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -82,8 +82,10 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final dep = formatter.formatCurrency(clampPpfDeposit(_rawDeposit),
-        symbol: currency.symbol);
+    final dep = formatter.formatCurrency(
+      clampPpfDeposit(_rawDeposit),
+      symbol: currency.symbol,
+    );
     if (r == null) return 'PPF $dep/yr';
     return '$dep/yr × ${_years}y → ${formatter.formatCurrency(r.maturity, symbol: currency.symbol)}';
   }
@@ -96,7 +98,8 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
     String money(double v) =>
         formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
-    final outOfRange = _rawDeposit > 0 &&
+    final outOfRange =
+        _rawDeposit > 0 &&
         (_rawDeposit < kPpfMinDeposit || _rawDeposit > kPpfMaxDeposit);
     void recompute(_) => scheduleRecompute();
 
@@ -112,53 +115,59 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _depositCtrl,
-            label: 'YEARLY DEPOSIT',
-            prefix: currency.symbol,
-            helper: '₹500 – ₹1,50,000 per year',
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: kPpfMinDeposit,
-            max: kPpfMaxDeposit,
-          ),
-          if (outOfRange)
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _depositCtrl,
+              label: 'YEARLY DEPOSIT',
+              prefix: currency.symbol,
+              helper: '₹500 – ₹1,50,000 per year',
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: kPpfMinDeposit,
+              max: kPpfMaxDeposit,
+            ),
+            if (outOfRange)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  'Deposit clamped to the ₹500 – ₹1,50,000 limit.',
+                  style: localeFont(fontSize: 11, color: cs.error),
+                ),
+              ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _tenureCtrl,
+              label: 'TENURE',
+              suffix: 'years',
+              onChanged: recompute,
+            ),
             Padding(
-              padding: const EdgeInsets.only(top: 6),
+              padding: const EdgeInsets.only(top: 5),
               child: Text(
-                'Deposit clamped to the ₹500 – ₹1,50,000 limit.',
-                style: localeFont(fontSize: 11.5, color: cs.error),
+                'Extendable in 5-year blocks',
+                style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
               ),
             ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _tenureCtrl,
-            label: 'TENURE',
-            suffix: 'years',
-            onChanged: recompute,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: Text('Extendable in 5-year blocks',
-                style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _rateCtrl,
-            label: 'INTEREST RATE',
-            suffix: '%',
-            onChanged: recompute,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: Text(
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _rateCtrl,
+              label: 'INTEREST RATE',
+              suffix: '%',
+              onChanged: recompute,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(
                 'Current PPF rate is 7.1% (subject to govt revision)',
-                style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
-          ),
-        ]),
+                style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -169,13 +178,21 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
                       value: money(result.maturity),
                       color: ToolAccents.emerald,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol('Total Deposited', money(result.totalDeposited)),
-                      StatCol('Interest Earned', money(result.interestEarned),
-                          color: cs.tertiary),
-                      const StatCol('Returns', 'Tax-free'),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol(
+                          'Total Deposited',
+                          money(result.totalDeposited),
+                        ),
+                        StatCol(
+                          'Interest Earned',
+                          money(result.interestEarned),
+                          color: context.kuberMoney.income,
+                        ),
+                        const StatCol('Returns', 'Tax-free'),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -186,12 +203,20 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
             child: ToolDonutBreakdown(
               segments: [
                 BreakdownSegment(
-                    'Deposited', result.totalDeposited, cs.primary),
+                  'Deposited',
+                  result.totalDeposited,
+                  cs.primary,
+                ),
                 BreakdownSegment(
-                    'Interest', result.interestEarned, ToolAccents.emerald),
+                  'Interest',
+                  result.interestEarned,
+                  ToolAccents.emerald,
+                ),
               ],
-              centerBig: formatter.formatCompactCurrency(result.maturity,
-                  symbol: currency.symbol),
+              centerBig: formatter.formatCompactCurrency(
+                result.maturity,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'MATURITY',
             ),
           ),
@@ -200,10 +225,11 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'PPF balance',
-                    points: result.balanceSeries,
-                    color: ToolAccents.emerald,
-                    fill: true),
+                  name: 'PPF balance',
+                  points: result.balanceSeries,
+                  color: ToolAccents.emerald,
+                  fill: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.balanceSeries.length; i++) 'Y$i',

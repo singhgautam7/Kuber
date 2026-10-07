@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/paywall/pro_state.dart';
 import '../providers/advanced_analytics_provider.dart';
@@ -66,27 +65,21 @@ class _MerchantAnalysisScreenState
     }
     if (!hasAccess) {
       return const Scaffold(
-        appBar: KuberAppBar(showBack: true, showHome: true, showBrand: false),
+        appBar: KuberAppBar(title: 'Merchant analysis', showBack: true),
         body: SizedBox.shrink(),
       );
     }
 
+    // Header scrolls with the content (no sticky headers); it lives inside
+    // this scroll view because the paging needs its own controller.
     return Scaffold(
-      appBar: const KuberAppBar(
-        showBack: true,
-        showHome: true,
-        showBrand: false,
-      ),
       body: SingleChildScrollView(
         controller: _scrollController,
-        padding: const EdgeInsets.only(bottom: KuberSpacing.xxl),
+        padding: const EdgeInsets.only(bottom: KuberSpace.xxl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const KuberPageHeader(
-              title: 'Merchant analysis',
-              description: 'Who you pay the most',
-            ),
+            const KuberAppBar(title: 'Merchant analysis', showBack: true),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: MerchantAnalysisSection(displayedCount: _displayedCount),

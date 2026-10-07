@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/color_harmonizer.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/add_new_button.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../more/screens/add_edit_category_screen.dart';
@@ -50,17 +53,17 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        color: cs.surfaceContainerLow,
+        borderRadius: KuberShape.sheetR,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              KuberSpacing.sm,
-              KuberSpacing.lg,
+              KuberSpace.screenMargin,
+              KuberSpace.sm,
+              KuberSpace.sm,
               0,
             ),
             child: Column(
@@ -72,56 +75,73 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                     width: 32,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                      borderRadius: KuberShape.fullR,
                     ),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
 
                 // Title row
                 Row(
                   children: [
-                    Text(
-                      context.l10n.selectCategoryTitle,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
+                    Expanded(
+                      child: Text(
+                        context.l10n.selectCategoryTitle,
+                        style: textTheme.titleLarge?.copyWith(
+                          color: cs.onSurface,
+                        ),
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 20),
+                    AppIconButton(
+                      icon: Icons.close_rounded,
+                      semanticLabel: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonTooltip,
                       onPressed: () => Navigator.pop(context),
-                      color: cs.onSurfaceVariant,
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
 
                 // Search field
-                TextField(
-                  controller: _searchController,
-                  autofocus: false,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.searchCategories,
-                    hintStyle: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurfaceVariant,
+                Padding(
+                  padding: const EdgeInsets.only(right: KuberSpace.md),
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: false,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.searchCategories,
+                      hintStyle: textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      filled: true,
+                      fillColor: cs.surfaceContainerHigh,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      border: const OutlineInputBorder(
+                        borderRadius: KuberShape.fullR,
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: const OutlineInputBorder(
+                        borderRadius: KuberShape.fullR,
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: KuberShape.fullR,
+                        borderSide: BorderSide(color: cs.primary, width: 2),
+                      ),
                     ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    filled: true,
-                    fillColor: cs.surfaceContainerHigh,
+                    onChanged: (v) => setState(() => _query = v.toLowerCase()),
                   ),
-                  onChanged: (v) => setState(() => _query = v.toLowerCase()),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
               ],
             ),
           ),
@@ -129,7 +149,8 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
           Flexible(
             child: categories.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
+              error: (e, _) =>
+                  Center(child: Text('${context.l10n.errorLabel}: $e')),
               data: (cats) {
                 final groupsData = groups.valueOrNull ?? [];
 
@@ -143,22 +164,26 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
 
                 if (widget.defaultType == 'expense') {
                   filtered = filtered
-                      .where((c) =>
-                          c.effectiveType == 'expense' ||
-                          c.effectiveType == 'both')
+                      .where(
+                        (c) =>
+                            c.effectiveType == 'expense' ||
+                            c.effectiveType == 'both',
+                      )
                       .toList();
                 } else if (widget.defaultType == 'income') {
                   filtered = filtered
-                      .where((c) =>
-                          c.effectiveType == 'income' ||
-                          c.effectiveType == 'both')
+                      .where(
+                        (c) =>
+                            c.effectiveType == 'income' ||
+                            c.effectiveType == 'both',
+                      )
                       .toList();
                 }
 
                 if (filtered.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(KuberSpacing.lg),
+                      padding: const EdgeInsets.all(KuberSpace.lg),
                       child: Text(
                         context.l10n.noCategoriesFound,
                         style: textTheme.bodyMedium?.copyWith(
@@ -173,16 +198,22 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                 if (_query.isNotEmpty) {
                   // Flat grid for search results
                   return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: KuberSpacing.md,
-                      crossAxisSpacing: KuberSpacing.md,
-                      childAspectRatio: 0.8,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KuberSpace.screenMargin,
                     ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          mainAxisSpacing: KuberSpace.md,
+                          crossAxisSpacing: KuberSpace.sm,
+                          mainAxisExtent: 112,
+                        ),
                     itemCount: filtered.length,
-                    itemBuilder: (context, index) =>
-                        _CategoryItem(cat: filtered[index], selectedCategoryId: widget.selectedCategoryId, onSelected: widget.onSelected),
+                    itemBuilder: (context, index) => _CategoryItem(
+                      cat: filtered[index],
+                      selectedCategoryId: widget.selectedCategoryId,
+                      onSelected: widget.onSelected,
+                    ),
                   );
                 }
 
@@ -206,26 +237,32 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                   slivers: [
                     // Grouped categories
                     for (final group in sortedGroups) ...[
-                      if (grouped.containsKey(group.id) && grouped[group.id]!.isNotEmpty) ...[
+                      if (grouped.containsKey(group.id) &&
+                          grouped[group.id]!.isNotEmpty) ...[
                         SliverToBoxAdapter(
                           child: _GroupHeader(name: group.name),
                         ),
                         SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: KuberSpace.screenMargin,
+                          ),
                           sliver: SliverGrid(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisSpacing: KuberSpacing.md,
-                              crossAxisSpacing: KuberSpacing.md,
-                              childAspectRatio: 0.8,
-                            ),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisSpacing: KuberSpace.md,
+                                  crossAxisSpacing: KuberSpace.sm,
+                                  mainAxisExtent: 112,
+                                ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) => _CategoryItem(
                                 cat: grouped[group.id]![index],
                                 selectedCategoryId: widget.selectedCategoryId,
                                 onSelected: widget.onSelected,
-                                hasBudget: widget.disabledCategoryIds
-                                        ?.contains(grouped[group.id]![index].id) ??
+                                hasBudget:
+                                    widget.disabledCategoryIds?.contains(
+                                      grouped[group.id]![index].id,
+                                    ) ??
                                     false,
                               ),
                               childCount: grouped[group.id]!.length,
@@ -236,26 +273,32 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                     ],
 
                     // Ungrouped categories
-                    if (grouped.containsKey(null) && grouped[null]!.isNotEmpty) ...[
+                    if (grouped.containsKey(null) &&
+                        grouped[null]!.isNotEmpty) ...[
                       SliverToBoxAdapter(
                         child: _GroupHeader(name: context.l10n.ungrouped),
                       ),
                       SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpace.screenMargin,
+                        ),
                         sliver: SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: KuberSpacing.md,
-                            crossAxisSpacing: KuberSpacing.md,
-                            childAspectRatio: 0.8,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: KuberSpace.md,
+                                crossAxisSpacing: KuberSpace.sm,
+                                mainAxisExtent: 112,
+                              ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) => _CategoryItem(
                               cat: grouped[null]![index],
                               selectedCategoryId: widget.selectedCategoryId,
                               onSelected: widget.onSelected,
-                              hasBudget: widget.disabledCategoryIds
-                                      ?.contains(grouped[null]![index].id) ??
+                              hasBudget:
+                                  widget.disabledCategoryIds?.contains(
+                                    grouped[null]![index].id,
+                                  ) ??
                                   false,
                             ),
                             childCount: grouped[null]!.length,
@@ -263,7 +306,9 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                         ),
                       ),
                     ],
-                    const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.lg)),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: KuberSpace.lg),
+                    ),
                   ],
                 );
               },
@@ -272,7 +317,9 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
 
           // Add new category button
           Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom + 16),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom + 16,
+            ),
             child: AddNewButton(
               label: context.l10n.addNewCategory,
               onTap: () {
@@ -294,6 +341,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
     );
   }
 }
+
 class _GroupHeader extends StatelessWidget {
   final String name;
 
@@ -301,25 +349,14 @@ class _GroupHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.lg,
-        KuberSpacing.lg,
-        KuberSpacing.sm,
+        KuberSpace.screenMargin,
+        KuberSpace.lg,
+        KuberSpace.screenMargin,
+        KuberSpace.sm,
       ),
-      child: Text(
-        name.toUpperCase(),
-        style: textTheme.labelSmall?.copyWith(
-          color: cs.onSurfaceVariant,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
-        ),
-      ),
+      child: Text(name.toUpperCase(), style: sectionHeaderStyle(context)),
     );
   }
 }
@@ -343,37 +380,35 @@ class _CategoryItem extends StatelessWidget {
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
     final selected = cat.id == selectedCategoryId;
-    final harmonized = harmonizeCategory(context, Color(cat.colorValue));
+    final tones = categoryTones(context, Color(cat.colorValue));
 
-    return GestureDetector(
+    return InkWell(
       onTap: () => onSelected(cat.id),
+      borderRadius: KuberShape.mediumR,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(height: KuberSpace.xs),
           Container(
-            width: 64,
-            height: 64,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: harmonized.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: selected
-                  ? Border.all(
-                      color: harmonized,
-                      width: 2,
-                    )
-                  : null,
+              color: tones.container,
+              borderRadius: BorderRadius.circular(KuberShape.large),
+              border: selected ? Border.all(color: cs.primary, width: 2) : null,
             ),
             child: Icon(
               IconMapper.fromString(cat.icon),
-              color: harmonized,
-              size: 28,
+              color: tones.fg,
+              size: 24,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xs),
+          const SizedBox(height: KuberSpace.xs),
           Text(
             cat.name,
-            style: textTheme.labelSmall?.copyWith(
+            style: textTheme.labelMedium?.copyWith(
               color: selected ? cs.onSurface : cs.onSurfaceVariant,
+              fontWeight: selected ? FontWeight.w600 : null,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -382,16 +417,7 @@ class _CategoryItem extends StatelessWidget {
           if (hasBudget)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                context.l10n.budgetExists,
-                style: textTheme.labelSmall?.copyWith(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w800,
-                  color: cs.primary,
-                  letterSpacing: 0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              child: KuberPill(label: context.l10n.budgetLabel),
             ),
         ],
       ),

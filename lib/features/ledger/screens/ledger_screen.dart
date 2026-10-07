@@ -1,17 +1,18 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../settings/providers/info_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -30,6 +31,14 @@ class LedgerScreen extends ConsumerStatefulWidget {
 
 class _LedgerScreenState extends ConsumerState<LedgerScreen> {
   String? _filterType;
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +62,12 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
     final txnsAsync = ref.watch(transactionListProvider);
 
     return Scaffold(
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: context.l10n.addEntry,
+        onPressed: () => context.push('/ledger/add'),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       body: ledgersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -66,6 +81,16 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
           var filtered = ledgers;
           if (_filterType != null) {
             filtered = ledgers.where((l) => l.type == _filterType).toList();
+          }
+          // Header search: person name or notes; the hero hides meanwhile.
+          final q = _query.trim().toLowerCase();
+          if (q.isNotEmpty) {
+            filtered = [
+              for (final l in filtered)
+                if (l.personNameLower.contains(q) ||
+                    (l.notes?.toLowerCase().contains(q) ?? false))
+                  l,
+            ];
           }
           final active = filtered.where((l) => !l.isSettled).toList();
           final settled = filtered.where((l) => l.isSettled).toList();
@@ -84,29 +109,28 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
 
           return CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  showHome: true,
-                  title: '',
+                  title: context.l10n.ledgerTitle,
                   infoConfig: InfoConstants.ledger,
+                  search: ledgers.isEmpty
+                      ? null
+                      : KuberHeaderSearch(
+                          controller: _searchController,
+                          hint: context.l10n.searchLedgerHint,
+                          onChanged: (v) => setState(() => _query = v),
+                        ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: KuberPageHeader(
-                  title: context.l10n.lentBorrowedTitle,
-                  description: '',
-                  actionTooltip: context.l10n.addEntry,
-                  onAction: () => context.push('/ledger/add'),
-                ),
-              ),
-              if (ledgers.isNotEmpty)
+
+              if (ledgers.isNotEmpty && q.isEmpty)
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.lg,
+                    KuberSpace.screenMargin,
                     0,
-                    KuberSpacing.lg,
-                    KuberSpacing.md,
+                    KuberSpace.screenMargin,
+                    KuberSpace.lg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: LedgerHero(
@@ -114,13 +138,19 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                       owed: owed,
                       receiveCount: receiveCount,
                       oweCount: oweCount,
+                      activeEntries: ledgers.where((l) => !l.isSettled).length,
+                      peopleCount: ledgers
+                          .where((l) => !l.isSettled)
+                          .map((l) => l.personNameLower)
+                          .toSet()
+                          .length,
                     ),
                   ),
                 ),
               if (ledgers.isNotEmpty)
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
+                    horizontal: KuberSpace.screenMargin,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: _FilterRow(
@@ -129,49 +159,60 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                     ),
                   ),
                 ),
-              if (filtered.isEmpty)
+              if (filtered.isEmpty && q.isNotEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: KuberEmptyState(
+                    icon: Icons.search_off_rounded,
+                    title: context.l10n.noMatches,
+                    description: context.l10n.nothingMatchesQuery(
+                      _query.trim(),
+                    ),
+                  ),
+                )
+              else if (filtered.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.handshake_outlined,
                     title: context.l10n.noLedgerEntries,
                     description: context.l10n.ledgerEmptyDesc,
-                    actionLabel: context.l10n.addEntry,
-                    onAction: () => context.push('/ledger/add'),
                   ),
                 ),
-              if (active.isNotEmpty)
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                  ),
-                  sliver: SliverList.separated(
-                    itemCount: active.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: KuberSpacing.sm),
-                    itemBuilder: (_, i) =>
-                        _LedgerRow(ledger: active[i], allTxns: allTxns),
+              // Board 3.20: Active and Settled as grouped lists.
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.screenMargin,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (active.isNotEmpty) ...[
+                        KuberSectionHeader(title: context.l10n.activeUpper),
+                        KuberGroup(
+                          children: [
+                            for (final l in active)
+                              _LedgerRow(ledger: l, allTxns: allTxns),
+                          ],
+                        ),
+                      ],
+                      if (settled.isNotEmpty) ...[
+                        const SizedBox(height: KuberSpace.sectionGap),
+                        KuberSectionHeader(title: context.l10n.settledUpper),
+                        KuberGroup(
+                          children: [
+                            for (final l in settled)
+                              _LedgerRow(ledger: l, allTxns: allTxns),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              if (settled.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: _SectionHeader(label: context.l10n.settledUpper),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                  ),
-                  sliver: SliverList.separated(
-                    itemCount: settled.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: KuberSpacing.sm),
-                    itemBuilder: (_, i) =>
-                        _LedgerRow(ledger: settled[i], allTxns: allTxns),
-                  ),
-                ),
-              ],
-              SliverToBoxAdapter(
-                child: SizedBox(height: navBarBottomPadding(context)),
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: KuberExtendedFab.clearance),
               ),
             ],
           );
@@ -218,6 +259,8 @@ class _LedgerRow extends StatelessWidget {
   }
 }
 
+/// Lent / Borrowed filter chips (board 3.20: no FILTERS label; tapping the
+/// selected chip again clears it).
 class _FilterRow extends StatelessWidget {
   final String? selected;
   final ValueChanged<String?> onChanged;
@@ -226,129 +269,22 @@ class _FilterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final hasFilter = selected != null;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-      child: SizedBox(
-        height: 48,
-        child: Row(
-          children: [
-            Text(
-              context.l10n.filtersUpper,
-              style: localeFont(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-            ),
-            const Spacer(),
-            _FilterChip(
-              label: context.l10n.lentLabel,
-              isSelected: selected == 'lent',
-              onTap: () => onChanged(selected == 'lent' ? null : 'lent'),
-            ),
-            const SizedBox(width: 8),
-            _FilterChip(
-              label: context.l10n.borrowedLabel,
-              isSelected: selected == 'borrowed',
-              onTap: () =>
-                  onChanged(selected == 'borrowed' ? null : 'borrowed'),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: hasFilter ? () => onChanged(null) : null,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: hasFilter ? 1.0 : 0.3,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: hasFilter
-                        ? Border.all(color: cs.error.withValues(alpha: 0.5))
-                        : null,
-                  ),
-                  child: Icon(
-                    Icons.delete_sweep_rounded,
-                    size: 20,
-                    color: hasFilter ? cs.error : cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sm),
+      child: Wrap(
+        spacing: KuberSpace.sm,
+        children: [
+          KuberChip(
+            label: context.l10n.lentLabel,
+            selected: selected == 'lent',
+            onTap: () => onChanged(selected == 'lent' ? null : 'lent'),
           ),
-        ),
-        child: Text(
-          label,
-          style: localeFont(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: isSelected ? Colors.white : cs.onSurfaceVariant,
-            letterSpacing: 0.5,
+          KuberChip(
+            label: context.l10n.borrowedLabel,
+            selected: selected == 'borrowed',
+            onTap: () => onChanged(selected == 'borrowed' ? null : 'borrowed'),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.sm,
-        KuberSpacing.lg,
-        KuberSpacing.md,
-      ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: cs.onSurfaceVariant,
-          letterSpacing: 1.2,
-        ),
+        ],
       ),
     );
   }

@@ -51,8 +51,10 @@ class StoredCardVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onCard =
-        CardPalette.onCardColor(colorValue: colorValue, isGradient: isGradient);
+    final onCard = CardPalette.onCardColor(
+      colorValue: colorValue,
+      isGradient: isGradient,
+    );
     final hasHolder = (cardholder ?? '').isNotEmpty;
     final hasExpiry = (expiry ?? '').isNotEmpty;
 
@@ -70,7 +72,7 @@ class StoredCardVisual extends StatelessWidget {
 
           return DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(KuberRadius.xl),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               gradient: isGradient
                   ? LinearGradient(
                       begin: Alignment.topLeft,
@@ -89,7 +91,9 @@ class StoredCardVisual extends StatelessWidget {
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(KuberRadius.xl),
+                      borderRadius: BorderRadius.circular(
+                        KuberShape.largeIncreased,
+                      ),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.10),
                       ),
@@ -143,14 +147,24 @@ class StoredCardVisual extends StatelessWidget {
                               children: [
                                 if (hasHolder)
                                   Flexible(
-                                    child: _pair(onCard, 'CARD HOLDER',
-                                        cardholder!, labelSize, valueSize),
+                                    child: _pair(
+                                      onCard,
+                                      'CARD HOLDER',
+                                      cardholder!,
+                                      labelSize,
+                                      valueSize,
+                                    ),
                                   ),
                                 if (hasHolder && hasExpiry)
                                   SizedBox(width: pad * 1.4),
                                 if (hasExpiry)
-                                  _pair(onCard, 'EXPIRES', expiry!, labelSize,
-                                      valueSize),
+                                  _pair(
+                                    onCard,
+                                    'EXPIRES',
+                                    expiry!,
+                                    labelSize,
+                                    valueSize,
+                                  ),
                               ],
                             ),
                           ),
@@ -179,15 +193,14 @@ class StoredCardVisual extends StatelessWidget {
       height: tile,
       decoration: BoxDecoration(
         color: onCard.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
       ),
       alignment: Alignment.center,
       child: CardIcon(iconKey: bankIcon, size: tile * 0.62, color: onCard),
     );
   }
 
-  Widget _pair(
-      Color onCard, String label, String value, double ls, double vs) {
+  Widget _pair(Color onCard, String label, String value, double ls, double vs) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -245,7 +258,7 @@ class _MetallicSheen extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         gradient: const LinearGradient(
           begin: Alignment(-0.9, -1),
           end: Alignment(0.9, 1),
@@ -260,10 +273,8 @@ class _MetallicSheen extends StatelessWidget {
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(KuberRadius.xl),
-          border: const Border(
-            top: BorderSide(color: Color(0x4DFFFFFF)),
-          ),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: const Border(top: BorderSide(color: Color(0x4DFFFFFF))),
         ),
       ),
     );

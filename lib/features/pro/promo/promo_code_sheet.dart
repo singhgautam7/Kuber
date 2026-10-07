@@ -73,7 +73,10 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                     try {
                       await ref
                           .read(purchaseServiceProvider)
-                          .restorePurchases(source: 'promo_return', force: true);
+                          .restorePurchases(
+                            source: 'promo_return',
+                            force: true,
+                          );
                       await pollForProEntitlement(
                         () => ref.read(kuberProStateProvider).isPro,
                         timeout: const Duration(milliseconds: 2500),
@@ -89,16 +92,16 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                 },
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                   ),
                 ),
                 child: Text(
                   'Open Play Store',
-                  style: localeFont(fontSize: 14, fontWeight: FontWeight.w700),
+                  style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -111,7 +114,9 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                     duration: const Duration(seconds: 3),
                   );
                   try {
-                    await ref.read(purchaseServiceProvider).restorePurchases(
+                    await ref
+                        .read(purchaseServiceProvider)
+                        .restorePurchases(
                           source: 'promo_already_redeemed',
                           force: true,
                         );
@@ -131,9 +136,9 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                   );
                 },
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: cs.outline),
+                  side: BorderSide(color: cs.outlineVariant),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                   ),
                 ),
                 child: Text(
@@ -155,14 +160,14 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
             Text(
               'Redeem this promo code in Play Store to unlock Kuber Pro.',
               style: localeFont(
-                fontSize: 13.5,
+                fontSize: 14,
                 color: cs.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             InkWell(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.full),
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: code));
                 if (context.mounted) {
@@ -172,13 +177,15 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
-                  vertical: KuberSpacing.lg,
+                  horizontal: KuberSpace.lg,
+                  vertical: KuberSpace.lg,
                 ),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
+                  borderRadius: BorderRadius.circular(
+                    KuberShape.largeIncreased,
+                  ),
+                  border: Border.all(color: cs.outlineVariant),
                 ),
                 child: Row(
                   children: [
@@ -186,8 +193,8 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                       child: Text(
                         code,
                         style: localeFont(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: 1.2,
                           color: cs.onSurface,
                         ),

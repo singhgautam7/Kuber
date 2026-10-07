@@ -13,14 +13,13 @@ class KuberLoader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
       elevation: 0,
       child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.xl),
+        padding: const EdgeInsets.all(KuberSpace.xl),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -33,13 +32,13 @@ class KuberLoader extends StatelessWidget {
                 strokeWidth: 3,
               ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             Text(
               label,
               textAlign: TextAlign.center,
               style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
             ),

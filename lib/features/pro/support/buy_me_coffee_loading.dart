@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../shared/widgets/kuber_skeleton.dart';
+import 'buy_me_coffee_section.dart' show kCoffeeTileAspect;
 
 /// Mounted in place of the real `GridView.count` of `_SupportTierCard`s in
 /// `support/buy_me_coffee_section.dart`'s sheet while `productsLoadingProvider`
@@ -24,29 +24,18 @@ class BuyMeCoffeeSkeletonGrid extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: KuberSpacing.sm,
-      mainAxisSpacing: KuberSpacing.sm,
-      childAspectRatio: 1.55,
-      children: List.generate(4, (_) {
-        return Container(
+      crossAxisSpacing: KuberSpace.sm,
+      mainAxisSpacing: KuberSpace.sm,
+      childAspectRatio: kCoffeeTileAspect,
+      children: List.generate(
+        4,
+        (_) => Container(
           decoration: BoxDecoration(
             color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            borderRadius: KuberShape.cardR,
           ),
-          padding: const EdgeInsets.all(KuberSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              KuberSkeleton(width: 32, height: 32, borderRadius: KuberRadius.sm),
-              const Spacer(),
-              KuberSkeleton(width: 60, height: 13),
-              const SizedBox(height: 6),
-              KuberSkeleton(width: 40, height: 11),
-            ],
-          ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

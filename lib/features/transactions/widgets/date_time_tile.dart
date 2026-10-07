@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../core/utils/locale_font.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 
 /// Shared date & time selector tile used by both normal and transfer forms.
@@ -17,63 +18,14 @@ class DateTimeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+    // Navigation row inside the Add Transaction grouped list (board 3.4):
+    // value as the title, the field name under it.
+    return KuberListRow(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.calendar_today,
-                size: 18,
-                color: cs.primary,
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.dateTimeLabel,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  formatDate(context, selectedDate),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface,
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Icon(
-              Icons.chevron_right,
-              color: cs.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
+      leading: const KuberIconTile(icon: Icons.calendar_today),
+      title: formatDate(context, selectedDate),
+      subtitle: sentenceCase(context.l10n.dateTimeLabel),
+      trailing: const KuberChevron(),
     );
   }
 

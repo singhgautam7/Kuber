@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/paywall/pro_state.dart';
 import '../widgets/cash_flow_section.dart';
@@ -30,31 +29,27 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     }
     if (!hasAccess) {
       return const Scaffold(
-        appBar: KuberAppBar(showBack: true, showHome: true, showBrand: false),
-        body: SizedBox.shrink(),
+        body: KuberScrollAwayHeader(
+          header: KuberAppBar(title: 'Cash flow', showBack: true),
+          body: SizedBox.shrink(),
+        ),
       );
     }
 
     return const Scaffold(
-      appBar: KuberAppBar(
-        showBack: true,
-        showHome: true,
-        showBrand: false,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: KuberSpacing.xxl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            KuberPageHeader(
-              title: 'Cash flow',
-              description: 'Income, expense and net over time',
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: CashFlowSection(),
-            ),
-          ],
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(title: 'Cash flow', showBack: true),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: KuberSpace.xxl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: CashFlowSection(),
+              ),
+            ],
+          ),
         ),
       ),
     );

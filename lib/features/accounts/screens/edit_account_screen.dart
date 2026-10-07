@@ -38,8 +38,10 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
-import '../../../shared/widgets/icon_picker_bottom_sheet.dart';
-import '../../../shared/widgets/color_picker_bottom_sheet.dart';
+import '../../../shared/widgets/icon_color_picker_sheet.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../settings/providers/settings_provider.dart'
     show currencyProvider, formatterProvider, settingsProvider;
 import '../../transactions/providers/transaction_provider.dart';
@@ -133,8 +135,9 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     if (_seeded) return;
     _seeded = true;
     _seedSigned = _round2(computedBalance);
-    _valueController.text =
-        _fmtSeed(_isCredit ? _seedSigned.abs() : _seedSigned);
+    _valueController.text = _fmtSeed(
+      _isCredit ? _seedSigned.abs() : _seedSigned,
+    );
   }
 
   /// Signed new hero value, mirroring EditBalanceSheet (_newValue):
@@ -178,8 +181,9 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
       final confirmed = await showAdjustmentConfirmation(
         context,
         valueNoun: _isCredit ? l10n.valueNounLimitSpent : l10n.valueNounBalance,
-        valueNounCap:
-            _isCredit ? l10n.valueNounLimitSpentCap : l10n.valueNounBalanceCap,
+        valueNounCap: _isCredit
+            ? l10n.valueNounLimitSpentCap
+            : l10n.valueNounBalanceCap,
         fromText: _formatCurrency(fromMag),
         toText: _formatCurrency(toMag),
         diffText: _formatCurrency(diff.abs()),
@@ -188,7 +192,9 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
       if (confirmed != true) return; // cancel → keep typed value
 
       await _persistAccount(name: name);
-      await ref.read(transactionListProvider.notifier).addBalanceAdjustment(
+      await ref
+          .read(transactionListProvider.notifier)
+          .addBalanceAdjustment(
             accountId: _a.id,
             diff: diff,
             isCredit: _isCredit,
@@ -211,8 +217,8 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
       ..isDisabled = _isDisabled
       ..last4Digits =
           (_showIdentifier && _last4Controller.text.trim().isNotEmpty)
-              ? _last4Controller.text.trim()
-              : null;
+          ? _last4Controller.text.trim()
+          : null;
     // Total Limit is a plain field write (no adjustment).
     if (_isCredit) {
       account.creditLimit = double.tryParse(_limitController.text.trim());
@@ -244,7 +250,8 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   void _finish() {
     if (!mounted) return;
     final rootNav = Navigator.maybeOf(context, rootNavigator: true);
-    final hasRootOverlay = rootNav != null && Overlay.maybeOf(rootNav.context) != null;
+    final hasRootOverlay =
+        rootNav != null && Overlay.maybeOf(rootNav.context) != null;
     final message = context.l10n.accountUpdated;
 
     if (hasRootOverlay) {
@@ -264,27 +271,34 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: BorderSide(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant),
         ),
         title: Row(
           children: [
             Icon(Icons.lock_outline_rounded, size: 20, color: cs.onSurface),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(l10n.accountTypeLockedTitle,
-                  style: localeFont(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface)),
+              child: Text(
+                l10n.accountTypeLockedTitle,
+                style: localeFont(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
             ),
           ],
         ),
-        content: Text(l10n.accountTypeLockedBody,
-            style: localeFont(
-                fontSize: 14, height: 1.5, color: cs.onSurfaceVariant)),
+        content: Text(
+          l10n.accountTypeLockedBody,
+          style: localeFont(
+            fontSize: 14,
+            height: 1.5,
+            color: cs.onSurfaceVariant,
+          ),
+        ),
         actions: [
           AppButton(
             label: l10n.gotIt,
@@ -308,20 +322,24 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: cs.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            side: BorderSide(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+            side: BorderSide(color: cs.outlineVariant),
           ),
-          title: Text(l10n.cannotDeleteAccount,
-              style: localeFont(fontWeight: FontWeight.bold)),
-          content: Text(l10n.cannotDeleteAccountBody,
-              style: localeFont(height: 1.5)),
+          title: Text(
+            l10n.cannotDeleteAccount,
+            style: localeFont(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            l10n.cannotDeleteAccountBody,
+            style: localeFont(height: 1.5),
+          ),
           actions: [
             AppButton(
-                label: l10n.okLabel,
-                type: AppButtonType.primary,
-                onPressed: () => Navigator.pop(ctx)),
+              label: l10n.okLabel,
+              type: AppButtonType.primary,
+              onPressed: () => Navigator.pop(ctx),
+            ),
           ],
         ),
       );
@@ -345,19 +363,23 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: BorderSide(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant),
         ),
-        title: Text(l10n.deleteAccountConfirm,
-            style: localeFont(fontWeight: FontWeight.bold)),
-        content: Text(l10n.deleteAccountBody(_a.name),
-            style: localeFont(height: 1.5)),
+        title: Text(
+          l10n.deleteAccountConfirm,
+          style: localeFont(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          l10n.deleteAccountBody(_a.name),
+          style: localeFont(height: 1.5),
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.cancelLabel, style: localeFont())),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancelLabel, style: localeFont()),
+          ),
           AppButton(
             label: l10n.deleteLabel,
             type: AppButtonType.danger,
@@ -378,13 +400,14 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     return showDialog<Account>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: BorderSide(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant),
         ),
-        title: Text(l10n.pickNewDefaultTitle,
-            style: localeFont(fontWeight: FontWeight.bold)),
+        title: Text(
+          l10n.pickNewDefaultTitle,
+          style: localeFont(fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -400,15 +423,19 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                     onTap: () => Navigator.pop(ctx, acc),
                     child: Ink(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline),
+                        borderRadius: BorderRadius.circular(
+                          KuberShape.largeIncreased,
+                        ),
+                        border: Border.all(color: cs.outlineVariant),
                       ),
                       child: Row(
                         children: [
@@ -423,14 +450,20 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(acc.name,
-                                style: localeFont(
-                                    fontSize: 14.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface)),
+                            child: Text(
+                              acc.name,
+                              style: localeFont(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurface,
+                              ),
+                            ),
                           ),
-                          Icon(Icons.chevron_right_rounded,
-                              color: cs.onSurfaceVariant, size: 20),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: cs.onSurfaceVariant,
+                            size: 20,
+                          ),
                         ],
                       ),
                     ),
@@ -441,8 +474,9 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.cancelLabel, style: localeFont())),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancelLabel, style: localeFont()),
+          ),
         ],
       ),
     );
@@ -455,7 +489,20 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     balanceAsync.whenData(_seedValueField);
 
     return Scaffold(
-      appBar: KuberAppBar(showBack: true, title: context.l10n.editAccount),
+      // Board 3.15 edit: close + title + destructive delete in the header.
+      appBar: KuberAppBar(
+        showBack: true,
+        closeIcon: true,
+        title: context.l10n.editAccount,
+        actions: [
+          AppIconButton(
+            icon: Icons.delete_outline_rounded,
+            kind: AppIconButtonKind.danger,
+            semanticLabel: context.l10n.deleteAccount,
+            onPressed: _onDelete,
+          ),
+        ],
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
@@ -472,9 +519,10 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                   error: (e, _) => Padding(
                     padding: const EdgeInsets.only(top: 80),
                     child: Center(
-                      child: Text(context.l10n.couldntLoadBalance,
-                          style: localeFont(
-                              color: Theme.of(context).colorScheme.error)),
+                      child: Text(
+                        context.l10n.couldntLoadBalance,
+                        style: localeFont(color: context.kuberMoney.expense),
+                      ),
                     ),
                   ),
                   data: (_) => _buildForm(),
@@ -489,175 +537,199 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   }
 
   Widget _buildForm() {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final l10n = context.l10n;
     final symbol = ref.watch(currencyProvider).symbol;
-    final swatch = Color(_selectedColor ?? AppColorPalette.kVibrant.first);
+    final iconKey = _selectedIcon ?? IconMapper.kAccountIconKeys.first;
+    final colorValue = _selectedColor ?? AppColorPalette.kVibrant.first;
+    final field = theme.textTheme.bodyLarge!.copyWith(color: cs.onSurface);
+
+    Widget switchRow({
+      required String title,
+      required String sub,
+      required bool value,
+      required ValueChanged<bool> onChanged,
+    }) => KuberListRow(
+      title: title,
+      subtitle: sub,
+      subtitleLines: 2,
+      onTap: () => onChanged(!value),
+      trailing: Switch(value: value, onChanged: onChanged),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── Page header (inlined) ─────────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.only(top: 8, left: 2, bottom: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.editAccount,
-                  style: localeFont(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                      color: cs.onSurface)),
-              const SizedBox(height: 2),
-              Text(l10n.editAccountSubtitle,
-                  style:
-                      localeFont(fontSize: 13.5, color: cs.onSurfaceVariant)),
-            ],
-          ),
-        ),
-
-        // ── Account Name ──────────────────────────────────────────────────
-        const SizedBox(height: 18),
-        KuberFieldLabel(l10n.accountNameLabel),
-        TextField(
-          controller: _nameController,
-          textCapitalization: TextCapitalization.words,
-          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-          style: localeFont(color: cs.onSurface, fontSize: 15),
-          decoration: InputDecoration(hintText: l10n.accountNameHint),
-        ),
-
-        // ── Account Type (read-only, locked) ──────────────────────────────
-        const SizedBox(height: 18),
-        KuberFieldLabel(l10n.accountTypeLabel),
-        _ReadOnlyTypeRow(
-          typeName: _typeName(l10n),
-          icon: _typeIcon(),
-          tooltip: l10n.accountTypeLockedTooltip,
-          onInfoTap: _showTypeInfo,
-        ),
-
-        // ── Icon + Color ──────────────────────────────────────────────────
-        const SizedBox(height: 18),
-        KuberPickerRow(
-          leading: KuberLeadingSwatch(
-            color: swatch,
-            icon: IconMapper.fromString(
-                _selectedIcon ?? IconMapper.kAccountIconKeys.first),
-          ),
-          label: l10n.iconLabel,
-          value: IconMapper.labelFor(
-              _selectedIcon ?? IconMapper.kAccountIconKeys.first),
-          onTap: () => showIconPicker(
-            context: context,
-            iconKeys: IconMapper.kAccountIconKeys,
-            tags: IconMapper.kIconTags,
-            selected: _selectedIcon,
-            onSelected: (key) => setState(() => _selectedIcon = key),
-          ),
-        ),
-        const SizedBox(height: 10),
-        KuberPickerRow(
-          leading: Container(
-            decoration: BoxDecoration(
-              color: swatch,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+        // ── Live preview ─────────────────────────────────────────────────
+        AnimatedBuilder(
+          animation: Listenable.merge([_nameController, _valueController]),
+          builder: (context, _) => KuberCard(
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: KuberLeadingSwatch(
+                    color: Color(colorValue),
+                    icon: IconMapper.fromString(iconKey),
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _nameController.text.trim().isEmpty
+                            ? _typeName(l10n)
+                            : _nameController.text.trim(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '${_typeName(l10n)} · ${sentenceCase(l10n.livePreview)}',
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '$symbol${_valueController.text.isEmpty ? '0' : _valueController.text}',
+                  style: theme.textTheme.titleMedium!.copyWith(
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
-          label: l10n.colorLabel,
-          value: AppColorPalette.nameFor(
-              _selectedColor ?? AppColorPalette.kVibrant.first),
-          onTap: () => showColorPicker(
-            context: context,
-            selected: _selectedColor,
-            onSelected: (value) => setState(() => _selectedColor = value),
-          ),
         ),
 
-        // ── Default toggle ────────────────────────────────────────────────
-        const SizedBox(height: 18),
-        KuberSwitchRow(
-          icon: Icons.star_rounded,
-          name: l10n.makeDefaultAccount,
-          sub: l10n.makeDefaultAccountSub,
-          value: _isDefault,
-          onChanged: (v) => setState(() => _isDefault = v),
-        ),
-
-        // ── Identifier (bank + credit only) ───────────────────────────────
-        if (_showIdentifier) ...[
-          const SizedBox(height: 18),
-          KuberFieldLabel(l10n.accountIdentifierLabel, optional: true),
-          TextField(
-            controller: _last4Controller,
-            keyboardType: TextInputType.number,
-            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: localeFont(color: cs.onSurface, fontSize: 15),
-            decoration:
-                InputDecoration(hintText: l10n.accountIdentifierHint),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.only(left: 2),
-            child: Text(l10n.accountIdentifierHelper,
-                style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
-          ),
-        ],
-
-        // ── HERO: Current Balance / Limit Spent ───────────────────────────
-        const SizedBox(height: 26),
-        KuberHeroAmountInput(
-          label: _isCredit ? l10n.limitSpentLabel : l10n.currentBalanceLabel,
-          currencySymbol: symbol,
-          controller: _valueController,
-          tone: _isCredit ? HeroAmountTone.expense : HeroAmountTone.neutral,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+        // ── Identity ─────────────────────────────────────────────────────
+        KuberFormSection(
+          label: l10n.identity,
+          children: [
+            TextField(
+              controller: _nameController,
+              textCapitalization: TextCapitalization.words,
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              style: field,
+              decoration: InputDecoration(
+                labelText: sentenceCase(l10n.accountNameLabel),
+                hintText: l10n.accountNameHint,
+              ),
+            ),
+            // Type is locked on edit: the chip row shows it, info explains.
+            Row(
+              children: [
+                Expanded(
+                  child: Wrap(
+                    spacing: KuberSpace.sm,
+                    runSpacing: KuberSpace.sm,
+                    children: [
+                      for (final (key, label) in [
+                        ('bank', l10n.accountTypeBank),
+                        ('cash', l10n.accountTypeCash),
+                        ('credit', l10n.accountTypeCreditCard),
+                      ])
+                        Opacity(
+                          opacity: _isTypeKey(key) ? 1 : 0.38,
+                          child: KuberChip(
+                            label: label,
+                            selected: _isTypeKey(key),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                AppIconButton(
+                  icon: Icons.info_outline_rounded,
+                  kind: AppIconButtonKind.plain,
+                  semanticLabel: l10n.accountTypeLockedTooltip,
+                  onPressed: _showTypeInfo,
+                ),
+              ],
+            ),
+            if (_showIdentifier)
+              TextField(
+                controller: _last4Controller,
+                keyboardType: TextInputType.number,
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                style: field,
+                decoration: InputDecoration(
+                  labelText: l10n.accountIdentifierLabel,
+                  hintText: l10n.accountIdentifierHint,
+                  helperText: l10n.accountIdentifierHelper,
+                  helperMaxLines: 2,
+                ),
+              ),
           ],
         ),
-        const SizedBox(height: 10),
-        _AdjustmentIndicator(
-          hasChange: _hasAdjustment,
-          increased: _diffSigned > 0,
-          restHelper: l10n.balanceAdjustHelper,
-          changedText: _hasAdjustment
-              ? (_diffSigned > 0
-                  ? l10n.adjustmentWillBeCredited(
-                      _formatCurrency(_diffSigned.abs()))
-                  : l10n.adjustmentWillBeDebited(
-                      _formatCurrency(_diffSigned.abs())))
-              : '',
+
+        // ── Balance ──────────────────────────────────────────────────────
+        KuberFormSection(
+          label: l10n.balanceLabel,
+          children: [
+            KuberHeroAmountInput(
+              label: _isCredit
+                  ? l10n.limitSpentLabel
+                  : l10n.currentBalanceLabel,
+              currencySymbol: symbol,
+              controller: _valueController,
+              large: false,
+              tone: _isCredit ? HeroAmountTone.expense : HeroAmountTone.neutral,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+              ],
+            ),
+            _AdjustmentIndicator(
+              hasChange: _hasAdjustment,
+              increased: _diffSigned > 0,
+              restHelper: l10n.balanceAdjustHelper,
+              changedText: _hasAdjustment
+                  ? (_diffSigned > 0
+                        ? l10n.adjustmentWillBeCredited(
+                            _formatCurrency(_diffSigned.abs()),
+                          )
+                        : l10n.adjustmentWillBeDebited(
+                            _formatCurrency(_diffSigned.abs()),
+                          ))
+                  : '',
+            ),
+            if (_isCredit)
+              TextField(
+                controller: _limitController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                ],
+                style: field,
+                decoration: InputDecoration(
+                  labelText: l10n.totalLimitLabel,
+                  prefixText: '$symbol ',
+                  hintText: '0',
+                  helperText: l10n.totalLimitHelper,
+                  helperMaxLines: 2,
+                ),
+              ),
+          ],
         ),
 
-        // ── Total Limit (credit only, plain field, no adjustment) ─────────
+        // ── Billing cycle (credit only) ──────────────────────────────────
         if (_isCredit) ...[
-          const SizedBox(height: 18),
-          KuberFieldLabel(l10n.totalLimitLabel),
-          TextField(
-            controller: _limitController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-            ],
-            style: localeFont(color: cs.onSurface, fontSize: 15),
-            decoration: InputDecoration(
-              prefixText: '$symbol ',
-              prefixStyle: localeFont(color: cs.onSurfaceVariant, fontSize: 15),
-              hintText: '0',
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.only(left: 2),
-            child: Text(l10n.totalLimitHelper,
-                style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
-          ),
-
-          // ── Billing cycle (collapsible) ────────────────────────────────
-          const SizedBox(height: 24),
+          const SizedBox(height: KuberSpace.xl),
           CreditBillingCycleSection(
             billDay: _billGenerationDay,
             dueDay: _paymentDueDay,
@@ -670,35 +742,60 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
           ),
         ],
 
-        // ── Danger Zone: disable toggle + delete ──────────────────────────
-        const SizedBox(height: 30),
-        KuberFieldLabel(l10n.dangerZone),
-        const SizedBox(height: 4),
-        KuberSwitchRow(
-          icon: _isDisabled
-              ? Icons.visibility_off_rounded
-              : Icons.visibility_rounded,
-          name: _isDisabled
-              ? l10n.accountDisabledToggle
-              : l10n.disableAccountToggle,
-          sub: _isDisabled
-              ? l10n.accountDisabledHelper
-              : l10n.disableAccountHelper,
-          value: _isDisabled,
-          onChanged: (v) => setState(() => _isDisabled = v),
+        // ── Appearance ───────────────────────────────────────────────────
+        KuberFormSection(
+          label: l10n.appearanceCategory,
+          children: [
+            IconColorPickerRow(
+              iconKey: iconKey,
+              colorValue: colorValue,
+              label: l10n.iconAndColour,
+              onTap: () => showIconColorPicker(
+                context: context,
+                iconKeys: IconMapper.kAccountIconKeys,
+                tags: IconMapper.kIconTags,
+                iconKey: iconKey,
+                colorValue: colorValue,
+                onDone: (icon, color) => setState(() {
+                  _selectedIcon = icon;
+                  _selectedColor = color;
+                }),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        AppButton(
-          label: l10n.deleteAccount,
-          type: AppButtonType.danger,
-          fullWidth: true,
-          height: 46,
-          icon: Icons.delete_outline_rounded,
-          onPressed: _onDelete,
+
+        // ── Default + Disable as one group ───────────────────────────────
+        const SizedBox(height: KuberSpace.xl),
+        KuberGroup(
+          children: [
+            switchRow(
+              title: l10n.makeDefaultAccount,
+              sub: l10n.makeDefaultAccountSub,
+              value: _isDefault,
+              onChanged: (v) => setState(() => _isDefault = v),
+            ),
+            switchRow(
+              title: _isDisabled
+                  ? l10n.accountDisabledToggle
+                  : l10n.disableAccountToggle,
+              sub: _isDisabled
+                  ? l10n.accountDisabledHelper
+                  : l10n.disableAccountHelper,
+              value: _isDisabled,
+              onChanged: (v) => setState(() => _isDisabled = v),
+            ),
+          ],
         ),
       ],
     );
   }
+
+  bool _isTypeKey(String key) => switch (key) {
+    'credit' => _isCredit,
+    'cash' => _isCash,
+    _ => !_isCredit && !_isCash,
+  };
 
   String _typeName(AppLocalizations l10n) {
     if (_isCredit) return l10n.accountTypeCreditCard;
@@ -706,20 +803,16 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     return l10n.accountTypeBank;
   }
 
-  IconData _typeIcon() {
-    if (_isCredit) return Icons.credit_card_rounded;
-    if (_isCash) return Icons.payments_rounded;
-    return Icons.account_balance_rounded;
-  }
-
   Widget _buildBottomBar() {
     final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
-    final navInset = MediaQuery.of(context).viewPadding.bottom; // 3-button inset
+    final navInset = MediaQuery.of(
+      context,
+    ).viewPadding.bottom; // 3-button inset
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outline, width: 0.5)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + navInset),
@@ -727,81 +820,9 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
           label: l10n.saveChanges,
           type: AppButtonType.primary,
           fullWidth: true,
-          height: 50,
           isLoading: _saving,
           onPressed: _onSave,
         ),
-      ),
-    );
-  }
-}
-
-// =============================================================================
-// Read-only Account Type row — muted surface, lock glyph, info button only.
-// =============================================================================
-class _ReadOnlyTypeRow extends StatelessWidget {
-  final String typeName;
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onInfoTap;
-  const _ReadOnlyTypeRow({
-    required this.typeName,
-    required this.icon,
-    required this.tooltip,
-    required this.onInfoTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.6)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: Container(
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-              ),
-              child: Icon(icon, size: 18, color: cs.onSurfaceVariant),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Row(
-              children: [
-                Flexible(
-                  child: Text(typeName,
-                      overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface)),
-                ),
-                const SizedBox(width: 8),
-                Icon(Icons.lock_outline_rounded,
-                    size: 13,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.7)),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: onInfoTap,
-            visualDensity: VisualDensity.compact,
-            splashRadius: 18,
-            icon: Icon(Icons.info_outline_rounded,
-                size: 18, color: cs.onSurfaceVariant),
-            tooltip: tooltip,
-          ),
-        ],
       ),
     );
   }
@@ -835,27 +856,27 @@ class _AdjustmentIndicator extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.sync_alt_rounded,
-                size: 14, color: cs.onSurfaceVariant.withValues(alpha: 0.8)),
+            Icon(Icons.sync_alt_rounded, size: 16, color: cs.onSurfaceVariant),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(restHelper,
-                  style: localeFont(
-                      fontSize: 12, height: 1.4, color: cs.onSurfaceVariant)),
+              child: Text(
+                restHelper,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+              ),
             ),
           ],
         ),
       );
     }
 
-    final tone = increased ? cs.tertiary : cs.error;
+    final m = context.kuberMoney;
+    final bg = increased ? m.incomeContainer : m.expenseContainer;
+    final tone = increased ? m.onIncomeContainer : m.onExpenseContainer;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-      decoration: BoxDecoration(
-        color: tone.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: tone.withValues(alpha: 0.32)),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(color: bg, borderRadius: KuberShape.largeR),
       child: Row(
         children: [
           Icon(
@@ -867,9 +888,12 @@ class _AdjustmentIndicator extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(changedText,
-                style: localeFont(
-                    fontSize: 12.5, height: 1.35, color: cs.onSurfaceVariant)),
+            child: Text(
+              changedText,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: tone),
+            ),
           ),
         ],
       ),

@@ -13,7 +13,7 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('renders one numbered row per step with bold tokens', (tester) async {
+  testWidgets('renders one bulleted row per step with bold tokens', (tester) async {
     await pump(
       tester,
       const ThinkingInfo(
@@ -27,10 +27,11 @@ void main() {
       ),
     );
 
-    // Numbered indices 1..3.
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
-    expect(find.text('3'), findsOneWidget);
+    // One row per step (bulleted, board 3.8b).
+    expect(find.textContaining('Detected intent', findRichText: true),
+        findsOneWidget);
+    expect(find.textContaining('87 transactions', findRichText: true),
+        findsOneWidget);
     // Bold token text is present (inside RichText spans).
     expect(find.textContaining('Rent', findRichText: true), findsWidgets);
     expect(find.textContaining('₹18,000', findRichText: true), findsWidgets);
@@ -43,8 +44,9 @@ void main() {
       const ThinkingInfo(dateFilter: 'this month', scanned: ['Transactions']),
     );
     // Two synthesized steps from dateFilter + scanned.
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
+    expect(find.textContaining('Parsed time range', findRichText: true),
+        findsOneWidget);
+    expect(find.textContaining('Scanned', findRichText: true), findsOneWidget);
     expect(find.textContaining('this month', findRichText: true), findsWidgets);
   });
 }

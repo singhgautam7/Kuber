@@ -88,10 +88,10 @@ class _BillingDiagnosticSheetState
       final addition = InAppPurchase.instance
           .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
       final resp = await addition.queryPastPurchases().timeout(
-            const Duration(seconds: 10),
-            onTimeout: () =>
-                throw TimeoutException('queryPurchases timed out after 10s'),
-          );
+        const Duration(seconds: 10),
+        onTimeout: () =>
+            throw TimeoutException('queryPurchases timed out after 10s'),
+      );
 
       final snapshots = resp.pastPurchases.map((p) {
         final wrapper = p.billingClientPurchase;
@@ -174,22 +174,24 @@ class _BillingDiagnosticSheetState
             'entitlement is never changed here. Long-press any row, or use '
             'Copy report, to share.',
             style: localeFont(
-              fontSize: 13,
+              fontSize: 14,
               color: cs.onSurfaceVariant,
               height: 1.4,
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
 
           // Resolved entitlement (what the app currently thinks).
           _label(cs, 'RESOLVED ENTITLEMENT'),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           InfoTable(
             rows: [
               InfoTableHighlightRow(
                 label: 'Pro active',
                 value: pro.isPro ? 'Yes' : 'No',
-                valueColor: pro.isPro ? cs.tertiary : cs.error,
+                valueColor: pro.isPro
+                    ? context.kuberMoney.income
+                    : context.kuberMoney.expense,
               ),
               InfoTableDataRow(label: 'Source', value: pro.source.name),
               InfoTableDataRow(label: 'Plan', value: pro.plan?.name ?? '—'),
@@ -199,14 +201,14 @@ class _BillingDiagnosticSheetState
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
 
           _label(cs, 'PLAY PURCHASES (queryPurchases)'),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           if (_loading)
             const Padding(
-              padding: EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+              padding: EdgeInsets.symmetric(vertical: KuberSpace.xl),
               child: Center(
                 child: SizedBox(
                   width: 26,
@@ -222,20 +224,21 @@ class _BillingDiagnosticSheetState
                   InfoTableLabelOnlyRow(label: 'Query error', value: _error!),
                 ],
               ),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
             ],
             if (_purchases.isEmpty)
               InfoTable(
                 rows: const [
                   InfoTableLabelOnlyRow(
-                    value: 'queryPurchases() returned no owned purchases on '
+                    value:
+                        'queryPurchases() returned no owned purchases on '
                         'this device / Play account.',
                   ),
                 ],
               )
             else
               for (var i = 0; i < _purchases.length; i++) ...[
-                if (i > 0) const SizedBox(height: KuberSpacing.md),
+                if (i > 0) const SizedBox(height: KuberSpace.md),
                 _purchaseCard(cs, _purchases[i]),
               ],
           ],
@@ -246,58 +249,60 @@ class _BillingDiagnosticSheetState
 
   Widget _actions(ColorScheme cs, KuberProState pro) {
     return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: _loading ? null : _run,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: cs.outline),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _loading ? null : _run,
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: cs.outlineVariant),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               ),
-              child: Text(
-                'Re-query',
-                style: localeFont(
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: Text(
+              'Re-query',
+              style: localeFont(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
               ),
             ),
           ),
-          const SizedBox(width: KuberSpacing.md),
-          Expanded(
-            child: FilledButton(
-              onPressed: _loading
-                  ? null
-                  : () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: _buildCopyText(pro)),
-                      );
-                      if (!mounted) return;
-                      showKuberSnackBar(context, 'Billing diagnostic copied');
-                    },
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        const SizedBox(width: KuberSpace.md),
+        Expanded(
+          child: FilledButton(
+            onPressed: _loading
+                ? null
+                : () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: _buildCopyText(pro)),
+                    );
+                    if (!mounted) return;
+                    showKuberSnackBar(context, 'Billing diagnostic copied');
+                  },
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
-              child: Text(
-                'Copy report',
-                style: localeFont(fontWeight: FontWeight.w600),
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: Text(
+              'Copy report',
+              style: localeFont(fontWeight: FontWeight.w600),
             ),
           ),
-        ],
+        ),
+      ],
     );
   }
 
   Widget _purchaseCard(ColorScheme cs, _PurchaseSnapshot p) {
     // Flag the exact failure the resolver would hit: a purchase Play returns
     // whose product id is not in kProProductIds silently grants nothing.
-    final grantColor = p.grantsProByResolver ? cs.tertiary : cs.error;
+    final grantColor = p.grantsProByResolver
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
     return InfoTable(
       rows: [
         InfoTableDataRow(
@@ -335,12 +340,12 @@ class _BillingDiagnosticSheetState
   }
 
   Widget _label(ColorScheme cs, String text) => Text(
-        text,
-        style: localeFont(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.8,
-          color: cs.onSurfaceVariant,
-        ),
-      );
+    text,
+    style: localeFont(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.8,
+      color: cs.onSurfaceVariant,
+    ),
+  );
 }

@@ -17,16 +17,16 @@ class KuberProSettingsCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
-          KuberSkeleton(width: 40, height: 40, borderRadius: KuberRadius.md),
-          const SizedBox(width: KuberSpacing.md),
+          KuberSkeleton(width: 40, height: 40, borderRadius: KuberShape.medium),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

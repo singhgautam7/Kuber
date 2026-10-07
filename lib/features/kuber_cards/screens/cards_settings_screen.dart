@@ -31,9 +31,9 @@ class _CardsSettingsScreenState extends ConsumerState<CardsSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _biometric
-        .canAuthenticate()
-        .then((v) => mounted ? setState(() => _biometricAvailable = v) : null);
+    _biometric.canAuthenticate().then(
+      (v) => mounted ? setState(() => _biometricAvailable = v) : null,
+    );
   }
 
   @override
@@ -45,93 +45,115 @@ class _CardsSettingsScreenState extends ConsumerState<CardsSettingsScreen> {
     return CardsSecureScaffold(
       child: Scaffold(
         backgroundColor: cs.surface,
-        appBar: KuberAppBar(showBack: true, title: 'Kuber Cards settings'),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SettingsSectionLabel(label: 'SECURITY'),
-              const SettingsSectionDescription(
-                  'Control how your cards stay locked.'),
-              SettingsCard(
-                children: [
-                  SettingsTile(
-                    icon: Icons.password_rounded,
-                    label: 'Change PIN',
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        size: 20, color: cs.onSurfaceVariant),
-                    onTap: () => context.push('/cards/change-pin'),
-                  ),
-                  Divider(height: 1, color: cs.outline),
-                  Opacity(
-                    opacity: _biometricAvailable ? 1 : 0.45,
-                    child: SettingsTile(
-                      icon: Icons.fingerprint_rounded,
-                      label: 'Biometric unlock',
-                      subtitle: _biometricAvailable
-                          ? 'Use your fingerprint or face to unlock'
-                          : 'Not available on this device',
-                      trailing: Switch(
-                        value: biometricOn,
-                        onChanged: _biometricAvailable
-                            ? (v) => _toggleBiometric(v)
-                            : null,
-                        activeTrackColor: cs.primary,
+        body: KuberScrollAwayHeader(
+          header: KuberAppBar(showBack: true, title: 'Kuber Cards settings'),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(KuberSpace.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SettingsSectionLabel(label: 'SECURITY'),
+                const SettingsSectionDescription(
+                  'Control how your cards stay locked.',
+                ),
+                SettingsCard(
+                  children: [
+                    SettingsTile(
+                      icon: Icons.password_rounded,
+                      label: 'Change PIN',
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      onTap: () => context.push('/cards/change-pin'),
+                    ),
+                    Divider(height: 1, color: cs.outlineVariant),
+                    Opacity(
+                      opacity: _biometricAvailable ? 1 : 0.45,
+                      child: SettingsTile(
+                        icon: Icons.fingerprint_rounded,
+                        label: 'Biometric unlock',
+                        subtitle: _biometricAvailable
+                            ? 'Use your fingerprint or face to unlock'
+                            : 'Not available on this device',
+                        trailing: Switch(
+                          value: biometricOn,
+                          onChanged: _biometricAvailable
+                              ? (v) => _toggleBiometric(v)
+                              : null,
+                          activeTrackColor: cs.primary,
+                        ),
                       ),
                     ),
-                  ),
-                  Divider(height: 1, color: cs.outline),
-                  const SettingsTile(
-                    icon: Icons.lock_clock_rounded,
-                    label: 'Auto-lock',
-                    subtitle:
-                        'Locks after 60 seconds in the background and on cold start',
-                  ),
-                ],
-              ),
-              const SizedBox(height: KuberSpacing.xl),
-              const SettingsSectionLabel(label: 'DATA'),
-              const SettingsSectionDescription(
-                  'Move just your cards, separately from the main backup.'),
-              SettingsCard(
-                children: [
-                  SettingsTile(
-                    icon: Icons.ios_share_rounded,
-                    label: 'Export cards only',
-                    subtitle: 'An encrypted file, separate from your main backup',
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        size: 20, color: cs.onSurfaceVariant),
-                    onTap: _exportCardsOnly,
-                  ),
-                ],
-              ),
-              const SizedBox(height: KuberSpacing.xl),
-              const SettingsSectionLabel(label: 'ABOUT'),
-              const SettingsSectionDescription(
-                  'How Kuber Cards protects what you store.'),
-              SettingsCard(
-                children: [
-                  SettingsTile(
-                    icon: Icons.lock_rounded,
-                    label: 'How encryption works',
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        size: 20, color: cs.onSurfaceVariant),
-                    onTap: () => KuberInfoBottomSheet.show(
-                        context, howEncryptionWorksInfo),
-                  ),
-                  Divider(height: 1, color: cs.outline),
-                  SettingsTile(
-                    icon: Icons.block_rounded,
-                    label: 'What we do not store',
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        size: 20, color: cs.onSurfaceVariant),
-                    onTap: () =>
-                        KuberInfoBottomSheet.show(context, whatWeDontStoreInfo),
-                  ),
-                ],
-              ),
-            ],
+                    Divider(height: 1, color: cs.outlineVariant),
+                    const SettingsTile(
+                      icon: Icons.lock_clock_rounded,
+                      label: 'Auto-lock',
+                      subtitle:
+                          'Locks after 60 seconds in the background and on cold start',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpace.xl),
+                const SettingsSectionLabel(label: 'DATA'),
+                const SettingsSectionDescription(
+                  'Move just your cards, separately from the main backup.',
+                ),
+                SettingsCard(
+                  children: [
+                    SettingsTile(
+                      icon: Icons.ios_share_rounded,
+                      label: 'Export cards only',
+                      subtitle:
+                          'An encrypted file, separate from your main backup',
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      onTap: _exportCardsOnly,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpace.xl),
+                const SettingsSectionLabel(label: 'ABOUT'),
+                const SettingsSectionDescription(
+                  'How Kuber Cards protects what you store.',
+                ),
+                SettingsCard(
+                  children: [
+                    SettingsTile(
+                      icon: Icons.lock_rounded,
+                      label: 'How encryption works',
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      onTap: () => KuberInfoBottomSheet.show(
+                        context,
+                        howEncryptionWorksInfo,
+                      ),
+                    ),
+                    Divider(height: 1, color: cs.outlineVariant),
+                    SettingsTile(
+                      icon: Icons.block_rounded,
+                      label: 'What we do not store',
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      onTap: () => KuberInfoBottomSheet.show(
+                        context,
+                        whatWeDontStoreInfo,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -150,8 +172,11 @@ class _CardsSettingsScreenState extends ConsumerState<CardsSettingsScreen> {
       final stored = await CardKeystore.storeKey(key);
       if (!stored) {
         if (mounted) {
-          showKuberSnackBar(context, 'Could not enable biometrics.',
-              isError: true);
+          showKuberSnackBar(
+            context,
+            'Could not enable biometrics.',
+            isError: true,
+          );
         }
         return;
       }

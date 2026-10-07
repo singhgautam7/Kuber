@@ -1,17 +1,20 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/analytics/providers/analytics_provider.dart'
     show FilterType;
-import '../../features/analytics/widgets/active_selection_widget.dart';
 import '../../features/analytics/widgets/kuber_calendar_widget.dart';
 import '../../features/analytics/widgets/manual_date_range_bottom_sheet.dart';
 import '../../features/analytics/widgets/month_picker_bottom_sheet.dart';
 import '../../features/analytics/widgets/quick_filter_chips_row.dart';
 import '../../features/transactions/providers/transaction_provider.dart';
 import '../../core/utils/breakpoints.dart';
-import 'horizontal_fade_wrapper.dart';
+import 'package:intl/intl.dart';
+import '../../core/utils/l10n_ext.dart';
+import 'app_button.dart';
+import 'kuber_app_bar.dart';
 
 class KuberDateRangeResult {
   final FilterType type;
@@ -176,74 +179,78 @@ class _KuberDateRangeSelectorState
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.title,
-                    style:
-                        tt.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
+    String fmt(DateTime d) => DateFormat('MMM d, yyyy').format(d);
+    Widget dateField(String label, DateTime value) => Expanded(
+          child: Material(
+            color: cs.surfaceContainerHigh,
+            borderRadius: KuberShape.cardR,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: _showManualInput,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpace.lg, vertical: KuberSpace.sm + 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: ActiveSelectionWidget(
-                        start: _rangeStart,
-                        end: _rangeEnd,
-                        onEdit: _showManualInput,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    HorizontalFadeWrapper(
-                      child: QuickFilterChipsRow(
-                        selectedType: _selectedType,
-                        onTypeSelected: _onTypeSelected,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: KuberCalendarWidget(
-                        viewDate: _viewDate,
-                        rangeStart: _rangeStart,
-                        rangeEnd: _rangeEnd,
-                        onDateTapped: _onDateTapped,
-                        onMonthPressed: _showMonthPicker,
-                        onPrevMonth: () => setState(() => _viewDate =
-                            DateTime(_viewDate.year, _viewDate.month - 1, 1)),
-                        onNextMonth: () => setState(() => _viewDate =
-                            DateTime(_viewDate.year, _viewDate.month + 1, 1)),
-                      ),
-                    ),
-                    const SizedBox(height: 100),
+                    Text(label,
+                        style: tt.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant)),
+                    const SizedBox(height: 2),
+                    Text(fmt(value),
+                        style: tt.bodyLarge?.copyWith(color: cs.onSurface)),
                   ],
                 ),
               ),
+            ),
+          ),
+        );
+
+    // Board 6 "Date range": presets as chips, From / To fields, range
+    // calendar, Cancel / Apply. Kept as the existing pushed screen.
+    return Scaffold(
+      backgroundColor: cs.surface,
+      appBar: KuberAppBar(
+        title: widget.title,
+        showBack: true,
+        closeIcon: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, KuberSpace.sm,
+            KuberSpace.screenMargin, 120),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            QuickFilterChipsRow(
+              selectedType: _selectedType,
+              onTypeSelected: _onTypeSelected,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            Row(
+              children: [
+                dateField(context.l10n.rangeFrom, _rangeStart),
+                const SizedBox(width: KuberSpace.md),
+                dateField(context.l10n.rangeTo, _rangeEnd),
+              ],
+            ),
+            const SizedBox(height: KuberSpace.xl),
+            KuberCalendarWidget(
+              viewDate: _viewDate,
+              rangeStart: _rangeStart,
+              rangeEnd: _rangeEnd,
+              onDateTapped: _onDateTapped,
+              onMonthPressed: _showMonthPicker,
+              onPrevMonth: () => setState(() => _viewDate =
+                  DateTime(_viewDate.year, _viewDate.month - 1, 1)),
+              onNextMonth: () => setState(() => _viewDate =
+                  DateTime(_viewDate.year, _viewDate.month + 1, 1)),
             ),
           ],
         ),
       ),
       bottomSheet: _StickyPrimary(
-        label: widget.primaryButtonLabel.toUpperCase(),
+        label: sentenceCase(widget.primaryButtonLabel),
+        onCancel: () => Navigator.pop(context),
         onTap: () {
           widget.onApply(KuberDateRangeResult(
             type: _selectedType,
@@ -260,7 +267,9 @@ class _KuberDateRangeSelectorState
 class _StickyPrimary extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  const _StickyPrimary({required this.label, required this.onTap});
+  final VoidCallback onCancel;
+  const _StickyPrimary(
+      {required this.label, required this.onTap, required this.onCancel});
 
   @override
   Widget build(BuildContext context) {
@@ -271,35 +280,29 @@ class _StickyPrimary extends StatelessWidget {
     // nav bar (incl. 3-button navigation) in edge-to-edge mode.
     final bottomInset = systemNavBarInset(context);
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 12 + bottomInset),
-        decoration: BoxDecoration(
-          color: cs.surface,
-          border: Border(
-            top: BorderSide(color: cs.outline.withValues(alpha: 0.1)),
-          ),
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: onTap,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: cs.primary,
-              foregroundColor: cs.onPrimary,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: Text(
-              label,
-              style: localeFont(
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + bottomInset),
+      color: cs.surface,
+      child: Row(
+        children: [
+          Expanded(
+            child: AppButton(
+              label: MaterialLocalizations.of(context).cancelButtonLabel,
+              type: AppButtonType.outline,
+              fullWidth: true,
+              onPressed: onCancel,
             ),
           ),
-        ),
+          const SizedBox(width: KuberSpace.md),
+          Expanded(
+            child: AppButton(
+              label: label,
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: onTap,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

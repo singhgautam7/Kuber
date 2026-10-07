@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
 import '../../../shared/widgets/loading_widgets.dart';
 import '../../backups/providers/backup_provider.dart';
 import '../../budgets/services/budget_service.dart';
+
 enum _LoaderPhase { recurring, backup }
 
 class RecurringLoaderScreen extends ConsumerStatefulWidget {
@@ -110,31 +110,34 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               SweepRingWidget(controller: _ringController),
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
 
               Text(
                 title,
                 style: AppTextStyles.inter.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
               ),
-              const SizedBox(height: KuberSpacing.sm),
+              const SizedBox(height: KuberSpace.sm),
               Text(
                 subtitle,
                 style: textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
 
               // Status pills
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  StatusPill(label: context.l10n.networkUpper, value: context.l10n.localOnly),
-                  const SizedBox(width: KuberSpacing.md),
+                  StatusPill(
+                    label: context.l10n.networkUpper,
+                    value: context.l10n.localOnly,
+                  ),
+                  const SizedBox(width: KuberSpace.md),
                   StatusPill(label: statusLabel, value: statusValue),
                 ],
               ),

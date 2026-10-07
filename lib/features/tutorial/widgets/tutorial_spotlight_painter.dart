@@ -31,7 +31,7 @@ class TutorialSpotlightPainter extends CustomPainter {
 
     final hole = RRect.fromRectAndRadius(
       target.inflate(8),
-      const Radius.circular(KuberRadius.md),
+      const Radius.circular(KuberShape.medium),
     );
     final holePath = Path()..addRRect(hole);
     final cutout = Path.combine(PathOperation.difference, fullPath, holePath);

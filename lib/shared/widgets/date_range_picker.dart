@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'app_icon_button.dart';
+import 'kuber_chips.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/locale_font.dart';
 
 class DateRangePickerValue {
   final String label;
@@ -35,106 +36,43 @@ class KuberDateRangePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
+    // Board 3.6: the period as a selected dropdown chip, the range as a
+    // calendar chip that ellipsizes, and the reset icon button.
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: KuberSpace.xs),
       child: Row(
         children: [
-          GestureDetector(
+          KuberChip(
+            label: value.label,
+            selected: true,
+            dropdown: true,
             onTap: onTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.unfold_more_rounded, size: 14, color: cs.primary),
-                  const SizedBox(width: 6),
-                  Text(
-                    value.label,
-                    style: localeFont(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: cs.primary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
+          // Takes all the free width up to the reset button; ellipsizes only
+          // when the full range doesn't fit.
           Expanded(
-            child: GestureDetector(
-              onTap: onTap,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.calendar_month_outlined,
-                      size: 16,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Flexible(
-                      child: Text(
-                        formatKuberRangeLabel(value.from, value.to),
-                        textAlign: TextAlign.center,
-                        style: tt.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: KuberChip(
+                label: formatKuberRangeLabel(value.from, value.to),
+                icon: Icons.calendar_today_rounded,
+                iconColor: cs.onSurfaceVariant,
+                shrink: true,
+                onTap: onTap,
               ),
             ),
           ),
-          if (onReset != null) ...[
-            const SizedBox(width: KuberSpacing.sm),
-            Tooltip(
-              message: resetTooltip,
-              child: GestureDetector(
-                onTap: canReset ? onReset : null,
-                child: Opacity(
-                  opacity: canReset ? 1 : 0.3,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(
-                        color: cs.outline.withValues(alpha: 0.1),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.replay_rounded,
-                      size: 18,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+          const SizedBox(width: KuberSpace.sm),
+          if (onReset != null)
+            Transform.translate(
+              offset: const Offset(4, 0),
+              child: AppIconButton(
+                icon: Icons.restart_alt_rounded,
+                semanticLabel: resetTooltip,
+                onPressed: canReset ? onReset : null,
               ),
             ),
-          ],
         ],
       ),
     );

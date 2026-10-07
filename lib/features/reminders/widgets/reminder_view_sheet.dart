@@ -7,11 +7,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/info_table.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/sheet_button_section.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../data/reminder.dart';
 import '../providers/reminders_provider.dart';
 import 'reminder_row.dart' show reminderCreatedLabel, reminderDueDateTime;
@@ -38,35 +38,28 @@ class ReminderViewSheet extends ConsumerWidget {
       Navigator.of(context, rootNavigator: true).pop();
 
   Future<void> _delete(
-      BuildContext context, WidgetRef ref, Reminder reminder) async {
+    BuildContext context,
+    WidgetRef ref,
+    Reminder reminder,
+  ) async {
     final cs = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          side: BorderSide(color: cs.outline),
-        ),
-        title: Text('Delete reminder?',
-            style: localeFont(fontWeight: FontWeight.w700, fontSize: 18)),
-        content: Text(
-          '"${reminder.title}" will be permanently deleted.',
-          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-        ),
+        title: const Text('Delete reminder?'),
+        content: Text('"${reminder.title}" will be permanently deleted.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel',
-                style: localeFont(
-                    color: cs.onSurfaceVariant,
-                    fontWeight: FontWeight.w600)),
+            child: const Text('Cancel'),
           ),
-          TextButton(
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Delete',
-                style: localeFont(
-                    color: cs.error, fontWeight: FontWeight.w700)),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -95,7 +88,7 @@ class ReminderViewSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
+    final warning = context.kuberMoney.warning;
 
     // Watch the stream so Mark done / Snooze refresh the open sheet.
     final reminder = ref
@@ -105,40 +98,38 @@ class ReminderViewSheet extends ConsumerWidget {
     if (reminder == null) return const SizedBox.shrink();
 
     final fmt = ref.watch(formatterProvider);
-    final category = ref.watch(categoryListProvider.select(
-      (async) => async.valueOrNull
-          ?.firstWhereOrNull((c) => c.id.toString() == reminder.categoryId),
-    ));
+    final category = ref.watch(
+      categoryListProvider.select(
+        (async) => async.valueOrNull?.firstWhereOrNull(
+          (c) => c.id.toString() == reminder.categoryId,
+        ),
+      ),
+    );
 
     final overdue = reminder.isOverdue;
     final completed = reminder.isCompleted;
     final statusLabel = completed
         ? 'Completed'
         : overdue
-            ? 'Overdue'
-            : reminder.status == ReminderStatus.snoozed
-                ? 'Snoozed'
-                : 'Pending';
+        ? 'Overdue'
+        : reminder.status == ReminderStatus.snoozed
+        ? 'Snoozed'
+        : 'Pending';
     final statusColor = completed
-        ? cs.tertiary
+        ? context.kuberMoney.income
         : overdue
-            ? cs.error
-            : warning;
+        ? context.kuberMoney.expense
+        : warning;
 
     final isIncome = reminder.transactionType == 'income';
 
     return KuberBottomSheet(
       title: reminder.title,
-      subtitle: 'Reminder',
-      leadingIcon: Container(
-        width: 46,
-        height: 46,
-        decoration: BoxDecoration(
-          color: warning.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child:
-            Icon(Icons.notifications_active_outlined, size: 22, color: warning),
+      subtitle: overdue ? 'Reminder · Overdue' : 'Reminder',
+      leadingIcon: KuberIconTile(
+        icon: Icons.notifications_active_outlined,
+        tone: overdue ? KuberTone.error : KuberTone.secondary,
+        size: 48,
       ),
       actions: SheetButtonSection(
         padding: EdgeInsets.zero,
@@ -160,9 +151,7 @@ class ReminderViewSheet extends ConsumerWidget {
           ),
           SheetAction(
             label: completed ? 'Reopen' : 'Mark done',
-            icon: completed
-                ? Icons.replay_rounded
-                : Icons.check_rounded,
+            icon: completed ? Icons.replay_rounded : Icons.check_rounded,
             onPressed: () async {
               final repo = ref.read(remindersRepositoryProvider);
               if (completed) {
@@ -193,56 +182,49 @@ class ReminderViewSheet extends ConsumerWidget {
               caption: 'Amount',
               amount:
                   '${isIncome ? '+' : '−'}${fmt.formatCurrency(reminder.amount!)}',
-              amountColor: isIncome ? cs.tertiary : cs.error,
+              amountColor: isIncome
+                  ? context.kuberMoney.income
+                  : context.kuberMoney.expense,
             ),
             const SizedBox(height: 16),
           ],
-          InfoTable(rows: [
-            // Always a plain "Due date" row (short format). Overdue is
-            // signalled by the red Status row below, not here.
-            InfoTableDataRow(
-              label: 'Due date',
-              value: reminderDueDateTime(reminder),
-            ),
-            InfoTableDataRow(
-              label: 'Created on',
-              value: reminderCreatedLabel(reminder),
-            ),
-            if (reminder.repeat != null)
+          InfoTable(
+            rows: [
+              // Always a plain "Due date" row (short format). Overdue is
+              // signalled by the red Status row below, not here.
               InfoTableDataRow(
-                label: 'Repeat',
-                value: reminder.repeat![0].toUpperCase() +
-                    reminder.repeat!.substring(1),
-                valueLeadingIcon: Icons.repeat_rounded,
-                valueIconColor: cs.primary,
+                label: 'Due date',
+                value: reminderDueDateTime(reminder),
               ),
-            if (category != null)
               InfoTableDataRow(
-                label: 'Category',
-                value: category.name,
+                label: 'Created on',
+                value: reminderCreatedLabel(reminder),
               ),
-            InfoTableHighlightRow(
-              label: 'Status',
-              value: statusLabel,
-              valueColor: statusColor,
-            ),
-          ]),
+              if (reminder.repeat != null)
+                InfoTableDataRow(
+                  label: 'Repeat',
+                  value:
+                      reminder.repeat![0].toUpperCase() +
+                      reminder.repeat!.substring(1),
+                  valueLeadingIcon: Icons.repeat_rounded,
+                  valueIconColor: cs.primary,
+                ),
+              if (category != null)
+                InfoTableDataRow(label: 'Category', value: category.name),
+              InfoTableHighlightRow(
+                label: 'Status',
+                value: statusLabel,
+                valueColor: statusColor,
+              ),
+            ],
+          ),
           if ((reminder.notes ?? '').trim().isNotEmpty) ...[
             const SizedBox(height: 18),
-            Text(
-              'NOTES',
-              style: localeFont(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.0,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
+            const KuberSectionHeader(title: 'Notes'),
             Text(
               reminder.notes!.trim(),
               style: localeFont(
-                fontSize: 13.5,
+                fontSize: 14,
                 color: cs.onSurface,
                 height: 1.55,
               ),

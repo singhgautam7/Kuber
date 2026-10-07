@@ -6,11 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 /// Kuber mark variants. Default is [spark] (rupee + one twinkle).
 enum KuberMarkVariant { spark, plain, flanked }
 
-/// The Kuber identity mark: a rupee glyph in a softly glowing primary-tinted
-/// circle, with a small four-point twinkle in the top-right that signals
-/// "assistant". Single source of truth, consumed by the AppBar avatar and the
-/// Welcome centerpiece. Glow is rendered as a [RadialGradient] (never a
-/// BoxShadow) to keep the Vault "no shadows" rule.
+/// The Kuber identity mark: a rupee glyph on a solid primary disc, with a small
+/// four-point twinkle in the top-right that signals "assistant". Single source
+/// of truth, consumed by the AppBar avatar and the Welcome centerpiece.
 class KuberMarkWidget extends StatelessWidget {
   final double size;
   final KuberMarkVariant variant;
@@ -46,7 +44,7 @@ class KuberMarkWidget extends StatelessWidget {
             Text(
               '₹',
               style: GoogleFonts.inter(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 fontSize: size * 0.92,
                 height: 1.0,
                 color: c,
@@ -66,8 +64,8 @@ class KuberMarkWidget extends StatelessWidget {
       );
     }
 
-    // The halo extends beyond the circle; reserve room for it.
-    final box = size * 1.34;
+    // Board 3.8a: solid primary disc, no halo or gradients.
+    final box = size;
     final twinkle = size * 0.26;
     final inset = size * 0.04;
 
@@ -78,35 +76,13 @@ class KuberMarkWidget extends StatelessWidget {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // Outer soft glow (radial gradient, not a shadow).
-          Container(
-            width: box,
-            height: box,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  cs.primary.withValues(alpha: 0.18),
-                  cs.primary.withValues(alpha: 0.06),
-                  cs.primary.withValues(alpha: 0.0),
-                ],
-                stops: const [0.45, 0.7, 1.0],
-              ),
-            ),
-          ),
           // The mark circle.
           Container(
             width: size,
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  cs.primary.withValues(alpha: 0.45),
-                  cs.primary.withValues(alpha: 0.10),
-                ],
-              ),
-              border: Border.all(color: cs.primary.withValues(alpha: 0.30)),
+              color: cs.primary,
             ),
           ),
           // Rupee, optically nudged up.
@@ -115,7 +91,7 @@ class KuberMarkWidget extends StatelessWidget {
             child: Text(
               '₹',
               style: GoogleFonts.inter(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 fontSize: size * 0.62,
                 height: 1.0,
                 color: cs.onPrimary,

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../core/utils/locale_font.dart' show monoFont;
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -20,43 +20,45 @@ String signedAmount(WidgetRef ref, double amount, String type) {
   return type == 'income' ? '+$body' : '−$body';
 }
 
-/// 36dp rounded square with a debit/credit arrow tinted by type.
+/// Filled type circle (board 3.9a): income / expense container with the
+/// arrow in its on-container colour. 40 by default.
 class SmsTypeGlyph extends StatelessWidget {
   final String type; // 'expense' | 'income'
   final double size;
 
-  const SmsTypeGlyph({super.key, required this.type, this.size = 36});
+  const SmsTypeGlyph({super.key, required this.type, this.size = 40});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final isIncome = type == 'income';
-    final color = isIncome ? cs.tertiary : cs.error;
+    final m = context.kuberMoney;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: color.withValues(alpha: 0.30)),
+        color: isIncome ? m.incomeContainer : m.expenseContainer,
+        shape: BoxShape.circle,
       ),
       child: Icon(
         isIncome ? Icons.south_west_rounded : Icons.north_east_rounded,
-        color: color,
+        color: isIncome ? m.onIncomeContainer : m.onExpenseContainer,
         size: size * 0.5,
       ),
     );
   }
 }
 
-/// A single chip used on import cards (account / category / "pick category").
+/// Mini chip on an import row (account / category), 24 high, r8,
+/// surfaceContainerHigh; `dashed` is the "+ Pick account" placeholder.
 class SmsChip extends StatelessWidget {
   final String label;
-  final Color? dotColor; // shown as a small square (category)
-  final IconData? icon; // shown leading (account card icon)
-  final bool dashed; // empty "pick category" placeholder
-  final bool accent; // primary-tinted (category)
-  final Color? customColor; // custom tinted color for background, border, and text
+  final Color? dotColor;
+  final IconData? icon;
+  final bool dashed;
+  final bool accent;
+
+  /// Icon tint (account / category colour, re-toned by the caller).
+  final Color? customColor;
 
   const SmsChip({
     super.key,
@@ -70,75 +72,46 @@ class SmsChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final Color bg;
-    final Color border;
-    final Color fg;
-    if (dashed) {
-      bg = Colors.transparent;
-      border = cs.onSurfaceVariant.withValues(alpha: 0.5);
-      fg = cs.onSurfaceVariant;
-    } else if (customColor != null) {
-      bg = customColor!.withValues(alpha: 0.10);
-      border = customColor!.withValues(alpha: 0.25);
-      fg = customColor!;
-    } else if (accent) {
-      bg = cs.primary.withValues(alpha: 0.10);
-      border = cs.primary.withValues(alpha: 0.25);
-      fg = cs.primary;
-    } else {
-      bg = cs.surfaceContainerHigh;
-      border = cs.outline;
-      fg = cs.onSurface;
-    }
-
-    final content = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon != null) ...[
-          Icon(icon, size: 10, color: fg),
-          const SizedBox(width: 4),
-        ],
-        if (dotColor != null) ...[
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: dotColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-        if (dashed) ...[
-          Icon(Icons.add_rounded, size: 10, color: fg),
-          const SizedBox(width: 4),
-        ],
-        Text(
-          label,
-          style: localeFont(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: fg,
-          ),
-        ),
-      ],
-    );
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = dashed ? cs.onSurfaceVariant : cs.onSurface;
+    final iconColor = dashed
+        ? cs.onSurfaceVariant
+        : (customColor ?? (accent ? cs.primary : cs.onSurfaceVariant));
 
     final inner = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: dashed ? null : Border.all(color: border),
+        color: dashed ? Colors.transparent : cs.surfaceContainerHigh,
+        borderRadius: KuberShape.smallR,
       ),
-      child: content,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (dashed)
+            Icon(Icons.add_rounded, size: 14, color: iconColor)
+          else if (icon != null)
+            Icon(icon, size: 14, color: iconColor)
+          else if (dotColor != null)
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          if (dashed || icon != null || dotColor != null)
+            const SizedBox(width: 6),
+          Text(label, style: theme.textTheme.labelMedium!.copyWith(color: fg)),
+        ],
+      ),
     );
 
-    // Dashed placeholder ("Pick category") gets a painted dashed border.
     if (dashed) {
       return CustomPaint(
-        foregroundPainter: _DashedRectPainter(color: border),
+        foregroundPainter: _DashedRectPainter(color: cs.outline),
         child: inner,
       );
     }
@@ -158,7 +131,7 @@ class _DashedRectPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
-      const Radius.circular(KuberRadius.sm),
+      const Radius.circular(KuberShape.small),
     );
     final path = Path()..addRRect(rrect);
     const dash = 3.0, gap = 2.5;
@@ -176,11 +149,13 @@ class _DashedRectPainter extends CustomPainter {
   bool shouldRepaint(covariant _DashedRectPainter old) => old.color != color;
 }
 
-/// Option A import card (Section 03). Glyph + merchant + amount on the first
-/// row, account / category chips on the second, date + sender at the foot.
+/// One import row inside a day group (board 3.9a): type circle (a check
+/// circle in selection mode), merchant + signed amount, account / category
+/// mini chips, relative time · sender in mono.
 class SmsImportCard extends ConsumerWidget {
   final SmsTransaction sms;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final bool selected;
   final bool selectionMode;
   final bool muted; // reviewed rows below the separator
@@ -189,6 +164,7 @@ class SmsImportCard extends ConsumerWidget {
     super.key,
     required this.sms,
     required this.onTap,
+    this.onLongPress,
     this.selected = false,
     this.selectionMode = false,
     this.muted = false,
@@ -196,158 +172,135 @@ class SmsImportCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final m = context.kuberMoney;
     final isIncome = sms.parsedType == 'income';
-    final amountColor = isIncome ? cs.tertiary : cs.error;
 
     final accounts = ref.watch(accountMapProvider).valueOrNull;
     final categories = ref.watch(categoryMapProvider).valueOrNull;
 
     final accId = int.tryParse(sms.suggestedAccountId ?? '');
     final account = accId == null ? null : accounts?[accId];
-    final accountName = account?.name;
-    final accountIcon = account != null ? resolveAccountIcon(account) : null;
-    final accountColor = account != null ? resolveAccountColor(account) : null;
-
     final catId = int.tryParse(sms.suggestedCategoryId ?? '');
     final category = catId == null ? null : categories?[catId];
-    final categoryName = category?.name;
-    Color? categoryColor;
-    IconData? categoryIcon;
-    if (category != null) {
-      categoryColor = harmonizeCategory(context, Color(category.colorValue));
-      categoryIcon = IconMapper.fromString(category.icon);
+
+    final Widget leading;
+    if (selectionMode) {
+      leading = Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selected ? cs.primary : Colors.transparent,
+          border: selected ? null : Border.all(color: cs.outline, width: 2),
+        ),
+        child: selected
+            ? Icon(Icons.check_rounded, size: 22, color: cs.onPrimary)
+            : null,
+      );
+    } else {
+      leading = SmsTypeGlyph(type: sms.parsedType);
     }
 
-    final card = AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: selected
-            ? cs.primary.withValues(alpha: 0.12)
-            : cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.4)
-              : cs.outline,
+    final titleColor = selected ? cs.onSecondaryContainer : cs.onSurface;
+    final subColor = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+
+    final row = Material(
+      color: selected ? cs.secondaryContainer : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              leading,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            sms.parsedMerchant ?? sms.senderId,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium!.copyWith(
+                              color: titleColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          signedAmount(ref, sms.parsedAmount, sms.parsedType),
+                          style: theme.textTheme.titleMedium!.copyWith(
+                            color: isIncome ? m.income : m.expense,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        SmsChip(
+                          label: account?.name ?? 'Pick account',
+                          icon: account != null
+                              ? resolveAccountIcon(account)
+                              : null,
+                          dashed: account == null,
+                          customColor: account != null
+                              ? categoryTones(
+                                  context,
+                                  resolveAccountColor(account),
+                                ).fg
+                              : null,
+                        ),
+                        if (category != null)
+                          SmsChip(
+                            label: category.name,
+                            icon: IconMapper.fromString(category.icon),
+                            customColor: categoryTones(
+                              context,
+                              Color(category.colorValue),
+                            ).fg,
+                          )
+                        else
+                          const SmsChip(label: 'Pick category', dashed: true),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text:
+                                '${DateFormatter.relativeSmsDate(sms.smsDate)}  ·  ',
+                          ),
+                          TextSpan(
+                            text: sms.senderId,
+                            style: monoFont(fontSize: 11, color: subColor),
+                          ),
+                        ],
+                      ),
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        color: subColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (selectionMode) ...[
-            Padding(
-              padding: const EdgeInsets.only(top: 2, right: 12),
-              child: Icon(
-                selected
-                    ? Icons.check_circle_rounded
-                    : Icons.radio_button_unchecked_rounded,
-                size: 22,
-                color: selected ? cs.primary : cs.onSurfaceVariant,
-              ),
-            ),
-          ] else ...[
-            SmsTypeGlyph(type: sms.parsedType),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        sms.parsedMerchant ?? sms.senderId,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: localeFont(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
-                          letterSpacing: -0.1,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      signedAmount(ref, sms.parsedAmount, sms.parsedType),
-                      style: localeFont(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: amountColor,
-                      ).copyWith(fontFeatures: const [
-                        FontFeature.tabularFigures(),
-                      ]),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 7),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    SmsChip(
-                      label: accountName ?? 'Pick account',
-                      icon: accountIcon ?? Icons.credit_card_rounded,
-                      dashed: accountName == null,
-                      customColor: accountColor,
-                    ),
-                    if (categoryName != null)
-                      SmsChip(
-                        label: categoryName,
-                        icon: categoryIcon,
-                        customColor: categoryColor,
-                      )
-                    else
-                      const SmsChip(label: 'Pick category', dashed: true),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      DateFormatter.relativeSmsDate(sms.smsDate),
-                      style: localeFont(
-                        fontSize: 10.5,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      width: 3,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      sms.senderId,
-                      style: monoFont(
-                        fontSize: 10,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
 
-    final tappable = InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: card,
-    );
-
-    return muted ? Opacity(opacity: 0.55, child: tappable) : tappable;
+    return muted ? Opacity(opacity: 0.55, child: row) : row;
   }
 }

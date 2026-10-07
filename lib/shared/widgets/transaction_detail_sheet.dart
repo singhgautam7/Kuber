@@ -4,6 +4,10 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import '../../core/utils/color_harmonizer.dart';
+import 'app_button.dart';
+import 'kuber_chips.dart';
+import 'kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -230,7 +234,7 @@ class _TransactionDetailSheetState
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
         ? cs.onSurface
-        : (isIncome ? cs.tertiary : cs.error);
+        : (isIncome ? context.kuberMoney.income : context.kuberMoney.expense);
 
     final formattedAmount = ref.watch(formatterProvider).formatCurrency(transaction.amount);
     final amountText = isTransfer
@@ -242,7 +246,7 @@ class _TransactionDetailSheetState
             ? IconMapper.fromString(category.icon)
             : Icons.category);
     final iconColor = isTransfer
-        ? const Color(0xFF78909C)
+        ? cs.onSurfaceVariant
         : (category != null ? Color(category.colorValue) : cs.primary);
     final displayName = isTransfer
         ? '${fromAccountName ?? context.l10n.unknownLabel} → ${toAccountName ?? context.l10n.unknownLabel}'
@@ -275,7 +279,7 @@ class _TransactionDetailSheetState
         label: context.l10n.accountLabel,
         value: accountDisplay,
         valueLeadingIcon: accountIcon,
-        valueIconColor: accountColor,
+        valueIconColor: harmonizeCategory(context, accountColor),
       ),
       InfoTableDataRow(
         label: context.l10n.categoryLabel,
@@ -284,7 +288,9 @@ class _TransactionDetailSheetState
             : (category?.name ??
                 (isIncome ? context.l10n.incomeLabel : context.l10n.noneLabel)),
         valueLeadingIcon: iconData,
-        valueIconColor: iconColor,
+        valueIconColor: isTransfer
+            ? cs.onSurfaceVariant
+            : harmonizeCategory(context, iconColor),
       ),
       if (transaction.sourceNoteId != null)
         InfoTableDataRow(
@@ -318,10 +324,10 @@ class _TransactionDetailSheetState
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.15),
+                color: cs.surfaceContainerHigh,
                 shape: BoxShape.circle,
               ),
-              child: Icon(iconData, size: 24, color: iconColor),
+              child: Icon(iconData, size: 24, color: cs.onSurfaceVariant),
             )
           : CategoryIcon.square(
               icon: iconData,
@@ -352,12 +358,12 @@ class _TransactionDetailSheetState
             amount: amountText,
             amountColor: amountColor,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: KuberSpace.xl - 4),
           InfoTable(rows: rows),
 
           // ── "View note" (Kuber Notes provenance, per 1m) ─────────────────
           if (transaction.sourceNoteId != null) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: KuberSpace.xl - 4),
             _ViewSourceNoteButton(
               sourceNoteId: transaction.sourceNoteId!,
               onTap: _openSourceNote,
@@ -370,12 +376,10 @@ class _TransactionDetailSheetState
               label: context.l10n.notesUpper,
               child: Text(
                 transaction.notes!,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurface,
-                  height: 1.5,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: cs.onSurface),
               ),
             ),
 
@@ -385,12 +389,10 @@ class _TransactionDetailSheetState
               label: context.l10n.addedUsingPrompt,
               child: Text(
                 transaction.quickAddNote!,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurface,
-                  height: 1.5,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: cs.onSurface),
               ),
             ),
 
@@ -403,24 +405,7 @@ class _TransactionDetailSheetState
                 runSpacing: 8,
                 children: [
                   for (final tag in tags)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(KuberRadius.sm),
-                        border: Border.all(
-                            color: cs.primary.withValues(alpha: 0.2)),
-                      ),
-                      child: Text(
-                        '#${tag.name}',
-                        style: localeFont(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: cs.primary,
-                        ),
-                      ),
-                    ),
+                    KuberChip(label: '#${tag.name}', icon: Icons.sell_outlined),
                 ],
               ),
             ),
@@ -431,19 +416,18 @@ class _TransactionDetailSheetState
               label: context.l10n.originalSmsLabel,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(KuberSpacing.md),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpace.lg, vertical: KuberSpace.md),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
+                  borderRadius: KuberShape.mediumR,
                 ),
                 child: Text(
                   transaction.importedFromSms!,
                   style: monoFont(
                     fontSize: 12,
-                    height: 1.55,
+                    height: 19 / 12,
                     color: cs.onSurfaceVariant,
-                    letterSpacing: -0.1,
                   ),
                 ),
               ),
@@ -459,7 +443,7 @@ class _TransactionDetailSheetState
                   scrollDirection: Axis.horizontal,
                   itemCount: transaction.attachmentPaths.length,
                   separatorBuilder: (_, __) =>
-                      const SizedBox(width: KuberSpacing.sm),
+                      const SizedBox(width: KuberSpace.sm),
                   itemBuilder: (context, index) {
                     final path = transaction.attachmentPaths[index];
                     final isImage =
@@ -471,8 +455,7 @@ class _TransactionDetailSheetState
                         height: 64,
                         decoration: BoxDecoration(
                           color: cs.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
-                          border: Border.all(color: cs.outline),
+                          borderRadius: KuberShape.mediumR,
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: isImage
@@ -518,7 +501,6 @@ class _ViewSourceNoteButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final id = int.tryParse(sourceNoteId);
     return FutureBuilder(
       future: id == null
@@ -529,36 +511,13 @@ class _ViewSourceNoteButton extends ConsumerWidget {
         final label = note == null
             ? 'View note'
             : 'View note: "${note.title.isEmpty ? 'Untitled note' : note.title}"';
-        return InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          child: Container(
-            height: 46,
-            decoration: BoxDecoration(
-              border: Border.all(color: cs.outline),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.sticky_note_2_outlined,
-                    size: 16, color: cs.primary),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        return AppButton(
+          label: label,
+          icon: Icons.sticky_note_2_outlined,
+          type: AppButtonType.outline,
+          height: 40,
+          fullWidth: true,
+          onPressed: onTap,
         );
       },
     );
@@ -574,22 +533,12 @@ class _LabeledBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.only(top: KuberSpace.xl - 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: localeFont(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 8),
+          KuberSectionHeader(title: label),
           child,
         ],
       ),

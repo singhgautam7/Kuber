@@ -6,6 +6,7 @@ import 'package:isar_community/isar.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../core/database/isar_service.dart';
 
 import '../../accounts/data/account.dart';
@@ -141,14 +142,42 @@ class DbExplorerScreen extends ConsumerWidget {
             child: KuberAppBar(showBack: true, title: 'DB Explorer'),
           ),
           SliverPadding(
-            padding: const EdgeInsets.all(KuberSpacing.lg),
-            sliver: SliverList.separated(
-              itemCount: collections.length,
-              separatorBuilder: (context, index) =>
-                  const SizedBox(height: KuberSpacing.sm),
-              itemBuilder: (context, index) {
-                return _CollectionCard(meta: collections[index], isar: isar);
-              },
+            padding: const EdgeInsets.fromLTRB(
+              KuberSpace.screenMargin,
+              0,
+              KuberSpace.screenMargin,
+              KuberSpace.xl,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpace.sm),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock_outline_rounded,
+                          size: 14,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Read-only · ${collections.length} collections',
+                          style: Theme.of(context).textTheme.bodySmall!
+                              .copyWith(color: cs.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                  KuberGroup(
+                    children: [
+                      for (final meta in collections)
+                        _CollectionCard(meta: meta, isar: isar),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -198,72 +227,44 @@ class _CollectionCardState extends State<_CollectionCard> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
+    final tt = Theme.of(context).textTheme;
     return InkWell(
-      onTap: () {
-        context.push('/more/dev-tools/db-explorer/${widget.meta.name}');
-      },
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
+      onTap: () =>
+          context.push('/more/dev-tools/db-explorer/${widget.meta.name}'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.table_rows_outlined,
-                color: cs.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.meta.name,
-                    style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  if (_loading)
-                    SizedBox(
-                      height: 14,
-                      width: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    )
-                  else
-                    Text(
-                      '${_count ?? '?'} records',
-                      style: localeFont(
-                        fontSize: 13,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
-            ),
             Icon(
-              Icons.chevron_right_rounded,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              Icons.table_rows_outlined,
               size: 20,
+              color: cs.onSurfaceVariant,
             ),
+            const SizedBox(width: KuberSpace.lg),
+            Expanded(
+              child: Text(
+                widget.meta.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: monoFont(fontSize: 14, color: cs.onSurface),
+              ),
+            ),
+            if (_loading)
+              SizedBox(
+                height: 14,
+                width: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: cs.onSurfaceVariant,
+                ),
+              )
+            else
+              Text(
+                '${_count ?? '?'}',
+                style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+              ),
+            const SizedBox(width: KuberSpace.sm),
+            const KuberChevron(),
           ],
         ),
       ),

@@ -62,12 +62,12 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'name': _nameCtrl.text,
-        'target': _targetCtrl.text,
-        'years': _yearsCtrl.text,
-        'rate': _rateCtrl.text,
-        'savings': _savingsCtrl.text,
-      };
+    'name': _nameCtrl.text,
+    'target': _targetCtrl.text,
+    'years': _yearsCtrl.text,
+    'rate': _rateCtrl.text,
+    'savings': _savingsCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -95,8 +95,10 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final t = formatter.formatCurrency(parseAmount(_targetCtrl.text),
-        symbol: currency.symbol);
+    final t = formatter.formatCurrency(
+      parseAmount(_targetCtrl.text),
+      symbol: currency.symbol,
+    );
     if (r == null) return 'Goal $t';
     return '$t in ${_years}y → ${formatter.formatCurrency(r.monthlyInvestment, symbol: currency.symbol)}/mo';
   }
@@ -125,80 +127,88 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          const ToolInputLabel('GOAL NAME'),
-          const SizedBox(height: KuberSpacing.sm),
-          TextField(
-            controller: _nameCtrl,
-            textCapitalization: TextCapitalization.sentences,
-            onChanged: recompute,
-            style: localeFont(
-                fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface),
-            decoration: InputDecoration(
-              hintText: 'e.g. Down payment',
-              hintStyle: localeFont(fontSize: 15, color: cs.onSurfaceVariant),
-              filled: true,
-              fillColor: cs.surfaceContainerHigh,
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.md, vertical: KuberSpacing.md),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+        ToolInputCard(
+          children: [
+            const ToolInputLabel('GOAL NAME'),
+            const SizedBox(height: KuberSpace.sm),
+            TextField(
+              controller: _nameCtrl,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: recompute,
+              style: localeFont(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.primary),
+              decoration: InputDecoration(
+                hintText: 'e.g. Down payment',
+                hintStyle: localeFont(fontSize: 16, color: cs.onSurfaceVariant),
+                filled: true,
+                fillColor: cs.surfaceContainerHigh,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.md,
+                  vertical: KuberSpace.md,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.primary),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _targetCtrl,
-            label: 'TARGET AMOUNT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 100000,
-            max: 50000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _yearsCtrl,
-            label: 'YEARS TO GOAL',
-            suffix: 'years',
-            onChanged: recompute,
-            min: 1,
-            max: 40,
-            divisions: 39,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'EXPECTED ANNUAL RETURN',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 30,
-            divisions: 290,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _savingsCtrl,
-            label: 'CURRENT SAVINGS',
-            prefix: currency.symbol,
-            helper: 'Optional — defaults to ₹0',
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 0,
-            max: 10000000,
-          ),
-        ]),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _targetCtrl,
+              label: 'TARGET AMOUNT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 100000,
+              max: 50000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _yearsCtrl,
+              label: 'YEARS TO GOAL',
+              suffix: 'years',
+              onChanged: recompute,
+              min: 1,
+              max: 40,
+              divisions: 39,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'EXPECTED ANNUAL RETURN',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 30,
+              divisions: 290,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _savingsCtrl,
+              label: 'CURRENT SAVINGS',
+              prefix: currency.symbol,
+              helper: 'Optional — defaults to ₹0',
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 0,
+              max: 10000000,
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -215,18 +225,27 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
                         child: Text(
                           'Already on track — ₹0/mo needed',
                           style: localeFont(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                              color: cs.tertiary),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.kuberMoney.income,
+                          ),
                         ),
                       ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol('Total Investment', money(result.totalInvestment)),
-                      StatCol('Returns', money(result.returns),
-                          color: cs.tertiary),
-                      StatCol('Final Corpus', money(result.finalCorpus)),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol(
+                          'Total Investment',
+                          money(result.totalInvestment),
+                        ),
+                        StatCol(
+                          'Returns',
+                          money(result.returns),
+                          color: context.kuberMoney.income,
+                        ),
+                        StatCol('Final Corpus', money(result.finalCorpus)),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -238,11 +257,20 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
               segments: [
                 BreakdownSegment('Current savings', savings, cs.primary),
                 BreakdownSegment(
-                    'Investment', result.totalInvestment, ToolAccents.amber),
-                BreakdownSegment('Returns', result.returns, cs.tertiary),
+                  'Investment',
+                  result.totalInvestment,
+                  ToolAccents.amber,
+                ),
+                BreakdownSegment(
+                  'Returns',
+                  result.returns,
+                  context.kuberMoney.income,
+                ),
               ],
-              centerBig: formatter.formatCompactCurrency(result.finalCorpus,
-                  symbol: currency.symbol),
+              centerBig: formatter.formatCompactCurrency(
+                result.finalCorpus,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'CORPUS',
             ),
           ),
@@ -252,10 +280,11 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Portfolio value',
-                    points: result.valueSeries,
-                    color: ToolAccents.amber,
-                    fill: true),
+                  name: 'Portfolio value',
+                  points: result.valueSeries,
+                  color: ToolAccents.amber,
+                  fill: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.valueSeries.length; i++) 'Y$i',
@@ -301,7 +330,11 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
   }
 
   List<List<String>> _monthlyRows(
-      GoalResult result, double savings, double rate, String Function(double) money) {
+    GoalResult result,
+    double savings,
+    double rate,
+    String Function(double) money,
+  ) {
     final r = rate / 100 / 12;
     final monthly = result.monthlyInvestment;
     final rows = <List<String>>[];

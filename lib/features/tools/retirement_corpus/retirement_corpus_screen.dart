@@ -69,15 +69,15 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'age': _ageCtrl.text,
-        'retire': _retireCtrl.text,
-        'life': _lifeCtrl.text,
-        'expense': _expenseCtrl.text,
-        'inflation': _inflationCtrl.text,
-        'pre': _preCtrl.text,
-        'post': _postCtrl.text,
-        'savings': _savingsCtrl.text,
-      };
+    'age': _ageCtrl.text,
+    'retire': _retireCtrl.text,
+    'life': _lifeCtrl.text,
+    'expense': _expenseCtrl.text,
+    'inflation': _inflationCtrl.text,
+    'pre': _preCtrl.text,
+    'post': _postCtrl.text,
+    'savings': _savingsCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -97,7 +97,9 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
 
   String? get _validationError {
     if (_age <= 0 || _retire <= 0 || _life <= 0) return null;
-    if (_retire <= _age) return 'Retirement age must be greater than current age.';
+    if (_retire <= _age) {
+      return 'Retirement age must be greater than current age.';
+    }
     if (_life <= _retire) {
       return 'Life expectancy must be greater than retirement age.';
     }
@@ -157,85 +159,100 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          Row(
-            children: [
-              Expanded(
+        ToolInputCard(
+          children: [
+            Row(
+              children: [
+                Expanded(
                   child: ToolTextField(
-                      controller: _ageCtrl,
-                      label: 'CURRENT AGE',
-                      onChanged: recompute)),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
+                    controller: _ageCtrl,
+                    label: 'CURRENT AGE',
+                    onChanged: recompute,
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
                   child: ToolTextField(
-                      controller: _retireCtrl,
-                      label: 'RETIRE AT',
-                      onChanged: recompute)),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
+                    controller: _retireCtrl,
+                    label: 'RETIRE AT',
+                    onChanged: recompute,
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
                   child: ToolTextField(
-                      controller: _lifeCtrl,
-                      label: 'LIVE TILL',
-                      onChanged: recompute)),
-            ],
-          ),
-          if (error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(error,
-                  style: localeFont(fontSize: 11.5, color: cs.error)),
+                    controller: _lifeCtrl,
+                    label: 'LIVE TILL',
+                    onChanged: recompute,
+                  ),
+                ),
+              ],
             ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _expenseCtrl,
-            label: 'CURRENT MONTHLY EXPENSE',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 10000,
-            max: 500000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _inflationCtrl,
-            label: 'INFLATION RATE',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 12,
-            divisions: 110,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          Row(
-            children: [
-              Expanded(
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  error,
+                  style: localeFont(fontSize: 11, color: cs.error),
+                ),
+              ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _expenseCtrl,
+              label: 'CURRENT MONTHLY EXPENSE',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 10000,
+              max: 500000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _inflationCtrl,
+              label: 'INFLATION RATE',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 12,
+              divisions: 110,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            Row(
+              children: [
+                Expanded(
                   child: ToolTextField(
-                      controller: _preCtrl,
-                      label: 'PRE-RET. RETURN',
-                      suffix: '%',
-                      onChanged: recompute)),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
+                    controller: _preCtrl,
+                    label: 'PRE-RET. RETURN',
+                    suffix: '%',
+                    onChanged: recompute,
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
                   child: ToolTextField(
-                      controller: _postCtrl,
-                      label: 'POST-RET. RETURN',
-                      suffix: '%',
-                      onChanged: recompute)),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _savingsCtrl,
-            label: 'CURRENT SAVINGS',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 0,
-            max: 50000000,
-          ),
-        ]),
+                    controller: _postCtrl,
+                    label: 'POST-RET. RETURN',
+                    suffix: '%',
+                    onChanged: recompute,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _savingsCtrl,
+              label: 'CURRENT SAVINGS',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 0,
+              max: 50000000,
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : ToolDualHero(
@@ -256,24 +273,38 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
         if (result != null) ...[
           ToolSection(
             title: 'Secondary',
-            child: ToolStatCols(items: [
-              StatCol('Yrs to Retire', '${result.yearsToRetirement}'),
-              StatCol('Yrs in Retire', '${result.yearsInRetirement}'),
-              StatCol('Expense @retire /mo',
-                  compact(result.monthlyExpenseAtRetirement)),
-              StatCol('Total Invested', compact(result.totalInvested)),
-            ]),
+            child: ToolStatCols(
+              items: [
+                StatCol('Yrs to Retire', '${result.yearsToRetirement}'),
+                StatCol('Yrs in Retire', '${result.yearsInRetirement}'),
+                StatCol(
+                  'Expense @retire /mo',
+                  compact(result.monthlyExpenseAtRetirement),
+                ),
+                StatCol('Total Invested', compact(result.totalInvested)),
+              ],
+            ),
           ),
           ToolSection(
             title: 'Breakdown',
             subtitle: 'What builds your corpus',
             child: ToolDonutBreakdown(
               segments: [
-                BreakdownSegment('Current savings (grown)',
-                    result.fvCurrentSavings, cs.primary),
-                BreakdownSegment('Future investments', result.totalInvested,
-                    ToolAccents.amber),
-                BreakdownSegment('Returns', result.returns, cs.tertiary),
+                BreakdownSegment(
+                  'Current savings (grown)',
+                  result.fvCurrentSavings,
+                  cs.primary,
+                ),
+                BreakdownSegment(
+                  'Future investments',
+                  result.totalInvested,
+                  ToolAccents.amber,
+                ),
+                BreakdownSegment(
+                  'Returns',
+                  result.returns,
+                  context.kuberMoney.income,
+                ),
               ],
               centerBig: compact(result.requiredCorpus),
               centerSmall: 'CORPUS',
@@ -285,10 +316,11 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Corpus',
-                    points: result.preRetirementSeries,
-                    color: ToolAccents.emerald,
-                    fill: true),
+                  name: 'Corpus',
+                  points: result.preRetirementSeries,
+                  color: ToolAccents.emerald,
+                  fill: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.preRetirementSeries.length; i++)
@@ -302,10 +334,11 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Remaining corpus',
-                    points: result.postRetirementSeries,
-                    color: ToolAccents.amber,
-                    fill: true),
+                  name: 'Remaining corpus',
+                  points: result.postRetirementSeries,
+                  color: ToolAccents.amber,
+                  fill: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.postRetirementSeries.length; i++)
@@ -319,7 +352,7 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _PhaseHeader('Phase 1 — Working years', ToolAccents.emerald),
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
                 ToolScheduleTable(
                   columns: const [
                     ScheduleColumn('Age', numeric: false),
@@ -331,9 +364,9 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
                       ['${p.age}', money(p.investment), money(p.corpusValue)],
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 _PhaseHeader('Phase 2 — Retirement years', ToolAccents.amber),
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
                 ToolScheduleTable(
                   dataColumnWidth: 124,
                   columns: const [
@@ -371,8 +404,8 @@ class _PhaseHeader extends StatelessWidget {
     return Text(
       label.toUpperCase(),
       style: localeFont(
-        fontSize: 10.5,
-        fontWeight: FontWeight.w700,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
         color: color,
         letterSpacing: 0.6,
       ),

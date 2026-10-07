@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -35,9 +36,16 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).padding.bottom + 20),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        MediaQuery.of(context).padding.bottom + 20,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +57,7 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
               height: 4,
               decoration: BoxDecoration(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(KuberShape.full),
               ),
             ),
           ),
@@ -60,7 +68,7 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
               Text(
                 context.l10n.jumpTo,
                 style: tt.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -68,24 +76,34 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
               Container(
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(
+                    KuberShape.largeIncreased,
+                  ),
                 ),
                 child: Row(
                   children: [
                     IconButton(
                       onPressed: () => setState(() => _selectedYear--),
-                      icon: Icon(Icons.chevron_left, size: 18, color: cs.onSurfaceVariant),
+                      icon: Icon(
+                        Icons.chevron_left,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                     Text(
                       '$_selectedYear',
                       style: tt.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: cs.onSurface,
                       ),
                     ),
                     IconButton(
                       onPressed: () => setState(() => _selectedYear++),
-                      icon: Icon(Icons.chevron_right, size: 18, color: cs.onSurfaceVariant),
+                      icon: Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -107,8 +125,10 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
             itemBuilder: (context, index) {
               final month = index + 1;
               final date = DateTime(_selectedYear, month, 1);
-              final isSelected = widget.initialDate.year == _selectedYear && widget.initialDate.month == month;
-              
+              final isSelected =
+                  widget.initialDate.year == _selectedYear &&
+                  widget.initialDate.month == month;
+
               return GestureDetector(
                 onTap: () {
                   widget.onMonthSelected(date);
@@ -116,16 +136,22 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? cs.primary.withValues(alpha: 0.1) : cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(12),
-                    border: isSelected ? Border.all(color: cs.primary, width: 2) : null,
+                    color: isSelected
+                        ? cs.primary.withValues(alpha: 0.1)
+                        : cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(
+                      KuberShape.largeIncreased,
+                    ),
+                    border: isSelected
+                        ? Border.all(color: cs.primary, width: 2)
+                        : null,
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     DateFormat('MMM').format(date).toUpperCase(),
                     style: localeFont(
                       fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       color: isSelected ? cs.primary : cs.onSurfaceVariant,
                       letterSpacing: 1,
                     ),

@@ -1,6 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import 'app_button.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -20,38 +21,20 @@ class EditWidgetsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-      child: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: OutlinedButton.icon(
-          onPressed: onTap ??
-              () {
-                final r = scope == WidgetEditorScope.home
-                    ? '/widget-editor/home'
-                    : '/widget-editor/analytics';
-                context.push(r);
-              },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: cs.onSurface,
-            side: BorderSide(color: cs.outline),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-            ),
-          ),
-          icon: Icon(Icons.tune_rounded, size: 18, color: cs.onSurfaceVariant),
-          label: Text(
-            context.l10n.editWidgets,
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ),
-      ),
+    // Outlined 40 button at the end of the list (board 3.2a).
+    return AppButton(
+      label: context.l10n.editWidgets,
+      icon: Icons.tune_rounded,
+      type: AppButtonType.outline,
+      height: 40,
+      fullWidth: true,
+      onPressed: onTap ??
+          () {
+            final r = scope == WidgetEditorScope.home
+                ? '/widget-editor/home'
+                : '/widget-editor/analytics';
+            context.push(r);
+          },
     );
   }
 }
@@ -78,7 +61,7 @@ class EditWidgetsSettingsRows extends StatelessWidget {
           subtitle: context.l10n.editHomeWidgetsDesc,
           onTap: onHomeTap,
         ),
-        Divider(height: 1, color: cs.outline),
+        Divider(height: 1, color: cs.outlineVariant),
         _SettingsRow(
           icon: Icons.insert_chart_outlined_rounded,
           label: context.l10n.editAnalyticsWidgets,
@@ -109,19 +92,11 @@ class _SettingsRow extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
+            horizontal: KuberSpace.lg, vertical: KuberSpace.md),
         child: Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
-              ),
-              child: Icon(icon, size: 18, color: cs.primary),
-            ),
-            const SizedBox(width: KuberSpacing.md),
+            Icon(icon, size: 24, color: cs.onSurfaceVariant),
+            const SizedBox(width: KuberSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

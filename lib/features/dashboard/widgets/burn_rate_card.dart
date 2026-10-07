@@ -34,14 +34,16 @@ class BurnRateCard extends ConsumerWidget {
             //     letterSpacing: -0.3,
             //   ),
             // ),
-            // const SizedBox(height: KuberSpacing.sm),
+            // const SizedBox(height: KuberSpace.sm),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(KuberSpacing.lg),
+              padding: const EdgeInsets.all(KuberSpace.lg),
               decoration: BoxDecoration(
                 color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.5),
+                ),
               ),
               child: Column(
                 children: [
@@ -59,11 +61,11 @@ class BurnRateCard extends ConsumerWidget {
                               letterSpacing: 0.5,
                             ),
                           ),
-                          const SizedBox(height: KuberSpacing.xs),
+                          const SizedBox(height: KuberSpace.xs),
                           Text(
                             '${maskAmount(fmt.formatCurrency(data.avgDaily), isPrivate)}/day',
                             style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: cs.onSurface,
                               letterSpacing: -0.5,
                             ),
@@ -74,20 +76,27 @@ class BurnRateCard extends ConsumerWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: cs.primaryContainer.withValues(alpha: 0.3),
+                          color: cs.secondaryContainer.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.bolt_rounded, color: cs.primary, size: 24),
+                        child: Icon(
+                          Icons.bolt_rounded,
+                          color: cs.primary,
+                          size: 24,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: KuberSpacing.md),
+                  const SizedBox(height: KuberSpace.md),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(KuberShape.medium),
                     ),
                     child: Row(
                       children: [
@@ -99,7 +108,10 @@ class BurnRateCard extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          maskAmount(fmt.formatCurrency(data.projected), isPrivate),
+                          maskAmount(
+                            fmt.formatCurrency(data.projected),
+                            isPrivate,
+                          ),
                           style: textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: cs.onSurface,
@@ -118,7 +130,7 @@ class BurnRateCard extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.md),
           ],
         );
       },
@@ -138,7 +150,7 @@ class BurnRateCard extends ConsumerWidget {
         //     color: cs.onSurface.withValues(alpha: 0.1),
         //   ),
         // ),
-        // const SizedBox(height: KuberSpacing.sm),
+        // const SizedBox(height: KuberSpace.sm),
         Shimmer.fromColors(
           baseColor: cs.surfaceContainerHigh,
           highlightColor: cs.surfaceContainerLowest,
@@ -146,11 +158,11 @@ class BurnRateCard extends ConsumerWidget {
             height: 140,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.medium),
             ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
       ],
     );
   }

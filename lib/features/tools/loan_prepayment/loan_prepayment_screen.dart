@@ -61,13 +61,13 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'amount': _amountCtrl.text,
-        'rate': _rateCtrl.text,
-        'tenure': _tenureCtrl.text,
-        'prepay': _prepayCtrl.text,
-        'startYear': _startYearCtrl.text,
-        'type': _type,
-      };
+    'amount': _amountCtrl.text,
+    'rate': _rateCtrl.text,
+    'tenure': _tenureCtrl.text,
+    'prepay': _prepayCtrl.text,
+    'startYear': _startYearCtrl.text,
+    'type': _type,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -100,8 +100,10 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final pre = formatter.formatCurrency(parseAmount(_prepayCtrl.text),
-        symbol: currency.symbol);
+    final pre = formatter.formatCurrency(
+      parseAmount(_prepayCtrl.text),
+      symbol: currency.symbol,
+    );
     if (r == null) return 'Prepay $pre';
     return '$pre ${_type == 0 ? 'one-time' : 'yearly'} → saves ${r.yearsSaved}y ${r.remainderMonthsSaved}m & ${formatter.formatCurrency(r.interestSaved, symbol: currency.symbol)}';
   }
@@ -131,62 +133,65 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _amountCtrl,
-            label: 'LOAN AMOUNT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 50000,
-            max: 10000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'INTEREST RATE',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 20,
-            divisions: 190,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _tenureCtrl,
-            label: 'ORIGINAL TENURE',
-            suffix: 'years',
-            onChanged: recompute,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          const ToolInputLabel('PREPAYMENT TYPE'),
-          const SizedBox(height: KuberSpacing.sm),
-          ToolSegmentedControl(
-            labels: const ['One-time', 'Yearly'],
-            selectedIndex: _type,
-            onChanged: (i) => setState(() => _type = i),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _prepayCtrl,
-            label: 'PREPAYMENT AMOUNT',
-            prefix: currency.symbol,
-            helper: _type == 0 ? 'Paid once' : 'Extra paid each year',
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 10000,
-            max: 2000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _startYearCtrl,
-            label: 'START FROM YEAR',
-            suffix: 'year',
-            onChanged: recompute,
-          ),
-        ]),
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _amountCtrl,
+              label: 'LOAN AMOUNT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 50000,
+              max: 10000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'INTEREST RATE',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 20,
+              divisions: 190,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _tenureCtrl,
+              label: 'ORIGINAL TENURE',
+              suffix: 'years',
+              onChanged: recompute,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            const ToolInputLabel('PREPAYMENT TYPE'),
+            const SizedBox(height: KuberSpace.sm),
+            ToolSegmentedControl(
+              labels: const ['One-time', 'Yearly'],
+              selectedIndex: _type,
+              onChanged: (i) => setState(() => _type = i),
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _prepayCtrl,
+              label: 'PREPAYMENT AMOUNT',
+              prefix: currency.symbol,
+              helper: _type == 0 ? 'Paid once' : 'Extra paid each year',
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 10000,
+              max: 2000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _startYearCtrl,
+              label: 'START FROM YEAR',
+              suffix: 'year',
+              onChanged: recompute,
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : ToolDualHero(
@@ -199,7 +204,7 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
                   right: HeroSide(
                     label: 'Interest Saved',
                     value: money(result.interestSaved),
-                    color: cs.tertiary,
+                    color: context.kuberMoney.income,
                   ),
                   bannerText: result.monthsSaved > 0
                       ? 'Loan closes ${result.yearsSaved} years ${result.remainderMonthsSaved} months early'
@@ -214,13 +219,20 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
             child: ToolDonutBreakdown(
               segments: [
                 BreakdownSegment(
-                    'Interest saved', result.interestSaved, cs.tertiary),
-                BreakdownSegment('Interest still owed',
-                    result.withPrepay.totalInterest, cs.error),
+                  'Interest saved',
+                  result.interestSaved,
+                  context.kuberMoney.income,
+                ),
+                BreakdownSegment(
+                  'Interest still owed',
+                  result.withPrepay.totalInterest,
+                  context.kuberMoney.expense,
+                ),
               ],
               centerBig: formatter.formatCompactCurrency(
-                  result.baseline.totalInterest,
-                  symbol: currency.symbol),
+                result.baseline.totalInterest,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'ORIGINAL',
             ),
           ),
@@ -230,14 +242,16 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Without prepayment',
-                    points: result.baseline.balanceSeries,
-                    color: cs.error,
-                    dashed: true),
+                  name: 'Without prepayment',
+                  points: result.baseline.balanceSeries,
+                  color: context.kuberMoney.expense,
+                  dashed: true,
+                ),
                 ChartSeries(
-                    name: 'With prepayment',
-                    points: result.withPrepay.balanceSeries,
-                    color: cs.tertiary),
+                  name: 'With prepayment',
+                  points: result.withPrepay.balanceSeries,
+                  color: context.kuberMoney.income,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.baseline.balanceSeries.length; i++)

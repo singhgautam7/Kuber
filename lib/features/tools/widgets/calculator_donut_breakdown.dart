@@ -53,33 +53,36 @@ class _ToolDonutBreakdownState extends ConsumerState<ToolDonutBreakdown> {
             children: [
               RepaintBoundary(
                 child: PieChart(
-                PieChartData(
-                  startDegreeOffset: -90,
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 40,
-                  pieTouchData: PieTouchData(
-                    touchCallback: (event, resp) {
-                      if (event is FlTapUpEvent || event is FlPanEndEvent) {
-                        final idx =
-                            resp?.touchedSection?.touchedSectionIndex ?? -1;
-                        setState(() => _touched =
-                            (idx >= 0 && idx == _touched) ? null : (idx >= 0 ? idx : null));
-                      }
-                    },
+                  PieChartData(
+                    startDegreeOffset: -90,
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 40,
+                    pieTouchData: PieTouchData(
+                      touchCallback: (event, resp) {
+                        if (event is FlTapUpEvent || event is FlPanEndEvent) {
+                          final idx =
+                              resp?.touchedSection?.touchedSectionIndex ?? -1;
+                          setState(
+                            () => _touched = (idx >= 0 && idx == _touched)
+                                ? null
+                                : (idx >= 0 ? idx : null),
+                          );
+                        }
+                      },
+                    ),
+                    sections: [
+                      for (var i = 0; i < widget.segments.length; i++)
+                        PieChartSectionData(
+                          color: widget.segments[i].color,
+                          value: widget.segments[i].value <= 0
+                              ? 0.0001
+                              : widget.segments[i].value,
+                          radius: _touched == i ? 22 : 17,
+                          showTitle: false,
+                        ),
+                    ],
                   ),
-                  sections: [
-                    for (var i = 0; i < widget.segments.length; i++)
-                      PieChartSectionData(
-                        color: widget.segments[i].color,
-                        value: widget.segments[i].value <= 0
-                            ? 0.0001
-                            : widget.segments[i].value,
-                        radius: _touched == i ? 22 : 17,
-                        showTitle: false,
-                      ),
-                  ],
                 ),
-              ),
               ),
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -87,15 +90,15 @@ class _ToolDonutBreakdownState extends ConsumerState<ToolDonutBreakdown> {
                   Text(
                     widget.centerBig,
                     style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
                   ),
                   Text(
                     widget.centerSmall.toUpperCase(),
                     style: localeFont(
-                      fontSize: 9,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
                       letterSpacing: 0.4,
@@ -106,7 +109,7 @@ class _ToolDonutBreakdownState extends ConsumerState<ToolDonutBreakdown> {
             ],
           ),
         ),
-        const SizedBox(width: KuberSpacing.lg),
+        const SizedBox(width: KuberSpace.lg),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,8 +120,10 @@ class _ToolDonutBreakdownState extends ConsumerState<ToolDonutBreakdown> {
                   segment: widget.segments[i],
                   percent: widget.segments[i].value / safeTotal * 100,
                   emphasized: _touched == i,
-                  formatValue: (v) =>
-                      formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol),
+                  formatValue: (v) => formatter.formatCurrency(
+                    v.roundToDouble(),
+                    symbol: currency.symbol,
+                  ),
                 ),
               ],
             ],
@@ -150,8 +155,10 @@ class _LegendRow extends StatelessWidget {
         Container(
           width: 9,
           height: 9,
-          decoration:
-              BoxDecoration(color: segment.color, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: segment.color,
+            shape: BoxShape.circle,
+          ),
         ),
         const SizedBox(width: 9),
         Expanded(
@@ -166,8 +173,8 @@ class _LegendRow extends StatelessWidget {
               Text(
                 formatValue(segment.value),
                 style: localeFont(
-                  fontSize: 13.5,
-                  fontWeight: emphasized ? FontWeight.w800 : FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: emphasized ? FontWeight.w600 : FontWeight.w700,
                   color: cs.onSurface,
                 ),
               ),
@@ -177,7 +184,7 @@ class _LegendRow extends StatelessWidget {
         Text(
           '${percent.round()}%',
           style: localeFont(
-            fontSize: 11.5,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
           ),

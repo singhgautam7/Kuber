@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/l10n_ext.dart';
 import 'package:intl/intl.dart';
 
-
 class ActiveSelectionWidget extends StatelessWidget {
   final DateTime start;
   final DateTime end;
@@ -14,7 +13,6 @@ class ActiveSelectionWidget extends StatelessWidget {
     required this.end,
     required this.onEdit,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +26,7 @@ class ActiveSelectionWidget extends StatelessWidget {
     final endYearStr = DateFormat('yyyy').format(end);
 
     final headlineStyle = tt.headlineMedium?.copyWith(
-      fontWeight: FontWeight.w900,
+      fontWeight: FontWeight.w700,
       letterSpacing: -1,
     );
     final yearStyle = tt.titleMedium?.copyWith(
@@ -46,7 +44,7 @@ class ActiveSelectionWidget extends StatelessWidget {
               context.l10n.activeSelection,
               style: tt.labelSmall?.copyWith(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 1.5,
               ),
             ),
@@ -76,9 +74,10 @@ class ActiveSelectionWidget extends StatelessWidget {
                 child: Baseline(
                   baseline: 18,
                   baselineType: TextBaseline.alphabetic,
-                  child: Icon(Icons.arrow_forward_rounded,
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
                     color: cs.primary.withValues(alpha: 0.5),
-                    size: 20
+                    size: 20,
                   ),
                 ),
               ),

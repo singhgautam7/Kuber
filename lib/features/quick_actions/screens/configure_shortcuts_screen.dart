@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../pro/home/shortcut_catalog.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -55,8 +54,7 @@ class _ConfigureShortcutsScreenState
   late List<String> _draft;
   _Tab _tab = _Tab.arrange;
 
-  bool get _isShortcuts =>
-      widget.kind == ConfigureKind.quickActionShortcuts;
+  bool get _isShortcuts => widget.kind == ConfigureKind.quickActionShortcuts;
 
   @override
   void initState() {
@@ -102,10 +100,10 @@ class _ConfigureShortcutsScreenState
   }
 
   static String _sectionLabel(ShortcutSection s) => switch (s) {
-        ShortcutSection.manage => 'MANAGE',
-        ShortcutSection.tools => 'TOOLS',
-        ShortcutSection.kuberSpecific => 'KUBER SIGNATURE',
-      };
+    ShortcutSection.manage => 'MANAGE',
+    ShortcutSection.tools => 'TOOLS',
+    ShortcutSection.kuberSpecific => 'KUBER SIGNATURE',
+  };
 
   ConfigurableItem? _itemById(String id) =>
       _catalog.where((c) => c.id == id).firstOrNull;
@@ -143,47 +141,52 @@ class _ConfigureShortcutsScreenState
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      // Standard thin app bar (back + home only, no title/brand) — the title
-      // lives in the scrolling KuberPageHeader below, like every other page.
-      appBar: const KuberAppBar(
-        showBack: true,
-        showHome: true,
-        showBrand: false,
-      ),
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    KuberPageHeader(title: _title, description: _description),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.md),
-                      child: KuberSegmentedControl<_Tab>(
-                        values: const [_Tab.arrange, _Tab.add],
-                        labels: [
-                          'Arrange',
-                          _isShortcuts ? 'Add shortcuts' : 'Add actions',
-                        ],
-                        selected: _tab,
-                        onSelected: (t) => setState(() => _tab = t),
+      // Board 3.2d: pushed header with the title, description as subtitle.
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(
+          showBack: true,
+          title: _title,
+          subtitle: _description,
+        ),
+        body: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: KuberSpace.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          KuberSpace.screenMargin,
+                          KuberSpace.xs,
+                          KuberSpace.screenMargin,
+                          KuberSpace.xl,
+                        ),
+                        child: KuberSegmentedControl<_Tab>(
+                          showCheck: false,
+                          values: const [_Tab.arrange, _Tab.add],
+                          labels: [
+                            'Arrange',
+                            _isShortcuts ? 'Add shortcuts' : 'Add actions',
+                          ],
+                          selected: _tab,
+                          onSelected: (t) => setState(() => _tab = t),
+                        ),
                       ),
-                    ),
-                    if (_tab == _Tab.arrange)
-                      _buildArrange(cs)
-                    else
-                      _buildAdd(cs),
-                  ],
+                      if (_tab == _Tab.arrange)
+                        _buildArrange(cs)
+                      else
+                        _buildAdd(cs),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            _BottomBar(onCancel: _cancel, onSave: _save),
-          ],
+              _BottomBar(onCancel: _cancel, onSave: _save),
+            ],
+          ),
         ),
       ),
     );
@@ -191,35 +194,35 @@ class _ConfigureShortcutsScreenState
 
   // ── Arrange tab ────────────────────────────────────────────────────────
   Widget _buildArrange(ColorScheme cs) {
-    final items =
-        _draft.map(_itemById).whereType<ConfigurableItem>().toList();
+    final items = _draft.map(_itemById).whereType<ConfigurableItem>().toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg, 4, KuberSpacing.lg, 8),
-          child: Text(
-            'IN YOUR LIST · ${items.length}',
-            style: localeFont(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.2,
-            ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpace.screenMargin,
           ),
+          child: KuberSectionHeader(title: 'IN YOUR LIST · ${items.length}'),
         ),
         ReorderableListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpace.screenMargin,
+          ),
           itemCount: items.length,
           onReorder: _reorder,
+          proxyDecorator: (child, _, __) => Material(
+            color: cs.surfaceContainerHigh,
+            borderRadius: KuberShape.cardR,
+            child: child,
+          ),
           itemBuilder: (context, i) {
             final item = items[i];
             return _ArrangeRow(
               key: ValueKey(item.id),
               index: i,
+              isLast: i == items.length - 1,
               item: item,
               onRemove: () => _remove(item.id),
             );
@@ -236,32 +239,25 @@ class _ConfigureShortcutsScreenState
       sections.putIfAbsent(item.section, () => []).add(item);
     }
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final entry in sections.entries) ...[
-            Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 8),
-              child: Text(
-                entry.key,
-                style: localeFont(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1.2,
-                ),
-              ),
+            KuberSectionHeader(title: entry.key),
+            KuberGroup(
+              children: [
+                for (final item in entry.value)
+                  _AddRow(
+                    item: item,
+                    added: _draft.contains(item.id),
+                    onToggle: () => _draft.contains(item.id)
+                        ? _remove(item.id)
+                        : _add(item.id),
+                  ),
+              ],
             ),
-            for (final item in entry.value) ...[
-              _AddRow(
-                item: item,
-                added: _draft.contains(item.id),
-                onToggle: () =>
-                    _draft.contains(item.id) ? _remove(item.id) : _add(item.id),
-              ),
-              const SizedBox(height: 8),
-            ],
+            const SizedBox(height: KuberSpace.xl),
           ],
         ],
       ),
@@ -279,10 +275,14 @@ class _BottomBar extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.lg, KuberSpacing.md, KuberSpacing.lg, KuberSpacing.md),
+        KuberSpace.screenMargin,
+        KuberSpace.md,
+        KuberSpace.screenMargin,
+        KuberSpace.xl,
+      ),
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outline)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: Row(
         children: [
@@ -294,7 +294,7 @@ class _BottomBar extends StatelessWidget {
               onPressed: onCancel,
             ),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: AppButton(
               label: 'Save',
@@ -309,100 +309,78 @@ class _BottomBar extends StatelessWidget {
   }
 }
 
-class _AccentSquircle extends StatelessWidget {
-  final IconData icon;
-  final double size;
-  const _AccentSquircle({required this.icon, this.size = 38});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.32)),
-      ),
-      child: Icon(icon, size: size * 0.5, color: cs.primary),
-    );
-  }
-}
-
 class _ArrangeRow extends StatelessWidget {
   final int index;
+  final bool isLast;
   final ConfigurableItem item;
   final VoidCallback onRemove;
 
   const _ArrangeRow({
     super.key,
     required this.index,
+    required this.isLast,
     required this.item,
     required this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    const r = Radius.circular(KuberShape.largeIncreased);
+    // One grouped list: rounded ends, shared 1dp edges.
+    return Transform.translate(
+      offset: Offset(0, -index.toDouble()),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        height: KuberSpace.listItem1,
+        padding: const EdgeInsets.only(left: 12, right: 12),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.vertical(
+            top: index == 0 ? r : Radius.zero,
+            bottom: isLast ? r : Radius.zero,
+          ),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Row(
           children: [
             ReorderableDragStartListener(
               index: index,
-              child: Icon(Icons.drag_indicator_rounded,
-                  size: 20, color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(width: 12),
-            _AccentSquircle(icon: item.icon),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    item.section,
-                    style: localeFont(
-                      fontSize: 11,
-                      color: cs.onSurfaceVariant,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ],
+              child: Icon(
+                Icons.drag_indicator_rounded,
+                size: 20,
+                color: cs.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: KuberSpace.md),
+            Icon(item.icon, size: 24, color: cs.onSurfaceVariant),
+            const SizedBox(width: KuberSpace.lg),
+            Expanded(
+              child: Text(
+                item.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium!.copyWith(
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(width: KuberSpace.sm),
             GestureDetector(
               onTap: onRemove,
               behavior: HitTestBehavior.opaque,
               child: Container(
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
+                  color: cs.errorContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.remove_rounded,
-                    size: 18, color: cs.onSurfaceVariant),
+                child: Icon(
+                  Icons.remove_rounded,
+                  size: 18,
+                  color: cs.onErrorContainer,
+                ),
               ),
             ),
           ],
@@ -426,50 +404,22 @@ class _AddRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    return KuberListRow(
       onTap: onToggle,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      leading: Icon(item.icon, size: 24, color: cs.onSurfaceVariant),
+      title: item.label,
+      trailing: Container(
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: added ? cs.primary.withValues(alpha: 0.32) : cs.outline,
-          ),
+          color: added ? cs.primary : Colors.transparent,
+          shape: BoxShape.circle,
+          border: added ? null : Border.all(color: cs.outline),
         ),
-        child: Row(
-          children: [
-            _AccentSquircle(icon: item.icon, size: 36),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: added ? cs.primary : Colors.transparent,
-                shape: BoxShape.circle,
-                border: added ? null : Border.all(color: cs.outline),
-              ),
-              child: Icon(
-                added ? Icons.check_rounded : Icons.add_rounded,
-                size: 17,
-                color: added ? cs.onPrimary : cs.onSurfaceVariant,
-              ),
-            ),
-          ],
+        child: Icon(
+          added ? Icons.check_rounded : Icons.add_rounded,
+          size: 18,
+          color: added ? cs.onPrimary : cs.onSurfaceVariant,
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,10 +17,12 @@ class ManualDateRangeBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<ManualDateRangeBottomSheet> createState() => _ManualDateRangeBottomSheetState();
+  State<ManualDateRangeBottomSheet> createState() =>
+      _ManualDateRangeBottomSheetState();
 }
 
-class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet> {
+class _ManualDateRangeBottomSheetState
+    extends State<ManualDateRangeBottomSheet> {
   late TextEditingController _fromController;
   late TextEditingController _toController;
   String? _fromError;
@@ -29,29 +32,35 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
   @override
   void initState() {
     super.initState();
-    _fromController = TextEditingController(text: _df.format(widget.initialFrom));
+    _fromController = TextEditingController(
+      text: _df.format(widget.initialFrom),
+    );
     _toController = TextEditingController(text: _df.format(widget.initialTo));
-    
+
     _fromController.addListener(_liveValidate);
     _toController.addListener(_liveValidate);
   }
 
   void _liveValidate() {
     setState(() {
-       _fromError = null;
-       _toError = null;
+      _fromError = null;
+      _toError = null;
     });
   }
 
   bool get _isValid {
     final fromDate = _parseDate(_fromController.text);
     final toDate = _parseDate(_toController.text);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
 
-    return fromDate != null && 
-           toDate != null && 
-           !fromDate.isAfter(toDate) && 
-           !toDate.isAfter(today);
+    return fromDate != null &&
+        toDate != null &&
+        !fromDate.isAfter(toDate) &&
+        !toDate.isAfter(today);
   }
 
   @override
@@ -72,7 +81,9 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
       final year = int.parse(parts[2]);
       if (year < 2000 || year > 2100) return null;
       final date = DateTime(year, month, day);
-      if (date.day != day || date.month != month || date.year != year) return null;
+      if (date.day != day || date.month != month || date.year != year) {
+        return null;
+      }
       return date;
     } catch (_) {
       return null;
@@ -87,7 +98,11 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
 
     final fromDate = _parseDate(_fromController.text);
     final toDate = _parseDate(_toController.text);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
 
     if (fromDate == null) {
       setState(() => _fromError = context.l10n.invalidFormat);
@@ -121,9 +136,16 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,14 +157,14 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
               height: 4,
               decoration: BoxDecoration(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(KuberShape.full),
               ),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             context.l10n.manualDateRange,
-            style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
@@ -150,7 +172,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
             style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
-          
+
           _buildDateField(
             label: context.l10n.fromDateLabel,
             controller: _fromController,
@@ -166,7 +188,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
             cs: cs,
             tt: tt,
           ),
-          
+
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
@@ -178,7 +200,9 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
                 foregroundColor: cs.onPrimary,
                 disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.1),
                 disabledForegroundColor: cs.onSurface.withValues(alpha: 0.3),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                ),
                 elevation: 0,
               ),
               child: Row(
@@ -187,7 +211,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
                   Text(
                     context.l10n.doneUpper,
                     style: localeFont(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 2,
                     ),
                   ),
@@ -205,7 +229,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
                 context.l10n.cancelUpper,
                 style: tt.labelLarge?.copyWith(
                   color: cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -231,7 +255,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
           label,
           style: tt.labelSmall?.copyWith(
             color: hasError ? cs.error : cs.onSurfaceVariant,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             letterSpacing: 1,
           ),
         ),
@@ -242,28 +266,36 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
           style: tt.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             hintText: 'DD/MM/YYYY',
-            hintStyle: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant.withValues(alpha: 0.3)),
+            hintStyle: tt.bodyLarge?.copyWith(
+              color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+            ),
             filled: true,
             fillColor: cs.surfaceContainerHigh,
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.large),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: hasError ? cs.error : cs.primary, width: 2),
+              borderRadius: BorderRadius.circular(KuberShape.large),
+              borderSide: BorderSide(
+                color: hasError ? cs.error : cs.primary,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.large),
               borderSide: BorderSide(color: cs.error, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.large),
               borderSide: BorderSide(color: cs.error, width: 2),
             ),
             errorText: error,
             errorStyle: tt.labelSmall?.copyWith(color: cs.error),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
           ),
         ),
       ],

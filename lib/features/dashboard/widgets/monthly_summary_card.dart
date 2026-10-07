@@ -21,7 +21,7 @@ class MonthlySummaryCard extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.lg),
       child: Column(
         children: [
           // Net total — counts up on first appearance, tweens on change.
@@ -31,8 +31,8 @@ class MonthlySummaryCard extends ConsumerWidget {
             format: fmt.formatCurrency,
             style: textTheme.displaySmall?.copyWith(
               color: summary.net >= 0
-                  ? colorScheme.tertiary
-                  : colorScheme.error,
+                  ? context.kuberMoney.income
+                  : context.kuberMoney.expense,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -42,27 +42,33 @@ class MonthlySummaryCard extends ConsumerWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           // Income / Expense row
           Row(
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  padding: const EdgeInsets.all(KuberSpace.lg),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.arrow_downward,
-                          color: colorScheme.tertiary, size: 20),
-                      const SizedBox(height: KuberSpacing.xs),
+                      Icon(
+                        Icons.arrow_downward,
+                        color: context.kuberMoney.income,
+                        size: 20,
+                      ),
+                      const SizedBox(height: KuberSpace.xs),
                       Text('Income', style: textTheme.labelMedium),
                       Text(
-                        maskAmount(fmt.formatCurrency(summary.totalIncome), isPrivate),
+                        maskAmount(
+                          fmt.formatCurrency(summary.totalIncome),
+                          isPrivate,
+                        ),
                         style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.tertiary,
+                          color: context.kuberMoney.income,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -70,24 +76,30 @@ class MonthlySummaryCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  padding: const EdgeInsets.all(KuberSpace.lg),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.arrow_upward,
-                          color: colorScheme.error, size: 20),
-                      const SizedBox(height: KuberSpacing.xs),
+                      Icon(
+                        Icons.arrow_upward,
+                        color: context.kuberMoney.expense,
+                        size: 20,
+                      ),
+                      const SizedBox(height: KuberSpace.xs),
                       Text('Expenses', style: textTheme.labelMedium),
                       Text(
-                        maskAmount(fmt.formatCurrency(summary.totalExpense), isPrivate),
+                        maskAmount(
+                          fmt.formatCurrency(summary.totalExpense),
+                          isPrivate,
+                        ),
                         style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.error,
+                          color: context.kuberMoney.expense,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

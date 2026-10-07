@@ -1,4 +1,4 @@
-import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class SquircleIcon extends StatelessWidget {
@@ -23,17 +23,14 @@ class SquircleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final iconColor = color ?? cs.primary;
+    final iconColor = color ?? cs.onSecondaryContainer;
 
+    // M3 icon tile: secondaryContainer, r12, no border.
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cs.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.mediumR,
       ),
       child: glyph ?? Icon(icon, color: iconColor, size: size),
     );
@@ -56,81 +53,90 @@ class SettingsCardSelector<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Row(
-      children: options.map((option) {
-        final isSelected = option.value == selectedValue;
-        final isFirst = options.first == option;
-        final isLast = options.last == option;
+    final tt = Theme.of(context).textTheme;
 
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: isFirst ? 0 : 8,
-              right: isLast ? 0 : 8,
-            ),
-            child: InkWell(
-              onTap: () => onSelected(option.value),
-              borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.5),
-                      width: isSelected ? 1.5 : 1,
+    // M3 choice tiles: selected = secondaryContainer + check, others
+    // surfaceContainer with an outlineVariant border, r16.
+    return Row(
+      children: [
+        for (var i = 0; i < options.length; i++) ...[
+          if (i > 0) const SizedBox(width: KuberSpace.sm),
+          Expanded(
+            child: Builder(
+              builder: (context) {
+                final option = options[i];
+                final isSelected = option.value == selectedValue;
+                final fg = isSelected
+                    ? cs.onSecondaryContainer
+                    : cs.onSurfaceVariant;
+                return Material(
+                  color: isSelected
+                      ? cs.secondaryContainer
+                      : cs.surfaceContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: KuberShape.cardR,
+                    side: BorderSide(
+                      color: isSelected
+                          ? cs.secondaryContainer
+                          : cs.outlineVariant,
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SquircleIcon(
-                        icon: option.icon,
-                        size: 16,
-                        padding: 8,
-                        color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        option.label,
-                        style: localeFont(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                        ),
-                      ),
-                      if (option.subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          option.subtitle!,
-                          style: localeFont(
-                            fontSize: 10,
-                            color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => onSelected(option.value),
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: KuberSpace.lg,
+                            horizontal: KuberSpace.sm,
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(option.icon, size: 24, color: fg),
+                                const SizedBox(height: KuberSpace.sm),
+                                Text(
+                                  option.label,
+                                  textAlign: TextAlign.center,
+                                  style: tt.labelLarge!.copyWith(
+                                    color: isSelected
+                                        ? cs.onSecondaryContainer
+                                        : cs.onSurface,
+                                  ),
+                                ),
+                                if (option.subtitle != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    option.subtitle!,
+                                    textAlign: TextAlign.center,
+                                    style: tt.bodySmall!.copyWith(color: fg),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ),
+                        if (isSelected)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Icon(
+                              Icons.check_circle_rounded,
+                              size: 18,
+                              color: cs.primary,
+                            ),
+                          ),
                       ],
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Icon(
-                      Icons.check_circle_rounded,
-                      size: 18,
-                      color: cs.primary,
                     ),
                   ),
-              ],
-            ),
+                );
+              },
             ),
           ),
-        );
-      }).toList(),
+        ],
+      ],
     );
   }
 }

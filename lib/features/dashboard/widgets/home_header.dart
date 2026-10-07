@@ -1,23 +1,12 @@
-// =============================================================================
-// home_header.dart  — POLISHED
-//
-// WHAT CHANGED VISUALLY:
-//   • Replaced the AnimatedBuilder shimmer pill with a static `_HeaderIconButton`
-//     configured with a custom `Row` (containing KuberMarkWidget and Text)
-//     to match Option B from the wireframe design.
-//   • Border opacity for primary-accented buttons is updated to 28-32% alpha.
-//
-// WHAT MUST NOT CHANGE LOGICALLY:
-//   • Notification and privacy buttons' onTap/state bindings.
-//   • GoRouter navigation to '/more/ask-kuber'.
-// =============================================================================
+// Home header (board 3.2b): Pro pill, privacy, notifications. Built from the
+// shared M3 AppIconButton; tap/state bindings unchanged.
 
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import '../../pro/home/premium_home_button.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
@@ -39,128 +28,47 @@ class HomeHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isPrivate = ref.watch(privacyModeProvider);
 
+    // Header geometry (components/header.md): L20 T14 R16 B12; Pro pill on
+    // the left, privacy and notifications on the right (board 3.2b).
     return SafeArea(
       bottom: false,
-      child: SizedBox(
-        height: kToolbarHeight,
-        child: Padding(
-          // Match the surrounding content's horizontal padding so the bell
-          // sits at exactly the same right edge as the widget cards below.
-          padding: const EdgeInsets.symmetric(horizontal: 0),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          KuberSpace.screenMargin,
+          14,
+          KuberSpace.lg,
+          KuberSpace.md,
+        ),
+        child: SizedBox(
+          height: 48,
           child: Row(
             children: [
               const PremiumHomeButton(),
               const Spacer(),
-              _HeaderIconButton(
+              AppIconButton(
                 key: TutorialStepKeys.privacyModeIcon,
                 icon: isPrivate
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                accentBorder: isPrivate,
-                tooltip: isPrivate
+                kind: isPrivate
+                    ? AppIconButtonKind.tonal
+                    : AppIconButtonKind.standard,
+                semanticLabel: isPrivate
                     ? context.l10n.privacyModeOn
                     : context.l10n.privacyModeOff,
-                onTap: () =>
+                onPressed: () =>
                     ref.read(settingsProvider.notifier).togglePrivacyMode(),
               ),
-              const SizedBox(width: KuberSpacing.sm),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _HeaderIconButton(
-                    icon: Icons.notifications_none_rounded,
-                    tooltip: context.l10n.notificationsTooltip,
-                    onTap: onTapNotifications,
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      top: -5,
-                      right: -5,
-                      child: _UnreadBadge(count: unreadCount),
-                    ),
-                ],
+              AppIconButton(
+                icon: Icons.notifications_none_rounded,
+                semanticLabel: context.l10n.notificationsTooltip,
+                badge: unreadCount > 0
+                    ? (unreadCount > 9 ? '9+' : '$unreadCount')
+                    : null,
+                onPressed: onTapNotifications,
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderIconButton extends StatelessWidget {
-  final IconData? icon;
-  final Widget? child;
-  final String tooltip;
-  final VoidCallback onTap;
-  final bool accentBorder;
-  const _HeaderIconButton({
-    super.key,
-    this.icon,
-    this.child,
-    required this.tooltip,
-    required this.onTap,
-    this.accentBorder = false,
-  }) : assert(icon != null || child != null, 'Either icon or child must be provided');
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: tooltip,
-      triggerMode: TooltipTriggerMode.longPress,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(
-              color: accentBorder
-                  ? cs.primary.withValues(alpha: 0.3)
-                  : cs.outline.withValues(alpha: 0.3),
-            ),
-          ),
-          child: child ?? Icon(
-            icon,
-            size: 16,
-            color: accentBorder ? cs.primary : cs.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _UnreadBadge extends StatelessWidget {
-  final int count;
-  const _UnreadBadge({required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final label = count > 9 ? '9+' : '$count';
-    final wide = label.length > 1;
-    return Container(
-      constraints: BoxConstraints(
-        minWidth: wide ? 20 : 16,
-        minHeight: 16,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: wide ? 5 : 0),
-      decoration: BoxDecoration(
-        color: cs.error,
-        borderRadius: BorderRadius.circular(KuberRadius.full),
-        border: Border.all(color: cs.surface, width: 2),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          color: cs.onError,
-          height: 1,
         ),
       ),
     );

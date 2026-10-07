@@ -22,7 +22,8 @@ class InflationCalculatorScreen extends ConsumerStatefulWidget {
 }
 
 class _InflationCalculatorScreenState
-    extends ConsumerState<InflationCalculatorScreen> with CalculatorSupport {
+    extends ConsumerState<InflationCalculatorScreen>
+    with CalculatorSupport {
   final _amountCtrl = TextEditingController();
   final _rateCtrl = TextEditingController();
   final _yearsCtrl = TextEditingController();
@@ -54,10 +55,10 @@ class _InflationCalculatorScreenState
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'amount': _amountCtrl.text,
-        'rate': _rateCtrl.text,
-        'years': _yearsCtrl.text,
-      };
+    'amount': _amountCtrl.text,
+    'rate': _rateCtrl.text,
+    'years': _yearsCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -78,8 +79,10 @@ class _InflationCalculatorScreenState
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
-        symbol: currency.symbol);
+    final amt = formatter.formatCurrency(
+      parseAmount(_amountCtrl.text),
+      symbol: currency.symbol,
+    );
     if (r == null) return 'Inflation $amt';
     return '$amt @ ${_rateCtrl.text}% / ${_years}y → ${formatter.formatCurrency(r.futureValueRequired, symbol: currency.symbol)} needed';
   }
@@ -106,40 +109,43 @@ class _InflationCalculatorScreenState
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _amountCtrl,
-            label: 'CURRENT AMOUNT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 10000,
-            max: 50000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'INFLATION RATE',
-            suffix: '%',
-            helper: 'Long-term average for India ≈ 6%',
-            onChanged: recompute,
-            min: 1,
-            max: 15,
-            divisions: 140,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _yearsCtrl,
-            label: 'YEARS',
-            suffix: 'years',
-            onChanged: recompute,
-            min: 1,
-            max: 40,
-            divisions: 39,
-          ),
-        ]),
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _amountCtrl,
+              label: 'CURRENT AMOUNT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 10000,
+              max: 50000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'INFLATION RATE',
+              suffix: '%',
+              helper: 'Long-term average for India ≈ 6%',
+              onChanged: recompute,
+              min: 1,
+              max: 15,
+              divisions: 140,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _yearsCtrl,
+              label: 'YEARS',
+              suffix: 'years',
+              onChanged: recompute,
+              min: 1,
+              max: 40,
+              divisions: 39,
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : ToolDualHero(
@@ -164,14 +170,16 @@ class _InflationCalculatorScreenState
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Future value required',
-                    points: result.futureSeries,
-                    color: ToolAccents.pink),
+                  name: 'Future value required',
+                  points: result.futureSeries,
+                  color: ToolAccents.pink,
+                ),
                 ChartSeries(
-                    name: 'Real value of money',
-                    points: result.realSeries,
-                    color: cs.primary,
-                    dashed: true),
+                  name: 'Real value of money',
+                  points: result.realSeries,
+                  color: cs.primary,
+                  dashed: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.futureSeries.length; i++) 'Y$i',

@@ -35,11 +35,13 @@ class ViewBillSheet extends ConsumerWidget {
       builder: (_, scrollCtrl) => Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(KuberShape.extraLarge),
+          ),
           border: Border(
-            top: BorderSide(color: cs.outline),
-            left: BorderSide(color: cs.outline),
-            right: BorderSide(color: cs.outline),
+            top: BorderSide(color: cs.outlineVariant),
+            left: BorderSide(color: cs.outlineVariant),
+            right: BorderSide(color: cs.outlineVariant),
           ),
         ),
         child: Column(
@@ -52,8 +54,8 @@ class ViewBillSheet extends ConsumerWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: cs.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    color: cs.outline,
+                    borderRadius: BorderRadius.circular(KuberShape.full),
                   ),
                 ),
               ),
@@ -76,7 +78,7 @@ class ViewBillSheet extends ConsumerWidget {
                               '${DateFormat('d MMM yyyy').format(bill.createdAt).toUpperCase()} · $splitLabel SPLIT',
                               style: localeFont(
                                 fontSize: 11,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 1.2,
                                 color: cs.onSurfaceVariant,
                               ),
@@ -86,7 +88,7 @@ class ViewBillSheet extends ConsumerWidget {
                               bill.name,
                               style: localeFont(
                                 fontSize: 22,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: -0.6,
                                 color: cs.onSurface,
                               ),
@@ -113,7 +115,7 @@ class ViewBillSheet extends ConsumerWidget {
                       color: cs.surfaceContainerHigh,
                       shape: bsSquircle(
                         12,
-                        side: BorderSide(color: cs.outline),
+                        side: BorderSide(color: cs.outlineVariant),
                       ),
                     ),
                     child: Row(
@@ -125,8 +127,8 @@ class ViewBillSheet extends ConsumerWidget {
                               Text(
                                 'TOTAL',
                                 style: localeFont(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   letterSpacing: 1.1,
                                   color: cs.onSurfaceVariant,
                                 ),
@@ -139,7 +141,7 @@ class ViewBillSheet extends ConsumerWidget {
                                 ),
                                 style: localeFont(
                                   fontSize: 24,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w700,
                                   letterSpacing: -0.7,
                                   color: cs.onSurface,
                                   fontFeatures: const [
@@ -150,7 +152,11 @@ class ViewBillSheet extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        Container(width: 1, height: 48, color: cs.outline),
+                        Container(
+                          width: 1,
+                          height: 48,
+                          color: cs.outlineVariant,
+                        ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
@@ -159,8 +165,8 @@ class ViewBillSheet extends ConsumerWidget {
                               Text(
                                 'PAID BY',
                                 style: localeFont(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   letterSpacing: 1.1,
                                   color: cs.onSurfaceVariant,
                                 ),
@@ -178,7 +184,7 @@ class ViewBillSheet extends ConsumerWidget {
                                       bill.paidByPersonName,
                                       style: localeFont(
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.w600,
                                         letterSpacing: -0.1,
                                         color: bill.paidByPersonName == kYouName
                                             ? cs.primary
@@ -200,7 +206,7 @@ class ViewBillSheet extends ConsumerWidget {
               ),
             ),
 
-            Divider(height: 1, color: cs.outline),
+            Divider(height: 1, color: cs.outlineVariant),
 
             // Breakdown scroll area
             Expanded(
@@ -214,7 +220,7 @@ class ViewBillSheet extends ConsumerWidget {
                       'BREAKDOWN · ${bill.participants.length} PEOPLE',
                       style: localeFont(
                         fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 1.1,
                         color: cs.onSurfaceVariant,
                       ),
@@ -226,7 +232,7 @@ class ViewBillSheet extends ConsumerWidget {
                         color: cs.surfaceContainerHigh,
                         shape: bsSquircle(
                           12,
-                          side: BorderSide(color: cs.outline),
+                          side: BorderSide(color: cs.outlineVariant),
                         ),
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -246,10 +252,10 @@ class ViewBillSheet extends ConsumerWidget {
                             statusColor = cs.primary;
                           } else if (bill.paidByPersonName == kYouName) {
                             statusLabel = 'OWES YOU';
-                            statusColor = cs.tertiary;
+                            statusColor = context.kuberMoney.income;
                           } else if (p.personName == kYouName) {
                             statusLabel = 'YOU OWE';
-                            statusColor = cs.error;
+                            statusColor = context.kuberMoney.expense;
                           } else {
                             statusLabel = 'OWES';
                             statusColor = cs.onSurfaceVariant;
@@ -263,7 +269,9 @@ class ViewBillSheet extends ConsumerWidget {
                               border: isLast
                                   ? null
                                   : Border(
-                                      bottom: BorderSide(color: cs.outline),
+                                      bottom: BorderSide(
+                                        color: cs.outlineVariant,
+                                      ),
                                     ),
                             ),
                             padding: const EdgeInsets.symmetric(
@@ -283,7 +291,7 @@ class ViewBillSheet extends ConsumerWidget {
                                         p.personName,
                                         style: localeFont(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w600,
                                           color: cs.onSurface,
                                           letterSpacing: -0.1,
                                         ),
@@ -292,8 +300,8 @@ class ViewBillSheet extends ConsumerWidget {
                                       Text(
                                         statusLabel,
                                         style: localeFont(
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w800,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
                                           letterSpacing: 0.7,
                                           color: statusColor,
                                         ),
@@ -312,7 +320,7 @@ class ViewBillSheet extends ConsumerWidget {
                                         ),
                                         style: localeFont(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w800,
+                                          fontWeight: FontWeight.w600,
                                           letterSpacing: -0.2,
                                           color: statusColor,
                                           fontFeatures: const [
@@ -325,7 +333,7 @@ class ViewBillSheet extends ConsumerWidget {
                                         Text(
                                           '${p.rawInput!.toStringAsFixed(0)}% of total',
                                           style: localeFont(
-                                            fontSize: 10.5,
+                                            fontSize: 11,
                                             color: cs.onSurfaceVariant,
                                           ),
                                         ),
@@ -334,7 +342,7 @@ class ViewBillSheet extends ConsumerWidget {
                                         Text(
                                           '${p.rawInput!.toStringAsFixed(0)} parts',
                                           style: localeFont(
-                                            fontSize: 10.5,
+                                            fontSize: 11,
                                             color: cs.onSurfaceVariant,
                                           ),
                                         ),
@@ -348,7 +356,7 @@ class ViewBillSheet extends ConsumerWidget {
                                     ),
                                     style: localeFont(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w600,
                                       letterSpacing: -0.2,
                                       color: cs.primary,
                                       fontFeatures: const [
@@ -379,7 +387,7 @@ class ViewBillSheet extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: cs.outline)),
+                border: Border(top: BorderSide(color: cs.outlineVariant)),
               ),
               child: Row(
                 children: [
@@ -507,7 +515,7 @@ class _LedgerActionsCard extends StatelessWidget {
     return Container(
       decoration: ShapeDecoration(
         color: cs.surfaceContainerHigh,
-        shape: bsSquircle(12, side: BorderSide(color: cs.outline)),
+        shape: bsSquircle(12, side: BorderSide(color: cs.outlineVariant)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -521,7 +529,7 @@ class _LedgerActionsCard extends StatelessWidget {
                     'LEND / BORROW',
                     style: localeFont(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 1.1,
                       color: cs.onSurfaceVariant,
                     ),
@@ -535,7 +543,7 @@ class _LedgerActionsCard extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: cs.outline),
+          Divider(height: 1, color: cs.outlineVariant),
           if (debts.isEmpty)
             Padding(
               padding: const EdgeInsets.all(14),
@@ -553,8 +561,8 @@ class _LedgerActionsCard extends StatelessWidget {
               final debt = entry.value;
               final isLast = entry.key == debts.length - 1;
               final color = debt.isLent
-                  ? cs.tertiary
-                  : cs.error;
+                  ? context.kuberMoney.income
+                  : context.kuberMoney.expense;
               final label = debt.isLent
                   ? '${debt.personName} owes You'
                   : 'You owe ${debt.personName}';
@@ -563,7 +571,7 @@ class _LedgerActionsCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: isLast
                       ? null
-                      : Border(bottom: BorderSide(color: cs.outline)),
+                      : Border(bottom: BorderSide(color: cs.outlineVariant)),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -580,8 +588,8 @@ class _LedgerActionsCard extends StatelessWidget {
                           Text(
                             label,
                             style: localeFont(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                               color: color,
                             ),
                           ),
@@ -609,7 +617,7 @@ class _LedgerActionsCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: cs.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(KuberRadius.sm),
+                          borderRadius: BorderRadius.circular(KuberShape.small),
                           border: Border.all(
                             color: cs.primary.withValues(alpha: 0.35),
                           ),
@@ -618,7 +626,7 @@ class _LedgerActionsCard extends StatelessWidget {
                           'ADD',
                           style: localeFont(
                             fontSize: 11,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                             color: cs.primary,
                           ),

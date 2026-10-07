@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../engine/analytics_engine_adapter.dart';
 import '../providers/advanced_analytics_provider.dart';
 import 'analytics_common.dart';
@@ -22,7 +22,7 @@ class AnomalyDetectionSection extends ConsumerWidget {
           message:
               'Anomaly detection always compares this calendar month with recent history.',
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.lg),
         async.when(
           loading: () => const AnalyticsSkeletonBlock(),
           error: (error, _) => KuberEmptyState(
@@ -38,12 +38,10 @@ class AnomalyDetectionSection extends ConsumerWidget {
                 description: 'Kuber will notify you when something changes.',
               );
             }
-            return Column(
+            // Board "Anomaly detection": one grouped list.
+            return KuberGroup(
               children: [
-                for (final item in data.items) ...[
-                  _AnomalyCard(item: item),
-                  const SizedBox(height: KuberSpacing.sm),
-                ],
+                for (final item in data.items) _AnomalyCard(item: item),
               ],
             );
           },
@@ -60,63 +58,27 @@ class _AnomalyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final positive = item.tone == 'positive';
-    final accent = positive ? cs.tertiary : context.kuberColors.warning;
     final icon = positive
         ? Icons.trending_down_rounded
         : item.title.contains('large')
-            ? Icons.receipt_long_rounded
-            : Icons.trending_up_rounded;
+        ? Icons.receipt_long_rounded
+        : Icons.trending_up_rounded;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: accent.withValues(alpha: 0.4)),
+    final (bg, fg) = kuberToneColors(
+      context,
+      positive ? KuberTone.income : KuberTone.warning,
+    );
+    return KuberListRow(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(color: bg, borderRadius: KuberShape.mediumR),
+        child: Icon(icon, size: 20, color: fg),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(KuberRadius.sm),
-            ),
-            child: Icon(icon, size: 18, color: accent),
-          ),
-          const SizedBox(width: KuberSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: localeFont(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  item.description,
-                  style: localeFont(
-                    fontSize: 12,
-                    height: 1.4,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      title: item.title,
+      subtitle: item.description,
+      subtitleLines: 2,
     );
   }
 }

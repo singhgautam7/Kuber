@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_progress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -74,10 +75,9 @@ class _SmsFirstLoadScreenState extends ConsumerState<SmsFirstLoadScreen>
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          side: BorderSide(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
@@ -88,8 +88,8 @@ class _SmsFirstLoadScreenState extends ConsumerState<SmsFirstLoadScreen>
               Text(
                 'Cancel scanning?',
                 style: localeFont(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                   letterSpacing: -0.3,
                   height: 1.25,
@@ -99,7 +99,7 @@ class _SmsFirstLoadScreenState extends ConsumerState<SmsFirstLoadScreen>
               Text(
                 "You can resume later. Your progress so far won't be saved.",
                 style: localeFont(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: cs.onSurfaceVariant,
                   height: 1.5,
                 ),
@@ -135,23 +135,26 @@ class _SmsFirstLoadScreenState extends ConsumerState<SmsFirstLoadScreen>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final progress = _frozenProgress ?? ref.watch(
-      smsImportProvider.select((s) => s.valueOrNull?.scanProgress),
-    );
+    final progress =
+        _frozenProgress ??
+        ref.watch(smsImportProvider.select((s) => s.valueOrNull?.scanProgress));
 
     // Fire completion handling exactly once per completion.
-    ref.listen(
-      smsImportProvider.select((s) => s.valueOrNull?.scanProgress),
-      (prev, next) {
-        if (next != null && next.isComplete) {
-          _onComplete(next);
-        } else if (next == null && prev != null && !prev.isComplete && !_navigated) {
-          // The scan failed/cancelled in the background. Exit to avoid hang.
-          _navigated = true;
-          if (mounted) Navigator.of(context).pop();
-        }
-      },
-    );
+    ref.listen(smsImportProvider.select((s) => s.valueOrNull?.scanProgress), (
+      prev,
+      next,
+    ) {
+      if (next != null && next.isComplete) {
+        _onComplete(next);
+      } else if (next == null &&
+          prev != null &&
+          !prev.isComplete &&
+          !_navigated) {
+        // The scan failed/cancelled in the background. Exit to avoid hang.
+        _navigated = true;
+        if (mounted) Navigator.of(context).pop();
+      }
+    });
 
     final isComplete = progress?.isComplete ?? false;
     final isEmptyResult = isComplete && (progress?.bankMessagesFound ?? 0) <= 0;
@@ -174,7 +177,7 @@ class _SmsFirstLoadScreenState extends ConsumerState<SmsFirstLoadScreen>
         backgroundColor: cs.surface,
         body: Column(
           children: [
-            const KuberAppBar(showBack: true, title: 'Import from SMS'),
+            KuberAppBar(showBack: true, title: 'SMS'),
             Expanded(
               child: isEmptyResult
                   ? _EmptyResult(progress: progress!)
@@ -205,8 +208,8 @@ class _ScanningBody extends StatelessWidget {
     final status = isComplete
         ? 'Done! $found bank transactions found.'
         : nearDone
-            ? 'Almost done…'
-            : 'Reading your messages…';
+        ? 'Almost done…'
+        : 'Reading your messages…';
 
     return Column(
       children: [
@@ -230,8 +233,8 @@ class _ScanningBody extends StatelessWidget {
                     key: ValueKey(status),
                     textAlign: TextAlign.center,
                     style: localeFont(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                       letterSpacing: -0.3,
                     ),
@@ -243,10 +246,10 @@ class _ScanningBody extends StatelessWidget {
                     total > 0
                         ? '$scanned of $total messages scanned'
                         : 'Preparing to scan…',
-                    style: localeFont(
-                      fontSize: 13,
-                      color: cs.onSurfaceVariant,
-                    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                    style: localeFont(fontSize: 14, color: cs.onSurfaceVariant)
+                        .copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text.rich(
@@ -255,21 +258,21 @@ class _ScanningBody extends StatelessWidget {
                         TextSpan(
                           text: '$found',
                           style: TextStyle(
-                            color: cs.tertiary,
+                            color: context.kuberMoney.income,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const TextSpan(text: ' bank transactions found'),
                       ],
                     ),
-                    style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+                    style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                   ),
                 ] else ...[
                   const SizedBox(height: 14),
                   Text(
                     'Opening your list…',
                     style: localeFont(
-                      fontSize: 13,
+                      fontSize: 14,
                       color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                     ),
                   ),
@@ -292,7 +295,7 @@ class _HeroIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final color = complete ? cs.tertiary : cs.primary;
+    final color = complete ? context.kuberMoney.income : cs.primary;
     return SizedBox(
       width: 88,
       height: 88,
@@ -303,11 +306,18 @@ class _HeroIcon extends StatelessWidget {
             width: 88,
             height: 88,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(KuberRadius.xl),
-              border: Border.all(color: color.withValues(alpha: 0.25)),
+              color: complete
+                  ? context.kuberMoney.incomeContainer
+                  : cs.secondaryContainer,
+              borderRadius: KuberShape.cardR,
             ),
-            child: Icon(Icons.sms_outlined, size: 40, color: color),
+            child: Icon(
+              Icons.sms_outlined,
+              size: 40,
+              color: complete
+                  ? context.kuberMoney.onIncomeContainer
+                  : cs.onSecondaryContainer,
+            ),
           ),
           Positioned(
             top: -6,
@@ -323,14 +333,19 @@ class _HeroIcon extends StatelessWidget {
                 child: Container(
                   width: 24,
                   height: 24,
-                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
                   child: complete
-                      ? const Icon(Icons.check_rounded,
-                          size: 14, color: Colors.white)
+                      ? Icon(Icons.check_rounded, size: 14, color: cs.surface)
                       : RotationTransition(
                           turns: accent,
-                          child: const Icon(Icons.refresh_rounded,
-                              size: 14, color: Colors.white),
+                          child: Icon(
+                            Icons.refresh_rounded,
+                            size: 14,
+                            color: cs.surface,
+                          ),
                         ),
                 ),
               ),
@@ -349,41 +364,17 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     if (fraction == null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(999),
-        child: LinearProgressIndicator(
-          minHeight: 6,
-          backgroundColor: cs.surfaceContainerHigh,
-          valueColor: AlwaysStoppedAnimation(cs.primary),
-        ),
-      );
+      return const LinearProgressIndicator();
     }
-    final color = complete ? cs.tertiary : cs.primary;
-    return Container(
-      height: 6,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: fraction),
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutCubic,
-          builder: (_, value, __) => FractionallySizedBox(
-            widthFactor: value.clamp(0.0, 1.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ),
-        ),
+    // Same 400 ms tween as before; the bar itself is the M3 wavy indicator.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: fraction),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+      builder: (_, value, __) => KuberLinearProgress(
+        value: value.clamp(0.0, 1.0),
+        color: complete ? context.kuberMoney.income : null,
       ),
     );
   }
@@ -409,11 +400,16 @@ class _EmptyResult extends ConsumerWidget {
                   height: 88,
                   decoration: BoxDecoration(
                     color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.xl),
-                    border: Border.all(color: cs.outline),
+                    borderRadius: BorderRadius.circular(
+                      KuberShape.largeIncreased,
+                    ),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
-                  child: Icon(Icons.speaker_notes_off_outlined,
-                      size: 38, color: cs.onSurfaceVariant.withValues(alpha: 0.7)),
+                  child: Icon(
+                    Icons.speaker_notes_off_outlined,
+                    size: 38,
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                  ),
                 ),
                 const SizedBox(height: 36),
                 ConstrainedBox(
@@ -422,17 +418,19 @@ class _EmptyResult extends ConsumerWidget {
                     height: 6,
                     decoration: BoxDecoration(
                       color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(KuberShape.full),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Container(color: context.kuberColors.borderMuted),
+                    child: Container(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${progress.totalMessages} of ${progress.totalMessages} messages scanned',
                   style: localeFont(
-                    fontSize: 11.5,
+                    fontSize: 11,
                     color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                   ),
                 ),
@@ -441,8 +439,8 @@ class _EmptyResult extends ConsumerWidget {
                   'No bank transaction messages found.',
                   textAlign: TextAlign.center,
                   style: localeFont(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                     letterSpacing: -0.4,
                   ),
@@ -453,7 +451,7 @@ class _EmptyResult extends ConsumerWidget {
                   'paste an SMS manually.',
                   textAlign: TextAlign.center,
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: cs.onSurfaceVariant,
                     height: 1.55,
                   ),
@@ -479,7 +477,7 @@ class _EmptyResult extends ConsumerWidget {
                 child: Text(
                   'Go back',
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
                   ),
@@ -502,13 +500,16 @@ class _PrivacyLine extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shield_outlined,
-              size: 13, color: cs.onSurfaceVariant.withValues(alpha: 0.7)),
+          Icon(
+            Icons.shield_outlined,
+            size: 13,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+          ),
           const SizedBox(width: 8),
           Text(
             'On-device. Nothing leaves your phone.',
             style: localeFont(
-              fontSize: 11.5,
+              fontSize: 11,
               color: cs.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),

@@ -48,9 +48,9 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
           final cs = Theme.of(context).colorScheme;
           final isSel = c.value == selectedValue;
           return Padding(
-            padding: const EdgeInsets.only(bottom: KuberSpacing.xs),
+            padding: const EdgeInsets.only(bottom: KuberSpace.xs),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               onTap: () {
                 onSelected(c.value);
                 Navigator.of(context).pop();
@@ -58,10 +58,16 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isSel ? cs.primary.withValues(alpha: 0.08) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSel
+                      ? cs.primary.withValues(alpha: 0.08)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(
+                    KuberShape.largeIncreased,
+                  ),
                   border: Border.all(
-                    color: isSel ? cs.primary.withValues(alpha: 0.25) : Colors.transparent,
+                    color: isSel
+                        ? cs.primary.withValues(alpha: 0.25)
+                        : Colors.transparent,
                   ),
                 ),
                 child: Row(
@@ -69,9 +75,10 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
                     SquircleIcon(
                       icon: c.icon,
                       color: isSel ? cs.primary : cs.onSurfaceVariant,
-                      size: 18, padding: 8,
+                      size: 18,
+                      padding: 8,
                     ),
-                    const SizedBox(width: KuberSpacing.md),
+                    const SizedBox(width: KuberSpace.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +87,9 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
                             c.label,
                             style: localeFont(
                               fontSize: 14,
-                              fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                              fontWeight: isSel
+                                  ? FontWeight.w600
+                                  : FontWeight.w600,
                               color: isSel ? cs.primary : cs.onSurface,
                             ),
                           ),
@@ -99,14 +108,19 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
                       ),
                     ),
                     if (isSel)
-                      Icon(Icons.check_circle_rounded, color: cs.primary, size: 22)
+                      Icon(
+                        Icons.check_circle_rounded,
+                        color: cs.primary,
+                        size: 22,
+                      )
                     else
                       Container(
-                        width: 22, height: 22,
+                        width: 22,
+                        height: 22,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: cs.outline.withValues(alpha: 0.5),
+                            color: cs.outlineVariant.withValues(alpha: 0.5),
                             width: 2,
                           ),
                         ),

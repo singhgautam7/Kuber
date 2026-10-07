@@ -6,12 +6,14 @@ import '../../../shared/widgets/date_separator.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../core/models/overflow_config.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../data/sms_transaction.dart';
 import '../providers/sms_import_provider.dart';
 import '../widgets/batch_summary_sheet.dart';
@@ -33,8 +35,16 @@ class SmsImportScreen extends ConsumerStatefulWidget {
   ConsumerState<SmsImportScreen> createState() => _SmsImportScreenState();
 }
 
-class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
+class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
+    with SingleTickerProviderStateMixin {
   late SmsImportTab _tab = widget.initialTab;
+
+  /// Fades the list in after a tab change (tap or swipe).
+  late final AnimationController _tabFade = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    value: 1,
+  );
   SmsPermissionMode? _permMode; // null = permission granted, show list
   bool _resolvingPermission = true;
 
@@ -42,7 +52,6 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
   final Set<int> _selectedIds = {};
 
   final _searchController = TextEditingController();
-  final _searchFocusNode = FocusNode();
   String _query = '';
 
   // Pagination: render rows in pages and grow as the user scrolls (the inbox
@@ -60,26 +69,36 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
 
   @override
   void dispose() {
+    _tabFade.dispose();
     _scrollController.dispose();
     _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_searchFocusNode.hasFocus) {
-      _searchFocusNode.unfocus();
-    }
     if (_scrollController.position.extentAfter < 400) {
       setState(() => _displayedCount += _pageSize);
     }
   }
 
   void _switchTab(SmsImportTab tab) {
+    if (tab == _tab) return;
     setState(() {
       _tab = tab;
       _displayedCount = _pageSize; // reset pagination per tab
     });
+    _tabFade.forward(from: 0);
+  }
+
+  /// Horizontal swipe moves between Unreviewed / Imported / Dismissed (not
+  /// while multi-selecting).
+  void _onSwipe(DragEndDetails d) {
+    if (_selectionMode) return;
+    final v = d.primaryVelocity ?? 0;
+    if (v.abs() < 300) return;
+    final i = _tab.index + (v < 0 ? 1 : -1);
+    if (i < 0 || i >= SmsImportTab.values.length) return;
+    _switchTab(SmsImportTab.values[i]);
   }
 
   Future<void> _initPermission() async {
@@ -171,7 +190,8 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final canPop = !_selectionMode && !_searchFocusNode.hasFocus && _query.isEmpty;
+    final canPop =
+        !_selectionMode && _query.isEmpty;
 
     return PopScope(
       // While selecting or searching, back clears the state instead of leaving.
@@ -180,10 +200,6 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
         if (didPop) return;
         if (_selectionMode) {
           _exitSelection();
-          return;
-        }
-        if (_searchFocusNode.hasFocus) {
-          _searchFocusNode.unfocus();
           return;
         }
         if (_query.isNotEmpty) {
@@ -207,20 +223,31 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
                 ],
               )
             : _permMode != null
-                ? Column(
-                    children: [
-                      _topAppBar(cs),
-                      Expanded(
-                        child: SmsPermissionView(
-                          mode: _permMode!,
-                          onRequest: _requestPermission,
-                          onOpenSettings: () => openAppSettings(),
-                          onPaste: () => showPasteSmsSheet(context),
-                        ),
-                      ),
-                    ],
-                  )
-                : _buildListScrollView(cs),
+            ? Column(
+                children: [
+                  _topAppBar(cs),
+                  Expanded(
+                    child: SmsPermissionView(
+                      mode: _permMode!,
+                      onRequest: _requestPermission,
+                      onOpenSettings: () => openAppSettings(),
+                      onPaste: () => showPasteSmsSheet(context),
+                    ),
+                  ),
+                ],
+              )
+            : _buildListScrollView(cs),
+        // Paste is the screen's create action: a centred extended FAB, like
+        // Accounts (user review round 2), hidden while selecting.
+        floatingActionButton:
+            !_resolvingPermission && _permMode == null && !_selectionMode
+            ? KuberExtendedFab(
+                icon: Icons.content_paste_rounded,
+                label: 'Paste SMS',
+                onPressed: () => showPasteSmsSheet(context),
+              )
+            : null,
+        floatingActionButtonLocation: kuberFabLocation,
         bottomNavigationBar: _selectionMode ? _buildSelectionBar(cs) : null,
       ),
     );
@@ -231,29 +258,31 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
     final proceed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
-        title: Text('Reset SMS imports?',
-            style: localeFont(fontWeight: FontWeight.bold)),
+        title: const Text('Reset SMS imports?'),
         content: Text(
           'This will clear all the SMS imports we have right now and re-read all the SMS again with the parser. Are you sure you want to proceed?',
-          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Cancel'),
           ),
-          AppButton(
-            label: 'Reset',
-            type: AppButtonType.danger,
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Reset'),
           ),
         ],
       ),
     );
 
     if (proceed == true && mounted) {
-      await ref.read(smsImportProvider.notifier).resetSmsImports(runBackgroundScan: false);
+      await ref
+          .read(smsImportProvider.notifier)
+          .resetSmsImports(runBackgroundScan: false);
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
@@ -272,8 +301,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
   KuberAppBar _topAppBar(ColorScheme cs) {
     return KuberAppBar(
       showBack: true,
-      showHome: true,
-      title: '',
+      title: 'SMS',
       pinShortcut: const PinShortcutSpec(
         shortcutId: 'sms_import',
         shortLabel: 'SMS Import',
@@ -283,6 +311,16 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
       ),
       infoConfig: InfoConstants.smsImport,
       onBack: _selectionMode ? _exitSelection : null,
+      search: _selectionMode || _permMode != null || _resolvingPermission
+          ? null
+          : KuberHeaderSearch(
+              controller: _searchController,
+              hint: 'Search merchant, sender, or message',
+              onChanged: (v) => setState(() {
+                _query = v;
+                _displayedCount = _pageSize;
+              }),
+            ),
       overflowConfig: _selectionMode
           ? null
           : KuberOverflowConfig(
@@ -304,13 +342,13 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
   Widget _buildListScrollView(ColorScheme cs) {
     final unreviewed =
         ref.watch(smsImportProvider.select((s) => s.valueOrNull?.unreviewed)) ??
-            const <SmsTransaction>[];
+        const <SmsTransaction>[];
     final imported =
         ref.watch(smsImportProvider.select((s) => s.valueOrNull?.imported)) ??
-            const <SmsTransaction>[];
+        const <SmsTransaction>[];
     final dismissed =
         ref.watch(smsImportProvider.select((s) => s.valueOrNull?.dismissed)) ??
-            const <SmsTransaction>[];
+        const <SmsTransaction>[];
 
     final List<SmsTransaction> visibleItems;
     final List<SmsTransaction> sourceList;
@@ -344,13 +382,13 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
             ref.read(smsImportProvider.notifier).startBackgroundScan(),
         color: cs.primary,
         child: GestureDetector(
-          onTap: () {
-            if (_searchFocusNode.hasFocus) _searchFocusNode.unfocus();
-          },
+          onTap: () => FocusScope.of(context).unfocus(),
+          onHorizontalDragEnd: _onSwipe,
           behavior: HitTestBehavior.opaque,
           child: CustomScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               // App bar + header scroll away. removeTop avoids double safe-area
               // padding (the outer SafeArea already handles the status bar).
@@ -361,24 +399,11 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
                   child: _topAppBar(cs),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: KuberPageHeader(
-                  title: 'Import from\nSMS',
-                  description:
-                      'Review bank messages from last 90 days and add them as transactions.',
-                  actionIcon: Icons.content_paste_rounded,
-                  actionTooltip: 'Paste an SMS',
-                  onAction: () => showPasteSmsSheet(context),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: _searchField(cs),
-              ),
               // Pinned: tabs, or the selection bar during multi-select.
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _PinnedHeaderDelegate(
-                  height: 52,
+                  height: _selectionMode ? 64 : 52,
                   background: cs.surface,
                   child: _selectionMode
                       ? _selectionHeaderRow(cs, visibleItems)
@@ -387,13 +412,16 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
               ),
               const SliverToBoxAdapter(child: ScanProgressStrip()),
               SliverToBoxAdapter(child: _footer(cs, total)),
-              ..._contentSlivers(
+              for (final sliver in _contentSlivers(
                 cs,
                 visibleItems,
                 sourceList.isNotEmpty,
                 imported.isNotEmpty || dismissed.isNotEmpty,
+              ))
+                SliverFadeTransition(opacity: _tabFade, sliver: sliver),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: KuberExtendedFab.clearance),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           ),
         ),
@@ -401,96 +429,46 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
     );
   }
 
-  Widget _searchField(ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: TextField(
-        controller: _searchController,
-        focusNode: _searchFocusNode,
-        onChanged: (v) => setState(() {
-          _query = v;
-          _displayedCount = _pageSize;
-        }),
-        style: localeFont(
-          fontSize: 14,
-          color: cs.onSurface,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Search merchant, sender, or message...',
-          hintStyle: localeFont(
-            fontSize: 14,
-            color: cs.onSurfaceVariant,
+  /// M3 primary tabs (board 3.9a): underline indicator, count badge on
+  /// Unreviewed, a full-width divider under the strip.
+  Widget _tabsRow(ColorScheme cs, int unreviewedCount) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: cs.outlineVariant)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _TabPill(
+              label: 'Unreviewed',
+              count: unreviewedCount,
+              selected: _tab == SmsImportTab.unreviewed,
+              onTap: () => _switchTab(SmsImportTab.unreviewed),
+            ),
           ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: cs.onSurfaceVariant,
-            size: 20,
+          Expanded(
+            child: _TabPill(
+              label: 'Imported',
+              selected: _tab == SmsImportTab.imported,
+              onTap: () => _switchTab(SmsImportTab.imported),
+            ),
           ),
-          suffixIcon: _query.isEmpty
-              ? null
-              : IconButton(
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: cs.onSurfaceVariant,
-                    size: 18,
-                  ),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _query = '';
-                      _displayedCount = _pageSize;
-                    });
-                  },
-                ),
-          filled: true,
-          fillColor: cs.surfaceContainer,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 16,
+          Expanded(
+            child: _TabPill(
+              label: 'Dismissed',
+              selected: _tab == SmsImportTab.dismissed,
+              onTap: () => _switchTab(SmsImportTab.dismissed),
+            ),
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            borderSide: BorderSide(color: cs.outline),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            borderSide: BorderSide(color: cs.outline),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            borderSide: BorderSide(color: cs.primary),
-          ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _tabsRow(ColorScheme cs, int unreviewedCount) {
-    return Row(
-      children: [
-        _TabPill(
-          label: 'Unreviewed',
-          count: unreviewedCount,
-          selected: _tab == SmsImportTab.unreviewed,
-          onTap: () => _switchTab(SmsImportTab.unreviewed),
-        ),
-        const SizedBox(width: 6),
-        _TabPill(
-          label: 'Imported',
-          selected: _tab == SmsImportTab.imported,
-          onTap: () => _switchTab(SmsImportTab.imported),
-        ),
-        const SizedBox(width: 6),
-        _TabPill(
-          label: 'Dismissed',
-          selected: _tab == SmsImportTab.dismissed,
-          onTap: () => _switchTab(SmsImportTab.dismissed),
-        ),
-      ],
-    );
-  }
-
-  Widget _selectionHeaderRow(ColorScheme cs, List<SmsTransaction> visibleItems) {
+  Widget _selectionHeaderRow(
+    ColorScheme cs,
+    List<SmsTransaction> visibleItems,
+  ) {
     final visibleIds = visibleItems.map((e) => e.id).toSet();
     final selectedVisibleCount = _selectedIds.intersection(visibleIds).length;
 
@@ -503,45 +481,33 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
       checkboxValue = null; // Indeterminate
     }
 
+    final allSelected = checkboxValue == true;
     return Row(
       children: [
-        Checkbox(
-          value: checkboxValue,
-          tristate: true,
-          activeColor: cs.primary,
-          onChanged: (checked) {
-            if (checkboxValue != true) {
-              setState(() {
-                _selectedIds.addAll(visibleIds);
-              });
-            } else {
-              setState(() {
-                _selectedIds.removeAll(visibleIds);
-                if (_selectedIds.isEmpty) _selectionMode = false;
-              });
-            }
-          },
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '${_selectedIds.length} selected',
-          style: localeFont(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurface,
-          ),
-        ),
-        const Spacer(),
-        TextButton(
+        AppIconButton(
+          icon: Icons.close_rounded,
+          semanticLabel: 'Cancel selection',
           onPressed: _exitSelection,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
           child: Text(
-            'Cancel',
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: cs.primary,
-            ),
+            '${_selectedIds.length} selected',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge!.copyWith(color: cs.onSurface),
           ),
+        ),
+        TextButton(
+          onPressed: () => setState(() {
+            if (allSelected) {
+              _selectedIds.removeAll(visibleIds);
+              if (_selectedIds.isEmpty) _selectionMode = false;
+            } else {
+              _selectedIds.addAll(visibleIds);
+            }
+          }),
+          child: Text(allSelected ? 'Deselect all' : 'Select all'),
         ),
       ],
     );
@@ -549,14 +515,16 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
 
   Widget _footer(ColorScheme cs, int total) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 6, 20, 2),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
         children: [
-          Icon(Icons.schedule_rounded, size: 12, color: cs.onSurfaceVariant),
+          Icon(Icons.schedule_rounded, size: 16, color: cs.onSurfaceVariant),
           const SizedBox(width: 6),
           Text(
             '$total from the last 90 days',
-            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -626,11 +594,13 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
             ];
           }
           return [
-            _emptySliver(const _EmptyState(
-              icon: Icons.inbox_outlined,
-              title: 'Nothing imported yet',
-              body: 'Imported transactions will appear here.',
-            )),
+            _emptySliver(
+              const _EmptyState(
+                icon: Icons.inbox_outlined,
+                title: 'Nothing imported yet',
+                body: 'Imported transactions will appear here.',
+              ),
+            ),
           ];
         }
         return [_cardsSliver(visibleItems, selectable: false)];
@@ -653,12 +623,15 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
             ];
           }
           return [
-            _emptySliver(const _EmptyState(
-              icon: Icons.do_not_disturb_on_outlined,
-              title: 'Nothing dismissed',
-              body: 'Messages you dismiss appear here. You can still add them '
-                  'later.',
-            )),
+            _emptySliver(
+              const _EmptyState(
+                icon: Icons.do_not_disturb_on_outlined,
+                title: 'Nothing dismissed',
+                body:
+                    'Messages you dismiss appear here. You can still add them '
+                    'later.',
+              ),
+            ),
           ];
         }
         return [_cardsSliver(visibleItems, selectable: false)];
@@ -671,38 +644,48 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
   /// Paginated card list for a single status. Renders at most [_displayedCount]
   /// rows; [_onScroll] grows that as the user reaches the bottom.
   Widget _cardsSliver(List<SmsTransaction> rows, {required bool selectable}) {
-    final count =
-        rows.length < _displayedCount ? rows.length : _displayedCount;
+    final count = rows.length < _displayedCount ? rows.length : _displayedCount;
 
+    // Day groups (board 3.9a): caps section label, then one grouped card.
     final children = <Widget>[];
-    DateTime? lastDate;
+    var dayRows = <Widget>[];
+    DateTime? lastDay;
+    void flush() {
+      if (dayRows.isEmpty) return;
+      children.add(KuberGroup(children: dayRows));
+      dayRows = <Widget>[];
+    }
 
     for (var i = 0; i < count; i++) {
       final sms = rows[i];
       final date = sms.smsDate;
       final day = DateTime(date.year, date.month, date.day);
-      if (lastDate == null || day != lastDate) {
-        children.add(DateSeparator(date: date));
-        lastDate = day;
+      if (lastDay == null || day != lastDay) {
+        flush();
+        children.add(
+          KuberSectionHeader(
+            title: DateSeparator.labelFor(date),
+            padding: EdgeInsets.only(
+              top: lastDay == null ? KuberSpace.md : KuberSpace.xl,
+              bottom: KuberSpace.sectionHeaderGap,
+            ),
+          ),
+        );
+        lastDay = day;
       }
-      children.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _card(sms, selectable: selectable),
-        ),
-      );
+      dayRows.add(_card(sms, selectable: selectable));
     }
+    flush();
 
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      sliver: SliverList(
-        delegate: SliverChildListDelegate(children),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
+      sliver: SliverList(delegate: SliverChildListDelegate(children)),
     );
   }
 
   Widget _card(SmsTransaction sms, {required bool selectable}) {
-    return GestureDetector(
+    return SmsImportCard(
+      key: ValueKey(sms.id),
       onLongPress: selectable
           ? () {
               setState(() {
@@ -711,43 +694,42 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
               });
             }
           : null,
-      child: SmsImportCard(
-        sms: sms,
-        muted: false,
-        selectionMode: _selectionMode && selectable,
-        selected: _selectedIds.contains(sms.id),
-        onTap: () {
-          if (_selectionMode && selectable) {
-            _toggleSelect(sms);
-          } else {
-            showSmsReviewSheet(context, sms);
-          }
-        },
-      ),
+      sms: sms,
+      muted: false,
+      selectionMode: _selectionMode && selectable,
+      selected: _selectedIds.contains(sms.id),
+      onTap: () {
+        if (_selectionMode && selectable) {
+          _toggleSelect(sms);
+        } else {
+          showSmsReviewSheet(context, sms);
+        }
+      },
     );
   }
 
   Widget _buildSelectionBar(ColorScheme cs) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         child: Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 3,
               child: AppButton(
                 label: 'Add Selected (${_selectedIds.length})',
+                icon: Icons.playlist_add_check_rounded,
                 type: AppButtonType.primary,
                 fullWidth: true,
                 onPressed: _selectedIds.isEmpty ? null : _openBatch,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: KuberSpace.md),
             Expanded(
-              flex: 1,
+              flex: 2,
               child: AppButton(
                 label: 'Dismiss',
-                type: AppButtonType.outline,
+                icon: Icons.remove_circle_outline_rounded,
                 fullWidth: true,
                 onPressed: _selectedIds.isEmpty ? null : _dismissBatch,
               ),
@@ -763,22 +745,22 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
     final proceed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
-        title: Text('Dismiss messages?',
-            style: localeFont(fontWeight: FontWeight.bold)),
+        title: const Text('Dismiss messages?'),
         content: Text(
           'Are you sure you want to dismiss ${_selectedIds.length} selected messages? You can find them later under the "Dismissed" tab.',
-          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Cancel'),
           ),
-          AppButton(
-            label: 'Dismiss',
-            type: AppButtonType.danger,
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Dismiss'),
           ),
         ],
       ),
@@ -829,50 +811,59 @@ class _TabPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = selected ? cs.primary : cs.onSurfaceVariant;
+    return InkWell(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? cs.surfaceContainerHigh : Colors.transparent,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: selected ? cs.primary.withValues(alpha: 0.25) : cs.outline,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: SizedBox(
+        height: 48,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            Text(
-              label,
-              style: localeFont(
-                fontSize: 12.5,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? cs.onSurface : cs.onSurfaceVariant,
-              ),
-            ),
-            if (count != null && count! > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                constraints: const BoxConstraints(minWidth: 18),
-                height: 18,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                decoration: BoxDecoration(
-                  color: cs.primary,
-                  borderRadius: BorderRadius.circular(9),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.titleSmall!.copyWith(color: fg),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  '$count',
-                  style: localeFont(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                if (count != null && count! > 0) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 18),
+                    height: 18,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: cs.primary,
+                      borderRadius: KuberShape.fullR,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$count',
+                      style: theme.textTheme.labelSmall!.copyWith(
+                        color: cs.onPrimary,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            if (selected)
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  width: 64,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: cs.primary,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(3),
+                    ),
                   ),
                 ),
               ),
-            ],
           ],
         ),
       ),
@@ -891,51 +882,8 @@ class _EmptyState extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    // Centered; the surrounding SliverFillRemaining + AlwaysScrollable scroll
-    // view keeps pull-to-refresh working even when the tab is empty.
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: cs.outline),
-              ),
-              child: Icon(icon, size: 30, color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: localeFont(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              body,
-              textAlign: TextAlign.center,
-              style: localeFont(
-                fontSize: 13,
-                color: cs.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      KuberEmptyState(icon: icon, title: title, description: body);
 }
 
 /// Pinned sticky-header delegate with a fixed height, used for the tab strip
@@ -957,12 +905,16 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: background,
       height: height,
       alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       child: child,
     );
   }
@@ -981,50 +933,11 @@ class _SearchEmptyState extends StatelessWidget {
   const _SearchEmptyState({required this.query, required this.onClear});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: cs.outline),
-              ),
-              child: Icon(Icons.search_off_rounded, size: 30, color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "No matches for '$query'",
-              style: localeFont(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: onClear,
-              child: Text(
-                'Clear search',
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: cs.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => KuberEmptyState(
+    icon: Icons.search_off_rounded,
+    title: "No matches for '$query'",
+    description: 'Try a merchant name, a sender id or part of the message.',
+    actionLabel: 'Clear search',
+    onAction: onClear,
+  );
 }
-

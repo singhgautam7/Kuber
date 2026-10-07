@@ -11,7 +11,7 @@
 //   • false/null  → user tapped "Cancel" or dismissed → caller returns to the
 //                   edit screen with the typed value still in the field.
 //
-// Design-system: colorScheme roles only, KuberRadius.md, border (no shadow),
+// Design-system: colorScheme roles only, KuberShape.medium, border (no shadow),
 // localeFont() everywhere. Renders in Obsidian + Alabaster. Copy via l10n.
 // =============================================================================
 
@@ -41,25 +41,27 @@ Future<bool?> showAdjustmentConfirmation(
 }) {
   final cs = Theme.of(context).colorScheme;
   final l10n = context.l10n;
-  final directionColor = increased ? cs.tertiary : cs.error;
-  final directionWord =
-      increased ? l10n.adjustmentIncreasedBy : l10n.adjustmentDecreasedBy;
+  final directionColor = increased
+      ? context.kuberMoney.income
+      : context.kuberMoney.expense;
+  final directionWord = increased
+      ? l10n.adjustmentIncreasedBy
+      : l10n.adjustmentDecreasedBy;
 
   return showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      backgroundColor: cs.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        side: BorderSide(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+        side: BorderSide(color: cs.outlineVariant),
       ),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
       title: Text(
         l10n.adjustmentModalTitle,
         style: localeFont(
-          fontSize: 17,
-          fontWeight: FontWeight.w800,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
           letterSpacing: -0.2,
           color: cs.onSurface,
         ),
@@ -83,8 +85,10 @@ Future<bool?> showAdjustmentConfirmation(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline.withValues(alpha: 0.6)),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.6),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,9 +104,12 @@ Future<bool?> showAdjustmentConfirmation(
                 Expanded(
                   child: Text(
                     l10n.adjustmentModalChip(
-                        valueNounCap, directionWord, diffText),
+                      valueNounCap,
+                      directionWord,
+                      diffText,
+                    ),
                     style: localeFont(
-                      fontSize: 12.5,
+                      fontSize: 12,
                       height: 1.4,
                       color: cs.onSurfaceVariant,
                     ),

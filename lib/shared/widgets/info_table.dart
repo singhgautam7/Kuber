@@ -4,7 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/locale_font.dart';
 
 /// A bordered card of key/value rows that replaces the old card-in-card field
-/// grid in the view bottom sheets. The card has a rounded [cs.outline] border;
+/// grid in the view bottom sheets. The card has a rounded [cs.outlineVariant] border;
 /// rows inside are separated by a 1px divider.
 ///
 /// Row variants (see the `InfoTableRow` subclasses):
@@ -23,7 +23,7 @@ class InfoTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dividerColor = cs.outline.withValues(alpha: 0.6);
+    final dividerColor = cs.outlineVariant;
 
     final children = <Widget>[];
     for (var i = 0; i < rows.length; i++) {
@@ -35,8 +35,9 @@ class InfoTable extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        color: cs.surfaceContainer,
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -127,12 +128,16 @@ class _RowWidget extends StatelessWidget {
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: cs.onSurfaceVariant,
+        height: 20 / 14,
       );
 
   static TextStyle _valueStyle(ColorScheme cs, [Color? color]) => localeFont(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
         color: color ?? cs.onSurface,
+        height: 20 / 14,
+        fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   @override
@@ -159,7 +164,7 @@ class _RowWidget extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: _minRowHeight),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 8),
         child: Row(
           children: [
             Text(r.label, style: _labelStyle(cs)),
@@ -178,7 +183,6 @@ class _RowWidget extends StatelessWidget {
       child: InkWell(
         onTap: r.onTap,
         onLongPress: r.onLongPress,
-        highlightColor: cs.primary.withValues(alpha: 0.06),
         child: _standard(cs, r),
       ),
     );
@@ -194,7 +198,7 @@ class _RowWidget extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _minRowHeight),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 8),
             child: Row(
               children: [
                 if (r.label.isNotEmpty) ...[
@@ -251,7 +255,7 @@ class _RowWidget extends StatelessWidget {
         if (r.valueLeadingIcon != null) ...[
           Icon(
             r.valueLeadingIcon,
-            size: 17,
+            size: 18,
             color: r.valueIconColor ?? cs.onSurfaceVariant,
           ),
           const SizedBox(width: 8),
@@ -293,47 +297,36 @@ class SheetAmountHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           caption.toUpperCase(),
-          style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.0,
-          ),
+          style: theme.textTheme.labelMedium!
+              .copyWith(letterSpacing: 0.8, color: cs.onSurfaceVariant),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: KuberSpace.xs),
         Text(
           amount,
-          style: localeFont(
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            color: amountColor,
-            letterSpacing: -1,
-          ),
+          style: theme.textTheme.headlineMedium!.copyWith(color: amountColor),
         ),
         if (subline != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: KuberSpace.sm),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (sublineIcon != null) ...[
-                Icon(sublineIcon, size: 14, color: cs.onSurfaceVariant),
-                const SizedBox(width: 7),
+                Icon(sublineIcon, size: 16, color: cs.onSurfaceVariant),
+                const SizedBox(width: KuberSpace.sm),
               ],
               Flexible(
                 child: Text(
                   subline!,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium!
+                      .copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/color_harmonizer.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../features/settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
@@ -31,24 +32,27 @@ class KuberAutocompleteOverlay<T> extends ConsumerWidget {
     return Align(
       alignment: Alignment.topLeft,
       child: Padding(
-        padding: const EdgeInsets.only(top: KuberSpacing.xs),
+        padding: const EdgeInsets.only(top: KuberSpace.xs),
         child: Material(
           key: overlayKey,
-          elevation: 8,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          color: cs.surfaceContainerHigh,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: KuberShape.cardR,
+            side: BorderSide(color: cs.outlineVariant),
+          ),
+          color: cs.surfaceContainer,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: 200,
-              maxWidth: MediaQuery.of(context).size.width - 2 * KuberSpacing.lg,
+              maxWidth: MediaQuery.of(context).size.width - 2 * KuberSpace.lg,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: KuberShape.cardR,
               child: NotificationListener<ScrollNotification>(
                 onNotification: (_) => true,
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(
-                    vertical: KuberSpacing.xs,
+                    vertical: KuberSpace.sm,
                   ),
                   physics: const ClampingScrollPhysics(),
                   shrinkWrap: true,
@@ -96,8 +100,8 @@ class KuberSuggestionTile extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: KuberSpacing.md,
+        horizontal: KuberSpace.lg,
+        vertical: KuberSpace.sm,
       ),
       child: Row(
         children: [
@@ -105,12 +109,12 @@ class KuberSuggestionTile extends ConsumerWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
+              color: categoryTones(context, iconColor).container,
+              borderRadius: KuberShape.mediumR,
             ),
-            child: Icon(icon, size: 18, color: iconColor),
+            child: Icon(icon, size: 20, color: iconColor),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,17 +122,19 @@ class KuberSuggestionTile extends ConsumerWidget {
               children: [
                 Text(
                   title,
-                  style: textTheme.bodyMedium?.copyWith(
+                  style: textTheme.bodyLarge?.copyWith(
                     color: cs.onSurface,
                   ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null && subtitle!.isNotEmpty)
                   Text(
                     subtitle!,
-                    style: textTheme.labelSmall?.copyWith(
+                    style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
               ],
@@ -140,9 +146,8 @@ class KuberSuggestionTile extends ConsumerWidget {
                 ref.watch(formatterProvider).formatCurrency(amount!),
                 ref.watch(privacyModeProvider),
               ),
-              style: textTheme.bodySmall?.copyWith(
+              style: textTheme.titleSmall?.copyWith(
                 color: cs.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
               ),
             ),
         ],

@@ -25,17 +25,13 @@ class NotesField extends StatelessWidget {
       controller: controller,
       focusNode: focusNode,
       maxLines: 2,
-      style: textTheme.bodyMedium?.copyWith(
-        color: cs.onSurface,
-      ),
+      minLines: 1,
+      style: textTheme.bodyLarge?.copyWith(color: cs.onSurface),
+      // Filled M3 field with the leading notes glyph (board 3.4).
       decoration: InputDecoration(
         hintText: context.l10n.addNoteHint,
-        hintStyle: textTheme.bodyMedium?.copyWith(
-          color: cs.onSurfaceVariant,
-        ),
-        prefixIcon: showPrefixIcon
-            ? Icon(Icons.note_outlined, color: cs.onSurfaceVariant)
-            : null,
+        hintStyle: textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+        prefixIcon: Icon(Icons.notes_rounded, color: cs.onSurfaceVariant),
       ),
     );
   }

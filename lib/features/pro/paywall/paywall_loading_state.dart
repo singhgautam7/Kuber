@@ -18,11 +18,11 @@ class PaywallPricingSkeleton extends StatelessWidget {
       children: [
         for (var i = 0; i < 3; i++) ...[
           Container(
-            padding: const EdgeInsets.all(KuberSpacing.lg),
+            padding: const EdgeInsets.all(KuberSpace.lg),
             decoration: BoxDecoration(
               color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: Row(
               children: [
@@ -40,7 +40,7 @@ class PaywallPricingSkeleton extends StatelessWidget {
               ],
             ),
           ),
-          if (i != 2) const SizedBox(height: KuberSpacing.sm),
+          if (i != 2) const SizedBox(height: KuberSpace.sm),
         ],
       ],
     );
@@ -69,11 +69,11 @@ class RestorePurchasesLinkLoading extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: KuberSpacing.sm),
+        const SizedBox(width: KuberSpace.sm),
         Text(
           'Restore purchases',
           style: localeFont(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant.withValues(alpha: 0.5),
           ),

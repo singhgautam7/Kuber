@@ -70,12 +70,12 @@ class SubscoreExplanationSheet extends StatelessWidget {
 
     return KuberBottomSheet(
       title: content.title,
-      subtitle: 'Financial Health Score',
+      subtitle: 'Subscore',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ScoreCard(detail: detail),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
           _SectionBlock(
             title: "How it's calculated",
             body: content.calculationExplanation,
@@ -89,7 +89,7 @@ class SubscoreExplanationSheet extends StatelessWidget {
             body: content.improvementSuggestion,
           ),
           if (content.actionLabel != null && content.actionRoute != null) ...[
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             SheetButtonSection(
               padding: EdgeInsets.zero,
               primary: SheetAction(
@@ -102,11 +102,10 @@ class SubscoreExplanationSheet extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           Text(
             content.footerNote,
-            style: localeFont(
-              fontSize: 12,
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -116,6 +115,7 @@ class SubscoreExplanationSheet extends StatelessWidget {
   }
 }
 
+/// Board "Subscore sheet": a 56 ring with the score beside the status.
 class _ScoreCard extends StatelessWidget {
   final SubscoreDetail detail;
 
@@ -124,40 +124,53 @@ class _ScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final color = detail.score >= 16
-        ? cs.tertiary
+        ? context.kuberMoney.income
         : detail.score >= 10
-        ? context.kuberColors.warning
-        : cs.error;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        children: [
-          Text(
-            '${detail.score}/20',
-            style: localeFont(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: color,
-            ),
+        ? context.kuberMoney.warning
+        : context.kuberMoney.expense;
+    return Row(
+      children: [
+        SizedBox(
+          width: 56,
+          height: 56,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox.expand(
+                child: CircularProgressIndicator(
+                  value: (detail.score / 20).clamp(0.0, 1.0),
+                  strokeWidth: 5,
+                  strokeCap: StrokeCap.round,
+                  color: color,
+                  backgroundColor: cs.surfaceContainerHighest,
+                ),
+              ),
+              Text(
+                '${detail.score}',
+                style: tt.titleMedium!.copyWith(color: cs.onSurface),
+              ),
+            ],
           ),
-          const Spacer(),
-          Text(
-            detail.status,
-            style: localeFont(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-            ),
+        ),
+        const SizedBox(width: KuberSpace.lg),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${detail.score} of 20',
+                style: tt.titleMedium!.copyWith(color: color),
+              ),
+              Text(
+                detail.status,
+                style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -172,25 +185,16 @@ class _SectionBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+      padding: const EdgeInsets.only(bottom: KuberSpace.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xs),
+          Text(title.toUpperCase(), style: sectionHeaderStyle(context)),
+          const SizedBox(height: KuberSpace.sectionHeaderGap),
           Text(
             body,
-            style: localeFont(
-              fontSize: 13,
-              height: 1.4,
-              color: cs.onSurfaceVariant,
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: cs.onSurface,
             ),
           ),
         ],

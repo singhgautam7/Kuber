@@ -34,7 +34,7 @@ class HomeRecurringCard extends ConsumerWidget {
         if (rules.isEmpty) return const SizedBox.shrink();
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+          padding: const EdgeInsets.only(bottom: KuberSpace.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -62,13 +62,16 @@ class HomeRecurringCard extends ConsumerWidget {
                     final now = DateTime.now();
                     final today = DateTime(now.year, now.month, now.day);
                     final dueDay = DateTime(
-                        rule.nextDueAt.year, rule.nextDueAt.month, rule.nextDueAt.day);
+                      rule.nextDueAt.year,
+                      rule.nextDueAt.month,
+                      rule.nextDueAt.day,
+                    );
 
                     String statusLabel;
                     Color statusColor;
                     if (dueDay.isBefore(today)) {
                       statusLabel = context.l10n.statusProcessed;
-                      statusColor = cs.tertiary;
+                      statusColor = context.kuberMoney.income;
                     } else if (dueDay.isAtSameMomentAs(today)) {
                       statusLabel = context.l10n.statusPending;
                       statusColor = cs.primary;
@@ -84,12 +87,16 @@ class HomeRecurringCard extends ConsumerWidget {
                     return GestureDetector(
                       onTap: () => showRecurringDetailSheet(context, ref, rule),
                       child: Container(
-                        margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                        padding: const EdgeInsets.all(KuberSpacing.md),
+                        margin: const EdgeInsets.only(bottom: KuberSpace.sm),
+                        padding: const EdgeInsets.all(KuberSpace.md),
                         decoration: BoxDecoration(
                           color: cs.surfaceContainer,
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
-                          border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+                          borderRadius: BorderRadius.circular(
+                            KuberShape.largeIncreased,
+                          ),
+                          border: Border.all(
+                            color: cs.outlineVariant.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -98,7 +105,9 @@ class HomeRecurringCard extends ConsumerWidget {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: catColor.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(
+                                  KuberShape.medium,
+                                ),
                               ),
                               child: Icon(
                                 cat != null
@@ -108,7 +117,7 @@ class HomeRecurringCard extends ConsumerWidget {
                                 size: 20,
                               ),
                             ),
-                            const SizedBox(width: KuberSpacing.md),
+                            const SizedBox(width: KuberSpace.md),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,15 +140,18 @@ class HomeRecurringCard extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                            const SizedBox(width: KuberSpacing.md),
+                            const SizedBox(width: KuberSpace.md),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  maskAmount(fmt.formatCurrency(rule.amount), ref.watch(privacyModeProvider)),
+                                  maskAmount(
+                                    fmt.formatCurrency(rule.amount),
+                                    ref.watch(privacyModeProvider),
+                                  ),
                                   style: textTheme.bodyMedium?.copyWith(
                                     color: rule.type == 'income'
-                                        ? cs.tertiary
+                                        ? context.kuberMoney.income
                                         : cs.onSurface,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -152,8 +164,9 @@ class HomeRecurringCard extends ConsumerWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: statusColor.withValues(alpha: 0.1),
-                                    borderRadius:
-                                        BorderRadius.circular(4),
+                                    borderRadius: BorderRadius.circular(
+                                      KuberShape.small,
+                                    ),
                                     border: Border.all(
                                       color: statusColor.withValues(alpha: 0.2),
                                     ),
@@ -161,8 +174,8 @@ class HomeRecurringCard extends ConsumerWidget {
                                   child: Text(
                                     statusLabel,
                                     style: localeFont(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w800,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                       color: statusColor,
                                       letterSpacing: 0.5,
                                     ),

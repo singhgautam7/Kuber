@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart'
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 
@@ -31,9 +34,11 @@ class AmountInput extends ConsumerWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: KuberSpacing.xxl,
-            horizontal: KuberSpacing.lg,
+          // About half of the old 32 / 32: the amount gets room to breathe
+          // without pushing the form down as far as before.
+          padding: const EdgeInsets.only(
+            top: KuberSpace.xl,
+            bottom: KuberSpace.lg,
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -46,21 +51,13 @@ class AmountInput extends ConsumerWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  inputFormatters: [
-                    CurrencyInputFormatter(isIndian: isIndian),
-                  ],
+                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
                   textAlign: TextAlign.center,
                   maxLines: 1,
-                  style: textTheme.displayLarge?.copyWith(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: amountColor,
-                  ),
+                  style: textTheme.displaySmall?.copyWith(color: amountColor),
                   decoration: InputDecoration(
                     hintText: '0',
-                    hintStyle: textTheme.displayLarge?.copyWith(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
+                    hintStyle: textTheme.displaySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
                     border: InputBorder.none,
@@ -79,82 +76,54 @@ class AmountInput extends ConsumerWidget {
                 child: Text(
                   ref.watch(currencyProvider).symbol,
                   style: textTheme.titleLarge?.copyWith(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w300,
                     color: cs.onSurfaceVariant,
                   ),
                 ),
               ),
               // Calculator button — pinned right
               Positioned(
-                right: 0,
-                child: GestureDetector(
-                  onTap: () => _openCalculator(context, ref),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(color: cs.outline),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.calculate_outlined,
-                      size: 20,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
+                right: -4,
+                child: AppIconButton(
+                  icon: Icons.calculate_outlined,
+                  semanticLabel: 'Calculator',
+                  onPressed: () => _openCalculator(context, ref),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
 
         // Quick-add amount chips
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: KuberSpace.sm,
           children: [50, 100, 500, 1000].map((amount) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.xs,
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  final current =
-                      double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0;
-                  final newAmount = current + amount;
-                  final unformattedText = newAmount.truncateToDouble() == newAmount
-                      ? newAmount.toInt().toString()
-                      : newAmount.toStringAsFixed(2);
-                  
-                  controller.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
-                    TextEditingValue.empty,
-                    TextEditingValue(
-                      text: unformattedText,
-                      selection: TextSelection.collapsed(offset: unformattedText.length),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: cs.outlineVariant),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '+$amount',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: cs.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
+            return KuberChip(
+              label: '+$amount',
+              onTap: () {
+                final current =
+                    double.tryParse(
+                      controller.text.trim().replaceAll(',', ''),
+                    ) ??
+                    0;
+                final newAmount = current + amount;
+                final unformattedText =
+                    newAmount.truncateToDouble() == newAmount
+                    ? newAmount.toInt().toString()
+                    : newAmount.toStringAsFixed(2);
+
+                controller.value = CurrencyInputFormatter(isIndian: isIndian)
+                    .formatEditUpdate(
+                      TextEditingValue.empty,
+                      TextEditingValue(
+                        text: unformattedText,
+                        selection: TextSelection.collapsed(
+                          offset: unformattedText.length,
+                        ),
+                      ),
+                    );
+              },
             );
           }).toList(),
         ),
@@ -164,31 +133,30 @@ class AmountInput extends ConsumerWidget {
 
   void _openCalculator(BuildContext context, WidgetRef ref) {
     FocusScope.of(context).unfocus();
-    final cs = Theme.of(context).colorScheme;
     final isIndian = ref.read(formatterProvider).system == NumberSystem.indian;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       useRootNavigator: true,
-      backgroundColor: cs.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => KuberCalculator(
-        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
+        initialValue:
+            double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
           final unformattedText = result == result.truncateToDouble()
               ? result.toInt().toString()
               : result.toStringAsFixed(2);
-          controller.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
-            TextEditingValue.empty,
-            TextEditingValue(
-              text: unformattedText,
-              selection: TextSelection.collapsed(offset: unformattedText.length),
-            ),
-          );
+          controller.value = CurrencyInputFormatter(isIndian: isIndian)
+              .formatEditUpdate(
+                TextEditingValue.empty,
+                TextEditingValue(
+                  text: unformattedText,
+                  selection: TextSelection.collapsed(
+                    offset: unformattedText.length,
+                  ),
+                ),
+              );
         },
       ),
     ).then((_) {

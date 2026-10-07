@@ -20,11 +20,12 @@ class ThinkingMetaRow extends StatelessWidget {
   final String time;
   final bool expanded;
   final VoidCallback onToggle;
-  const ThinkingMetaRow(
-      {super.key,
-      required this.time,
-      required this.expanded,
-      required this.onToggle});
+  const ThinkingMetaRow({
+    super.key,
+    required this.time,
+    required this.expanded,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,33 +37,35 @@ class ThinkingMetaRow extends StatelessWidget {
         runSpacing: 6,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Text(time, style: localeFont(fontSize: 11, color: cs.onSurfaceVariant)),
-          GestureDetector(
+          Text(
+            time,
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall!.copyWith(color: cs.onSurfaceVariant),
+          ),
+          // Board 3.8b: a quiet primary text toggle after the time.
+          InkWell(
             onTap: onToggle,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(7, 5, 9, 5),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
-                border: Border.all(color: cs.outline),
-              ),
+            borderRadius: KuberShape.smallR,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AnimatedRotation(
-                    turns: expanded ? 0.25 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(Icons.chevron_right_rounded,
-                        size: 11, color: cs.onSurfaceVariant),
-                  ),
-                  const SizedBox(width: 4),
                   Text(
                     expanded ? 'HIDE THINKING' : 'SHOW THINKING',
-                    style: localeFont(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                      color: cs.onSurfaceVariant,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                      letterSpacing: 0.8,
+                      color: cs.primary,
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 16,
+                      color: cs.primary,
                     ),
                   ),
                 ],
@@ -99,8 +102,15 @@ class ThinkingPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final base = localeFont(fontSize: 12, color: cs.onSurfaceVariant, height: 1.45);
-    final bold = base.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
+    final base = localeFont(
+      fontSize: 12,
+      color: cs.onSurfaceVariant,
+      height: 1.45,
+    );
+    final bold = base.copyWith(
+      color: cs.onSurface,
+      fontWeight: FontWeight.w500,
+    );
     final steps = _steps;
 
     return Padding(
@@ -108,9 +118,9 @@ class ThinkingPanel extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          color: cs.surfaceContainerLow,
+          borderRadius: KuberShape.cardR,
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,24 +132,21 @@ class ThinkingPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 16,
-                      height: 16,
-                      margin: const EdgeInsets.only(top: 1),
+                      width: 5,
+                      height: 5,
+                      margin: const EdgeInsets.only(top: 7, left: 2),
                       decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(4),
+                        color: cs.onSurfaceVariant,
+                        shape: BoxShape.circle,
                       ),
-                      alignment: Alignment.center,
-                      child: Text('${i + 1}',
-                          style: localeFont(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.primary)),
                     ),
                     const SizedBox(width: 9),
                     Expanded(
-                      child: Text.rich(TextSpan(
-                          children: markerSpans(steps[i].text, base, bold))),
+                      child: Text.rich(
+                        TextSpan(
+                          children: markerSpans(steps[i].text, base, bold),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -168,8 +175,9 @@ class _BlinkingCaretState extends State<BlinkingCaret>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
   }
 
   @override
@@ -190,7 +198,7 @@ class _BlinkingCaretState extends State<BlinkingCaret>
           margin: const EdgeInsets.only(left: 2),
           decoration: BoxDecoration(
             color: widget.color,
-            borderRadius: BorderRadius.circular(1),
+            borderRadius: BorderRadius.circular(KuberShape.small),
           ),
         ),
       ),

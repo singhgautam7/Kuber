@@ -39,7 +39,8 @@ class DataImportBottomSheet extends ConsumerStatefulWidget {
   const DataImportBottomSheet({super.key});
 
   @override
-  ConsumerState<DataImportBottomSheet> createState() => _DataImportBottomSheetState();
+  ConsumerState<DataImportBottomSheet> createState() =>
+      _DataImportBottomSheetState();
 }
 
 class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
@@ -54,14 +55,16 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.xl,
-        KuberSpacing.lg,
-        KuberSpacing.xl,
-        viewPadding > 0 ? viewPadding + KuberSpacing.lg : KuberSpacing.xxl,
+        KuberSpace.xl,
+        KuberSpace.lg,
+        KuberSpace.xl,
+        viewPadding > 0 ? viewPadding + KuberSpace.lg : KuberSpace.xxl,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -72,10 +75,10 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
             height: 4,
             decoration: BoxDecoration(
               color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(KuberShape.full),
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
 
           // Close button
           Row(
@@ -90,12 +93,16 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     color: cs.surfaceContainerHigh,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           _buildOptions(cs),
         ],
@@ -117,24 +124,24 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
             context.l10n.dataImportTitle,
             style: localeFont(
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
               letterSpacing: -0.3,
             ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         Text(
           context.l10n.selectFormat,
           style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
             letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         SettingsCardSelector<_ImportFmt>(
           options: [
             SelectorOption(
@@ -156,10 +163,10 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
             _override = false;
           }),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
 
         if (isCsv) _buildCsvOptions(cs) else _buildJsonDanger(cs),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         AppButton(
           label: context.l10n.selectFileImport,
@@ -178,11 +185,11 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
       children: [
         // Override toggle card
         Container(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
+          padding: const EdgeInsets.all(KuberSpace.lg),
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -194,7 +201,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                       context.l10n.overrideExistingData,
                       style: localeFont(
                         fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
                     ),
@@ -212,7 +219,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                   ],
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Switch.adaptive(
                 value: _override,
                 onChanged: (val) => setState(() => _override = val),
@@ -222,49 +229,39 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           ),
         ),
         if (_override) ...[
-          const SizedBox(height: KuberSpacing.md),
-          _buildDangerChip(
-            cs,
-            context.l10n.importWipeWarning,
-          ),
+          const SizedBox(height: KuberSpace.md),
+          _buildDangerChip(cs, context.l10n.importWipeWarning),
         ] else ...[
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           _buildInfoChip(cs, context.l10n.importMergeChip),
         ],
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         _buildTemplateCard(cs),
       ],
     );
   }
 
   Widget _buildJsonDanger(ColorScheme cs) {
-    return _buildDangerChip(
-      cs,
-      context.l10n.importReplaceWarning,
-    );
+    return _buildDangerChip(cs, context.l10n.importReplaceWarning);
   }
 
   Widget _buildDangerChip(ColorScheme cs, String message) {
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.error.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Text(
               message,
-              style: localeFont(
-                fontSize: 12,
-                color: cs.error,
-                height: 1.45,
-              ),
+              style: localeFont(fontSize: 12, color: cs.error, height: 1.45),
             ),
           ),
         ],
@@ -274,17 +271,17 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
 
   Widget _buildInfoChip(ColorScheme cs, String message) {
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.primary.withValues(alpha: 0.12)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.info_outline_rounded, size: 18, color: cs.primary),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Text(
               message,
@@ -304,8 +301,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,23 +310,25 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           // Header strip
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.md,
+              horizontal: KuberSpace.lg,
+              vertical: KuberSpace.md,
             ),
             decoration: BoxDecoration(
               color: cs.secondaryContainer.withValues(alpha: 0.3),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.md)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(KuberShape.medium),
+              ),
             ),
             child: Row(
               children: [
-                Icon(Icons.swap_horiz_rounded, size: 16, color: cs.secondary),
-                const SizedBox(width: KuberSpacing.sm),
+                Icon(Icons.swap_horiz_rounded, size: 16, color: cs.primary),
+                const SizedBox(width: KuberSpace.sm),
                 Text(
                   'MIGRATING FROM ANOTHER APP?',
                   style: localeFont(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: cs.secondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: cs.primary,
                     letterSpacing: 0.6,
                   ),
                 ),
@@ -337,7 +336,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(KuberSpacing.lg),
+            padding: const EdgeInsets.all(KuberSpace.lg),
             child: Row(
               children: [
                 Expanded(
@@ -348,7 +347,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                         context.l10n.downloadTemplate,
                         style: localeFont(
                           fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: cs.onSurface,
                         ),
                       ),
@@ -364,7 +363,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     ],
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.md),
+                const SizedBox(width: KuberSpace.md),
                 _isDownloadingTemplate
                     ? SizedBox(
                         width: 20,
@@ -377,10 +376,12 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     : GestureDetector(
                         onTap: _downloadTemplate,
                         child: Container(
-                          padding: const EdgeInsets.all(KuberSpacing.sm),
+                          padding: const EdgeInsets.all(KuberSpace.sm),
                           decoration: BoxDecoration(
-                            color: cs.primaryContainer.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                            color: cs.secondaryContainer.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(
+                              KuberShape.largeIncreased,
+                            ),
                             border: Border.all(
                               color: cs.primary.withValues(alpha: 0.2),
                             ),
@@ -430,10 +431,12 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
     // Close the sheet and let DataManagementScreen show the full-screen loader
     Navigator.of(context).pop();
 
-    ref.read(dataControllerProvider.notifier).runImport(
-      content,
-      isJson: _format == _ImportFmt.json,
-      override: _override,
-    );
+    ref
+        .read(dataControllerProvider.notifier)
+        .runImport(
+          content,
+          isJson: _format == _ImportFmt.json,
+          override: _override,
+        );
   }
 }

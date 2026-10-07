@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../pro/more/more_premium_card.dart';
 import '../../pro/paywall/pro_state.dart';
@@ -30,43 +30,56 @@ class _AdvancedAnalyticsLandingState
     );
 
     return Scaffold(
-      appBar: KuberAppBar(
-        showBack: true,
-        showHome: true,
-        showBrand: false,
-        infoConfig: hasAccess ? kAboutAdvancedAnalyticsInfoConfig : null,
-      ),
-      body: hasAccess
-          // ListView.builder (not a static children list) so off-screen
-          // preview cards are built lazily. Each card watches its own heavy
-          // `compute()` provider; building them all on the first frame spawned
-          // ~8 isolates at once and janked the open. Now the visible cards
-          // render skeletons immediately and the rest hydrate as they scroll
-          // into view.
-          ? ListView.builder(
-              // No horizontal padding here — KuberPageHeader supplies its own
-              // 20px, and the cards get matching horizontal padding below.
-              padding: const EdgeInsets.only(bottom: KuberSpacing.xxl),
-              itemCount: _landingCards.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return const KuberPageHeader(
-                    title: 'Advanced Analytics',
-                    description: 'Deep analysis of your financial patterns',
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(
+          title: 'Advanced Analytics',
+          showBack: true,
+          infoConfig: hasAccess ? kAboutAdvancedAnalyticsInfoConfig : null,
+        ),
+        body: hasAccess
+            // ListView.builder (not a static children list) so off-screen
+            // preview cards are built lazily. Each card watches its own heavy
+            // `compute()` provider; building them all on the first frame spawned
+            // ~8 isolates at once and janked the open. Now the visible cards
+            // render skeletons immediately and the rest hydrate as they scroll
+            // into view.
+            ? ListView.builder(
+                // No horizontal padding here — KuberPageHeader supplies its own
+                // 20px, and the cards get matching horizontal padding below.
+                padding: const EdgeInsets.only(bottom: KuberSpace.xxl),
+                itemCount: _landingCards.length + 1,
+                // Board 3.6c: the health score is its own card; every other
+                // section is a row of one grouped list. The rows stay separate
+                // lazy items (drawn as segments of the group) so off-screen
+                // sections still build late.
+                itemBuilder: (context, index) {
+                  if (index == 0) return const SizedBox.shrink();
+                  final i = index - 1;
+                  if (i == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin,
+                        0,
+                        KuberSpace.screenMargin,
+                        KuberSpace.md,
+                      ),
+                      child: _landingCards[0],
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KuberSpace.screenMargin,
+                    ),
+                    child: _GroupSegment(
+                      isFirst: i == 1,
+                      isLast: i == _landingCards.length - 1,
+                      child: _landingCards[i],
+                    ),
                   );
-                }
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    20,
-                    0,
-                    20,
-                    KuberSpacing.md,
-                  ),
-                  child: _landingCards[index - 1],
-                );
-              },
-            )
-          : const _LockedUpgradeView(),
+                },
+              )
+            : const _LockedUpgradeView(),
+      ),
     );
   }
 }
@@ -85,67 +98,106 @@ const List<Widget> _landingCards = [
   _SavingsRateCard(),
 ];
 
+/// One segment of the sections group: surfaceContainer with the outline on
+/// the outer edges, rounded at the ends, a divider between rows.
+class _GroupSegment extends StatelessWidget {
+  final bool isFirst;
+  final bool isLast;
+  final Widget child;
+  const _GroupSegment({
+    required this.isFirst,
+    required this.isLast,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final side = BorderSide(color: cs.outlineVariant);
+    final radius = BorderRadius.vertical(
+      top: isFirst ? KuberShape.cardR.topLeft : Radius.zero,
+      bottom: isLast ? KuberShape.cardR.bottomLeft : Radius.zero,
+    );
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: radius,
+        border: Border(
+          left: side,
+          right: side,
+          top: side,
+          bottom: isLast ? side : BorderSide.none,
+        ),
+      ),
+      child: ClipRRect(borderRadius: radius, child: child),
+    );
+  }
+}
+
+/// A section row (board 3.6c): primary glyph, title, one-line summary,
+/// chevron.
 class _RowCard extends StatelessWidget {
   final String title;
   final IconData icon;
-  final Widget? preview;
   final Widget? subtitle;
   final VoidCallback onTap;
 
   const _RowCard({
     required this.title,
     required this.icon,
-    this.preview,
     this.subtitle,
     required this.onTap,
   });
 
+  /// Placeholder row while the section's provider computes.
+  static Widget loading(String title, IconData icon, VoidCallback onTap) =>
+      _RowCard(
+        title: title,
+        icon: icon,
+        subtitle: const Padding(
+          padding: EdgeInsets.only(top: 4),
+          child: KuberSkeleton(width: 160, height: 12),
+        ),
+        onTap: onTap,
+      );
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: cs.primary, size: 20),
-                const SizedBox(width: KuberSpacing.sm),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
+    final tt = Theme.of(context).textTheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          child: Row(
+            children: [
+              Icon(icon, color: cs.primary, size: 24),
+              const SizedBox(width: KuberSpace.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.titleMedium!.copyWith(color: cs.onSurface),
                     ),
-                  ),
+                    if (subtitle != null)
+                      DefaultTextStyle.merge(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        child: subtitle!,
+                      ),
+                  ],
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                  size: 20,
-                ),
-              ],
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: KuberSpacing.xs),
-              subtitle!,
+              ),
+              const SizedBox(width: KuberSpace.sm),
+              const KuberChevron(),
             ],
-            if (preview != null) ...[
-              const SizedBox(height: KuberSpacing.sm),
-              preview!,
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -161,112 +213,97 @@ class _HealthScoreCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
-      error: (_, __) => _RowCard(
-        title: 'Financial health score',
-        icon: Icons.health_and_safety_outlined,
-        subtitle: Text(
-          'Score calculation error',
-          style: localeFont(fontSize: 12, color: cs.error),
-        ),
-        onTap: () => context.push('/advanced-analytics/health-score'),
+      loading: () => const KuberSkeleton(height: 88),
+      error: (_, __) => KuberGroup(
+        children: [
+          _RowCard(
+            title: 'Financial health score',
+            icon: Icons.health_and_safety_outlined,
+            subtitle: Text(
+              'Score calculation error',
+              style: localeFont(fontSize: 12, color: cs.error),
+            ),
+            onTap: () => context.push('/advanced-analytics/health-score'),
+          ),
+        ],
       ),
       data: (score) {
         final scoreVal = score.total;
         final rating = scoreVal >= 75
             ? 'Good'
             : scoreVal >= 50
-                ? 'Fair'
-                : 'Needs improvement';
+            ? 'Fair'
+            : 'Needs improvement';
         final focus = score.improvementAreas.isNotEmpty
             ? 'focus on ${score.improvementAreas.first.toLowerCase()} next'
             : 'finances are in great shape';
 
-        return InkWell(
+        final ratingColor = scoreVal >= 75
+            ? context.kuberMoney.income
+            : scoreVal >= 50
+            ? context.kuberMoney.warning
+            : cs.error;
+        final tt = Theme.of(context).textTheme;
+        // Board 3.6c: its own card above the sections group.
+        return KuberCard(
           onTap: () => context.push('/advanced-analytics/health-score'),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          child: Container(
-            padding: const EdgeInsets.all(KuberSpacing.md),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
-            ),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CircularProgressIndicator(
+          padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox.expand(
+                      child: CircularProgressIndicator(
                         value: scoreVal / 100,
-                        strokeWidth: 4,
-                        color: scoreVal >= 75
-                            ? cs.tertiary
-                            : scoreVal >= 50
-                                ? context.kuberColors.warning
-                                : cs.error,
-                        backgroundColor: cs.outline,
+                        strokeWidth: 5,
+                        strokeCap: StrokeCap.round,
+                        color: cs.primary,
+                        backgroundColor: cs.secondaryContainer,
                       ),
-                      Text(
-                        '$scoreVal',
-                        style: localeFont(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      '$scoreVal',
+                      style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Financial health score',
-                        style: localeFont(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
+              ),
+              const SizedBox(width: KuberSpace.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Financial health score',
+                      style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        style: tt.bodyMedium!.copyWith(
+                          color: cs.onSurfaceVariant,
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      RichText(
-                        text: TextSpan(
-                          style: localeFont(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: rating,
-                              style: localeFont(
-                                fontWeight: FontWeight.bold,
-                                color: scoreVal >= 75
-                                    ? cs.tertiary
-                                    : scoreVal >= 50
-                                        ? context.kuberColors.warning
-                                        : cs.error,
-                              ),
+                        children: [
+                          TextSpan(
+                            text: rating,
+                            style: TextStyle(
+                              color: ratingColor,
+                              fontWeight: FontWeight.w600,
                             ),
-                            TextSpan(text: ' · $focus'),
-                          ],
-                        ),
+                          ),
+                          TextSpan(text: ' · $focus'),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                  size: 20,
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: KuberSpace.sm),
+              const KuberChevron(),
+            ],
           ),
         );
       },
@@ -283,7 +320,11 @@ class _TrendsCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 84),
+      loading: () => _RowCard.loading(
+        'Year over year',
+        Icons.bar_chart_rounded,
+        () => context.push('/advanced-analytics/trends'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Year over year',
         icon: Icons.bar_chart_rounded,
@@ -291,40 +332,18 @@ class _TrendsCard extends ConsumerWidget {
       ),
       data: (data) {
         final change = data.percentChange;
-        final isNegative = change <= 0;
         final changeText =
             '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)}% vs last year';
-
-        final bars = [
-          ...data.previousSeries.map((m) => m.expense),
-          ...data.currentSeries.map((m) => m.expense),
-        ].take(6).toList();
 
         return _RowCard(
           title: 'Year over year',
           icon: Icons.bar_chart_rounded,
           onTap: () => context.push('/advanced-analytics/trends'),
-          preview: Row(
-            children: [
-              if (bars.isNotEmpty)
-                SizedBox(
-                  width: 80,
-                  height: 24,
-                  child: TinyBars(
-                    values: bars,
-                    color: cs.primary,
-                  ),
-                ),
-              const Spacer(),
-              Text(
-                changeText,
-                style: localeFont(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: isNegative ? cs.tertiary : cs.error,
-                ),
-              ),
-            ],
+          subtitle: Text(
+            changeText,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
           ),
         );
       },
@@ -343,7 +362,9 @@ class _CategoryDeepDiveCard extends StatelessWidget {
       icon: Icons.category_outlined,
       subtitle: Text(
         'Pick any category for merchants, trends & weekday habits',
-        style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
       ),
       onTap: () => context.push('/advanced-analytics/category'),
     );
@@ -359,7 +380,11 @@ class _SpendingPatternsCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
+      loading: () => _RowCard.loading(
+        'Spending patterns',
+        Icons.donut_large_rounded,
+        () => context.push('/advanced-analytics/spending-patterns'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Spending patterns',
         icon: Icons.donut_large_rounded,
@@ -372,7 +397,9 @@ class _SpendingPatternsCard extends ConsumerWidget {
             icon: Icons.donut_large_rounded,
             subtitle: Text(
               'Not enough transaction history yet',
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
             onTap: () => context.push('/advanced-analytics/spending-patterns'),
           );
@@ -394,7 +421,7 @@ class _SpendingPatternsCard extends ConsumerWidget {
           'Thursdays',
           'Fridays',
           'Saturdays',
-          'Sundays'
+          'Sundays',
         ];
         final maxDay = days[maxAvgIdx];
 
@@ -411,9 +438,11 @@ class _SpendingPatternsCard extends ConsumerWidget {
         return _RowCard(
           title: 'Spending patterns',
           icon: Icons.donut_large_rounded,
-          subtitle: RichText(
-            text: TextSpan(
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+          subtitle: Text.rich(
+            TextSpan(
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
               children: [
                 const TextSpan(text: 'You spend most on '),
                 TextSpan(
@@ -450,7 +479,11 @@ class _ForecastCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
+      loading: () => _RowCard.loading(
+        'Forecast',
+        Icons.trending_up_rounded,
+        () => context.push('/advanced-analytics/forecast'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Forecast',
         icon: Icons.trending_up_rounded,
@@ -463,7 +496,9 @@ class _ForecastCard extends ConsumerWidget {
             icon: Icons.trending_up_rounded,
             subtitle: Text(
               'Forecast needs 2 months of history',
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
             onTap: () => context.push('/advanced-analytics/forecast'),
           );
@@ -472,16 +507,18 @@ class _ForecastCard extends ConsumerWidget {
         return _RowCard(
           title: 'Forecast',
           icon: Icons.trending_up_rounded,
-          subtitle: RichText(
-            text: TextSpan(
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+          subtitle: Text.rich(
+            TextSpan(
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
               children: [
                 const TextSpan(text: 'Likely to spend '),
                 TextSpan(
                   text: aaMoney(data.projectedTotal),
                   style: localeFont(
                     fontWeight: FontWeight.bold,
-                    color: context.kuberColors.warning,
+                    color: context.kuberMoney.warning,
                   ),
                 ),
                 const TextSpan(text: ' by month end (estimate)'),
@@ -504,7 +541,11 @@ class _CashFlowCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
+      loading: () => _RowCard.loading(
+        'Cash flow',
+        Icons.account_balance_wallet_outlined,
+        () => context.push('/advanced-analytics/cash-flow'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Cash flow',
         icon: Icons.account_balance_wallet_outlined,
@@ -517,7 +558,9 @@ class _CashFlowCard extends ConsumerWidget {
             icon: Icons.account_balance_wallet_outlined,
             subtitle: Text(
               'Track income and expenses to see ledger',
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
             onTap: () => context.push('/advanced-analytics/cash-flow'),
           );
@@ -527,8 +570,8 @@ class _CashFlowCard extends ConsumerWidget {
         final label = negative == 0
             ? 'Consistent positive cash flow'
             : negative > months.length / 2
-                ? 'Negative cash flow is frequent'
-                : 'Cash flow is variable';
+            ? 'Negative cash flow is frequent'
+            : 'Cash flow is variable';
 
         final income = months.fold<double>(0, (sum, m) => sum + m.income);
         final expense = months.fold<double>(0, (sum, m) => sum + m.expense);
@@ -544,15 +587,19 @@ class _CashFlowCard extends ConsumerWidget {
                 height: 7,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: negative == 0 ? cs.tertiary : context.kuberColors.warning,
+                  color: negative == 0
+                      ? context.kuberMoney.income
+                      : context.kuberMoney.warning,
                 ),
               ),
-              const SizedBox(width: KuberSpacing.xs),
+              const SizedBox(width: KuberSpace.xs),
               Expanded(
                 child: Text(
                   '$label · ${rate.toStringAsFixed(0)}% savings rate · includes monthly ledger',
                   overflow: TextOverflow.ellipsis,
-                  style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             ],
@@ -573,7 +620,11 @@ class _AnomalyCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
+      loading: () => _RowCard.loading(
+        'Anomaly detection',
+        Icons.radar_rounded,
+        () => context.push('/advanced-analytics/anomalies'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Anomaly detection',
         icon: Icons.radar_rounded,
@@ -612,7 +663,11 @@ class _MerchantCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
+      loading: () => _RowCard.loading(
+        'Merchant analysis',
+        Icons.storefront_outlined,
+        () => context.push('/advanced-analytics/merchants'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Merchant analysis',
         icon: Icons.storefront_outlined,
@@ -625,7 +680,9 @@ class _MerchantCard extends ConsumerWidget {
             icon: Icons.storefront_outlined,
             subtitle: Text(
               'Not enough merchant history yet',
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
             onTap: () => context.push('/advanced-analytics/merchants'),
           );
@@ -636,9 +693,11 @@ class _MerchantCard extends ConsumerWidget {
         return _RowCard(
           title: 'Merchant analysis',
           icon: Icons.storefront_outlined,
-          subtitle: RichText(
-            text: TextSpan(
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+          subtitle: Text.rich(
+            TextSpan(
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
               children: [
                 TextSpan(
                   text: topMerchant,
@@ -667,7 +726,11 @@ class _SavingsRateCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return async.when(
-      loading: () => const KuberSkeleton(height: 72),
+      loading: () => _RowCard.loading(
+        'Savings rate tracker',
+        Icons.savings_outlined,
+        () => context.push('/advanced-analytics/savings-rate'),
+      ),
       error: (_, __) => _RowCard(
         title: 'Savings rate tracker',
         icon: Icons.savings_outlined,
@@ -680,7 +743,9 @@ class _SavingsRateCard extends ConsumerWidget {
             icon: Icons.savings_outlined,
             subtitle: Text(
               'Savings rate tracker needs 3 months of history',
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
             onTap: () => context.push('/advanced-analytics/savings-rate'),
           );
@@ -692,15 +757,19 @@ class _SavingsRateCard extends ConsumerWidget {
         return _RowCard(
           title: 'Savings rate tracker',
           icon: Icons.savings_outlined,
-          subtitle: RichText(
-            text: TextSpan(
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+          subtitle: Text.rich(
+            TextSpan(
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
               children: [
                 TextSpan(
                   text: '${overallRate.toStringAsFixed(0)}%',
                   style: localeFont(
                     fontWeight: FontWeight.bold,
-                    color: targetMet ? cs.tertiary : context.kuberColors.warning,
+                    color: targetMet
+                        ? context.kuberMoney.income
+                        : context.kuberMoney.warning,
                   ),
                 ),
                 const TextSpan(text: ' overall rate · '),
@@ -735,31 +804,26 @@ class _LockedUpgradeView extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
+        KuberSpace.lg,
         0,
-        KuberSpacing.lg,
-        KuberSpacing.xxl,
+        KuberSpace.lg,
+        KuberSpace.xxl,
       ),
       children: [
-        const KuberPageHeader(
-          title: 'Advanced Analytics',
-          description: 'Deep analysis of your financial patterns',
-        ),
-        const SizedBox(height: KuberSpacing.md),
         const MorePremiumHeroCard(),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         Text(
           "What's inside",
           style: localeFont(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
         for (final feature in _features)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xs),
+            padding: const EdgeInsets.symmetric(vertical: KuberSpace.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -768,12 +832,12 @@ class _LockedUpgradeView extends StatelessWidget {
                   size: 18,
                   color: cs.primary,
                 ),
-                const SizedBox(width: KuberSpacing.sm),
+                const SizedBox(width: KuberSpace.sm),
                 Expanded(
                   child: Text(
                     feature,
                     style: localeFont(
-                      fontSize: 13,
+                      fontSize: 14,
                       color: cs.onSurfaceVariant,
                       height: 1.35,
                     ),

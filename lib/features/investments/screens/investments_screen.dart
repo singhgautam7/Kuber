@@ -1,17 +1,17 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../settings/providers/info_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 
@@ -21,11 +21,25 @@ import '../utils/investment_calculations.dart' as calc;
 import '../widgets/investment_detail_sheet.dart';
 import '../widgets/investment_widgets.dart';
 
-class InvestmentsScreen extends ConsumerWidget {
+class InvestmentsScreen extends ConsumerStatefulWidget {
   const InvestmentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InvestmentsScreen> createState() => _InvestmentsScreenState();
+}
+
+class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<AsyncValue<bool>>(
       infoSeenProvider(PrefsKeys.seenInfoInvestments),
       (prev, next) {
@@ -44,8 +58,13 @@ class InvestmentsScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final investmentsAsync = ref.watch(investmentListProvider);
 
-
     return Scaffold(
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: context.l10n.addInvestment,
+        onPressed: () => context.push('/investments/add'),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       body: investmentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -62,33 +81,56 @@ class InvestmentsScreen extends ConsumerWidget {
               ? gainLoss / invested * 100
               : 0.0;
           final allocation = _assetAllocation(context, investments);
+          // Header search: name, type or notes; the hero hides meanwhile.
+          final q = _query.trim().toLowerCase();
+          final shown = q.isEmpty
+              ? investments
+              : [
+                  for (final i in investments)
+                    if (i.name.toLowerCase().contains(q) ||
+                        i.investmentType
+                            .replaceAll('_', ' ')
+                            .toLowerCase()
+                            .contains(q) ||
+                        (i.notes?.toLowerCase().contains(q) ?? false))
+                      i,
+                ];
 
           return CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  showHome: true,
-                  title: '',
-                  infoConfig: InfoConstants.investments,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: KuberPageHeader(
                   title: context.l10n.investmentsTitle,
-                  description:
-                      '',
-                  actionTooltip: context.l10n.addInvestment,
-                  onAction: () => context.push('/investments/add'),
+                  infoConfig: InfoConstants.investments,
+                  search: investments.isEmpty
+                      ? null
+                      : KuberHeaderSearch(
+                          controller: _searchController,
+                          hint: context.l10n.searchInvestmentsHint,
+                          onChanged: (v) => setState(() => _query = v),
+                        ),
                 ),
               ),
-              if (investments.isNotEmpty) ...[
+
+              if (shown.isEmpty && q.isNotEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: KuberEmptyState(
+                    icon: Icons.search_off_rounded,
+                    title: context.l10n.noMatches,
+                    description: context.l10n.nothingMatchesQuery(
+                      _query.trim(),
+                    ),
+                  ),
+                ),
+              if (investments.isNotEmpty && q.isEmpty) ...[
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.lg,
+                    KuberSpace.screenMargin,
                     0,
-                    KuberSpacing.lg,
-                    KuberSpacing.md,
+                    KuberSpace.screenMargin,
+                    KuberSpace.sectionGap,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: PortfolioHero(
@@ -96,21 +138,10 @@ class InvestmentsScreen extends ConsumerWidget {
                       invested: invested,
                       gainLoss: gainLoss,
                       gainLossPercent: gainLossPercent,
+                      allocation: allocation,
                     ),
                   ),
                 ),
-                if (allocation.isNotEmpty)
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      KuberSpacing.lg,
-                      0,
-                      KuberSpacing.lg,
-                      KuberSpacing.lg,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: AssetAllocationStrip(slices: allocation),
-                    ),
-                  ),
               ],
               if (investments.isEmpty)
                 SliverFillRemaining(
@@ -119,30 +150,32 @@ class InvestmentsScreen extends ConsumerWidget {
                     icon: Icons.show_chart,
                     title: context.l10n.noInvestments,
                     description: context.l10n.investmentsEmptyDesc,
-                    actionLabel: context.l10n.addInvestment,
-                    onAction: () => context.push('/investments/add'),
                   ),
                 ),
-              if (investments.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: _SectionHeader(label: context.l10n.allInvestmentsUpper),
-                ),
+              if (shown.isNotEmpty)
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
+                    horizontal: KuberSpace.screenMargin,
                   ),
-                  sliver: SliverList.separated(
-                    itemCount: investments.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: KuberSpacing.sm),
-                    itemBuilder: (_, i) => _InvestmentRow(
-                      investment: investments[i],
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        KuberSectionHeader(
+                          title: context.l10n.allInvestmentsUpper,
+                        ),
+                        KuberGroup(
+                          children: [
+                            for (final inv in shown)
+                              _InvestmentRow(investment: inv),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-              SliverToBoxAdapter(
-                child: SizedBox(height: navBarBottomPadding(context)),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: KuberExtendedFab.clearance),
               ),
             ],
           );
@@ -188,11 +221,13 @@ class _InvestmentRow extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     return InvestmentCard(
       name: investment.name,
-      assetTypeLabel: _assetDisplay(context, label).toUpperCase(),
+      assetTypeLabel: _assetDisplay(context, label),
       icon: _investmentIcon(investment.investmentType),
       iconColor: _assetColor(context, label),
       quantityLabel: investment.autoDebit && investment.sipAmount != null
-          ? context.l10n.sipAmountPrefix(fmt.formatCurrency(investment.sipAmount!))
+          ? context.l10n.sipAmountPrefix(
+              fmt.formatCurrency(investment.sipAmount!),
+            )
           : null,
       currentValue: investment.currentValue ?? 0,
       gainLossPercent: calc.computeGainLossPercent(investment),
@@ -206,33 +241,6 @@ class _InvestmentRow extends ConsumerWidget {
           builder: (_) => InvestmentDetailSheet(investment: investment),
         );
       },
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.sm,
-        KuberSpacing.lg,
-        KuberSpacing.md,
-      ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: cs.onSurfaceVariant,
-          letterSpacing: 1.2,
-        ),
-      ),
     );
   }
 }

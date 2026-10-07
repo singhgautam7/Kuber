@@ -60,11 +60,11 @@ class _InvestmentReturnsCalculatorScreenState
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'amount': _amountCtrl.text,
-        'rate': _rateCtrl.text,
-        'tenure': _tenureCtrl.text,
-        'type': _type,
-      };
+    'amount': _amountCtrl.text,
+    'rate': _rateCtrl.text,
+    'tenure': _tenureCtrl.text,
+    'type': _type,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -89,8 +89,10 @@ class _InvestmentReturnsCalculatorScreenState
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
-        symbol: currency.symbol);
+    final amt = formatter.formatCurrency(
+      parseAmount(_amountCtrl.text),
+      symbol: currency.symbol,
+    );
     final kind = _isSip ? 'SIP' : 'Lumpsum';
     if (r == null) return '$kind $amt';
     return '$kind $amt @ ${_rateCtrl.text}% for ${_years}y → ${formatter.formatCurrency(r.futureValue, symbol: currency.symbol)}';
@@ -118,47 +120,52 @@ class _InvestmentReturnsCalculatorScreenState
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _amountCtrl,
-            label: _isSip ? 'INVESTMENT AMOUNT (PER MONTH)' : 'INVESTMENT AMOUNT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 500,
-            max: _isSip ? 200000 : 10000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'EXPECTED ANNUAL RETURN',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 30,
-            divisions: 290,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _tenureCtrl,
-            label: 'TENURE',
-            suffix: 'years',
-            onChanged: recompute,
-            min: 1,
-            max: 40,
-            divisions: 39,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          const ToolInputLabel('INVESTMENT TYPE'),
-          const SizedBox(height: KuberSpacing.sm),
-          ToolSegmentedControl(
-            labels: const ['Lumpsum', 'SIP'],
-            selectedIndex: _type,
-            onChanged: (i) => setState(() => _type = i),
-          ),
-        ]),
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _amountCtrl,
+              label: _isSip
+                  ? 'INVESTMENT AMOUNT (PER MONTH)'
+                  : 'INVESTMENT AMOUNT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 500,
+              max: _isSip ? 200000 : 10000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'EXPECTED ANNUAL RETURN',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 30,
+              divisions: 290,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _tenureCtrl,
+              label: 'TENURE',
+              suffix: 'years',
+              onChanged: recompute,
+              min: 1,
+              max: 40,
+              divisions: 39,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            const ToolInputLabel('INVESTMENT TYPE'),
+            const SizedBox(height: KuberSpace.sm),
+            ToolSegmentedControl(
+              labels: const ['Lumpsum', 'SIP'],
+              selectedIndex: _type,
+              onChanged: (i) => setState(() => _type = i),
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -167,16 +174,23 @@ class _InvestmentReturnsCalculatorScreenState
                     ToolHero(
                       label: 'Future Value',
                       value: money(result.futureValue),
-                      color: cs.tertiary,
+                      color: context.kuberMoney.income,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol('Total Invested', money(result.totalInvested)),
-                      StatCol('Total Gains', money(result.totalGains),
-                          color: cs.tertiary),
-                      StatCol('Abs. Return',
-                          '${result.absoluteReturnPercent.round()}%'),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol('Total Invested', money(result.totalInvested)),
+                        StatCol(
+                          'Total Gains',
+                          money(result.totalGains),
+                          color: context.kuberMoney.income,
+                        ),
+                        StatCol(
+                          'Abs. Return',
+                          '${result.absoluteReturnPercent.round()}%',
+                        ),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -187,10 +201,16 @@ class _InvestmentReturnsCalculatorScreenState
             child: ToolDonutBreakdown(
               segments: [
                 BreakdownSegment('Invested', result.totalInvested, cs.primary),
-                BreakdownSegment('Returns', result.totalGains, cs.tertiary),
+                BreakdownSegment(
+                  'Returns',
+                  result.totalGains,
+                  context.kuberMoney.income,
+                ),
               ],
-              centerBig: formatter.formatCompactCurrency(result.futureValue,
-                  symbol: currency.symbol),
+              centerBig: formatter.formatCompactCurrency(
+                result.futureValue,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'VALUE',
             ),
           ),
@@ -200,15 +220,17 @@ class _InvestmentReturnsCalculatorScreenState
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Portfolio value',
-                    points: result.valueSeries,
-                    color: cs.tertiary,
-                    fill: true),
+                  name: 'Portfolio value',
+                  points: result.valueSeries,
+                  color: context.kuberMoney.income,
+                  fill: true,
+                ),
                 ChartSeries(
-                    name: 'Invested',
-                    points: result.investedSeries,
-                    color: cs.primary,
-                    dashed: true),
+                  name: 'Invested',
+                  points: result.investedSeries,
+                  color: cs.primary,
+                  dashed: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.valueSeries.length; i++) 'Y$i',
@@ -231,9 +253,10 @@ class _InvestmentReturnsCalculatorScreenState
               rows: (_isSip && _scheduleMode == 1)
                   ? [
                       for (final m in sipMonthlyRows(
-                          parseAmount(_amountCtrl.text),
-                          parseNum(_rateCtrl.text),
-                          _years))
+                        parseAmount(_amountCtrl.text),
+                        parseNum(_rateCtrl.text),
+                        _years,
+                      ))
                         [
                           'M${m[0].toInt()}',
                           money(m[1]),
@@ -248,8 +271,9 @@ class _InvestmentReturnsCalculatorScreenState
                           'Y$y',
                           money(result.investedSeries[y]),
                           money(result.valueSeries[y]),
-                          money(result.valueSeries[y] -
-                              result.investedSeries[y]),
+                          money(
+                            result.valueSeries[y] - result.investedSeries[y],
+                          ),
                           '${result.investedSeries[y] == 0 ? 0 : ((result.valueSeries[y] - result.investedSeries[y]) / result.investedSeries[y] * 100).round()}%',
                         ],
                     ],

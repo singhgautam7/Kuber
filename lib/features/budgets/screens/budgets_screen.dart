@@ -1,6 +1,8 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,7 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../categories/providers/category_provider.dart';
 import '../data/budget.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -20,51 +22,97 @@ import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../settings/providers/info_provider.dart';
 
-class BudgetsScreen extends ConsumerWidget {
+class BudgetsScreen extends ConsumerStatefulWidget {
   const BudgetsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetsScreen> createState() => _BudgetsScreenState();
+}
+
+class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final budgetsAsync = ref.watch(budgetListProvider);
+    // Header search matches the budget's category name.
+    final q = _query.trim().toLowerCase();
+    final categoryNames = {
+      for (final c in ref.watch(categoryListProvider).valueOrNull ?? const [])
+        c.id.toString(): c.name.toLowerCase(),
+    };
     final cs = Theme.of(context).colorScheme;
 
     // Auto-trigger info sheet
-    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoBudgets), (prev, next) {
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoBudgets), (
+      prev,
+      next,
+    ) {
       if (next.hasValue && next.value == false) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
           KuberInfoBottomSheet.show(context, InfoConstants.budgets);
-          ref.read(infoSeenProvider(PrefsKeys.seenInfoBudgets).notifier).markSeen();
+          ref
+              .read(infoSeenProvider(PrefsKeys.seenInfoBudgets).notifier)
+              .markSeen();
         });
       }
     });
 
     return Scaffold(
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: context.l10n.createBudget,
+        onPressed: () => context.push('/budgets/add'),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
           // App bar
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: KuberAppBar(
               showBack: true,
-              showHome: true,
-              title: '',
+              title: context.l10n.budgetsTitle,
               infoConfig: InfoConstants.budgets,
+              search: (budgetsAsync.valueOrNull?.isEmpty ?? true)
+                  ? null
+                  : KuberHeaderSearch(
+                      controller: _searchController,
+                      hint: context.l10n.searchBudgetsHint,
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
             ),
           ),
 
           // Page header
-          SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: context.l10n.trackBudgets,
-              description: '',
-              actionTooltip: context.l10n.createBudget,
-              onAction: () => context.push('/budgets/add'),
-            ),
-          ),
-
           budgetsAsync.when(
-            data: (budgets) {
+            data: (all) {
+              final budgets = q.isEmpty
+                  ? all
+                  : [
+                      for (final b in all)
+                        if ((categoryNames[b.categoryId] ?? '').contains(q)) b,
+                    ];
+              if (budgets.isEmpty && q.isNotEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: KuberEmptyState(
+                    icon: Icons.search_off_rounded,
+                    title: context.l10n.noMatches,
+                    description: context.l10n.nothingMatchesQuery(
+                      _query.trim(),
+                    ),
+                  ),
+                );
+              }
               if (budgets.isEmpty) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
@@ -72,34 +120,60 @@ class BudgetsScreen extends ConsumerWidget {
                     icon: Icons.account_balance_rounded,
                     title: context.l10n.noBudgetsYet,
                     description: context.l10n.createBudgetsDesc,
-                    actionLabel: context.l10n.createBudget,
-                    onAction: () => context.push('/budgets/add'),
                   ),
                 );
               }
 
+              // Board 3.18: active budgets, then paused / ended, each one
+              // grouped list of rows.
+              bool inactive(Budget b) =>
+                  !b.isActive ||
+                  (!b.isRecurring &&
+                      b.endDate != null &&
+                      b.endDate!.isBefore(DateTime.now()));
+              final active = budgets.where((b) => !inactive(b)).toList();
+              final ended = budgets.where(inactive).toList();
               return SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList.separated(
-                  itemCount: budgets.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    return BudgetCard(budget: budgets[index]);
-                  },
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.screenMargin,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (active.isNotEmpty) ...[
+                        KuberSectionHeader(title: context.l10n.thisMonth),
+                        KuberGroup(
+                          children: [
+                            for (final b in active) BudgetCard(budget: b),
+                          ],
+                        ),
+                      ],
+                      if (ended.isNotEmpty) ...[
+                        if (active.isNotEmpty)
+                          const SizedBox(height: KuberSpace.sectionGap),
+                        KuberSectionHeader(title: context.l10n.pausedAndEnded),
+                        KuberGroup(
+                          children: [
+                            for (final b in ended) BudgetCard(budget: b),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               );
             },
             loading: () => const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (err, stack) => SliverFillRemaining(
-              child: Center(child: Text('Error: $err')),
-            ),
+            error: (err, stack) =>
+                SliverFillRemaining(child: Center(child: Text('Error: $err'))),
           ),
 
           // Bottom padding
-          SliverToBoxAdapter(
-            child: SizedBox(height: MediaQuery.of(context).padding.bottom + 40),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: KuberExtendedFab.clearance),
           ),
         ],
       ),
@@ -126,259 +200,149 @@ class BudgetCard extends ConsumerWidget {
             orElse: () => categories.first,
           );
 
-    final isExpired = !budget.isRecurring && budget.endDate != null && budget.endDate!.isBefore(DateTime.now());
+    final isExpired =
+        !budget.isRecurring &&
+        budget.endDate != null &&
+        budget.endDate!.isBefore(DateTime.now());
     final isDisabled = !budget.isActive;
     final isInactive = isExpired || isDisabled;
 
-    return GestureDetector(
-      onTap: (isExpired || category == null) ? null : () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => BudgetDetailsSheet(
-            budgetId: budget.id,
-            category: category,
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    final theme = Theme.of(context);
+    final fmt = ref.watch(formatterProvider);
+    final masked = ref.watch(privacyModeProvider);
+    final tones = category == null
+        ? null
+        : categoryTones(context, Color(category.colorValue));
+
+    // Board 3.18 row: tile, name (+ status pill), "₹x of ₹y", percentage in
+    // the status colour, wavy bar, the existing caps footer.
+    final row = InkWell(
+      onTap: (isExpired || category == null)
+          ? null
+          : () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) =>
+                    BudgetDetailsSheet(budgetId: budget.id, category: category),
+              );
+            },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: progressAsync.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (err, _) => Text('Error: $err'),
+          data: (p) {
+            final pct = p.percentage;
+            final (state, pctColor) = isInactive
+                ? (KuberProgressState.normal, cs.onSurfaceVariant)
+                : pct >= 100
+                ? (KuberProgressState.overLimit, context.kuberMoney.expense)
+                : pct >= 80
+                ? (KuberProgressState.nearLimit, context.kuberMoney.warning)
+                : (KuberProgressState.normal, cs.onSurfaceVariant);
+            final footer = isExpired
+                ? context.l10n.budgetPeriodEnded
+                : isDisabled
+                ? context.l10n.budgetPaused
+                : pct >= 100
+                ? context.l10n.exceededBy(
+                    maskAmount(fmt.formatCurrency(p.spent - p.limit), masked),
+                  )
+                : (budget.isRecurring
+                      ? context.l10n.budgetResetsIn(p.daysRemaining)
+                      : context.l10n.budgetExpiresIn(p.daysRemaining));
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(KuberSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: isInactive
-                        ? cs.onSurfaceVariant.withValues(alpha: 0.1)
-                        : Color(category?.colorValue ?? 0).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
-                  ),
-                  child: Icon(
-                    category != null ? IconMapper.fromString(category.icon) : Icons.shopping_bag_outlined,
-                    color: isInactive ? cs.onSurfaceVariant : Color(category?.colorValue ?? 0xFF000000),
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: tones?.container ?? cs.surfaceContainerHigh,
+                        borderRadius: KuberShape.mediumR,
+                      ),
+                      child: Icon(
+                        category != null
+                            ? IconMapper.fromString(category.icon)
+                            : Icons.shopping_bag_outlined,
+                        size: 20,
+                        color: tones?.fg ?? cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  category?.name ?? context.l10n.budgetLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleMedium!.copyWith(
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                              ),
+                              if (isDisabled) ...[
+                                const SizedBox(width: 8),
+                                KuberPill(
+                                  label: context.l10n.disabledUpper,
+                                  tone: KuberTone.neutral,
+                                ),
+                              ] else if (isExpired) ...[
+                                const SizedBox(width: 8),
+                                KuberPill(
+                                  label: context.l10n.expiredUpper,
+                                  tone: KuberTone.error,
+                                ),
+                              ],
+                            ],
+                          ),
                           Text(
-                            category?.name ?? context.l10n.budgetLabel,
-                            style: localeFont(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: isInactive ? cs.onSurfaceVariant : cs.onSurface,
+                            '${maskAmount(fmt.formatCurrency(p.spent), masked)} of ${maskAmount(fmt.formatCurrency(p.limit), masked)}',
+                            style: theme.textTheme.bodyMedium!.copyWith(
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
-                          if (isDisabled) ...[
-                            const SizedBox(width: 8),
-                            _StatusBadge(label: context.l10n.disabledUpper, color: cs.onSurfaceVariant),
-                          ] else if (isExpired) ...[
-                            const SizedBox(width: 8),
-                            _StatusBadge(label: context.l10n.expiredUpper, color: cs.error),
-                          ],
                         ],
                       ),
-                      progressAsync.when(
-                        data: (p) => Text(
-                          isExpired
-                            ? context.l10n.budgetPeriodEnded
-                            : isDisabled
-                              ? context.l10n.budgetPaused
-                              : p.percentage >= 100
-                                ? context.l10n.exceededBy(maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent - p.limit), ref.watch(privacyModeProvider)))
-                                : (budget.isRecurring
-                                    ? context.l10n.budgetResetsIn(p.daysRemaining)
-                                    : context.l10n.budgetExpiresIn(p.daysRemaining)),
-                          style: localeFont(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: isInactive
-                                ? cs.onSurfaceVariant
-                                : p.percentage >= 100 ? cs.error : cs.onSurfaceVariant,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    Text(
+                      fmt.formatPercentage(pct),
+                      style: theme.textTheme.titleSmall!.copyWith(
+                        color: pctColor,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpace.md),
+                KuberLinearProgress(
+                  value: (pct / 100).clamp(0.0, 1.0),
+                  state: state,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  footer,
+                  style: theme.textTheme.labelSmall!.copyWith(
+                    letterSpacing: 0.6,
+                    color: !isInactive && pct >= 100
+                        ? context.kuberMoney.expense
+                        : cs.onSurfaceVariant,
                   ),
                 ),
-                if (!isInactive) _AlertChips(alerts: budget.alerts, budgetAmount: budget.amount),
               ],
-            ),
-            const SizedBox(height: KuberSpacing.lg),
-            progressAsync.when(
-              data: (p) => Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        context.l10n.progressLabel,
-                        style: localeFont(
-                          fontSize: 12,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent), ref.watch(privacyModeProvider))} ',
-                              style: localeFont(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: isInactive ? cs.onSurfaceVariant : cs.onSurface,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '/ ${maskAmount(ref.watch(formatterProvider).formatCurrency(p.limit), ref.watch(privacyModeProvider))}',
-                              style: localeFont(
-                                fontSize: 13,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: KuberSpacing.sm),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(KuberRadius.full),
-                    child: LinearProgressIndicator(
-                      value: (p.percentage / 100).clamp(0.0, 1.0),
-                      minHeight: 8,
-                      backgroundColor: cs.outline.withValues(alpha: 0.2),
-                      color: isInactive ? cs.onSurfaceVariant.withValues(alpha: 0.5) : cs.primary,
-                    ),
-                  ),
-                ],
-              ),
-              loading: () => const LinearProgressIndicator(minHeight: 8),
-              error: (err, _) => Text('Error: $err'),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
-  }
-
-  // Static accent color used for progress bars (reverted from dynamic)
-  // Dynamic color still used in details sheet for text
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _StatusBadge({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          color: color,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-class _AlertChips extends ConsumerWidget {
-  final List<BudgetAlert> alerts;
-  final double budgetAmount;
-  const _AlertChips({required this.alerts, required this.budgetAmount});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (alerts.isEmpty) return const SizedBox.shrink();
-    final cs = Theme.of(context).colorScheme;
-
-    // Show first 2 alerts
-    final displayAlerts = alerts.take(2).toList();
-    return Row(
-      children: displayAlerts.map((a) {
-        final percentage = a.type == BudgetAlertType.percentage
-            ? a.value
-            : (a.value / budgetAmount) * 100;
-
-        final label = a.type == BudgetAlertType.percentage
-            ? ref.watch(formatterProvider).formatPercentage(a.value)
-            : maskAmount(ref.watch(formatterProvider).formatCurrency(a.value), ref.watch(privacyModeProvider));
-
-        Color badgeColor;
-        if (percentage >= 66) {
-          badgeColor = Colors.orangeAccent;
-        } else if (percentage >= 33) {
-          badgeColor = Colors.amber;
-        } else {
-          badgeColor = Colors.green;
-        }
-
-        if (a.isTriggered) badgeColor = cs.error;
-
-        return Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: _Chip(
-            label: label,
-            color: badgeColor,
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _Chip({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
-    );
+    return isInactive ? Opacity(opacity: 0.6, child: row) : row;
   }
 }

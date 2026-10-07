@@ -24,13 +24,13 @@ const List<AddActionMeta> kAddActionCatalog = [
   AddActionMeta(
     id: 'add_expense',
     label: 'Add Expense',
-    icon: Icons.south_west_rounded,
+    icon: Icons.north_east_rounded,
     route: '/add-transaction?type=expense',
   ),
   AddActionMeta(
     id: 'add_income',
     label: 'Add Income',
-    icon: Icons.north_east_rounded,
+    icon: Icons.south_west_rounded,
     route: '/add-transaction?type=income',
   ),
   AddActionMeta(

@@ -23,6 +23,18 @@ import '../paywall/pro_state.dart';
 class PremiumHomeButton extends ConsumerWidget {
   const PremiumHomeButton({super.key});
 
+  /// Skeleton -> badge (and label changes) cross-fade instead of popping in.
+  static Widget _fade(Widget child) => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        layoutBuilder: (current, previous) => Stack(
+          alignment: Alignment.centerLeft,
+          children: [...previous, ?current],
+        ),
+        child: child,
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
@@ -31,10 +43,13 @@ class PremiumHomeButton extends ConsumerWidget {
     // loader instead of guessing a tier (which would flash "Kuber Pro" at a
     // user who actually has Pro).
     if (ref.watch(proBootstrapLoadingProvider)) {
-      return const KuberSkeleton(
-        width: 96,
-        height: 32,
-        borderRadius: KuberRadius.md,
+      return _fade(
+        const KuberSkeleton(
+          key: ValueKey('pro-skeleton'),
+          width: 96,
+          height: 32,
+          borderRadius: KuberShape.full,
+        ),
       );
     }
 
@@ -55,42 +70,47 @@ class PremiumHomeButton extends ConsumerWidget {
       amber = false;
     }
 
-    final tint = amber ? context.kuberColors.warning : cs.primary;
-    final tintSubtle = amber
-        ? context.kuberColors.warningSubtle
-        : cs.primary.withValues(alpha: 0.10);
+    // Board 3.2d: 32 pill, primaryContainer, workspace_premium + labelLarge.
+    // Trial ending soon swaps to the warning container.
+    final bg = amber
+        ? context.kuberMoney.warningContainer
+        : cs.primaryContainer;
+    final fg = amber
+        ? context.kuberMoney.onWarningContainer
+        : cs.onPrimaryContainer;
 
-    return GestureDetector(
-      onTap: () => context.push('/pro'),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: tint.withValues(alpha: 0.35)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: tintSubtle),
-              child: Icon(Icons.workspace_premium_rounded, size: 12, color: tint),
+    return _fade(Semantics(
+      key: ValueKey(label),
+      button: true,
+      label: label,
+      child: Material(
+        color: bg,
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.push('/pro'),
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.only(left: 8, right: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.workspace_premium_rounded, size: 18, color: fg),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: localeFont(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: label == 'Kuber Pro' ? 0.1 : 0.8,
+                    color: fg,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: localeFont(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: proState.inTrialPhase ? 0.3 : 0,
-                color: cs.onSurface,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-    );
+    ));
   }
 }

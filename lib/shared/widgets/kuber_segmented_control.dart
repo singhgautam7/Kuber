@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 
-/// Reusable segmented control matching the Add Transaction type selector: a
-/// `surfaceContainerHigh` track with a `1px outline` border and `KuberRadius.md`
-/// corners, 4px inner padding. The selected segment is a solid `primary` fill
-/// with `onPrimary` text; unselected segments are transparent with
-/// `onSurfaceVariant` text. Not a raised/elevated pill.
+/// M3 segmented button (components/controls.md): 40 high, stadium, 1dp
+/// outline dividers; the selected segment takes secondaryContainer with a check
+/// (no check for 4+ segments).
 ///
 /// Generalized from `TransactionTypeSelector` so the Quick Actions configure
 /// screen (Arrange | Add shortcuts) and the transaction type picker share one
@@ -19,6 +17,13 @@ class KuberSegmentedControl<T> extends StatelessWidget {
   final bool enabled;
   final double height;
 
+  /// Draw the check on the selected segment (spec: no check for 4+ segments
+  /// and for Bar | Line).
+  final bool showCheck;
+
+  /// Hug content (in-card toggles) instead of filling the width.
+  final bool compact;
+
   const KuberSegmentedControl({
     super.key,
     required this.values,
@@ -27,6 +32,8 @@ class KuberSegmentedControl<T> extends StatelessWidget {
     required this.onSelected,
     this.enabled = true,
     this.height = 48,
+    this.showCheck = true,
+    this.compact = false,
   }) : assert(values.length == labels.length);
 
   @override
@@ -35,44 +42,61 @@ class KuberSegmentedControl<T> extends StatelessWidget {
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
 
+    // The outline is a foreground decoration so the selected segment's fill
+    // sits inside it instead of painting over the stadium edge.
     return Container(
-      height: height,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+      height: height < 48 ? height : 40,
+      decoration: const BoxDecoration(borderRadius: KuberShape.fullR),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: KuberShape.fullR,
         border: Border.all(color: cs.outline),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Row(
+        mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
         children: List.generate(values.length, (i) {
           final isSelected = values[i] == selected;
-          return Expanded(
-            child: GestureDetector(
+          final fg = isSelected
+              ? cs.onSecondaryContainer
+              : cs.onSurface.withValues(alpha: enabled ? 1.0 : 0.38);
+          final segment = GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: enabled ? () => onSelected(values[i]) : null,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? (enabled ? cs.primary : cs.surfaceContainerHighest)
+                      ? (enabled
+                          ? cs.secondaryContainer
+                          : cs.onSurface.withValues(alpha: 0.12))
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: i == 0
+                      ? null
+                      : Border(left: BorderSide(color: cs.outline)),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  labels[i],
-                  style: textTheme.labelLarge?.copyWith(
-                    color: isSelected
-                        ? (enabled ? cs.onPrimary : cs.onSurface)
-                        : cs.onSurfaceVariant
-                            .withValues(alpha: enabled ? 1.0 : 0.5),
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
+                padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSelected && showCheck && values.length < 4) ...[
+                      Icon(Icons.check_rounded, size: 18, color: fg),
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(
+                        labels[i],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.labelLarge?.copyWith(color: fg),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          );
+            );
+          return compact ? segment : Expanded(child: segment);
         }),
       ),
     );

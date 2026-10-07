@@ -11,7 +11,9 @@ double navBarBottomPadding(BuildContext context) {
   final width = MediaQuery.of(context).size.width;
   if (width >= KuberBreakpoints.smallTablet) return 0;
   final safeBottom = MediaQuery.of(context).padding.bottom;
-  return safeBottom + 80; // safeBottom + 64px nav + 8px margin + 8px clearance
+  // Floating pill row sits max(22, inset) above the screen edge, 56 tall, plus
+  // 30 clearance: KuberSpace.navClearance (108) on a gesture-nav device.
+  return (safeBottom > 22 ? safeBottom : 22) + 86;
 }
 
 /// The OS navigation-bar inset (gesture pill / 3-button bar), read straight from

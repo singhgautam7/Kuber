@@ -8,6 +8,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,8 +19,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/recurring_rule.dart';
@@ -63,8 +63,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   bool get _canSave =>
       _nameController.text.trim().isNotEmpty &&
       _amountController.text.trim().isNotEmpty &&
-      double.tryParse(
-              _amountController.text.trim().replaceAll(',', '')) !=
+      double.tryParse(_amountController.text.trim().replaceAll(',', '')) !=
           null &&
       _selectedCategoryId != null &&
       _selectedAccountId != null;
@@ -133,177 +132,186 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _isEdit ? context.l10n.editRecurring : context.l10n.newRecurring,
-          style: localeFont(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
-          ),
-        ),
+      appBar: KuberAppBar(
+        showBack: true,
+        closeIcon: true,
+        onBack: () => context.pop(),
+        title: _isEdit ? context.l10n.editRecurring : context.l10n.newRecurring,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── TRANSACTION ──────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.transactionLabel,
-              topGap: 0,
-              children: [
-                KuberSegmented<String>(
-                  groupValue: _type,
-                  onChanged: (v) => setState(() {
-                    _type = v;
-                    // PRESERVED: nulling category when type flips
-                    _selectedCategoryId = null;
-                  }),
-                  segments: [
-                    KuberSegment(
-                      value: 'expense',
-                      label: context.l10n.expenseLabel,
-                      icon: Icons.arrow_outward_rounded,
-                      tone: SegmentTone.expense,
-                    ),
-                    KuberSegment(
-                      value: 'income',
-                      label: context.l10n.incomeLabel,
-                      icon: Icons.south_west_rounded,
-                      tone: SegmentTone.income,
-                    ),
-                  ],
-                ),
-                KuberHeroAmountInput(
-                  label: context.l10n.amountTitle,
-                  currencySymbol: symbol,
-                  controller: _amountController,
-                  tone: _type == 'income'
-                      ? HeroAmountTone.income
-                      : HeroAmountTone.expense,
-                  onChanged: (_) => setState(() {}),
-                ),
-                TextField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  onChanged: (_) => setState(() {}),
-                  style: localeFont(color: cs.onSurface, fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.recurringNameHint,
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── TRANSACTION ──────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.transactionLabel,
+                topGap: 0,
+                children: [
+                  KuberSegmented<String>(
+                    groupValue: _type,
+                    onChanged: (v) => setState(() {
+                      _type = v;
+                      // PRESERVED: nulling category when type flips
+                      _selectedCategoryId = null;
+                    }),
+                    segments: [
+                      KuberSegment(
+                        value: 'expense',
+                        label: context.l10n.expenseLabel,
+                        icon: Icons.arrow_outward_rounded,
+                        tone: SegmentTone.expense,
+                      ),
+                      KuberSegment(
+                        value: 'income',
+                        label: context.l10n.incomeLabel,
+                        icon: Icons.south_west_rounded,
+                        tone: SegmentTone.income,
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
+                  KuberHeroAmountInput(
+                    label: context.l10n.amountTitle,
+                    currencySymbol: symbol,
+                    controller: _amountController,
+                    tone: _type == 'income'
+                        ? HeroAmountTone.income
+                        : HeroAmountTone.expense,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    onChanged: (_) => setState(() {}),
+                    style: localeFont(color: cs.onSurface, fontSize: 16),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.recurringNameHint,
+                    ),
+                  ),
+                ],
+              ),
 
-            // ── WHERE ────────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.whereLabel,
-              children: [
-                _categoryRow(context, ref),
-                _accountRow(context, ref),
-              ],
-            ),
+              // ── WHERE ────────────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.whereLabel,
+                children: [
+                  _categoryRow(context, ref),
+                  _accountRow(context, ref),
+                ],
+              ),
 
-            // ── SCHEDULE (tinted) ────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.schedule,
-              sublabel: context.l10n.scheduleSublabel,
-              tinted: true,
-              children: [
-                KuberFieldLabel(context.l10n.frequencyLabel),
-                KuberChipGrid<String>(
-                  columns: 3,
-                  selected: _frequency,
-                  onChanged: (v) => setState(() => _frequency = v),
-                  options: [
-                    for (final (val, _) in _frequencies)
-                      KuberChipOption(value: val, label: _freqTitle(context, val)),
-                  ],
-                ),
-                // PRESERVED — Every-X-days only when frequency == 'custom'
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOutCubic,
-                  child: _frequency != 'custom'
-                      ? const SizedBox.shrink()
-                      : Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Row(
-                            children: [
-                              Text(context.l10n.everyLabel,
-                                  style: localeFont(
-                                      color: cs.onSurfaceVariant)),
-                              const SizedBox(width: 10),
-                              SizedBox(
-                                width: 80,
-                                child: TextField(
-                                  controller: _customDaysController,
-                                  keyboardType: TextInputType.number,
-                                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                  ],
-                                  textAlign: TextAlign.center,
-                                  style: localeFont(
-                                    color: cs.onSurface,
-                                    fontWeight: FontWeight.w600,
+              // ── SCHEDULE (tinted) ────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.schedule,
+                sublabel: context.l10n.scheduleSublabel,
+                tinted: true,
+                children: [
+                  KuberFieldLabel(context.l10n.frequencyLabel),
+                  KuberChipGrid<String>(
+                    columns: 3,
+                    selected: _frequency,
+                    onChanged: (v) => setState(() => _frequency = v),
+                    options: [
+                      for (final (val, _) in _frequencies)
+                        KuberChipOption(
+                          value: val,
+                          label: _freqTitle(context, val),
+                        ),
+                    ],
+                  ),
+                  // PRESERVED — Every-X-days only when frequency == 'custom'
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    child: _frequency != 'custom'
+                        ? const SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              children: [
+                                Text(
+                                  context.l10n.everyLabel,
+                                  style: localeFont(color: cs.onSurfaceVariant),
+                                ),
+                                const SizedBox(width: 10),
+                                SizedBox(
+                                  width: 80,
+                                  child: TextField(
+                                    controller: _customDaysController,
+                                    keyboardType: TextInputType.number,
+                                    onTapOutside: (_) => FocusManager
+                                        .instance
+                                        .primaryFocus
+                                        ?.unfocus(),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    textAlign: TextAlign.center,
+                                    style: localeFont(
+                                      color: cs.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(context.l10n.daysLabel,
-                                  style: localeFont(
-                                      color: cs.onSurfaceVariant)),
-                            ],
+                                const SizedBox(width: 10),
+                                Text(
+                                  context.l10n.daysLabel,
+                                  style: localeFont(color: cs.onSurfaceVariant),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                ),
-                KuberFieldLabel(context.l10n.startsOn),
-                _dateRow(
-                  label: context.l10n.startDate,
-                  date: _startDate,
-                  onTap: _pickStartDate,
-                ),
-                KuberFieldLabel(context.l10n.endsLabel),
-                KuberSegmented<String>(
-                  groupValue: _endType,
-                  onChanged: (v) => setState(() => _endType = v),
-                  segments: [
-                    KuberSegment(value: 'never', label: context.l10n.neverLabel),
-                    KuberSegment(value: 'occurrences', label: context.l10n.afterN),
-                    KuberSegment(value: 'date', label: context.l10n.onDate),
-                  ],
-                ),
-                // PRESERVED — conditional end-type fields
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOutCubic,
-                  child: switch (_endType) {
-                    'occurrences' => Padding(
+                  ),
+                  KuberFieldLabel(context.l10n.startsOn),
+                  _dateRow(
+                    label: context.l10n.startDate,
+                    date: _startDate,
+                    onTap: _pickStartDate,
+                  ),
+                  KuberFieldLabel(context.l10n.endsLabel),
+                  KuberSegmented<String>(
+                    groupValue: _endType,
+                    onChanged: (v) => setState(() => _endType = v),
+                    segments: [
+                      KuberSegment(
+                        value: 'never',
+                        label: context.l10n.neverLabel,
+                      ),
+                      KuberSegment(
+                        value: 'occurrences',
+                        label: context.l10n.afterN,
+                      ),
+                      KuberSegment(value: 'date', label: context.l10n.onDate),
+                    ],
+                  ),
+                  // PRESERVED — conditional end-type fields
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    child: switch (_endType) {
+                      'occurrences' => Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: Row(
                           children: [
-                            Text(context.l10n.afterLabel,
-                                style: localeFont(
-                                    color: cs.onSurfaceVariant)),
+                            Text(
+                              context.l10n.afterLabel,
+                              style: localeFont(color: cs.onSurfaceVariant),
+                            ),
                             const SizedBox(width: 10),
                             SizedBox(
                               width: 80,
                               child: TextField(
                                 controller: _endAfterController,
                                 keyboardType: TextInputType.number,
-                                onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                                onTapOutside: (_) => FocusManager
+                                    .instance
+                                    .primaryFocus
+                                    ?.unfocus(),
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
@@ -315,13 +323,14 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            Text(context.l10n.occurrencesLabel,
-                                style: localeFont(
-                                    color: cs.onSurfaceVariant)),
+                            Text(
+                              context.l10n.occurrencesLabel,
+                              style: localeFont(color: cs.onSurfaceVariant),
+                            ),
                           ],
                         ),
                       ),
-                    'date' => Padding(
+                      'date' => Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: _dateRow(
                           label: context.l10n.endDate,
@@ -329,40 +338,40 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                           onTap: _pickEndDate,
                         ),
                       ),
-                    _ => const SizedBox.shrink(),
-                  },
-                ),
-                const SizedBox(height: 4),
-                _NextOccurrencePreview(
-                  startDate: _startDate,
-                  frequency: _frequency,
-                  endType: _endType,
-                ),
-              ],
-            ),
-
-            // ── NOTES ────────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.notesLabel,
-              children: [
-                TextField(
-                  controller: _notesController,
-                  maxLines: 3,
-                  minLines: 1,
-                  textCapitalization: TextCapitalization.sentences,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  style:
-                      localeFont(color: cs.onSurface, fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.recurringNotesHint,
+                      _ => const SizedBox.shrink(),
+                    },
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 4),
+                  _NextOccurrencePreview(
+                    startDate: _startDate,
+                    frequency: _frequency,
+                    endType: _endType,
+                  ),
+                ],
+              ),
+
+              // ── NOTES ────────────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.notesLabel,
+                children: [
+                  TextField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    minLines: 1,
+                    textCapitalization: TextCapitalization.sentences,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    style: localeFont(color: cs.onSurface, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.recurringNotesHint,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEdit ? context.l10n.saveChanges : context.l10n.saveRecurring,
         onPressed: _canSave ? _save : null,
@@ -428,11 +437,14 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       leading: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        child: Icon(Icons.calendar_today_rounded,
-            size: 16, color: cs.onSurface),
+        child: Icon(
+          Icons.calendar_today_rounded,
+          size: 16,
+          color: cs.onSurface,
+        ),
       ),
       label: label,
       value: DateFormat('d MMM yyyy').format(date),
@@ -502,8 +514,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     final rule = widget.existingRule ?? RecurringRule();
     rule
       ..name = _nameController.text.trim()
-      ..amount = double.parse(
-          _amountController.text.trim().replaceAll(',', ''))
+      ..amount = double.parse(_amountController.text.trim().replaceAll(',', ''))
       ..type = _type
       ..categoryId = _selectedCategoryId.toString()
       ..accountId = _selectedAccountId.toString()
@@ -575,7 +586,7 @@ class _NextOccurrencePreview extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(
           color: cs.primary.withValues(alpha: 0.40),
           style: BorderStyle.solid,
@@ -591,23 +602,19 @@ class _NextOccurrencePreview extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: '${l.nextOccurrenceLabel} ',
-                    style: localeFont(
-                        fontSize: 12, color: cs.onSurface),
+                    style: localeFont(fontSize: 12, color: cs.onSurface),
                   ),
                   TextSpan(
                     text: next,
                     style: localeFont(
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: cs.primary,
                     ),
                   ),
                   TextSpan(
                     text: ' · $cadence',
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurface,
-                    ),
+                    style: localeFont(fontSize: 12, color: cs.onSurface),
                   ),
                 ],
               ),

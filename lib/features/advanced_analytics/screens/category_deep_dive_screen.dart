@@ -3,20 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../transactions/widgets/category_picker_sheet.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/paywall/pro_state.dart';
 import '../engine/analytics_engine_adapter.dart';
 import '../providers/advanced_analytics_provider.dart';
 import '../widgets/aa_bar_chart.dart';
 import '../widgets/analytics_common.dart';
+import '../widgets/trends_over_time_section.dart' show AaCategorySelector;
 
 class CategoryDeepDiveScreen extends ConsumerStatefulWidget {
   const CategoryDeepDiveScreen({super.key});
@@ -42,8 +41,10 @@ class _CategoryDeepDiveScreenState
     }
     if (!hasAccess) {
       return const Scaffold(
-        appBar: KuberAppBar(showBack: true, showHome: true, showBrand: false),
-        body: SizedBox.shrink(),
+        body: KuberScrollAwayHeader(
+          header: KuberAppBar(title: 'Category deep-dive', showBack: true),
+          body: SizedBox.shrink(),
+        ),
       );
     }
 
@@ -52,83 +53,75 @@ class _CategoryDeepDiveScreenState
     final async = ref.watch(categoryDeepDiveProvider);
 
     return Scaffold(
-      appBar: const KuberAppBar(
-        showBack: true,
-        showHome: true,
-        showBrand: false,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.xxl),
-        children: [
-          const KuberPageHeader(
-            title: 'Category deep-dive',
-            description:
-                'Inspect a category across time, merchants, and weekday habits',
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Category (60%) + date filter (40%) share a row of equal
-                // height, per the design.
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        flex: 6,
-                        child: _CategorySelector(
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(title: 'Category deep-dive', showBack: true),
+        body: ListView(
+          padding: const EdgeInsets.only(bottom: KuberSpace.xxl),
+          children: [
+            const SizedBox.shrink(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Board "Category deep-dive": category chip + date chip.
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      spacing: KuberSpace.sm,
+                      children: [
+                        AaCategorySelector(
                           categories: categories,
                           selectedId: selected,
-                          onSelected: (id) => ref
-                              .read(selectedDeepDiveCategoryProvider.notifier)
-                              .state = id,
+                          onSelected: (id) =>
+                              ref
+                                      .read(
+                                        selectedDeepDiveCategoryProvider
+                                            .notifier,
+                                      )
+                                      .state =
+                                  id,
                         ),
-                      ),
-                      const SizedBox(width: KuberSpacing.sm),
-                      const Expanded(
-                        flex: 4,
-                        child: SectionDateRangePicker(
+                        const SectionDateRangePicker(
                           section: AdvancedAnalyticsSection.category,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: KuberSpacing.lg),
-                async.when(
-            loading: () => const AnalyticsSkeletonBlock(),
-            error: (error, _) => KuberEmptyState(
-              icon: Icons.error_outline_rounded,
-              title: 'Could not load category',
-              description: '$error',
+                  const SizedBox(height: KuberSpace.lg),
+                  async.when(
+                    loading: () => const AnalyticsSkeletonBlock(),
+                    error: (error, _) => KuberEmptyState(
+                      icon: Icons.error_outline_rounded,
+                      title: 'Could not load category',
+                      description: '$error',
+                    ),
+                    data: (data) {
+                      if (data.categoryId == null) {
+                        return const KuberEmptyState(
+                          icon: Icons.category_outlined,
+                          title: 'Select a category to analyze',
+                          description:
+                              'Pick a category above to see its spend over time, top '
+                              'merchants, and weekday habits.',
+                        );
+                      }
+                      if (data.totalSpent <= 0) {
+                        return const KuberEmptyState(
+                          icon: Icons.category_outlined,
+                          title: 'Not enough data',
+                          description:
+                              'This category has no expenses in the selected range.',
+                        );
+                      }
+                      return _Results(data: data, categories: categories);
+                    },
+                  ),
+                ],
+              ),
             ),
-            data: (data) {
-              if (data.categoryId == null) {
-                return const KuberEmptyState(
-                  icon: Icons.category_outlined,
-                  title: 'Select a category to analyze',
-                  description:
-                      'Pick a category above to see its spend over time, top '
-                      'merchants, and weekday habits.',
-                );
-              }
-              if (data.totalSpent <= 0) {
-                return const KuberEmptyState(
-                  icon: Icons.category_outlined,
-                  title: 'Not enough data',
-                  description:
-                      'This category has no expenses in the selected range.',
-                );
-              }
-              return _Results(data: data, categories: categories);
-            },
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -143,33 +136,23 @@ class _Results extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final merchants = data.topMerchants.take(5).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: StatPill(
-                label: 'Total spent',
-                value: aaMoney(data.totalSpent),
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Expanded(
-              child: StatPill(
-                label: 'Monthly avg',
-                value: aaMoney(data.monthlyAverage),
-                color: cs.onSurface,
-              ),
-            ),
-          ],
+        KuberCard(
+          child: Row(
+            children: [
+              _figure(context, 'Total spent', aaMoney(data.totalSpent)),
+              _figure(context, 'Monthly avg', aaMoney(data.monthlyAverage)),
+            ],
+          ),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.sectionGap - 4),
         const _Label('SPEND OVER TIME'),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sectionHeaderGap),
         AaBarChart(
           height: 170,
           currentLabel: 'Spent',
@@ -181,41 +164,31 @@ class _Results extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.sectionGap - 4),
         const _Label('TOP 5 MERCHANTS AND THEIR TOTALS'),
-        const SizedBox(height: KuberSpacing.sm),
-        for (var i = 0; i < merchants.length; i++)
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
-            decoration: BoxDecoration(
-              border: i == merchants.length - 1
-                  ? null
-                  : Border(bottom: BorderSide(color: cs.outline)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
+        const SizedBox(height: KuberSpace.sm),
+        KuberGroup(
+          children: [
+            for (var i = 0; i < merchants.length; i++)
+              KuberListRow(
+                leading: SizedBox(
+                  width: 28,
                   child: Text(
-                    merchants[i].name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(fontSize: 13.5, color: cs.onSurface),
+                    '#${i + 1}',
+                    style: tt.labelLarge!.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
-                Text(
+                title: merchants[i].name,
+                trailing: Text(
                   aaMoney(merchants[i].total),
-                  style: localeFont(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                  ),
+                  style: tt.titleSmall!.copyWith(color: cs.onSurface),
                 ),
-              ],
-            ),
-          ),
-        const SizedBox(height: KuberSpacing.lg),
+              ),
+          ],
+        ),
+        const SizedBox(height: KuberSpace.sectionGap - 4),
         const _Label('WEEKDAY DISTRIBUTION'),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sectionHeaderGap),
         AaBarChart(
           height: 130,
           currentLabel: 'Spent',
@@ -236,21 +209,27 @@ class _Results extends StatelessWidget {
   }
 }
 
+Widget _figure(BuildContext context, String label, String value) {
+  final cs = Theme.of(context).colorScheme;
+  final tt = Theme.of(context).textTheme;
+  return Expanded(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+        Text(value, style: tt.titleMedium!.copyWith(color: cs.onSurface)),
+      ],
+    ),
+  );
+}
+
 class _Label extends StatelessWidget {
   final String text;
   const _Label(this.text);
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: localeFont(
-        fontSize: 10,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 1.4,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
-    );
+    return Text(text, style: sectionHeaderStyle(context));
   }
 }
 
@@ -290,138 +269,30 @@ class _CoOccurrence extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: const EdgeInsets.only(top: KuberSpacing.md),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Text.rich(
-          TextSpan(
-            style: localeFont(
-              fontSize: 12.5,
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-            children: [
-              const TextSpan(text: 'You often also spend on '),
-              TextSpan(
-                text: relatedName,
-                style: localeFont(
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                ),
-              ),
-              const TextSpan(text: ' when you spend on '),
-              TextSpan(
-                text: thisName,
-                style: localeFont(
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                ),
-              ),
-              const TextSpan(text: '.'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Category chooser that opens the same [CategoryPickerSheet] as Add
-/// Transaction (search, grouped grid, icons and colors).
-class _CategorySelector extends StatelessWidget {
-  final List<Category> categories;
-  final String? selectedId;
-  final ValueChanged<String> onSelected;
-
-  const _CategorySelector({
-    required this.categories,
-    required this.selectedId,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final selectedIntId = int.tryParse(selectedId ?? '');
-    final matches = categories.where((c) => c.id == selectedIntId);
-    final selectedCat = matches.isEmpty ? null : matches.first;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: () {
-        showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          backgroundColor: cs.surfaceContainer,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(KuberRadius.lg),
-            ),
-          ),
-          builder: (_) => CategoryPickerSheet(
-            selectedCategoryId: selectedIntId,
-            onSelected: (id) {
-              onSelected(id.toString());
-              Navigator.pop(context);
-            },
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
+      padding: const EdgeInsets.only(top: KuberSpace.md),
+      child: Text.rich(
+        TextSpan(
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
           children: [
-            if (selectedCat != null) ...[
-              Container(
-                width: 28,
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Color(selectedCat.colorValue).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
-                ),
-                child: Icon(
-                  IconMapper.fromString(selectedCat.icon),
-                  size: 16,
-                  color: Color(selectedCat.colorValue),
-                ),
+            const TextSpan(text: 'You often also spend on '),
+            TextSpan(
+              text: relatedName,
+              style: localeFont(
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
               ),
-              const SizedBox(width: KuberSpacing.sm),
-              Expanded(
-                child: Text(
-                  selectedCat.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
+            ),
+            const TextSpan(text: ' when you spend on '),
+            TextSpan(
+              text: thisName,
+              style: localeFont(
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
               ),
-            ] else
-              Expanded(
-                child: Text(
-                  'Select a category',
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            Icon(Icons.expand_more_rounded, color: cs.onSurfaceVariant),
+            ),
+            const TextSpan(text: '.'),
           ],
         ),
       ),

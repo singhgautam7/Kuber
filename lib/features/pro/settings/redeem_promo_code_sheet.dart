@@ -57,7 +57,9 @@ void showRedeemPromoCodeSheet(BuildContext context, [WidgetRef? ref]) {
                   duration: const Duration(seconds: 3),
                 );
                 try {
-                  await ref.read(purchaseServiceProvider).restorePurchases(
+                  await ref
+                      .read(purchaseServiceProvider)
+                      .restorePurchases(
                         source: 'redeem_sheet_return',
                         force: true,
                       );
@@ -76,12 +78,12 @@ void showRedeemPromoCodeSheet(BuildContext context, [WidgetRef? ref]) {
             },
             style: FilledButton.styleFrom(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
             ),
             child: Text(
               'Redeem',
-              style: localeFont(fontSize: 14, fontWeight: FontWeight.w700),
+              style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -93,30 +95,30 @@ void showRedeemPromoCodeSheet(BuildContext context, [WidgetRef? ref]) {
               'Enter your code and continue. Google Play handles '
               'redemption, Kuber just opens the right page.',
               style: localeFont(
-                fontSize: 13.5,
+                fontSize: 14,
                 color: cs.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             TextField(
               controller: controller,
               textCapitalization: TextCapitalization.characters,
-              style: localeFont(fontSize: 15, color: cs.onSurface),
+              style: localeFont(fontSize: 16, color: cs.onSurface),
               decoration: InputDecoration(
                 hintText: 'Promo code',
                 filled: true,
                 fillColor: cs.surface,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
                   borderSide: BorderSide(color: cs.primary, width: 1.5),
                 ),
               ),

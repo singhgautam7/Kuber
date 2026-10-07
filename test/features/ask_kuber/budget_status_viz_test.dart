@@ -12,7 +12,7 @@ void main() {
 
   final theme = AppTheme.dark(const Locale('en'));
   final cs = theme.colorScheme;
-  final warning = theme.extension<KuberSemanticColors>()!.warning;
+  final warning = theme.extension<KuberMoneyColors>()!.warning;
 
   Future<void> pumpViz(WidgetTester tester, BudgetStatusViz data) async {
     await tester.pumpWidget(ProviderScope(

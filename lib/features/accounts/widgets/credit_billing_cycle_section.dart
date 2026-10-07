@@ -43,7 +43,8 @@ class CreditBillingCycleSection extends StatelessWidget {
 
     // Collapsed summary: set days, or "Optional" when nothing is set yet.
     final parts = <String>[
-      if (billDay != null) '${l10n.billGenerationLabel} ${ordinalDay(billDay!)}',
+      if (billDay != null)
+        '${l10n.billGenerationLabel} ${ordinalDay(billDay!)}',
       if (dueDay != null) '${l10n.paymentDueLabel} ${ordinalDay(dueDay!)}',
     ];
     final summary = parts.isEmpty ? l10n.optionalLabel : parts.join('  ·  ');
@@ -53,8 +54,8 @@ class CreditBillingCycleSection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Theme(
@@ -65,13 +66,12 @@ class CreditBillingCycleSection extends StatelessWidget {
           initiallyExpanded: billDay != null || dueDay != null,
           shape: const Border(),
           collapsedShape: const Border(),
-          tilePadding:
-              const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
+          tilePadding: const EdgeInsets.symmetric(horizontal: KuberSpace.md),
           childrenPadding: const EdgeInsets.fromLTRB(
-            KuberSpacing.md,
+            KuberSpace.md,
             0,
-            KuberSpacing.md,
-            KuberSpacing.md,
+            KuberSpace.md,
+            KuberSpace.md,
           ),
           iconColor: cs.onSurfaceVariant,
           collapsedIconColor: cs.onSurfaceVariant,
@@ -127,7 +127,7 @@ class CreditBillingCycleSection extends StatelessWidget {
                     ordinalDay(dueDay!),
                   ),
                   style: localeFont(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     color: cs.onSurface,
                     height: 1.4,
                   ),

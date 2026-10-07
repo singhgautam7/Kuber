@@ -215,11 +215,9 @@ void main() {
         await buildContainer(tester, defaultAccountId: account.id.toString());
     await pumpScreen(tester, container, account);
 
-    // Delete now lives in the scrollable "Danger Zone" at the end of the form.
-    await tester.ensureVisible(find.text('Delete Account'));
-    await tester.pump();
+    // Delete is the red disc in the header (board 3.15).
     await tester.runAsync(() async {
-      await tester.tap(find.text('Delete Account'));
+      await tester.tap(find.byTooltip('Delete Account'));
       await Future.delayed(const Duration(milliseconds: 200));
     });
     await settle(tester);

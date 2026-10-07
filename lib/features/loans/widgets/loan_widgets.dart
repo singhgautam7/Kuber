@@ -20,6 +20,10 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -69,291 +73,87 @@ class LoansHero extends ConsumerWidget {
         ? 'in $daysToNext days'
         : DateFormat('MMM d').format(nextDue!);
 
-    final monthLabel = DateFormat(
-      'MMM yyyy',
-    ).format(DateTime.now()).toUpperCase();
-
-    // Loans hero accent flips to error when there's outstanding debt.
-    final heroAccent = totalOutstanding > 0 ? cs.error : cs.primary;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Color.alphaBlend(
-              heroAccent.withValues(alpha: 0.16),
-              cs.surfaceContainer,
-            ),
-            cs.surfaceContainer,
-          ],
-          stops: const [0.0, 0.75],
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
+    final tt = Theme.of(context).textTheme;
+    Widget legend(Color dot, String label, String value) => Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(width: 8),
+          Text(value, style: tt.titleSmall!.copyWith(color: cs.onSurface)),
+        ],
+      ),
+    );
+
+    // Board 3.21: total outstanding, a flat paid bar, Paid / Outstanding
+    // legend and the next EMI line.
+    return KuberCard(
+      hero: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.totalOutstandingDebt,
+            style: tt.labelMedium!.copyWith(
+              letterSpacing: 0.8,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            maskAmount(fmt.formatCurrency(totalOutstanding), masked),
+            style: tt.headlineMedium!.copyWith(color: cs.onSurface),
+          ),
+          const SizedBox(height: KuberSpace.lg),
+          KuberLinearProgress(value: paidPct, flat: true, height: 8),
+          const SizedBox(height: KuberSpace.sm),
+          legend(
+            cs.primary,
+            context.l10n.paidLabel,
+            maskAmount(fmt.formatCurrency(totalPaid), masked),
+          ),
+          legend(
+            cs.surfaceContainerHighest,
+            context.l10n.outstandingTitle,
+            maskAmount(fmt.formatCurrency(totalOutstanding), masked),
+          ),
+          if (nextDueLabel != null) ...[
+            const SizedBox(height: KuberSpace.md),
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.l10n.totalOutstandingDebt,
-                        style: localeFont(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 1.4,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        border: Border.all(color: cs.outline),
-                        borderRadius: BorderRadius.circular(KuberRadius.sm),
-                      ),
-                      child: Text(
-                        monthLabel,
-                        style: monoFont(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                  ],
+                Icon(
+                  Icons.event_rounded,
+                  size: 16,
+                  color: daysToNext! <= 1
+                      ? context.kuberMoney.warning
+                      : cs.onSurfaceVariant,
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        maskAmount(
-                          fmt.formatCurrency(totalOutstanding),
-                          masked,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: localeFont(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          letterSpacing: -0.8,
-                          height: 1.1,
-                        ),
-                      ),
-                    ),
-                    if (totalPrincipal > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4, left: 8),
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
-                          decoration: BoxDecoration(
-                            color: cs.tertiary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(
-                              KuberRadius.full,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.trending_down_rounded,
-                                size: 14,
-                                color: cs.tertiary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${(paidPct * 100).toStringAsFixed(0)}% paid',
-                                style: localeFont(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: cs.tertiary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text.rich(
-                  TextSpan(
-                    style: localeFont(
-                      fontSize: 11.5,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: activeCount == 0
-                            ? 'no active loans'
-                            : '$activeCount active loan${activeCount == 1 ? '' : 's'}',
-                        style: localeFont(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      if (activeCount > 0 && nextDueLabel != null)
-                        TextSpan(text: ' · next EMI $nextDueLabel'),
-                    ],
+                const SizedBox(width: 6),
+                Text(
+                  '${sentenceCase(context.l10n.nextDue)} $nextDueLabel',
+                  style: tt.bodySmall!.copyWith(
+                    color: daysToNext <= 1
+                        ? context.kuberMoney.warning
+                        : cs.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cs.surface,
-                border: Border.all(color: cs.outline),
-                borderRadius: BorderRadius.circular(KuberRadius.lg),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: SizedBox(
-                      height: 8,
-                      child: Row(
-                        children: [
-                          if (paidPct > 0)
-                            Expanded(
-                              flex: (paidPct * 1000).round().clamp(1, 1000),
-                              child: ColoredBox(color: cs.tertiary),
-                            ),
-                          Expanded(
-                            flex: ((1 - paidPct) * 1000).round().clamp(1, 1000),
-                            child: ColoredBox(color: cs.outlineVariant),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _LegendBlock(
-                          color: cs.tertiary,
-                          label: context.l10n.paidLabel,
-                          value: maskAmount(
-                            fmt.formatCurrency(totalPaid),
-                            masked,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: _LegendBlock(
-                          color: cs.outlineVariant,
-                          label: context.l10n.outstandingTitle,
-                          value: maskAmount(
-                            fmt.formatCurrency(totalOutstanding),
-                            masked,
-                          ),
-                          alignEnd: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
   }
 }
-
-class _LegendBlock extends StatelessWidget {
-  final Color color;
-  final String label;
-  final String value;
-  final bool alignEnd;
-  const _LegendBlock({
-    required this.color,
-    required this.label,
-    required this.value,
-    this.alignEnd = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: alignEnd
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: alignEnd
-              ? MainAxisAlignment.end
-              : MainAxisAlignment.start,
-          children: [
-            if (!alignEnd) ...[_Dot(color: color), const SizedBox(width: 6)],
-            Text(
-              label.toUpperCase(),
-              style: localeFont(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 0.6,
-              ),
-            ),
-            if (alignEnd) ...[const SizedBox(width: 6), _Dot(color: color)],
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: localeFont(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurface,
-            letterSpacing: -0.2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Dot extends StatelessWidget {
-  final Color color;
-  const _Dot({required this.color});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 7,
-    height: 7,
-    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Loan card
-// ---------------------------------------------------------------------------
 
 class LoanCard extends ConsumerWidget {
   final String name;
@@ -397,206 +197,151 @@ class LoanCard extends ConsumerWidget {
     final overdue = nextDue != null && daysToDue! < 0;
     final dueSoon = nextDue != null && daysToDue! >= 0 && daysToDue <= 3;
 
-    final dueColor = overdue
-        ? cs.error
-        : dueSoon
-        ? context.kuberColors.warning
-        : cs.onSurface;
+    // "tomorrow" / "overdue" use the warning colour (board 3.21).
+    final dueColor = context.kuberMoney.warning;
 
-    final progressColor = isCompleted ? cs.tertiary : iconColor;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            border: Border.all(color: cs.outline),
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-          ),
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.12),
-                      border: Border.all(
-                        color: iconColor.withValues(alpha: 0.30),
-                      ),
-                      borderRadius: BorderRadius.circular(KuberRadius.md + 2),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(icon, size: 22, color: iconColor),
+    final theme = Theme.of(context);
+    final tones = categoryTones(context, iconColor);
+    // Board 3.21 row: tile, name + lender, outstanding on the right, wavy
+    // progress with "29% paid", the three facts in a tonal strip.
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: tones.container,
+                    borderRadius: KuberShape.mediumR,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                name,
-                                overflow: TextOverflow.ellipsis,
-                                style: localeFont(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: cs.onSurface,
-                                  letterSpacing: -0.2,
-                                ),
+                  child: Icon(icon, size: 20, color: tones.fg),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium!.copyWith(
+                                color: cs.onSurface,
                               ),
                             ),
-                            if (isCompleted) ...[
-                              const SizedBox(width: 8),
-                              const _CompletePill(),
-                            ],
+                          ),
+                          if (isCompleted) ...[
+                            const SizedBox(width: 8),
+                            KuberPill(
+                              label: sentenceCase(context.l10n.completedUpper),
+                              tone: KuberTone.income,
+                            ),
                           ],
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          lenderLabel,
-                          overflow: TextOverflow.ellipsis,
-                          style: localeFont(
-                            fontSize: 11,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        isCompleted ? context.l10n.paidUpper : context.l10n.outstandingLabel,
-                        style: localeFont(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        maskAmount(
-                          fmt.formatCurrency(
-                            isCompleted ? principal : outstanding,
-                          ),
-                          masked,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: localeFont(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: SizedBox(
-                  height: 6,
-                  child: Stack(
-                    children: [
-                      Container(color: cs.surfaceContainerHigh),
-                      FractionallySizedBox(
-                        widthFactor: progress.clamp(0.0, 1.0),
-                        child: Container(color: progressColor),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        style: localeFont(
-                          fontSize: 11,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '${(progress * 100).toStringAsFixed(0)}%',
-                            style: localeFont(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          const TextSpan(text: ' paid · '),
-                          TextSpan(
-                            text: maskAmount(fmt.formatCurrency(paid), masked),
-                          ),
-                          const TextSpan(text: ' of '),
-                          TextSpan(
-                            text: maskAmount(
-                              fmt.formatCurrency(principal),
-                              masked,
-                            ),
-                          ),
                         ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              if (!isCompleted) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.only(top: 12),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _StripItem(
-                          label: context.l10n.monthlyEmi,
-                          value: maskAmount(fmt.formatCurrency(emi), masked),
-                        ),
-                      ),
-                      if (interestRate != null)
-                        Expanded(
-                          child: _StripItem(
-                            label: context.l10n.interestLabel,
-                            value: '${interestRate!.toStringAsFixed(2)}%',
-                          ),
-                        ),
-                      Expanded(
-                        child: _StripItem(
-                          label: context.l10n.nextDue,
-                          value: nextDue == null
-                              ? '—'
-                              : DateFormat('MMM d').format(nextDue!),
-                          valueColor: dueColor,
+                      Text(
+                        lenderLabel,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      maskAmount(
+                        fmt.formatCurrency(
+                          isCompleted ? principal : outstanding,
+                        ),
+                        masked,
+                      ),
+                      style: theme.textTheme.titleMedium!.copyWith(
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    Text(
+                      (isCompleted
+                              ? context.l10n.paidUpper
+                              : context.l10n.outstandingLabel)
+                          .toUpperCase(),
+                      style: theme.textTheme.labelSmall!.copyWith(
+                        letterSpacing: 0.6,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ],
+            ),
+            const SizedBox(height: KuberSpace.md),
+            KuberLinearProgress(
+              value: progress.clamp(0.0, 1.0),
+              color: isCompleted ? context.kuberMoney.income : null,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${(progress * 100).toStringAsFixed(0)}% paid',
+              style: theme.textTheme.labelSmall!.copyWith(
+                letterSpacing: 0.4,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            if (!isCompleted) ...[
+              const SizedBox(height: KuberSpace.md),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: KuberShape.mediumR,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _StripItem(
+                        label: context.l10n.monthlyEmi,
+                        value: maskAmount(fmt.formatCurrency(emi), masked),
+                      ),
+                    ),
+                    if (interestRate != null)
+                      Expanded(
+                        child: _StripItem(
+                          label: context.l10n.interestLabel,
+                          value: '${interestRate!.toStringAsFixed(1)}%',
+                        ),
+                      ),
+                    Expanded(
+                      child: _StripItem(
+                        label: context.l10n.nextDue,
+                        value: nextDue == null
+                            ? '-'
+                            : dueSoon && daysToDue <= 1
+                            ? (daysToDue == 0
+                                  ? context.l10n.todayLower
+                                  : context.l10n.tomorrowLower)
+                            : DateFormat('MMM d').format(nextDue!),
+                        valueColor: overdue || dueSoon ? dueColor : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -616,60 +361,23 @@ class _StripItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
+          sentenceCase(label),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: localeFont(
-            fontSize: 9.5,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.6,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: localeFont(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: valueColor ?? cs.onSurface,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(color: valueColor ?? cs.onSurface),
         ),
       ],
-    );
-  }
-}
-
-class _CompletePill extends StatelessWidget {
-  const _CompletePill();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-      decoration: BoxDecoration(
-        color: cs.tertiary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.check_rounded, size: 11, color: cs.tertiary),
-          const SizedBox(width: 3),
-          Text(
-            context.l10n.completedUpper,
-            style: localeFont(
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              color: cs.tertiary,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -689,53 +397,16 @@ class LoansCompletedToggle extends StatelessWidget {
     required this.onToggle,
   });
 
+  /// Board 3.21: a filter chip "Completed · n" that shows / hides the
+  /// completed loans.
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
+    return KuberChip(
+      label: '${sentenceCase(context.l10n.completedUpper)} · $count',
+      icon: Icons.check_circle_outline_rounded,
+      selected: expanded,
+      showCheck: false,
       onTap: onToggle,
-      borderRadius: BorderRadius.circular(KuberRadius.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            Text(
-              context.l10n.completedUpper,
-              style: localeFont(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: cs.tertiary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
-              ),
-              child: Text(
-                '$count',
-                style: localeFont(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: cs.tertiary,
-                  letterSpacing: 0.4,
-                ),
-              ),
-            ),
-            const Spacer(),
-            Icon(
-              expanded
-                  ? Icons.keyboard_arrow_up_rounded
-                  : Icons.keyboard_arrow_down_rounded,
-              size: 18,
-              color: cs.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

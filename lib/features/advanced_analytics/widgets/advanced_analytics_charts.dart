@@ -4,8 +4,11 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 
-final _chartInr =
-    NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
+final _chartInr = NumberFormat.currency(
+  locale: 'en_IN',
+  symbol: '₹',
+  decimalDigits: 0,
+);
 
 /// One x-position's tooltip content.
 class AaTapPoint {
@@ -67,35 +70,35 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
             if (_touched != -1) setState(() => _touched = -1);
           },
           child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          // Tap toggles; horizontal drag scrubs the selection across the chart
-          // (like the Home/Analytics line charts).
-          onTapDown: (d) {
-            if (n == 0) return;
-            final i = indexAt(d.localPosition.dx);
-            setState(() => _touched = _touched == i ? -1 : i);
-          },
-          onHorizontalDragStart: (d) => select(d.localPosition.dx),
-          onHorizontalDragUpdate: (d) => select(d.localPosition.dx),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // RepaintBoundary isolates the hand-drawn chart so it isn't
-              // repainted by the enclosing scrollable / tooltip rebuilds
-              // (performance.md §5).
-              RepaintBoundary(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: widget.height,
-                  child: CustomPaint(painter: widget.painter),
+            behavior: HitTestBehavior.opaque,
+            // Tap toggles; horizontal drag scrubs the selection across the chart
+            // (like the Home/Analytics line charts).
+            onTapDown: (d) {
+              if (n == 0) return;
+              final i = indexAt(d.localPosition.dx);
+              setState(() => _touched = _touched == i ? -1 : i);
+            },
+            onHorizontalDragStart: (d) => select(d.localPosition.dx),
+            onHorizontalDragUpdate: (d) => select(d.localPosition.dx),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // RepaintBoundary isolates the hand-drawn chart so it isn't
+                // repainted by the enclosing scrollable / tooltip rebuilds
+                // (performance.md §5).
+                RepaintBoundary(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: widget.height,
+                    child: CustomPaint(painter: widget.painter),
+                  ),
                 ),
-              ),
-              if (_touched >= 0 && _touched < n) ...[
-                _selectionLine(cs, w, n),
-                _tooltip(cs, w, n),
+                if (_touched >= 0 && _touched < n) ...[
+                  _selectionLine(cs, w, n),
+                  _tooltip(cs, w, n),
+                ],
               ],
-            ],
-          ),
+            ),
           ),
         );
       },
@@ -108,10 +111,7 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
       left: (x - 0.75).clamp(0.0, math.max(0.0, w - 1.5)).toDouble(),
       top: 0,
       bottom: 0,
-      child: Container(
-        width: 1.5,
-        color: cs.primary.withValues(alpha: 0.55),
-      ),
+      child: Container(width: 1.5, color: cs.primary.withValues(alpha: 0.55)),
     );
   }
 
@@ -127,20 +127,13 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
       width: _cardW,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md,
-          vertical: KuberSpacing.sm,
+          horizontal: KuberSpace.md,
+          vertical: KuberSpace.sm,
         ),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-          boxShadow: [
-            BoxShadow(
-              color: cs.shadow.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          borderRadius: KuberShape.largeR,
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -149,8 +142,8 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
             Text(
               p.title.toUpperCase(),
               style: localeFont(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.6,
                 color: cs.onSurfaceVariant,
               ),
@@ -161,14 +154,21 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(r.label,
-                        style: localeFont(
-                            fontSize: 11, color: cs.onSurfaceVariant)),
-                    Text(r.value,
-                        style: localeFont(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: r.color)),
+                    Text(
+                      r.label,
+                      style: localeFont(
+                        fontSize: 11,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      r.value,
+                      style: localeFont(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: r.color,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -196,7 +196,9 @@ class _FixedBar extends StatelessWidget {
     required this.width,
     required this.maxHeight,
     required this.color,
-    this.radius = const BorderRadius.vertical(top: Radius.circular(2)),
+    this.radius = const BorderRadius.vertical(
+      top: Radius.circular(KuberShape.extraSmall),
+    ),
   });
 
   @override
@@ -273,18 +275,18 @@ class TrendsDualBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final maxVal = [...currentValues, ...previousValues].fold<double>(
-      0.01,
-      (max, v) => v > max ? v : max,
-    );
+    final maxVal = [
+      ...currentValues,
+      ...previousValues,
+    ].fold<double>(0.01, (max, v) => v > max ? v : max);
     const chartH = 110.0;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +303,7 @@ class TrendsDualBarChart extends StatelessWidget {
                   factor: previousValues[i] / maxVal,
                   width: 12,
                   maxHeight: chartH,
-                  color: cs.outlineVariant.withValues(alpha: 0.5),
+                  color: cs.outline.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 4),
                 _FixedBar(
@@ -317,19 +319,25 @@ class TrendsDualBarChart extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: localeFont(fontSize: 10, color: cs.onSurfaceVariant),
+              style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              _LegendDot(color: cs.outlineVariant.withValues(alpha: 0.5)),
+              _LegendDot(color: cs.outline.withValues(alpha: 0.5)),
               const SizedBox(width: 5),
-              Text('Previous', style: localeFont(fontSize: 10.5, color: cs.onSurfaceVariant)),
+              Text(
+                'Previous',
+                style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+              ),
               const SizedBox(width: 14),
               _LegendDot(color: cs.primary),
               const SizedBox(width: 5),
-              Text('Current', style: localeFont(fontSize: 10.5, color: cs.onSurfaceVariant)),
+              Text(
+                'Current',
+                style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+              ),
             ],
           ),
         ],
@@ -347,7 +355,10 @@ class _LegendDot extends StatelessWidget {
     return Container(
       width: 8,
       height: 8,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(KuberShape.full),
+      ),
     );
   }
 }
@@ -369,18 +380,22 @@ class CategoryDeepDiveChart extends StatelessWidget {
     const chartH = 70.0;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Spend over time',
-            style: localeFont(fontSize: 11, fontWeight: FontWeight.bold, color: cs.onSurfaceVariant),
+            style: localeFont(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: cs.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 8),
           _ScrollableBarStrip(
@@ -398,7 +413,7 @@ class CategoryDeepDiveChart extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: localeFont(fontSize: 9, color: cs.onSurfaceVariant),
+              style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
             ),
           ),
         ],
@@ -430,11 +445,11 @@ class DayOfWeekChart extends StatelessWidget {
     const chartH = 50.0;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,7 +457,11 @@ class DayOfWeekChart extends StatelessWidget {
           if (title != null) ...[
             Text(
               title!,
-              style: localeFont(fontSize: 11, fontWeight: FontWeight.bold, color: cs.onSurfaceVariant),
+              style: localeFont(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: cs.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 10),
           ],
@@ -454,14 +473,16 @@ class DayOfWeekChart extends StatelessWidget {
               factor: values[i] / maxVal,
               width: 18,
               maxHeight: chartH,
-              color: i == maxIdx ? cs.primary : cs.outlineVariant.withValues(alpha: 0.5),
-              radius: BorderRadius.circular(2),
+              color: i == maxIdx
+                  ? cs.primary
+                  : cs.outline.withValues(alpha: 0.5),
+              radius: BorderRadius.circular(KuberShape.small),
             ),
             labelBuilder: (i) => Text(
               i < labels.length ? labels[i] : '',
               textAlign: TextAlign.center,
               style: localeFont(
-                fontSize: 9,
+                fontSize: 11,
                 color: i == maxIdx ? cs.primary : cs.onSurfaceVariant,
                 fontWeight: i == maxIdx ? FontWeight.bold : FontWeight.normal,
               ),
@@ -488,16 +509,16 @@ class ForecastZoneChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final warningColor = context.kuberColors.warning;
+    final warningColor = context.kuberMoney.warning;
     final all = [...actuals, ...projections];
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.sm),
+      padding: const EdgeInsets.all(KuberSpace.sm),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: AaChartTapArea(
         height: 80,
@@ -506,10 +527,10 @@ class ForecastZoneChart extends StatelessWidget {
           projections: projections,
           limit: limit,
           primaryColor: cs.primary,
-          safeColor: cs.tertiary,
+          safeColor: context.kuberMoney.income,
           warningColor: warningColor,
-          overColor: cs.error,
-          outlineColor: cs.outline,
+          overColor: context.kuberMoney.expense,
+          outlineColor: cs.outlineVariant,
         ),
         points: [
           for (var i = 0; i < all.length; i++)
@@ -574,7 +595,10 @@ class _ForecastPainter extends CustomPainter {
 
     final allPoints = [...actuals, ...projections];
     if (allPoints.isEmpty) return;
-    final maxPoint = allPoints.fold<double>(0.01, (max, v) => v > max ? v : max);
+    final maxPoint = allPoints.fold<double>(
+      0.01,
+      (max, v) => v > max ? v : max,
+    );
     final scaleY = maxPoint > limit ? maxPoint * 1.15 : limit * 1.15;
 
     double getX(int index, int total) {
@@ -641,7 +665,11 @@ class _ForecastPainter extends CustomPainter {
 
       // Draw transition dot
       final dotPaint = Paint()..color = primaryColor;
-      canvas.drawCircle(Offset(getX(startIdx, totalDays), getY(actuals.last)), 4, dotPaint);
+      canvas.drawCircle(
+        Offset(getX(startIdx, totalDays), getY(actuals.last)),
+        4,
+        dotPaint,
+      );
     }
   }
 
@@ -669,11 +697,11 @@ class CashFlowAreaChart extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,31 +712,41 @@ class CashFlowAreaChart extends StatelessWidget {
               incomes: incomes,
               expenses: expenses,
               nets: nets,
-              incomeColor: cs.tertiary,
-              expenseColor: cs.error,
+              incomeColor: context.kuberMoney.income,
+              expenseColor: context.kuberMoney.expense,
               netColor: cs.onSurface,
-              outlineColor: cs.outline,
+              outlineColor: cs.outlineVariant,
             ),
             points: [
               for (var i = 0; i < incomes.length; i++)
                 AaTapPoint(i < labels.length ? labels[i] : 'Month ${i + 1}', [
-                  AaTapRow('Income', _chartInr.format(incomes[i]), cs.tertiary),
-                  AaTapRow('Expense', _chartInr.format(expenses[i]), cs.error),
+                  AaTapRow(
+                    'Income',
+                    _chartInr.format(incomes[i]),
+                    context.kuberMoney.income,
+                  ),
+                  AaTapRow(
+                    'Expense',
+                    _chartInr.format(expenses[i]),
+                    context.kuberMoney.expense,
+                  ),
                   AaTapRow(
                     'Net',
                     '${nets[i] >= 0 ? '+' : ''}${_chartInr.format(nets[i])}',
-                    nets[i] >= 0 ? cs.tertiary : cs.error,
+                    nets[i] >= 0
+                        ? context.kuberMoney.income
+                        : context.kuberMoney.expense,
                   ),
                 ]),
             ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Row(
             children: [
-              _CfLegend(color: cs.tertiary, label: 'Income'),
-              const SizedBox(width: KuberSpacing.md),
-              _CfLegend(color: cs.error, label: 'Expense'),
-              const SizedBox(width: KuberSpacing.md),
+              _CfLegend(color: context.kuberMoney.income, label: 'Income'),
+              const SizedBox(width: KuberSpace.md),
+              _CfLegend(color: context.kuberMoney.expense, label: 'Expense'),
+              const SizedBox(width: KuberSpace.md),
               _CfLegend(color: cs.onSurface, label: 'Net', line: true),
             ],
           ),
@@ -722,7 +760,11 @@ class _CfLegend extends StatelessWidget {
   final Color color;
   final String label;
   final bool line;
-  const _CfLegend({required this.color, required this.label, this.line = false});
+  const _CfLegend({
+    required this.color,
+    required this.label,
+    this.line = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -735,12 +777,14 @@ class _CfLegend extends StatelessWidget {
           height: line ? 2 : 8,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(KuberShape.small),
           ),
         ),
         const SizedBox(width: 5),
-        Text(label,
-            style: localeFont(fontSize: 10, color: cs.onSurfaceVariant)),
+        Text(
+          label,
+          style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+        ),
       ],
     );
   }
@@ -779,10 +823,10 @@ class _CashFlowPainter extends CustomPainter {
     final total = incomes.length;
     if (total <= 1) return;
 
-    final maxVal = [...incomes, ...expenses].fold<double>(
-      0.01,
-      (max, v) => v > max ? v : max,
-    );
+    final maxVal = [
+      ...incomes,
+      ...expenses,
+    ].fold<double>(0.01, (max, v) => v > max ? v : max);
     final scaleY = maxVal * 1.15;
 
     double getX(int index) => (index / (total - 1)) * w;
@@ -804,7 +848,10 @@ class _CashFlowPainter extends CustomPainter {
     }
     incAreaPath.lineTo(getX(total - 1), h * 0.5);
     incAreaPath.close();
-    canvas.drawPath(incAreaPath, Paint()..color = incomeColor.withValues(alpha: 0.12));
+    canvas.drawPath(
+      incAreaPath,
+      Paint()..color = incomeColor.withValues(alpha: 0.12),
+    );
 
     // Draw income line
     final incLinePath = Path();
@@ -828,7 +875,10 @@ class _CashFlowPainter extends CustomPainter {
     }
     expAreaPath.lineTo(getX(total - 1), h * 0.5);
     expAreaPath.close();
-    canvas.drawPath(expAreaPath, Paint()..color = expenseColor.withValues(alpha: 0.12));
+    canvas.drawPath(
+      expAreaPath,
+      Paint()..color = expenseColor.withValues(alpha: 0.12),
+    );
 
     // Draw expense line
     final expLinePath = Path();
@@ -896,18 +946,18 @@ class SavingsRateLineChart extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: AaChartTapArea(
         height: 90,
         painter: _SavingsRatePainter(
           values: values,
           primaryColor: cs.primary,
-          // Brighter than cs.outline so the 20% / 10% reference dashes read.
+          // Brighter than cs.outlineVariant so the 20% / 10% reference dashes read.
           outlineColor: cs.onSurfaceVariant.withValues(alpha: 0.5),
         ),
         points: [
@@ -917,10 +967,10 @@ class SavingsRateLineChart extends StatelessWidget {
                 'Savings rate',
                 '${values[i].toStringAsFixed(1)}%',
                 values[i] >= 20
-                    ? cs.tertiary
+                    ? context.kuberMoney.income
                     : values[i] >= 0
-                        ? cs.primary
-                        : cs.error,
+                    ? cs.primary
+                    : context.kuberMoney.expense,
               ),
             ]),
         ],
@@ -989,7 +1039,11 @@ class _SavingsRatePainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
 
-    canvas.drawCircle(Offset(getX(total - 1), getY(values.last)), 4, Paint()..color = primaryColor);
+    canvas.drawCircle(
+      Offset(getX(total - 1), getY(values.last)),
+      4,
+      Paint()..color = primaryColor,
+    );
   }
 
   @override

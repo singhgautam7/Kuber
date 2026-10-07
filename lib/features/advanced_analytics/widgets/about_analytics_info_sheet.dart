@@ -67,9 +67,9 @@ class _DateFilterBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
+    final warning = context.kuberMoney.warning;
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+      padding: const EdgeInsets.only(bottom: KuberSpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -77,18 +77,18 @@ class _DateFilterBlock extends StatelessWidget {
             'Date filters',
             style: localeFont(
               fontSize: 14,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           InfoTable(
             rows: [
               for (final section in _ownFilter)
                 InfoTableDataRow(
                   label: section,
                   value: 'Own filter',
-                  valueColor: cs.tertiary,
+                  valueColor: context.kuberMoney.income,
                 ),
               for (final section in _fixedWindow)
                 InfoTableDataRow(
@@ -103,4 +103,3 @@ class _DateFilterBlock extends StatelessWidget {
     );
   }
 }
-

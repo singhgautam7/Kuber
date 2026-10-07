@@ -208,7 +208,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
             ),
           ),
         ],
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
 
         // Card container
         TapRegion(
@@ -226,16 +226,16 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                 // gets more room, with the right side keeping enough room
                 // for the legend/dropdown chrome.
                 padding: const EdgeInsets.fromLTRB(
-                  KuberSpacing.sm,
-                  KuberSpacing.lg,
-                  KuberSpacing.lg,
-                  KuberSpacing.lg,
+                  KuberSpace.sm,
+                  KuberSpace.lg,
+                  KuberSpace.lg,
+                  KuberSpace.lg,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
                   border: Border.all(
-                    color: cs.outline.withValues(alpha: 0.5),
+                    color: cs.outlineVariant.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -248,20 +248,20 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                         Expanded(
                           child: Row(
                             children: [
-                              _LegendDot(color: cs.tertiary, label: context.l10n.incShort),
-                              const SizedBox(width: KuberSpacing.md),
-                              _LegendDot(color: cs.error, label: context.l10n.expShort),
+                              _LegendDot(color: context.kuberMoney.income, label: context.l10n.incShort),
+                              const SizedBox(width: KuberSpace.md),
+                              _LegendDot(color: context.kuberMoney.expense, label: context.l10n.expShort),
                             ],
                           ),
                         ),
-                        const SizedBox(width: KuberSpacing.md),
+                        const SizedBox(width: KuberSpace.md),
                         _ChartTypeTabs(
                           current: _chartType,
                           onChanged: _switchChartType,
                         ),
                         if (widget.enableBucketDropdown &&
                             widget.availableBuckets.length > 1) ...[
-                          const SizedBox(width: KuberSpacing.sm),
+                          const SizedBox(width: KuberSpace.sm),
                           _BucketDropdown(
                             current: widget.bucket,
                             options: widget.availableBuckets,
@@ -272,7 +272,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                       ],
                     ),
 
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
 
                     // Chart area
                     SizedBox(
@@ -414,8 +414,8 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                   maxY: _maxY,
                   slide: _detailSlide,
                   fade: _detailFade,
-                  bottomOffset: KuberSpacing.lg,
-                  leftOffset: KuberSpacing.lg,
+                  bottomOffset: KuberSpace.lg,
+                  leftOffset: KuberSpace.lg,
                 ),
             ],
           ),
@@ -449,7 +449,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
     bool showLeftTitles = true,
   }) {
     final axisStyle = tt.labelSmall?.copyWith(
-      fontSize: 10,
+      fontSize: 11,
       color: cs.onSurfaceVariant,
     );
 
@@ -530,7 +530,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                   Text(
                     b.monthLabel,
                     style: tt.labelSmall?.copyWith(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w400,
                       color: cs.onSurfaceVariant,
                     ),
@@ -550,7 +550,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       drawVerticalLine: false,
       horizontalInterval: _gridInterval,
       getDrawingHorizontalLine: (_) => FlLine(
-        color: cs.outline,
+        color: cs.outlineVariant,
         strokeWidth: 1,
       ),
     );
@@ -615,8 +615,8 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       final bool expenseOnTop = b.expense >= b.income;
       final double bottomVal = expenseOnTop ? b.income : b.expense;
       final double topVal = expenseOnTop ? b.expense : b.income;
-      final Color bottomColor = expenseOnTop ? cs.tertiary : cs.error;
-      final Color topColor = expenseOnTop ? cs.error : cs.tertiary;
+      final Color bottomColor = expenseOnTop ? context.kuberMoney.income : context.kuberMoney.expense;
+      final Color topColor = expenseOnTop ? context.kuberMoney.expense : context.kuberMoney.income;
 
       Color applyDim(Color c) => isDimmed
           ? Color.lerp(cs.surfaceContainer, cs.onSurface, 0.15)!.withValues(alpha: 1.0)
@@ -651,7 +651,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                     toY: bottomVal,
                     color: applyDim(bottomColor),
                     width: barWidth,
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    borderRadius: BorderRadius.circular(KuberShape.extraSmall),
                   ),
                 if (hasTop)
                   BarChartRodData(
@@ -659,7 +659,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                     toY: adjustedTopTo,
                     color: applyDim(topColor),
                     width: barWidth,
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    borderRadius: BorderRadius.circular(KuberShape.extraSmall),
                   ),
               ],
       );
@@ -717,11 +717,11 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         ),
         lineBarsData: [
           _lineData(
-            cs.tertiary,
+            context.kuberMoney.income,
             widget.buckets.map((b) => b.income).toList(),
           ),
           _lineData(
-            cs.error,
+            context.kuberMoney.expense,
             widget.buckets.map((b) => b.expense).toList(),
           ),
         ],
@@ -789,7 +789,7 @@ class _LegendDot extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             color: color,
           ),
@@ -810,7 +810,7 @@ class _ChartTypeTabs extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
+        borderRadius: BorderRadius.circular(KuberShape.small),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -850,12 +850,12 @@ class _ChartTypeTab extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.sm,
-          vertical: KuberSpacing.xs,
+          horizontal: KuberSpace.sm,
+          vertical: KuberSpace.xs,
         ),
         decoration: BoxDecoration(
           color: isActive ? cs.surfaceContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
+          borderRadius: BorderRadius.circular(KuberShape.small),
         ),
         child: Icon(
           icon,
@@ -951,22 +951,15 @@ class _TooltipOverlay extends ConsumerWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.md,
-                    vertical: KuberSpacing.md,
+                    horizontal: KuberSpace.md,
+                    vertical: KuberSpace.md,
                   ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
                     border: Border.all(
-                      color: cs.outline.withValues(alpha: 0.1),
+                      color: cs.outlineVariant.withValues(alpha: 0.1),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: cs.shadow.withValues(alpha: 0.2),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -980,18 +973,18 @@ class _TooltipOverlay extends ConsumerWidget {
                           letterSpacing: 1.0,
                         ),
                       ),
-                      const SizedBox(height: KuberSpacing.sm),
+                      const SizedBox(height: KuberSpace.sm),
                       _TooltipRow(
                         label: context.l10n.incomeLabel,
                         amount: maskAmount('+${whole(bucket.income)}', isPrivate),
-                        color: cs.tertiary,
+                        color: context.kuberMoney.income,
                         labelColor: cs.onSurfaceVariant,
                       ),
                       const SizedBox(height: 4),
                       _TooltipRow(
                         label: context.l10n.expenseLabel,
                         amount: maskAmount('-${whole(bucket.expense)}', isPrivate),
-                        color: cs.error,
+                        color: context.kuberMoney.expense,
                         labelColor: cs.onSurfaceVariant,
                       ),
                       Padding(
@@ -999,7 +992,7 @@ class _TooltipOverlay extends ConsumerWidget {
                         child: Divider(
                           height: 1,
                           thickness: 1,
-                          color: cs.outline.withValues(alpha: 0.2),
+                          color: cs.outlineVariant.withValues(alpha: 0.2),
                         ),
                       ),
                       _TooltipRow(
@@ -1012,13 +1005,13 @@ class _TooltipOverlay extends ConsumerWidget {
                         isBold: true,
                       ),
                       if (bucket.date != null) ...[
-                        const SizedBox(height: KuberSpacing.sm),
+                        const SizedBox(height: KuberSpace.sm),
                         Divider(
                           height: 1,
                           thickness: 1,
-                          color: cs.outline.withValues(alpha: 0.2),
+                          color: cs.outlineVariant.withValues(alpha: 0.2),
                         ),
-                        const SizedBox(height: KuberSpacing.sm),
+                        const SizedBox(height: KuberSpace.sm),
                         GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
@@ -1091,7 +1084,7 @@ class _TooltipRow extends StatelessWidget {
         Text(
           amount,
           style: tt.labelMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
             color: color,
           ),
           maxLines: 1,
@@ -1118,7 +1111,7 @@ class _YAxisColumn extends ConsumerWidget {
     final formatter = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final style = tt.labelSmall?.copyWith(
-      fontSize: 10,
+      fontSize: 11,
       color: cs.onSurfaceVariant,
     );
 
@@ -1204,9 +1197,9 @@ class _BucketDropdown extends StatelessWidget {
                 Text(
                   b.label,
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight:
-                        current == b ? FontWeight.w700 : FontWeight.w500,
+                        current == b ? FontWeight.w600 : FontWeight.w500,
                     color: options.contains(b)
                         ? cs.onSurface
                         : cs.onSurfaceVariant.withValues(alpha: 0.4),
@@ -1220,8 +1213,8 @@ class _BucketDropdown extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
-          border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(KuberShape.small),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1230,7 +1223,7 @@ class _BucketDropdown extends StatelessWidget {
               current.label,
               style: localeFont(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurface,
                 letterSpacing: 0.3,
               ),

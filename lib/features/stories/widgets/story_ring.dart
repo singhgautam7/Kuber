@@ -78,7 +78,10 @@ class _StoryRingSectionState extends ConsumerState<StoryRingSection> {
             begin: begin,
             end: end,
           ).chain(CurveTween(curve: Curves.easeOutCubic));
-          return SlideTransition(position: animation.drive(tween), child: child);
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
         },
       ),
     );
@@ -104,14 +107,14 @@ class StoryRing extends StatelessWidget {
           infoConfig: InfoConstants.moneyStories,
         ),
         SizedBox(
-          height: 84,
+          height: 80,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             cacheExtent: 360,
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.zero,
             itemCount: bubbles.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, i) => _StoryAvatar(
               bubble: bubbles[i],
               colorScheme: cs,
@@ -139,14 +142,11 @@ class _StoryAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = colorScheme;
     final seen = bubble.seen;
-    final ringColor = StoryPalette.ring[bubble.color]!;
-    final discTint = seen
-        ? cs.surfaceContainerHigh
-        : Color.alphaBlend(
-            ringColor.withValues(alpha: 0.16),
-            cs.surfaceContainerHigh,
-          );
-    final iconColor = seen ? cs.onSurfaceVariant : ringColor;
+    // Board 3.2a: unseen arcs in primary, seen in outlineVariant; 44 disc in
+    // surfaceContainerHigh.
+    final ringColor = cs.primary;
+    final discTint = cs.surfaceContainerHigh;
+    final iconColor = seen ? cs.onSurfaceVariant : cs.primary;
 
     // One ring arc per slide across all stories in the bubble (Instagram-style);
     // an arc is "seen" when that slide has been viewed.
@@ -159,7 +159,8 @@ class _StoryAvatar extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 64,
+        // 56 ring, label slot wider so "Monthly" / "Insights" fit.
+        width: 72,
         child: Column(
           children: [
             CustomPaint(
@@ -170,10 +171,10 @@ class _StoryAvatar extends StatelessWidget {
                 inactiveColor: cs.outlineVariant,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(6),
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: discTint,
                     shape: BoxShape.circle,
@@ -181,21 +182,25 @@ class _StoryAvatar extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Icon(
                     storyIcon(bubble.icon),
-                    size: 24,
+                    size: 22,
                     color: iconColor,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 7),
-            Text(
-              _localizeBubbleLabel(context, bubble.label),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.inter.copyWith(
-                fontSize: 11,
-                fontWeight: seen ? FontWeight.w500 : FontWeight.w600,
-                color: seen ? cs.onSurfaceVariant : cs.onSurface,
+            const SizedBox(height: KuberSpace.sm),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                _localizeBubbleLabel(context, bubble.label),
+                maxLines: 1,
+                style: AppTextStyles.inter.copyWith(
+                  fontSize: 12,
+                  height: 16 / 12,
+                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
               ),
             ),
           ],
@@ -254,7 +259,7 @@ class _SegmentedRingPainter extends CustomPainter {
             ? inactiveColor
             : activeColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
+        ..strokeWidth = 3
         ..strokeCap = StrokeCap.round;
       canvas.drawCircle(center, radius, paint);
       return;
@@ -271,7 +276,7 @@ class _SegmentedRingPainter extends CustomPainter {
             ? inactiveColor
             : activeColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
+        ..strokeWidth = 3
         ..strokeCap = StrokeCap.round;
 
       final start = -math.pi / 2 + i * (2 * math.pi / segments) + gapRad / 2;
@@ -308,21 +313,20 @@ class _StoryRingEmpty extends StatelessWidget {
           infoConfig: InfoConstants.moneyStories,
         ),
         Container(
-          height: 84,
           width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(KuberSpace.cardPadding),
           decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+            color: cs.surfaceContainer,
+            borderRadius: KuberShape.cardR,
+            border: Border.all(color: cs.outlineVariant),
           ),
           alignment: Alignment.center,
           child: Text(
             context.l10n.moneyStoriesEmpty,
             textAlign: TextAlign.center,
             style: AppTextStyles.inter.copyWith(
-              fontSize: 12,
+              fontSize: 14,
+              height: 20 / 14,
               color: cs.onSurfaceVariant,
             ),
           ),
@@ -345,20 +349,19 @@ class _StoryRingSkeleton extends StatelessWidget {
           infoConfig: InfoConstants.moneyStories,
         ),
         SizedBox(
-          height: 84,
+          height: 80,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: EdgeInsets.zero,
             itemCount: 4,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (_, __) => SizedBox(
-              width: 64,
+              width: 72,
               child: Column(
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
-                    margin: const EdgeInsets.all(5),
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: cs.surfaceContainerHigh,
@@ -369,7 +372,7 @@ class _StoryRingSkeleton extends StatelessWidget {
                     width: 40,
                     height: 10,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(KuberShape.small),
                       color: cs.surfaceContainerHigh,
                     ),
                   ),

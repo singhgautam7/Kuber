@@ -108,11 +108,13 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
       builder: (_, scrollCtrl) => Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(KuberShape.extraLarge),
+          ),
           border: Border(
-            top: BorderSide(color: cs.outline),
-            left: BorderSide(color: cs.outline),
-            right: BorderSide(color: cs.outline),
+            top: BorderSide(color: cs.outlineVariant),
+            left: BorderSide(color: cs.outlineVariant),
+            right: BorderSide(color: cs.outlineVariant),
           ),
         ),
         child: Column(
@@ -125,8 +127,8 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: cs.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    color: cs.outline,
+                    borderRadius: BorderRadius.circular(KuberShape.full),
                   ),
                 ),
               ),
@@ -144,8 +146,8 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                         Text(
                           'Select people',
                           style: localeFont(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                             color: cs.onSurface,
                             letterSpacing: -0.4,
                           ),
@@ -195,15 +197,15 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                     vertical: 10,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: cs.outline),
+                    borderRadius: BorderRadius.circular(KuberShape.large),
+                    borderSide: BorderSide(color: cs.outlineVariant),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: cs.outline),
+                    borderRadius: BorderRadius.circular(KuberShape.large),
+                    borderSide: BorderSide(color: cs.outlineVariant),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(KuberShape.large),
                     borderSide: BorderSide(color: cs.primary, width: 2),
                   ),
                 ),
@@ -222,7 +224,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                       'YOUR PEOPLE',
                       style: localeFont(
                         fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 1.1,
                         color: cs.onSurfaceVariant,
                       ),
@@ -268,7 +270,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                     ),
 
                     const SizedBox(height: 18),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -303,8 +305,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                   0,
                   16,
                   MediaQuery.viewInsetsOf(context).bottom > 0
-                      ? MediaQuery.viewInsetsOf(context).bottom +
-                            KuberSpacing.sm
+                      ? MediaQuery.viewInsetsOf(context).bottom + KuberSpace.sm
                       : 0,
                 ),
                 child: _AddPersonInput(
@@ -321,7 +322,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
             Container(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: cs.outline)),
+                border: Border(top: BorderSide(color: cs.outlineVariant)),
               ),
               child: AppButton(
                 label: 'Add ${_selected.length} people',
@@ -359,11 +360,11 @@ class _AddPersonInput extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.sm),
+      padding: const EdgeInsets.all(KuberSpace.sm),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
@@ -375,40 +376,37 @@ class _AddPersonInput extends StatelessWidget {
               style: localeFont(fontSize: 14, color: cs.onSurface),
               decoration: InputDecoration(
                 hintText: 'Name (must be unique)...',
-                hintStyle: localeFont(
-                  fontSize: 14,
-                  color: cs.onSurfaceVariant,
-                ),
+                hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                 filled: true,
                 fillColor: cs.surfaceContainerHigh,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.md,
-                  vertical: KuberSpacing.sm,
+                  horizontal: KuberSpace.md,
+                  vertical: KuberSpace.sm,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
                   borderSide: BorderSide(color: cs.primary, width: 2),
                 ),
               ),
               onSubmitted: (_) => onSubmit(),
             ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           IconButton(
             onPressed: onSubmit,
             icon: Icon(Icons.check_rounded, color: cs.primary),
             style: IconButton.styleFrom(
-              backgroundColor: cs.primaryContainer,
+              backgroundColor: cs.secondaryContainer,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
             ),
           ),
@@ -451,7 +449,7 @@ class _PersonTile extends StatelessWidget {
             side: BorderSide(
               color: isSelected
                   ? cs.primary.withValues(alpha: 0.35)
-                  : cs.outline,
+                  : cs.outlineVariant,
             ),
           ),
         ),
@@ -493,12 +491,12 @@ class _PersonTile extends StatelessWidget {
                   height: 16,
                   decoration: BoxDecoration(
                     color: cs.primary,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(KuberShape.small),
                   ),
                   child: Icon(
                     Icons.check_rounded,
                     size: 11,
-                    color: Colors.white,
+                    color: cs.onPrimary,
                   ),
                 ),
               ),
@@ -514,13 +512,13 @@ class _PersonTile extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(KuberShape.small),
                   ),
                   child: Text(
                     'ME',
                     style: localeFont(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 0.6,
                       color: cs.primary,
                     ),
@@ -549,7 +547,7 @@ class _AddPersonTile extends StatelessWidget {
           shape: bsSquircle(
             14,
             side: BorderSide(
-              color: cs.outlineVariant,
+              color: cs.outline,
               style: BorderStyle.solid,
               width: 1.5,
             ),
@@ -564,7 +562,10 @@ class _AddPersonTile extends StatelessWidget {
               height: 48,
               decoration: ShapeDecoration(
                 color: cs.surfaceContainerHigh,
-                shape: bsSquircle(16, side: BorderSide(color: cs.outline)),
+                shape: bsSquircle(
+                  16,
+                  side: BorderSide(color: cs.outlineVariant),
+                ),
               ),
               child: Icon(Icons.add_rounded, size: 20, color: cs.primary),
             ),

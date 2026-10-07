@@ -22,7 +22,9 @@ void showCurrencyPicker({
     useSafeArea: true,
     backgroundColor: cs.surfaceContainer,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(KuberShape.extraLarge),
+      ),
     ),
     builder: (_) => _CurrencyPickerSheet(
       ref: ref,
@@ -86,10 +88,18 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
             decoration: InputDecoration(
               hintText: context.l10n.searchCurrencyHint,
               hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-              prefixIcon: Icon(Icons.search_rounded, size: 20, color: cs.onSurfaceVariant),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                size: 20,
+                color: cs.onSurfaceVariant,
+              ),
               suffixIcon: _searchCtrl.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.close_rounded, size: 18, color: cs.onSurfaceVariant),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
                       onPressed: () {
                         _searchCtrl.clear();
                         _onSearch('');
@@ -100,23 +110,23 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
               fillColor: cs.surfaceContainerHigh,
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           if (_filtered.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+              padding: const EdgeInsets.symmetric(vertical: KuberSpace.xl),
               child: Center(
                 child: Text(
                   context.l10n.noCurrenciesFound,
@@ -139,8 +149,10 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                     height: 40,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isSelected ? cs.primaryContainer : cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                      color: isSelected
+                          ? cs.secondaryContainer
+                          : cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(KuberShape.medium),
                     ),
                     child: Text(
                       c.symbol,
@@ -155,7 +167,9 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                     c.name,
                     style: localeFont(
                       fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: cs.onSurface,
                     ),
                   ),
@@ -168,7 +182,9 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                       : null,
                   onTap: () {
                     widget.onSelected(c.code);
-                    widget.ref.read(settingsProvider.notifier).setCurrency(c.code);
+                    widget.ref
+                        .read(settingsProvider.notifier)
+                        .setCurrency(c.code);
                     Navigator.of(context, rootNavigator: true).pop();
                   },
                 );

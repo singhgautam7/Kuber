@@ -27,13 +27,13 @@ class TutorialTooltipCard extends ConsumerWidget {
     final state = ref.watch(tutorialNotifierProvider);
     final cs = Theme.of(context).colorScheme;
     final size = MediaQuery.sizeOf(context);
-    final cardWidth = (size.width - KuberSpacing.xl * 2).clamp(280.0, 420.0);
+    final cardWidth = (size.width - KuberSpace.xl * 2).clamp(280.0, 420.0);
     final target = spotlightRect;
     final below = target == null || target.center.dy < size.height * 0.55;
     final top = target == null
         ? (size.height - 260) / 2
         : below
-        ? (target.bottom + KuberSpacing.xl).clamp(96.0, size.height - 310)
+        ? (target.bottom + KuberSpace.xl).clamp(96.0, size.height - 310)
         : (target.top - 286).clamp(48.0, size.height - 310);
 
     return Positioned(
@@ -110,10 +110,10 @@ class _AnimatedTooltipBodyState extends State<_AnimatedTooltipBody>
           mainAxisSize: MainAxisSize.min,
           children: [
             if (widget.showArrow && !widget.arrowDown)
-              _TooltipArrow(color: cs.outline, down: false),
+              _TooltipArrow(color: cs.outlineVariant, down: false),
             widget.child,
             if (widget.showArrow && widget.arrowDown)
-              _TooltipArrow(color: cs.outline, down: true),
+              _TooltipArrow(color: cs.outlineVariant, down: true),
           ],
         ),
       ),
@@ -141,11 +141,11 @@ class _TooltipContent extends StatelessWidget {
     final chapter = state.chapter;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: colorScheme.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +155,7 @@ class _TooltipContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: colorScheme.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(KuberRadius.full),
+              borderRadius: BorderRadius.circular(KuberShape.full),
               border: Border.all(
                 color: colorScheme.primary.withValues(alpha: 0.5),
                 width: 0.5,
@@ -165,42 +165,42 @@ class _TooltipContent extends StatelessWidget {
               '● ${context.l10n.chapterXofY('${state.chapterIndex + 1}', '${tutorialChapters.length}')} · ${tutChapterTitle(context, state.chapterIndex)}',
               style: localeFont(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: colorScheme.primary,
                 decoration: TextDecoration.none,
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           Text(
             tutStepTitle(context, state.chapterIndex, state.stepIndex),
             style: localeFont(
               fontSize: 16,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
               decoration: TextDecoration.none,
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Text(
             tutStepDesc(context, state.chapterIndex, state.stepIndex),
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
             style: localeFont(
-              fontSize: 13,
+              fontSize: 14,
               height: 1.5,
               color: colorScheme.onSurfaceVariant,
               decoration: TextDecoration.none,
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           Row(
             children: List.generate(chapter.steps.length, (index) {
               final color = index == state.stepIndex
                   ? colorScheme.primary
                   : index < state.stepIndex
                   ? colorScheme.primary.withValues(alpha: 0.4)
-                  : colorScheme.outline;
+                  : colorScheme.outlineVariant;
               return Expanded(
                 child: Container(
                   height: 3,
@@ -209,13 +209,13 @@ class _TooltipContent extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(KuberRadius.full),
+                    borderRadius: BorderRadius.circular(KuberShape.full),
                   ),
                 ),
               );
             }),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           Row(
             children: [
               TextButton(
@@ -232,11 +232,15 @@ class _TooltipContent extends StatelessWidget {
               const Spacer(),
               if (state.stepIndex > 0) ...[
                 OutlinedButton(onPressed: onPrev, child: const Text('‹ Prev')),
-                const SizedBox(width: KuberSpacing.sm),
+                const SizedBox(width: KuberSpace.sm),
               ],
               FilledButton(
                 onPressed: onNext,
-                child: Text(state.isLastStep ? context.l10n.doneLabel : context.l10n.nextArrow),
+                child: Text(
+                  state.isLastStep
+                      ? context.l10n.doneLabel
+                      : context.l10n.nextArrow,
+                ),
               ),
             ],
           ),

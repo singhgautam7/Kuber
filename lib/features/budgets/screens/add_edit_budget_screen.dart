@@ -1,6 +1,12 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_segmented_control.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -98,16 +104,18 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: KuberAppBar(
-        title: widget.existingBudget == null ? context.l10n.createBudget : context.l10n.editBudget,
+        title: widget.existingBudget == null
+            ? context.l10n.createBudget
+            : context.l10n.editBudget,
         showBack: true,
+        closeIcon: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _SectionHeader(title: context.l10n.selectCategoryUpper),
-            const SizedBox(height: KuberSpacing.sm),
             _CategorySelector(
               selected: _selectedCategory,
               onTap: _showCategoryPicker,
@@ -139,65 +147,40 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                   return const SizedBox.shrink();
                 },
               ),
-            const SizedBox(height: KuberSpacing.xl),
+            const SizedBox(height: KuberSpace.xl),
             _SectionHeader(title: context.l10n.budgetAmount),
-            const SizedBox(height: KuberSpacing.sm),
+            // Board 3.18: a large filled amount field.
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: localeFont(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
+              onChanged: (_) => setState(() {}),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium!.copyWith(color: cs.onSurface),
               decoration: InputDecoration(
+                labelText: 'Amount',
                 prefixText: '${ref.watch(currencyProvider).symbol} ',
+                prefixStyle: Theme.of(
+                  context,
+                ).textTheme.headlineSmall!.copyWith(color: cs.onSurfaceVariant),
                 hintText: '0',
-                filled: true,
-                fillColor: cs.surfaceContainer,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
-                ),
+                contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
               ),
             ),
-            const SizedBox(height: KuberSpacing.xl),
+            const SizedBox(height: KuberSpace.xl),
             _SectionHeader(title: context.l10n.appliesTo),
-            const SizedBox(height: KuberSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: _OptionCard(
-                    icon: Icons.calendar_today_outlined,
-                    label: context.l10n.thisMonthOnly,
-                    isSelected: !_isEveryMonth,
-                    onTap: () => setState(() => _isEveryMonth = false),
-                  ),
-                ),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: _OptionCard(
-                    icon: Icons.refresh_rounded,
-                    label: context.l10n.everyMonth,
-                    isSelected: _isEveryMonth,
-                    onTap: () => setState(() => _isEveryMonth = true),
-                  ),
-                ),
-              ],
+            KuberSegmentedControl<bool>(
+              values: const [false, true],
+              labels: [context.l10n.thisMonthOnly, context.l10n.everyMonth],
+              selected: _isEveryMonth,
+              onSelected: (v) => setState(() => _isEveryMonth = v),
+              height: 40,
             ),
-            const SizedBox(height: KuberSpacing.xl),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _SectionHeader(title: context.l10n.budgetAlerts),
-                TextButton.icon(
-                  onPressed: _addAlert,
-                  icon: const Icon(Icons.add, size: 16),
-                  label: Text(context.l10n.addAlert),
-                ),
-              ],
-            ),
+            const SizedBox(height: KuberSpace.xl),
+            _SectionHeader(title: context.l10n.budgetAlerts),
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: _alerts
                   .map(
                     (a) => _AlertChip(
@@ -209,15 +192,27 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                   )
                   .toList(),
             ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _addAlert,
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(context.l10n.addAlert),
+              ),
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          border: Border(top: BorderSide(color: cs.outlineVariant)),
+        ),
         padding: EdgeInsets.only(
-          left: KuberSpacing.lg,
-          right: KuberSpacing.lg,
-          bottom: MediaQuery.of(context).padding.bottom + KuberSpacing.md,
-          top: KuberSpacing.md,
+          left: 20,
+          right: 20,
+          bottom: MediaQuery.of(context).padding.bottom + KuberSpace.md,
+          top: KuberSpace.md,
         ),
         child: Consumer(
           builder: (context, ref, _) {
@@ -235,19 +230,11 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                 _amountController.text.isNotEmpty &&
                 !isDuplicate;
 
-            return FilledButton.icon(
+            return AppButton(
+              label: context.l10n.saveBudget,
+              type: AppButtonType.primary,
+              fullWidth: true,
               onPressed: isValid ? _save : null,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                backgroundColor: isValid
-                    ? cs.primary
-                    : cs.surfaceContainerHighest,
-              ),
-              icon: const Icon(Icons.save_rounded),
-              label: Text(context.l10n.saveBudget),
             );
           },
         ),
@@ -335,15 +322,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: localeFont(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        letterSpacing: 1.0,
-      ),
-    );
+    return KuberSectionHeader(title: title);
   }
 }
 
@@ -356,107 +335,23 @@ class _CategorySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            if (selected != null) ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Color(selected!.colorValue).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.category,
-                  color: Color(selected!.colorValue),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      selected!.name,
-                      style: localeFont(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      context.l10n.tapToChangeCategory,
-                      style: localeFont(
-                        fontSize: 12,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ] else
-              Expanded(
-                child: Text(
-                  context.l10n.chooseCategory,
-                  style: localeFont(color: cs.onSurfaceVariant),
-                ),
-              ),
-            Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OptionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _OptionCard({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primaryContainer.withValues(alpha: 0.1)
-              : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: isSelected ? cs.primary : cs.outline),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: isSelected ? cs.primary : cs.onSurfaceVariant),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: localeFont(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? cs.primary : cs.onSurface,
-              ),
+    return KuberPickerRow(
+      leading: selected == null
+          ? KuberLeadingSwatch(
+              color: cs.surfaceContainerHigh,
+              icon: Icons.category_outlined,
+              empty: true,
+            )
+          : KuberLeadingSwatch(
+              color: Color(selected!.colorValue),
+              icon: IconMapper.fromString(selected!.icon),
             ),
-          ],
-        ),
-      ),
+      label: selected == null
+          ? context.l10n.selectCategoryUpper
+          : context.l10n.tapToChangeCategory,
+      value: selected?.name ?? context.l10n.chooseCategory,
+      valueIsPlaceholder: selected == null,
+      onTap: onTap,
     );
   }
 }
@@ -469,16 +364,14 @@ class _AlertChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final label = alert.type == BudgetAlertType.percentage
         ? ref.watch(formatterProvider).formatPercentage(alert.value)
         : ref.watch(formatterProvider).formatCurrency(alert.value);
 
-    return Chip(
-      label: Text(label, style: localeFont(fontSize: 12)),
+    return KuberChip(
+      label: label,
+      icon: Icons.notifications_active_outlined,
       onDeleted: onDelete,
-      backgroundColor: cs.surfaceContainer,
-      deleteIconColor: cs.onSurfaceVariant,
     );
   }
 }

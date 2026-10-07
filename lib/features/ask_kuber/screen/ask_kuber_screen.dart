@@ -67,8 +67,9 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
   void initState() {
     super.initState();
     _pulseCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
     _initialize();
   }
 
@@ -153,8 +154,11 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
     if (!unlimited) unawaited(AskKuberUsage.increment());
 
     final repo = ref.read(askKuberRepositoryProvider);
-    final userMsg =
-        ChatMessage(text: input, isUser: true, time: DateTime.now());
+    final userMsg = ChatMessage(
+      text: input,
+      isUser: true,
+      time: DateTime.now(),
+    );
     setState(() {
       _messages.add(userMsg);
       _isProcessing = true;
@@ -248,7 +252,9 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
       try {
         final info = await PackageInfo.fromPlatform();
         resolvedBody = resolvedBody.replaceAll(
-            '{version}', '${info.version}+${info.buildNumber}');
+          '{version}',
+          '${info.version}+${info.buildNumber}',
+        );
       } catch (_) {
         resolvedBody = resolvedBody.replaceAll('{version}', 'unknown');
       }
@@ -256,7 +262,9 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
         final device = DeviceInfoPlugin();
         final android = await device.androidInfo;
         resolvedBody = resolvedBody.replaceAll(
-            '{device}', '${android.manufacturer} ${android.model}');
+          '{device}',
+          '${android.manufacturer} ${android.model}',
+        );
       } catch (_) {
         resolvedBody = resolvedBody.replaceAll('{device}', 'unknown');
       }
@@ -270,8 +278,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
 
     var launched = false;
     try {
-      launched =
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       launched = false;
     }
@@ -282,26 +289,26 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
       'No email app found. The developer is at ${EmailTemplates.developerEmail}',
       isError: true,
       actionLabel: 'Copy address',
-      onAction: () =>
-          Clipboard.setData(const ClipboardData(text: EmailTemplates.developerEmail)),
+      onAction: () => Clipboard.setData(
+        const ClipboardData(text: EmailTemplates.developerEmail),
+      ),
     );
   }
 
   /// mailto query encoding: spaces must be %20 (not '+', which some mail apps
   /// render literally), so we can't use Uri's default form-encoding.
   String _encodeMailtoQuery(Map<String, String> params) => params.entries
-      .map((e) =>
-          '${e.key}=${Uri.encodeComponent(e.value)}')
+      .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
       .join('&');
 
   void _openFeedback() => _navigate('/more/feedback');
 
-  void _howItWorks() =>
-      KuberInfoBottomSheet.show(context, askKuberInfoConfig);
+  void _howItWorks() => KuberInfoBottomSheet.show(context, askKuberInfoConfig);
 
   Future<void> _copyLast() async {
-    final last = _messages
-        .lastWhereOrNull((m) => !m.isUser && m.text.trim().isNotEmpty);
+    final last = _messages.lastWhereOrNull(
+      (m) => !m.isUser && m.text.trim().isNotEmpty,
+    );
     if (last == null) return;
     await Clipboard.setData(ClipboardData(text: last.text));
     if (mounted) showKuberSnackBar(context, 'Copied to clipboard');
@@ -325,20 +332,30 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
-        title: Text('Clear chat?',
-            style: localeFont(
-                fontSize: 16, fontWeight: FontWeight.w700, color: cs.onSurface)),
-        content: Text('This removes the whole conversation.',
-            style: localeFont(fontSize: 14, color: cs.onSurfaceVariant)),
+        title: Text(
+          'Clear chat?',
+          style: localeFont(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
+          ),
+        ),
+        content: Text(
+          'This removes the whole conversation.',
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child:
-                  Text('Cancel', style: localeFont(color: cs.onSurfaceVariant))),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancel',
+              style: localeFont(color: cs.onSurfaceVariant),
+            ),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text('Clear', style: localeFont(color: cs.error))),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Clear', style: localeFont(color: cs.error)),
+          ),
         ],
       ),
     );
@@ -367,7 +384,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
             onFeedback: _openFeedback,
             onClear: _clearChat,
           ),
-          Divider(height: 1, color: cs.outline.withValues(alpha: 0.3)),
+          Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.3)),
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -377,13 +394,16 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
                 // Welcome fades + translates up on its way out; the chat (and
                 // its first user bubble) fades up from just below.
                 final isWelcome = child.key == const ValueKey('welcome');
-                final begin =
-                    isWelcome ? const Offset(0, -0.05) : const Offset(0, 0.04);
+                final begin = isWelcome
+                    ? const Offset(0, -0.05)
+                    : const Offset(0, 0.04);
                 return FadeTransition(
                   opacity: anim,
                   child: SlideTransition(
-                    position:
-                        Tween(begin: begin, end: Offset.zero).animate(anim),
+                    position: Tween(
+                      begin: begin,
+                      end: Offset.zero,
+                    ).animate(anim),
                     child: child,
                   ),
                 );
@@ -391,13 +411,13 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
               child: _isInitializing
                   ? const SizedBox.shrink()
                   : showWelcome
-                      ? WelcomeView(
-                          key: const ValueKey('welcome'),
-                          greeting: _greeting,
-                          pulse: _pulseCtrl,
-                          onSend: _send,
-                        )
-                      : _buildChatList(),
+                  ? WelcomeView(
+                      key: const ValueKey('welcome'),
+                      greeting: _greeting,
+                      pulse: _pulseCtrl,
+                      onSend: _send,
+                    )
+                  : _buildChatList(),
             ),
           ),
           // Suggestion chips reflect the latest response; hidden while typing or
@@ -405,7 +425,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _controller,
             builder: (context, value, _) {
-              final canShow = lastKuber != null &&
+              final canShow =
+                  lastKuber != null &&
                   lastKuber.followUps.isNotEmpty &&
                   !_isProcessing &&
                   !_isTyping &&
@@ -435,15 +456,16 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
       key: const ValueKey('chat'),
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
+        horizontal: KuberSpace.lg,
+        vertical: KuberSpace.md,
+      ),
       itemCount: _messages.length + (_isProcessing ? 1 : 0),
       itemBuilder: (context, i) {
         if (_isProcessing && i == _messages.length) {
           return const TypingIndicator();
         }
         final msg = _messages[i];
-        final showDate =
-            i == 0 || !_isSameDay(_messages[i - 1].time, msg.time);
+        final showDate = i == 0 || !_isSameDay(_messages[i - 1].time, msg.time);
         final isStreaming =
             _isTyping && !msg.isUser && i == _messages.length - 1;
         return Column(

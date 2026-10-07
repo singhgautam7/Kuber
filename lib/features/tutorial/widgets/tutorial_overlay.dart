@@ -42,6 +42,28 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
   /// For routing (GoRouter), we still need the rootNavigatorKey's context.
   BuildContext? get _routerCtx => rootNavigatorKey.currentContext;
 
+  /// Context for sheets and dialogs. This overlay sits above the app's
+  /// Navigator, so its own [context] has no Navigator and
+  /// `showModalBottomSheet` / `showDialog` from it throw (the chapter-end
+  /// Next and Skip tour then silently did nothing). Use the root
+  /// navigator's overlay instead.
+  BuildContext get _sheetCtx =>
+      rootNavigatorKey.currentState?.overlay?.context ?? context;
+
+  /// True while one of our sheets / dialogs is up. They live below this
+  /// overlay, so the dim layer and tooltip step aside (hidden, no hit
+  /// testing) or the sheet could not be tapped.
+  bool _modalOpen = false;
+
+  Future<T?> _withModal<T>(Future<T?> Function() show) async {
+    setState(() => _modalOpen = true);
+    try {
+      return await show();
+    } finally {
+      if (mounted) setState(() => _modalOpen = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +91,13 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
   /// This avoids the `BackButtonListener` / `PopScope` widgets, both of which
   /// require a Router/ModalRoute ancestor that doesn't exist above the
   /// Navigator.
+  /// The keyboard opening or closing moves the target: re-measure.
+  @override
+  void didChangeMetrics() {
+    if (!mounted || !ref.read(tutorialNotifierProvider).isActive) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateSpotlight());
+  }
+
   @override
   Future<bool> didPopRoute() async {
     if (!mounted) return false;
@@ -105,13 +134,13 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
       children: [
         widget.child,
         IgnorePointer(
-          ignoring: !state.isActive,
+          ignoring: !state.isActive || _modalOpen,
           child: AnimatedBuilder(
             animation: Listenable.merge([_dimController, _spotController]),
             builder: (context, _) {
               final rect = _animatedRect();
               return Opacity(
-                opacity: state.isActive ? 1 : 0,
+                opacity: state.isActive && !_modalOpen ? 1 : 0,
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -124,7 +153,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
                         ),
                       ),
                     ),
-                    if (state.isActive)
+                    if (state.isActive && !_modalOpen)
                       TutorialTooltipCard(
                         spotlightRect: rect,
                         onPrev: _previous,
@@ -184,7 +213,17 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
           await Future<void>.delayed(const Duration(milliseconds: 50));
         }
         if (!mounted || token != _spotlightToken) return;
+        // The target is laid out while its route is still sliding in (and
+        // before the keyboard settles), so wait for it to hold still across
+        // two checks before measuring. Up to ~1.5 s.
         rect = _getTargetRect(step.key);
+        for (var i = 0; i < 15; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          if (!mounted || token != _spotlightToken) return;
+          final next = _getTargetRect(step.key);
+          if (next == rect) break;
+          rect = next;
+        }
       }
     }
 
@@ -215,8 +254,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
     final state = ref.read(tutorialNotifierProvider);
     final stepCount = state.chapter.steps.length;
     final isLastStepOfChapter = state.stepIndex == stepCount - 1;
-    final isFinalChapter =
-        state.chapterIndex == tutorialChapters.length - 1;
+    final isFinalChapter = state.chapterIndex == tutorialChapters.length - 1;
 
     if (isLastStepOfChapter && isFinalChapter) {
       await _endTutorial();
@@ -236,49 +274,53 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
     final doneTitle = l.chapterDoneTitle('${state.chapterIndex + 1}');
     final nextTitle = tutChapterTitle(context, nextChapterIndex);
 
-    final proceed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (sheetCtx) {
-        final cs = Theme.of(sheetCtx).colorScheme;
-        return KuberBottomSheet(
-          title: doneTitle,
-          actions: Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: () =>
-                        Navigator.of(sheetCtx, rootNavigator: true).pop(false),
-                    child: Text(l.endTutorial),
+    final proceed = await _withModal(
+      () => showModalBottomSheet<bool>(
+        context: _sheetCtx,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        builder: (sheetCtx) {
+          final cs = Theme.of(sheetCtx).colorScheme;
+          return KuberBottomSheet(
+            title: doneTitle,
+            actions: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(
+                        sheetCtx,
+                        rootNavigator: true,
+                      ).pop(false),
+                      child: Text(l.endTutorial),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: FilledButton(
-                    onPressed: () =>
-                        Navigator.of(sheetCtx, rootNavigator: true).pop(true),
-                    child: Text('$nextTitle →'),
+                SizedBox(width: KuberSpace.md),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: () =>
+                          Navigator.of(sheetCtx, rootNavigator: true).pop(true),
+                      child: Text('$nextTitle →'),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          child: Text(
-            l.readyToStart(nextTitle),
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: cs.onSurfaceVariant,
+              ],
             ),
-          ),
-        );
-      },
+            child: Text(
+              l.readyToStart(nextTitle),
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          );
+        },
+      ),
     );
 
     if (!mounted) return;
@@ -301,49 +343,53 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
   /// (via [BackButtonListener]) and the tooltip's "Skip tour" button.
   Future<void> _confirmExit() async {
     final l = context.l10n;
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (sheetCtx) {
-        final cs = Theme.of(sheetCtx).colorScheme;
-        return KuberBottomSheet(
-          title: l.exitTutorialConfirm,
-          actions: Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: () =>
-                        Navigator.of(sheetCtx, rootNavigator: true).pop(false),
-                    child: Text(l.keepGoing),
+    final confirmed = await _withModal(
+      () => showModalBottomSheet<bool>(
+        context: _sheetCtx,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        builder: (sheetCtx) {
+          final cs = Theme.of(sheetCtx).colorScheme;
+          return KuberBottomSheet(
+            title: l.exitTutorialConfirm,
+            actions: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(
+                        sheetCtx,
+                        rootNavigator: true,
+                      ).pop(false),
+                      child: Text(l.keepGoing),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: FilledButton(
-                    onPressed: () =>
-                        Navigator.of(sheetCtx, rootNavigator: true).pop(true),
-                    child: Text(l.exitLabel),
+                SizedBox(width: KuberSpace.md),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: () =>
+                          Navigator.of(sheetCtx, rootNavigator: true).pop(true),
+                      child: Text(l.exitLabel),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          child: Text(
-            l.replayHintApp,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: cs.onSurfaceVariant,
+              ],
             ),
-          ),
-        );
-      },
+            child: Text(
+              l.replayHintApp,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          );
+        },
+      ),
     );
     if (confirmed == true) await _endTutorial();
   }
@@ -351,8 +397,9 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
   Future<void> _endTutorial() async {
     final state = ref.read(tutorialNotifierProvider);
     final sandbox = ref.read(tutorialSandboxIsarProvider);
+    final dialogCtx = _sheetCtx;
     showDialog<void>(
-      context: context,
+      context: dialogCtx,
       barrierDismissible: false,
       builder: (_) => const KuberLoader(label: 'Closing tutorial...'),
     );
@@ -367,10 +414,14 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
       ref.read(tutorialNotifierProvider.notifier).completeTutorial();
     } finally {
       if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
+        if (dialogCtx.mounted) {
+          Navigator.of(dialogCtx, rootNavigator: true).pop();
+        }
         final endCtx = _routerCtx;
         if (endCtx != null && endCtx.mounted) {
-          endCtx.go('/tutorial');
+          // Ending or skipping closes the tutorial completely: back to More,
+          // where it was opened from.
+          endCtx.go('/more');
         }
       }
     }

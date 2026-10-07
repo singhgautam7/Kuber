@@ -37,22 +37,26 @@ class PaywallManageSection extends ConsumerWidget {
       null => isPromo ? 'Promo' : 'Pro',
     };
     final planValue = switch (plan) {
-      ProPlan.monthly => 'Monthly · ${_price(kProMonthlyId, prices, '₹119')}/mo',
+      ProPlan.monthly =>
+        'Monthly · ${_price(kProMonthlyId, prices, '₹119')}/mo',
       ProPlan.yearly => 'Yearly · ${_price(kProYearlyId, prices, '₹1,099')}/yr',
-      ProPlan.lifetime => 'Lifetime · ${_price(kProLifetimeId, prices, '₹2,199')}',
+      ProPlan.lifetime =>
+        'Lifetime · ${_price(kProLifetimeId, prices, '₹2,199')}',
       null => isPromo ? 'Kuber Pro (promo)' : 'Kuber Pro',
     };
 
     // The status row swaps by state (only truthful states — scheduled-cancel is
     // not detectable from in_app_purchase, so it is omitted; Play shows it).
     final (String statusLabel, String statusValue, Color statusColor) =
-        _statusRow(cs, plan, inTrial, isPromo);
+        _statusRow(cs, context.kuberMoney.income, plan, inTrial, isPromo);
 
     final rows = <InfoTableRow>[
       InfoTableDataRow(label: 'Plan', value: planValue),
       if (proState.activatedAt != null)
         InfoTableDataRow(
-            label: 'Purchased', value: _shortDate(proState.activatedAt!)),
+          label: 'Purchased',
+          value: _shortDate(proState.activatedAt!),
+        ),
       InfoTableHighlightRow(
         label: statusLabel,
         value: statusValue,
@@ -69,32 +73,32 @@ class PaywallManageSection extends ConsumerWidget {
       children: [
         _StatusHero(proState: proState, planLabel: planLabel),
         if (inTrial) ...[
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           Center(child: _TrialCountdownPill(daysLeft: proState.trialDaysLeft)),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Text(
             'You won\'t be charged until the trial ends. Cancel anytime in '
             'Play Store.',
             textAlign: TextAlign.center,
             style: localeFont(
-              fontSize: 12.5,
+              fontSize: 12,
               color: cs.onSurfaceVariant,
               height: 1.4,
             ),
           ),
         ],
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
         Text(
           'Your plan',
           style: localeFont(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
         InfoTable(rows: rows),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         if (showManageOnPlay) ...[
           AppButton(
             label: 'Manage on Play Store',
@@ -105,7 +109,7 @@ class PaywallManageSection extends ConsumerWidget {
             iconAfterLabel: true,
             onPressed: () => _openPlaySubscriptions(plan),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
         ],
         if (showCancel) ...[
           AppButton(
@@ -115,7 +119,7 @@ class PaywallManageSection extends ConsumerWidget {
             height: 48,
             onPressed: () => _openPlaySubscriptions(plan),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
         ],
         AppButton(
           label: 'Restore purchases',
@@ -124,7 +128,7 @@ class PaywallManageSection extends ConsumerWidget {
           height: 48,
           onPressed: () => restorePurchases(context, ref),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
         AppButton(
           label: 'Redeem promo code',
           type: AppButtonType.outline,
@@ -132,12 +136,12 @@ class PaywallManageSection extends ConsumerWidget {
           height: 48,
           onPressed: () => showRedeemPromoCodeSheet(context, ref),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         Text(
           'Thanks for backing Kuber. Every subscription funds a solo developer '
           'building this fully offline, ad-free, and account-free.',
           style: localeFont(
-            fontSize: 12.5,
+            fontSize: 12,
             color: cs.onSurfaceVariant,
             height: 1.45,
           ),
@@ -147,7 +151,12 @@ class PaywallManageSection extends ConsumerWidget {
   }
 
   (String, String, Color) _statusRow(
-      ColorScheme cs, ProPlan? plan, bool inTrial, bool isPromo) {
+    ColorScheme cs,
+    Color income,
+    ProPlan? plan,
+    bool inTrial,
+    bool isPromo,
+  ) {
     if (plan == ProPlan.lifetime) {
       return ('Status', 'Lifetime access, no expiry', cs.onSurface);
     }
@@ -162,19 +171,23 @@ class PaywallManageSection extends ConsumerWidget {
       final v = proState.promoEndsAt == null
           ? 'Active, no expiry'
           : 'Active until ${_shortDate(proState.promoEndsAt!)}';
-      return ('Status', v, cs.tertiary);
+      return ('Status', v, income);
     }
     if (proState.expiryDate != null) {
-      return ('Status', 'Renews on ${_shortDate(proState.expiryDate!)}', cs.tertiary);
+      return (
+        'Status',
+        'Renews on ${_shortDate(proState.expiryDate!)}',
+        income,
+      );
     }
-    return ('Status', 'Active', cs.tertiary);
+    return ('Status', 'Active', income);
   }
 
   void _openPlaySubscriptions(ProPlan? plan) {
     final sku = plan != null ? productIdForPlan(plan) : null;
     final uri = sku != null
         ? 'https://play.google.com/store/account/subscriptions'
-            '?sku=$sku&package=$_kAndroidPackage'
+              '?sku=$sku&package=$_kAndroidPackage'
         : 'https://play.google.com/store/account/subscriptions';
     launchUrl(Uri.parse(uri), mode: LaunchMode.externalApplication);
   }
@@ -191,17 +204,20 @@ class _TrialCountdownPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpace.md,
+        vertical: 6,
+      ),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.full),
+        borderRadius: BorderRadius.circular(KuberShape.full),
         border: Border.all(color: cs.primary.withValues(alpha: 0.4)),
       ),
       child: Text(
         daysLeft == 1 ? 'Trial ends in 1 day' : 'Trial ends in $daysLeft days',
         style: localeFont(
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
           color: cs.primary,
         ),
       ),
@@ -250,11 +266,11 @@ class _StatusHeroState extends State<_StatusHero>
     return RepaintBoundary(
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+        padding: const EdgeInsets.symmetric(vertical: KuberSpace.xl),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           children: [
@@ -262,43 +278,21 @@ class _StatusHeroState extends State<_StatusHero>
               animation: _controller,
               builder: (context, child) {
                 final t = Curves.easeInOut.transform(_controller.value);
+                // Board 3.14: solid primary tile, no glow; same pulse.
                 return SizedBox(
-                  width: 108,
-                  height: 108,
+                  width: 72,
+                  height: 72,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
-                        width: 108,
-                        height: 108,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              cs.primary.withValues(alpha: 0.28 + t * 0.14),
-                              cs.primary.withValues(alpha: 0.05),
-                              cs.primary.withValues(alpha: 0.0),
-                            ],
-                            stops: const [0.35, 0.7, 1.0],
-                          ),
-                        ),
-                      ),
                       Transform.scale(
                         scale: 1.0 + t * 0.04,
                         child: Container(
-                          width: 64,
-                          height: 64,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [
-                                cs.primary.withValues(alpha: 0.55),
-                                cs.primary.withValues(alpha: 0.15),
-                              ],
-                            ),
-                            border: Border.all(
-                              color: cs.primary.withValues(alpha: 0.35),
-                            ),
+                            color: cs.primary,
+                            borderRadius: KuberShape.largeR,
                           ),
                           child: Icon(
                             Icons.workspace_premium_rounded,
@@ -312,23 +306,21 @@ class _StatusHeroState extends State<_StatusHero>
                 );
               },
             ),
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.md),
             Text(
               trial ? 'You\'re on a free trial' : 'You\'re on Kuber Pro',
-              style: localeFont(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall!.copyWith(color: cs.onSurface),
             ),
             const SizedBox(height: 4),
             Text(
               trial
                   ? '${widget.planLabel} plan · trial'
                   : days > 0
-                      ? '${widget.planLabel} · $days ${days == 1 ? 'day' : 'days'} as Pro'
-                      : '${widget.planLabel} · active today',
-              style: localeFont(fontSize: 12.5, color: cs.onSurfaceVariant),
+                  ? '${widget.planLabel} · $days ${days == 1 ? 'day' : 'days'} as Pro'
+                  : '${widget.planLabel} · active today',
+              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -339,8 +331,18 @@ class _StatusHeroState extends State<_StatusHero>
 
 String _shortDate(DateTime d) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${d.day} ${months[d.month - 1]} ${d.year}';
 }

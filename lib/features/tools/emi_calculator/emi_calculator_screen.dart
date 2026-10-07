@@ -61,11 +61,11 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'principal': _principalCtrl.text,
-        'rate': _rateCtrl.text,
-        'tenure': _tenureCtrl.text,
-        'tenureUnit': _tenureUnit,
-      };
+    'principal': _principalCtrl.text,
+    'rate': _rateCtrl.text,
+    'tenure': _tenureCtrl.text,
+    'tenureUnit': _tenureUnit,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -89,8 +89,10 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
     final currency = ref.read(currencyProvider);
     final r = _compute();
     final years = (_tenureMonths / 12).toStringAsFixed(0);
-    final p = formatter.formatCurrency(parseAmount(_principalCtrl.text),
-        symbol: currency.symbol);
+    final p = formatter.formatCurrency(
+      parseAmount(_principalCtrl.text),
+      symbol: currency.symbol,
+    );
     if (r == null) return '$p loan';
     return '$p @ ${_rateCtrl.text}% for ${years}y → EMI ${formatter.formatCurrency(r.emi, symbol: currency.symbol)}';
   }
@@ -117,49 +119,54 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _principalCtrl,
-            label: 'LOAN AMOUNT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 50000,
-            max: 10000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'ANNUAL INTEREST RATE',
-            suffix: '%',
-            helper: 'Annual rate, as a percentage',
-            onChanged: recompute,
-            min: 1,
-            max: 20,
-            divisions: 190,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          const ToolInputLabel('TENURE'),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: ToolTextField(
-                    controller: _tenureCtrl, onChanged: recompute),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: ToolSegmentedControl(
-                  labels: const ['Years', 'Months'],
-                  selectedIndex: _tenureUnit,
-                  onChanged: (i) => setState(() => _tenureUnit = i),
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _principalCtrl,
+              label: 'LOAN AMOUNT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 50000,
+              max: 10000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'ANNUAL INTEREST RATE',
+              suffix: '%',
+              helper: 'Annual rate, as a percentage',
+              onChanged: recompute,
+              min: 1,
+              max: 20,
+              divisions: 190,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            const ToolInputLabel('TENURE'),
+            const SizedBox(height: KuberSpace.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: ToolTextField(
+                    controller: _tenureCtrl,
+                    onChanged: recompute,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ]),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
+                  child: ToolSegmentedControl(
+                    labels: const ['Years', 'Months'],
+                    selectedIndex: _tenureUnit,
+                    onChanged: (i) => setState(() => _tenureUnit = i),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -170,14 +177,21 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
                       value: money(result.emi),
                       color: cs.primary,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol('Total Interest', money(result.totalInterest),
-                          color: cs.error),
-                      StatCol('Total Payable', money(result.totalPayable)),
-                      StatCol('Interest / Principal',
-                          '${(result.totalInterest / result.principal * 100).round()}%'),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol(
+                          'Total Interest',
+                          money(result.totalInterest),
+                          color: cs.error,
+                        ),
+                        StatCol('Total Payable', money(result.totalPayable)),
+                        StatCol(
+                          'Interest / Principal',
+                          '${(result.totalInterest / result.principal * 100).round()}%',
+                        ),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -190,8 +204,10 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
                 BreakdownSegment('Principal', result.principal, cs.primary),
                 BreakdownSegment('Interest', result.totalInterest, cs.error),
               ],
-              centerBig: formatter.formatCompactCurrency(result.totalPayable,
-                  symbol: currency.symbol),
+              centerBig: formatter.formatCompactCurrency(
+                result.totalPayable,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'TOTAL',
             ),
           ),
@@ -201,13 +217,15 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Outstanding balance',
-                    points: result.balanceSeries,
-                    color: cs.primary),
+                  name: 'Outstanding balance',
+                  points: result.balanceSeries,
+                  color: cs.primary,
+                ),
                 ChartSeries(
-                    name: 'Cumulative interest',
-                    points: result.interestSeries,
-                    color: cs.error),
+                  name: 'Cumulative interest',
+                  points: result.interestSeries,
+                  color: cs.error,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.balanceSeries.length; i++) 'Y$i',
@@ -243,9 +261,10 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
                     ]
                   : [
                       for (final m in emiMonthlyRows(
-                          result.principal,
-                          parseNum(_rateCtrl.text),
-                          _tenureMonths))
+                        result.principal,
+                        parseNum(_rateCtrl.text),
+                        _tenureMonths,
+                      ))
                         [
                           'M${m[0].toInt()}',
                           money(m[1]),

@@ -36,7 +36,7 @@ class KuberInfoBottomSheet extends StatelessWidget {
             Text(
               displayDescription,
               style: localeFont(
-                fontSize: 15,
+                fontSize: 16,
                 color: cs.onSurfaceVariant,
                 height: 1.5,
               ),
@@ -55,18 +55,19 @@ class KuberInfoBottomSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      color: cs.secondaryContainer,
+                      borderRadius: KuberShape.mediumR,
                     ),
                     child: Icon(
                       item.icon,
                       size: 20,
-                      color: cs.primary,
+                      color: cs.onSecondaryContainer,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: KuberSpace.lg),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,18 +75,18 @@ class KuberInfoBottomSheet extends StatelessWidget {
                         Text(
                           displayItemTitle,
                           style: localeFont(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                             color: cs.onSurface,
+                            height: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 2),
                         Text(
                           displayItemDescription,
                           style: localeFont(
-                            fontSize: 13,
+                            fontSize: 14,
                             color: cs.onSurfaceVariant,
-                            height: 1.4,
+                            height: 20 / 14,
                           ),
                         ),
                         if (item.example != null) ...[
@@ -131,11 +132,10 @@ class _ExampleBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        color: cs.surfaceContainer,
+        borderRadius: KuberShape.mediumR,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +143,7 @@ class _ExampleBox extends StatelessWidget {
           Text(
             example.expression,
             style: localeFont(
-              fontSize: 13,
+              fontSize: 14,
               color: cs.onSurface,
               height: 1.6,
             ),
@@ -154,7 +154,7 @@ class _ExampleBox extends StatelessWidget {
               Text(
                 example.trigger,
                 style: localeFont(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
@@ -165,14 +165,14 @@ class _ExampleBox extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: cs.primary,
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(KuberShape.small),
                 ),
                 child: Text(
                   example.result,
                   style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onPrimary,
                   ),
                 ),
               ),

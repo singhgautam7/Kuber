@@ -60,12 +60,12 @@ class _EntitlementOverrideSheetState
   }
 
   String _label(DebugForcedTier t) => switch (t) {
-        DebugForcedTier.free => 'Free',
-        DebugForcedTier.trial => 'Trial',
-        DebugForcedTier.monthly => 'Monthly',
-        DebugForcedTier.yearly => 'Yearly',
-        DebugForcedTier.lifetime => 'Lifetime',
-      };
+    DebugForcedTier.free => 'Free',
+    DebugForcedTier.trial => 'Trial',
+    DebugForcedTier.monthly => 'Monthly',
+    DebugForcedTier.yearly => 'Yearly',
+    DebugForcedTier.lifetime => 'Lifetime',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +83,7 @@ class _EntitlementOverrideSheetState
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: AppButton(
               label: 'Apply',
@@ -102,12 +102,12 @@ class _EntitlementOverrideSheetState
             'purchase. Persists across restarts. Choose "Clear override" to '
             'fall back to real Play Billing state.',
             style: localeFont(
-              fontSize: 13,
+              fontSize: 14,
               color: cs.onSurfaceVariant,
               height: 1.4,
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           _OptionTile(
             label: 'Clear override',
             subtitle: 'Use real Play Billing state',
@@ -122,11 +122,11 @@ class _EntitlementOverrideSheetState
               onTap: () => setState(() => _selected = tier),
             ),
           if (_selected == DebugForcedTier.trial) ...[
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.md),
             Text(
               'Trial days remaining: ${_trialDays.round()}',
               style: localeFont(
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
@@ -146,12 +146,12 @@ class _EntitlementOverrideSheetState
   }
 
   String _subtitleFor(DebugForcedTier tier) => switch (tier) {
-        DebugForcedTier.free => 'All gates engaged',
-        DebugForcedTier.trial => 'Full access, trial UI',
-        DebugForcedTier.monthly => 'Full Pro, 30-day expiry',
-        DebugForcedTier.yearly => 'Full Pro, 14-day trial phase',
-        DebugForcedTier.lifetime => 'Full Pro, no expiry',
-      };
+    DebugForcedTier.free => 'All gates engaged',
+    DebugForcedTier.trial => 'Full access, trial UI',
+    DebugForcedTier.monthly => 'Full Pro, 30-day expiry',
+    DebugForcedTier.yearly => 'Full Pro, 14-day trial phase',
+    DebugForcedTier.lifetime => 'Full Pro, no expiry',
+  };
 }
 
 class _OptionTile extends StatelessWidget {
@@ -171,19 +171,21 @@ class _OptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sm),
       child: InkWell(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg,
-            vertical: KuberSpacing.md,
+            horizontal: KuberSpace.lg,
+            vertical: KuberSpace.md,
           ),
           decoration: BoxDecoration(
             color: selected ? cs.primary.withValues(alpha: 0.10) : cs.surface,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: selected ? cs.primary : cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(
+              color: selected ? cs.primary : cs.outlineVariant,
+            ),
           ),
           child: Row(
             children: [

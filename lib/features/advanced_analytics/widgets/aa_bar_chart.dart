@@ -117,10 +117,10 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
     final nice = norm <= 1
         ? 1.0
         : norm <= 2
-            ? 2.0
-            : norm <= 5
-                ? 5.0
-                : 10.0;
+        ? 2.0
+        : norm <= 5
+        ? 5.0
+        : 10.0;
     return nice * mag;
   }
 
@@ -132,7 +132,7 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
     final formatter = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final currentColor = widget.currentColor ?? cs.primary;
-    final previousColor = widget.previousColor ?? cs.outlineVariant;
+    final previousColor = widget.previousColor ?? cs.outline;
 
     String money(double v) => maskAmount(
       formatter.formatCurrency(v.roundToDouble()).replaceAll('.00', ''),
@@ -145,15 +145,17 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
       },
       child: Container(
         padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.sm,
-          KuberSpacing.lg,
-          KuberSpacing.md,
-          KuberSpacing.md,
+          KuberSpace.sm,
+          KuberSpace.lg,
+          KuberSpace.md,
+          KuberSpace.md,
         ),
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: widget.showBorder ? Border.all(color: cs.outline) : null,
+          borderRadius: KuberShape.largeR,
+          border: widget.showBorder
+              ? Border.all(color: cs.outlineVariant)
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,13 +163,16 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
             if (_hasPrevious)
               Padding(
                 padding: const EdgeInsets.only(
-                  left: KuberSpacing.sm,
-                  bottom: KuberSpacing.md,
+                  left: KuberSpace.sm,
+                  bottom: KuberSpace.md,
                 ),
                 child: Row(
                   children: [
-                    _LegendDot(color: previousColor, label: widget.previousLabel),
-                    const SizedBox(width: KuberSpacing.md),
+                    _LegendDot(
+                      color: previousColor,
+                      label: widget.previousLabel,
+                    ),
+                    const SizedBox(width: KuberSpace.md),
                     _LegendDot(color: currentColor, label: widget.currentLabel),
                   ],
                 ),
@@ -176,7 +181,8 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
               height: widget.height,
               child: LayoutBuilder(
                 builder: (context, c) {
-                  final needScroll = widget.scrollable &&
+                  final needScroll =
+                      widget.scrollable &&
                       widget.data.length * _slotWidth > c.maxWidth &&
                       widget.data.length > 1;
 
@@ -202,10 +208,14 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
                             money,
                             currentColor,
                             previousColor,
-                            left: (plotLeft +
-                                    (_touched + 0.5) * slot -
-                                    _cardWidth / 2)
-                                .clamp(0.0, math.max(0.0, c.maxWidth - _cardWidth)),
+                            left:
+                                (plotLeft +
+                                        (_touched + 0.5) * slot -
+                                        _cardWidth / 2)
+                                    .clamp(
+                                      0.0,
+                                      math.max(0.0, c.maxWidth - _cardWidth),
+                                    ),
                           ),
                       ],
                     );
@@ -243,26 +253,32 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
                               child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                _chart(
-                                  cs,
-                                  formatter,
-                                  isPrivate,
-                                  currentColor,
-                                  previousColor,
-                                  showLeftTitles: false,
-                                ),
-                                if (_touched >= 0 &&
-                                    _touched < widget.data.length)
-                                  _tooltip(
+                                  _chart(
                                     cs,
-                                    money,
+                                    formatter,
+                                    isPrivate,
                                     currentColor,
                                     previousColor,
-                                    left: ((_touched + 0.5) * _slotWidth -
-                                            _cardWidth / 2)
-                                        .clamp(0.0,
-                                            math.max(0.0, plotWidth - _cardWidth)),
+                                    showLeftTitles: false,
                                   ),
+                                  if (_touched >= 0 &&
+                                      _touched < widget.data.length)
+                                    _tooltip(
+                                      cs,
+                                      money,
+                                      currentColor,
+                                      previousColor,
+                                      left:
+                                          ((_touched + 0.5) * _slotWidth -
+                                                  _cardWidth / 2)
+                                              .clamp(
+                                                0.0,
+                                                math.max(
+                                                  0.0,
+                                                  plotWidth - _cardWidth,
+                                                ),
+                                              ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -289,8 +305,9 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
   }) {
     final d = widget.data[_touched];
     final prev = d.previous;
-    final change =
-        (prev == null || prev <= 0) ? 0.0 : ((d.current - prev) / prev) * 100;
+    final change = (prev == null || prev <= 0)
+        ? 0.0
+        : ((d.current - prev) / prev) * 100;
     final up = change > 0;
 
     Widget row(String k, String v, Color color, {bool bold = false}) => Padding(
@@ -303,7 +320,7 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
             v,
             style: localeFont(
               fontSize: 11,
-              fontWeight: bold ? FontWeight.w800 : FontWeight.w700,
+              fontWeight: bold ? FontWeight.w600 : FontWeight.w700,
               color: color,
             ),
           ),
@@ -317,20 +334,13 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
       width: _cardWidth,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md,
-          vertical: KuberSpacing.sm,
+          horizontal: KuberSpace.md,
+          vertical: KuberSpace.sm,
         ),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-          boxShadow: [
-            BoxShadow(
-              color: cs.shadow.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          borderRadius: KuberShape.largeR,
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -339,8 +349,8 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
             Text(
               d.label.toUpperCase(),
               style: localeFont(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.8,
                 color: cs.onSurfaceVariant,
               ),
@@ -351,7 +361,7 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
               row(
                 'Change',
                 '${up ? '+' : ''}${change.toStringAsFixed(1)}%',
-                up ? cs.error : cs.tertiary,
+                up ? context.kuberMoney.expense : context.kuberMoney.income,
                 bold: true,
               ),
             ],
@@ -391,8 +401,10 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
             show: true,
             drawVerticalLine: false,
             horizontalInterval: _gridInterval,
-            getDrawingHorizontalLine: (_) =>
-                FlLine(color: cs.outline.withValues(alpha: 0.5), strokeWidth: 1),
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: cs.outlineVariant.withValues(alpha: 0.5),
+              strokeWidth: 1,
+            ),
           ),
           borderData: FlBorderData(show: false),
           titlesData: _titles(cs, formatter, isPrivate, showLeftTitles),
@@ -422,8 +434,9 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
     final d = widget.data[i];
     final dim = _touched != -1 && _touched != i;
     // Optional peak highlight (single-series weekday chart).
-    final baseCurrent = widget.highlightIndex != null && i != widget.highlightIndex
-        ? cs.outlineVariant
+    final baseCurrent =
+        widget.highlightIndex != null && i != widget.highlightIndex
+        ? cs.outline
         : currentColor;
     Color shade(Color c) => c.withValues(alpha: dim ? 0.3 : 1);
     return BarChartGroupData(
@@ -435,13 +448,17 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
             toY: d.previous!,
             color: shade(previousColor),
             width: _barWidth,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(KuberShape.extraSmall),
+            ),
           ),
         BarChartRodData(
           toY: d.current,
           color: shade(baseCurrent),
           width: _barWidth,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(KuberShape.extraSmall),
+          ),
         ),
       ],
     );
@@ -453,7 +470,7 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
     bool isPrivate,
     bool showLeft,
   ) {
-    final axisStyle = localeFont(fontSize: 9.5, color: cs.onSurfaceVariant);
+    final axisStyle = localeFont(fontSize: 11, color: cs.onSurfaceVariant);
     return FlTitlesData(
       leftTitles: showLeft
           ? AxisTitles(
@@ -478,9 +495,7 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
               ),
             )
           : const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      rightTitles: const AxisTitles(
-        sideTitles: SideTitles(showTitles: false),
-      ),
+      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -523,14 +538,14 @@ class _LegendDot extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(KuberShape.full),
           ),
         ),
         const SizedBox(width: 5),
         Text(
           label,
           style: localeFont(
-            fontSize: 10.5,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
           ),
@@ -556,7 +571,7 @@ class _YAxis extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
-    final style = localeFont(fontSize: 9.5, color: cs.onSurfaceVariant);
+    final style = localeFont(fontSize: 11, color: cs.onSurfaceVariant);
 
     final ticks = <double>[];
     for (var v = 0.0; v <= maxY + 0.001; v += interval) {

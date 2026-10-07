@@ -49,14 +49,11 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
               backgroundColor: cs.surfaceContainerHigh,
               selectedBackgroundColor: cs.primary.withValues(alpha: 0.15),
               selectedForegroundColor: cs.primary,
-              textStyle: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+              textStyle: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         // Content
         if (_viewModeIndex == 0) _buildKeyValueView(cs) else _buildJsonView(cs),
@@ -70,7 +67,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: widget.recordMap.entries.map((entry) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+          padding: const EdgeInsets.only(bottom: KuberSpace.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -78,17 +75,11 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
                 flex: 2,
                 child: Text(
                   entry.key,
-                  style: monoFont(
-                    fontSize: 13,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: monoFont(fontSize: 14, color: cs.onSurfaceVariant),
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                flex: 3,
-                child: _buildValueWidget(entry.value, cs),
-              ),
+              const SizedBox(width: KuberSpace.md),
+              Expanded(flex: 3, child: _buildValueWidget(entry.value, cs)),
             ],
           ),
         );
@@ -115,7 +106,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
             color: value
                 ? Colors.green.withValues(alpha: 0.15)
                 : Colors.red.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(KuberShape.small),
             border: Border.all(
               color: value
                   ? Colors.green.withValues(alpha: 0.3)
@@ -141,7 +132,8 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
         if (dt != null) {
           // simple formatting fallback to avoid adding intl if it's not present,
           // but we can just show original or simple formatting.
-          displayStr = '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+          displayStr =
+              '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
         }
       }
 
@@ -157,20 +149,19 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
   }
 
   Widget _buildJsonView(ColorScheme cs) {
-    final jsonStr = const JsonEncoder.withIndent('  ').convert(widget.recordMap);
+    final jsonStr = const JsonEncoder.withIndent(
+      '  ',
+    ).convert(widget.recordMap);
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outlineVariant),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outline),
       ),
       child: SelectableText(
         jsonStr,
-        style: monoFont(
-          fontSize: 13,
-          color: cs.onSurface,
-        ),
+        style: monoFont(fontSize: 14, color: cs.onSurface),
       ),
     );
   }

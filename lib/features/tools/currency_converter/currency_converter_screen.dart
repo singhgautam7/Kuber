@@ -7,7 +7,7 @@ import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/calculator_widgets.dart';
 import 'providers/exchange_rates_provider.dart';
@@ -113,41 +113,39 @@ class _CurrencyConverterScreenState
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.currencyConverter,
-            ),
-          ),
           SliverToBoxAdapter(
-            child: KuberPageHeader(
+            child: KuberAppBar(
               title: 'Currency Converter',
-              description: 'Convert currencies using live exchange rates',
-              actionIcon: Icons.refresh_rounded,
-              onAction: _refresh,
-              actionTooltip: 'Refresh rates',
-              isLoading: ratesAsync.isLoading || ratesAsync.isRefreshing,
+              showBack: true,
+              infoConfig: InfoConstants.currencyConverter,
+              actions: [
+                AppIconButton(
+                  icon: Icons.refresh_rounded,
+                  semanticLabel: 'Refresh rates',
+                  onPressed: ratesAsync.isLoading || ratesAsync.isRefreshing
+                      ? null
+                      : _refresh,
+                ),
+              ],
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
+              KuberSpace.lg,
               0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+              KuberSpace.lg,
+              KuberSpace.xl,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Last updated label
                 Padding(
-                  padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                  padding: const EdgeInsets.only(bottom: KuberSpace.sm),
                   child: RichText(
                     text: TextSpan(
                       style: localeFont(
                         fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 1.0,
                       ),
                       children: [
@@ -157,7 +155,9 @@ class _CurrencyConverterScreenState
                         ),
                         TextSpan(
                           text: lastUpdatedLabel,
-                          style: TextStyle(color: isStale ? cs.error : cs.primary),
+                          style: TextStyle(
+                            color: isStale ? cs.error : cs.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -170,7 +170,7 @@ class _CurrencyConverterScreenState
                       controller: _amountCtrl,
                       onChanged: (_) => setState(() {}),
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     Row(
                       children: [
                         Expanded(
@@ -182,17 +182,21 @@ class _CurrencyConverterScreenState
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: KuberSpacing.md),
+                            horizontal: KuberSpace.md,
+                          ),
                           child: IconButton(
                             onPressed: _swap,
-                            icon: Icon(Icons.swap_horiz_rounded,
-                                color: cs.primary),
+                            icon: Icon(
+                              Icons.swap_horiz_rounded,
+                              color: cs.primary,
+                            ),
                             style: IconButton.styleFrom(
                               backgroundColor: cs.surfaceContainerHigh,
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(KuberRadius.md),
-                                side: BorderSide(color: cs.outline),
+                                borderRadius: BorderRadius.circular(
+                                  KuberShape.medium,
+                                ),
+                                side: BorderSide(color: cs.outlineVariant),
                               ),
                             ),
                           ),
@@ -208,20 +212,19 @@ class _CurrencyConverterScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 ToolResultCard(
                   children: [
                     ratesAsync.when(
                       loading: () => const Center(
                         child: Padding(
-                          padding: EdgeInsets.all(KuberSpacing.xl),
+                          padding: EdgeInsets.all(KuberSpace.xl),
                           child: CircularProgressIndicator(),
                         ),
                       ),
                       error: (e, _) => _ErrorState(onRetry: _refresh),
                       data: (result) {
-                        final amount =
-                            double.tryParse(_amountCtrl.text) ?? 1;
+                        final amount = double.tryParse(_amountCtrl.text) ?? 1;
                         final rate = result.rates[_toCurrency] ?? 1;
                         final converted = amount * rate;
                         final fromRate = result.rates[_fromCurrency] ?? 1;
@@ -236,7 +239,7 @@ class _CurrencyConverterScreenState
                                   '${_currencySymbol(_toCurrency)}${converted.toStringAsFixed(2)}',
                               color: cs.primary,
                             ),
-                            const SizedBox(height: KuberSpacing.lg),
+                            const SizedBox(height: KuberSpace.lg),
                             ToolStatRow(
                               label: 'Exchange Rate',
                               value:
@@ -273,17 +276,17 @@ class _CurrencyPickerSheet extends StatefulWidget {
 class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
   String _query = '';
 
-  static final _nameMap = {
-    for (final c in kCurrencies) c.code: c.name,
-  };
+  static final _nameMap = {for (final c in kCurrencies) c.code: c.name};
 
   List<String> get _filtered {
     final q = _query.toLowerCase();
     if (q.isEmpty) return kFrankfurterCurrencies;
     return kFrankfurterCurrencies
-        .where((code) =>
-            code.toLowerCase().contains(q) ||
-            (_nameMap[code] ?? '').toLowerCase().contains(q))
+        .where(
+          (code) =>
+              code.toLowerCase().contains(q) ||
+              (_nameMap[code] ?? '').toLowerCase().contains(q),
+        )
         .toList();
   }
 
@@ -300,8 +303,9 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
       builder: (_, ctrl) => Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(KuberShape.extraLarge),
+          ),
         ),
         child: SafeArea(
           child: Column(
@@ -315,7 +319,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(KuberShape.full),
                     ),
                   ),
                 ),
@@ -332,7 +336,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                         'Select Currency',
                         style: localeFont(
                           fontSize: 24,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: cs.onSurface,
                           letterSpacing: -0.5,
                         ),
@@ -354,51 +358,60 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: cs.outline),
+              Divider(height: 1, thickness: 0.5, color: cs.outlineVariant),
               // Search bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.lg, KuberSpacing.md, KuberSpacing.lg, 0),
+                  KuberSpace.lg,
+                  KuberSpace.md,
+                  KuberSpace.lg,
+                  0,
+                ),
                 child: TextField(
                   autofocus: false,
                   onChanged: (v) => setState(() => _query = v),
-                  style:
-                      localeFont(fontSize: 14, color: cs.onSurface),
+                  style: localeFont(fontSize: 14, color: cs.onSurface),
                   decoration: InputDecoration(
                     hintText: 'Search currencies...',
                     hintStyle: localeFont(
-                        fontSize: 14, color: cs.onSurfaceVariant),
-                    prefixIcon: Icon(Icons.search_rounded,
-                        color: cs.onSurfaceVariant, size: 20),
+                      fontSize: 14,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: cs.onSurfaceVariant,
+                      size: 20,
+                    ),
                     filled: true,
                     fillColor: cs.surfaceContainerHigh,
                     contentPadding: const EdgeInsets.symmetric(
-                      vertical: KuberSpacing.md,
-                      horizontal: KuberSpacing.lg,
+                      vertical: KuberSpace.md,
+                      horizontal: KuberSpace.lg,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.outline),
+                      borderRadius: BorderRadius.circular(KuberShape.large),
+                      borderSide: BorderSide(color: cs.outlineVariant),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.outline),
+                      borderRadius: BorderRadius.circular(KuberShape.large),
+                      borderSide: BorderSide(color: cs.outlineVariant),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                      borderRadius: BorderRadius.circular(KuberShape.large),
                       borderSide: BorderSide(color: cs.primary),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.sm),
+              const SizedBox(height: KuberSpace.sm),
               // List
               Expanded(
                 child: ListView.builder(
                   controller: ctrl,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: KuberSpacing.lg,
-                      vertical: KuberSpacing.sm),
+                    horizontal: KuberSpace.lg,
+                    vertical: KuberSpace.sm,
+                  ),
                   itemCount: filtered.length,
                   itemBuilder: (_, i) {
                     final code = filtered[i];
@@ -410,12 +423,13 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                         widget.onSelected(code);
                       },
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.sm),
+                        horizontal: KuberSpace.sm,
+                      ),
                       title: Text(
                         code,
                         style: localeFont(
                           fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: cs.onSurface,
                         ),
                       ),
@@ -427,8 +441,11 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                         ),
                       ),
                       trailing: selected
-                          ? Icon(Icons.check_rounded,
-                              color: cs.primary, size: 20)
+                          ? Icon(
+                              Icons.check_rounded,
+                              color: cs.primary,
+                              size: 20,
+                            )
                           : null,
                       dense: true,
                     );
@@ -454,9 +471,7 @@ class _CurrencySelector extends StatelessWidget {
     required this.onTap,
   });
 
-  static final _nameMap = {
-    for (final c in kCurrencies) c.code: c.name,
-  };
+  static final _nameMap = {for (final c in kCurrencies) c.code: c.name};
 
   @override
   Widget build(BuildContext context) {
@@ -468,17 +483,17 @@ class _CurrencySelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ToolInputLabel(label),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.md,
-              vertical: KuberSpacing.md,
+              horizontal: KuberSpace.md,
+              vertical: KuberSpace.md,
             ),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,17 +501,14 @@ class _CurrencySelector extends StatelessWidget {
                 Text(
                   code,
                   style: localeFont(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
                 Text(
                   name,
-                  style: localeFont(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -511,12 +523,36 @@ class _CurrencySelector extends StatelessWidget {
 
 String _currencySymbol(String code) {
   const symbols = {
-    'USD': '\$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'INR': '₹',
-    'CNY': '¥', 'KRW': '₩', 'BRL': 'R\$', 'MXN': 'MX\$', 'CAD': 'CA\$',
-    'AUD': 'A\$', 'CHF': 'Fr', 'HKD': 'HK\$', 'SGD': 'S\$', 'NOK': 'kr',
-    'SEK': 'kr', 'DKK': 'kr', 'NZD': 'NZ\$', 'ZAR': 'R', 'TRY': '₺',
-    'PLN': 'zł', 'THB': '฿', 'PHP': '₱', 'MYR': 'RM', 'IDR': 'Rp',
-    'ILS': '₪', 'CZK': 'Kč', 'HUF': 'Ft', 'RON': 'lei', 'BGN': 'лв',
+    'USD': '\$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+    'INR': '₹',
+    'CNY': '¥',
+    'KRW': '₩',
+    'BRL': 'R\$',
+    'MXN': 'MX\$',
+    'CAD': 'CA\$',
+    'AUD': 'A\$',
+    'CHF': 'Fr',
+    'HKD': 'HK\$',
+    'SGD': 'S\$',
+    'NOK': 'kr',
+    'SEK': 'kr',
+    'DKK': 'kr',
+    'NZD': 'NZ\$',
+    'ZAR': 'R',
+    'TRY': '₺',
+    'PLN': 'zł',
+    'THB': '฿',
+    'PHP': '₱',
+    'MYR': 'RM',
+    'IDR': 'Rp',
+    'ILS': '₪',
+    'CZK': 'Kč',
+    'HUF': 'Ft',
+    'RON': 'lei',
+    'BGN': 'лв',
     'ISK': 'kr',
   };
   return symbols[code] ?? '';
@@ -532,20 +568,18 @@ class _ErrorState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.xl),
+        padding: const EdgeInsets.all(KuberSpace.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.wifi_off_rounded,
-                size: 40, color: cs.onSurfaceVariant),
-            const SizedBox(height: KuberSpacing.md),
+            Icon(Icons.wifi_off_rounded, size: 40, color: cs.onSurfaceVariant),
+            const SizedBox(height: KuberSpace.md),
             Text(
               'Could not load exchange rates',
-              style: localeFont(
-                  fontSize: 14, color: cs.onSurfaceVariant),
+              style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.md),
             TextButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),

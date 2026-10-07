@@ -1,16 +1,19 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../core/models/overflow_config.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/info_table.dart';
 import '../../../shared/widgets/sheet_button_section.dart';
@@ -153,6 +156,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
 
     return Scaffold(
+      // Board 3.16: Add Category is the FAB; Add Group is in the overflow.
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: context.l10n.addCategory,
+        onPressed: () => context.push(
+          '/category/add',
+          extra: const CategoryRouteArgs(returnToCategoryPicker: false),
+        ),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
       // Tap anywhere outside the search field to dismiss the keyboard.
       // `behavior: opaque` so the detector also catches taps on empty
@@ -163,31 +176,37 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: categoriesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+          error: (e, _) =>
+              Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
           data: (categories) {
             final groups = groupsAsync.valueOrNull ?? [];
 
             return CustomScrollView(
               slivers: [
                 // App bar
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: KuberAppBar(
                     showBack: true,
-                    showHome: true,
-                    title: '',
+                    title: context.l10n.menuCategories,
                     infoConfig: InfoConstants.categories,
+                    search: KuberHeaderSearch(
+                      controller: _searchController,
+                      hint: context.l10n.searchCategoriesHint,
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
+                    overflowConfig: KuberOverflowConfig(
+                      items: [
+                        KuberOverflowItem(
+                          icon: Icons.create_new_folder_outlined,
+                          label: context.l10n.addGroup,
+                          onTap: () => _showAddGroupDialog(context),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
                 // Page header
-                SliverToBoxAdapter(
-                  child: KuberPageHeader(
-                    title: context.l10n.categoriesTitle,
-                    description: '',
-                    actionTooltip: context.l10n.addCategoryGroup,
-                    onAction: () => _showAddSelectionSheet(context),
-                  ),
-                ),
 
                 // Spend hero — hidden when there is no expense activity this
                 // month so we don't render an empty ₹0 / 0 categories card.
@@ -196,16 +215,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       .watch(categorySpendBreakdownProvider)
                       .when(
                         data: (breakdown) {
-                          if (breakdown.total <= 0 ||
+                          if (_query.trim().isNotEmpty ||
+                              breakdown.total <= 0 ||
                               breakdown.topSlices.isEmpty) {
                             return const SizedBox.shrink();
                           }
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(
-                              KuberSpacing.lg,
+                              KuberSpace.screenMargin,
                               0,
-                              KuberSpacing.lg,
-                              KuberSpacing.lg,
+                              KuberSpace.screenMargin,
+                              0,
                             ),
                             child: CategorySpendHero(
                               total: breakdown.total,
@@ -217,10 +237,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         },
                         loading: () => const Padding(
                           padding: EdgeInsets.fromLTRB(
-                            KuberSpacing.lg,
+                            KuberSpace.lg,
                             0,
-                            KuberSpacing.lg,
-                            KuberSpacing.lg,
+                            KuberSpace.lg,
+                            KuberSpace.lg,
                           ),
                           child: SizedBox(
                             height: 180,
@@ -238,77 +258,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       icon: Icons.category_outlined,
                       title: context.l10n.noCategories,
                       description: context.l10n.categoriesEmptyDesc,
-                      actionLabel: context.l10n.addCategory,
-                      onAction: () => _showAddSelectionSheet(context),
                     ),
                   )
                 else ...[
-                  // Search field — matches the tools_hub_screen treatment.
-                  // Filters by category name OR parent group name (case-
-                  // insensitive); when matches occur, the list flips from
-                  // grouped to a flat sorted result list.
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        KuberSpacing.lg,
-                        0,
-                        KuberSpacing.lg,
-                        KuberSpacing.md,
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (v) => setState(() => _query = v),
-                        style: localeFont(
-                          fontSize: 14,
-                          color: cs.onSurface,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: context.l10n.searchCategoriesHint,
-                          hintStyle: localeFont(
-                            fontSize: 14,
-                            color: cs.onSurfaceVariant,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            color: cs.onSurfaceVariant,
-                            size: 20,
-                          ),
-                          suffixIcon: _query.isEmpty
-                              ? null
-                              : IconButton(
-                                  icon: Icon(
-                                    Icons.close_rounded,
-                                    color: cs.onSurfaceVariant,
-                                    size: 18,
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() => _query = '');
-                                  },
-                                ),
-                          filled: true,
-                          fillColor: cs.surfaceContainer,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: KuberSpacing.md,
-                            horizontal: KuberSpacing.lg,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
-                            borderSide: BorderSide(color: cs.outline),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
-                            borderSide: BorderSide(color: cs.outline),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
-                            borderSide: BorderSide(color: cs.primary),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
                   ...() {
                     // Per-category this-month aggregates — same source the
                     // hero uses, so per-row amount + txn count stay in
@@ -354,14 +306,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         return <Widget>[
                           SliverPadding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: KuberSpacing.lg,
-                              vertical: KuberSpacing.xl,
+                              horizontal: KuberSpace.lg,
+                              vertical: KuberSpace.xl,
                             ),
                             sliver: SliverToBoxAdapter(
                               child: KuberEmptyState(
                                 icon: Icons.search_off_rounded,
                                 title: context.l10n.noMatches,
-                                description: context.l10n.noCategoryMatches(_query.trim()),
+                                description: context.l10n.noCategoryMatches(
+                                  _query.trim(),
+                                ),
                               ),
                             ),
                           ),
@@ -370,41 +324,43 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
                       return <Widget>[
                         SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate((
-                              context,
-                              index,
-                            ) {
-                              final cat = matched[index];
-                              final catIdStr = cat.id.toString();
-                              final realGname = cat.groupId != null
-                                  ? groupNameById[cat.groupId!]
-                                  : null;
-                              // Always surface a group tag in search
-                              // results: real group name if set, else
-                              // "Ungrouped". Otherwise an orphan category
-                              // looks identical to a grouped one and the
-                              // user can't tell why it matched.
-                              final searchTag = realGname ?? context.l10n.ungroupedLabel;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: CategoryListItem(
-                                  category: cat,
-                                  thisMonthSpent:
-                                      perCategoryThisMonth[catIdStr] ?? 0,
-                                  thisMonthTxnCount:
-                                      perCategoryThisMonthCount[catIdStr] ?? 0,
-                                  groupName: searchTag,
-                                  onTap: () => _showCategoryDetails(
-                                    context,
-                                    ref,
-                                    cat,
-                                    realGname,
-                                  ),
-                                ),
-                              );
-                            }, childCount: matched.length),
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: KuberGroup(
+                              children: [
+                                for (final (index, _) in matched.indexed)
+                                  () {
+                                    final cat = matched[index];
+                                    final catIdStr = cat.id.toString();
+                                    final realGname = cat.groupId != null
+                                        ? groupNameById[cat.groupId!]
+                                        : null;
+                                    // Always surface a group tag in search
+                                    // results: real group name if set, else
+                                    // "Ungrouped". Otherwise an orphan category
+                                    // looks identical to a grouped one and the
+                                    // user can't tell why it matched.
+                                    final searchTag =
+                                        realGname ??
+                                        context.l10n.ungroupedLabel;
+                                    return CategoryListItem(
+                                      category: cat,
+                                      thisMonthSpent:
+                                          perCategoryThisMonth[catIdStr] ?? 0,
+                                      thisMonthTxnCount:
+                                          perCategoryThisMonthCount[catIdStr] ??
+                                          0,
+                                      groupName: searchTag,
+                                      onTap: () => _showCategoryDetails(
+                                        context,
+                                        ref,
+                                        cat,
+                                        realGname,
+                                      ),
+                                    );
+                                  }(),
+                              ],
+                            ),
                           ),
                         ),
                       ];
@@ -421,7 +377,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       ..sort((a, b) => a.name.compareTo(b.name));
 
                     final List<Widget> slivers = [];
-                    int groupSerial = 0;
 
                     // Render each group
                     for (final group in sortedGroups) {
@@ -430,47 +385,45 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         groupCategories.sort(
                           (a, b) => a.name.compareTo(b.name),
                         );
-                        groupSerial += 1;
-                        slivers.add(
-                          SliverToBoxAdapter(
-                            child: _GroupHeader(
-                              name: group.name,
-                              serial: groupSerial.toString().padLeft(2, '0'),
-                              count: groupCategories.length,
-                              onTap: () =>
-                                  _showGroupActionsSheet(context, ref, group),
-                            ),
-                          ),
-                        );
                         slivers.add(
                           SliverPadding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            sliver: SliverList(
-                              delegate: SliverChildBuilderDelegate((
-                                context,
-                                index,
-                              ) {
-                                final cat = groupCategories[index];
-                                final catIdStr = cat.id.toString();
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: CategoryListItem(
-                                    category: cat,
-                                    thisMonthSpent:
-                                        perCategoryThisMonth[catIdStr] ?? 0,
-                                    thisMonthTxnCount:
-                                        perCategoryThisMonthCount[catIdStr] ??
-                                        0,
-                                    groupName: group.name,
-                                    onTap: () => _showCategoryDetails(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            sliver: SliverToBoxAdapter(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _GroupHeader(
+                                    name: group.name,
+                                    onMore: () => _showGroupActionsSheet(
                                       context,
                                       ref,
-                                      cat,
-                                      group.name,
+                                      group,
                                     ),
                                   ),
-                                );
-                              }, childCount: groupCategories.length),
+                                  KuberGroup(
+                                    children: [
+                                      for (final cat in groupCategories)
+                                        CategoryListItem(
+                                          category: cat,
+                                          thisMonthSpent:
+                                              perCategoryThisMonth[cat.id
+                                                  .toString()] ??
+                                              0,
+                                          thisMonthTxnCount:
+                                              perCategoryThisMonthCount[cat.id
+                                                  .toString()] ??
+                                              0,
+                                          onTap: () => _showCategoryDetails(
+                                            context,
+                                            ref,
+                                            cat,
+                                            group.name,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -481,43 +434,38 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     final ungrouped = grouped[null] ?? [];
                     if (ungrouped.isNotEmpty) {
                       ungrouped.sort((a, b) => a.name.compareTo(b.name));
-                      groupSerial += 1;
-                      slivers.add(
-                        SliverToBoxAdapter(
-                          child: _GroupHeader(
-                            name: 'Ungrouped',
-                            serial: groupSerial.toString().padLeft(2, '0'),
-                            count: ungrouped.length,
-                          ),
-                        ),
-                      );
                       slivers.add(
                         SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate((
-                              context,
-                              index,
-                            ) {
-                              final cat = ungrouped[index];
-                              final catIdStr = cat.id.toString();
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: CategoryListItem(
-                                  category: cat,
-                                  thisMonthSpent:
-                                      perCategoryThisMonth[catIdStr] ?? 0,
-                                  thisMonthTxnCount:
-                                      perCategoryThisMonthCount[catIdStr] ?? 0,
-                                  onTap: () => _showCategoryDetails(
-                                    context,
-                                    ref,
-                                    cat,
-                                    null,
-                                  ),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _GroupHeader(name: context.l10n.ungroupedLabel),
+                                KuberGroup(
+                                  children: [
+                                    for (final cat in ungrouped)
+                                      CategoryListItem(
+                                        category: cat,
+                                        thisMonthSpent:
+                                            perCategoryThisMonth[cat.id
+                                                .toString()] ??
+                                            0,
+                                        thisMonthTxnCount:
+                                            perCategoryThisMonthCount[cat.id
+                                                .toString()] ??
+                                            0,
+                                        onTap: () => _showCategoryDetails(
+                                          context,
+                                          ref,
+                                          cat,
+                                          null,
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              );
-                            }, childCount: ungrouped.length),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -528,167 +476,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 ],
 
                 // Bottom padding
-                SliverToBoxAdapter(
-                  child: SizedBox(height: navBarBottomPadding(context) + 40),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: KuberExtendedFab.clearance),
                 ),
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-
-  void _showAddSelectionSheet(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.xl,
-          0,
-          KuberSpacing.xl,
-          KuberSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Header with Title + Close
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.l10n.addNew,
-                  style: localeFont(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context, rootNavigator: true).pop(),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _buildAddOption(
-              context,
-              icon: Icons.category_rounded,
-              title: context.l10n.addCategory,
-              description: context.l10n.addCategoryDesc,
-              onTap: () {
-                Navigator.pop(context);
-                context.push(
-                  '/category/add',
-                  extra: const CategoryRouteArgs(returnToCategoryPicker: false),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            _buildAddOption(
-              context,
-              icon: Icons.grid_view_rounded,
-              title: context.l10n.addGroup,
-              description: context.l10n.addGroupDesc,
-              onTap: () {
-                Navigator.pop(context);
-                _showAddGroupDialog(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddOption(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String description,
-    required VoidCallback onTap,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: cs.outlineVariant),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: cs.primary, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: localeFont(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  Text(
-                    description,
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
-          ],
         ),
       ),
     );
@@ -746,7 +539,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 _showEditGroupDialog(context, ref, group);
               },
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             AppButton(
               label: context.l10n.deleteGroupLabel,
               icon: Icons.delete_outline_rounded,
@@ -800,7 +593,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               }
 
               return AlertDialog(
-                backgroundColor: cs.surfaceContainer,
                 title: Text(
                   title,
                   style: localeFont(fontWeight: FontWeight.w600),
@@ -819,7 +611,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         errorText: errorText,
                         counterText: '${raw.length} / 15',
                         counterStyle: localeFont(
-                          fontSize: 10,
+                          fontSize: 11,
                           color: raw.length >= 15
                               ? cs.error
                               : cs.onSurfaceVariant,
@@ -858,18 +650,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     WidgetRef ref,
     CategoryGroup group,
   ) {
-    final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
         title: Text(
           context.l10n.deleteGroupConfirm,
           style: localeFont(fontWeight: FontWeight.w600),
         ),
-        content: Text(
-          context.l10n.deleteGroupBody(group.name),
-        ),
+        content: Text(context.l10n.deleteGroupBody(group.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -897,8 +685,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final typeValue = cat.effectiveType == 'both'
         ? context.l10n.incomeAndExpense
         : cat.effectiveType == 'income'
-            ? context.l10n.incomeLabel
-            : context.l10n.expenseLabel;
+        ? context.l10n.incomeLabel
+        : context.l10n.expenseLabel;
 
     showModalBottomSheet(
       context: context,
@@ -997,17 +785,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       showDialog(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          backgroundColor: cs.surfaceContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: cs.outline, width: 1),
+            borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+            side: BorderSide(color: cs.outlineVariant, width: 1),
           ),
           title: Text(
             context.l10n.cannotDeleteCategory,
-            style: localeFont(
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+            style: localeFont(fontWeight: FontWeight.w600, color: cs.onSurface),
           ),
           content: Text(
             context.l10n.cannotDeleteCategoryBody,
@@ -1026,17 +810,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       showDialog(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          backgroundColor: cs.surfaceContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: cs.outline, width: 1),
+            borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+            side: BorderSide(color: cs.outlineVariant, width: 1),
           ),
           title: Text(
             context.l10n.deleteCategoryConfirm,
-            style: localeFont(
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+            style: localeFont(fontWeight: FontWeight.w600, color: cs.onSurface),
           ),
           content: Text(
             context.l10n.deleteCategoryBody(cat.name),
@@ -1066,62 +846,44 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 }
 
+/// Group section header (board 3.16): caps name with its own "···" menu
+/// (edit / delete group) on the right.
 class _GroupHeader extends StatelessWidget {
   final String name;
-  final String? serial;
-  final int? count;
+  final VoidCallback? onMore;
 
-  /// When non-null, the entire header row is tappable. Use to open a
-  /// bottom sheet with group actions (edit / delete). Pass null for
-  /// non-actionable groups (e.g. "Ungrouped").
-  final VoidCallback? onTap;
-
-  const _GroupHeader({required this.name, this.serial, this.count, this.onTap});
+  const _GroupHeader({required this.name, this.onMore});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final row = Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (serial != null) ...[
-            Text(
-              serial!,
-              style: monoFont(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 0.4,
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-          ],
-          Text(
-            name.toUpperCase(),
-            style: localeFont(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: cs.primary,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const Spacer(),
-          if (count != null)
-            Text(
-              count == 1 ? '1 category' : '$count categories',
-              style: localeFont(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-        ],
+    return KuberSectionHeader(
+      title: name,
+      // A 32 row (the button) around a ~16 label: 20 + 8 above makes the
+      // sectionGap between groups, and the 8 below is the header gap.
+      padding: EdgeInsets.only(
+        top: KuberSpace.sectionGap - 8,
+        bottom: onMore == null ? KuberSpace.sectionHeaderGap : 0,
       ),
+      trailing: onMore == null
+          ? null
+          // A 48x32 slot: the 48 tap target overflows it vertically, so
+          // the row stays label-height.
+          : SizedBox(
+              width: KuberSpace.tapTarget,
+              height: 32,
+              child: OverflowBox(
+                minHeight: KuberSpace.tapTarget,
+                maxHeight: KuberSpace.tapTarget,
+                child: AppIconButton(
+                  icon: Icons.more_horiz_rounded,
+                  kind: AppIconButtonKind.plain,
+                  size: 32,
+                  semanticLabel: 'Group actions',
+                  onPressed: onMore,
+                ),
+              ),
+            ),
     );
-
-    if (onTap == null) return row;
-    return InkWell(onTap: onTap, child: row);
   }
 }
 
@@ -1191,8 +953,8 @@ class _CategoryKpisGrid extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1202,8 +964,8 @@ class _CategoryKpisGrid extends ConsumerWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: localeFont(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
               letterSpacing: 1.1,
               color: cs.onSurfaceVariant,
             ),
@@ -1214,8 +976,8 @@ class _CategoryKpisGrid extends ConsumerWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: localeFont(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
@@ -1249,14 +1011,14 @@ class _CategoryListItem extends ConsumerWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(KuberShape.full),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
           border: Border.all(
-            color: cs.outlineVariant.withValues(alpha: 0.5),
+            color: cs.outline.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -1281,7 +1043,7 @@ class _CategoryListItem extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         style: localeFont(
                           fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: cs.onSurface,
                         ),
                       ),
@@ -1289,7 +1051,7 @@ class _CategoryListItem extends ConsumerWidget {
                       Text(
                         category.effectiveType.toUpperCase(),
                         style: localeFont(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.8),
                           letterSpacing: 1.1,
@@ -1331,7 +1093,7 @@ class _CategoryListItem extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: cs.onSurfaceVariant.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(KuberShape.medium),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1345,8 +1107,8 @@ class _CategoryListItem extends ConsumerWidget {
               Text(
                 'NO BUDGET',
                 style: localeFont(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
@@ -1359,7 +1121,7 @@ class _CategoryListItem extends ConsumerWidget {
             height: 6,
             decoration: BoxDecoration(
               color: cs.onSurfaceVariant.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.circular(KuberShape.full),
             ),
           ),
         ),
@@ -1384,8 +1146,8 @@ class _CategoryListItem extends ConsumerWidget {
         final progressNum = p.percentage / 100.0;
         final isOverBudget = progressNum >= 1.0;
 
-        final trackColor = cs.outlineVariant.withValues(alpha: 0.3);
-        final barColor = isOverBudget ? cs.error : cs.primary;
+        final trackColor = cs.outline.withValues(alpha: 0.3);
+        final barColor = isOverBudget ? context.kuberMoney.expense : cs.primary;
         final iconData = isOverBudget
             ? Icons.warning_amber_rounded
             : Icons.check_circle_outline_rounded;
@@ -1396,7 +1158,7 @@ class _CategoryListItem extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: barColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(KuberShape.medium),
                 border: Border.all(color: barColor.withValues(alpha: 0.2)),
               ),
               child: Row(
@@ -1407,8 +1169,8 @@ class _CategoryListItem extends ConsumerWidget {
                   Text(
                     'BUDGET',
                     style: localeFont(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                       color: barColor,
                     ),
                   ),
@@ -1426,7 +1188,7 @@ class _CategoryListItem extends ConsumerWidget {
                         height: 6,
                         decoration: BoxDecoration(
                           color: trackColor,
-                          borderRadius: BorderRadius.circular(3),
+                          borderRadius: BorderRadius.circular(KuberShape.full),
                         ),
                       ),
                       TweenAnimationBuilder<double>(
@@ -1446,7 +1208,9 @@ class _CategoryListItem extends ConsumerWidget {
                             height: 6,
                             decoration: BoxDecoration(
                               color: barColor,
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(
+                                KuberShape.full,
+                              ),
                             ),
                           );
                         },
@@ -1464,7 +1228,7 @@ class _CategoryListItem extends ConsumerWidget {
                 textAlign: TextAlign.right,
                 style: localeFont(
                   fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: barColor,
                 ),
               ),
@@ -1495,16 +1259,7 @@ class _BudgetStatusSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.budgetStatusLabel.toUpperCase(),
-          style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.1,
-          ),
-        ),
-        const SizedBox(height: 12),
+        KuberSectionHeader(title: context.l10n.budgetStatusLabel),
         budgetAsync.when(
           data: (budget) {
             if (budget == null || !budget.isActive) {
@@ -1513,30 +1268,25 @@ class _BudgetStatusSection extends ConsumerWidget {
                   Navigator.pop(context);
                   context.push('/budgets/add', extra: category);
                 },
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: KuberShape.cardR,
                 child: Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(
-                      color: cs.primary.withValues(alpha: 0.25),
-                    ),
+                    color: cs.secondaryContainer,
+                    borderRadius: KuberShape.cardR,
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.add_circle_outline_rounded,
                         size: 20,
-                        color: cs.primary,
+                        color: cs.onSecondaryContainer,
                       ),
-                      const SizedBox(width: 11),
+                      const SizedBox(width: 12),
                       Text(
                         context.l10n.setBudgetForCategory,
-                        style: localeFont(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: cs.primary,
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: cs.onSecondaryContainer,
                         ),
                       ),
                     ],
@@ -1560,51 +1310,60 @@ class _BudgetStatusSection extends ConsumerWidget {
                     ),
                   );
                 },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                borderRadius: BorderRadius.circular(KuberShape.medium),
+                // Board 3.16: "₹6,200 of ₹8,000" + status pill, wavy bar.
+                child: Builder(
+                  builder: (context) {
+                    final fmt = ref.watch(formatterProvider);
+                    final pct = p.percentage;
+                    final (state, tone, label) = pct >= 100
+                        ? (
+                            KuberProgressState.overLimit,
+                            KuberTone.expense,
+                            'Over budget',
+                          )
+                        : pct >= 80
+                        ? (
+                            KuberProgressState.nearLimit,
+                            KuberTone.warning,
+                            'High usage',
+                          )
+                        : (
+                            KuberProgressState.normal,
+                            KuberTone.secondary,
+                            'On track',
+                          );
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainer,
+                        borderRadius: KuberShape.cardR,
+                        border: Border.all(color: cs.outlineVariant),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                            style: localeFont(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${fmt.formatCurrency(p.spent)} of ${fmt.formatCurrency(p.limit)}',
+                                  style: Theme.of(context).textTheme.bodyMedium!
+                                      .copyWith(color: cs.onSurfaceVariant),
+                                ),
+                              ),
+                              KuberPill(label: label, tone: tone),
+                            ],
                           ),
-                          Text(
-                            ref
-                                .watch(formatterProvider)
-                                .formatPercentage(p.percentage),
-                            style: localeFont(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: p.percentage >= 100
-                                  ? cs.error
-                                  : cs.primary,
-                            ),
+                          const SizedBox(height: KuberSpace.md),
+                          KuberLinearProgress(
+                            value: (pct / 100).clamp(0.0, 1.0),
+                            state: state,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: (p.percentage / 100).clamp(0.0, 1.0),
-                          minHeight: 6,
-                          backgroundColor: cs.outline.withValues(alpha: 0.1),
-                          color: p.percentage >= 100 ? cs.error : cs.primary,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
               loading: () => const LinearProgressIndicator(),

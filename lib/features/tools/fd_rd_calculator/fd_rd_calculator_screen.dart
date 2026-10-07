@@ -61,7 +61,8 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
   @override
   int? get initialSavedId => widget.savedId;
   @override
-  String get defaultSaveName => _type == 0 ? 'Fixed deposit' : 'Recurring deposit';
+  String get defaultSaveName =>
+      _type == 0 ? 'Fixed deposit' : 'Recurring deposit';
   @override
   String get savePlaceholder => 'e.g. Emergency FD';
 
@@ -70,12 +71,12 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'amount': _amountCtrl.text,
-        'rate': _rateCtrl.text,
-        'tenure': _tenureCtrl.text,
-        'type': _type,
-        'freq': _freq,
-      };
+    'amount': _amountCtrl.text,
+    'rate': _rateCtrl.text,
+    'tenure': _tenureCtrl.text,
+    'type': _type,
+    'freq': _freq,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -100,8 +101,10 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
-        symbol: currency.symbol);
+    final amt = formatter.formatCurrency(
+      parseAmount(_amountCtrl.text),
+      symbol: currency.symbol,
+    );
     final kind = _isFd ? 'FD' : 'RD';
     if (r == null) return '$kind $amt';
     return '$kind $amt @ ${_rateCtrl.text}% for ${_years}y → ${formatter.formatCurrency(r.maturity, symbol: currency.symbol)}';
@@ -156,69 +159,72 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          const ToolInputLabel('DEPOSIT TYPE'),
-          const SizedBox(height: KuberSpacing.sm),
-          ToolSegmentedControl(
-            labels: const ['Fixed (FD)', 'Recurring (RD)'],
-            selectedIndex: _type,
-            onChanged: (i) => setState(() => _type = i),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _amountCtrl,
-            label: _isFd ? 'PRINCIPAL AMOUNT' : 'MONTHLY DEPOSIT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: _isFd ? 10000 : 500,
-            max: _isFd ? 10000000 : 100000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'INTEREST RATE',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 12,
-            divisions: 110,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _tenureCtrl,
-            label: 'TENURE',
-            suffix: 'years',
-            onChanged: recompute,
-            min: 1,
-            max: 20,
-            divisions: 19,
-          ),
-          if (_isFd) ...[
-            const SizedBox(height: KuberSpacing.lg),
-            const ToolInputLabel('COMPOUNDING FREQUENCY'),
-            const SizedBox(height: KuberSpacing.sm),
-            Wrap(
-              spacing: KuberSpacing.sm,
-              runSpacing: KuberSpacing.sm,
-              children: [
-                for (var i = 0; i < 4; i++)
-                  _Chip(
-                    label: const [
-                      'Yearly',
-                      'Half-yearly',
-                      'Quarterly',
-                      'Monthly'
-                    ][i],
-                    selected: _freq == i,
-                    onTap: () => setState(() => _freq = i),
-                  ),
-              ],
+        ToolInputCard(
+          children: [
+            const ToolInputLabel('DEPOSIT TYPE'),
+            const SizedBox(height: KuberSpace.sm),
+            ToolSegmentedControl(
+              labels: const ['Fixed (FD)', 'Recurring (RD)'],
+              selectedIndex: _type,
+              onChanged: (i) => setState(() => _type = i),
             ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _amountCtrl,
+              label: _isFd ? 'PRINCIPAL AMOUNT' : 'MONTHLY DEPOSIT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: _isFd ? 10000 : 500,
+              max: _isFd ? 10000000 : 100000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'INTEREST RATE',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 12,
+              divisions: 110,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _tenureCtrl,
+              label: 'TENURE',
+              suffix: 'years',
+              onChanged: recompute,
+              min: 1,
+              max: 20,
+              divisions: 19,
+            ),
+            if (_isFd) ...[
+              const SizedBox(height: KuberSpace.lg),
+              const ToolInputLabel('COMPOUNDING FREQUENCY'),
+              const SizedBox(height: KuberSpace.sm),
+              Wrap(
+                spacing: KuberSpace.sm,
+                runSpacing: KuberSpace.sm,
+                children: [
+                  for (var i = 0; i < 4; i++)
+                    _Chip(
+                      label: const [
+                        'Yearly',
+                        'Half-yearly',
+                        'Quarterly',
+                        'Monthly',
+                      ][i],
+                      selected: _freq == i,
+                      onTap: () => setState(() => _freq = i),
+                    ),
+                ],
+              ),
+            ],
           ],
-        ]),
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -229,14 +235,21 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
                       value: money(result.maturity),
                       color: ToolAccents.amber,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol('Total Invested', money(result.totalInvested)),
-                      StatCol('Interest Earned', money(result.interestEarned),
-                          color: cs.tertiary),
-                      StatCol('Eff. Yield',
-                          '${result.effectiveYieldPercent.toStringAsFixed(2)}%'),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol('Total Invested', money(result.totalInvested)),
+                        StatCol(
+                          'Interest Earned',
+                          money(result.interestEarned),
+                          color: context.kuberMoney.income,
+                        ),
+                        StatCol(
+                          'Eff. Yield',
+                          '${result.effectiveYieldPercent.toStringAsFixed(2)}%',
+                        ),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -246,13 +259,17 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
             subtitle: 'Principal vs interest',
             child: ToolDonutBreakdown(
               segments: [
+                BreakdownSegment('Principal', result.totalInvested, cs.primary),
                 BreakdownSegment(
-                    'Principal', result.totalInvested, cs.primary),
-                BreakdownSegment(
-                    'Interest', result.interestEarned, ToolAccents.amber),
+                  'Interest',
+                  result.interestEarned,
+                  ToolAccents.amber,
+                ),
               ],
-              centerBig: formatter.formatCompactCurrency(result.maturity,
-                  symbol: currency.symbol),
+              centerBig: formatter.formatCompactCurrency(
+                result.maturity,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'MATURITY',
             ),
           ),
@@ -261,10 +278,11 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Balance',
-                    points: result.balanceSeries,
-                    color: ToolAccents.amber,
-                    fill: true),
+                  name: 'Balance',
+                  points: result.balanceSeries,
+                  color: ToolAccents.amber,
+                  fill: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.balanceSeries.length; i++) 'Y$i',
@@ -315,27 +333,31 @@ class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _Chip({required this.label, required this.selected, required this.onTap});
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+      borderRadius: BorderRadius.circular(KuberShape.medium),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: selected
               ? cs.primary.withValues(alpha: 0.12)
               : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: selected ? cs.primary : cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: selected ? cs.primary : cs.outlineVariant),
         ),
         child: Text(
           label,
           style: localeFont(
-            fontSize: 12.5,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             color: selected ? cs.primary : cs.onSurfaceVariant,
           ),

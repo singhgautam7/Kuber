@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../data/reminder.dart';
 import '../providers/reminders_provider.dart';
@@ -27,7 +27,10 @@ class SnoozeSheet extends ConsumerWidget {
   }
 
   Future<void> _apply(
-      BuildContext context, WidgetRef ref, DateTime until) async {
+    BuildContext context,
+    WidgetRef ref,
+    DateTime until,
+  ) async {
     await ref.read(remindersRepositoryProvider).snooze(reminder.id, until);
     if (context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();
@@ -65,156 +68,56 @@ class SnoozeSheet extends ConsumerWidget {
     final now = DateTime.now();
     final tomorrow9 = DateTime(now.year, now.month, now.day + 1, 9);
 
-    return Container(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 4),
-              child: Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+    Widget option(
+      IconData icon,
+      String label,
+      VoidCallback onTap, {
+      String? note,
+      bool chevron = false,
+    }) => KuberListRow(
+      leading: KuberIconTile(icon: icon),
+      title: label,
+      onTap: onTap,
+      trailing: chevron
+          ? const KuberChevron()
+          : note == null
+          ? null
+          : Text(
+              note,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Snooze reminder',
-                    style: localeFont(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    reminder.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 22),
-              child: Column(
-                children: [
-                  _SnoozeOption(
-                    icon: Icons.schedule_rounded,
-                    label: '15 minutes',
-                    onTap: () => _apply(context, ref,
-                        now.add(const Duration(minutes: 15))),
-                  ),
-                  _SnoozeOption(
-                    icon: Icons.schedule_rounded,
-                    label: '1 hour',
-                    onTap: () =>
-                        _apply(context, ref, now.add(const Duration(hours: 1))),
-                  ),
-                  _SnoozeOption(
-                    icon: Icons.update_rounded,
-                    label: 'Tomorrow',
-                    trailing: '9:00 AM',
-                    onTap: () => _apply(context, ref, tomorrow9),
-                  ),
-                  _SnoozeOption(
-                    icon: Icons.calendar_month_rounded,
-                    label: 'Pick a time',
-                    chevron: true,
-                    onTap: () => _pickTime(context, ref),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
-  }
-}
 
-class _SnoozeOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String? trailing;
-  final bool chevron;
-  final VoidCallback onTap;
-
-  const _SnoozeOption({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.trailing,
-    this.chevron = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: cs.outline),
+    return KuberBottomSheet(
+      title: 'Snooze reminder',
+      description: reminder.title,
+      child: KuberGroup(
+        children: [
+          option(
+            Icons.schedule_rounded,
+            '15 minutes',
+            () => _apply(context, ref, now.add(const Duration(minutes: 15))),
           ),
-          child: Row(
-            children: [
-              Icon(icon, size: 19, color: cs.primary),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Text(
-                  label,
-                  style: localeFont(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-              if (trailing != null)
-                Text(
-                  trailing!,
-                  style: localeFont(
-                    fontSize: 12,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              if (chevron)
-                Icon(Icons.chevron_right_rounded,
-                    size: 16,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
-            ],
+          option(
+            Icons.schedule_rounded,
+            '1 hour',
+            () => _apply(context, ref, now.add(const Duration(hours: 1))),
           ),
-        ),
+          option(
+            Icons.update_rounded,
+            'Tomorrow',
+            () => _apply(context, ref, tomorrow9),
+            note: '9:00 AM',
+          ),
+          option(
+            Icons.calendar_month_rounded,
+            'Pick a time',
+            () => _pickTime(context, ref),
+            chevron: true,
+          ),
+        ],
       ),
     );
   }

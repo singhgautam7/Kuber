@@ -70,7 +70,7 @@ class _ToolLineChartState extends ConsumerState<ToolLineChart> {
     final currency = ref.watch(currencyProvider);
     final maxY = _maxY;
     final n = widget.xLabels.length;
-    final targetColor = widget.targetColor ?? cs.tertiary;
+    final targetColor = widget.targetColor ?? context.kuberMoney.income;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,166 +79,191 @@ class _ToolLineChartState extends ConsumerState<ToolLineChart> {
           height: widget.height,
           child: RepaintBoundary(
             child: LineChart(
-            LineChartData(
-              minY: 0,
-              maxY: maxY,
-              minX: 0,
-              maxX: (n - 1).toDouble().clamp(0, double.infinity),
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: true,
-                horizontalInterval: maxY / 4,
-                verticalInterval: max(1, (n / 5).ceilToDouble()),
-                getDrawingHorizontalLine: (_) =>
-                    FlLine(color: cs.outline.withValues(alpha: 0.5), strokeWidth: 1),
-                getDrawingVerticalLine: (_) =>
-                    FlLine(color: cs.outline.withValues(alpha: 0.25), strokeWidth: 1),
-              ),
-              borderData: FlBorderData(show: false),
-              titlesData: FlTitlesData(
-                topTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 38,
-                    interval: maxY / 2,
-                    getTitlesWidget: (value, meta) {
-                      if (value < 0 || value > maxY) {
-                        return const SizedBox.shrink();
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Text(
-                          formatter.formatCompactCurrency(value,
-                              symbol: currency.symbol),
-                          style: localeFont(
-                              fontSize: 8.5, color: cs.onSurfaceVariant),
-                          textAlign: TextAlign.right,
-                        ),
-                      );
-                    },
+              LineChartData(
+                minY: 0,
+                maxY: maxY,
+                minX: 0,
+                maxX: (n - 1).toDouble().clamp(0, double.infinity),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  horizontalInterval: maxY / 4,
+                  verticalInterval: max(1, (n / 5).ceilToDouble()),
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: cs.outlineVariant.withValues(alpha: 0.5),
+                    strokeWidth: 1,
+                  ),
+                  getDrawingVerticalLine: (_) => FlLine(
+                    color: cs.outlineVariant.withValues(alpha: 0.25),
+                    strokeWidth: 1,
                   ),
                 ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 20,
-                    interval: max(1, (n / 5).ceilToDouble()),
-                    getTitlesWidget: (value, meta) {
-                      final i = value.round();
-                      if (i < 0 || i >= n) return const SizedBox.shrink();
-                      if ((value - i).abs() > 0.01) {
-                        return const SizedBox.shrink();
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                          widget.xLabels[i],
-                          style: localeFont(
-                              fontSize: 9, color: cs.onSurfaceVariant),
-                        ),
-                      );
-                    },
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
                   ),
-                ),
-              ),
-              extraLinesData: widget.target == null
-                  ? const ExtraLinesData()
-                  : ExtraLinesData(horizontalLines: [
-                      HorizontalLine(
-                        y: widget.target!,
-                        color: targetColor,
-                        strokeWidth: 1.4,
-                        dashArray: [5, 4],
-                      ),
-                    ]),
-              lineTouchData: LineTouchData(
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (_) => cs.surfaceContainerHigh,
-                  getTooltipItems: (spots) => spots.map((s) {
-                    final series = widget.series[s.barIndex];
-                    return LineTooltipItem(
-                      '${series.name}\n',
-                      localeFont(
-                          fontSize: 10,
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w600),
-                      children: [
-                        TextSpan(
-                          text: formatter.formatCurrency(s.y.roundToDouble(),
-                              symbol: currency.symbol),
-                          style: localeFont(
-                              fontSize: 12,
-                              color: series.color,
-                              fontWeight: FontWeight.w800),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-                touchCallback: (event, resp) {
-                  if (resp?.lineBarSpots != null &&
-                      resp!.lineBarSpots!.isNotEmpty) {
-                    setState(() => _touchedX = resp.lineBarSpots!.first.x.round());
-                  } else if (event is FlTapUpEvent || event is FlPanEndEvent) {
-                    setState(() => _touchedX = null);
-                  }
-                },
-              ),
-              lineBarsData: [
-                for (final s in widget.series)
-                  LineChartBarData(
-                    isCurved: true,
-                    preventCurveOverShooting: true,
-                    curveSmoothness: 0.2,
-                    color: s.color,
-                    barWidth: 2.4,
-                    isStrokeCapRound: true,
-                    dashArray: s.dashed ? [5, 4] : null,
-                    dotData: FlDotData(
-                      show: _touchedX != null,
-                      checkToShowDot: (spot, _) => spot.x.round() == _touchedX,
-                      getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-                        radius: 4,
-                        color: s.color,
-                        strokeWidth: 2,
-                        strokeColor: cs.surface,
-                      ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 38,
+                      interval: maxY / 2,
+                      getTitlesWidget: (value, meta) {
+                        if (value < 0 || value > maxY) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Text(
+                            formatter.formatCompactCurrency(
+                              value,
+                              symbol: currency.symbol,
+                            ),
+                            style: localeFont(
+                              fontSize: 11,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        );
+                      },
                     ),
-                    belowBarData: BarAreaData(
-                      show: s.fill,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          s.color.withValues(alpha: 0.18),
-                          s.color.withValues(alpha: 0.0),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 20,
+                      interval: max(1, (n / 5).ceilToDouble()),
+                      getTitlesWidget: (value, meta) {
+                        final i = value.round();
+                        if (i < 0 || i >= n) return const SizedBox.shrink();
+                        if ((value - i).abs() > 0.01) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            widget.xLabels[i],
+                            style: localeFont(
+                              fontSize: 11,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                extraLinesData: widget.target == null
+                    ? const ExtraLinesData()
+                    : ExtraLinesData(
+                        horizontalLines: [
+                          HorizontalLine(
+                            y: widget.target!,
+                            color: targetColor,
+                            strokeWidth: 1.4,
+                            dashArray: [5, 4],
+                          ),
                         ],
                       ),
-                    ),
-                    spots: [
-                      for (var i = 0; i < s.points.length; i++)
-                        FlSpot(i.toDouble(), s.points[i]),
-                    ],
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (_) => cs.surfaceContainerHigh,
+                    getTooltipItems: (spots) => spots.map((s) {
+                      final series = widget.series[s.barIndex];
+                      return LineTooltipItem(
+                        '${series.name}\n',
+                        localeFont(
+                          fontSize: 11,
+                          color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: formatter.formatCurrency(
+                              s.y.roundToDouble(),
+                              symbol: currency.symbol,
+                            ),
+                            style: localeFont(
+                              fontSize: 12,
+                              color: series.color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
                   ),
-              ],
+                  touchCallback: (event, resp) {
+                    if (resp?.lineBarSpots != null &&
+                        resp!.lineBarSpots!.isNotEmpty) {
+                      setState(
+                        () => _touchedX = resp.lineBarSpots!.first.x.round(),
+                      );
+                    } else if (event is FlTapUpEvent ||
+                        event is FlPanEndEvent) {
+                      setState(() => _touchedX = null);
+                    }
+                  },
+                ),
+                lineBarsData: [
+                  for (final s in widget.series)
+                    LineChartBarData(
+                      isCurved: true,
+                      preventCurveOverShooting: true,
+                      curveSmoothness: 0.2,
+                      color: s.color,
+                      barWidth: 2.4,
+                      isStrokeCapRound: true,
+                      dashArray: s.dashed ? [5, 4] : null,
+                      dotData: FlDotData(
+                        show: _touchedX != null,
+                        checkToShowDot: (spot, _) =>
+                            spot.x.round() == _touchedX,
+                        getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                          radius: 4,
+                          color: s.color,
+                          strokeWidth: 2,
+                          strokeColor: cs.surface,
+                        ),
+                      ),
+                      belowBarData: BarAreaData(
+                        show: s.fill,
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            s.color.withValues(alpha: 0.18),
+                            s.color.withValues(alpha: 0.0),
+                          ],
+                        ),
+                      ),
+                      spots: [
+                        for (var i = 0; i < s.points.length; i++)
+                          FlSpot(i.toDouble(), s.points[i]),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ),
-          ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         Wrap(
-          spacing: KuberSpacing.lg,
-          runSpacing: KuberSpacing.sm,
+          spacing: KuberSpace.lg,
+          runSpacing: KuberSpace.sm,
           children: [
             for (final s in widget.series)
               _LegendItem(color: s.color, label: s.name, dashed: s.dashed),
             if (widget.targetLabel != null)
               _LegendItem(
-                  color: targetColor, label: widget.targetLabel!, dashed: true),
+                color: targetColor,
+                label: widget.targetLabel!,
+                dashed: true,
+              ),
           ],
         ),
       ],
@@ -250,8 +275,11 @@ class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
   final bool dashed;
-  const _LegendItem(
-      {required this.color, required this.label, this.dashed = false});
+  const _LegendItem({
+    required this.color,
+    required this.label,
+    this.dashed = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -264,13 +292,15 @@ class _LegendItem extends StatelessWidget {
           height: 3,
           decoration: BoxDecoration(
             color: dashed ? null : color,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(KuberShape.full),
             border: dashed ? Border.all(color: color, width: 1) : null,
           ),
         ),
         const SizedBox(width: 6),
-        Text(label,
-            style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
+        Text(
+          label,
+          style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+        ),
       ],
     );
   }

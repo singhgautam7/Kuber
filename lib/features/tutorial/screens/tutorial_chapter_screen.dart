@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/brand_icon.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../models/tutorial_chapter.dart';
 import '../models/tutorial_l10n.dart';
@@ -20,104 +21,94 @@ class TutorialChapterScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final state = ref.watch(tutorialNotifierProvider);
 
+    // The app's header (back + title). Back keeps the old close
+    // behaviour: confirm, then leave the tutorial.
     return Scaffold(
       backgroundColor: cs.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.xl,
-            KuberSpacing.xl,
-            KuberSpacing.xl,
-            0,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KuberAppBar(
+            title: sentenceCase(context.l10n.tutorialUpper),
+            showBack: true,
+            onBack: () => _confirmSkip(context, ref),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top bar — always visible
-              Row(
-                children: [
-                  const BrandIcon(size: 36),
-                  const SizedBox(width: KuberSpacing.md),
-                  Text(
-                    context.l10n.tutorialUpper,
-                    style: localeFont(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurfaceVariant,
-                      letterSpacing: 1.5,
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.screenMargin,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Scrollable list with heading as first item
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: tutorialChapters.length + 1,
+                        separatorBuilder: (_, index) => index == 0
+                            ? const SizedBox(height: KuberSpace.xl)
+                            : const SizedBox(height: KuberSpace.md),
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.l10n.pickChapter,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall!
+                                      .copyWith(color: cs.onSurface),
+                                ),
+                                const SizedBox(height: KuberSpace.sm),
+                                Text(
+                                  context.l10n.pickChapterSubtitle,
+                                  style: Theme.of(context).textTheme.bodyMedium!
+                                      .copyWith(color: cs.onSurfaceVariant),
+                                ),
+                              ],
+                            );
+                          }
+                          final chapter = tutorialChapters[index - 1];
+                          final chapterIndex = index - 1;
+                          return _ChapterCard(
+                            chapter: chapter,
+                            chapterIndex: chapterIndex,
+                            selected:
+                                state.isActive &&
+                                state.chapterIndex == chapterIndex,
+                            completed: state.completedChapters.contains(
+                              chapterIndex,
+                            ),
+                            onTap: () =>
+                                _startChapter(context, ref, chapterIndex),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  IconButton.outlined(
-                    onPressed: () => _confirmSkip(context, ref),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ],
-              ),
-              const SizedBox(height: KuberSpacing.xl),
 
-              // Scrollable list with heading as first item
-              Expanded(
-                child: ListView.separated(
-                  itemCount: tutorialChapters.length + 1,
-                  separatorBuilder: (_, index) => index == 0
-                      ? const SizedBox(height: KuberSpacing.xl)
-                      : const SizedBox(height: KuberSpacing.md),
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.pickChapter,
-                            style: localeFont(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: cs.onSurface,
-                              letterSpacing: -0.8,
-                            ),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          Text(
-                            context.l10n.pickChapterSubtitle,
-                            style: localeFont(
-                              fontSize: 14,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    final chapter = tutorialChapters[index - 1];
-                    final chapterIndex = index - 1;
-                    return _ChapterCard(
-                      chapter: chapter,
-                      chapterIndex: chapterIndex,
-                      selected:
-                          state.isActive && state.chapterIndex == chapterIndex,
-                      completed:
-                          state.completedChapters.contains(chapterIndex),
-                      onTap: () => _startChapter(context, ref, chapterIndex),
-                    );
-                  },
+                    // Bottom CTA — full-width single button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: KuberSpace.lg,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: FilledButton(
+                          onPressed: () => _startChapter(context, ref, 0),
+                          child: Text(context.l10n.startFromBeginning),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
-              // Bottom CTA — full-width single button
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: FilledButton(
-                    onPressed: () => _startChapter(context, ref, 0),
-                    child: Text(context.l10n.startFromBeginning),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -142,23 +133,19 @@ class TutorialChapterScreen extends ConsumerWidget {
                 child: SizedBox(
                   height: 48,
                   child: OutlinedButton(
-                    onPressed: () => Navigator.of(
-                      sheetCtx,
-                      rootNavigator: true,
-                    ).pop(false),
+                    onPressed: () =>
+                        Navigator.of(sheetCtx, rootNavigator: true).pop(false),
                     child: Text(context.l10n.keepGoing),
                   ),
                 ),
               ),
-              SizedBox(width: KuberSpacing.md),
+              SizedBox(width: KuberSpace.md),
               Expanded(
                 child: SizedBox(
                   height: 48,
                   child: FilledButton(
-                    onPressed: () => Navigator.of(
-                      sheetCtx,
-                      rootNavigator: true,
-                    ).pop(true),
+                    onPressed: () =>
+                        Navigator.of(sheetCtx, rootNavigator: true).pop(true),
                     child: Text(context.l10n.skipLabel),
                   ),
                 ),
@@ -213,33 +200,27 @@ class _ChapterCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         child: Ink(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
+          padding: const EdgeInsets.all(KuberSpace.lg),
           decoration: BoxDecoration(
             color: selected
                 ? cs.primary.withValues(alpha: 0.08)
                 : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: selected ? cs.primary : cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(
+              color: selected ? cs.primary : cs.outlineVariant,
+            ),
           ),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
-                ),
-                child: Text(
-                  chapter.emoji,
-                  style: const TextStyle(fontSize: 22),
-                ),
+              KuberIconTile(
+                icon: chapter.icon,
+                tone: selected ? KuberTone.primary : KuberTone.secondary,
+                size: 44,
+                glyph: 22,
               ),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,8 +231,8 @@ class _ChapterCard extends StatelessWidget {
                           child: Text(
                             tutChapterTitle(context, chapterIndex),
                             style: localeFont(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                               color: cs.onSurface,
                             ),
                           ),
@@ -259,12 +240,12 @@ class _ChapterCard extends StatelessWidget {
                         if (completed)
                           Icon(
                             Icons.check_circle_rounded,
-                            color: cs.tertiary,
+                            color: context.kuberMoney.income,
                             size: 18,
                           ),
                       ],
                     ),
-                    const SizedBox(height: KuberSpacing.xs),
+                    const SizedBox(height: KuberSpace.xs),
                     Text(
                       tutChapterDesc(context, chapterIndex),
                       maxLines: 2,
@@ -275,13 +256,15 @@ class _ChapterCard extends StatelessWidget {
                         color: cs.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: KuberSpacing.xs),
+                    const SizedBox(height: KuberSpace.xs),
                     Text(
                       context.l10n.tutStepsAndMin(
-                          '${chapter.steps.length}', chapter.steps.length <= 4 ? '1' : '2'),
+                        '${chapter.steps.length}',
+                        chapter.steps.length <= 4 ? '1' : '2',
+                      ),
                       style: localeFont(
                         fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurfaceVariant,
                       ),
                     ),

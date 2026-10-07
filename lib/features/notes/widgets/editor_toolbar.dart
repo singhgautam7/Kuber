@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 import '../../../core/utils/locale_font.dart';
@@ -10,10 +11,7 @@ import '../../../core/utils/locale_font.dart';
 class KuberEditorToolbar extends StatefulWidget {
   final QuillController controller;
 
-  const KuberEditorToolbar({
-    super.key,
-    required this.controller,
-  });
+  const KuberEditorToolbar({super.key, required this.controller});
 
   @override
   State<KuberEditorToolbar> createState() => _KuberEditorToolbarState();
@@ -58,8 +56,7 @@ class _KuberEditorToolbarState extends State<KuberEditorToolbar> {
 
   void _toggleBold() {
     if (_hasInline(Attribute.bold)) {
-      widget.controller
-          .formatSelection(Attribute.clone(Attribute.bold, null));
+      widget.controller.formatSelection(Attribute.clone(Attribute.bold, null));
     } else {
       widget.controller.formatSelection(Attribute.bold);
     }
@@ -68,7 +65,8 @@ class _KuberEditorToolbarState extends State<KuberEditorToolbar> {
   void _toggleList(Attribute target) {
     final active = _currentListValue() == target.value;
     widget.controller.formatSelection(
-        active ? Attribute.clone(Attribute.list, null) : target);
+      active ? Attribute.clone(Attribute.list, null) : target,
+    );
   }
 
   void _moveCursor(int delta) {
@@ -92,7 +90,7 @@ class _KuberEditorToolbarState extends State<KuberEditorToolbar> {
       height: 52,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        border: Border(top: BorderSide(color: cs.outline)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
@@ -120,7 +118,8 @@ class _KuberEditorToolbarState extends State<KuberEditorToolbar> {
           ),
           _ToolbarButton(
             icon: Icons.checklist_rounded,
-            active: listValue == Attribute.unchecked.value ||
+            active:
+                listValue == Attribute.unchecked.value ||
                 listValue == Attribute.checked.value,
             onTap: () => _toggleList(Attribute.unchecked),
           ),
@@ -158,10 +157,10 @@ class _ToolbarButton extends StatelessWidget {
     final color = !enabled
         ? cs.onSurfaceVariant.withValues(alpha: 0.35)
         : active
-            ? cs.primary
-            : cs.onSurfaceVariant;
+        ? cs.primary
+        : cs.onSurfaceVariant;
     return InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(KuberShape.medium),
       onTap: enabled ? onTap : null,
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -186,15 +185,15 @@ class _ToolbarTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(KuberShape.medium),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Text(
           label,
           style: localeFont(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
             color: active ? cs.primary : cs.onSurface,
           ),
         ),

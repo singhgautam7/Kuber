@@ -3,6 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../widgets/onboarding_fit.dart';
 import '../widgets/onboarding_skip_button.dart';
 
@@ -49,43 +50,32 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.l10n.modulesTitle,
-                  style: localeFont(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.4,
-                  ),
+                  context.l10n.modulesTitle.toUpperCase(),
+                  style: sectionHeaderStyle(context),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Text(
                   context.l10n.everythingInOnePlace,
-                  style: localeFont(
-                    fontSize: 28,
-                    height: 1.05,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                    letterSpacing: -0.9,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineLarge!.copyWith(color: cs.onSurface),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Text(
                   context.l10n.onboardingPage3Description,
-                  style: localeFont(
-                    fontSize: 13,
-                    height: 1.38,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 GridView.builder(
                   itemCount: 6,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    mainAxisSpacing: KuberSpacing.sm,
-                    crossAxisSpacing: KuberSpacing.sm,
+                    mainAxisSpacing: KuberSpace.sm,
+                    crossAxisSpacing: KuberSpace.sm,
                     childAspectRatio: 1.0,
                   ),
                   itemBuilder: (context, index) => _AnimatedFeatureCard(
@@ -94,7 +84,7 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
                     spec: features[index],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
                 Row(
                   children: [
                     Expanded(
@@ -105,7 +95,7 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
                         wide: true,
                       ),
                     ),
-                    const SizedBox(width: KuberSpacing.sm),
+                    const SizedBox(width: KuberSpace.sm),
                     Expanded(
                       child: _AnimatedFeatureCard(
                         animation: _controller,
@@ -116,7 +106,7 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 _MorePill(colorScheme: cs),
               ],
             ),
@@ -130,57 +120,56 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
 class _FeatureSpec {
   final IconData icon;
   final String label;
-  final Color color;
+  final KuberTone tone;
 
   const _FeatureSpec({
     required this.icon,
     required this.label,
-    required this.color,
+    required this.tone,
   });
 
   static List<_FeatureSpec> build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     return [
       _FeatureSpec(
         icon: Icons.account_balance_wallet_rounded,
         label: l10n.budgetsModule,
-        color: cs.primary,
+        tone: KuberTone.secondary,
       ),
       _FeatureSpec(
         icon: Icons.pie_chart_rounded,
         label: l10n.analyticsModule,
-        color: cs.secondary,
+        tone: KuberTone.secondary,
       ),
       _FeatureSpec(
         icon: Icons.sync_rounded,
         label: l10n.recurringModule,
-        color: cs.tertiary,
+        tone: KuberTone.income,
       ),
       _FeatureSpec(
         icon: Icons.handshake_rounded,
         label: l10n.lendBorrowModule,
-        color: cs.error,
+        tone: KuberTone.expense,
       ),
       _FeatureSpec(
         icon: Icons.show_chart_rounded,
         label: l10n.investmentsModule,
-        color: cs.tertiary,
+        tone: KuberTone.income,
       ),
       _FeatureSpec(
         icon: Icons.auto_awesome_rounded,
         label: l10n.askKuberModule,
-        color: cs.primary,
+        tone: KuberTone.secondary,
       ),
       _FeatureSpec(
         icon: Icons.calculate_rounded,
         label: l10n.toolsModule,
-        color: cs.error,
+        tone: KuberTone.secondary,
       ),
       _FeatureSpec(
         icon: Icons.label_rounded,
         label: l10n.tagsCategoriesModule,
-        color: cs.primary,
+        tone: KuberTone.secondary,
       ),
     ];
   }
@@ -227,17 +216,17 @@ class _FeatureCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.sm),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: wide
           ? Row(
               children: [
                 _FeatureIcon(spec: spec),
-                const SizedBox(width: KuberSpacing.sm),
+                const SizedBox(width: KuberSpace.sm),
                 Expanded(child: _FeatureLabel(spec.label)),
               ],
             )
@@ -260,16 +249,7 @@ class _FeatureIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 40,
-      decoration: BoxDecoration(
-        color: spec.color.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: spec.color.withValues(alpha: 0.45)),
-      ),
-      child: Icon(spec.icon, color: spec.color, size: 21),
-    );
+    return KuberIconTile(icon: spec.icon, tone: spec.tone);
   }
 }
 
@@ -284,12 +264,8 @@ class _FeatureLabel extends StatelessWidget {
       label,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: localeFont(
-        fontSize: 12,
-        height: 1.15,
-        fontWeight: FontWeight.w800,
+      style: Theme.of(context).textTheme.labelLarge!.copyWith(
         color: Theme.of(context).colorScheme.onSurface,
-        letterSpacing: -0.2,
       ),
     );
   }
@@ -303,22 +279,16 @@ class _MorePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _DashedBorderPainter(color: colorScheme.primary),
+      painter: _DashedBorderPainter(color: colorScheme.outline),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: KuberSpace.md),
         child: Text(
           context.l10n.andMuchMore,
           textAlign: TextAlign.center,
-          style: localeFont(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            color: colorScheme.primary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge!.copyWith(color: colorScheme.onSurfaceVariant),
         ),
       ),
     );
@@ -333,12 +303,12 @@ class _DashedBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withValues(alpha: 0.6)
-      ..strokeWidth = 1.4
+      ..color = color
+      ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
     final rrect = RRect.fromRectAndRadius(
       Offset.zero & size,
-      const Radius.circular(KuberRadius.md),
+      const Radius.circular(KuberShape.large),
     );
     final path = Path()..addRRect(rrect);
     for (final metric in path.computeMetrics()) {

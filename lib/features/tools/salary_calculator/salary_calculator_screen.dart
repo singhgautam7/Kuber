@@ -69,14 +69,14 @@ class _SalaryCalculatorScreenState extends ConsumerState<SalaryCalculatorScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'ctc': _ctcCtrl.text,
-        'basic': _basicCtrl.text,
-        'hraExempt': _hraExemptCtrl.text,
-        'c80c': _c80cCtrl.text,
-        'c80d': _c80dCtrl.text,
-        'homeLoan': _homeLoanCtrl.text,
-        'nps': _npsCtrl.text,
-      };
+    'ctc': _ctcCtrl.text,
+    'basic': _basicCtrl.text,
+    'hraExempt': _hraExemptCtrl.text,
+    'c80c': _c80cCtrl.text,
+    'c80d': _c80dCtrl.text,
+    'homeLoan': _homeLoanCtrl.text,
+    'nps': _npsCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -109,13 +109,17 @@ class _SalaryCalculatorScreenState extends ConsumerState<SalaryCalculatorScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final i = _inputs();
-    final ctc = formatter.formatCurrency(parseAmount(_ctcCtrl.text),
-        symbol: currency.symbol);
+    final ctc = formatter.formatCurrency(
+      parseAmount(_ctcCtrl.text),
+      symbol: currency.symbol,
+    );
     if (i == null) return 'Salary $ctc';
     final r = computeSalary(i);
     final regime = r.newIsBetter ? 'New' : 'Old';
-    final monthly = formatter.formatCurrency(r.recommended.netMonthly,
-        symbol: currency.symbol);
+    final monthly = formatter.formatCurrency(
+      r.recommended.netMonthly,
+      symbol: currency.symbol,
+    );
     return 'CTC $ctc → $regime regime $monthly/mo';
   }
 
@@ -139,8 +143,7 @@ class _SalaryCalculatorScreenState extends ConsumerState<SalaryCalculatorScreen>
     final result = inputs == null ? null : computeSalary(inputs);
     void recompute(_) => scheduleRecompute();
 
-    String deductionCell(double v) =>
-        v == 0 ? '—' : '−${money(v.abs())}';
+    String deductionCell(double v) => v == 0 ? '—' : '−${money(v.abs())}';
 
     return ToolScreenScaffold(
       title: 'Salary Breakdown',
@@ -154,107 +157,120 @@ class _SalaryCalculatorScreenState extends ConsumerState<SalaryCalculatorScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _ctcCtrl,
-            label: 'ANNUAL CTC',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 300000,
-            max: 10000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _basicCtrl,
-            label: 'BASIC SALARY %',
-            suffix: '%',
-            helper: 'Of CTC — drives HRA & PF',
-            onChanged: recompute,
-            min: 30,
-            max: 60,
-            divisions: 30,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _hraExemptCtrl,
-            label: 'HRA EXEMPTION (CLAIMED)',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-          ),
-          const SizedBox(height: KuberSpacing.md),
-          _Expandable(
-            title: 'Other components',
-            expanded: _showComponents,
-            onToggle: () => setState(() => _showComponents = !_showComponents),
-            child: inputs == null
-                ? Text('Enter a CTC to see derived components',
-                    style:
-                        localeFont(fontSize: 12, color: cs.onSurfaceVariant))
-                : Column(
-                    children: [
-                      ToolStatRow(label: 'Basic', value: money(inputs.basic)),
-                      const SizedBox(height: KuberSpacing.sm),
-                      ToolStatRow(label: 'HRA', value: money(inputs.hra)),
-                      const SizedBox(height: KuberSpacing.sm),
-                      ToolStatRow(
-                          label: 'Special Allowance',
-                          value: money(inputs.specialAllowance)),
-                      const SizedBox(height: KuberSpacing.sm),
-                      ToolStatRow(
-                          label: 'Employer PF',
-                          value: money(inputs.employerPf)),
-                      const SizedBox(height: KuberSpacing.sm),
-                      ToolStatRow(
-                          label: 'Gratuity', value: money(inputs.gratuity)),
-                    ],
-                  ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          _Expandable(
-            title: 'Deductions — 80C, 80D, Home Loan, NPS',
-            expanded: _showDeductions,
-            onToggle: () => setState(() => _showDeductions = !_showDeductions),
-            child: Column(
-              children: [
-                ToolTextField(
-                  controller: _c80cCtrl,
-                  label: '80C (up to ₹1,50,000)',
-                  prefix: currency.symbol,
-                  formatAsAmount: true,
-                  onChanged: recompute,
-                ),
-                const SizedBox(height: KuberSpacing.md),
-                ToolTextField(
-                  controller: _c80dCtrl,
-                  label: '80D (health insurance)',
-                  prefix: currency.symbol,
-                  formatAsAmount: true,
-                  onChanged: recompute,
-                ),
-                const SizedBox(height: KuberSpacing.md),
-                ToolTextField(
-                  controller: _homeLoanCtrl,
-                  label: 'Home Loan Interest (up to ₹2,00,000)',
-                  prefix: currency.symbol,
-                  formatAsAmount: true,
-                  onChanged: recompute,
-                ),
-                const SizedBox(height: KuberSpacing.md),
-                ToolTextField(
-                  controller: _npsCtrl,
-                  label: 'NPS 80CCD(1B) (up to ₹50,000)',
-                  prefix: currency.symbol,
-                  formatAsAmount: true,
-                  onChanged: recompute,
-                ),
-              ],
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _ctcCtrl,
+              label: 'ANNUAL CTC',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 300000,
+              max: 10000000,
             ),
-          ),
-        ]),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _basicCtrl,
+              label: 'BASIC SALARY %',
+              suffix: '%',
+              helper: 'Of CTC — drives HRA & PF',
+              onChanged: recompute,
+              min: 30,
+              max: 60,
+              divisions: 30,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _hraExemptCtrl,
+              label: 'HRA EXEMPTION (CLAIMED)',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+            ),
+            const SizedBox(height: KuberSpace.md),
+            _Expandable(
+              title: 'Other components',
+              expanded: _showComponents,
+              onToggle: () =>
+                  setState(() => _showComponents = !_showComponents),
+              child: inputs == null
+                  ? Text(
+                      'Enter a CTC to see derived components',
+                      style: localeFont(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        ToolStatRow(label: 'Basic', value: money(inputs.basic)),
+                        const SizedBox(height: KuberSpace.sm),
+                        ToolStatRow(label: 'HRA', value: money(inputs.hra)),
+                        const SizedBox(height: KuberSpace.sm),
+                        ToolStatRow(
+                          label: 'Special Allowance',
+                          value: money(inputs.specialAllowance),
+                        ),
+                        const SizedBox(height: KuberSpace.sm),
+                        ToolStatRow(
+                          label: 'Employer PF',
+                          value: money(inputs.employerPf),
+                        ),
+                        const SizedBox(height: KuberSpace.sm),
+                        ToolStatRow(
+                          label: 'Gratuity',
+                          value: money(inputs.gratuity),
+                        ),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: KuberSpace.sm),
+            _Expandable(
+              title: 'Deductions — 80C, 80D, Home Loan, NPS',
+              expanded: _showDeductions,
+              onToggle: () =>
+                  setState(() => _showDeductions = !_showDeductions),
+              child: Column(
+                children: [
+                  ToolTextField(
+                    controller: _c80cCtrl,
+                    label: '80C (up to ₹1,50,000)',
+                    prefix: currency.symbol,
+                    formatAsAmount: true,
+                    onChanged: recompute,
+                  ),
+                  const SizedBox(height: KuberSpace.md),
+                  ToolTextField(
+                    controller: _c80dCtrl,
+                    label: '80D (health insurance)',
+                    prefix: currency.symbol,
+                    formatAsAmount: true,
+                    onChanged: recompute,
+                  ),
+                  const SizedBox(height: KuberSpace.md),
+                  ToolTextField(
+                    controller: _homeLoanCtrl,
+                    label: 'Home Loan Interest (up to ₹2,00,000)',
+                    prefix: currency.symbol,
+                    formatAsAmount: true,
+                    onChanged: recompute,
+                  ),
+                  const SizedBox(height: KuberSpace.md),
+                  ToolTextField(
+                    controller: _npsCtrl,
+                    label: 'NPS 80CCD(1B) (up to ₹50,000)',
+                    prefix: currency.symbol,
+                    formatAsAmount: true,
+                    onChanged: recompute,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : ToolDualHero(
@@ -284,10 +300,10 @@ class _SalaryCalculatorScreenState extends ConsumerState<SalaryCalculatorScreen>
               series: [
                 BarCompareSeries(
                   name: 'Take-home',
-                  color: cs.tertiary,
+                  color: context.kuberMoney.income,
                   values: [
                     result.oldRegime.netAnnual,
-                    result.newRegime.netAnnual
+                    result.newRegime.netAnnual,
                   ],
                 ),
                 BarCompareSeries(
@@ -295,26 +311,32 @@ class _SalaryCalculatorScreenState extends ConsumerState<SalaryCalculatorScreen>
                   color: cs.error,
                   values: [
                     result.oldRegime.totalTax,
-                    result.newRegime.totalTax
+                    result.newRegime.totalTax,
                   ],
                 ),
               ],
             ),
           ),
           ToolSection(
-            title:
-                'Recommended regime — ${result.newIsBetter ? 'New' : 'Old'}',
+            title: 'Recommended regime — ${result.newIsBetter ? 'New' : 'Old'}',
             subtitle: 'Take-home vs tax',
             child: ToolDonutBreakdown(
               segments: [
                 BreakdownSegment(
-                    'Take-home', result.recommended.netAnnual, cs.tertiary),
+                  'Take-home',
+                  result.recommended.netAnnual,
+                  context.kuberMoney.income,
+                ),
                 BreakdownSegment(
-                    'Total Tax', result.recommended.totalTax, cs.error),
+                  'Total Tax',
+                  result.recommended.totalTax,
+                  context.kuberMoney.expense,
+                ),
               ],
               centerBig: formatter.formatCompactCurrency(
-                  result.recommended.netAnnual,
-                  symbol: currency.symbol),
+                result.recommended.netAnnual,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'TAKE-HOME',
             ),
           ),
@@ -374,14 +396,16 @@ class _Expandable extends StatelessWidget {
       children: [
         InkWell(
           onTap: onToggle,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.medium),
           child: Container(
             padding: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.md, vertical: 11),
+              horizontal: KuberSpace.md,
+              vertical: 11,
+            ),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: Row(
               children: [
@@ -389,16 +413,20 @@ class _Expandable extends StatelessWidget {
                   child: Text(
                     title,
                     style: localeFont(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
                   ),
                 ),
                 AnimatedRotation(
                   turns: expanded ? 0.25 : 0,
                   duration: const Duration(milliseconds: 180),
-                  child: Icon(Icons.chevron_right_rounded,
-                      size: 18, color: cs.onSurfaceVariant),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -407,11 +435,12 @@ class _Expandable extends StatelessWidget {
         AnimatedCrossFade(
           firstChild: const SizedBox(width: double.infinity),
           secondChild: Padding(
-            padding: const EdgeInsets.only(top: KuberSpacing.md),
+            padding: const EdgeInsets.only(top: KuberSpace.md),
             child: child,
           ),
-          crossFadeState:
-              expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          crossFadeState: expanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 180),
         ),
       ],

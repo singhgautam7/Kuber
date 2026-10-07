@@ -18,7 +18,6 @@ import '../providers/settings_provider.dart';
 
 import '../widgets/settings_section.dart';
 import '../widgets/settings_choice_sheet.dart';
-import '../widgets/theme_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../widgets/settings_language_row.dart';
 import '../../more/widgets/more_tab_layout_picker.dart';
@@ -207,15 +206,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (text != null && text.isNotEmpty) ...[
           Text(
             text,
-            style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
         ],
-        Icon(
-          Icons.chevron_right_rounded,
-          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-          size: 20,
-        ),
+        Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
       ],
     );
   }
@@ -247,8 +244,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _tempMoreTabLayout ?? settings?.moreTabLayout ?? MoreTabLayout.simple;
     final currentBiometricsEnabled =
         _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
-    final hasCardsVault =
-        ref.watch(cardVaultMetaProvider).valueOrNull != null;
+    final hasCardsVault = ref.watch(cardVaultMetaProvider).valueOrNull != null;
     final currency = currencyFromCode(currencyCode);
 
     final themeStr = currentTheme == ThemeMode.light
@@ -284,49 +280,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, showHome: true, title: ''),
-          ),
-          // Page header
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.settingsTitle,
-                    style: localeFont(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      height: 1.15,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.l10n.settingsSubtitle,
-                    style: localeFont(
-                      fontSize: 13,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+            child: KuberAppBar(
+              showBack: true,
+              title: context.l10n.settingsTitle,
             ),
           ),
-
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpace.screenMargin,
+            ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const KuberProSettingsSection(),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 // PROFILE
                 _SectionLabel(label: context.l10n.profileSection),
                 _SectionDescription(context.l10n.profileDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
@@ -342,12 +312,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // APPEARANCE
                 _SectionLabel(label: context.l10n.appearanceSection),
                 _SectionDescription(context.l10n.appearanceDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
@@ -355,21 +324,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       label: context.l10n.themeLabel,
                       subtitle:
                           '${themeFamilyName(settings?.themeVariant ?? ThemeVariant.signature)} • $themeStr',
-                      onTap: () => showThemeSheet(context),
+                      onTap: () => context.push('/more/settings/theme'),
                       trailing: _trailingWidget(context),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
-                      icon: Icons.space_dashboard_rounded,
+                      icon: Icons.space_dashboard_outlined,
                       label: context.l10n.bottomNavLabel,
                       subtitle: context.l10n.bottomNavSubtitle,
                       onTap: () =>
                           _showBottomNavSheet(context, currentNavBarStyle),
                       trailing: _trailingWidget(context, text: navStr),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
-                      icon: Icons.grid_view_rounded,
+                      icon: Icons.grid_view_outlined,
                       label: context.l10n.moreTabLayoutLabel,
                       subtitle: context.l10n.moreTabLayoutSubtitle,
                       onTap: () => _showMoreTabLayoutSheet(
@@ -380,74 +349,77 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // SHORTCUTS — Quick Actions (nav-bar long-press) + Add menu
                 // (FAB long-press). English-only literals, like other
                 // Kuber-signature surfaces.
                 const _SectionLabel(label: 'SHORTCUTS'),
                 const _SectionDescription('Personalize your long-press menus.'),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
-                      icon: Icons.bolt_rounded,
+                      icon: Icons.bolt_outlined,
                       label: 'Quick Actions',
                       subtitle: 'Nav-bar long-press · controls & shortcuts',
                       onTap: () => context.push('/settings/quick-actions'),
-                      trailing: Icon(Icons.chevron_right_rounded,
-                          color: cs.onSurfaceVariant),
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
                       icon: Icons.add_circle_outline_rounded,
                       label: 'Add Menu',
                       subtitle: '+ button long-press · add-entry shortcuts',
                       onTap: () => context.push('/settings/add-menu'),
-                      trailing: Icon(Icons.chevron_right_rounded,
-                          color: cs.onSurfaceVariant),
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 const _ShortcutsDiscoveryTip(),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // WIDGETS
                 _SectionLabel(label: context.l10n.widgetsSection),
                 _SectionDescription(context.l10n.widgetsDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.home_outlined,
                       label: context.l10n.homeWidgetsLabel,
-                      subtitle:
-                          context.l10n.homeWidgetsSubtitle('$enabledHomeCount'),
+                      subtitle: context.l10n.homeWidgetsSubtitle(
+                        '$enabledHomeCount',
+                      ),
                       onTap: () => context.push('/widget-editor/home'),
                       trailing: _trailingWidget(context),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
                       icon: Icons.insert_chart_outlined_rounded,
                       label: context.l10n.analyticsWidgetsLabel,
-                      subtitle: context.l10n
-                          .analyticsWidgetsSubtitle('$enabledAnalyticsCount'),
+                      subtitle: context.l10n.analyticsWidgetsSubtitle(
+                        '$enabledAnalyticsCount',
+                      ),
                       onTap: () => context.push('/widget-editor/analytics'),
                       trailing: _trailingWidget(context),
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // MONEY DISPLAY
                 _SectionLabel(label: context.l10n.moneyDisplaySection),
                 _SectionDescription(context.l10n.moneyDisplayDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     const SettingsLanguageRow(),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
                       icon: Icons.account_balance_wallet_outlined,
                       label: context.l10n.currencyLabel,
@@ -459,9 +431,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         text: '${currency.symbol} ${currency.code}',
                       ),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
-                      icon: Icons.money_rounded,
+                      icon: Icons.money_outlined,
                       label: context.l10n.numberFormatLabel,
                       subtitle: context.l10n.numberFormatSubtitle,
                       onTap: () =>
@@ -470,12 +442,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // TRANSACTIONS
                 _SectionLabel(label: context.l10n.transactionsSection),
                 _SectionDescription(context.l10n.transactionsDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
@@ -489,7 +460,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       trailing: _trailingWidget(context, text: defaultAccName),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
                       icon: Icons.swap_horiz_rounded,
                       label: context.l10n.horizontalSwipeLabel,
@@ -500,12 +471,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // PRIVACY & SECURITY
                 _SectionLabel(label: context.l10n.privacySecuritySection),
                 _SectionDescription(context.l10n.privacySecurityDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
@@ -520,7 +490,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         activeTrackColor: cs.primary,
                       ),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(
                       icon: Icons.fingerprint_rounded,
                       label: context.l10n.biometricLockLabel,
@@ -579,7 +549,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         activeTrackColor: cs.primary,
                       ),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                    Divider(height: 1, color: cs.outlineVariant),
                     // Notes-specific gate. Greyed out until the app-wide
                     // biometric toggle above is on (per design 1l).
                     Opacity(
@@ -591,21 +561,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ? 'Ask for Face / fingerprint unlock'
                             : 'Turn on Biometric unlock above first',
                         trailing: Switch(
-                          value: currentBiometricsEnabled &&
+                          value:
+                              currentBiometricsEnabled &&
                               ref.watch(notesBiometricRequiredProvider),
                           onChanged: !currentBiometricsEnabled
                               ? null
                               : (val) async {
                                   await ref
-                                      .read(notesBiometricRequiredProvider
-                                          .notifier)
+                                      .read(
+                                        notesBiometricRequiredProvider.notifier,
+                                      )
                                       .set(val);
                                   if (!val) {
                                     ref
-                                        .read(
-                                            notesUnlockedThisSessionProvider
-                                                .notifier)
-                                        .state = false;
+                                            .read(
+                                              notesUnlockedThisSessionProvider
+                                                  .notifier,
+                                            )
+                                            .state =
+                                        false;
                                   }
                                 },
                           activeTrackColor: cs.primary,
@@ -616,13 +590,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     // there is no PIN to change until the user has set up Kuber
                     // Cards. Routed through the Pro gate.
                     if (hasCardsVault) ...[
-                      Divider(height: 1, color: cs.outline),
+                      Divider(height: 1, color: cs.outlineVariant),
                       _SettingsTile(
-                        icon: Icons.credit_card_rounded,
+                        icon: Icons.credit_card_outlined,
                         label: 'Change Kuber Cards PIN',
                         subtitle: 'Update the PIN that unlocks your cards',
-                        trailing: Icon(Icons.chevron_right_rounded,
-                            size: 20, color: cs.onSurfaceVariant),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 20,
+                          color: cs.onSurfaceVariant,
+                        ),
                         // Kuber Cards is free up to 2 cards, so managing the
                         // unlock PIN is free too. No entry-level Pro gate.
                         onTap: () => context.push('/cards/change-pin'),
@@ -630,12 +607,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // ABOUT
                 _SectionLabel(label: context.l10n.aboutSection),
                 _SectionDescription(context.l10n.aboutDescription),
-                const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
@@ -647,7 +623,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: KuberSpacing.xxl + systemNavBarInset(context)),
+                SizedBox(height: KuberSpace.xxl + systemNavBarInset(context)),
               ]),
             ),
           ),
@@ -668,8 +644,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       builder: (ctx) {
         final cs = Theme.of(ctx).colorScheme;
@@ -681,28 +659,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           builder: (ctx, scrollController) {
             return Column(
               children: [
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Container(
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
                     color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(KuberShape.full),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 Text(
                   context.l10n.defaultAccountLabel,
                   style: localeFont(
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 if (accounts.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.all(KuberSpacing.xl),
+                    padding: const EdgeInsets.all(KuberSpace.xl),
                     child: Text(
                       context.l10n.noAccountsFound,
                       style: localeFont(color: cs.onSurfaceVariant),
@@ -769,10 +747,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 if (currentId != null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      KuberSpacing.lg,
-                      KuberSpacing.sm,
-                      KuberSpacing.lg,
-                      KuberSpacing.lg,
+                      KuberSpace.lg,
+                      KuberSpace.sm,
+                      KuberSpace.lg,
+                      KuberSpace.lg,
                     ),
                     child: SizedBox(
                       width: double.infinity,
@@ -793,7 +771,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: cs.error.withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(
+                              KuberShape.medium,
+                            ),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
@@ -838,8 +818,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (ctx, setSheetState) => Container(
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(color: cs.outline),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(KuberShape.extraLarge),
+            ),
+            border: Border.all(color: cs.outlineVariant),
           ),
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -847,16 +829,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
               Container(
                 width: 32,
                 height: 4,
                 decoration: BoxDecoration(
                   color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(KuberShape.full),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -864,8 +846,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Text(
                       context.l10n.yourNameLabel,
                       style: localeFont(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
                     ),
@@ -880,7 +862,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Form(
@@ -906,24 +888,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       filled: true,
                       fillColor: cs.surface,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: cs.outline),
+                        borderRadius: BorderRadius.circular(KuberShape.large),
+                        borderSide: BorderSide(color: cs.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(KuberShape.large),
                         borderSide: BorderSide(
-                          color: cs.outline.withValues(alpha: 0.5),
+                          color: cs.outlineVariant.withValues(alpha: 0.5),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(KuberShape.large),
                         borderSide: BorderSide(color: cs.primary, width: 1.5),
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: SizedBox(
@@ -942,14 +924,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     },
                     style: FilledButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(KuberShape.large),
                       ),
                     ),
                     child: Text(
                       context.l10n.doneLabel,
                       style: localeFont(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -971,6 +953,7 @@ typedef _SectionLabel = SettingsSectionLabel;
 typedef _SectionDescription = SettingsSectionDescription;
 typedef _SettingsCard = SettingsCard;
 typedef _SettingsTile = SettingsTile;
+
 /// Discovery tip below the SHORTCUTS card — teaches both long-press gestures so
 /// the feature is findable without knowing them. Dashed primary-tinted bar.
 class _ShortcutsDiscoveryTip extends StatelessWidget {
@@ -980,10 +963,10 @@ class _ShortcutsDiscoveryTip extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.primary.withValues(alpha: 0.28)),
       ),
       child: Row(
@@ -994,17 +977,16 @@ class _ShortcutsDiscoveryTip extends StatelessWidget {
             height: 34,
             decoration: BoxDecoration(
               color: cs.primary,
-              borderRadius: BorderRadius.circular(KuberRadius.sm),
+              borderRadius: BorderRadius.circular(KuberShape.small),
             ),
-            child: const Icon(Icons.touch_app_rounded,
-                size: 18, color: Colors.white),
+            child: Icon(Icons.touch_app_rounded, size: 18, color: cs.onPrimary),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Text.rich(
               TextSpan(
                 style: localeFont(
-                  fontSize: 12.5,
+                  fontSize: 12,
                   color: cs.onSurface,
                   height: 1.45,
                 ),
@@ -1012,8 +994,8 @@ class _ShortcutsDiscoveryTip extends StatelessWidget {
                   TextSpan(
                     text: 'Tip: ',
                     style: localeFont(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                       color: cs.primary,
                     ),
                   ),

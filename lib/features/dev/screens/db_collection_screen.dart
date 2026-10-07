@@ -351,12 +351,12 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           // Subtitle and Pagination Header
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.md,
+              horizontal: KuberSpace.lg,
+              vertical: KuberSpace.md,
             ),
             decoration: BoxDecoration(
               color: cs.surface,
-              border: Border(bottom: BorderSide(color: cs.outline)),
+              border: Border(bottom: BorderSide(color: cs.outlineVariant)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -407,7 +407,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                           size: 64,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.3),
                         ),
-                        const SizedBox(height: KuberSpacing.lg),
+                        const SizedBox(height: KuberSpace.lg),
                         Text(
                           'Collection is empty',
                           style: localeFont(
@@ -426,7 +426,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                       child: Theme(
                         data: Theme.of(
                           context,
-                        ).copyWith(dividerColor: cs.outline),
+                        ).copyWith(dividerColor: cs.outlineVariant),
                         child: DataTable(
                           headingRowColor: WidgetStateProperty.all(
                             cs.surfaceContainerHigh,
@@ -446,14 +446,14 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           // Footer Pagination Controls
           Container(
             padding: EdgeInsets.only(
-              left: KuberSpacing.lg,
-              right: KuberSpacing.lg,
-              top: KuberSpacing.md,
-              bottom: MediaQuery.of(context).padding.bottom + KuberSpacing.md,
+              left: KuberSpace.lg,
+              right: KuberSpace.lg,
+              top: KuberSpace.md,
+              bottom: MediaQuery.of(context).padding.bottom + KuberSpace.md,
             ),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              border: Border(top: BorderSide(color: cs.outline)),
+              border: Border(top: BorderSide(color: cs.outlineVariant)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -513,7 +513,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           child: Text(
             key,
             style: monoFont(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
             ),
@@ -554,7 +554,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
             Text(
               displayVal,
               style: localeFont(
-                fontSize: 13,
+                fontSize: 14,
                 fontStyle: val == null ? FontStyle.italic : FontStyle.normal,
                 color: val == null
                     ? cs.onSurfaceVariant.withValues(alpha: 0.6)

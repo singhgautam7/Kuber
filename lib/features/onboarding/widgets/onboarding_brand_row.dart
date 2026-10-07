@@ -15,20 +15,20 @@ class OnboardingBrandRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.xl,
-        KuberSpacing.lg,
-        KuberSpacing.xl,
-        KuberSpacing.sm,
+        KuberSpace.xl,
+        KuberSpace.lg,
+        KuberSpace.xl,
+        KuberSpace.sm,
       ),
       child: Row(
         children: [
           const BrandIcon(size: 40),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Text(
             'Kuber',
             style: localeFont(
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
               letterSpacing: -0.3,
             ),
@@ -41,7 +41,7 @@ class OnboardingBrandRow extends StatelessWidget {
                 'Skip',
                 style: localeFont(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,
                 ),
               ),

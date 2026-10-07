@@ -12,7 +12,7 @@ class TypingIndicator extends StatelessWidget {
     return const Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: EdgeInsets.only(top: 4, bottom: KuberSpacing.md),
+        padding: EdgeInsets.only(top: 4, bottom: KuberSpace.md),
         child: SizedBox(
           height: 18,
           child: Row(
@@ -50,9 +50,10 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _anim = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _anim = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _ctrl.repeat(reverse: true);
     });
@@ -77,8 +78,9 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color:
-                cs.onSurfaceVariant.withValues(alpha: 0.3 + 0.7 * _anim.value),
+            color: cs.onSurfaceVariant.withValues(
+              alpha: 0.3 + 0.7 * _anim.value,
+            ),
             shape: BoxShape.circle,
           ),
         ),

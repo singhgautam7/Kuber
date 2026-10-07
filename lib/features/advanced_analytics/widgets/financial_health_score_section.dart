@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../engine/analytics_engine_adapter.dart';
 import '../providers/advanced_analytics_provider.dart';
 import 'analytics_common.dart';
@@ -16,14 +17,13 @@ class FinancialHealthScoreSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(financialHealthProvider);
+    const note = FixedWindowNote(
+      message:
+          'Health score always reflects the last 3-6 months, regardless of section date filters.',
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const FixedWindowNote(
-          message:
-              'Health score always reflects the last 3-6 months, regardless of section date filters.',
-        ),
-        const SizedBox(height: KuberSpacing.md),
         async.when(
           loading: () => const AnalyticsSkeletonBlock(),
           error: (error, _) => KuberEmptyState(
@@ -33,24 +33,39 @@ class FinancialHealthScoreSection extends ConsumerWidget {
           ),
           data: (score) {
             if (score.monthsTracked < 2) {
-              return KuberEmptyState(
-                icon: Icons.health_and_safety_outlined,
-                title: 'Score needs 2 months of history',
-                description:
-                    'You currently have ${score.monthsTracked} months.',
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  note,
+                  KuberEmptyState(
+                    icon: Icons.health_and_safety_outlined,
+                    title: 'Score needs 2 months of history',
+                    description:
+                        'You currently have ${score.monthsTracked} months.',
+                  ),
+                ],
               );
             }
             final band = _bandFor(context, score.total);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: KuberSpacing.md),
-                Center(child: _ScoreHero(score: score.total, band: band)),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.sm),
+                Center(
+                  child: _ScoreHero(score: score.total, band: band),
+                ),
+                const SizedBox(height: KuberSpace.sm),
                 _HealthSummary(band: band, focusAreas: score.improvementAreas),
-                const SizedBox(height: KuberSpacing.xl),
-                for (final detail in score.subscores)
-                  _SubscoreRow(detail: detail),
+                const SizedBox(height: KuberSpace.xl),
+                note,
+                const SizedBox(height: KuberSpace.sectionGap - 4),
+                KuberSectionHeader(title: 'Breakdown'),
+                KuberGroup(
+                  children: [
+                    for (final detail in score.subscores)
+                      _SubscoreRow(detail: detail),
+                  ],
+                ),
                 _ImprovementBanner(score: score),
               ],
             );
@@ -70,19 +85,17 @@ class _HealthBand {
 }
 
 _HealthBand _bandFor(BuildContext context, int total) {
-  final cs = Theme.of(context).colorScheme;
-  final warning = context.kuberColors.warning;
-  if (total >= 80) return _HealthBand('Excellent', cs.tertiary);
-  if (total >= 65) return _HealthBand('Good', cs.tertiary);
+  final warning = context.kuberMoney.warning;
+  if (total >= 80) return _HealthBand('Excellent', context.kuberMoney.income);
+  if (total >= 65) return _HealthBand('Good', context.kuberMoney.income);
   if (total >= 45) return _HealthBand('Fair', warning);
-  return _HealthBand('Needs attention', cs.error);
+  return _HealthBand('Needs attention', context.kuberMoney.expense);
 }
 
 Color _subscoreColor(BuildContext context, int score) {
-  final cs = Theme.of(context).colorScheme;
-  if (score >= 16) return cs.tertiary;
-  if (score >= 10) return context.kuberColors.warning;
-  return cs.error;
+  if (score >= 16) return context.kuberMoney.income;
+  if (score >= 10) return context.kuberMoney.warning;
+  return context.kuberMoney.expense;
 }
 
 String _subscoreTitle(SubscoreType type) => switch (type) {
@@ -138,22 +151,23 @@ class _ScoreHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 150,
-          height: 150,
+          width: 140,
+          height: 140,
           child: Stack(
             alignment: Alignment.center,
             children: [
               SizedBox.expand(
                 child: CircularProgressIndicator(
                   value: (score / 100).clamp(0.0, 1.0),
-                  strokeWidth: 12,
+                  strokeWidth: 10,
                   strokeCap: StrokeCap.round,
                   color: band.color,
-                  backgroundColor: cs.surfaceContainerHigh,
+                  backgroundColor: cs.surfaceContainerHighest,
                 ),
               ),
               Column(
@@ -161,37 +175,21 @@ class _ScoreHero extends StatelessWidget {
                 children: [
                   Text(
                     '$score',
-                    style: localeFont(
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
+                    style: tt.displaySmall!.copyWith(color: cs.onSurface),
                   ),
                   Text(
                     '/ 100',
-                    style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-          decoration: BoxDecoration(
-            color: band.color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: band.color.withValues(alpha: 0.35)),
-          ),
-          child: Text(
-            band.label,
-            style: localeFont(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: band.color,
-            ),
-          ),
+        const SizedBox(height: KuberSpace.md),
+        Text(
+          band.label,
+          style: tt.headlineSmall!.copyWith(color: band.color),
         ),
       ],
     );
@@ -225,10 +223,7 @@ class _HealthSummary extends StatelessWidget {
         spans.add(
           TextSpan(
             text: focusAreas[i],
-            style: localeFont(
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-            ),
+            style: localeFont(fontWeight: FontWeight.w700, color: cs.onSurface),
           ),
         );
       }
@@ -236,10 +231,8 @@ class _HealthSummary extends StatelessWidget {
     }
     return Text.rich(
       TextSpan(
-        style: localeFont(
-          fontSize: 12.5,
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: cs.onSurfaceVariant,
-          height: 1.5,
         ),
         children: spans,
       ),
@@ -258,110 +251,55 @@ class _SubscoreRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final applicable = detail.applicable;
-    final barColor = applicable
+    final color = applicable
         ? _subscoreColor(context, detail.score)
-        : cs.outlineVariant;
+        : cs.outline;
 
-    final card = Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 6,
-            height: 34,
-            decoration: BoxDecoration(
-              color: barColor,
-              borderRadius: BorderRadius.circular(3),
+    final row = KuberListRow(
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox.expand(
+              child: CircularProgressIndicator(
+                value: applicable ? (detail.score / 20).clamp(0.0, 1.0) : 0,
+                strokeWidth: 3.5,
+                strokeCap: StrokeCap.round,
+                color: color,
+                backgroundColor: cs.surfaceContainerHighest,
+              ),
             ),
-          ),
-          const SizedBox(width: KuberSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Text(
+              applicable ? '${detail.score}' : '–',
+              style: tt.labelMedium!.copyWith(color: cs.onSurface),
+            ),
+          ],
+        ),
+      ),
+      title: _subscoreTitle(detail.type),
+      subtitle: _subscoreSubtitle(detail),
+      trailing: applicable
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _subscoreTitle(detail.type),
-                  style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: applicable ? cs.onSurface : cs.onSurfaceVariant,
-                  ),
+                  '${detail.score}/20',
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _subscoreSubtitle(detail),
-                  style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant),
-                ),
+                const SizedBox(width: KuberSpace.xs),
+                const KuberChevron(),
               ],
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          if (applicable) ...[
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '${detail.score}',
-                    style: localeFont(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  TextSpan(
-                    text: '/20',
-                    style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.xs),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
-          ] else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
-              ),
-              child: Text(
-                'NOT APPLICABLE',
-                style: localeFont(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.6,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-      child: applicable
-          ? Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => showSubscoreExplanationSheet(context, detail),
-                child: card,
-              ),
             )
-          : Opacity(opacity: 0.6, child: card),
+          : const KuberPill(label: 'Not applicable'),
+      onTap: applicable
+          ? () => showSubscoreExplanationSheet(context, detail)
+          : null,
     );
+    return applicable ? row : Opacity(opacity: 0.6, child: row);
   }
 }
 
@@ -387,25 +325,26 @@ class _ImprovementBanner extends StatelessWidget {
         : buildSubscoreContent(weakest).improvementSuggestion;
 
     return Container(
-      margin: const EdgeInsets.only(top: KuberSpacing.sm),
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      margin: const EdgeInsets.only(top: KuberSpace.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.largeR,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.lightbulb_outline_rounded, size: 18, color: cs.primary),
-          const SizedBox(width: KuberSpacing.sm),
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            size: 20,
+            color: cs.onSecondaryContainer,
+          ),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Text(
               message,
-              style: localeFont(
-                fontSize: 12.5,
-                color: cs.onSurface,
-                height: 1.45,
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                color: cs.onSecondaryContainer,
               ),
             ),
           ),

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../widgets/calculator_widgets.dart';
 
@@ -18,8 +17,8 @@ class _Person {
   final FocusNode nameFocus;
 
   _Person({this.name = ''})
-      : inputCtrl = TextEditingController(),
-        nameFocus = FocusNode();
+    : inputCtrl = TextEditingController(),
+      nameFocus = FocusNode();
 
   void dispose() {
     inputCtrl.dispose();
@@ -35,8 +34,7 @@ class SplitCalculatorScreen extends ConsumerStatefulWidget {
       _SplitCalculatorScreenState();
 }
 
-class _SplitCalculatorScreenState
-    extends ConsumerState<SplitCalculatorScreen> {
+class _SplitCalculatorScreenState extends ConsumerState<SplitCalculatorScreen> {
   final _totalCtrl = TextEditingController();
   _SplitType _splitType = _SplitType.equal;
   final List<_Person> _people = [
@@ -82,8 +80,9 @@ class _SplitCalculatorScreenState
 
       case _SplitType.unequal:
         return _people
-            .map((p) =>
-                double.tryParse(p.inputCtrl.text.replaceAll(',', '')) ?? 0)
+            .map(
+              (p) => double.tryParse(p.inputCtrl.text.replaceAll(',', '')) ?? 0,
+            )
             .toList();
 
       case _SplitType.percentage:
@@ -114,9 +113,9 @@ class _SplitCalculatorScreenState
         return (sum - total).abs() < 0.01;
       case _SplitType.percentage:
         final sum = _people.fold(
-            0.0,
-            (a, p) =>
-                a + (double.tryParse(p.inputCtrl.text) ?? 0));
+          0.0,
+          (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0),
+        );
         return (sum - 100).abs() < 0.01;
     }
   }
@@ -140,9 +139,9 @@ class _SplitCalculatorScreenState
         return 'Remaining: ${formatter.formatCurrency(-diff, symbol: currency.symbol)}';
       case _SplitType.percentage:
         final sum = _people.fold(
-            0.0,
-            (a, p) =>
-                a + (double.tryParse(p.inputCtrl.text) ?? 0));
+          0.0,
+          (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0),
+        );
         if ((sum - 100).abs() < 0.01) return null;
         return 'Total: ${sum.toStringAsFixed(1)}% / 100%';
     }
@@ -164,24 +163,17 @@ class _SplitCalculatorScreenState
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.splitCalculator,
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
               title: 'Split Calculator',
-              description: 'Split expenses between people',
+              showBack: true,
+              infoConfig: InfoConstants.splitCalculator,
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
+              KuberSpace.lg,
               0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+              KuberSpace.lg,
+              KuberSpace.xl,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
@@ -194,21 +186,21 @@ class _SplitCalculatorScreenState
                       onChanged: (_) => setState(() {}),
                       formatAsAmount: true,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     const ToolInputLabel('SPLIT TYPE'),
-                    const SizedBox(height: KuberSpacing.sm),
+                    const SizedBox(height: KuberSpace.sm),
                     _SplitTypeChips(
                       selected: _splitType,
                       onChanged: (t) => setState(() => _splitType = t),
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     const ToolInputLabel('PEOPLE'),
-                    const SizedBox(height: KuberSpacing.sm),
+                    const SizedBox(height: KuberSpace.sm),
                     ..._people.asMap().entries.map((entry) {
                       final i = entry.key;
                       final person = entry.value;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                        padding: const EdgeInsets.only(bottom: KuberSpace.sm),
                         child: _PersonRow(
                           person: person,
                           share: hasData ? shares[i] : null,
@@ -216,15 +208,14 @@ class _SplitCalculatorScreenState
                           canRemove: _people.length > 2,
                           formatter: formatter,
                           currency: currency,
-                          onNameChanged: (v) =>
-                              setState(() => person.name = v),
+                          onNameChanged: (v) => setState(() => person.name = v),
                           onInputChanged: (_) => setState(() {}),
                           onRemove: () => _removePerson(i),
                         ),
                       );
                     }),
                     if (_splitType == _SplitType.unequal && hasData) ...[
-                      const SizedBox(height: KuberSpacing.xs),
+                      const SizedBox(height: KuberSpace.xs),
                       _RemainingIndicator(
                         shares: shares,
                         total: _total,
@@ -233,17 +224,17 @@ class _SplitCalculatorScreenState
                       ),
                     ],
                     if (_splitType == _SplitType.percentage && hasData) ...[
-                      const SizedBox(height: KuberSpacing.xs),
+                      const SizedBox(height: KuberSpace.xs),
                       _PercentageIndicator(people: _people),
                     ],
-                    const SizedBox(height: KuberSpacing.sm),
+                    const SizedBox(height: KuberSpace.sm),
                     TextButton.icon(
                       onPressed: _people.length < 20 ? _addPerson : null,
                       icon: Icon(Icons.add, size: 16, color: cs.primary),
                       label: Text(
                         'Add Person',
                         style: localeFont(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: cs.primary,
                         ),
@@ -256,154 +247,169 @@ class _SplitCalculatorScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 // Result card
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  padding: const EdgeInsets.all(KuberSpace.lg),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(
+                      KuberShape.largeIncreased,
+                    ),
                     border: Border.all(
-                        color: cs.outlineVariant.withValues(alpha: 0.5)),
+                      color: cs.outline.withValues(alpha: 0.5),
+                    ),
                   ),
                   child: !hasData
                       ? const ToolEmptyResult()
                       : !valid && error != null
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(KuberSpacing.md),
-                                  decoration: BoxDecoration(
-                                    color: cs.error.withValues(alpha: 0.1),
-                                    borderRadius:
-                                        BorderRadius.circular(KuberRadius.md),
-                                    border: Border.all(
-                                        color: cs.error.withValues(alpha: 0.3)),
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(KuberSpace.md),
+                              decoration: BoxDecoration(
+                                color: cs.error.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(
+                                  KuberShape.largeIncreased,
+                                ),
+                                border: Border.all(
+                                  color: cs.error.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning_rounded,
+                                    size: 16,
+                                    color: cs.error,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.warning_rounded,
-                                          size: 16, color: cs.error),
-                                      const SizedBox(width: KuberSpacing.sm),
-                                      Text(
-                                        error,
+                                  const SizedBox(width: KuberSpace.sm),
+                                  Text(
+                                    error,
+                                    style: localeFont(
+                                      fontSize: 14,
+                                      color: cs.error,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ..._people.asMap().entries.map((entry) {
+                              final i = entry.key;
+                              final person = entry.value;
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: KuberSpace.sm,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        person.name.isEmpty
+                                            ? 'Person ${i + 1}'
+                                            : person.name,
                                         style: localeFont(
-                                          fontSize: 13,
-                                          color: cs.error,
+                                          fontSize: 14,
+                                          color: cs.onSurface,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ..._people.asMap().entries.map((entry) {
-                                  final i = entry.key;
-                                  final person = entry.value;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: KuberSpacing.sm),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            person.name.isEmpty
-                                                ? 'Person ${i + 1}'
-                                                : person.name,
-                                            style: localeFont(
-                                              fontSize: 14,
-                                              color: cs.onSurface,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          formatter.formatCurrency(shares[i],
-                                              symbol: currency.symbol),
-                                          style: localeFont(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: cs.onSurface,
-                                          ),
-                                        ),
-                                        const SizedBox(width: KuberSpacing.sm),
-                                        GestureDetector(
-                                          onTap: () {
-                                            if (person.name.isEmpty) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Enter a name first',
-                                                    style: localeFont(),
-                                                  ),
-                                                ),
-                                              );
-                                              return;
-                                            }
-                                            context.push('/ledger/add');
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: KuberSpacing.sm,
-                                              vertical: KuberSpacing.xs,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      KuberRadius.md),
-                                              border: Border.all(
-                                                  color: cs.outline),
-                                            ),
-                                            child: Text(
-                                              'Lent/Borrow',
-                                              style: localeFont(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                                color: cs.primary,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
                                     ),
-                                  );
-                                }),
-                                const SizedBox(height: KuberSpacing.md),
-                                Divider(
-                                    color: cs.outline.withValues(alpha: 0.4),
-                                    height: 1),
-                                const SizedBox(height: KuberSpacing.md),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
                                     Text(
-                                      'Total',
+                                      formatter.formatCurrency(
+                                        shares[i],
+                                        symbol: currency.symbol,
+                                      ),
                                       style: localeFont(
-                                        fontSize: 13,
-                                        color: cs.onSurfaceVariant,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: cs.onSurface,
                                       ),
                                     ),
-                                    Text(
-                                      formatter.formatCurrency(_total,
-                                          symbol: currency.symbol),
-                                      style: localeFont(
-                                        fontSize: 13,
-                                        color: cs.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
+                                    const SizedBox(width: KuberSpace.sm),
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (person.name.isEmpty) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Enter a name first',
+                                                style: localeFont(),
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        context.push('/ledger/add');
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: KuberSpace.sm,
+                                          vertical: KuberSpace.xs,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            KuberShape.largeIncreased,
+                                          ),
+                                          border: Border.all(
+                                            color: cs.outlineVariant,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Lent/Borrow',
+                                          style: localeFont(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: cs.primary,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
+                              );
+                            }),
+                            const SizedBox(height: KuberSpace.md),
+                            Divider(
+                              color: cs.outlineVariant.withValues(alpha: 0.4),
+                              height: 1,
+                            ),
+                            const SizedBox(height: KuberSpace.md),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Total',
+                                  style: localeFont(
+                                    fontSize: 14,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  formatter.formatCurrency(
+                                    _total,
+                                    symbol: currency.symbol,
+                                  ),
+                                  style: localeFont(
+                                    fontSize: 14,
+                                    color: cs.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
+                          ],
+                        ),
                 ),
               ]),
             ),
@@ -430,8 +436,8 @@ class _SplitTypeChips extends StatelessWidget {
       (_SplitType.fraction, 'FRACTION'),
     ];
     return Wrap(
-      spacing: KuberSpacing.xs,
-      runSpacing: KuberSpacing.xs,
+      spacing: KuberSpace.xs,
+      runSpacing: KuberSpace.xs,
       children: types.map((entry) {
         final (type, label) = entry;
         final isSelected = selected == type;
@@ -440,14 +446,15 @@ class _SplitTypeChips extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.md,
-              vertical: KuberSpacing.xs + 2,
+              horizontal: KuberSpace.md,
+              vertical: KuberSpace.xs + 2,
             ),
             decoration: BoxDecoration(
               color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               border: Border.all(
-                  color: isSelected ? cs.primary : cs.outline),
+                color: isSelected ? cs.primary : cs.outlineVariant,
+              ),
             ),
             child: Text(
               label,
@@ -531,62 +538,66 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
             style: localeFont(fontSize: 14, color: cs.onSurface),
             decoration: InputDecoration(
               hintText: 'Name',
-              hintStyle: localeFont(
-                  fontSize: 14, color: cs.onSurfaceVariant),
+              hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
               filled: true,
               fillColor: cs.surfaceContainerHigh,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.md,
-                vertical: KuberSpacing.sm,
+                horizontal: KuberSpace.md,
+                vertical: KuberSpace.sm,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.large),
                 borderSide: BorderSide(color: cs.primary),
               ),
             ),
           ),
         ),
-        const SizedBox(width: KuberSpacing.sm),
+        const SizedBox(width: KuberSpace.sm),
         if (showInput)
           Expanded(
             flex: 2,
             child: TextField(
               controller: widget.person.inputCtrl,
               onChanged: widget.onInputChanged,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               style: localeFont(fontSize: 14, color: cs.onSurface),
               decoration: InputDecoration(
                 prefixText: prefix != null ? '$prefix ' : null,
                 prefixStyle: localeFont(
-                    fontSize: 14, color: cs.onSurfaceVariant),
+                  fontSize: 14,
+                  color: cs.onSurfaceVariant,
+                ),
                 suffixText: suffix,
                 suffixStyle: localeFont(
-                    fontSize: 13, color: cs.onSurfaceVariant),
+                  fontSize: 14,
+                  color: cs.onSurfaceVariant,
+                ),
                 filled: true,
                 fillColor: cs.surfaceContainerHigh,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.md,
-                  vertical: KuberSpacing.sm,
+                  horizontal: KuberSpace.md,
+                  vertical: KuberSpace.sm,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
                   borderSide: BorderSide(color: cs.primary),
                 ),
               ),
@@ -596,8 +607,10 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
           Expanded(
             flex: 2,
             child: Text(
-              widget.formatter.formatCurrency(widget.share,
-                  symbol: widget.currency.symbol as String),
+              widget.formatter.formatCurrency(
+                widget.share,
+                symbol: widget.currency.symbol as String,
+              ),
               textAlign: TextAlign.right,
               style: localeFont(
                 fontSize: 14,
@@ -606,7 +619,7 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
               ),
             ),
           ),
-        const SizedBox(width: KuberSpacing.sm),
+        const SizedBox(width: KuberSpace.sm),
         GestureDetector(
           onTap: widget.canRemove ? widget.onRemove : null,
           child: Icon(
@@ -644,10 +657,7 @@ class _RemainingIndicator extends StatelessWidget {
         ? 'Over by ${formatter.formatCurrency(remaining.abs(), symbol: currency.symbol as String)}'
         : 'Remaining: ${formatter.formatCurrency(remaining, symbol: currency.symbol as String)}';
 
-    return Text(
-      label,
-      style: localeFont(fontSize: 12, color: color),
-    );
+    return Text(label, style: localeFont(fontSize: 12, color: color));
   }
 }
 
@@ -658,15 +668,16 @@ class _PercentageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final total = people.fold(
-        0.0, (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0));
+      0.0,
+      (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0),
+    );
     final ok = (total - 100).abs() < 0.01;
     return Text(
       '${total.toStringAsFixed(1)}% / 100%',
       style: localeFont(
         fontSize: 12,
-        color: ok ? cs.tertiary : cs.error,
+        color: ok ? context.kuberMoney.income : context.kuberMoney.expense,
         fontWeight: FontWeight.w600,
       ),
     );

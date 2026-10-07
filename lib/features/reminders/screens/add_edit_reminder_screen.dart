@@ -4,17 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
-import '../../../shared/widgets/app_button.dart';
+import 'package:flutter/services.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/reminder.dart';
 import '../providers/reminders_provider.dart';
-import '../widgets/reminder_form_fields.dart';
-import '../widgets/reminder_details_section.dart';
 
 /// Add / Edit Reminder full screen (screens 2b collapsed / 2c expanded).
 /// Universal pattern header, no FAB (form screen).
@@ -28,15 +29,13 @@ class AddEditReminderScreen extends ConsumerStatefulWidget {
       _AddEditReminderScreenState();
 }
 
-class _AddEditReminderScreenState
-    extends ConsumerState<AddEditReminderScreen> {
+class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
   final _amountController = TextEditingController();
 
   late DateTime _dueDate;
   late TimeOfDay _dueTime;
-  bool _detailsExpanded = false;
   String _transactionType = 'expense';
   int? _categoryId;
   String? _repeat;
@@ -60,10 +59,6 @@ class _AddEditReminderScreenState
       _transactionType = e.transactionType ?? 'expense';
       _categoryId = int.tryParse(e.categoryId ?? '');
       _repeat = e.repeat;
-      _detailsExpanded = e.notes != null ||
-          e.amount != null ||
-          e.categoryId != null ||
-          e.repeat != null;
     } else {
       final now = DateTime.now().add(const Duration(hours: 1));
       _dueDate = now;
@@ -80,12 +75,12 @@ class _AddEditReminderScreenState
   }
 
   DateTime get _dueAt => DateTime(
-        _dueDate.year,
-        _dueDate.month,
-        _dueDate.day,
-        _dueTime.hour,
-        _dueTime.minute,
-      );
+    _dueDate.year,
+    _dueDate.month,
+    _dueDate.day,
+    _dueTime.hour,
+    _dueTime.minute,
+  );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -98,8 +93,10 @@ class _AddEditReminderScreenState
   }
 
   Future<void> _pickTime() async {
-    final picked =
-        await showTimePicker(context: context, initialTime: _dueTime);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _dueTime,
+    );
     if (picked != null) setState(() => _dueTime = picked);
   }
 
@@ -154,7 +151,9 @@ class _AddEditReminderScreenState
     if (!mounted) return;
     Navigator.of(context).pop();
     showKuberSnackBar(
-        context, _isEditing ? 'Reminder updated' : 'Reminder saved');
+      context,
+      _isEditing ? 'Reminder updated' : 'Reminder saved',
+    );
   }
 
   Future<void> _delete() async {
@@ -164,30 +163,20 @@ class _AddEditReminderScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          side: BorderSide(color: cs.outline),
-        ),
-        title: Text('Delete reminder?',
-            style: localeFont(fontWeight: FontWeight.w700, fontSize: 18)),
-        content: Text(
-          '"${e.title}" will be permanently deleted.',
-          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-        ),
+        title: const Text('Delete reminder?'),
+        content: Text('"${e.title}" will be permanently deleted.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel',
-                style: localeFont(
-                    color: cs.onSurfaceVariant,
-                    fontWeight: FontWeight.w600)),
+            child: const Text('Cancel'),
           ),
-          TextButton(
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Delete',
-                style: localeFont(
-                    color: cs.error, fontWeight: FontWeight.w700)),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -203,98 +192,173 @@ class _AddEditReminderScreenState
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final category = ref.watch(categoryListProvider.select(
-      (async) =>
-          async.valueOrNull?.firstWhereOrNull((c) => c.id == _categoryId),
-    ));
+    final category = ref.watch(
+      categoryListProvider.select(
+        (async) =>
+            async.valueOrNull?.firstWhereOrNull((c) => c.id == _categoryId),
+      ),
+    );
+
+    final tt = Theme.of(context).textTheme;
+    Widget section(String title, Widget child) => Padding(
+      padding: const EdgeInsets.only(top: KuberSpace.sectionGap - 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KuberSectionHeader(title: title),
+          child,
+        ],
+      ),
+    );
+    String repeatLabel(String? v) => switch (v) {
+      ReminderRepeat.daily => 'Daily',
+      ReminderRepeat.weekly => 'Weekly',
+      ReminderRepeat.monthly => 'Monthly',
+      ReminderRepeat.yearly => 'Yearly',
+      _ => 'Never',
+    };
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, showHome: true, showBrand: false),
+      appBar: KuberAppBar(
+        title: _isEditing ? 'Edit reminder' : 'New reminder',
+        showBack: true,
+        closeIcon: true,
+        actions: [
+          if (_isEditing)
+            AppIconButton(
+              icon: Icons.delete_outline_rounded,
+              kind: AppIconButtonKind.danger,
+              semanticLabel: 'Delete reminder',
+              onPressed: _delete,
+            ),
+        ],
+      ),
       body: Column(
         children: [
-          KuberPageHeader(
-            title: _isEditing ? 'Edit reminder' : 'New reminder',
-          ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(
+                KuberSpace.screenMargin,
+                0,
+                KuberSpace.screenMargin,
+                KuberSpace.lg,
+              ),
               children: [
-                const ReminderFieldLabel('Title'),
-                ReminderTextField(
+                TextField(
                   controller: _titleController,
-                  hint: 'e.g. Pay maid salary',
+                  textCapitalization: TextCapitalization.sentences,
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  style: tt.bodyLarge!.copyWith(color: cs.onSurface),
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                    hintText: 'e.g. Pay maid salary',
+                  ),
                 ),
-                const SizedBox(height: 16),
-                const ReminderFieldLabel('Date & time'),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 14,
-                      child: ReminderPickerField(
-                        icon: Icons.calendar_month_rounded,
-                        label: DateFormat('EEE, d MMM').format(_dueDate),
+                const SizedBox(height: KuberSpace.md),
+                TextField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                  ],
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  style: tt.bodyLarge!.copyWith(color: cs.onSurface),
+                  decoration: const InputDecoration(
+                    labelText: 'Amount · optional',
+                    prefixText: '₹',
+                  ),
+                ),
+                const SizedBox(height: KuberSpace.md),
+                KuberSegmentedControl<String>(
+                  values: const ['expense', 'income'],
+                  labels: const ['Expense', 'Income'],
+                  selected: _transactionType,
+                  onSelected: (t) => setState(() => _transactionType = t),
+                  height: 40,
+                ),
+                section(
+                  'When',
+                  KuberGroup(
+                    children: [
+                      KuberListRow(
+                        leading: const KuberIconTile(
+                          icon: Icons.calendar_month_rounded,
+                        ),
+                        title: DateFormat('EEE, MMM d, y').format(_dueDate),
+                        subtitle: 'Date',
+                        trailing: const KuberChevron(),
                         onTap: _pickDate,
                       ),
-                    ),
-                    const SizedBox(width: 9),
-                    Expanded(
-                      flex: 10,
-                      child: ReminderPickerField(
-                        icon: Icons.schedule_rounded,
-                        label: _dueTime.format(context),
+                      KuberListRow(
+                        leading: const KuberIconTile(
+                          icon: Icons.schedule_rounded,
+                        ),
+                        title: _dueTime.format(context),
+                        subtitle: 'Time',
+                        trailing: const KuberChevron(),
                         onTap: _pickTime,
                       ),
+                    ],
+                  ),
+                ),
+                section(
+                  'Repeat',
+                  Wrap(
+                    spacing: KuberSpace.sm,
+                    runSpacing: KuberSpace.sm,
+                    children: [
+                      for (final v in [null, ...ReminderRepeat.all])
+                        KuberChip(
+                          label: repeatLabel(v),
+                          selected: _repeat == v,
+                          onTap: () => setState(() => _repeat = v),
+                        ),
+                    ],
+                  ),
+                ),
+                section(
+                  'Category',
+                  KuberGroup(
+                    children: [
+                      KuberListRow(
+                        leading: const KuberIconTile(
+                          icon: Icons.category_outlined,
+                        ),
+                        title: category?.name ?? 'Pick a category',
+                        subtitle: 'Optional',
+                        trailing: const KuberChevron(),
+                        onTap: _pickCategory,
+                      ),
+                    ],
+                  ),
+                ),
+                section(
+                  'Notes',
+                  TextField(
+                    controller: _notesController,
+                    minLines: 1,
+                    maxLines: 4,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    style: tt.bodyLarge!.copyWith(color: cs.onSurface),
+                    decoration: InputDecoration(
+                      hintText: 'Optional · anything worth remembering',
+                      prefixIcon: Icon(
+                        Icons.notes_rounded,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 18),
-                ReminderDetailsSection(
-                  expanded: _detailsExpanded,
-                  onToggle: () =>
-                      setState(() => _detailsExpanded = !_detailsExpanded),
-                  notesController: _notesController,
-                  amountController: _amountController,
-                  transactionType: _transactionType,
-                  onTypeChanged: (t) =>
-                      setState(() => _transactionType = t),
-                  categoryName: category?.name,
-                  onCategoryTap: _pickCategory,
-                  repeat: _repeat,
-                  onRepeatChanged: (r) => setState(() => _repeat = r),
-                ),
-                const SizedBox(height: 24),
               ],
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AppButton(
-                    label: 'Save reminder',
-                    type: AppButtonType.primary,
-                    fullWidth: true,
-                    onPressed: _save,
-                  ),
-                  if (_isEditing) ...[
-                    const SizedBox(height: 10),
-                    AppButton(
-                      label: 'Delete reminder',
-                      icon: Icons.delete_outline_rounded,
-                      type: AppButtonType.danger,
-                      height: 46,
-                      fullWidth: true,
-                      onPressed: _delete,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
+          KuberSaveButton(label: 'Save reminder', onPressed: _save),
         ],
       ),
     );

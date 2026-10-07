@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 
 enum AppButtonType {
-  primary,   // accent fill (submit)
-  normal,    // default neutral
-  outline,   // bordered
-  danger,    // red (delete)
-  dotted,    // dashed neutral border (secondary, low-emphasis)
+  primary, // filled (primary / onPrimary)
+  normal, // tonal (secondaryContainer)
+  outline, // outlined (1dp outlineVariant)
+  danger, // danger tonal (errorContainer); `filled` = solid error
+  dotted, // dashed outline, low emphasis
 }
 
+/// The one button (components/controls.md, board 2i): stadium, 40 high
+/// (padding 16, labelLarge) or 56 high (padding 24, titleMedium), icon 20 with
+/// an 8 gap. Disabled = onSurface 12% / 38%.
+///
+/// Pill structure (Material + InkWell + StadiumBorder) adapted from Mull
+/// `shared/widgets/app_button.dart`; the public API is unchanged.
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -18,12 +23,16 @@ class AppButton extends StatelessWidget {
   final bool iconAfterLabel;
   final bool fullWidth;
   final double? width;
+
+  /// Snaps to the two spec sizes: >= 48 renders 56, below that 40.
   final double height;
   final bool isLoading;
 
-  /// For [AppButtonType.danger] only: render a solid filled red button (like a
-  /// primary destructive action) instead of the default outlined/tinted red.
-  /// Used for high-stakes confirm buttons (delete a card, reset all data).
+  /// Overrides the side padding (24 for 56 buttons, 16 otherwise).
+  final double? horizontalPadding;
+
+  /// For [AppButtonType.danger] only: a solid error fill (high-stakes
+  /// confirms) instead of the default danger-tonal container.
   final bool filled;
 
   const AppButton({
@@ -33,69 +42,51 @@ class AppButton extends StatelessWidget {
     this.type = AppButtonType.normal,
     this.icon,
     this.iconAfterLabel = false,
+    this.horizontalPadding,
     this.fullWidth = false,
     this.width,
-    this.height = 52,
+    this.height = 56,
     this.isLoading = false,
     this.filled = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final large = height >= 48;
+    final h = large ? 56.0 : 40.0;
+    final disabled = onPressed == null || isLoading;
 
-    // Style configuration
-    final Color backgroundColor;
-    final Color foregroundColor;
-    final BorderSide? borderSide;
-
-    switch (type) {
-      case AppButtonType.primary:
-        backgroundColor = cs.primary;
-        foregroundColor = Colors.white;
-        borderSide = null;
-        break;
-      case AppButtonType.normal:
-        backgroundColor = cs.surfaceContainerHigh;
-        foregroundColor = cs.onSurface;
-        borderSide = BorderSide(color: cs.outline.withValues(alpha: 0.1));
-        break;
-      case AppButtonType.outline:
-        backgroundColor = Colors.transparent;
-        foregroundColor = cs.onSurface;
-        borderSide = BorderSide(color: cs.outline);
-        break;
-      case AppButtonType.danger:
-        // Solid red when [filled] (prominent confirm actions); otherwise the
-        // default outlined/tinted red used inline across detail sheets.
-        backgroundColor = filled ? cs.error : Colors.transparent;
-        foregroundColor = filled ? Colors.white : cs.error;
-        borderSide =
-            filled ? null : BorderSide(color: cs.error.withValues(alpha: 0.5));
-        break;
-      case AppButtonType.dotted:
-        // Solid border omitted here; a dashed border is painted below.
-        backgroundColor = Colors.transparent;
-        foregroundColor = cs.onSurface;
-        borderSide = null;
-        break;
+    var (Color bg, Color fg, BorderSide side) = switch (type) {
+      AppButtonType.primary => (cs.primary, cs.onPrimary, BorderSide.none),
+      AppButtonType.normal =>
+        (cs.secondaryContainer, cs.onSecondaryContainer, BorderSide.none),
+      AppButtonType.outline => (
+          Colors.transparent,
+          cs.onSurface,
+          BorderSide(color: cs.outlineVariant)
+        ),
+      AppButtonType.danger => filled
+          ? (cs.error, cs.onError, BorderSide.none)
+          : (cs.errorContainer, cs.onErrorContainer, BorderSide.none),
+      AppButtonType.dotted =>
+        (Colors.transparent, cs.onSurfaceVariant, BorderSide.none),
+    };
+    if (disabled && !isLoading) {
+      bg = type == AppButtonType.outline || type == AppButtonType.dotted
+          ? Colors.transparent
+          : cs.onSurface.withValues(alpha: 0.12);
+      fg = cs.onSurface.withValues(alpha: 0.38);
+      if (type == AppButtonType.outline) {
+        side = BorderSide(color: cs.onSurface.withValues(alpha: 0.12));
+      }
     }
 
-    final buttonStyle = ElevatedButton.styleFrom(
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      elevation: 0,
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: 12,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        side: borderSide ?? BorderSide.none,
-      ),
-      disabledBackgroundColor: backgroundColor.withValues(alpha: 0.12),
-      disabledForegroundColor: foregroundColor.withValues(alpha: 0.38),
-    );
+    final textStyle =
+        (large ? theme.textTheme.titleMedium : theme.textTheme.labelLarge)!
+            .copyWith(color: fg);
+    final iconWidget = Icon(icon, size: 20, color: fg);
 
     final content = Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -103,65 +94,78 @@ class AppButton extends StatelessWidget {
       children: [
         if (isLoading)
           SizedBox(
-            width: 18,
-            height: 18,
+            width: 20,
+            height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
+              valueColor: AlwaysStoppedAnimation<Color>(fg),
             ),
           )
         else if (icon != null && !iconAfterLabel) ...[
-          Icon(icon, size: 18),
+          iconWidget,
           const SizedBox(width: 8),
         ],
+        if (isLoading) const SizedBox(width: 8),
         Flexible(
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-              color: foregroundColor,
-            ),
+            style: textStyle,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
         ),
         if (!isLoading && icon != null && iconAfterLabel) ...[
           const SizedBox(width: 8),
-          Icon(icon, size: 18),
+          iconWidget,
         ],
       ],
     );
 
-    final button = SizedBox(
-      width: fullWidth ? double.infinity : width,
-      height: height,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: buttonStyle,
-        child: content,
+    Widget button = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: h),
+      child: Material(
+        color: bg,
+        shape: StadiumBorder(side: side),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: disabled ? null : onPressed,
+          child: Padding(
+            // 24 side padding for 56 buttons, unless a caller fixed a narrow
+            // width (Quick Add Cancel is 100, Ask Kuber preview 96).
+            padding: EdgeInsets.symmetric(
+              horizontal:
+                  horizontalPadding ??
+                  (large && (width == null || width! >= 120) ? 24 : 16),
+            ),
+            child: Center(widthFactor: 1, heightFactor: 1, child: content),
+          ),
+        ),
       ),
     );
 
     if (type == AppButtonType.dotted) {
-      return CustomPaint(
-        foregroundPainter: _DashedBorderPainter(
-          color: cs.outline,
-          radius: KuberRadius.md,
-        ),
+      button = CustomPaint(
+        foregroundPainter: _DashedBorderPainter(color: cs.outline),
         child: button,
       );
     }
-    return button;
+
+    return Semantics(
+      button: true,
+      enabled: !disabled,
+      child: SizedBox(
+        width: fullWidth ? double.infinity : width,
+        height: h,
+        child: button,
+      ),
+    );
   }
 }
 
-/// Paints a dashed rounded-rectangle border, used by [AppButtonType.dotted].
+/// Paints a dashed stadium border, used by [AppButtonType.dotted].
 class _DashedBorderPainter extends CustomPainter {
   final Color color;
-  final double radius;
-  _DashedBorderPainter({required this.color, required this.radius});
+  _DashedBorderPainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -171,7 +175,7 @@ class _DashedBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
-      Radius.circular(radius),
+      Radius.circular(size.height / 2),
     );
     final path = Path()..addRRect(rrect);
     const dashWidth = 4.0;
@@ -187,6 +191,5 @@ class _DashedBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DashedBorderPainter old) =>
-      old.color != color || old.radius != radius;
+  bool shouldRepaint(covariant _DashedBorderPainter old) => old.color != color;
 }

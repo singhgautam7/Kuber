@@ -11,6 +11,9 @@ class OnboardingNavBar extends StatelessWidget {
   final String primaryLabel;
   final bool showBack;
 
+  /// Saving state: the primary button reads as disabled and drops its arrow.
+  final bool busy;
+
   const OnboardingNavBar({
     super.key,
     required this.currentPage,
@@ -18,6 +21,7 @@ class OnboardingNavBar extends StatelessWidget {
     required this.primaryLabel,
     this.onBack,
     this.showBack = true,
+    this.busy = false,
   });
 
   @override
@@ -29,16 +33,16 @@ class OnboardingNavBar extends StatelessWidget {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.xl,
-          KuberSpacing.md,
-          KuberSpacing.xl,
-          KuberSpacing.lg,
+          KuberSpace.screenMargin,
+          KuberSpace.md,
+          KuberSpace.screenMargin,
+          KuberSpace.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             OnboardingDotsIndicator(currentPage: currentPage),
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.lg),
             AnimatedSize(
               duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,
@@ -51,7 +55,7 @@ class OnboardingNavBar extends StatelessWidget {
                     height: 56,
                     width: backWidth,
                     margin: EdgeInsets.only(
-                      right: showBack ? KuberSpacing.md : 0,
+                      right: showBack ? KuberSpace.md : 0,
                     ),
                     child: ClipRect(
                       child: AnimatedOpacity(
@@ -61,30 +65,28 @@ class OnboardingNavBar extends StatelessWidget {
                           onPressed: onBack,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: cs.onSurface,
-                            side: BorderSide(color: cs.outline),
+                            side: BorderSide(color: cs.outlineVariant),
                             padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                KuberRadius.md,
-                              ),
-                            ),
+                            minimumSize: const Size(56, 56),
+                            shape: const StadiumBorder(),
                           ),
                           child: currentPage == 3
-                              ? const Icon(Icons.chevron_left_rounded, size: 28)
+                              ? const Icon(Icons.arrow_back_rounded, size: 24)
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(
-                                      Icons.chevron_left_rounded,
-                                      size: 24,
+                                      Icons.arrow_back_rounded,
+                                      size: 20,
                                     ),
-                                    const SizedBox(width: KuberSpacing.xs),
+                                    const SizedBox(width: KuberSpace.sm),
                                     Text(
                                       'Back',
                                       style: localeFont(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.1,
                                       ),
                                     ),
                                   ],
@@ -101,11 +103,21 @@ class OnboardingNavBar extends StatelessWidget {
                       child: FilledButton(
                         onPressed: onPrimary,
                         style: FilledButton.styleFrom(
-                          backgroundColor: cs.primary,
-                          foregroundColor: cs.onPrimary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                          backgroundColor: busy
+                              ? cs.onSurface.withValues(alpha: 0.12)
+                              : cs.primary,
+                          foregroundColor: busy
+                              ? cs.onSurface.withValues(alpha: 0.38)
+                              : cs.onPrimary,
+                          disabledBackgroundColor: cs.onSurface.withValues(
+                            alpha: 0.12,
                           ),
+                          disabledForegroundColor: cs.onSurface.withValues(
+                            alpha: 0.38,
+                          ),
+                          minimumSize: const Size(64, 56),
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          shape: const StadiumBorder(),
                         ),
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 180),
@@ -135,12 +147,18 @@ class OnboardingNavBar extends StatelessWidget {
                                   softWrap: false,
                                   style: localeFont(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.1,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: KuberSpacing.sm),
-                              const Icon(Icons.arrow_forward_rounded, size: 24),
+                              if (!busy) ...[
+                                const SizedBox(width: KuberSpace.sm),
+                                const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 20,
+                                ),
+                              ],
                             ],
                           ),
                         ),

@@ -19,7 +19,7 @@ class KuberSkeleton extends StatefulWidget {
     super.key,
     this.width,
     required this.height,
-    this.borderRadius = KuberRadius.md,
+    this.borderRadius = KuberShape.medium,
   });
 
   @override

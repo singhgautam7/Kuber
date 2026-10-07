@@ -1,10 +1,14 @@
 import 'dart:math' as math;
+import 'package:kuber/core/theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
+
+import 'app_icon_button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/settings/providers/settings_provider.dart' show formatterProvider, currencyProvider;
+import '../../features/settings/providers/settings_provider.dart'
+    show formatterProvider, currencyProvider;
 
 class KuberCalculator extends ConsumerStatefulWidget {
   final double initialValue;
@@ -115,7 +119,8 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
         _rawExpression = result.toString();
       } else {
         final left = double.tryParse(expr.substring(0, lastOpIdx).trim()) ?? 0;
-        final right = double.tryParse(expr.substring(lastOpIdx + 1).trim()) ?? 0;
+        final right =
+            double.tryParse(expr.substring(lastOpIdx + 1).trim()) ?? 0;
         final pct = left * right / 100;
         final prefix = expr.substring(0, lastOpIdx + 1);
         _rawExpression = '$prefix$pct';
@@ -232,7 +237,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
           if (trimmed.contains('.')) {
             final splitVal = trimmed.split('.');
             final integralPart = double.tryParse(splitVal[0]) ?? 0;
-            final formattedIntegral = ref.read(formatterProvider).formatNumber(integralPart, decimalDigits: 0);
+            final formattedIntegral = ref
+                .read(formatterProvider)
+                .formatNumber(integralPart, decimalDigits: 0);
             formattedParts.add('$formattedIntegral.${splitVal[1]}');
           } else {
             formattedParts.add(_formatNumber(parsed));
@@ -262,77 +269,80 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // ── Header — surfaceContainer ──────────────────
-        Container(
-          color: cs.surfaceContainer,
-          child: Column(
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  decoration: BoxDecoration(
-                    color: cs.outline,
-                    borderRadius: BorderRadius.circular(2),
+    return ClipRRect(
+      borderRadius: KuberShape.sheetR,
+      child: ColoredBox(
+        color: cs.surfaceContainerLow,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Header ──────────────────
+            Padding(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      margin: const EdgeInsets.only(top: 12, bottom: 8),
+                      decoration: BoxDecoration(
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                        borderRadius: KuberShape.fullR,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              // Title row
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 12, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Calculator',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
+                  // Title row
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 8, 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Calculator',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(color: cs.onSurface),
+                        ),
+                        AppIconButton(
+                          icon: Icons.close_rounded,
+                          semanticLabel: MaterialLocalizations.of(
+                            context,
+                          ).closeButtonTooltip,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: cs.onSurfaceVariant,
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
 
-        // ── Everything below — surface ─────────
-        Container(
-          color: cs.surface,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom + 12.0,
-          ),
-          child: Column(
-            children: [
-              _buildDisplay(),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _buildButtonGrid(),
+            // ── Display, keys, CTA ─────────
+            Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 12.0,
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: _buildHeroCTA(),
+              child: Column(
+                children: [
+                  _buildDisplay(),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: _buildButtonGrid(),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: _buildHeroCTA(),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -342,7 +352,8 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
     final textTheme = theme.textTheme;
     final currency = ref.watch(currencyProvider);
 
-    final resultStr = _previewResult ?? (_expression.isEmpty ? '0' : _expression);
+    final resultStr =
+        _previewResult ?? (_expression.isEmpty ? '0' : _expression);
     final hasExpression = _expression.isNotEmpty;
 
     return Container(
@@ -359,9 +370,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
             duration: const Duration(milliseconds: 150),
             child: Text(
               _expression,
-              style: textTheme.bodyMedium?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
@@ -375,9 +384,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
             children: [
               Text(
                 currency.symbol,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w400,
+                style: textTheme.headlineSmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
               ),
@@ -385,13 +392,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
               Flexible(
                 child: Text(
                   resultStr,
-                  style: textTheme.displayLarge?.copyWith(
-                    fontSize: 56,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -2,
-                    color: cs.onSurface,
-                    height: 1.1,
-                  ),
+                  style: textTheme.displayMedium?.copyWith(color: cs.onSurface),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
@@ -409,20 +410,16 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
       children: [
         Row(
           children: [
-            _CalcKey(
-              label: 'C',
-              onTap: _onClear,
-              kind: _CalcKeyKind.danger,
-            ),
+            _CalcKey(label: 'C', onTap: _onClear, kind: _CalcKeyKind.danger),
             _CalcKey(
               label: '%',
               onTap: _onPercent,
-              kind: _CalcKeyKind.operator,
+              kind: _CalcKeyKind.function,
             ),
             _CalcKey(
               label: '⌫',
               onTap: _onBackspace,
-              kind: _CalcKeyKind.number,
+              kind: _CalcKeyKind.function,
               icon: Icons.backspace_outlined,
             ),
             _CalcKey(
@@ -538,39 +535,30 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
     final textTheme = theme.textTheme;
     final currency = ref.watch(currencyProvider);
 
-    final evaluated = _evaluate(_rawExpression) ?? double.tryParse(_rawExpression) ?? 0.0;
+    final evaluated =
+        _evaluate(_rawExpression) ?? double.tryParse(_rawExpression) ?? 0.0;
     final formattedResult = _formatNumber(evaluated);
 
-    return GestureDetector(
-      onTap: _onConfirm,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: cs.primary,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: cs.primary.withValues(alpha: 0.18),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_rounded, color: cs.onPrimary, size: 22),
-            const SizedBox(width: 10),
-            Text(
-              'Use ${currency.symbol}$formattedResult',
-              style: textTheme.titleSmall?.copyWith(
-                color: cs.onPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+    return Material(
+      color: cs.primary,
+      shape: const StadiumBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: _onConfirm,
+        child: Container(
+          height: 56,
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_rounded, color: cs.onPrimary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Use ${currency.symbol}$formattedResult',
+                style: textTheme.titleMedium?.copyWith(color: cs.onPrimary),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -580,6 +568,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
 enum _CalcKeyKind {
   number,
   operator,
+
+  /// % and ⌫: surfaceContainerHighest.
+  function,
   danger,
 }
 
@@ -649,20 +640,26 @@ class _CalcKeyState extends State<_CalcKey>
 
     switch (widget.kind) {
       case _CalcKeyKind.number:
-        solidBg = cs.surfaceContainer;
-        solidBorder = cs.outline;
+        solidBg = cs.surfaceContainerHigh;
+        solidBorder = solidBg;
         restFg = cs.onSurface;
         accent = cs.onSurface;
         break;
       case _CalcKeyKind.operator:
-        solidBg = Color.alphaBlend(cs.primary.withValues(alpha: 0.10), cs.surface);
-        solidBorder = Color.alphaBlend(cs.primary.withValues(alpha: 0.18), cs.surface);
-        restFg = cs.primary;
+        solidBg = cs.secondaryContainer;
+        solidBorder = solidBg;
+        restFg = cs.onSecondaryContainer;
         accent = cs.primary;
         break;
+      case _CalcKeyKind.function:
+        solidBg = cs.surfaceContainerHighest;
+        solidBorder = solidBg;
+        restFg = cs.onSurfaceVariant;
+        accent = cs.onSurface;
+        break;
       case _CalcKeyKind.danger:
-        solidBg = Color.alphaBlend(cs.error.withValues(alpha: 0.10), cs.surface);
-        solidBorder = Color.alphaBlend(cs.error.withValues(alpha: 0.10), cs.surface);
+        solidBg = cs.surfaceContainerHighest;
+        solidBorder = solidBg;
         restFg = cs.error;
         accent = cs.error;
         break;
@@ -694,8 +691,14 @@ class _CalcKeyState extends State<_CalcKey>
                 // Blend the translucent active overlays over the solid resting colors.
                 // Since both inputs are opaque/pre-blended, the target colors are solid,
                 // and Color.lerp will compute intermediate values with a constant 1.0 alpha.
-                final targetBg = Color.alphaBlend(accent.withValues(alpha: 0.28), solidBg);
-                final targetBorder = Color.alphaBlend(accent.withValues(alpha: 0.55), solidBorder);
+                final targetBg = Color.alphaBlend(
+                  accent.withValues(alpha: 0.28),
+                  solidBg,
+                );
+                final targetBorder = Color.alphaBlend(
+                  accent.withValues(alpha: 0.55),
+                  solidBorder,
+                );
 
                 final bg = Color.lerp(solidBg, targetBg, v)!;
                 final border = Color.lerp(solidBorder, targetBorder, v)!;
@@ -705,22 +708,20 @@ class _CalcKeyState extends State<_CalcKey>
                 return Transform.scale(
                   scale: scale,
                   child: Container(
-                    height: 54,
+                    height: 56,
                     decoration: BoxDecoration(
                       color: bg,
                       border: Border.all(color: border),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: KuberShape.fullR,
                     ),
                     alignment: Alignment.center,
                     child: widget.icon != null
                         ? Icon(widget.icon, size: 22, color: restFg)
                         : Text(
                             widget.label,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                              color: restFg,
-                            ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(color: restFg),
                           ),
                   ),
                 );
@@ -732,4 +733,3 @@ class _CalcKeyState extends State<_CalcKey>
     );
   }
 }
-

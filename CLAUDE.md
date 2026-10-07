@@ -125,10 +125,11 @@ specs/                 see table above
 Startup order:
 - `main.dart:_bootstrap` runs only what decides the first frame (DB open, migrations,
   entitlement row, theme prefs, recurring processor for splash routing). ~50 ms total.
-- `ColdStartSplash` is an overlay painted on top of the already-built Home for ~1.6 s.
-  **Any UI-isolate work in that window stutters the splash.** So:
+- The splash is native (`flutter_native_splash`, config in `pubspec.yaml`, art from
+  `tool/generate_icons_test.dart`) and the engine drops it on the first frame. Home's first
+  frames still get ~1.6 s (`_onOpenSettleDelay`) of UI isolate to themselves. So:
 - All on-app-open work lives in `app.dart:_runOnOpenBatch`, which runs only when
-  `onOpenBatchReadyProvider` flips true (splash finished, and on a first-of-day start the
+  `onOpenBatchReadyProvider` flips true (settle delay passed, and on a first-of-day start the
   recurring loader has handed off). Never call it from a post-frame callback or
   `_bootstrap`. Any widget that wants to do work "on app open" (like the Home SMS card's
   background scan) reads / `listenManual`s `onOpenBatchReadyProvider` first.

@@ -15,6 +15,9 @@
 
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
+import 'app_button.dart';
+import 'app_icon_button.dart';
+import '../../core/utils/color_harmonizer.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -38,20 +41,20 @@ class KuberFormSection extends StatelessWidget {
     this.sublabel,
     this.trailing,
     this.tinted = false,
-    this.topGap = 22,
+    this.topGap = KuberSpace.xl,
     required this.children,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final accent = tinted ? cs.primary : cs.onSurfaceVariant;
+    final accent = cs.onSurfaceVariant;
 
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 2, bottom: 10),
+          padding: const EdgeInsets.only(bottom: KuberSpace.sectionHeaderGap),
           child: Row(
             children: [
               Expanded(
@@ -61,21 +64,16 @@ class KuberFormSection extends StatelessWidget {
                   children: [
                     Text(
                       label.toUpperCase(),
-                      style: localeFont(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.6,
-                        color: accent,
-                      ),
+                      style: sectionHeaderStyle(context),
                     ),
                     if (sublabel != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         sublabel!,
-                        style: localeFont(
-                          fontSize: 12,
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.85),
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(color: accent),
                       ),
                     ],
                   ],
@@ -88,7 +86,7 @@ class KuberFormSection extends StatelessWidget {
         // Children are joined by a 10 dp gap, matching the picker rows in
         // the visual reference.
         for (var i = 0; i < children.length; i++) ...[
-          if (i > 0) const SizedBox(height: 10),
+          if (i > 0) const SizedBox(height: KuberSpace.md),
           children[i],
         ],
       ],
@@ -96,16 +94,11 @@ class KuberFormSection extends StatelessWidget {
 
     final wrapped = tinted
         ? Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(KuberSpace.cardPadding),
             decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.04),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(
-                color: Color.alphaBlend(
-                  cs.primary.withValues(alpha: 0.18),
-                  cs.outline,
-                ),
-              ),
+              color: cs.surfaceContainer,
+              borderRadius: KuberShape.cardR,
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: body,
           )
@@ -138,18 +131,17 @@ class KuberFieldLabel extends StatelessWidget {
                   TextSpan(
                     text: '  · optional',
                     style: localeFont(
-                      fontSize: 11.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                     ),
                   ),
                 ]
               : null,
-          style: localeFont(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant,
-          ),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: cs.onSurfaceVariant),
         ),
       ),
     );
@@ -162,8 +154,8 @@ class KuberFieldLabel extends StatelessWidget {
 ///
 /// Tone tints the value text:
 ///   • HeroAmountTone.neutral — onSurface (default)
-///   • HeroAmountTone.income  — cs.tertiary (green)
-///   • HeroAmountTone.expense — cs.error (red)
+///   • HeroAmountTone.income  — context.kuberMoney.income (green)
+///   • HeroAmountTone.expense — context.kuberMoney.expense (red)
 class KuberHeroAmountInput extends StatelessWidget {
   final String label;
   final String currencySymbol;
@@ -173,6 +165,11 @@ class KuberHeroAmountInput extends StatelessWidget {
   final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
   final List<TextInputFormatter>? inputFormatters;
+
+  /// True (default): the form's hero amount, headlineMedium value (board
+  /// 3.19). False: a regular filled field with a titleMedium value (account
+  /// balance, board 3.15).
+  final bool large;
 
   const KuberHeroAmountInput({
     super.key,
@@ -184,95 +181,87 @@ class KuberHeroAmountInput extends StatelessWidget {
     this.focusNode,
     this.onChanged,
     this.inputFormatters,
+    this.large = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final valueColor = switch (tone) {
-      HeroAmountTone.income => cs.tertiary,
-      HeroAmountTone.expense => cs.error,
+      HeroAmountTone.income => context.kuberMoney.income,
+      HeroAmountTone.expense => context.kuberMoney.expense,
       HeroAmountTone.neutral => cs.onSurface,
     };
 
+    final tt = Theme.of(context).textTheme;
+    final valueStyle = large ? tt.headlineMedium! : tt.titleMedium!;
+    final symbolStyle = large ? tt.titleLarge! : tt.titleMedium!;
+    // A filled field (surfaceContainerHigh, r16), label inside at the top,
+    // optional calculator on the right.
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 12, 14),
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: EdgeInsets.fromLTRB(
+          16, large ? 14 : 8, onCalculatorTap != null ? 4 : 16, large ? 14 : 8),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        color: cs.surfaceContainerHigh,
+        borderRadius: KuberShape.largeR,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Text(
-            label.toUpperCase(),
-            style: localeFont(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.4,
-              color: cs.onSurfaceVariant,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(label,
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(currencySymbol,
+                        style: symbolStyle.copyWith(
+                            color: large ? cs.onSurfaceVariant : valueColor)),
+                    SizedBox(width: large ? 6 : 2),
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        onChanged: onChanged,
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        inputFormatters: inputFormatters,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        style: valueStyle.copyWith(color: valueColor),
+                        decoration: InputDecoration(
+                          hintText: '0',
+                          hintStyle:
+                              valueStyle.copyWith(color: cs.onSurfaceVariant),
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          focusedErrorBorder: InputBorder.none,
+                          isCollapsed: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                currencySymbol,
-                style: localeFont(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  onChanged: onChanged,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  inputFormatters: inputFormatters,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  style: localeFont(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    color: valueColor,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: '0',
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    focusedErrorBorder: InputBorder.none,
-                    isCollapsed: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ),
-              if (onCalculatorTap != null)
-                IconButton(
-                  onPressed: onCalculatorTap,
-                  icon: Icon(Icons.calculate_outlined,
-                      size: 18, color: cs.onSurfaceVariant),
-                  style: IconButton.styleFrom(
-                    backgroundColor: cs.surfaceContainerHigh,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.sm),
-                    ),
-                  ),
-                  visualDensity: VisualDensity.compact,
-                ),
-            ],
-          ),
+          if (onCalculatorTap != null)
+            AppIconButton(
+              icon: Icons.calculate_outlined,
+              kind: AppIconButtonKind.plain,
+              semanticLabel: 'Calculator',
+              onPressed: onCalculatorTap,
+            ),
         ],
       ),
     );
@@ -310,69 +299,65 @@ class KuberPickerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // Navigation row (screens/add-transaction.md "grouped navigation rows"):
+    // a 72 row on a surfaceContainer card, 40 leading, value as titleMedium
+    // with the label under it.
     return Material(
-      color: Colors.transparent,
+      color: cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.cardR,
+        side: BorderSide(color: cs.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           FocusScope.of(context).unfocus();
           onTap();
         },
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
-          ),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: KuberSpace.listItem2),
+          padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
           child: Row(
             children: [
-              SizedBox(width: 36, height: 36, child: leading),
-              const SizedBox(width: 12),
+              SizedBox(width: 40, height: 40, child: leading),
+              const SizedBox(width: KuberSpace.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      label.toUpperCase(),
-                      style: localeFont(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
                       value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                        fontSize: 14.5,
-                        fontWeight: valueIsPlaceholder
-                            ? FontWeight.w500
-                            : FontWeight.w600,
+                      style: theme.textTheme.titleMedium!.copyWith(
                         color: valueIsPlaceholder
                             ? cs.onSurfaceVariant
                             : cs.onSurface,
                       ),
                     ),
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium!
+                          .copyWith(color: cs.onSurfaceVariant),
+                    ),
                   ],
                 ),
               ),
               if (clearable && onClear != null)
-                IconButton(
+                AppIconButton(
+                  icon: Icons.cancel_rounded,
+                  kind: AppIconButtonKind.plain,
+                  semanticLabel: 'Clear',
                   onPressed: onClear,
-                  icon: Icon(Icons.cancel_rounded,
-                      size: 18, color: cs.onSurfaceVariant),
-                  visualDensity: VisualDensity.compact,
-                  splashRadius: 18,
                 )
               else
                 Icon(Icons.chevron_right_rounded,
-                    color: cs.onSurfaceVariant, size: 22),
+                    color: cs.onSurfaceVariant, size: 20),
             ],
           ),
         ),
@@ -405,66 +390,45 @@ class KuberSwitchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    // Board 3.15: a card row with title + supporting text and the switch;
+    // no leading icon. [icon] is kept for API compatibility.
     final rowBody = Ink(
-      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
-          Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              color: value
-                  ? cs.primary.withValues(alpha: 0.15)
-                  : cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-            ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: value ? cs.primary : cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  name,
-                  style: localeFont(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  sub,
-                  style: localeFont(
-                    fontSize: 11.5,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
+                Text(name,
+                    style: tt.titleMedium!.copyWith(color: cs.onSurface)),
+                Text(sub,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
           ),
+          const SizedBox(width: KuberSpace.md),
           Switch(value: value, onChanged: enabled ? onChanged : null),
         ],
       ),
     );
 
     return Opacity(
-      opacity: enabled ? 1.0 : 0.5,
+      opacity: enabled ? 1.0 : 0.38,
       child: IgnorePointer(
         ignoring: !enabled,
         child: InkWell(
           onTap: () => onChanged(!value),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: KuberShape.cardR,
           child: rowBody,
         ),
       ),
@@ -498,20 +462,28 @@ class KuberSegmented<T> extends StatelessWidget {
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+          height: 40,
+          decoration: const BoxDecoration(borderRadius: KuberShape.fullR),
+          foregroundDecoration: BoxDecoration(
+            borderRadius: KuberShape.fullR,
             border: Border.all(color: cs.outline),
           ),
+          clipBehavior: Clip.antiAlias,
           child: Row(
             children: [
-              for (final seg in segments)
+              for (var i = 0; i < segments.length; i++)
                 Expanded(
-                  child: _SegmentButton(
-                    segment: seg,
-                    selected: seg.value == groupValue,
-                    onTap: () => onChanged(seg.value),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: i == 0
+                          ? null
+                          : Border(left: BorderSide(color: cs.outline)),
+                    ),
+                    child: _SegmentButton(
+                      segment: segments[i],
+                      selected: segments[i].value == groupValue,
+                      onTap: () => onChanged(segments[i].value),
+                    ),
                   ),
                 ),
             ],
@@ -550,44 +522,49 @@ class _SegmentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final activeColor = switch (segment.tone) {
-      SegmentTone.income => cs.tertiary,
-      SegmentTone.expense => cs.error,
-      SegmentTone.neutral => cs.primary,
+    final (Color bg, Color fg) = switch (segment.tone) {
+      SegmentTone.income => (
+          context.kuberMoney.incomeContainer,
+          context.kuberMoney.onIncomeContainer
+        ),
+      SegmentTone.expense => (
+          context.kuberMoney.expenseContainer,
+          context.kuberMoney.onExpenseContainer
+        ),
+      SegmentTone.neutral => (cs.secondaryContainer, cs.onSecondaryContainer),
     };
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? activeColor.withValues(alpha: 0.12) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: selected
-                ? Border.all(color: activeColor.withValues(alpha: 0.30))
-                : Border.all(color: Colors.transparent),
-          ),
+          color: selected ? bg : Colors.transparent,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (segment.icon != null) ...[
+              if (selected || segment.icon != null) ...[
                 Icon(
-                  segment.icon,
-                  size: 16,
-                  color: selected ? activeColor : cs.onSurfaceVariant,
+                  selected ? Icons.check_rounded : segment.icon,
+                  size: 18,
+                  color: selected ? fg : cs.onSurface,
                 ),
                 const SizedBox(width: 6),
               ],
-              Text(
-                segment.label,
-                style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: selected ? activeColor : cs.onSurfaceVariant,
+              Flexible(
+                child: Text(
+                  segment.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: localeFont(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.1,
+                    color: selected ? fg : cs.onSurface,
+                  ),
                 ),
               ),
             ],
@@ -634,16 +611,14 @@ class KuberChipGrid<T> extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => onChanged(opt.value),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(KuberShape.medium),
             child: Ink(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? cs.primary.withValues(alpha: 0.12)
-                    : cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                color: isSelected ? cs.secondaryContainer : cs.surfaceContainer,
+                borderRadius: KuberShape.largeR,
                 border: Border.all(
-                  color: isSelected ? cs.primary : cs.outline,
+                  color: isSelected ? cs.secondaryContainer : cs.outlineVariant,
                 ),
               ),
               child: Column(
@@ -654,17 +629,18 @@ class KuberChipGrid<T> extends StatelessWidget {
                     Icon(
                       opt.icon,
                       size: 18,
-                      color: isSelected ? cs.primary : cs.onSurfaceVariant,
+                      color: isSelected
+                          ? cs.onSecondaryContainer
+                          : cs.onSurfaceVariant,
                     ),
                     const SizedBox(height: 4),
                   ],
                   Text(
                     opt.label,
-                    style: localeFont(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                        color: isSelected
+                            ? cs.onSecondaryContainer
+                            : cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -714,26 +690,18 @@ class KuberDayGrid extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => onChanged(day),
-            borderRadius: BorderRadius.circular(6),
+            customBorder: const CircleBorder(),
             child: Ink(
               decoration: BoxDecoration(
-                color: isSelected
-                    ? cs.primary.withValues(alpha: 0.12)
-                    : cs.surfaceContainer,
-                border: Border.all(
-                  color: isSelected ? cs.primary : cs.outline,
-                ),
-                borderRadius: BorderRadius.circular(6),
+                color: isSelected ? cs.primary : Colors.transparent,
+                shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   '$day',
-                  style: localeFont(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: isSelected ? cs.onPrimary : cs.onSurface,
+                      ),
                 ),
               ),
             ),
@@ -769,27 +737,22 @@ class KuberAnswerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(
-          color: cs.primary.withValues(alpha: 0.40),
-        ),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.cardR,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(labelIcon, size: 13, color: cs.primary),
+              Icon(labelIcon, size: 16, color: cs.onSecondaryContainer),
               const SizedBox(width: 6),
               Text(
                 labelText.toUpperCase(),
-                style: localeFont(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.4,
-                  color: cs.primary,
-                ),
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                      letterSpacing: 0.8,
+                      color: cs.onSecondaryContainer,
+                    ),
               ),
             ],
           ),
@@ -800,21 +763,18 @@ class KuberAnswerCard extends StatelessWidget {
             children: [
               Text(
                 amountText,
-                style: localeFont(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.6,
-                  color: cs.primary,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: cs.onSecondaryContainer),
               ),
               const Spacer(),
               Text(
                 unitText,
-                style: localeFont(
-                  fontSize: 12.5,
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(color: cs.onSecondaryContainer),
               ),
             ],
           ),
@@ -825,7 +785,7 @@ class KuberAnswerCard extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: cs.primary.withValues(alpha: 0.20),
+                    color: cs.onSecondaryContainer.withValues(alpha: 0.16),
                   ),
                 ),
               ),
@@ -840,22 +800,18 @@ class KuberAnswerCard extends StatelessWidget {
                         children: [
                           Text(
                             meta[i].key.toUpperCase(),
-                            style: localeFont(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
-                              color: cs.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                                  letterSpacing: 0.8,
+                                  color: cs.onSecondaryContainer,
+                                ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             meta[i].value,
-                            style: localeFont(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface,
-                              fontFeatures: const [FontFeature.tabularFigures()],
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall!
+                                .copyWith(color: cs.onSecondaryContainer),
                           ),
                         ],
                       ),
@@ -893,48 +849,22 @@ class KuberSaveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    // Pinned save (board 3.15): 1dp divider, stadium 56 primary button.
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(
-          top: BorderSide(color: cs.outline, width: 0.5),
-        ),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: FilledButton(
-              onPressed: loading ? null : onPressed,
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.primary,
-                foregroundColor: cs.onPrimary,
-                disabledBackgroundColor: cs.primary.withValues(alpha: 0.4),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-              ),
-              child: loading
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: cs.onPrimary,
-                      ),
-                    )
-                  : Text(
-                      label,
-                      style: localeFont(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-            ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+          child: AppButton(
+            label: label,
+            type: AppButtonType.primary,
+            fullWidth: true,
+            isLoading: loading,
+            onPressed: loading ? null : onPressed,
           ),
         ),
       ),
@@ -957,29 +887,15 @@ class KuberLeadingSwatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    if (empty) {
-      return Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: cs.outline,
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: Center(
-          child: Icon(icon, size: 16, color: cs.onSurfaceVariant),
-        ),
-      );
-    }
-    final swatchColor = color;
+    final tones = empty ? null : categoryTones(context, color);
     return Container(
       decoration: BoxDecoration(
-        color: swatchColor.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        color: tones?.container ?? cs.surfaceContainerHigh,
+        borderRadius: KuberShape.mediumR,
       ),
       child: Center(
-        child: Icon(icon, size: 18, color: swatchColor),
+        child: Icon(icon,
+            size: 20, color: tones?.fg ?? cs.onSurfaceVariant),
       ),
     );
   }
@@ -992,22 +908,27 @@ class KuberCallout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final warning = context.kuberColors.warning;
+    final m = context.kuberMoney;
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: warning.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: warning.withValues(alpha: 0.35)),
+        color: m.warningContainer,
+        borderRadius: KuberShape.largeR,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1, right: 10),
-            child: Icon(Icons.error_outline_rounded, size: 16, color: warning),
+            child: Icon(Icons.error_outline_rounded,
+                size: 20, color: m.onWarningContainer),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: m.onWarningContainer),
+              child: child,
+            ),
+          ),
         ],
       ),
     );

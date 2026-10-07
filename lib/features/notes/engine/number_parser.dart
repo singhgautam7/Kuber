@@ -56,8 +56,28 @@ class NumberParser {
     r'([+\-]?)(₹?)(\d{1,3}(?:,\d{2,3})+(?:\.\d+)?|\d+(?:\.\d+)?)',
   );
 
-  static bool _isWordChar(String c) =>
-      RegExp(r'[A-Za-z0-9_]').hasMatch(c) || c == '.' || c == ',' || c == '₹';
+  static final RegExp _wordChar = RegExp(r'[A-Za-z0-9_₹]');
+  static final RegExp _digit = RegExp(r'\d');
+
+  static bool _isPunct(String c) => c == '.' || c == ',';
+
+  /// Glued on the right: a word char (`12th`), or `.` / `,` that continues
+  /// into another digit (`3.4.5`, `1,2`). Plain punctuation ("2500, Riya",
+  /// "total 500.") is a boundary.
+  static bool _gluedRight(String text, int i) {
+    if (i >= text.length) return false;
+    final c = text[i];
+    if (_wordChar.hasMatch(c)) return true;
+    return _isPunct(c) && i + 1 < text.length && _digit.hasMatch(text[i + 1]);
+  }
+
+  /// Mirror of [_gluedRight] for the character before the token.
+  static bool _gluedLeft(String text, int i) {
+    if (i < 0) return false;
+    final c = text[i];
+    if (_wordChar.hasMatch(c)) return true;
+    return _isPunct(c) && i - 1 >= 0 && _digit.hasMatch(text[i - 1]);
+  }
 
   /// Extracts all numeric tokens from [text]. Ranges listed in [excluded]
   /// (e.g. resolved arithmetic results) never produce tokens.
@@ -70,9 +90,9 @@ class NumberParser {
       final digits = m.group(3)!;
 
       // Reject when glued to a word/number on the left …
-      if (m.start > 0 && _isWordChar(text[m.start - 1])) continue;
+      if (_gluedLeft(text, m.start - 1)) continue;
       // … or on the right (`3.4.5`, `12th`).
-      if (m.end < text.length && _isWordChar(text[m.end])) continue;
+      if (_gluedRight(text, m.end)) continue;
 
       // A sign only counts when attached to the number, i.e. "-30" not "- 30".
       // The regex already guarantees adjacency; nothing extra needed here.

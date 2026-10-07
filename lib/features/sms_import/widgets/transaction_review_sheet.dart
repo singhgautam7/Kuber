@@ -7,7 +7,14 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_segmented_control.dart';
+import '../screens/sms_import_widgets.dart' show SmsTypeGlyph;
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
@@ -33,10 +40,8 @@ Future<bool?> showSmsReviewSheet(
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => TransactionReviewSheet(
-      sms: sms,
-      countsTowardLimit: countsTowardLimit,
-    ),
+    builder: (_) =>
+        TransactionReviewSheet(sms: sms, countsTowardLimit: countsTowardLimit),
   );
 }
 
@@ -101,12 +106,12 @@ class _TransactionReviewSheetState
         : value.toStringAsFixed(2);
     _amountController.value = CurrencyInputFormatter(isIndian: _isIndian)
         .formatEditUpdate(
-      TextEditingValue.empty,
-      TextEditingValue(
-        text: raw,
-        selection: TextSelection.collapsed(offset: raw.length),
-      ),
-    );
+          TextEditingValue.empty,
+          TextEditingValue(
+            text: raw,
+            selection: TextSelection.collapsed(offset: raw.length),
+          ),
+        );
   }
 
   void _onAmountChanged(String text) {
@@ -116,16 +121,12 @@ class _TransactionReviewSheetState
 
   void _openCalculator() {
     FocusScope.of(context).unfocus();
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       useRootNavigator: true,
-      backgroundColor: cs.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => KuberCalculator(
         initialValue: _amount,
         onConfirm: (result) {
@@ -151,253 +152,163 @@ class _TransactionReviewSheetState
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final accounts = ref.watch(accountMapProvider).valueOrNull;
     final categories = ref.watch(categoryMapProvider).valueOrNull;
     final isIncome = _type == 'income';
-    final amountColor = isIncome ? cs.tertiary : cs.error;
+    final amountColor = isIncome
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
     final symbol = ref.watch(currencyProvider).symbol;
 
     final account = _accountId == null ? null : accounts?[_accountId];
     final category = _categoryId == null ? null : categories?[_categoryId];
+    final amountStyle = theme.textTheme.displaySmall!.copyWith(
+      color: amountColor,
+    );
 
-    return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
+    // Board 3.9a review sheet = the transaction sheet layout (3.3): type
+    // circle + "Review SMS" overline + merchant title, amount hero, type
+    // segmented, grouped editable rows, original SMS, Dismiss / Add.
+    return KuberBottomSheet(
+      leadingIcon: SmsTypeGlyph(type: _type, size: 48),
+      subtitle: 'Review SMS',
+      title: _name,
+      actions: _buildActions(cs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const KuberSectionHeader(title: 'Amount'),
+          // The amount is plain text on the sheet (no inner field box).
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                symbol,
+                style: theme.textTheme.headlineMedium!.copyWith(
+                  color: cs.onSurfaceVariant,
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 12, 12, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Review transaction',
-                      style: localeFont(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
+              const SizedBox(width: KuberSpace.xs),
+              Expanded(
+                child: TextField(
+                  controller: _amountController,
+                  onChanged: _onAmountChanged,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    color: cs.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── Amount ──
-                    Text(
-                      'AMOUNT',
-                      style: localeFont(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      // Same fill as the sheet so the field reads as one piece,
-                      // not a box-within-a-box.
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            symbol,
-                            style: localeFont(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: TextField(
-                              controller: _amountController,
-                              onChanged: _onAmountChanged,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              inputFormatters: [
-                                CurrencyInputFormatter(isIndian: _isIndian),
-                              ],
-                              style: localeFont(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w700,
-                                color: amountColor,
-                                letterSpacing: -1,
-                              ).copyWith(fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ]),
-                              decoration: InputDecoration(
-                                hintText: '0',
-                                hintStyle: localeFont(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w700,
-                                  color: cs.onSurfaceVariant,
-                                  letterSpacing: -1,
-                                ),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                isCollapsed: true,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: _openCalculator,
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainerHigh,
-                                borderRadius:
-                                    BorderRadius.circular(KuberRadius.md),
-                                border: Border.all(color: cs.outline),
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.calculate_outlined,
-                                size: 20,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // ── Type segmented ──
-                    _TypeSegmented(
-                      type: _type,
-                      onChanged: (t) => setState(() => _type = t),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // ── Name ──
-                    _FieldRow(
-                      icon: Icons.notes_rounded,
-                      label: 'NAME',
-                      value: _name,
-                      trailing: Icons.edit_outlined,
-                      onTap: _editName,
-                    ),
-
-                    // Learned mapping banner.
-                    if (_learnedUsageCount != null) _LearnedBanner(
-                      accountName: account?.name ?? 'account',
-                      sender: widget.sms.senderId,
-                      count: _learnedUsageCount!,
-                    ),
-
-                    // ── Account ──
-                    _FieldRow(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'ACCOUNT',
-                      value: account == null
-                          ? 'Select account'
-                          : account.name +
-                              (account.last4Digits != null
-                                  ? '  ·  ${account.last4Digits}'
-                                  : ''),
-                      muted: account == null,
-                      error: account == null,
-                      onTap: _pickAccount,
-                    ),
-
-                    // ── Category ──
-                    _FieldRow(
-                      icon: Icons.category_outlined,
-                      label: 'CATEGORY',
-                      value: category?.name ?? 'Pick category',
-                      muted: category == null,
-                      error: category == null,
-                      leadingDot: category == null
-                          ? null
-                          : harmonizeCategory(
-                              context, Color(category.colorValue)),
-                      onTap: _pickCategory,
-                    ),
-
-                    // ── Date ──
-                    _FieldRow(
-                      icon: Icons.calendar_today_outlined,
-                      label: 'DATE',
-                      value: DateFormat('d MMM yyyy · h:mm a').format(_date),
-                      onTap: _pickDate,
-                    ),
-
-                    // ── Original SMS (collapsible) ──
-                    _SmsDisclosure(
-                      sms: widget.sms,
-                      expanded: _smsExpanded,
-                      onToggle: () =>
-                          setState(() => _smsExpanded = !_smsExpanded),
-                    ),
+                  inputFormatters: [
+                    CurrencyInputFormatter(isIndian: _isIndian),
                   ],
+                  style: amountStyle,
+                  decoration: InputDecoration(
+                    hintText: '0',
+                    hintStyle: amountStyle.copyWith(color: cs.onSurfaceVariant),
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
               ),
+              AppIconButton(
+                icon: Icons.calculate_outlined,
+                semanticLabel: 'Calculator',
+                onPressed: _openCalculator,
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpace.lg),
+          KuberSegmentedControl<String>(
+            values: const ['expense', 'income'],
+            labels: const ['Expense', 'Income'],
+            selected: _type,
+            onSelected: (t) => setState(() => _type = t),
+            height: 40,
+          ),
+          const SizedBox(height: KuberSpace.lg),
+          if (_learnedUsageCount != null)
+            _LearnedBanner(
+              accountName: account?.name ?? 'account',
+              sender: widget.sms.senderId,
+              count: _learnedUsageCount!,
             ),
-            _buildActions(cs),
-          ],
-        ),
+          KuberGroup(
+            children: [
+              KuberListRow(
+                leading: const KuberIconTile(icon: Icons.notes_rounded),
+                title: _name,
+                subtitle: 'Name',
+                trailing: Icon(
+                  Icons.edit_outlined,
+                  size: 20,
+                  color: cs.onSurfaceVariant,
+                ),
+                onTap: _editName,
+              ),
+              _PickRow(
+                icon: account != null
+                    ? resolveAccountIcon(account)
+                    : Icons.account_balance_wallet_outlined,
+                value: account == null
+                    ? 'Select account'
+                    : account.name +
+                          (account.last4Digits != null
+                              ? '  ·  ${account.last4Digits}'
+                              : ''),
+                label: 'Account',
+                missing: account == null,
+                tint: account == null ? null : resolveAccountColor(account),
+                onTap: _pickAccount,
+              ),
+              _PickRow(
+                icon: category != null
+                    ? IconMapper.fromString(category.icon)
+                    : Icons.category_outlined,
+                value: category?.name ?? 'Pick category',
+                label: 'Category',
+                missing: category == null,
+                tint: category == null ? null : Color(category.colorValue),
+                onTap: _pickCategory,
+              ),
+              KuberListRow(
+                leading: const KuberIconTile(
+                  icon: Icons.calendar_today_outlined,
+                ),
+                title: DateFormat('d MMM yyyy · h:mm a').format(_date),
+                subtitle: 'Date & time',
+                trailing: const KuberChevron(),
+                onTap: _pickDate,
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpace.xl),
+          _SmsDisclosure(
+            sms: widget.sms,
+            expanded: _smsExpanded,
+            onToggle: () => setState(() => _smsExpanded = !_smsExpanded),
+          ),
+        ],
       ),
     );
   }
 
   /// Action buttons depend on the row's review status:
-  /// - unreviewed: Add to Kuber + Dismiss
-  /// - dismissed: only Add to Kuber (a chance to reconsider)
-  /// - imported: no buttons (view only)
-  Widget _buildActions(ColorScheme cs) {
+  /// - unreviewed: Dismiss + Add transaction
+  /// - dismissed: only Add transaction (a chance to reconsider)
+  /// - imported: none (view only)
+  Widget? _buildActions(ColorScheme cs) {
     final status = widget.sms.reviewStatus;
-    if (status == SmsReviewStatus.imported) {
-      return const SizedBox(height: 12);
-    }
+    if (status == SmsReviewStatus.imported) return null;
 
     final needAccount = _accountId == null;
     final needCategory = _categoryId == null;
     final addButton = AppButton(
-      label: 'Add to Kuber',
+      label: 'Add transaction',
+      icon: Icons.check_rounded,
       type: AppButtonType.primary,
       fullWidth: true,
       isLoading: _saving,
@@ -408,41 +319,45 @@ class _TransactionReviewSheetState
 
     final String? blockReason = _amount > 0
         ? (needAccount && needCategory
-            ? 'Enter account and category details'
-            : needAccount
-                ? 'Enter account details'
-                : needCategory
-                    ? 'Enter category details'
-                    : null)
+              ? 'Pick an account and a category to add this'
+              : needAccount
+              ? 'Pick an account to add this'
+              : needCategory
+              ? 'Pick a category to add this'
+              : null)
         : null;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
-      child: Column(
-        children: [
-          addButton,
-          if (blockReason != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              blockReason,
-              textAlign: TextAlign.center,
-              style: localeFont(fontSize: 11.5, color: cs.error),
-            ),
-          ],
-          if (status == SmsReviewStatus.unreviewed)
-            TextButton(
-              onPressed: _saving ? null : _dismiss,
-              child: Text(
-                'Dismiss',
-                style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (blockReason != null) ...[
+          Text(
+            blockReason,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall!.copyWith(color: cs.error),
+          ),
+          const SizedBox(height: KuberSpace.sm),
+        ],
+        Row(
+          children: [
+            if (status == SmsReviewStatus.unreviewed) ...[
+              Expanded(
+                flex: 2,
+                child: AppButton(
+                  label: 'Dismiss',
+                  type: AppButtonType.outline,
+                  fullWidth: true,
+                  onPressed: _saving ? null : _dismiss,
                 ),
               ),
-            ),
-        ],
-      ),
+              const SizedBox(width: KuberSpace.md),
+            ],
+            Expanded(flex: 3, child: addButton),
+          ],
+        ),
+      ],
     );
   }
 
@@ -456,15 +371,12 @@ class _TransactionReviewSheetState
   }
 
   void _pickAccount() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: KuberShape.sheetR),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: _accountId,
         onSelected: (id) {
@@ -479,15 +391,11 @@ class _TransactionReviewSheetState
   }
 
   void _pickCategory() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: _categoryId,
         defaultType: _type,
@@ -567,22 +475,22 @@ class _TransactionReviewSheetState
     final proceed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
-        title: Text('Dismiss message?',
-            style: localeFont(fontWeight: FontWeight.bold)),
-        content: Text(
+        title: const Text('Dismiss message?'),
+        content: const Text(
           'Are you sure you want to dismiss this message? You can find it later under the "Dismissed" tab.',
-          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Cancel'),
           ),
-          AppButton(
-            label: 'Dismiss',
-            type: AppButtonType.danger,
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Dismiss'),
           ),
         ],
       ),
@@ -596,19 +504,13 @@ class _TransactionReviewSheetState
 
   Future<bool?> _showDuplicateDialog(dynamic existing) {
     final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
     final symbol = ref.read(currencyProvider).symbol;
     final formatter = ref.read(formatterProvider);
     return showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: cs.surfaceContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: BorderSide(color: cs.outline),
-        ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -619,24 +521,22 @@ class _TransactionReviewSheetState
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: warning.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: warning.withValues(alpha: 0.3)),
+                      color: context.kuberMoney.warningContainer,
+                      borderRadius: KuberShape.mediumR,
                     ),
-                    child: Icon(Icons.warning_amber_rounded,
-                        size: 20, color: warning),
+                    child: Icon(
+                      Icons.warning_amber_rounded,
+                      size: 20,
+                      color: context.kuberMoney.onWarningContainer,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'A similar transaction may already exist',
-                      style: localeFont(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                        height: 1.2,
-                        letterSpacing: -0.3,
-                      ),
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.titleLarge!.copyWith(color: cs.onSurface),
                     ),
                   ),
                 ],
@@ -644,15 +544,14 @@ class _TransactionReviewSheetState
               const SizedBox(height: 14),
               Text(
                 'In your history:',
-                style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+                style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
               ),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
+                  color: cs.surfaceContainerHighest,
+                  borderRadius: KuberShape.mediumR,
                 ),
                 child: Row(
                   children: [
@@ -673,11 +572,11 @@ class _TransactionReviewSheetState
                             symbol: symbol,
                           ),
                       style: localeFont(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         color: existing.type == 'income'
-                            ? cs.tertiary
-                            : cs.error,
+                            ? context.kuberMoney.income
+                            : context.kuberMoney.expense,
                       ),
                     ),
                   ],
@@ -711,167 +610,77 @@ class _TransactionReviewSheetState
   }
 }
 
-class _TypeSegmented extends StatelessWidget {
-  final String type;
-  final ValueChanged<String> onChanged;
-  const _TypeSegmented({required this.type, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    Widget seg(String value, String label, IconData icon, Color color) {
-      final selected = type == value;
-      return Expanded(
-        child: GestureDetector(
-          onTap: () => onChanged(value),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            height: 36,
-            decoration: BoxDecoration(
-              color: selected ? cs.surface : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: selected ? color : Colors.transparent,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon,
-                    size: 13,
-                    color: selected ? color : cs.onSurfaceVariant),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: selected ? color : cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
-        children: [
-          seg('expense', 'Expense', Icons.south_west_rounded, cs.error),
-          const SizedBox(width: 3),
-          seg('income', 'Income', Icons.north_east_rounded, cs.tertiary),
-        ],
-      ),
-    );
-  }
-}
-
-class _FieldRow extends StatelessWidget {
+/// Account / category row: value as the title, field name under it. A
+/// missing required value shows in the error colour (it blocks Add).
+class _PickRow extends StatelessWidget {
   final IconData icon;
-  final String label;
   final String value;
-  final IconData trailing;
-  final bool muted;
-
-  /// Highlights the row (label + icon in error color) when a required value is
-  /// missing.
-  final bool error;
-  final Color? leadingDot;
+  final String label;
+  final bool missing;
+  final Color? tint;
   final VoidCallback onTap;
 
-  const _FieldRow({
+  const _PickRow({
     required this.icon,
-    required this.label,
     required this.value,
-    this.trailing = Icons.chevron_right_rounded,
-    this.muted = false,
-    this.error = false,
-    this.leadingDot,
+    required this.label,
+    required this.missing,
     required this.onTap,
+    this.tint,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tones = tint == null ? null : categoryTones(context, tint!);
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: cs.outline)),
-        ),
+        constraints: const BoxConstraints(minHeight: 72),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: error
-                    ? cs.error.withValues(alpha: 0.12)
-                    : cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                color: missing
+                    ? cs.errorContainer
+                    : (tones?.container ?? cs.secondaryContainer),
+                borderRadius: KuberShape.mediumR,
               ),
-              child: Icon(icon,
-                  size: 14, color: error ? cs.error : cs.onSurfaceVariant),
+              child: Icon(
+                icon,
+                size: 20,
+                color: missing
+                    ? cs.onErrorContainer
+                    : (tones?.fg ?? cs.onSecondaryContainer),
+              ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    label,
-                    style: localeFont(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      color: error ? cs.error : cs.onSurfaceVariant,
-                      letterSpacing: 0.4,
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      color: missing ? cs.error : cs.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      if (leadingDot != null) ...[
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: leadingDot,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Flexible(
-                        child: Text(
-                          value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: localeFont(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w500,
-                            color: error
-                                ? cs.error
-                                : muted
-                                    ? cs.onSurfaceVariant
-                                    : cs.onSurface,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    label,
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      color: missing ? cs.error : cs.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(trailing, size: 16, color: cs.onSurfaceVariant),
+            const KuberChevron(),
           ],
         ),
       ),
@@ -893,38 +702,39 @@ class _LearnedBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      margin: const EdgeInsets.only(top: 10, bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      margin: const EdgeInsets.only(bottom: KuberSpace.md),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.25)),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.largeR,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_rounded, size: 14, color: cs.primary),
+          Icon(
+            Icons.auto_awesome_rounded,
+            size: 18,
+            color: cs.onSecondaryContainer,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text.rich(
               TextSpan(
                 children: [
                   TextSpan(text: 'Auto-filled $accountName '),
-                  TextSpan(
-                    text: 'used $count times from ',
-                    style: TextStyle(color: cs.onSurfaceVariant),
-                  ),
+                  TextSpan(text: 'used $count times from '),
                   TextSpan(
                     text: sender,
-                    style: monoFont(color: cs.onSurface),
+                    style: monoFont(
+                      fontSize: 12,
+                      color: cs.onSecondaryContainer,
+                    ),
                   ),
                 ],
               ),
-              style: localeFont(
-                fontSize: 11.5,
-                color: cs.primary,
-                height: 1.4,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: cs.onSecondaryContainer),
             ),
           ),
         ],
@@ -945,82 +755,50 @@ class _SmsDisclosure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        InkWell(
-          onTap: onToggle,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  child: Icon(Icons.sms_outlined,
-                      size: 14, color: cs.onSurfaceVariant),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        expanded ? 'Original SMS' : 'View original SMS',
-                        style: localeFont(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w500,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        'From ${sms.senderId}'
-                        '${sms.patternMatched != null ? ' · matched ${sms.patternMatched} pattern' : ''}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: localeFont(
-                          fontSize: 10.5,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  expanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  size: 18,
-                  color: cs.onSurfaceVariant,
-                ),
-              ],
-            ),
+        KuberSectionHeader(
+          title: 'Original SMS',
+          onTitleTap: onToggle,
+          trailing: AppIconButton(
+            icon: expanded
+                ? Icons.keyboard_arrow_up_rounded
+                : Icons.keyboard_arrow_down_rounded,
+            kind: AppIconButtonKind.plain,
+            semanticLabel: expanded ? 'Hide SMS' : 'Show SMS',
+            onPressed: onToggle,
           ),
         ),
-        if (expanded)
+        Text(
+          'From ${sms.senderId}'
+          '${sms.patternMatched != null ? ' · matched ${sms.patternMatched} pattern' : ''}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall!.copyWith(
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+        if (expanded) ...[
+          const SizedBox(height: KuberSpace.sm),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              borderRadius: KuberShape.mediumR,
             ),
             child: Text(
               sms.rawSms,
               style: monoFont(
-                fontSize: 12,
+                fontSize: 13,
                 height: 1.55,
                 color: cs.onSurfaceVariant,
-                letterSpacing: -0.1,
               ),
             ),
           ),
+        ],
       ],
     );
   }
@@ -1034,17 +812,14 @@ Future<String?> _editTextDialog(
   required String initial,
 }) {
   final controller = TextEditingController(text: initial);
-  final cs = Theme.of(context).colorScheme;
   return showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      backgroundColor: cs.surfaceContainer,
-      title: Text(title, style: localeFont(fontSize: 16, fontWeight: FontWeight.w700)),
+      title: Text(title),
       content: TextField(
         controller: controller,
         autofocus: true,
         textCapitalization: TextCapitalization.words,
-        decoration: const InputDecoration(border: OutlineInputBorder()),
       ),
       actions: [
         TextButton(
@@ -1059,4 +834,3 @@ Future<String?> _editTextDialog(
     ),
   );
 }
-

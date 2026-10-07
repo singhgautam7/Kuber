@@ -9,8 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../providers/chart_data_provider.dart';
 
 class ChartsScreen extends ConsumerWidget {
@@ -22,10 +21,8 @@ class ChartsScreen extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          KuberAppBar(showBack: true, showHome: true, title: ''),
-          Expanded(
-            child: _ChartsBody(),
-          ),
+          KuberAppBar(showBack: true, title: context.l10n.chartsTitle),
+          Expanded(child: _ChartsBody()),
         ],
       ),
     );
@@ -67,7 +64,11 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
         // Header
         Padding(
           padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg, KuberSpacing.md, KuberSpacing.lg, 0),
+            KuberSpace.lg,
+            KuberSpace.md,
+            KuberSpace.lg,
+            0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -79,20 +80,11 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          context.l10n.chartsTitle,
-                          style: localeFont(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurface,
-                            height: 1.15,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
                           context.l10n.chartsSubtitle,
                           style: localeFont(
-                              fontSize: 13, color: cs.onSurfaceVariant),
+                            fontSize: 14,
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
@@ -102,56 +94,65 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                     opacity: 0.35,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHigh,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                        border:
-                            Border.all(color: cs.outline.withValues(alpha: 0.4)),
+                        borderRadius: BorderRadius.circular(
+                          KuberShape.largeIncreased,
+                        ),
+                        border: Border.all(
+                          color: cs.outlineVariant.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.construction_rounded,
-                              size: 14, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.construction_rounded,
+                            size: 14,
+                            color: cs.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 6),
-                          Text(context.l10n.wipBadge,
-                              style: localeFont(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurfaceVariant)),
+                          Text(
+                            context.l10n.wipBadge,
+                            style: localeFont(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
               // Period chips
               _PeriodChipRow(),
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         // Top panel — bar chart
         Expanded(
           flex: 5,
           child: dataAsync.when(
             loading: () => _ChartSkeleton(),
             error: (e, _) => Center(
-              child: Text(context.l10n.failedToLoadData,
-                  style: localeFont(color: cs.error)),
+              child: Text(
+                context.l10n.failedToLoadData,
+                style: localeFont(color: cs.error),
+              ),
             ),
             data: (buckets) => _ScrollableBarChart(buckets: buckets),
           ),
         ),
-        Divider(height: 1, color: cs.outline.withValues(alpha: 0.4)),
+        Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
         // Bottom panel — period detail
-        Expanded(
-          flex: 5,
-          child: _DetailsPanel(),
-        ),
+        Expanded(flex: 5, child: _DetailsPanel()),
       ],
     );
   }
@@ -191,17 +192,17 @@ class _PeriodChipRow extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               decoration: BoxDecoration(
                 color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(KuberRadius.full),
+                borderRadius: BorderRadius.circular(KuberShape.full),
                 border: Border.all(
                   color: isSelected
                       ? cs.primary
-                      : cs.outline.withValues(alpha: 0.4),
+                      : cs.outlineVariant.withValues(alpha: 0.4),
                 ),
               ),
               child: Text(
                 p.label,
                 style: localeFont(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
                 ),
@@ -222,7 +223,9 @@ class _ChartSkeleton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
+        horizontal: KuberSpace.lg,
+        vertical: KuberSpace.md,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(
@@ -235,7 +238,7 @@ class _ChartSkeleton extends StatelessWidget {
                 height: 40.0 + (i % 4) * 24,
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
+                  borderRadius: BorderRadius.circular(KuberShape.small),
                 ),
               ),
             ),
@@ -269,8 +272,10 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
 
     if (buckets.isEmpty) {
       return Center(
-        child: Text(context.l10n.noDataForPeriod,
-            style: localeFont(color: cs.onSurfaceVariant)),
+        child: Text(
+          context.l10n.noDataForPeriod,
+          style: localeFont(color: cs.onSurfaceVariant),
+        ),
       );
     }
 
@@ -287,15 +292,17 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
         // Fixed Y-axis labels
         Padding(
           padding: const EdgeInsets.only(
-              left: KuberSpacing.lg, bottom: 28, top: KuberSpacing.sm),
+            left: KuberSpace.lg,
+            bottom: 28,
+            top: KuberSpace.sm,
+          ),
           child: _YAxisLabels(yMax: yMax, interval: intervals),
         ),
         // Scrollable chart area
         Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(
-                right: KuberSpacing.lg, bottom: 0),
+            padding: const EdgeInsets.only(right: KuberSpace.lg, bottom: 0),
             child: SizedBox(
               width: buckets.length * _barGroupWidth.toDouble(),
               child: BarChart(
@@ -307,18 +314,21 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
                     drawVerticalLine: false,
                     horizontalInterval: intervals,
                     getDrawingHorizontalLine: (v) => FlLine(
-                      color: cs.outline.withValues(alpha: 0.2),
+                      color: cs.outlineVariant.withValues(alpha: 0.2),
                       strokeWidth: 1,
                     ),
                   ),
                   borderData: FlBorderData(show: false),
                   titlesData: FlTitlesData(
-                    leftTitles:
-                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles:
-                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles:
-                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
@@ -329,8 +339,7 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
                             return const SizedBox.shrink();
                           }
                           // Show every Nth label to avoid crowding
-                          final step =
-                              (buckets.length / 6).ceil().clamp(1, 99);
+                          final step = (buckets.length / 6).ceil().clamp(1, 99);
                           if (idx % step != 0 && idx != buckets.length - 1) {
                             return const SizedBox.shrink();
                           }
@@ -339,7 +348,7 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
                             child: Text(
                               buckets[idx].label,
                               style: localeFont(
-                                fontSize: 10,
+                                fontSize: 11,
                                 color: idx == selectedIdx
                                     ? cs.primary
                                     : cs.onSurfaceVariant,
@@ -366,16 +375,22 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
                         BarChartRodData(
                           toY: b.expense,
                           width: _barWidth,
-                          color: cs.error.withValues(alpha: dimOpacity),
+                          color: context.kuberMoney.expense.withValues(
+                            alpha: dimOpacity,
+                          ),
                           borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(3)),
+                            top: Radius.circular(KuberShape.extraSmall),
+                          ),
                         ),
                         BarChartRodData(
                           toY: b.income,
                           width: _barWidth,
-                          color: cs.tertiary.withValues(alpha: dimOpacity),
+                          color: context.kuberMoney.income.withValues(
+                            alpha: dimOpacity,
+                          ),
                           borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(3)),
+                            top: Radius.circular(KuberShape.extraSmall),
+                          ),
                         ),
                       ],
                       barsSpace: 4,
@@ -387,16 +402,21 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
                       getTooltipColor: (_) => Colors.transparent,
                       tooltipPadding: EdgeInsets.zero,
                     ),
-                    touchCallback: (FlTouchEvent event, BarTouchResponse? response) {
-                      if (event is FlTapUpEvent || event is FlPanUpdateEvent) {
-                        final idx = response?.spot?.touchedBarGroupIndex;
-                        if (idx != null) {
-                          ref
-                              .read(selectedChartBarIndexProvider.notifier)
-                              .state = idx;
-                        }
-                      }
-                    },
+                    touchCallback:
+                        (FlTouchEvent event, BarTouchResponse? response) {
+                          if (event is FlTapUpEvent ||
+                              event is FlPanUpdateEvent) {
+                            final idx = response?.spot?.touchedBarGroupIndex;
+                            if (idx != null) {
+                              ref
+                                      .read(
+                                        selectedChartBarIndexProvider.notifier,
+                                      )
+                                      .state =
+                                  idx;
+                            }
+                          }
+                        },
                   ),
                 ),
               ),
@@ -441,9 +461,10 @@ class _YAxisLabels extends StatelessWidget {
         return Text(
           _compactValue(val),
           style: localeFont(
-              fontSize: 10,
-              color: cs.onSurfaceVariant,
-              fontWeight: FontWeight.w500),
+            fontSize: 11,
+            color: cs.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
         );
       }),
     );
@@ -467,8 +488,10 @@ class _DetailsPanel extends ConsumerWidget {
       data: (buckets) {
         if (buckets.isEmpty || selectedIdx == null) {
           return Center(
-            child: Text(context.l10n.tapBarForDetails,
-                style: localeFont(color: cs.onSurfaceVariant)),
+            child: Text(
+              context.l10n.tapBarForDetails,
+              style: localeFont(color: cs.onSurfaceVariant),
+            ),
           );
         }
         final bucket = buckets[selectedIdx.clamp(0, buckets.length - 1)];
@@ -477,7 +500,7 @@ class _DetailsPanel extends ConsumerWidget {
         final catAsync = ref.watch(chartCategoryStatsProvider(range));
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
+          padding: const EdgeInsets.all(KuberSpace.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -485,46 +508,52 @@ class _DetailsPanel extends ConsumerWidget {
               Text(
                 _periodLabel(bucket, period),
                 style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
               // Summary row
               Row(
                 children: [
                   _SummaryTile(
                     label: context.l10n.incomeUpper,
                     value: formatter.formatCurrency(bucket.income),
-                    color: cs.tertiary,
+                    color: context.kuberMoney.income,
                   ),
-                  const SizedBox(width: KuberSpacing.sm),
+                  const SizedBox(width: KuberSpace.sm),
                   _SummaryTile(
                     label: context.l10n.expenseUpper,
                     value: formatter.formatCurrency(bucket.expense),
-                    color: cs.error,
+                    color: context.kuberMoney.expense,
                   ),
-                  const SizedBox(width: KuberSpacing.sm),
+                  const SizedBox(width: KuberSpace.sm),
                   _SummaryTile(
                     label: context.l10n.netUpper,
                     value: formatter.formatCurrency(net.abs()),
-                    color: net >= 0 ? cs.tertiary : cs.error,
+                    color: net >= 0
+                        ? context.kuberMoney.income
+                        : context.kuberMoney.expense,
                     prefix: net < 0 ? '−' : '+',
                   ),
                 ],
               ),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
               // Category breakdown
               catAsync.when(
                 loading: () => _DetailsSkeleton(),
                 error: (_, __) => const SizedBox.shrink(),
                 data: (stats) {
                   if (stats.isEmpty) {
-                    return Text(context.l10n.noExpenseBreakdown,
-                        style: localeFont(
-                            fontSize: 13, color: cs.onSurfaceVariant));
+                    return Text(
+                      context.l10n.noExpenseBreakdown,
+                      style: localeFont(
+                        fontSize: 14,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -533,42 +562,47 @@ class _DetailsPanel extends ConsumerWidget {
                         context.l10n.byCategoryUpper,
                         style: localeFont(
                           fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
                           letterSpacing: 1.0,
                         ),
                       ),
-                      const SizedBox(height: KuberSpacing.sm),
+                      const SizedBox(height: KuberSpace.sm),
                       ...stats.take(5).map((s) {
-                        final color =
-                            harmonizeCategory(context, Color(s.category.colorValue));
+                        final color = categoryVizColor(
+                          context,
+                          Color(s.category.colorValue),
+                        );
                         return Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
                               Container(
                                 width: 8,
                                 height: 8,
                                 decoration: BoxDecoration(
-                                    color: color, shape: BoxShape.circle),
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   s.category.name,
                                   style: localeFont(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: cs.onSurface),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: cs.onSurface,
+                                  ),
                                 ),
                               ),
                               Text(
                                 formatter.formatCurrency(s.total),
                                 style: localeFont(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurface,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               SizedBox(
@@ -577,8 +611,9 @@ class _DetailsPanel extends ConsumerWidget {
                                   '${s.percentage.toStringAsFixed(0)}%',
                                   textAlign: TextAlign.right,
                                   style: localeFont(
-                                      fontSize: 11,
-                                      color: cs.onSurfaceVariant),
+                                    fontSize: 11,
+                                    color: cs.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             ],
@@ -598,14 +633,27 @@ class _DetailsPanel extends ConsumerWidget {
 
   String _periodLabel(ChartBarBucket b, ChartPeriod period) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return switch (period) {
       ChartPeriod.oneDay =>
-        '${b.startDate.hour == 0 ? '12' : b.startDate.hour <= 12 ? '${b.startDate.hour}' : '${b.startDate.hour - 12}'}:00 ${b.startDate.hour < 12 ? 'AM' : 'PM'}',
-      ChartPeriod.oneWeek ||
-      ChartPeriod.oneMonth =>
+        '${b.startDate.hour == 0
+            ? '12'
+            : b.startDate.hour <= 12
+            ? '${b.startDate.hour}'
+            : '${b.startDate.hour - 12}'}:00 ${b.startDate.hour < 12 ? 'AM' : 'PM'}',
+      ChartPeriod.oneWeek || ChartPeriod.oneMonth =>
         '${b.startDate.day} ${months[b.startDate.month - 1]} ${b.startDate.year}',
       ChartPeriod.oneQuarter =>
         'Week of ${b.startDate.day} ${months[b.startDate.month - 1]}',
@@ -620,7 +668,7 @@ class _DetailsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -634,13 +682,13 @@ class _DetailsSkeleton extends StatelessWidget {
                   height: 56,
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           // Category rows skeleton
           ...List.generate(
             4,
@@ -650,7 +698,7 @@ class _DetailsSkeleton extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                borderRadius: BorderRadius.circular(KuberShape.small),
               ),
             ),
           ),
@@ -679,10 +727,12 @@ class _SummaryTile extends StatelessWidget {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.md, vertical: KuberSpacing.md),
+          horizontal: KuberSpace.md,
+          vertical: KuberSpace.md,
+        ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
           border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
@@ -691,8 +741,8 @@ class _SummaryTile extends StatelessWidget {
             Text(
               label,
               style: localeFont(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 0.8,
               ),
@@ -701,8 +751,8 @@ class _SummaryTile extends StatelessWidget {
             Text(
               '$prefix$value',
               style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
                 color: color,
               ),
               maxLines: 1,

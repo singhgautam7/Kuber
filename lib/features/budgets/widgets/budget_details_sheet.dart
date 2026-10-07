@@ -1,6 +1,9 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/info_table.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,8 +13,8 @@ import '../../categories/data/category.dart';
 import '../data/budget.dart';
 import '../providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart';
-import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import 'budget_history_sheet.dart';
@@ -46,260 +49,181 @@ class BudgetDetailsSheet extends ConsumerWidget {
             rawColor: Color(category.colorValue),
             size: 48,
           ),
+          // Edit + Pause / Resume in the row; History and Delete fall into the
+          // overflow (⋯) menu, like the account view sheet.
+          actions: SheetButtonSection(
+            padding: EdgeInsets.zero,
+            actions: [
+              SheetAction(
+                label: context.l10n.editLabel,
+                icon: Icons.edit_outlined,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.push('/budgets/edit', extra: budget);
+                },
+              ),
+              SheetAction(
+                label: budget.isActive
+                    ? context.l10n.pauseLabel
+                    : context.l10n.resumeLabel,
+                icon: budget.isActive
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
+                onPressed: () {
+                  ref
+                      .read(budgetListProvider.notifier)
+                      .toggleActive(budget.id, !budget.isActive);
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              ),
+              SheetAction(
+                label: context.l10n.historyLabel,
+                icon: Icons.history_rounded,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    useRootNavigator: true,
+                    backgroundColor: cs.surfaceContainer,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(KuberShape.extraLarge),
+                      ),
+                    ),
+                    builder: (_) =>
+                        BudgetHistorySheet(budget: budget, category: category),
+                  );
+                },
+              ),
+              SheetAction(
+                label: context.l10n.deleteLabel,
+                icon: Icons.delete_outline_rounded,
+                destructive: true,
+                onPressed: () => _confirmDeleteBudget(context, ref, budget.id),
+              ),
+            ],
+          ),
           child: progressAsync.when(
             data: (p) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.currentSpending,
-                            style: localeFont(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.0,
+                // Board 3.18 view sheet: amount of limit + status pill, wavy
+                // bar, the reset / expiry line, then the details table.
+                Builder(
+                  builder: (context) {
+                    final fmt = ref.watch(formatterProvider);
+                    final tt = Theme.of(context).textTheme;
+                    final pct = p.percentage;
+                    final (state, tone, label) = pct >= 100
+                        ? (
+                            KuberProgressState.overLimit,
+                            KuberTone.expense,
+                            'Over budget',
+                          )
+                        : pct >= 80
+                        ? (
+                            KuberProgressState.nearLimit,
+                            KuberTone.warning,
+                            'Near limit',
+                          )
+                        : (
+                            KuberProgressState.normal,
+                            KuberTone.secondary,
+                            'On track',
+                          );
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              fmt.formatCurrency(p.spent),
+                              style: tt.headlineMedium!.copyWith(
+                                color: cs.onSurface,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: ref
-                                      .watch(formatterProvider)
-                                      .formatCurrency(p.spent),
-                                  style: localeFont(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurface,
-                                  ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'of ${fmt.formatCurrency(p.limit)}',
+                                style: tt.bodyMedium!.copyWith(
+                                  color: cs.onSurfaceVariant,
                                 ),
-                                TextSpan(
-                                  text:
-                                      ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                                  style: localeFont(
-                                    fontSize: 16,
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
+                            KuberPill(label: label, tone: tone),
+                          ],
+                        ),
+                        const SizedBox(height: KuberSpace.md),
+                        KuberLinearProgress(
+                          value: (pct / 100).clamp(0.0, 1.0),
+                          state: state,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          (budget.isRecurring
+                                  ? context.l10n.budgetResetsIn(p.daysRemaining)
+                                  : context.l10n.budgetExpiresIn(
+                                      p.daysRemaining,
+                                    ))
+                              .toUpperCase(),
+                          style: tt.labelSmall!.copyWith(
+                            letterSpacing: 0.6,
+                            color: cs.onSurfaceVariant,
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            context.l10n.utilization,
-                            style: localeFont(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            ref
-                                .watch(formatterProvider)
-                                .formatPercentage(p.percentage),
-                            style: localeFont(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: _getUtilizationColor(p.percentage, cs),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.end,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: LinearProgressIndicator(
-                    value: (p.percentage / 100).clamp(0.0, 1.0),
-                    minHeight: 12,
-                    backgroundColor: cs.outline.withValues(alpha: 0.1),
-                    color: cs.primary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(ref.watch(formatterProvider).formatCurrency(0),
-                        style: localeFont(
-                            fontSize: 12, color: cs.onSurfaceVariant)),
-                    Text(
-                        ref
-                            .watch(formatterProvider)
-                            .formatCompactCurrency(p.limit),
-                        style: localeFont(
-                            fontSize: 12, color: cs.onSurfaceVariant)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.budgetDetails,
-                  style: localeFont(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.xs),
-                Row(
-                  children: [
-                    Expanded(
-                        child: _DetailCell(
+                const SizedBox(height: KuberSpace.lg),
+                InfoTable(
+                  rows: [
+                    InfoTableDataRow(
                       label: context.l10n.createdOn,
-                      value:
-                          DateFormat('MMM d, yyyy').format(budget.createdAt),
-                    )),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                        child: _DetailCell(
-                      label: budget.isRecurring ? context.l10n.renewsOn : context.l10n.expiresOn,
+                      value: DateFormat('MMM d, yyyy').format(budget.createdAt),
+                    ),
+                    InfoTableDataRow(
+                      label: budget.isRecurring
+                          ? context.l10n.renewsOn
+                          : context.l10n.expiresOn,
                       value: DateFormat('MMM d, yyyy').format(p.endDate),
-                    )),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                        child: _DetailCell(
+                    ),
+                    InfoTableDataRow(
                       label: context.l10n.startedOn,
                       value: DateFormat('MMM d, yyyy').format(budget.startDate),
-                    )),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                        child: _DetailCell(
-                      label: context.l10n.statusUpper,
-                      value: budget.isActive ? context.l10n.activeLabel : context.l10n.pausedLabel,
-                    )),
+                    ),
+                    InfoTableDataRow(
+                      label: sentenceCase(context.l10n.statusUpper),
+                      value: budget.isActive
+                          ? context.l10n.activeLabel
+                          : context.l10n.pausedLabel,
+                    ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                Text(
-                  context.l10n.activeAlerts,
-                  style: localeFont(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.xs),
+                const SizedBox(height: KuberSpace.lg),
+                KuberSectionHeader(title: context.l10n.activeAlerts),
                 if (alerts.isEmpty)
-                  Text(context.l10n.noAlertsSet,
-                      style: localeFont(color: cs.onSurfaceVariant))
+                  Text(
+                    context.l10n.noAlertsSet,
+                    style: localeFont(color: cs.onSurfaceVariant),
+                  )
                 else
                   Column(
                     children: alerts
-                        .map((a) => _AlertRow(
-                              alert: a,
-                              currentSpent:
-                                  progressAsync.valueOrNull?.spent ?? 0,
-                              budgetAmount: budget.amount,
-                            ))
+                        .map(
+                          (a) => _AlertRow(
+                            alert: a,
+                            currentSpent: progressAsync.valueOrNull?.spent ?? 0,
+                            budgetAmount: budget.amount,
+                          ),
+                        )
                         .toList(),
                   ),
-                const SizedBox(height: KuberSpacing.lg),
-                Text(
-                  context.l10n.actionsUpper,
-                  style: localeFont(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.xs),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        label: context.l10n.editLabel,
-                        icon: Icons.edit_outlined,
-                        type: AppButtonType.normal,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          context.push('/budgets/edit', extra: budget);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppButton(
-                        label: budget.isActive ? context.l10n.pauseLabel : context.l10n.resumeLabel,
-                        icon: budget.isActive
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        type: AppButtonType.normal,
-                        onPressed: () {
-                          ref
-                              .read(budgetListProvider.notifier)
-                              .toggleActive(budget.id, !budget.isActive);
-                          Navigator.of(context, rootNavigator: true).pop();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        label: context.l10n.historyLabel,
-                        icon: Icons.history_rounded,
-                        type: AppButtonType.primary,
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            useSafeArea: true,
-                            useRootNavigator: true,
-                            backgroundColor: cs.surfaceContainer,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(KuberRadius.lg),
-                              ),
-                            ),
-                            builder: (_) => BudgetHistorySheet(budget: budget, category: category),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppButton(
-                        label: context.l10n.deleteLabel,
-                        icon: Icons.delete_outline_rounded,
-                        type: AppButtonType.danger,
-                        onPressed: () => _confirmDeleteBudget(
-                            context, ref, budget.id),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.xs),
+                const SizedBox(height: KuberSpace.xs),
               ],
             ),
             loading: () => const LinearProgressIndicator(),
@@ -311,7 +235,6 @@ class BudgetDetailsSheet extends ConsumerWidget {
       error: (err, _) =>
           Center(child: Text('Error loading budget details: $err')),
     );
-
   }
 
   void _confirmDeleteBudget(BuildContext context, WidgetRef ref, int id) {
@@ -319,20 +242,18 @@ class BudgetDetailsSheet extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
-          side: BorderSide(color: cs.outline, width: 1),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant, width: 1),
         ),
-        title: Text(context.l10n.deleteBudgetConfirm,
-            style: localeFont(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-            )),
-        content: Text(context.l10n.deleteBudgetBody(category.name),
-            style: localeFont(
-              color: cs.onSurfaceVariant,
-            )),
+        title: Text(
+          context.l10n.deleteBudgetConfirm,
+          style: localeFont(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+        content: Text(
+          context.l10n.deleteBudgetBody(category.name),
+          style: localeFont(color: cs.onSurfaceVariant),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -342,7 +263,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
             style: FilledButton.styleFrom(
               backgroundColor: cs.error,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                borderRadius: BorderRadius.circular(KuberShape.small),
               ),
             ),
             onPressed: () {
@@ -355,13 +276,6 @@ class BudgetDetailsSheet extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  Color _getUtilizationColor(double percentage, ColorScheme cs) {
-    if (percentage >= 100) return cs.error;
-    if (percentage >= 66) return Colors.orangeAccent;
-    if (percentage >= 33) return Colors.amber;
-    return Colors.green;
   }
 }
 
@@ -388,99 +302,38 @@ class _AlertRow extends ConsumerWidget {
 
     final isReached = currentSpent >= threshold;
     final status = isReached ? 'REACHED' : 'UPCOMING';
-    final statusColor = isReached ? cs.primary : cs.onSurfaceVariant;
 
     // Notification Icon & Color
     final notificationIcon = alert.enableNotification
         ? Icons.notifications_active_outlined
         : Icons.notifications_off_outlined;
-    final notificationColor =
-        alert.enableNotification ? cs.primary : cs.onSurfaceVariant;
+    final notificationColor = alert.enableNotification
+        ? cs.primary
+        : cs.onSurfaceVariant;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
-          Icon(
-            notificationIcon,
-            size: 20,
-            color: notificationColor,
-          ),
+          Icon(notificationIcon, size: 20, color: notificationColor),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
-              style: localeFont(
-                  fontWeight: FontWeight.w500, color: cs.onSurface),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium!.copyWith(color: cs.onSurface),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              status,
-              style: localeFont(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: statusColor,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailCell extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailCell({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: KuberSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: localeFont(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xs),
-          Text(
-            value,
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
-            overflow: TextOverflow.ellipsis,
+          KuberPill(
+            label: sentenceCase(status),
+            tone: isReached ? KuberTone.secondary : KuberTone.neutral,
           ),
         ],
       ),

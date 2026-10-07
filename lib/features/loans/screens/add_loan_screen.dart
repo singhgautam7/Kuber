@@ -7,6 +7,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,8 @@ import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart'
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/loan.dart';
 import '../providers/loan_provider.dart';
@@ -45,8 +47,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   final _notesController = TextEditingController();
 
   String _loanType = 'personal';
-  String? _rateType;            // null = unset
-  DateTime? _loanStartDate;     // optional disbursement
+  String? _rateType; // null = unset
+  DateTime? _loanStartDate; // optional disbursement
   DateTime _startDate = DateTime.now(); // required repayment start
   int _billDate = 1;
   String? _selectedAccountId;
@@ -85,8 +87,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       _refController.text = e.referenceNumber ?? '';
       _principalController.text =
           e.principalAmount == e.principalAmount.truncateToDouble()
-              ? e.principalAmount.toStringAsFixed(0)
-              : e.principalAmount.toStringAsFixed(2);
+          ? e.principalAmount.toStringAsFixed(0)
+          : e.principalAmount.toStringAsFixed(2);
       _emiController.text = e.emiAmount.toStringAsFixed(0);
       if (e.interestRate != null) {
         _interestController.text = e.interestRate!.toString();
@@ -122,238 +124,252 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _isEditing ? context.l10n.editLoan : context.l10n.newLoan,
-          style: localeFont(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
-          ),
-        ),
+      appBar: KuberAppBar(
+        showBack: true,
+        closeIcon: true,
+        onBack: () => context.pop(),
+        title: _isEditing ? context.l10n.editLoan : context.l10n.newLoan,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            KuberFormSection(
-              label: context.l10n.loanAmount,
-              topGap: 0,
-              children: [
-                KuberHeroAmountInput(
-                  label: context.l10n.totalPrincipal,
-                  currencySymbol: symbol,
-                  controller: _principalController,
-                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
-                  onChanged: (_) => setState(() {}),
-                  onCalculatorTap: () =>
-                      _openCalculatorFor(_principalController),
-                ),
-              ],
-            ),
-            KuberFormSection(
-              label: context.l10n.loanType,
-              children: [
-                KuberChipGrid<String>(
-                  columns: 3,
-                  selected: _loanType,
-                  onChanged: (v) => setState(() => _loanType = v),
-                  options: [
-                    KuberChipOption(
-                        value: 'home', label: context.l10n.loanTypeHome, icon: Icons.home_outlined),
-                    KuberChipOption(
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              KuberFormSection(
+                label: context.l10n.loanAmount,
+                topGap: 0,
+                children: [
+                  KuberHeroAmountInput(
+                    label: context.l10n.totalPrincipal,
+                    currencySymbol: symbol,
+                    controller: _principalController,
+                    inputFormatters: [
+                      CurrencyInputFormatter(isIndian: isIndian),
+                    ],
+                    onChanged: (_) => setState(() {}),
+                    onCalculatorTap: () =>
+                        _openCalculatorFor(_principalController),
+                  ),
+                ],
+              ),
+              KuberFormSection(
+                label: context.l10n.loanType,
+                children: [
+                  KuberChipGrid<String>(
+                    columns: 3,
+                    selected: _loanType,
+                    onChanged: (v) => setState(() => _loanType = v),
+                    options: [
+                      KuberChipOption(
+                        value: 'home',
+                        label: context.l10n.loanTypeHome,
+                        icon: Icons.home_outlined,
+                      ),
+                      KuberChipOption(
                         value: 'vehicle',
                         label: context.l10n.loanTypeVehicle,
-                        icon: Icons.directions_car_outlined),
-                    KuberChipOption(
+                        icon: Icons.directions_car_outlined,
+                      ),
+                      KuberChipOption(
                         value: 'personal',
                         label: context.l10n.loanTypePersonal,
-                        icon: Icons.person_outline_rounded),
-                    KuberChipOption(
+                        icon: Icons.person_outline_rounded,
+                      ),
+                      KuberChipOption(
                         value: 'education',
                         label: context.l10n.loanTypeEducation,
-                        icon: Icons.school_outlined),
-                    KuberChipOption(
+                        icon: Icons.school_outlined,
+                      ),
+                      KuberChipOption(
                         value: 'credit_card',
                         label: context.l10n.creditCardLabel,
-                        icon: Icons.credit_card_outlined),
-                    KuberChipOption(
+                        icon: Icons.credit_card_outlined,
+                      ),
+                      KuberChipOption(
                         value: 'other',
                         label: context.l10n.loanTypeOther,
-                        icon: Icons.more_horiz_rounded),
-                  ],
-                ),
-              ],
-            ),
-            KuberFormSection(
-              label: context.l10n.identity,
-              children: [
-                KuberFieldLabel(context.l10n.loanName),
-                TextField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  onChanged: (_) => setState(() {}),
-                  style: localeFont(color: cs.onSurface, fontSize: 15),
-                  decoration: InputDecoration(hintText: context.l10n.loanNameHint),
-                ),
-                KuberFieldLabel(context.l10n.lenderField),
-                TextField(
-                  controller: _lenderController,
-                  textCapitalization: TextCapitalization.words,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  onChanged: (_) => setState(() {}),
-                  style: localeFont(color: cs.onSurface, fontSize: 15),
-                  decoration: InputDecoration(hintText: context.l10n.lenderHint),
-                ),
-                KuberFieldLabel(context.l10n.referenceNumber, optional: true),
-                TextField(
-                  controller: _refController,
-                  onChanged: (_) => setState(() {}),
-                  style: localeFont(color: cs.onSurface, fontSize: 15),
-                  decoration: InputDecoration(hintText: context.l10n.referenceNumberHint),
-                ),
-              ],
-            ),
-            KuberFormSection(
-              label: context.l10n.termsLabel,
-              children: [
-                KuberFieldLabel(context.l10n.monthlyEmi),
-                _amountFieldWithCalc(
-                    controller: _emiController, symbol: symbol, isIndian: isIndian),
-                KuberFieldLabel(context.l10n.interestRate, optional: true),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _interestController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                        onChanged: (_) => setState(() {}),
-                        style: localeFont(
-                            color: cs.onSurface, fontSize: 15),
-                        decoration: const InputDecoration(
-                          hintText: 'e.g. 8.45',
-                          suffixText: '%',
+                        icon: Icons.more_horiz_rounded,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              KuberFormSection(
+                label: context.l10n.identity,
+                children: [
+                  KuberFieldLabel(context.l10n.loanName),
+                  TextField(
+                    controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    onChanged: (_) => setState(() {}),
+                    style: localeFont(color: cs.onSurface, fontSize: 16),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.loanNameHint,
+                    ),
+                  ),
+                  KuberFieldLabel(context.l10n.lenderField),
+                  TextField(
+                    controller: _lenderController,
+                    textCapitalization: TextCapitalization.words,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    onChanged: (_) => setState(() {}),
+                    style: localeFont(color: cs.onSurface, fontSize: 16),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.lenderHint,
+                    ),
+                  ),
+                  KuberFieldLabel(context.l10n.referenceNumber, optional: true),
+                  TextField(
+                    controller: _refController,
+                    onChanged: (_) => setState(() {}),
+                    style: localeFont(color: cs.onSurface, fontSize: 16),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.referenceNumberHint,
+                    ),
+                  ),
+                ],
+              ),
+              KuberFormSection(
+                label: context.l10n.termsLabel,
+                children: [
+                  KuberFieldLabel(context.l10n.monthlyEmi),
+                  _amountFieldWithCalc(
+                    controller: _emiController,
+                    symbol: symbol,
+                    isIndian: isIndian,
+                  ),
+                  KuberFieldLabel(context.l10n.interestRate, optional: true),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _interestController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          onTapOutside: (_) =>
+                              FocusManager.instance.primaryFocus?.unfocus(),
+                          onChanged: (_) => setState(() {}),
+                          style: localeFont(color: cs.onSurface, fontSize: 16),
+                          decoration: const InputDecoration(
+                            hintText: 'e.g. 8.45',
+                            suffixText: '%',
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    _ratePill(context.l10n.rateFixed, 'fixed'),
-                    const SizedBox(width: 6),
-                    _ratePill(context.l10n.rateFloating, 'floating'),
-                  ],
-                ),
-              ],
-            ),
-
-            // ── ANSWER CARD ──────────────────────────────────────────
-            if (_emiAmount > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: 22),
-                child: KuberAnswerCard(
-                  labelText: context.l10n.monthlyOutflow,
-                  labelIcon: Icons.bolt_rounded,
-                  amountText: '$symbol${_formatThousands(_emiAmount)}',
-                  unitText: context.l10n.perMonth,
-                  meta: _principalAmount > 0
-                      ? [
-                          KuberAnswerMeta(
-                            key: context.l10n.principal,
-                            value: '$symbol${_compactL(_principalAmount)}',
-                          ),
-                          KuberAnswerMeta(
-                            key: context.l10n.tenure,
-                            value: '— mo',
-                          ),
-                          KuberAnswerMeta(
-                            key: context.l10n.interestLabel,
-                            value: '—',
-                          ),
-                        ]
-                      : const [],
-                ),
+                      const SizedBox(width: 10),
+                      _ratePill(context.l10n.rateFixed, 'fixed'),
+                      const SizedBox(width: 6),
+                      _ratePill(context.l10n.rateFloating, 'floating'),
+                    ],
+                  ),
+                ],
               ),
 
-            // ── SCHEDULE (tinted) ────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.schedule,
-              tinted: true,
-              children: [
-                KuberFieldLabel(context.l10n.loanStartDate,
-                    optional: true),
-                _loanStartDateRow(),
-                KuberFieldLabel(context.l10n.repaymentStart),
-                _dateRow(
-                  label: context.l10n.firstEmiOn,
-                  date: _startDate,
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _startDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) {
-                      setState(() => _startDate = picked);
-                    }
-                  },
-                ),
-                KuberFieldLabel(context.l10n.monthlyBillDate),
-                KuberDayGrid(
-                  selected: _billDate,
-                  onChanged: (v) => setState(() => _billDate = v),
-                ),
-              ],
-            ),
-
-            KuberFormSection(
-              label: context.l10n.sourceAccount,
-              children: [
-                _accountPickerRow(),
-                KuberSwitchRow(
-                  icon: Icons.bolt_rounded,
-                  name: context.l10n.autoAddTransactions,
-                  sub: context.l10n.autoAddTransactionsSub,
-                  value: _autoAddTransaction,
-                  onChanged: (v) => setState(() => _autoAddTransaction = v),
-                ),
-              ],
-            ),
-
-            KuberFormSection(
-              label: context.l10n.notesLabel,
-              children: [
-                TextField(
-                  controller: _notesController,
-                  maxLines: 3,
-                  minLines: 1,
-                  textCapitalization: TextCapitalization.sentences,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  style: localeFont(color: cs.onSurface, fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.loanNotesHint,
+              // ── ANSWER CARD ──────────────────────────────────────────
+              if (_emiAmount > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 22),
+                  child: KuberAnswerCard(
+                    labelText: context.l10n.monthlyOutflow,
+                    labelIcon: Icons.bolt_rounded,
+                    amountText: '$symbol${_formatThousands(_emiAmount)}',
+                    unitText: context.l10n.perMonth,
+                    meta: _principalAmount > 0
+                        ? [
+                            KuberAnswerMeta(
+                              key: context.l10n.principal,
+                              value: '$symbol${_compactL(_principalAmount)}',
+                            ),
+                            KuberAnswerMeta(
+                              key: context.l10n.tenure,
+                              value: '— mo',
+                            ),
+                            KuberAnswerMeta(
+                              key: context.l10n.interestLabel,
+                              value: '—',
+                            ),
+                          ]
+                        : const [],
                   ),
                 ),
-              ],
-            ),
-          ],
+
+              // ── SCHEDULE (tinted) ────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.schedule,
+                tinted: true,
+                children: [
+                  KuberFieldLabel(context.l10n.loanStartDate, optional: true),
+                  _loanStartDateRow(),
+                  KuberFieldLabel(context.l10n.repaymentStart),
+                  _dateRow(
+                    label: context.l10n.firstEmiOn,
+                    date: _startDate,
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _startDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() => _startDate = picked);
+                      }
+                    },
+                  ),
+                  KuberFieldLabel(context.l10n.monthlyBillDate),
+                  KuberDayGrid(
+                    selected: _billDate,
+                    onChanged: (v) => setState(() => _billDate = v),
+                  ),
+                ],
+              ),
+
+              KuberFormSection(
+                label: context.l10n.sourceAccount,
+                children: [
+                  _accountPickerRow(),
+                  KuberSwitchRow(
+                    icon: Icons.bolt_rounded,
+                    name: context.l10n.autoAddTransactions,
+                    sub: context.l10n.autoAddTransactionsSub,
+                    value: _autoAddTransaction,
+                    onChanged: (v) => setState(() => _autoAddTransaction = v),
+                  ),
+                ],
+              ),
+
+              KuberFormSection(
+                label: context.l10n.notesLabel,
+                children: [
+                  TextField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    minLines: 1,
+                    textCapitalization: TextCapitalization.sentences,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    style: localeFont(color: cs.onSurface, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.loanNotesHint,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEditing ? context.l10n.saveChanges : context.l10n.confirmAddLoan,
+        label: _isEditing
+            ? context.l10n.saveChanges
+            : context.l10n.confirmAddLoan,
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -372,13 +388,16 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
       onChanged: (_) => setState(() {}),
-      style: localeFont(color: cs.onSurface, fontSize: 15),
+      style: localeFont(color: cs.onSurface, fontSize: 16),
       decoration: InputDecoration(
         prefixText: '$symbol ',
         prefixStyle: localeFont(color: cs.onSurfaceVariant),
         suffixIcon: IconButton(
-          icon: Icon(Icons.calculate_outlined,
-              size: 18, color: cs.onSurfaceVariant),
+          icon: Icon(
+            Icons.calculate_outlined,
+            size: 18,
+            color: cs.onSurfaceVariant,
+          ),
           onPressed: () => _openCalculatorFor(controller),
         ),
       ),
@@ -394,24 +413,23 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         onTap: () => setState(() {
           _rateType = selected ? null : value;
         }),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(KuberShape.full),
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: selected
                 ? cs.primary.withValues(alpha: 0.12)
                 : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(KuberShape.full),
             border: Border.all(
-              color: selected ? cs.primary : cs.outline,
+              color: selected ? cs.primary : cs.outlineVariant,
             ),
           ),
           child: Text(
             label.toUpperCase(),
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               letterSpacing: 1,
               color: selected ? cs.primary : cs.onSurfaceVariant,
             ),
@@ -440,11 +458,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       leading: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        child: Icon(Icons.calendar_today_rounded,
-            size: 16, color: cs.onSurface),
+        child: Icon(
+          Icons.calendar_today_rounded,
+          size: 16,
+          color: cs.onSurface,
+        ),
       ),
       label: context.l10n.disbursedOn,
       value: DateFormat('d MMM yyyy').format(_loanStartDate!),
@@ -464,11 +485,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       leading: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        child: Icon(Icons.calendar_today_rounded,
-            size: 16, color: cs.onSurface),
+        child: Icon(
+          Icons.calendar_today_rounded,
+          size: 16,
+          color: cs.onSurface,
+        ),
       ),
       label: label,
       value: DateFormat('d MMM yyyy').format(date),
@@ -480,9 +504,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final accs = ref.watch(accountListProvider).valueOrNull ?? [];
     final acc = _selectedAccountId == null
         ? null
-        : accs
-            .where((a) => a.id.toString() == _selectedAccountId)
-            .firstOrNull;
+        : accs.where((a) => a.id.toString() == _selectedAccountId).firstOrNull;
     return KuberPickerRow(
       leading: acc == null
           ? KuberLeadingSwatch(
@@ -534,11 +556,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => KuberCalculator(
-        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
+        initialValue:
+            double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
           setState(() {
             controller.text = result == result.truncateToDouble()
@@ -564,7 +588,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
     final emi = _emiAmount;
     final interest = double.tryParse(
-        _interestController.text.trim().replaceAll(',', ''));
+      _interestController.text.trim().replaceAll(',', ''),
+    );
 
     if (_isEditing) {
       final loan = widget.existing!
@@ -590,7 +615,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
       await ref.read(loanListProvider.notifier).updateLoan(loan);
     } else {
-      await ref.read(loanListProvider.notifier).addLoan(
+      await ref
+          .read(loanListProvider.notifier)
+          .addLoan(
             name: _nameController.text.trim(),
             loanType: _loanType,
             lenderName: _lenderController.text.trim(),

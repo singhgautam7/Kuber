@@ -39,9 +39,7 @@ class BudgetHistorySheet extends ConsumerWidget {
           child: Center(
             child: Text(
               '${context.l10n.errorLabel}: $err',
-              style: localeFont(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: localeFont(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ),
@@ -62,9 +60,9 @@ class BudgetHistorySheet extends ConsumerWidget {
               for (int i = 0; i < history.length; i++) ...[
                 _MonthHistoryCard(entry: history[i]),
                 if (i < history.length - 1)
-                  const SizedBox(height: KuberSpacing.md),
+                  const SizedBox(height: KuberSpace.md),
               ],
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
             ],
           );
         },
@@ -89,11 +87,13 @@ class _MonthHistoryCard extends ConsumerWidget {
     final progress = (entry.percentage / 100).clamp(0.0, 1.0);
 
     // Colors
-    final statusColor = isOver ? cs.error : cs.primary;
-    final amountColor = isOver ? cs.error : cs.primary;
+    final statusColor = isOver ? context.kuberMoney.expense : cs.primary;
+    final amountColor = isOver ? context.kuberMoney.expense : cs.primary;
 
     // Status label
-    final statusLabel = isOver ? context.l10n.overBudget : context.l10n.underBudget;
+    final statusLabel = isOver
+        ? context.l10n.overBudget
+        : context.l10n.underBudget;
 
     // Right detail: "₹X EXTRA" if over, "X% LEFT" if under
     final String rightDetail;
@@ -106,19 +106,23 @@ class _MonthHistoryCard extends ConsumerWidget {
     }
 
     // Date range: "01 MMM YYYY – DD MMM YYYY"
-    final startFmt = DateFormat('dd MMM yyyy').format(entry.startDate).toUpperCase();
-    final endFmt = DateFormat('dd MMM yyyy').format(entry.endDate).toUpperCase();
+    final startFmt = DateFormat(
+      'dd MMM yyyy',
+    ).format(entry.startDate).toUpperCase();
+    final endFmt = DateFormat(
+      'dd MMM yyyy',
+    ).format(entry.endDate).toUpperCase();
     final dateRange = '$startFmt – $endFmt';
 
     // Month header: "Sep 2025"
     final monthLabel = DateFormat('MMM yyyy').format(entry.startDate);
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline, width: 0.5),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant, width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +139,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                       monthLabel,
                       style: localeFont(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
                     ),
@@ -159,7 +163,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                     formatter.formatCurrency(entry.spent),
                     style: localeFont(
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: amountColor,
                     ),
                   ),
@@ -167,7 +171,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                   Text(
                     'ALLOCATED: ${formatter.formatCurrency(entry.budgetAmount)}',
                     style: localeFont(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
                       letterSpacing: 0.5,
@@ -178,20 +182,20 @@ class _MonthHistoryCard extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
 
           // ── Progress bar ───────────────────────────────────────────────
           ClipRRect(
-            borderRadius: BorderRadius.circular(KuberRadius.full),
+            borderRadius: BorderRadius.circular(KuberShape.full),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: cs.outline.withValues(alpha: 0.15),
+              backgroundColor: cs.outlineVariant.withValues(alpha: 0.15),
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
           ),
 
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           // ── Bottom row: status label + right detail ────────────────────
           Row(
@@ -201,7 +205,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                 statusLabel,
                 style: localeFont(
                   fontSize: 11,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                   color: statusColor,
                   letterSpacing: 0.8,
                 ),
@@ -210,7 +214,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                 rightDetail,
                 style: localeFont(
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: statusColor,
                   letterSpacing: 0.3,
                 ),

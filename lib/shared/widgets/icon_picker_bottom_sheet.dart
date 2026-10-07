@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/icon_mapper.dart';
+import 'app_icon_button.dart';
 import 'kuber_bottom_sheet.dart';
 
 /// Keys with this prefix render as a bundled monochrome bank SVG
@@ -31,15 +32,17 @@ bool _bankIconsWarmed = false;
 /// animation. `SvgLoader.loadBytes` populates the cache on first call and
 /// returns the cached bytes thereafter, so this is cheap on repeat runs.
 Future<void> _warmBankIcons(List<String> bankKeys) async {
-  await Future.wait(bankKeys.map((key) async {
-    final name = key.substring(_bankPrefix.length);
-    try {
-      await SvgAssetLoader('assets/bank_icons/$name.svg').loadBytes(null);
-    } catch (_) {
-      // A missing/broken asset must not block the picker; it falls back to a
-      // neutral bank icon at render time.
-    }
-  }));
+  await Future.wait(
+    bankKeys.map((key) async {
+      final name = key.substring(_bankPrefix.length);
+      try {
+        await SvgAssetLoader('assets/bank_icons/$name.svg').loadBytes(null);
+      } catch (_) {
+        // A missing/broken asset must not block the picker; it falls back to a
+        // neutral bank icon at render time.
+      }
+    }),
+  );
 }
 
 Future<void> showIconPicker({
@@ -51,28 +54,33 @@ Future<void> showIconPicker({
   Map<String, String>? bankLabels,
   bool allowGallery = false,
 }) {
-  final cs = Theme.of(context).colorScheme;
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     useRootNavigator: true,
-    backgroundColor: cs.surfaceContainer,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-    ),
-    builder: (_) => _IconPickerSheet(
-      iconKeys: iconKeys,
-      tags: tags,
-      selected: selected,
-      onSelected: onSelected,
-      bankLabels: bankLabels ?? const {},
-      allowGallery: allowGallery,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) => KuberBottomSheet(
+      title: 'Choose icon',
+      child: IconPickerBody(
+        iconKeys: iconKeys,
+        tags: tags,
+        selected: selected,
+        onSelected: (key) {
+          onSelected(key);
+          Navigator.of(sheetContext, rootNavigator: true).pop();
+        },
+        bankLabels: bankLabels ?? const {},
+        allowGallery: allowGallery,
+      ),
     ),
   );
 }
 
-class _IconPickerSheet extends StatefulWidget {
+/// Search pill + lazily built icon grid. Reports a pick through [onSelected];
+/// the host decides whether to close (single picker) or keep it open
+/// (Icon / Colour sheet).
+class IconPickerBody extends StatefulWidget {
   final List<String> iconKeys;
   final Map<String, List<String>> tags;
   final String? selected;
@@ -84,7 +92,8 @@ class _IconPickerSheet extends StatefulWidget {
   /// Adds a "From gallery" action that picks an image via `image_picker`.
   final bool allowGallery;
 
-  const _IconPickerSheet({
+  const IconPickerBody({
+    super.key,
     required this.iconKeys,
     required this.tags,
     required this.selected,
@@ -94,10 +103,10 @@ class _IconPickerSheet extends StatefulWidget {
   });
 
   @override
-  State<_IconPickerSheet> createState() => _IconPickerSheetState();
+  State<IconPickerBody> createState() => _IconPickerBodyState();
 }
 
-class _IconPickerSheetState extends State<_IconPickerSheet> {
+class _IconPickerBodyState extends State<IconPickerBody> {
   final _searchCtrl = TextEditingController();
   final _searchFocus = FocusNode();
   late List<String> _filtered = widget.iconKeys;
@@ -109,8 +118,9 @@ class _IconPickerSheetState extends State<_IconPickerSheet> {
   @override
   void initState() {
     super.initState();
-    final bankKeys =
-        widget.iconKeys.where((k) => k.startsWith(_bankPrefix)).toList();
+    final bankKeys = widget.iconKeys
+        .where((k) => k.startsWith(_bankPrefix))
+        .toList();
     if (bankKeys.isEmpty || _bankIconsWarmed) {
       // No SVGs to warm (category/account pickers) or already warmed: render at
       // once, no loader.
@@ -170,113 +180,110 @@ class _IconPickerSheetState extends State<_IconPickerSheet> {
     await File(picked.path).copy(dest);
     if (!mounted) return;
     widget.onSelected('$_galleryPrefix$dest');
-    Navigator.of(context, rootNavigator: true).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final columns = MediaQuery.of(context).size.width >= 600 ? 5 : 4;
+    // Board 3.16: plain icon squares, 6 across; bank logos keep their
+    // label (4 across) because the marks are hard to tell apart.
+    final hasBanks = widget.iconKeys.any((k) => k.startsWith(_bankPrefix));
+    final wide = MediaQuery.of(context).size.width >= 600;
+    final columns = hasBanks ? (wide ? 5 : 4) : (wide ? 8 : 6);
 
-    return KuberBottomSheet(
-      title: 'Choose icon',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextField(
-            controller: _searchCtrl,
-            focusNode: _searchFocus,
-            autofocus: false,
-            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-            onChanged: _onSearch,
-            style: localeFont(fontSize: 14, color: cs.onSurface),
-            decoration: InputDecoration(
-              hintText: 'Search by name or tag',
-              hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-              prefixIcon:
-                  Icon(Icons.search_rounded, size: 20, color: cs.onSurfaceVariant),
-              suffixIcon: _searchCtrl.text.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.close_rounded,
-                          size: 18, color: cs.onSurfaceVariant),
-                      onPressed: () {
-                        _searchCtrl.clear();
-                        _onSearch('');
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: cs.surfaceContainerHigh,
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
-              ),
+    const pill = OutlineInputBorder(
+      borderRadius: KuberShape.fullR,
+      borderSide: BorderSide.none,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _searchCtrl,
+          focusNode: _searchFocus,
+          autofocus: false,
+          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+          onChanged: _onSearch,
+          textAlignVertical: TextAlignVertical.center,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: cs.onSurface),
+          decoration: InputDecoration(
+            hintText: 'Search icons',
+            hintStyle: Theme.of(
+              context,
+            ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
+            prefixIcon: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+            suffixIcon: _searchCtrl.text.isNotEmpty
+                ? AppIconButton(
+                    icon: Icons.close_rounded,
+                    kind: AppIconButtonKind.plain,
+                    semanticLabel: 'Clear search',
+                    onPressed: () {
+                      _searchCtrl.clear();
+                      _onSearch('');
+                    },
+                  )
+                : null,
+            filled: true,
+            fillColor: cs.surfaceContainerHigh,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+            border: pill,
+            enabledBorder: pill,
+            focusedBorder: OutlineInputBorder(
+              borderRadius: KuberShape.fullR,
+              borderSide: BorderSide(color: cs.primary, width: 2),
             ),
           ),
-          const SizedBox(height: KuberSpacing.md),
-          // A bounded, LAZILY-built scroll area: only the icon cells actually on
-          // screen are constructed. Previously the grid was `shrinkWrap: true`
-          // inside the sheet's own scroll view, which forced EVERY cell to build
-          // at once on open and on each keystroke. For the Kuber Cards picker
-          // that meant ~200 cells including ~40 bundled bank SVGs (each parsed +
-          // rasterized by flutter_svg) — the source of the jitter. The category
-          // picker never felt it: fewer cells and only cheap font glyphs. Making
-          // the grid a real viewport (SliverGrid) builds ~a dozen cells at a
-          // time regardless of how many icons or SVGs are in the list. The
-          // gallery row rides inside the same scroll so it is not pinned.
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.52,
-            child: !_ready
-                ? const Center(child: CircularProgressIndicator())
-                : _filtered.isEmpty
-                ? _IconPickerEmpty(query: _searchCtrl.text)
-                : CustomScrollView(
-                    slivers: [
-                      if (widget.allowGallery && _searchCtrl.text.isEmpty) ...[
-                        SliverToBoxAdapter(
-                            child: _GalleryPickRow(onTap: _pickFromGallery)),
-                        const SliverToBoxAdapter(
-                            child: SizedBox(height: KuberSpacing.md)),
-                      ],
-                      SliverGrid(
-                        gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columns,
-                          mainAxisSpacing: KuberSpacing.sm,
-                          crossAxisSpacing: KuberSpacing.sm,
-                          childAspectRatio: 0.95,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (_, index) {
-                            final key = _filtered[index];
-                            return _IconCell(
-                              iconKey: key,
-                              label: _labelFor(key),
-                              isSelected: key == widget.selected,
-                              onTap: () {
-                                widget.onSelected(key);
-                                Navigator.of(context, rootNavigator: true)
-                                    .pop();
-                              },
-                            );
-                          },
-                          childCount: _filtered.length,
-                        ),
+        ),
+        const SizedBox(height: KuberSpace.md),
+        // A bounded, LAZILY-built scroll area: only the icon cells actually on
+        // screen are constructed. Previously the grid was `shrinkWrap: true`
+        // inside the sheet's own scroll view, which forced EVERY cell to build
+        // at once on open and on each keystroke. For the Kuber Cards picker
+        // that meant ~200 cells including ~40 bundled bank SVGs (each parsed +
+        // rasterized by flutter_svg) — the source of the jitter. The category
+        // picker never felt it: fewer cells and only cheap font glyphs. Making
+        // the grid a real viewport (SliverGrid) builds ~a dozen cells at a
+        // time regardless of how many icons or SVGs are in the list. The
+        // gallery row rides inside the same scroll so it is not pinned.
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.52,
+          child: !_ready
+              ? const Center(child: CircularProgressIndicator())
+              : _filtered.isEmpty
+              ? _IconPickerEmpty(query: _searchCtrl.text)
+              : CustomScrollView(
+                  slivers: [
+                    if (widget.allowGallery && _searchCtrl.text.isEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: _GalleryPickRow(onTap: _pickFromGallery),
+                      ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: KuberSpace.md),
                       ),
                     ],
-                  ),
-          ),
-        ],
-      ),
+                    SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columns,
+                        mainAxisSpacing: KuberSpace.sm,
+                        crossAxisSpacing: KuberSpace.sm,
+                        childAspectRatio: 0.95,
+                      ),
+                      delegate: SliverChildBuilderDelegate((_, index) {
+                        final key = _filtered[index];
+                        return _IconCell(
+                          iconKey: key,
+                          label: _labelFor(key),
+                          isSelected: key == widget.selected,
+                          onTap: () => widget.onSelected(key),
+                        );
+                      }, childCount: _filtered.length),
+                    ),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 }
@@ -294,18 +301,21 @@ class _GalleryPickRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Row(
             children: [
-              Icon(Icons.add_photo_alternate_outlined,
-                  size: 20, color: cs.primary),
+              Icon(
+                Icons.add_photo_alternate_outlined,
+                size: 20,
+                color: cs.primary,
+              ),
               const SizedBox(width: 12),
               Text(
                 'From gallery',
@@ -340,62 +350,56 @@ class _IconCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: isSelected
-                ? cs.primary.withValues(alpha: 0.10)
-                : cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(
-              color: isSelected ? cs.primary : cs.outline,
-              width: isSelected ? 1.5 : 1,
-            ),
+    final isBank = iconKey.startsWith(_bankPrefix);
+    final fg = isSelected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+    final glyph = isBank
+        ? SvgPicture.asset(
+            'assets/bank_icons/${iconKey.substring(_bankPrefix.length)}.svg',
+            width: 22,
+            height: 22,
+            colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
+            placeholderBuilder: (_) =>
+                Icon(Icons.account_balance_rounded, size: 22, color: fg),
+          )
+        : Icon(IconMapper.fromString(iconKey), size: 22, color: fg);
+    // Outlined r12 square; selected = secondaryContainer + 2dp primary.
+    return Tooltip(
+      message: label,
+      triggerMode: TooltipTriggerMode.longPress,
+      child: Material(
+        color: isSelected ? cs.secondaryContainer : Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: KuberShape.mediumR,
+          side: BorderSide(
+            color: isSelected ? cs.primary : cs.outlineVariant,
+            width: isSelected ? 2 : 1,
           ),
-          padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              iconKey.startsWith(_bankPrefix)
-                  ? SvgPicture.asset(
-                      'assets/bank_icons/${iconKey.substring(_bankPrefix.length)}.svg',
-                      width: 22,
-                      height: 22,
-                      colorFilter: ColorFilter.mode(
-                        isSelected ? cs.primary : cs.onSurface,
-                        BlendMode.srcIn,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: isBank
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      glyph,
+                      const SizedBox(height: 4),
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall!
+                            .copyWith(color: fg, letterSpacing: 0),
                       ),
-                      placeholderBuilder: (_) => Icon(
-                        Icons.account_balance_rounded,
-                        size: 22,
-                        color: isSelected ? cs.primary : cs.onSurface,
-                      ),
-                    )
-                  : Icon(
-                      IconMapper.fromString(iconKey),
-                      size: 22,
-                      color: isSelected ? cs.primary : cs.onSurface,
-                    ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: localeFont(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                  height: 1.1,
-                ),
-              ),
-            ],
-          ),
+                    ],
+                  ),
+                )
+              : Center(child: glyph),
         ),
       ),
     );
@@ -427,10 +431,7 @@ class _IconPickerEmpty extends StatelessWidget {
               children: [
                 TextSpan(
                   text: 'No icons match ',
-                  style: localeFont(
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                 ),
                 TextSpan(
                   text: '"$query"',
@@ -448,7 +449,7 @@ class _IconPickerEmpty extends StatelessWidget {
           Text(
             'Try a different word, or clear the search.',
             style: localeFont(
-              fontSize: 12.5,
+              fontSize: 12,
               color: cs.onSurfaceVariant.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/currency_formatter.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
@@ -28,7 +28,9 @@ class IncomeExpenseChartTooltip extends ConsumerWidget {
     if (d == null) return;
     final e = point.endDate ?? d;
     ref.read(historyFilterProvider.notifier).clearAll();
-    ref.read(historyFilterProvider.notifier).setFilters(
+    ref
+        .read(historyFilterProvider.notifier)
+        .setFilters(
           from: DateTime(d.year, d.month, d.day),
           to: DateTime(e.year, e.month, e.day, 23, 59, 59),
         );
@@ -42,59 +44,59 @@ class IncomeExpenseChartTooltip extends ConsumerWidget {
     final isPrivate = ref.watch(privacyModeProvider);
     final net = point.income - point.expense;
 
+    // Chart tooltip (tokens.md §6): inverseSurface, radius 8, padding 8/12,
+    // labelMedium inverseOnSurface; money in the inverse-safe tones.
+    final money = context.kuberMoney;
+    final on = cs.onInverseSurface;
+    final label = Theme.of(context).textTheme.labelMedium!;
     return Container(
       width: width,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: cs.primary),
+        color: cs.inverseSurface,
+        borderRadius: KuberShape.smallR,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            point.tooltipLabel,
-            style: localeFont(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
+          Text(point.tooltipLabel, style: label.copyWith(color: on)),
+          const SizedBox(height: 4),
+          _row(
+            cs,
+            'Income',
+            maskAmount(fmt.formatCurrency(point.income), isPrivate),
+            money.inverseIncome,
+            context,
+          ),
+          const SizedBox(height: 2),
+          _row(
+            cs,
+            'Expense',
+            maskAmount(fmt.formatCurrency(point.expense), isPrivate),
+            money.inverseExpense,
+            context,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: on.withValues(alpha: 0.16),
             ),
           ),
-          const SizedBox(height: 7),
-          _row(cs, 'Income',
-              maskAmount(fmt.formatCurrency(point.income), isPrivate),
-              cs.tertiary),
-          const SizedBox(height: 4),
-          _row(cs, 'Expense',
-              maskAmount(fmt.formatCurrency(point.expense), isPrivate),
-              cs.error),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7),
-            child: Divider(height: 1, thickness: 1, color: cs.outline),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Net',
-                  style: localeFont(
-                      fontSize: 11.5, color: cs.onSurfaceVariant)),
-              Text(
-                maskAmount(
-                  '${net < 0 ? '-' : ''}${fmt.formatCurrency(net.abs())}',
-                  isPrivate,
-                ),
-                style: localeFont(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: net < 0 ? cs.error : cs.primary,
-                ),
-              ),
-            ],
+          _row(
+            cs,
+            'Net',
+            maskAmount(
+              '${net < 0 ? '-' : ''}${fmt.formatCurrency(net.abs())}',
+              isPrivate,
+            ),
+            net < 0 ? money.inverseExpense : on,
+            context,
           ),
           if (showViewTransactions && point.date != null) ...[
-            const SizedBox(height: 9),
+            const SizedBox(height: 6),
             GestureDetector(
               onTap: () => _viewTransactions(context, ref),
               child: Row(
@@ -102,15 +104,14 @@ class IncomeExpenseChartTooltip extends ConsumerWidget {
                 children: [
                   Text(
                     'View transactions',
-                    style: localeFont(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary,
-                    ),
+                    style: label.copyWith(color: cs.inversePrimary),
                   ),
-                  const SizedBox(width: 3),
-                  Icon(Icons.arrow_forward_rounded,
-                      size: 11, color: cs.primary),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: cs.inversePrimary,
+                  ),
                 ],
               ),
             ),
@@ -120,20 +121,25 @@ class IncomeExpenseChartTooltip extends ConsumerWidget {
     );
   }
 
-  Widget _row(ColorScheme cs, String label, String amount, Color color) {
+  Widget _row(
+    ColorScheme cs,
+    String label,
+    String amount,
+    Color color,
+    BuildContext context,
+  ) {
+    final style = Theme.of(context).textTheme.labelMedium!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
         Text(
-          amount,
-          style: localeFont(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w700,
-            color: color,
+          label,
+          style: style.copyWith(
+            color: cs.onInverseSurface.withValues(alpha: 0.8),
+            fontWeight: FontWeight.w500,
           ),
         ),
+        Text(amount, style: style.copyWith(color: color)),
       ],
     );
   }

@@ -54,11 +54,11 @@ class _HraCalculatorScreenState extends ConsumerState<HraCalculatorScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'basic': _basicCtrl.text,
-        'hra': _hraCtrl.text,
-        'rent': _rentCtrl.text,
-        'city': _city,
-      };
+    'basic': _basicCtrl.text,
+    'hra': _hraCtrl.text,
+    'rent': _rentCtrl.text,
+    'city': _city,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -74,7 +74,11 @@ class _HraCalculatorScreenState extends ConsumerState<HraCalculatorScreen>
     final rent = parseAmount(_rentCtrl.text);
     if (basic <= 0 || hra <= 0 || rent <= 0) return null;
     return computeHra(
-        basic: basic, hraReceived: hra, rentPaid: rent, isMetro: _isMetro);
+      basic: basic,
+      hraReceived: hra,
+      rentPaid: rent,
+      isMetro: _isMetro,
+    );
   }
 
   @override
@@ -108,48 +112,51 @@ class _HraCalculatorScreenState extends ConsumerState<HraCalculatorScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolTextField(
-            controller: _basicCtrl,
-            label: 'BASIC SALARY (ANNUAL)',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _hraCtrl,
-            label: 'HRA RECEIVED (ANNUAL)',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolTextField(
-            controller: _rentCtrl,
-            label: 'RENT PAID (ANNUAL)',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          const ToolInputLabel('CITY'),
-          const SizedBox(height: KuberSpacing.sm),
-          ToolSegmentedControl(
-            labels: const ['Metro', 'Non-metro'],
-            selectedIndex: _city,
-            onChanged: (i) => setState(() => _city = i),
-          ),
-        ]),
+        ToolInputCard(
+          children: [
+            ToolTextField(
+              controller: _basicCtrl,
+              label: 'BASIC SALARY (ANNUAL)',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _hraCtrl,
+              label: 'HRA RECEIVED (ANNUAL)',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolTextField(
+              controller: _rentCtrl,
+              label: 'RENT PAID (ANNUAL)',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            const ToolInputLabel('CITY'),
+            const SizedBox(height: KuberSpace.sm),
+            ToolSegmentedControl(
+              labels: const ['Metro', 'Non-metro'],
+              selectedIndex: _city,
+              onChanged: (i) => setState(() => _city = i),
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : ToolDualHero(
                   left: HeroSide(
                     label: 'HRA Exemption',
                     value: money(result.exemption),
-                    color: cs.tertiary,
+                    color: context.kuberMoney.income,
                   ),
                   right: HeroSide(
                     label: 'Taxable HRA',
@@ -195,22 +202,30 @@ class _MethodRow extends StatelessWidget {
   final String label;
   final String value;
   final bool isWinner;
-  const _MethodRow(
-      {required this.label, required this.value, required this.isWinner});
+  const _MethodRow({
+    required this.label,
+    required this.value,
+    required this.isWinner,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md, vertical: 12),
+        horizontal: KuberSpace.md,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: isWinner
-            ? cs.tertiary.withValues(alpha: 0.10)
+            ? context.kuberMoney.income.withValues(alpha: 0.10)
             : cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(
-            color: isWinner ? cs.tertiary.withValues(alpha: 0.35) : cs.outline),
+          color: isWinner
+              ? context.kuberMoney.income.withValues(alpha: 0.35)
+              : cs.outlineVariant,
+        ),
       ),
       child: Row(
         children: [
@@ -218,9 +233,11 @@ class _MethodRow extends StatelessWidget {
             width: 18,
             height: 18,
             decoration: BoxDecoration(
-              color: isWinner ? cs.tertiary : Colors.transparent,
+              color: isWinner ? context.kuberMoney.income : Colors.transparent,
               shape: BoxShape.circle,
-              border: isWinner ? null : Border.all(color: cs.outline, width: 1.5),
+              border: isWinner
+                  ? null
+                  : Border.all(color: cs.outlineVariant, width: 1.5),
             ),
             child: isWinner
                 ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
@@ -231,7 +248,7 @@ class _MethodRow extends StatelessWidget {
             child: Text(
               label,
               style: localeFont(
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: isWinner ? FontWeight.w600 : FontWeight.w400,
                 color: isWinner ? cs.onSurface : cs.onSurfaceVariant,
               ),
@@ -241,8 +258,8 @@ class _MethodRow extends StatelessWidget {
             value,
             style: localeFont(
               fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: isWinner ? cs.tertiary : cs.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              color: isWinner ? context.kuberMoney.income : cs.onSurfaceVariant,
             ),
           ),
         ],

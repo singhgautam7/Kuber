@@ -7,6 +7,10 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../shared/widgets/icon_color_picker_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,8 +25,6 @@ import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
 
 // From the pickers-and-setup pass:
-import '../../../shared/widgets/icon_picker_bottom_sheet.dart';
-import '../../../shared/widgets/color_picker_bottom_sheet.dart';
 
 class CategoryRouteArgs {
   final Category? category;
@@ -99,159 +101,136 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _isEditing ? context.l10n.editCategory : context.l10n.newCategory,
-          style: localeFont(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
-          ),
-        ),
-        centerTitle: false,
+      appBar: KuberAppBar(
+        showBack: true,
+        closeIcon: true,
+        onBack: () => context.pop(),
+        title: _isEditing
+            ? context.l10n.editCategory
+            : context.l10n.newCategory,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── IDENTITY ─────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.identity,
-              topGap: 0,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  onChanged: (_) => setState(() {}),
-                  style: localeFont(color: cs.onSurface, fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.categoryNameHint,
-                  ),
-                ),
-                _LivePreview(
-                  name: _nameController.text,
-                  iconKey: _selectedIcon,
-                  color: _selectedColor,
-                  type: _selectedType,
-                ),
-              ],
-            ),
-
-            // ── GROUP (optional · hidden in Advanced Setup) ──────────
-            if (_shouldShowGroup)
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Board 3.16: live preview first, then Identity (name + group).
+              _LivePreview(
+                name: _nameController.text,
+                iconKey: _selectedIcon,
+                color: _selectedColor,
+                type: _selectedType,
+              ),
               KuberFormSection(
-                label: context.l10n.groupLabel,
-                sublabel: context.l10n.optionalLabel,
+                label: context.l10n.identity,
                 children: [
-                  Consumer(builder: (context, ref, _) {
-                    final groupsAsync = ref.watch(categoryGroupListProvider);
-                    final groupName = _selectedGroupId == null
-                        ? context.l10n.noneLabel
-                        : (groupsAsync.value
-                                ?.firstWhere(
-                                  (g) => g.id == _selectedGroupId,
-                                  orElse: () => CategoryGroup()..name = context.l10n.noneLabel,
-                                )
-                                .name ??
-                            context.l10n.noneLabel);
-                    return KuberPickerRow(
-                      leading: KuberLeadingSwatch(
-                        color: cs.surfaceContainerHigh,
-                        icon: Icons.folder_outlined,
-                        empty: true,
-                      ),
-                      label: context.l10n.groupLabel,
-                      value: groupName,
-                      valueIsPlaceholder: _selectedGroupId == null,
-                      onTap: _openGroupPicker,
-                    );
-                  }),
+                  TextField(
+                    controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    onChanged: (_) => setState(() {}),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge!.copyWith(color: cs.onSurface),
+                    decoration: InputDecoration(
+                      labelText: sentenceCase(context.l10n.categoryNameLabel),
+                      hintText: context.l10n.categoryNameHint,
+                    ),
+                  ),
+                  if (_shouldShowGroup)
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final groupsAsync = ref.watch(
+                          categoryGroupListProvider,
+                        );
+                        final groupName = _selectedGroupId == null
+                            ? context.l10n.noneLabel
+                            : (groupsAsync.value
+                                      ?.firstWhere(
+                                        (g) => g.id == _selectedGroupId,
+                                        orElse: () =>
+                                            CategoryGroup()
+                                              ..name = context.l10n.noneLabel,
+                                      )
+                                      .name ??
+                                  context.l10n.noneLabel);
+                        return KuberPickerRow(
+                          leading: KuberLeadingSwatch(
+                            color: cs.surfaceContainerHigh,
+                            icon: Icons.folder_outlined,
+                            empty: true,
+                          ),
+                          label:
+                              '${sentenceCase(context.l10n.groupLabel)} · ${context.l10n.optionalLabel.toLowerCase()}',
+                          value: groupName,
+                          valueIsPlaceholder: _selectedGroupId == null,
+                          onTap: _openGroupPicker,
+                        );
+                      },
+                    ),
                 ],
               ),
 
-            // ── APPEARANCE ───────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.appearance,
-              children: [
-                KuberPickerRow(
-                  leading: KuberLeadingSwatch(
-                    color: _selectedColor,
-                    icon: IconMapper.fromString(_selectedIcon),
+              // ── APPEARANCE ───────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.appearance,
+                children: [
+                  IconColorPickerRow(
+                    iconKey: _selectedIcon,
+                    colorValue: _selectedColor.toARGB32(),
+                    label: context.l10n.iconAndColour,
+                    onTap: () => showIconColorPicker(
+                      context: context,
+                      iconKeys: IconMapper.kCategoryIconKeys,
+                      tags: IconMapper.kIconTags,
+                      iconKey: _selectedIcon,
+                      colorValue: _selectedColor.toARGB32(),
+                      onDone: (icon, color) => setState(() {
+                        _selectedIcon = icon;
+                        _selectedColor = Color(color);
+                      }),
+                    ).unfocusOnComplete(context),
                   ),
-                  label: context.l10n.iconLabel,
-                  value: IconMapper.labelFor(_selectedIcon),
-                  onTap: () => showIconPicker(
-                    context: context,
-                    iconKeys: IconMapper.kCategoryIconKeys,
-                    tags: IconMapper.kIconTags,
-                    selected: _selectedIcon,
-                    onSelected: (key) =>
-                        setState(() => _selectedIcon = key),
-                  ).unfocusOnComplete(context),
-                ),
-                KuberPickerRow(
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      color: _selectedColor,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                  ),
-                  label: context.l10n.colorLabel,
-                  value: AppColorPalette.nameFor(_selectedColor.toARGB32()),
-                  onTap: () => showColorPicker(
-                    context: context,
-                    selected: _selectedColor.toARGB32(),
-                    onSelected: (value) =>
-                        setState(() => _selectedColor = Color(value)),
-                  ).unfocusOnComplete(context),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // ── TYPE ─────────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.typeLabel,
-              children: [
-                KuberSegmented<String>(
-                  groupValue: _selectedType,
-                  onChanged: (v) => setState(() => _selectedType = v),
-                  segments: [
-                    KuberSegment(
-                      value: 'expense',
-                      label: context.l10n.expenseLabel,
-                      icon: Icons.arrow_outward_rounded,
-                      tone: SegmentTone.expense,
-                    ),
-                    KuberSegment(
-                      value: 'income',
-                      label: context.l10n.incomeLabel,
-                      icon: Icons.south_west_rounded,
-                      tone: SegmentTone.income,
-                    ),
-                    KuberSegment(
-                      value: 'both',
-                      label: context.l10n.bothLabel,
-                      icon: Icons.swap_vert_rounded,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+              // ── TYPE ─────────────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.typeLabel,
+                children: [
+                  KuberSegmented<String>(
+                    groupValue: _selectedType,
+                    onChanged: (v) => setState(() => _selectedType = v),
+                    segments: [
+                      KuberSegment(
+                        value: 'expense',
+                        label: context.l10n.expenseLabel,
+                        icon: Icons.arrow_outward_rounded,
+                        tone: SegmentTone.expense,
+                      ),
+                      KuberSegment(
+                        value: 'income',
+                        label: context.l10n.incomeLabel,
+                        icon: Icons.south_west_rounded,
+                        tone: SegmentTone.income,
+                      ),
+                      KuberSegment(
+                        value: 'both',
+                        label: context.l10n.bothLabel,
+                        icon: Icons.swap_vert_rounded,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
       bottomNavigationBar: KuberSaveButton(
         label: widget.existingCategory != null
             ? widget.saveLabel ?? context.l10n.saveChanges
@@ -342,73 +321,59 @@ class _LivePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final displayName = name.trim().isEmpty ? context.l10n.categoryNameLabel : name;
+    final displayName = name.trim().isEmpty
+        ? context.l10n.categoryNameLabel
+        : name;
     final typeLabel = type == 'both'
         ? context.l10n.bothLabel
         : type == 'income'
-            ? context.l10n.incomeLabel
-            : context.l10n.expenseLabel;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        ? context.l10n.incomeLabel
+        : context.l10n.expenseLabel;
+    final tt = Theme.of(context).textTheme;
+    final tones = categoryTones(context, color);
+    // Board 3.16: tile + name + type, "Live preview" pill on the right.
+    return KuberCard(
+      child: Row(
         children: [
-          Text(
-            context.l10n.livePreview,
-            style: localeFont(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.4,
-              color: cs.onSurfaceVariant,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: tones.container,
+              borderRadius: KuberShape.mediumR,
+            ),
+            child: Icon(
+              IconMapper.fromString(iconKey),
+              color: tones.fg,
+              size: 20,
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+          const SizedBox(width: KuberSpace.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.titleMedium!.copyWith(
+                    color: name.trim().isEmpty
+                        ? cs.onSurfaceVariant
+                        : cs.onSurface,
+                  ),
                 ),
-                child: Icon(IconMapper.fromString(iconKey),
-                    color: color, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: name.trim().isEmpty
-                            ? cs.onSurfaceVariant
-                            : cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      typeLabel,
-                      style: localeFont(
-                        fontSize: 12,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                Text(
+                  typeLabel,
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          KuberPill(
+            label: sentenceCase(context.l10n.livePreview),
+            tone: KuberTone.neutral,
           ),
         ],
       ),
@@ -469,7 +434,9 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -485,8 +452,8 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
                 Text(
                   context.l10n.selectGroup,
                   style: localeFont(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
@@ -570,7 +537,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
                                 counterText:
                                     '${_groupNameController.text.length} / 15',
                                 counterStyle: localeFont(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   color: _groupNameController.text.length >= 15
                                       ? cs.error
                                       : cs.onSurfaceVariant,

@@ -27,8 +27,8 @@ class OnboardingDotsIndicator extends StatelessWidget {
           height: 8,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-            color: active ? cs.primary : cs.outline,
-            borderRadius: BorderRadius.circular(KuberRadius.full),
+            color: active ? cs.primary : cs.outlineVariant,
+            borderRadius: BorderRadius.circular(KuberShape.full),
           ),
         );
       }),

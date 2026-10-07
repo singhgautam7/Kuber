@@ -5,7 +5,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../core/models/overflow_config.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/skeleton_loader.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -13,11 +17,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show
-        formatterProvider,
-        privacyModeProvider,
-        navBarStyleProvider,
-        NavBarStyle;
+    show formatterProvider, privacyModeProvider;
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../export/widgets/export_bottom_sheet.dart';
@@ -35,10 +35,23 @@ class HistoryScreen extends ConsumerStatefulWidget {
   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
 }
 
-class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+class _HistoryScreenState extends ConsumerState<HistoryScreen>
+    with SingleTickerProviderStateMixin {
   static const _groupsPerPage = 10;
   int _displayedGroupCount = _groupsPerPage;
   final _scrollController = ScrollController();
+
+  /// True from a filter change until the re-filtered view arrives. Set in a
+  /// listener, so the progress bar paints on the frame before the (6000+
+  /// row) filter pass runs.
+  bool _filtering = false;
+
+  /// Fades the rows in after a filter change (review round 3).
+  late final AnimationController _listFade = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    value: 1,
+  );
 
   @override
   void initState() {
@@ -68,21 +81,30 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   @override
   void dispose() {
+    _listFade.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Reset pagination when filters change
+    // Reset pagination when filters change, and show the filtering bar.
     ref.listen(historyFilterProvider, (_, __) {
       _displayedGroupCount = _groupsPerPage;
+      if (!_filtering) setState(() => _filtering = true);
+    });
+    ref.listen(historyViewProvider, (prev, next) {
+      if (_filtering && !next.isLoading && (next.hasValue || next.hasError)) {
+        setState(() => _filtering = false);
+        _listFade.forward(from: 0);
+      }
     });
 
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
     final viewAsync = ref.watch(historyViewProvider);
+    final isSelecting = ref.watch(isSelectionModeProvider);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -94,20 +116,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               key: TutorialStepKeys.historyList,
               controller: _scrollController,
               slivers: [
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: KuberSpacing.xl),
-                ),
-
-                // Page header
+                // Header (feedback round 1): "Transactions", no description,
+                // Export in the overflow.
                 SliverToBoxAdapter(
-                  child: KuberPageHeader(
-                    title: context.l10n.historyTitle,
-                    description: context.l10n.historyDescription,
-                    actionIcon: Icons.file_download_outlined,
-                    actionTooltip: context.l10n.exportLabel,
-                    onAction: () => showExportBottomSheet(
-                      context: context,
-                      exportType: ExportType.transactions,
+                  child: KuberAppBar(
+                    title: sentenceCase(context.l10n.transactionsLabel),
+                    overflowConfig: KuberOverflowConfig(
+                      items: [
+                        KuberOverflowItem(
+                          icon: Icons.file_download_outlined,
+                          label: context.l10n.exportLabel,
+                          onTap: () => showExportBottomSheet(
+                            context: context,
+                            exportType: ExportType.transactions,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -119,12 +143,35 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ),
                 ),
 
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: KuberSpacing.sm),
+                // Thin progress bar while a filter is being applied; the
+                // previous rows stay on screen underneath.
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: KuberSpace.sm,
+                    child: AnimatedOpacity(
+                      opacity: _filtering ? 1 : 0,
+                      duration: const Duration(milliseconds: 150),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: KuberSpace.screenMargin,
+                        ),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: LinearProgressIndicator(
+                            minHeight: 2,
+                            borderRadius: KuberShape.fullR,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
 
                 // Transaction list
                 ...viewAsync.when(
+                  // Re-filtering keeps the current rows (the bar above shows
+                  // progress); only the very first load uses the skeleton.
+                  skipLoadingOnReload: true,
                   // Skeleton (summary bar + a few rows) so the first open of
                   // the History tab doesn't stutter behind a blank spinner.
                   loading: () => const [
@@ -132,7 +179,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ],
                   error: (e, _) => [
                     SliverFillRemaining(
-                      child: Center(child: Text('${context.l10n.errorLabel}: $e')),
+                      child: Center(
+                        child: Text('${context.l10n.errorLabel}: $e'),
+                      ),
                     ),
                   ],
                   data: (view) {
@@ -151,124 +200,99 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     final sourceEmpty = view.sourceEmpty;
 
                     return [
-                      // EXP / INC / NET summary
+                      // EXP / INC / NET summary + "Showing N" (board 3.5).
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: KuberSpacing.lg,
+                          padding: const EdgeInsets.fromLTRB(
+                            KuberSpace.screenMargin,
+                            KuberSpace.sm,
+                            KuberSpace.screenMargin,
+                            KuberSpace.md,
                           ),
+                          // One scale-down box for both lines, so "Showing N"
+                          // always renders at the totals' size.
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerLeft,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  '${context.l10n.expLabel} ',
-                                  style: textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.8,
-                                        color: cs.onSurfaceVariant,
+                                Text.rich(
+                                  TextSpan(
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: '${context.l10n.expLabel} ',
                                       ),
-                                ),
-                                Text(
-                                  maskAmount(
-                                    '-${fmt.formatCurrency(totalExp.round())}',
-                                    isPrivate,
+                                      TextSpan(
+                                        text: maskAmount(
+                                          '-${fmt.formatCurrency(totalExp.round())}',
+                                          isPrivate,
+                                        ),
+                                        style: TextStyle(
+                                          color: context.kuberMoney.expense,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: '   ${context.l10n.incLabel} ',
+                                      ),
+                                      TextSpan(
+                                        text: maskAmount(
+                                          '+${fmt.formatCurrency(totalInc.round())}',
+                                          isPrivate,
+                                        ),
+                                        style: TextStyle(
+                                          color: context.kuberMoney.income,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: '   ${context.l10n.netLabel} ',
+                                      ),
+                                      TextSpan(
+                                        text: maskAmount(
+                                          totalNet == 0
+                                              ? fmt.formatCurrency(0)
+                                              : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}',
+                                          isPrivate,
+                                        ),
+                                        style: TextStyle(
+                                          color: totalNet > 0
+                                              ? context.kuberMoney.income
+                                              : totalNet < 0
+                                              ? context.kuberMoney.expense
+                                              : cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  style: textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.8,
-                                        color: cs.error,
-                                      ),
                                 ),
-                                const SizedBox(width: KuberSpacing.lg),
-                                Text(
-                                  '${context.l10n.incLabel} ',
-                                  style: textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.8,
-                                        color: cs.onSurfaceVariant,
+                                const SizedBox(height: KuberSpace.xs),
+                                Text.rich(
+                                  TextSpan(
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            '${context.l10n.showingLabel.toUpperCase()} ',
                                       ),
-                                ),
-                                Text(
-                                  maskAmount(
-                                    '+${fmt.formatCurrency(totalInc.round())}',
-                                    isPrivate,
+                                      TextSpan(
+                                        text: '$filteredCount',
+                                        style: TextStyle(
+                                          color: cs.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            ' ${context.l10n.transactionsLabel.toUpperCase()}',
+                                      ),
+                                    ],
                                   ),
-                                  style: textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.8,
-                                        color: cs.tertiary,
-                                      ),
                                 ),
-                                const SizedBox(width: KuberSpacing.lg),
-                                Text(
-                                  '${context.l10n.netLabel} ',
-                                  style: textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.8,
-                                        color: cs.onSurfaceVariant,
-                                      ),
-                                ),
-                                Text(
-                                  maskAmount(
-                                    totalNet == 0
-                                        ? fmt.formatCurrency(0)
-                                        : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}',
-                                    isPrivate,
-                                  ),
-                                  style: textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.8,
-                                        color: totalNet > 0
-                                            ? cs.tertiary
-                                            : totalNet < 0
-                                            ? cs.error
-                                            : cs.onSurfaceVariant,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // SHOWING N TRANSACTIONS row
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: KuberSpacing.lg,
-                            vertical: KuberSpacing.sm,
-                          ),
-                          child: RichText(
-                            text: TextSpan(
-                              style: textTheme.labelSmall
-                                  ?.copyWith(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.2,
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                              children: [
-                                TextSpan(text: '${context.l10n.showingLabel} '),
-                                TextSpan(
-                                  text: '$filteredCount ',
-                                  style: TextStyle(color: cs.primary),
-                                ),
-                                TextSpan(text: context.l10n.transactionsLabel),
                               ],
                             ),
                           ),
@@ -302,53 +326,56 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           final hasMore =
                               displayedGroups.length < groups.length;
 
-                          return SliverPadding(
-                            padding: EdgeInsets.only(
-                              bottom: hasMore
-                                  ? 0
-                                  : navBarBottomPadding(context),
-                              left: KuberSpacing.lg,
-                              right: KuberSpacing.lg,
-                            ),
-                            sliver: SliverList.builder(
-                              itemCount: displayedGroups.length * 2,
-                              itemBuilder: (context, index) {
-                                final groupIndex = index ~/ 2;
-                                final group = displayedGroups[groupIndex];
+                          return SliverFadeTransition(
+                            opacity: _listFade,
+                            sliver: SliverPadding(
+                              padding: EdgeInsets.only(
+                                bottom: hasMore
+                                    ? 0
+                                    : navBarBottomPadding(context),
+                                left: KuberSpace.screenMargin,
+                                right: KuberSpace.screenMargin,
+                              ),
+                              sliver: SliverList.builder(
+                                itemCount: displayedGroups.length * 2,
+                                itemBuilder: (context, index) {
+                                  final groupIndex = index ~/ 2;
+                                  final group = displayedGroups[groupIndex];
 
-                                if (index.isEven) {
-                                  return DateGroupHeader(
-                                    label: group.label,
-                                    dayTotal: group.dayTotal,
-                                  );
-                                } else {
-                                  return TransactionDayCard(
-                                    key: groupIndex == 0
-                                        ? TutorialStepKeys.historyFirstItem
-                                        : null,
-                                    transactions: group.transactions,
-                                    onDelete: _deleteWithUndo,
-                                    onTap: (t) => _showTransactionDetail(t),
-                                    onEdit: (t) => context.push(
-                                      '/add-transaction',
-                                      extra: t,
-                                    ),
-                                    formatter: fmt,
-                                    categoryMap:
-                                        ref
-                                            .watch(categoryMapProvider)
-                                            .valueOrNull ??
-                                        {},
-                                    accountMap:
-                                        ref
-                                            .watch(accountMapProvider)
-                                            .valueOrNull ??
-                                        {},
-                                    transferPairAccountId: transferPairs,
-                                    tagNamesMap: tagNamesMap,
-                                  );
-                                }
-                              },
+                                  if (index.isEven) {
+                                    return DateGroupHeader(
+                                      label: group.label,
+                                      dayTotal: group.dayTotal,
+                                    );
+                                  } else {
+                                    return TransactionDayCard(
+                                      key: groupIndex == 0
+                                          ? TutorialStepKeys.historyFirstItem
+                                          : null,
+                                      transactions: group.transactions,
+                                      onDelete: _deleteWithUndo,
+                                      onTap: (t) => _showTransactionDetail(t),
+                                      onEdit: (t) => context.push(
+                                        '/add-transaction',
+                                        extra: t,
+                                      ),
+                                      formatter: fmt,
+                                      categoryMap:
+                                          ref
+                                              .watch(categoryMapProvider)
+                                              .valueOrNull ??
+                                          {},
+                                      accountMap:
+                                          ref
+                                              .watch(accountMapProvider)
+                                              .valueOrNull ??
+                                          {},
+                                      transferPairAccountId: transferPairs,
+                                      tagNamesMap: tagNamesMap,
+                                    );
+                                  }
+                                },
+                              ),
                             ),
                           );
                         }(),
@@ -356,7 +383,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           SliverToBoxAdapter(
                             child: Padding(
                               padding: EdgeInsets.only(
-                                top: KuberSpacing.lg,
+                                top: KuberSpace.lg,
                                 bottom: navBarBottomPadding(context),
                               ),
                               child: const Center(
@@ -376,14 +403,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
               ],
             ),
+            // Selection mode (board 3.5 / open decision 8): a one-line
+            // contextual header at the top, the totals pill where the nav was.
+            if (isSelecting)
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _SelectionHeader(),
+              ),
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: AnimatedSlide(
-                offset: ref.watch(isSelectionModeProvider)
-                    ? Offset.zero
-                    : const Offset(0, 1.2),
+                offset: isSelecting ? Offset.zero : const Offset(0, 1.2),
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutCubic,
                 child: const _SelectionActionBar(),
@@ -425,135 +459,108 @@ class _SelectionActionBar extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
 
-    final isModern = ref.watch(navBarStyleProvider) == NavBarStyle.modern;
-    // Root-view inset: the shell body has a bottomNavigationBar, so Flutter
-    // zeroes viewPadding.bottom here — viewPaddingOf would return 0 and the bar
-    // would slide under the system nav bar (the app nav bar is hidden during
-    // selection, so nothing else clears it).
     final bottomInset = systemNavBarInset(context);
-    // On the modern floating nav bar, add generous bottom clearance so
-    // curved-screen edges don't clip the action buttons.
-    final bottomPad = isModern ? bottomInset + KuberSpacing.xl : bottomInset;
+    final bottom = bottomInset > 22 ? bottomInset : 22.0;
+    final money = context.kuberMoney;
+    final style = Theme.of(
+      context,
+    ).textTheme.labelMedium!.copyWith(color: cs.onInverseSurface);
+    final strong = style.copyWith(fontWeight: FontWeight.w700);
 
-    return Material(
-      elevation: 8,
-      color: cs.surfaceContainerHigh,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: bottomPad),
+    // Totals pill (board 3.5): inverseSurface, h48, EXP / INC / NET of the
+    // selection in the inverse-safe money tones.
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom),
+      child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.sm,
-            vertical: KuberSpacing.md,
-          ),
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: cs.outline)),
+            color: cs.inverseSurface,
+            borderRadius: KuberShape.fullR,
           ),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () =>
-                    ref.read(transactionSelectionProvider.notifier).clear(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text.rich(
+              TextSpan(
+                style: style,
+                children: [
+                  TextSpan(text: '${context.l10n.expLabel} '),
+                  TextSpan(
+                    text: maskAmount(
+                      '-${fmt.formatCurrency(totalExp)}',
+                      isPrivate,
+                    ),
+                    style: strong.copyWith(color: money.inverseExpense),
                   ),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(
-                      color: cs.outline.withValues(alpha: 0.3),
+                  TextSpan(text: '    ${context.l10n.incLabel} '),
+                  TextSpan(
+                    text: maskAmount(
+                      '+${fmt.formatCurrency(totalInc)}',
+                      isPrivate,
+                    ),
+                    style: strong.copyWith(color: money.inverseIncome),
+                  ),
+                  TextSpan(text: '    ${context.l10n.netLabel} '),
+                  TextSpan(
+                    text: maskAmount(
+                      '${totalNet > 0
+                          ? "+"
+                          : totalNet < 0
+                          ? "-"
+                          : ""}${fmt.formatCurrency(totalNet.abs())}',
+                      isPrivate,
+                    ),
+                    style: strong.copyWith(
+                      color: totalNet > 0
+                          ? money.inverseIncome
+                          : totalNet < 0
+                          ? money.inverseExpense
+                          : cs.onInverseSurface,
                     ),
                   ),
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 16,
-                    color: cs.onSurface,
-                  ),
-                ),
+                ],
               ),
-              const SizedBox(width: KuberSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.l10n.selectedCount('${selectedIds.length}'),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          '${context.l10n.expLabel} ${maskAmount('-${fmt.formatCurrency(totalExp)}', isPrivate)}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: cs.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Text(
-                          '${context.l10n.incLabel} ${maskAmount('+${fmt.formatCurrency(totalInc)}', isPrivate)}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: cs.tertiary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Text(
-                          '${context.l10n.netLabel} ${maskAmount('${totalNet > 0
-                              ? "+"
-                              : totalNet < 0
-                              ? "-"
-                              : ""}${fmt.formatCurrency(totalNet.abs())}', isPrivate)}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: totalNet > 0
-                                ? cs.tertiary
-                                : totalNet < 0
-                                ? cs.error
-                                : cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _confirmDelete(context, ref, selectedIds),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.error.withValues(alpha: 0.5)),
-                  ),
-                  child: Icon(Icons.delete_outline, size: 16, color: cs.error),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  void _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    Set<int> selectedIds,
-  ) {
+/// Contextual header while selecting (components/contextual-header.md):
+/// surfaceContainer, close, "{n} selected", Delete (danger tonal).
+class _SelectionHeader extends ConsumerWidget {
+  const _SelectionHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedIds = ref.watch(transactionSelectionProvider);
+    return KuberAppBar(
+      background: Theme.of(context).colorScheme.surfaceContainer,
+      showBack: true,
+      closeIcon: true,
+      onBack: () => ref.read(transactionSelectionProvider.notifier).clear(),
+      title: context.l10n.selectedCount('${selectedIds.length}'),
+      actions: [
+        AppIconButton(
+          icon: Icons.delete_outline_rounded,
+          kind: AppIconButtonKind.danger,
+          semanticLabel: context.l10n.deleteLabel,
+          onPressed: () => _confirmDeleteSelection(context, ref, selectedIds),
+        ),
+      ],
+    );
+  }
+}
+
+void _confirmDeleteSelection(
+  BuildContext context,
+  WidgetRef ref,
+  Set<int> selectedIds,
+) {
+  {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -598,47 +605,50 @@ class _HistorySkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Summary bar (count / EXP / INC / NET).
-          Row(
-            children: const [
-              SkeletonBlock(width: 90, height: 20, borderRadius: 6),
-              SizedBox(width: 10),
-              SkeletonBlock(width: 70, height: 20, borderRadius: 6),
-              SizedBox(width: 10),
-              SkeletonBlock(width: 70, height: 20, borderRadius: 6),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          for (var i = 0; i < 7; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: KuberSpacing.md),
-              child: Row(
-                children: const [
-                  SkeletonBlock(width: 40, height: 40, borderRadius: 10),
-                  SizedBox(width: KuberSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SkeletonBlock(
-                            width: 140, height: 13, borderRadius: 5),
-                        SizedBox(height: 7),
-                        SkeletonBlock(
-                            width: 90, height: 11, borderRadius: 5),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: KuberSpacing.md),
-                  SkeletonBlock(width: 64, height: 14, borderRadius: 5),
+    Widget row() => const SizedBox(
+      height: KuberSpace.listItem2,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            SkeletonBlock(width: 40, height: 40, borderRadius: 12),
+            SizedBox(width: KuberSpace.lg),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBlock(width: 140, height: 12, borderRadius: 999),
+                  SizedBox(height: 8),
+                  SkeletonBlock(width: 90, height: 10, borderRadius: 999),
                 ],
               ),
             ),
+            SizedBox(width: KuberSpace.md),
+            SkeletonBlock(width: 56, height: 12, borderRadius: 999),
+          ],
+        ),
+      ),
+    );
+    // Loading skeleton (board 3.5): summary pill, then grouped day blocks.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpace.screenMargin,
+        KuberSpace.sm,
+        KuberSpace.screenMargin,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SkeletonBlock(width: 240, height: 16, borderRadius: 999),
+          const SizedBox(height: KuberSpace.xl),
+          for (var g = 0; g < 2; g++) ...[
+            const SkeletonBlock(width: 80, height: 12, borderRadius: 999),
+            const SizedBox(height: KuberSpace.md),
+            KuberGroup(children: [row(), row(), row()]),
+            const SizedBox(height: KuberSpace.xl),
+          ],
         ],
       ),
     );

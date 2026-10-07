@@ -9,7 +9,6 @@
 
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/about_l10n.dart';
@@ -22,7 +21,10 @@ class AboutWhatIsKuberSection extends StatelessWidget {
 
   List<InlineSpan> _buildWhatIsHeadline(BuildContext context, String lang) {
     final cs = Theme.of(context).colorScheme;
-    final fullText = abL10n('A simple way to {stay_aware} of where your money goes.', lang);
+    final fullText = abL10n(
+      'A simple way to {stay_aware} of where your money goes.',
+      lang,
+    );
     final stayAwareText = abL10n('stay aware', lang);
     final parts = fullText.split('{stay_aware}');
     final before = parts.first;
@@ -32,7 +34,7 @@ class AboutWhatIsKuberSection extends StatelessWidget {
       TextSpan(text: before),
       TextSpan(
         text: stayAwareText,
-        style: GoogleFonts.playfairDisplay(
+        style: serifFont(
           fontSize: 24,
           fontStyle: FontStyle.italic,
           fontWeight: FontWeight.w700,
@@ -54,9 +56,9 @@ class AboutWhatIsKuberSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(
-          KuberRadius.xl,
+          KuberShape.largeIncreased,
         ), // 24 — matches Letter card
-        border: Border.all(color: cs.outline),
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -75,12 +77,12 @@ class AboutWhatIsKuberSection extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.sm),
+                const SizedBox(width: KuberSpace.sm),
                 Text(
                   abL10n('WHAT IS KUBER', lang),
                   style: localeFont(
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 1.6,
                     color: cs.primary,
                   ),
@@ -88,7 +90,7 @@ class AboutWhatIsKuberSection extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
 
           // --- Body -----------------------------------------------------------
           Padding(
@@ -101,7 +103,7 @@ class AboutWhatIsKuberSection extends StatelessWidget {
                   TextSpan(
                     style: localeFont(
                       fontSize: 22,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       height: 1.25,
                       letterSpacing: -0.4,
                       color: cs.onSurface,
@@ -109,18 +111,21 @@ class AboutWhatIsKuberSection extends StatelessWidget {
                     children: _buildWhatIsHeadline(context, lang),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Text(
-                  abL10n('Kuber is a fast, no-fuss expense tracker. Built for consistency, not complexity. Open it, log what you spent, move on.', lang),
+                  abL10n(
+                    'Kuber is a fast, no-fuss expense tracker. Built for consistency, not complexity. Open it, log what you spent, move on.',
+                    lang,
+                  ),
                   style: localeFont(
-                    fontSize: 13.5,
+                    fontSize: 14,
                     color: cs.onSurfaceVariant,
                     height: 1.6,
                   ),
                 ),
 
                 // Tag rail
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -148,7 +153,10 @@ class AboutKuberMeaningSection extends StatelessWidget {
 
   List<InlineSpan> _buildVerse1Text(BuildContext context, String lang) {
     final cs = Theme.of(context).colorScheme;
-    final fullText = abL10n('In Indian mythology, {kuber} is the guardian of wealth and prosperity.', lang);
+    final fullText = abL10n(
+      'In Indian mythology, {kuber} is the guardian of wealth and prosperity.',
+      lang,
+    );
     final parts = fullText.split('{kuber}');
     final before = parts.first;
     final after = parts.length > 1 ? parts.last : '';
@@ -158,8 +166,8 @@ class AboutKuberMeaningSection extends StatelessWidget {
       TextSpan(
         text: 'Kuber',
         style: localeFont(
-          fontSize: 13.5,
-          fontWeight: FontWeight.w700,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
           color: cs.onSurface,
         ),
       ),
@@ -176,8 +184,8 @@ class AboutKuberMeaningSection extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -193,8 +201,8 @@ class AboutKuberMeaningSection extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
                     'क',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 26,
+                    style: serifFont(
+                      fontSize: 28,
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.w700,
                       color: cs.primary,
@@ -208,7 +216,7 @@ class AboutKuberMeaningSection extends StatelessWidget {
                     abL10n("WHAT DOES 'KUBER' MEAN?", lang),
                     style: localeFont(
                       fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 1.6,
                       color: cs.primary,
                     ),
@@ -222,13 +230,13 @@ class AboutKuberMeaningSection extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,
-                    border: Border.all(color: cs.outline),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    border: Border.all(color: cs.outlineVariant),
+                    borderRadius: BorderRadius.circular(KuberShape.small),
                   ),
                   child: Text(
                     abL10n('SANSKRIT', lang).toUpperCase(),
                     style: monoFont(
-                      fontSize: 9.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
                       letterSpacing: 0.6,
@@ -238,7 +246,7 @@ class AboutKuberMeaningSection extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
 
           // --- Verses ---------------------------------------------------------
           _MeaningVerse(
@@ -246,7 +254,7 @@ class AboutKuberMeaningSection extends StatelessWidget {
             child: Text.rich(
               TextSpan(
                 style: localeFont(
-                  fontSize: 13.5,
+                  fontSize: 14,
                   height: 1.55,
                   color: cs.onSurface,
                 ),
@@ -254,27 +262,33 @@ class AboutKuberMeaningSection extends StatelessWidget {
               ),
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
           _MeaningVerse(
             numeral: 'II',
             child: Text(
-              abL10n('He represents not just riches, but the responsibility of managing wealth wisely.', lang),
+              abL10n(
+                'He represents not just riches, but the responsibility of managing wealth wisely.',
+                lang,
+              ),
               style: localeFont(
-                fontSize: 13.5,
+                fontSize: 14,
                 height: 1.55,
                 color: cs.onSurface,
               ),
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
           _MeaningVerse(
             numeral: 'III',
             child: Text(
-              abL10n("Kuber is not about having more.\nIt's about being aware of what you have.", lang),
-              style: GoogleFonts.playfairDisplay(
+              abL10n(
+                "Kuber is not about having more.\nIt's about being aware of what you have.",
+                lang,
+              ),
+              style: serifFont(
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 height: 1.5,
                 color: cs.onSurface,
               ),
@@ -307,7 +321,7 @@ class _MeaningVerse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: Text(
                 numeral,
-                style: GoogleFonts.playfairDisplay(
+                style: serifFont(
                   fontSize: 28,
                   fontStyle: FontStyle.italic,
                   fontWeight: FontWeight.w700,
@@ -336,13 +350,13 @@ class _AboutTag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.full),
+        border: Border.all(color: cs.outlineVariant),
+        borderRadius: BorderRadius.circular(KuberShape.full),
       ),
       child: Text(
         label,
         style: localeFont(
-          fontSize: 10.5,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
           color: cs.onSurfaceVariant,
           letterSpacing: 0.3,

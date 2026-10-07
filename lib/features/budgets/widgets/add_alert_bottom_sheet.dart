@@ -21,7 +21,8 @@ class AddAlertBottomSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AddAlertBottomSheet> createState() => _AddAlertBottomSheetState();
+  ConsumerState<AddAlertBottomSheet> createState() =>
+      _AddAlertBottomSheetState();
 }
 
 class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
@@ -49,9 +50,13 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
   String get _description {
     final value = double.tryParse(_controller.text) ?? 0;
     if (_type == BudgetAlertType.percentage) {
-      return context.l10n.alertDesc(ref.watch(formatterProvider).formatPercentage(value));
+      return context.l10n.alertDesc(
+        ref.watch(formatterProvider).formatPercentage(value),
+      );
     } else {
-      return context.l10n.alertDesc(ref.watch(formatterProvider).formatCurrency(value));
+      return context.l10n.alertDesc(
+        ref.watch(formatterProvider).formatCurrency(value),
+      );
     }
   }
 
@@ -67,7 +72,9 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
     }
 
     // Check for duplicates
-    final isDuplicate = widget.existingAlerts.any((a) => a.type == _type && a.value == value);
+    final isDuplicate = widget.existingAlerts.any(
+      (a) => a.type == _type && a.value == value,
+    );
     if (isDuplicate) return context.l10n.alertAlreadyExists;
 
     return null;
@@ -77,12 +84,12 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
 
   void _submit() {
     if (!_isValid) return;
-    
+
     final alert = BudgetAlert()
       ..type = _type
       ..value = double.parse(_controller.text)
       ..enableNotification = _enableNotification;
-    
+
     widget.onAdd(alert);
     Navigator.pop(context);
   }
@@ -94,10 +101,17 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
     final viewPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(24, 24, 24, viewPadding > 0 ? viewPadding + 16 : 32),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        viewPadding > 0 ? viewPadding + 16 : 32,
+      ),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -110,7 +124,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
               height: 4,
               decoration: BoxDecoration(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(KuberShape.full),
               ),
             ),
           ),
@@ -123,8 +137,8 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
               Text(
                 context.l10n.addAlertTitle,
                 style: localeFont(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
               ),
@@ -137,7 +151,11 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                     color: cs.surfaceContainerHigh,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
@@ -159,7 +177,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             ),
             child: Row(
               children: [
@@ -169,7 +187,9 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                   () => setState(() => _type = BudgetAlertType.percentage),
                 ),
                 _buildToggleButton(
-                  context.l10n.alertAmountType(ref.watch(currencyProvider).symbol),
+                  context.l10n.alertAmountType(
+                    ref.watch(currencyProvider).symbol,
+                  ),
                   _type == BudgetAlertType.amount,
                   () => setState(() => _type = BudgetAlertType.amount),
                 ),
@@ -184,7 +204,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -195,9 +215,13 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                       controller: _controller,
                       autofocus: true,
                       textAlign: TextAlign.center,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
                       ],
                       decoration: InputDecoration(
                         border: InputBorder.none,
@@ -206,7 +230,9 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                         hintText: "0",
-                        hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.2)),
+                        hintStyle: TextStyle(
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.2),
+                        ),
                       ),
                       style: localeFont(
                         fontSize: 36,
@@ -218,7 +244,9 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _type == BudgetAlertType.percentage ? '%' : ref.watch(currencyProvider).symbol,
+                  _type == BudgetAlertType.percentage
+                      ? '%'
+                      : ref.watch(currencyProvider).symbol,
                   style: localeFont(
                     fontSize: 28,
                     fontWeight: FontWeight.w500,
@@ -235,7 +263,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +274,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                   child: Text(
                     _description,
                     style: localeFont(
-                      fontSize: 13,
+                      fontSize: 14,
                       height: 1.5,
                       color: cs.onSurface,
                     ),
@@ -262,17 +290,21 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             ),
             child: Row(
               children: [
-                Icon(Icons.notifications_active_outlined, size: 24, color: cs.onSurface),
+                Icon(
+                  Icons.notifications_active_outlined,
+                  size: 24,
+                  color: cs.onSurface,
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     context.l10n.pushNotification,
                     style: localeFont(
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: cs.onSurface,
                     ),
@@ -319,7 +351,9 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             child: FilledButton(
               onPressed: _isValid ? _submit : null,
               style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KuberShape.medium),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -328,7 +362,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                     context.l10n.addAlert,
                     style: localeFont(
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 1.0,
                     ),
                   ),
@@ -353,16 +387,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? cs.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            borderRadius: BorderRadius.circular(KuberShape.medium),
           ),
           child: Text(
             label,

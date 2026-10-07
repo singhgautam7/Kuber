@@ -69,7 +69,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
               height: 88,
               decoration: BoxDecoration(
                 color: cs.primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
               child: Icon(
                 IconMapper.fromCurrencyCode(currency.code),
@@ -77,20 +77,20 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                 size: 44,
               ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             Text(
               'Kuber',
               style: localeFont(
                 fontSize: 36,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: cs.primary,
               ),
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             Text(
               'your personal financial log',
               style: localeFont(
-                fontSize: 15,
+                fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: cs.onSurfaceVariant,
               ),
@@ -104,16 +104,13 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                 icon: const Icon(Icons.lock_open_rounded),
                 label: Text(
                   context.l10n.unlockToContinue,
-                  style: localeFont(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: localeFont(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: cs.primary,
                   foregroundColor: cs.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(KuberShape.large),
                   ),
                 ),
               ),

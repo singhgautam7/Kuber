@@ -10,7 +10,7 @@ class OnboardingFit extends StatelessWidget {
   const OnboardingFit({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.symmetric(horizontal: KuberSpacing.xl),
+    this.padding = const EdgeInsets.symmetric(horizontal: KuberSpace.xl),
     this.alignment = Alignment.topCenter,
   });
 

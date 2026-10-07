@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import 'package:intl/intl.dart';
 
 class KuberCalendarWidget extends StatefulWidget {
@@ -44,8 +45,16 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
 
-    final daysInMonth = DateTime(widget.viewDate.year, widget.viewDate.month + 1, 0).day;
-    final firstDayWeekday = DateTime(widget.viewDate.year, widget.viewDate.month, 1).weekday; // 1=Mon, 7=Sun
+    final daysInMonth = DateTime(
+      widget.viewDate.year,
+      widget.viewDate.month + 1,
+      0,
+    ).day;
+    final firstDayWeekday = DateTime(
+      widget.viewDate.year,
+      widget.viewDate.month,
+      1,
+    ).weekday; // 1=Mon, 7=Sun
     final paddingDays = firstDayWeekday - 1;
 
     return GestureDetector(
@@ -71,31 +80,30 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
                     children: [
                       Text(
                         DateFormat('MMMM yyyy').format(widget.viewDate),
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.onSurface,
-                        ),
+                        style: tt.titleSmall?.copyWith(color: cs.onSurface),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down_rounded, 
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                        size: 20
+                        size: 20,
                       ),
                     ],
                   ),
                 ),
                 Row(
                   children: [
-                    IconButton(
+                    AppIconButton(
+                      icon: Icons.chevron_left_rounded,
+                      kind: AppIconButtonKind.plain,
+                      semanticLabel: 'Previous month',
                       onPressed: widget.onPrevMonth,
-                      icon: Icon(Icons.chevron_left_rounded, color: cs.onSurfaceVariant),
-                      visualDensity: VisualDensity.compact,
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
+                    AppIconButton(
+                      icon: Icons.chevron_right_rounded,
+                      kind: AppIconButtonKind.plain,
+                      semanticLabel: 'Next month',
                       onPressed: widget.onNextMonth,
-                      icon: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
-                      visualDensity: VisualDensity.compact,
                     ),
                   ],
                 ),
@@ -112,10 +120,7 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
                 child: Text(
                   d,
                   textAlign: TextAlign.center,
-                  style: tt.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               );
             }).toList(),
@@ -126,10 +131,12 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) {
               return SlideTransition(
-                position: animation.drive(Tween(
-                  begin: Offset(_isBackwards ? -0.12 : 0.12, 0),
-                  end: Offset.zero,
-                )),
+                position: animation.drive(
+                  Tween(
+                    begin: Offset(_isBackwards ? -0.12 : 0.12, 0),
+                    end: Offset.zero,
+                  ),
+                ),
                 child: FadeTransition(opacity: animation, child: child),
               );
             },
@@ -139,7 +146,7 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 7,
-                mainAxisSpacing: 4, // Reduced spacing
+                mainAxisSpacing: 0,
                 crossAxisSpacing: 0,
                 childAspectRatio: 1.1, // Adjusted for height optimization
               ),
@@ -150,48 +157,72 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
                   return const SizedBox();
                 }
 
-                final date = DateTime(widget.viewDate.year, widget.viewDate.month, dayNumber);
-                final isToday = date.isAtSameMomentAs(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
-                final isSelectedStart = date.isAtSameMomentAs(widget.rangeStart);
+                final date = DateTime(
+                  widget.viewDate.year,
+                  widget.viewDate.month,
+                  dayNumber,
+                );
+                final isToday = date.isAtSameMomentAs(
+                  DateTime(
+                    DateTime.now().year,
+                    DateTime.now().month,
+                    DateTime.now().day,
+                  ),
+                );
+                final isSelectedStart = date.isAtSameMomentAs(
+                  widget.rangeStart,
+                );
                 final isSelectedEnd = date.isAtSameMomentAs(widget.rangeEnd);
-                final isInRange = date.isAfter(widget.rangeStart) && date.isBefore(widget.rangeEnd);
+                final isInRange =
+                    date.isAfter(widget.rangeStart) &&
+                    date.isBefore(widget.rangeEnd);
                 final isFuture = date.isAfter(DateTime.now());
 
                 return GestureDetector(
                   onTap: isFuture ? null : () => widget.onDateTapped(date),
                   child: Opacity(
-                    opacity: isFuture ? 0.3 : 1.0,
+                    opacity: isFuture ? 0.38 : 1.0,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         if (isInRange || isSelectedStart || isSelectedEnd)
                           Container(
+                            // secondaryContainer band; the caps sit on it.
                             margin: EdgeInsets.only(
-                              left: isSelectedStart ? 20 : 0,
-                              right: isSelectedEnd ? 20 : 0,
+                              left: isSelectedStart && !isSelectedEnd ? 20 : 0,
+                              right: isSelectedEnd && !isSelectedStart ? 20 : 0,
                             ),
+                            height: 40,
                             decoration: BoxDecoration(
-                              color: cs.primary.withValues(alpha: 0.22),
+                              color: isSelectedStart && isSelectedEnd
+                                  ? null
+                                  : cs.secondaryContainer,
                             ),
                           ),
                         Container(
-                          width: 38, // Optimized size
-                          height: 38,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
-                            color: (isSelectedStart || isSelectedEnd) ? cs.primary : null,
-                            borderRadius: BorderRadius.circular(8),
-                            border: isToday && !isSelectedStart && !isSelectedEnd 
-                                ? Border.all(color: cs.primary.withValues(alpha: 0.5), width: 1.5) 
+                            color: (isSelectedStart || isSelectedEnd)
+                                ? cs.primary
+                                : null,
+                            shape: BoxShape.circle,
+                            border:
+                                isToday && !isSelectedStart && !isSelectedEnd
+                                ? Border.all(color: cs.primary)
                                 : null,
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             '$dayNumber',
-                            style: tt.bodyMedium?.copyWith(
-                              fontWeight: (isSelectedStart || isSelectedEnd || isInRange) ? FontWeight.w900 : FontWeight.w600,
-                              color: (isSelectedStart || isSelectedEnd) 
-                                  ? cs.onPrimary 
-                                  : isFuture ? cs.onSurfaceVariant.withValues(alpha: 0.5) : cs.onSurface,
+                            style: tt.bodyLarge?.copyWith(
+                              color: (isSelectedStart || isSelectedEnd)
+                                  ? cs.onPrimary
+                                  : isInRange
+                                  ? cs.onSecondaryContainer
+                                  : isFuture
+                                  ? cs.onSurfaceVariant
+                                  : cs.onSurface,
                             ),
                           ),
                         ),

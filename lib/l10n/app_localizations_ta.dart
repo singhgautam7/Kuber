@@ -4963,4 +4963,128 @@ class AppLocalizationsTa extends AppLocalizations {
   String billDueCrossMonthHint(String billOrdinal, String dueOrdinal) {
     return 'The bill generates on the $billOrdinal and payment is due on the $dueOrdinal, so payment falls in the next month.';
   }
+
+  @override
+  String get rangeFrom => 'முதல்';
+
+  @override
+  String get rangeTo => 'வரை';
+
+  @override
+  String get changeView => 'காட்சியை மாற்று';
+
+  @override
+  String get iconAndColour => 'ஐகான் & நிறம்';
+
+  @override
+  String get chooseIcon => 'ஐகானைத் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get chooseColour => 'நிறத்தைத் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get budgetsTitle => 'பட்ஜெட்கள்';
+
+  @override
+  String get activeBudgetsSection => 'செயலில்';
+
+  @override
+  String get pausedAndEnded => 'இடைநிறுத்தப்பட்டவை & முடிந்தவை';
+
+  @override
+  String get gainLabel => 'லாபம்';
+
+  @override
+  String get returnLabel => 'வருமானம்';
+
+  @override
+  String moreCountAccounts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count கணக்குகள்',
+      one: '1 கணக்கு',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count வகைகள்',
+      one: '1 வகை',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count குறிச்சொற்கள்',
+      one: '1 குறிச்சொல்',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountActive(int count) {
+    return '$count செயலில்';
+  }
+
+  @override
+  String moreCountRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count விதிகள்',
+      one: '1 விதி',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountOpen(int count) {
+    return '$count திறந்தவை';
+  }
+
+  @override
+  String moreCountHoldings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count முதலீடுகள்',
+      one: '1 முதலீடு',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get netBalanceUpper => 'நிகர இருப்பு';
+
+  @override
+  String get netWorthUpper => 'நிகர மதிப்பு';
+
+  @override
+  String nothingMatchesQuery(Object query) {
+    return '\"$query\" உடன் எதுவும் பொருந்தவில்லை.';
+  }
+
+  @override
+  String get searchBudgetsHint => 'பட்ஜெட்களைத் தேடு';
+
+  @override
+  String get searchRecurringHint => 'தொடர்வனவற்றைத் தேடு';
+
+  @override
+  String get searchLoansHint => 'கடன்களைத் தேடு';
+
+  @override
+  String get searchLedgerHint => 'நபர்களைத் தேடு';
+
+  @override
+  String get searchInvestmentsHint => 'முதலீடுகளைத் தேடு';
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
+
 import '../../core/theme/app_theme.dart';
 
-/// The Kuber brand mark (dark tile, accent circle, angular rupee), drawn as a
-/// vector so it follows the active theme family instead of the static blue
-/// launcher PNG. Geometry is traced 1:1 from android/play_store_512.png; with
-/// the Signature theme the output matches the launcher icon (tile #0E397C,
-/// circle #4388FD).
+/// The Kuber brand mark: the folded-leg ₹ from the icon board
+/// (specs/design/kuber-m3-round-1-design-system/project/icon/icon.md), drawn
+/// as a vector so it follows the active theme family. The tones are the
+/// board's HCT recipe (ground T90, bars + bowl T27, leg T50) applied to the
+/// family's primary, so with Signature it is the launcher icon exactly.
 class BrandIcon extends StatelessWidget {
   final double size;
   final double? radius;
@@ -18,93 +20,88 @@ class BrandIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final hct = Hct.fromInt(Theme.of(context).colorScheme.primary.toARGB32());
+    Color tone(double t) =>
+        Color(Hct.from(hct.hue, hct.chroma, t).toInt());
     return ClipRRect(
-      borderRadius: BorderRadius.circular(radius ?? KuberRadius.xl),
+      borderRadius: BorderRadius.circular(radius ?? KuberShape.largeIncreased),
       child: CustomPaint(
         size: Size.square(size),
-        painter: KuberBrandMarkPainter(accent: cs.primary),
+        painter: KuberBrandMarkPainter(
+          background: tone(90),
+          dark: tone(27),
+          mid: tone(50),
+        ),
       ),
     );
   }
 }
 
+/// Paints the mark on the board's 108 x 108 adaptive-icon canvas, scaled to
+/// the paint size. Also used by `tool/generate_icons_test.dart` for the legacy
+/// launcher PNGs and the splash art, so the app and the launcher can't drift.
 class KuberBrandMarkPainter extends CustomPainter {
-  final Color accent;
+  final Color background;
+  final Color dark;
+  final Color mid;
 
-  const KuberBrandMarkPainter({required this.accent});
+  const KuberBrandMarkPainter({
+    required this.background,
+    required this.dark,
+    required this.mid,
+  });
 
-  /// Deep shade of the accent used for the tile and the rupee glyph. Derived
-  /// in HSL so every family keeps its hue: for the Signature blue this
-  /// reproduces the launcher icon's #0E397C within a couple of RGB points.
-  static Color deepShade(Color accent) {
-    final hsl = HSLColor.fromColor(accent);
-    return hsl
-        .withSaturation((hsl.saturation * 0.85).clamp(0.0, 1.0))
-        .withLightness(0.26)
-        .toColor();
-  }
+  /// Launcher icon / light splash colours from icon.md.
+  static const light = KuberBrandMarkPainter(
+    background: Color(0xFFD8E2FF),
+    dark: Color(0xFF003D88),
+    mid: Color(0xFF2573E6),
+  );
+
+  /// Dark splash colours from icon.md.
+  static const night = KuberBrandMarkPainter(
+    background: Color(0xFF001A42),
+    dark: Color(0xFFADC6FF),
+    mid: Color(0xFF4D8EFF),
+  );
+
+  /// Same strokes on a transparent ground (Android 12 splash icon).
+  KuberBrandMarkPainter get glyphOnly =>
+      KuberBrandMarkPainter(background: Colors.transparent, dark: dark, mid: mid);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final s = size.width / 512;
-    canvas.scale(s);
-    final deep = deepShade(accent);
+    canvas.save();
+    canvas.scale(size.width / 108, size.height / 108);
+    if (background.a > 0) {
+      canvas.drawRect(
+          const Rect.fromLTWH(0, 0, 108, 108), Paint()..color = background);
+    }
+    Paint stroke(Color c) => Paint()
+      ..color = c
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    // Tile
-    canvas.drawRect(
-      const Rect.fromLTWH(0, 0, 512, 512),
-      Paint()..color = deep,
-    );
-
-    // Accent circle
-    canvas.drawCircle(
-      const Offset(256, 256),
-      190,
-      Paint()..color = accent,
-    );
-
-    // Angular rupee glyph (same deep shade as the tile), traced from the
-    // 512px source. Overlapping subpaths union under the non-zero fill rule.
-    final glyph = Path()
-      // Top bar (right end is slightly shorter, matching the source).
-      ..addRect(const Rect.fromLTRB(176, 150, 335, 172))
-      ..addRect(const Rect.fromLTRB(176, 150, 303, 178))
-      // Bowl outer edge between the bars.
-      ..addPolygon(const [
-        Offset(259, 177),
-        Offset(306, 177),
-        Offset(316, 199),
-        Offset(281, 199),
-      ], true)
-      // Second bar.
-      ..addRect(const Rect.fromLTRB(176, 199, 335, 222))
-      // Bowl outer edge below the second bar.
-      ..addPolygon(const [
-        Offset(283, 222),
-        Offset(315, 222),
-        Offset(307, 246),
-        Offset(259, 246),
-      ], true)
-      // Bowl bottom, tapering into the leg junction.
-      ..addPolygon(const [
-        Offset(202, 245),
-        Offset(306, 245),
-        Offset(293, 260),
-        Offset(276, 270),
-        Offset(247, 275),
-        Offset(202, 275),
-      ], true)
-      // Diagonal leg.
-      ..addPolygon(const [
-        Offset(202, 275),
-        Offset(247, 275),
-        Offset(326, 360),
-        Offset(280, 361),
-      ], true);
-    canvas.drawPath(glyph, Paint()..color = deep);
+    // Dark: top bar, bowl, second bar. Mid: the leg, drawn last so its round
+    // cap sits on the end of the bowl (the fold).
+    final bars = Path()
+      ..moveTo(40.4, 32.75)
+      ..lineTo(67.6, 32.75)
+      ..moveTo(50.6, 32.75)
+      ..arcToPoint(const Offset(50.6, 58.25),
+          radius: const Radius.circular(12.75))
+      ..lineTo(42.1, 58.25)
+      ..moveTo(40.4, 45.5)
+      ..lineTo(67.6, 45.5);
+    canvas.drawPath(bars, stroke(dark));
+    canvas.drawLine(const Offset(42.1, 58.25), const Offset(61.65, 74.4),
+        stroke(mid));
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(KuberBrandMarkPainter old) => old.accent != accent;
+  bool shouldRepaint(KuberBrandMarkPainter old) =>
+      old.background != background || old.dark != dark || old.mid != mid;
 }

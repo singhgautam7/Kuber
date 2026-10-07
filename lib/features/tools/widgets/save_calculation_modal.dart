@@ -57,8 +57,9 @@ class SaveCalculationSheet extends ConsumerStatefulWidget {
 }
 
 class _SaveCalculationSheetState extends ConsumerState<SaveCalculationSheet> {
-  late final TextEditingController _ctrl =
-      TextEditingController(text: widget.defaultName);
+  late final TextEditingController _ctrl = TextEditingController(
+    text: widget.defaultName,
+  );
 
   @override
   void dispose() {
@@ -69,7 +70,9 @@ class _SaveCalculationSheetState extends ConsumerState<SaveCalculationSheet> {
   Future<void> _save() async {
     final name = _ctrl.text.trim();
     if (name.isEmpty) return;
-    await ref.read(savedCalculationsProvider.notifier).create(
+    await ref
+        .read(savedCalculationsProvider.notifier)
+        .create(
           tool: widget.tool,
           name: name,
           inputsJson: widget.inputsJson,
@@ -81,9 +84,8 @@ class _SaveCalculationSheetState extends ConsumerState<SaveCalculationSheet> {
       context,
       'Calculation saved. View in Saved Calculations.',
       actionLabel: 'View',
-      onAction: () => context.push(
-        '/more/tools/saved-calculations?tool=${widget.tool}',
-      ),
+      onAction: () =>
+          context.push('/more/tools/saved-calculations?tool=${widget.tool}'),
     );
   }
 
@@ -97,67 +99,75 @@ class _SaveCalculationSheetState extends ConsumerState<SaveCalculationSheet> {
         children: [
           Text(
             'Give it a memorable name so you can find it later in Saved Calculations.',
-            style: localeFont(fontSize: 12.5, color: cs.onSurfaceVariant),
+            style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           Text(
             'NAME THIS CALCULATION',
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           TextField(
             controller: _ctrl,
             autofocus: true,
             textCapitalization: TextCapitalization.sentences,
             style: localeFont(
-                fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _save(),
             decoration: InputDecoration(
               hintText: widget.placeholder,
-              hintStyle:
-                  localeFont(fontSize: 15, color: cs.onSurfaceVariant),
+              hintStyle: localeFont(fontSize: 16, color: cs.onSurfaceVariant),
               filled: true,
               fillColor: cs.surfaceContainerHigh,
               contentPadding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.md, vertical: KuberSpacing.md),
+                horizontal: KuberSpace.md,
+                vertical: KuberSpace.md,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.large),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.large),
                 borderSide: BorderSide(color: cs.primary),
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           FilledButton(
             onPressed: _ctrl.text.trim().isEmpty ? null : _save,
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
+              padding: const EdgeInsets.symmetric(vertical: KuberSpace.md),
             ),
-            child: Text('Save',
-                style:
-                    localeFont(fontSize: 14.5, fontWeight: FontWeight.w700)),
+            child: Text(
+              'Save',
+              style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel',
-                style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant)),
+            child: Text(
+              'Cancel',
+              style: localeFont(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
           ),
         ],
       ),
