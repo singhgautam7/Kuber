@@ -94,63 +94,94 @@ class _ControlTile extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     // Control tile (board 3.2d): on = secondaryContainer with a primary disc,
-    // off = surfaceContainer + outline. Tap toggles.
+    // off = surfaceContainer + outline. Tap toggles; the fill, border, disc,
+    // text colours and caption all animate between the two states.
+    const dur = Duration(milliseconds: 220);
+    const curve = Curves.easeOutCubic;
+    final fg = on ? cs.onSecondaryContainer : cs.onSurface;
+    final sub = on ? cs.onSecondaryContainer : cs.onSurfaceVariant;
     return Semantics(
       toggled: on,
       button: true,
-      child: Material(
-        color: on ? cs.secondaryContainer : cs.surfaceContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: KuberShape.cardR,
-          side: on ? BorderSide.none : BorderSide(color: cs.outlineVariant),
-        ),
+      child: AnimatedContainer(
+        duration: dur,
+        curve: curve,
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => onChanged(!on),
-          child: Padding(
-            padding: const EdgeInsets.all(KuberSpace.md),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: on ? cs.primary : cs.surfaceContainerHigh,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: on ? cs.onPrimary : cs.onSurface,
-                  ),
-                ),
-                const SizedBox(width: KuberSpace.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall!.copyWith(
-                          color: on ? cs.onSecondaryContainer : cs.onSurface,
-                        ),
+        decoration: BoxDecoration(
+          color: on ? cs.secondaryContainer : cs.surfaceContainer,
+          borderRadius: KuberShape.cardR,
+          // Constant width (transparent when on) so nothing shifts.
+          border: Border.all(
+            color: on ? cs.secondaryContainer : cs.outlineVariant,
+          ),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () => onChanged(!on),
+            child: Padding(
+              padding: const EdgeInsets.all(KuberSpace.md),
+              child: Row(
+                children: [
+                  AnimatedScale(
+                    scale: on ? 1 : 0.92,
+                    duration: dur,
+                    curve: Curves.easeOutBack,
+                    child: AnimatedContainer(
+                      duration: dur,
+                      curve: curve,
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: on ? cs.primary : cs.surfaceContainerHigh,
+                        shape: BoxShape.circle,
                       ),
-                      Text(
-                        caption,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall!.copyWith(
-                          color: on
-                              ? cs.onSecondaryContainer
-                              : cs.onSurfaceVariant,
+                      child: TweenAnimationBuilder<Color?>(
+                        tween: ColorTween(
+                          end: on ? cs.onPrimary : cs.onSurface,
                         ),
+                        duration: dur,
+                        builder: (_, c, __) => Icon(icon, size: 20, color: c),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: KuberSpace.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedDefaultTextStyle(
+                          duration: dur,
+                          style: theme.textTheme.titleSmall!.copyWith(
+                            color: fg,
+                          ),
+                          child: Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        AnimatedSwitcher(
+                          duration: dur,
+                          layoutBuilder: (current, previous) => Stack(
+                            alignment: AlignmentDirectional.centerStart,
+                            children: [...previous, ?current],
+                          ),
+                          child: Text(
+                            caption,
+                            key: ValueKey(caption),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall!.copyWith(
+                              color: sub,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

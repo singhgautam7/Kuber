@@ -152,13 +152,11 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
                     onChanged: recompute,
                   ),
                 ),
-                const SizedBox(width: KuberSpace.md),
-                Expanded(
-                  child: ToolSegmentedControl(
-                    labels: const ['Years', 'Months'],
-                    selectedIndex: _tenureUnit,
-                    onChanged: (i) => setState(() => _tenureUnit = i),
-                  ),
+                const SizedBox(width: KuberSpace.sm),
+                ToolUnitDropdown(
+                  labels: const ['Years', 'Months'],
+                  selectedIndex: _tenureUnit,
+                  onChanged: (i) => setState(() => _tenureUnit = i),
                 ),
               ],
             ),

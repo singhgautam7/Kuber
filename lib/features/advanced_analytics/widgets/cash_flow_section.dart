@@ -304,6 +304,9 @@ class _LedgerTableState extends State<_LedgerTable> {
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: KuberShape.largeR,
+      ),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: KuberShape.largeR,
         border: Border.all(color: cs.outlineVariant),
       ),
       child: SingleChildScrollView(

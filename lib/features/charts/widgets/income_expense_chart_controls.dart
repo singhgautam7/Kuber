@@ -96,17 +96,21 @@ class IncomeExpenseChartRangeSwitcher extends StatelessWidget {
     KuberChartBucket.day: 'Day',
     KuberChartBucket.week: 'Week',
     KuberChartBucket.month: 'Month',
+    KuberChartBucket.quarter: 'Quarter',
     KuberChartBucket.year: 'Year',
   };
 
   @override
   Widget build(BuildContext context) {
-    // The redesign offers Day | Week | Month | Year (quarter dropped).
+    // Day | Week | Month | Quarter | Year. Quarter stays listed: long ranges
+    // (All) default to it, and a value missing from the list showed an empty
+    // chip.
     final entries = [
       for (final b in const [
         KuberChartBucket.day,
         KuberChartBucket.week,
         KuberChartBucket.month,
+        KuberChartBucket.quarter,
         KuberChartBucket.year,
       ])
         if (available.contains(b)) b,

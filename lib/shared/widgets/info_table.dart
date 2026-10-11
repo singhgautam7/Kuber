@@ -37,6 +37,11 @@ class InfoTable extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: KuberShape.cardR,
+      ),
+      // Border on top of the rows, so header / highlight fills never cover
+      // it at the corners.
+      foregroundDecoration: BoxDecoration(
+        borderRadius: KuberShape.cardR,
         border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,

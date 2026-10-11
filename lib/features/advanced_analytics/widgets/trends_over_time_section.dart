@@ -11,8 +11,6 @@ import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../charts/widgets/income_expense_chart_controls.dart'
-    show KuberSegmentedTabs;
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../providers/advanced_analytics_provider.dart';
@@ -160,9 +158,12 @@ class _ByCategory extends ConsumerWidget {
           children: [
             Text('BY CATEGORY', style: sectionHeaderStyle(context)),
             const Spacer(),
-            KuberSegmentedTabs(
-              labels: const ['Percent', 'Amount'],
-              selectedIndex: valueMode,
+            KuberDropdownChip<int>(
+              value: valueMode,
+              options: const [
+                KuberDropdownOption(0, 'Percent'),
+                KuberDropdownOption(1, 'Amount'),
+              ],
               onChanged: (i) =>
                   ref.read(trendsCategoryValueModeProvider.notifier).state = i,
             ),

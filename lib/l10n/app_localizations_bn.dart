@@ -369,10 +369,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get navSubtitleModern => 'ভাসমান পিল';
 
   @override
-  String get navFuturisticChoice => 'Futuristic';
+  String get navFuturisticChoice => 'ফিউচারিস্টিক';
 
   @override
-  String get navSubtitleFuturistic => 'Label on active';
+  String get navSubtitleFuturistic => 'সক্রিয়টিতে লেবেল';
 
   @override
   String get numFormatIndian => 'ভারতীয়';
@@ -2508,10 +2508,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get menuStoriesArchiveDesc => 'প্রতিটি রিক্যাপ, নতুনগুলো আগে';
 
   @override
-  String get menuWidgets => 'Widgets';
+  String get menuWidgets => 'উইজেট';
 
   @override
-  String get menuWidgetsDesc => 'Home screen widgets to keep Kuber in view';
+  String get menuWidgetsDesc => 'Kuber সামনে রাখতে হোম স্ক্রিন উইজেট';
 
   @override
   String get menuTroubleshoot => 'সমস্যা সমাধান';
@@ -3253,10 +3253,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get invTypeEtf => 'ETF';
 
   @override
-  String get invTypeBonds => 'Bonds';
+  String get invTypeBonds => 'বন্ড';
 
   @override
-  String get invTypeCollectible => 'Collectible';
+  String get invTypeCollectible => 'সংগ্রহযোগ্য';
 
   @override
   String get invTypeOther => 'অন্যান্য';
@@ -4589,122 +4589,122 @@ class AppLocalizationsBn extends AppLocalizations {
   String get emiDebitedFrom => 'এখান থেকে EMI কাটা হয়েছে';
 
   @override
-  String get searchAccountsHint => 'Search accounts...';
+  String get searchAccountsHint => 'অ্যাকাউন্ট খুঁজুন...';
 
   @override
   String noAccountsMatch(String query) {
-    return 'No accounts match \'$query\'';
+    return '\'$query\'-এর সাথে কোনো অ্যাকাউন্ট মেলেনি';
   }
 
   @override
-  String get monthlyNetAutomation => 'MONTHLY NET';
+  String get monthlyNetAutomation => 'মাসিক নিট';
 
   @override
-  String get disableAccount => 'Disable account';
+  String get disableAccount => 'অ্যাকাউন্ট নিষ্ক্রিয় করুন';
 
   @override
-  String get enableAccount => 'Enable account';
+  String get enableAccount => 'অ্যাকাউন্ট সক্রিয় করুন';
 
   @override
-  String get accountHidden => 'Account hidden';
+  String get accountHidden => 'অ্যাকাউন্ট লুকানো হয়েছে';
 
   @override
-  String get accountRestored => 'Account restored';
+  String get accountRestored => 'অ্যাকাউন্ট ফিরিয়ে আনা হয়েছে';
 
   @override
   String get disableAccountConfirm =>
-      'This account will be hidden from pickers and home cards. You can re-enable it anytime.';
+      'এই অ্যাকাউন্টটি পিকার ও হোম কার্ড থেকে লুকানো থাকবে। যেকোনো সময় আবার সক্রিয় করতে পারবেন।';
 
   @override
-  String get hiddenChip => 'Hidden';
+  String get hiddenChip => 'লুকানো';
 
   @override
-  String get shareStory => 'Share story';
+  String get shareStory => 'স্টোরি শেয়ার করুন';
 
   @override
-  String get shareAsImage => 'Share as image';
+  String get shareAsImage => 'ছবি হিসেবে শেয়ার করুন';
 
   @override
-  String get shareAsText => 'Share as text';
+  String get shareAsText => 'লেখা হিসেবে শেয়ার করুন';
 
   @override
-  String get confirmLabel => 'Confirm';
+  String get confirmLabel => 'নিশ্চিত করুন';
 
   @override
-  String get sourceLabel => 'Source';
+  String get sourceLabel => 'উৎস';
 
   @override
-  String get sourceSms => 'SMS import';
+  String get sourceSms => 'SMS ইমপোর্ট';
 
   @override
-  String get sourceRecurring => 'Recurring';
+  String get sourceRecurring => 'পুনরাবৃত্ত';
 
   @override
-  String get sourceLentBorrowed => 'Lent or Borrowed';
+  String get sourceLentBorrowed => 'ধার দেওয়া বা নেওয়া';
 
   @override
-  String get sourceLoan => 'Loan';
+  String get sourceLoan => 'ঋণ';
 
   @override
-  String get sourceInvestment => 'Investment / SIP';
+  String get sourceInvestment => 'বিনিয়োগ / SIP';
 
   @override
-  String get sourceQuickAdd => 'Quick add';
+  String get sourceQuickAdd => 'কুইক অ্যাড';
 
   @override
-  String get sourceManual => 'Entered by you';
+  String get sourceManual => 'আপনার লেখা';
 
   @override
-  String get sourceBalanceAdjustment => 'Balance adjustment';
+  String get sourceBalanceAdjustment => 'ব্যালেন্স সমন্বয়';
 
   @override
-  String get viewOriginalSms => 'View original SMS';
+  String get viewOriginalSms => 'মূল SMS দেখুন';
 
   @override
-  String get accountTypeLabel => 'Account Type';
+  String get accountTypeLabel => 'অ্যাকাউন্টের ধরন';
 
   @override
-  String get accountNumberLabel => 'Account Number';
+  String get accountNumberLabel => 'অ্যাকাউন্ট নম্বর';
 
   @override
-  String get yesLabel => 'Yes';
+  String get yesLabel => 'হ্যাঁ';
 
   @override
-  String get noLabel => 'No';
+  String get noLabel => 'না';
 
   @override
-  String get lastTransactionLabel => 'Last Transaction';
+  String get lastTransactionLabel => 'শেষ লেনদেন';
 
   @override
-  String get budgetStatusLabel => 'Budget Status';
+  String get budgetStatusLabel => 'বাজেটের অবস্থা';
 
   @override
-  String get setBudgetForCategory => 'Set a budget for this category';
+  String get setBudgetForCategory => 'এই বিভাগের জন্য বাজেট সেট করুন';
 
   @override
-  String get usageCountLabel => 'Usage Count';
+  String get usageCountLabel => 'ব্যবহারের সংখ্যা';
 
   @override
-  String get firstUsedLabel => 'First Used';
+  String get firstUsedLabel => 'প্রথম ব্যবহার';
 
   @override
-  String get lastUsedLabel => 'Last Used';
+  String get lastUsedLabel => 'শেষ ব্যবহার';
 
   @override
-  String get viewTaggedTransactions => 'View Tagged Transactions';
+  String get viewTaggedTransactions => 'ট্যাগ করা লেনদেন দেখুন';
 
   @override
-  String get accountLabel => 'Account';
+  String get accountLabel => 'অ্যাকাউন্ট';
 
   @override
-  String get dateTimeTitle => 'Date & Time';
+  String get dateTimeTitle => 'তারিখ ও সময়';
 
   @override
-  String get originalSmsLabel => 'Original SMS';
+  String get originalSmsLabel => 'মূল SMS';
 
   @override
   String transactionsCountValue(int count) {
-    return '$count transactions';
+    return '$countটি লেনদেন';
   }
 
   @override
@@ -4874,37 +4874,37 @@ class AppLocalizationsBn extends AppLocalizations {
   String get speedDialNote => 'কুবের নোট যোগ করুন';
 
   @override
-  String get billingCycle => 'Billing cycle';
+  String get billingCycle => 'বিলিং চক্র';
 
   @override
-  String get billGenerationDaySection => 'Bill generation day';
+  String get billGenerationDaySection => 'বিল তৈরির দিন';
 
   @override
-  String get paymentDueDaySection => 'Payment due day';
+  String get paymentDueDaySection => 'পেমেন্টের শেষ দিন';
 
   @override
-  String get remindMe => 'Remind me';
+  String get remindMe => 'আমাকে মনে করিয়ে দিন';
 
   @override
-  String get billReminderSub => 'Notify on the day the bill is generated';
+  String get billReminderSub => 'বিল তৈরির দিন জানান';
 
   @override
-  String get dueReminderSub => 'Notify on the payment due date';
+  String get dueReminderSub => 'পেমেন্টের শেষ দিনে জানান';
 
   @override
-  String get billGenerationLabel => 'Bill generation';
+  String get billGenerationLabel => 'বিল তৈরি';
 
   @override
-  String get paymentDueLabel => 'Payment due';
+  String get paymentDueLabel => 'পেমেন্ট বাকি';
 
   @override
   String dayOfEveryMonth(String ordinal) {
-    return '$ordinal of every month';
+    return 'প্রতি মাসের $ordinal';
   }
 
   @override
   String billDueCrossMonthHint(String billOrdinal, String dueOrdinal) {
-    return 'The bill generates on the $billOrdinal and payment is due on the $dueOrdinal, so payment falls in the next month.';
+    return 'বিল $billOrdinal তারিখে তৈরি হয় এবং পেমেন্ট $dueOrdinal তারিখে বাকি, তাই পেমেন্ট পরের মাসে পড়ে।';
   }
 
   @override

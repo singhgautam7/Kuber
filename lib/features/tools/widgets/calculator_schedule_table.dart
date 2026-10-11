@@ -178,25 +178,25 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.toggleLabels != null && widget.onToggle != null) ...[
-          SizedBox(
-            width: 168,
-            child: ToolSegmentedControl(
-              labels: widget.toggleLabels!,
-              selectedIndex: widget.toggleIndex,
-              onChanged: widget.onToggle!,
-            ),
+          ToolUnitDropdown(
+            labels: widget.toggleLabels!,
+            selectedIndex: widget.toggleIndex,
+            onChanged: widget.onToggle!,
           ),
           const SizedBox(height: KuberSpace.md),
         ],
-        DecoratedBox(
+        // One radius for clip and border, and the border painted above the
+        // header row so the corners stay even.
+        Container(
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          ),
+          foregroundDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             border: Border.all(color: cs.outlineVariant),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(KuberShape.medium),
-            child: lazy ? _buildVirtualized(cs) : _buildEager(cs),
-          ),
+          clipBehavior: Clip.antiAlias,
+          child: lazy ? _buildVirtualized(cs) : _buildEager(cs),
         ),
         if (widget.note != null) ...[
           const SizedBox(height: KuberSpace.sm),
