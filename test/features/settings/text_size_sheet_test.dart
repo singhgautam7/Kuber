@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kuber/core/theme/app_theme.dart';
-import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/features/settings/widgets/text_size_sheet.dart';
 import 'package:kuber/l10n/app_localizations.dart';
 

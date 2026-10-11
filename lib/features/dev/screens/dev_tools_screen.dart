@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/material.dart';
+import '../../home_v2/services/home_v2_dev_tools.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,6 +126,27 @@ class DevToolsScreen extends ConsumerWidget {
                   size: 20,
                   color: cs.onSurfaceVariant,
                 ),
+              ),
+            ]),
+            // Home v2 (specs/home-v2): test every state by hand.
+            section('HOME V2', [
+              row(
+                Icons.restart_alt_rounded,
+                'Reset Home v2 onboarding',
+                'New-install Home: v2 widgets, Get started, no suggestion state',
+                () => resetHomeV2Onboarding(context, ref),
+              ),
+              row(
+                Icons.play_arrow_rounded,
+                'Run suggestion rules now',
+                'Real rules on this data, skipping the 24 h and daily waits',
+                () => runSuggestionRulesNow(context, ref),
+              ),
+              row(
+                Icons.lightbulb_outline_rounded,
+                'Force suggestion',
+                'Show any suggestion card now with sample data',
+                () => showForceSuggestionSheet(context, ref),
               ),
             ]),
             section('DATABASE', [

@@ -41,8 +41,13 @@ class KuberComparisonTable extends StatelessWidget {
           });
         }
 
+        // The border is a foreground decoration so the filled header row
+        // can't paint over its inner half at the corners.
         return Container(
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          ),
+          foregroundDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             border: Border.all(color: cs.outlineVariant),
           ),

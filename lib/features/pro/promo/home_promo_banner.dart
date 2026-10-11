@@ -14,18 +14,22 @@ import 'promo_code_sheet.dart';
 /// Round 2: the CTA no longer grants Pro locally. "Get code" opens
 /// [showPromoCodeSheet], which hands off to Play Store's own redemption —
 /// see the security note in `promo_code_sheet.dart`.
+/// True while the Home promo banner would render. Shared with Home v2's
+/// top slot (suggestions wait while a promo is visible).
+final homePromoVisibleProvider = Provider<bool>((ref) {
+  final isPro = ref.watch(kuberProStateProvider.select((s) => s.isPro));
+  final promo = ref.watch(promoConfigProvider);
+  final dismissed = ref.watch(promoBannerDismissedProvider);
+  return promo != null && !isPro && !dismissed;
+});
+
 class HomePromoBanner extends ConsumerWidget {
   const HomePromoBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proState = ref.watch(kuberProStateProvider);
-    final promo = ref.watch(promoConfigProvider);
-    final dismissed = ref.watch(promoBannerDismissedProvider);
-
-    if (promo == null || proState.isPro || dismissed) {
-      return const SizedBox.shrink();
-    }
+    if (!ref.watch(homePromoVisibleProvider)) return const SizedBox.shrink();
+    final promo = ref.watch(promoConfigProvider)!;
 
     final cs = Theme.of(context).colorScheme;
 

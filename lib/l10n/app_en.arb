@@ -2906,5 +2906,224 @@
   "textSizeExtraLarge": "Extra large",
   "textSizePreviewUpper": "PREVIEW",
   "textSizePreviewBody": "Track your daily expenses, manage budgets, and reach your goals with Kuber.",
-  "textSizePreviewMeta": "Groceries · Today"
+  "textSizePreviewMeta": "Groceries · Today",
+  "homeV2GsProgress": "{done} of 3 done",
+  "@homeV2GsProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV2GsTitle": "Let's set up Kuber",
+  "homeV2GsBodyFresh": "Import your bank SMS and Kuber adds your transactions for you. Your messages stay on this phone.",
+  "homeV2GsBodyOneDone": "Good start. Two more steps to go.",
+  "homeV2GsBodyTwoDone": "Almost there. One more step to go.",
+  "homeV2GsBodyDenied": "Kuber needs permission to read bank SMS. Messages are read on this phone and never uploaded.",
+  "homeV2GsBodyBlocked": "SMS access is turned off for Kuber. You can turn it on in your phone settings or paste a bank SMS.",
+  "homeV2GsStep1": "Import from SMS",
+  "homeV2GsStep2": "Add a transaction yourself",
+  "homeV2GsStep3": "Set your starting balance",
+  "homeV2GsStepNeedsPermission": "Needs SMS permission",
+  "homeV2GsLimitTitle": "This week's free imports are used",
+  "homeV2GsLimitBody": "{count, plural, =1{1 more SMS is waiting in SMS import. It stays there until you import it.} other{{count} more SMS are waiting in SMS import. They stay there until you import them.}}",
+  "@homeV2GsLimitBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV2GsLimitReset": "Free imports reset on {date}.",
+  "@homeV2GsLimitReset": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2GsDoneTitle": "You're all set",
+  "homeV2GsDoneBody": "Kuber will add more to your Home as you use it.",
+  "homeV2GsActImport": "Import from SMS",
+  "homeV2GsActAdd": "Add transaction",
+  "homeV2GsActQuick": "Quick Add",
+  "homeV2GsActBalance": "Set balance",
+  "homeV2GsActAllow": "Allow SMS access",
+  "homeV2GsActSettings": "Open phone settings",
+  "homeV2GsActPaste": "Paste an SMS",
+  "homeV2GsActPro": "See Kuber Pro",
+  "homeV2GsCloseA11y": "Close Get started",
+  "homeV2GsClosedSnack": "Get started is hidden. You can show it again from Settings.",
+  "homeV2ActUndo": "Undo",
+  "homeV2SetGsTitle": "Get started card",
+  "homeV2SetGsSub": "Show setup steps on Home",
+  "homeV2SetSgTitle": "Suggestions on Home",
+  "homeV2SetSgSub": "Tips based on your own transactions",
+  "homeV2WBalanceEmpty": "Money in and money out for {month} will show here.",
+  "@homeV2WBalanceEmpty": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2WBalanceEmptyAct": "Add transaction",
+  "homeV2WRecentEmptyBody": "Your latest transactions will show here.",
+  "homeV2WRecentEmptyAct": "Import from SMS",
+  "homeV2WEditMore": "{count, plural, =1{1 more widget will turn on when it has something to show.} other{{count} more widgets will turn on when they have something to show.}}",
+  "@homeV2WEditMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV2EdSecOn": "On your Home",
+  "homeV2EdSgTitle": "Suggestions",
+  "homeV2EdSgSub": "Tips from your own transactions. Always at the top.",
+  "homeV2EdSecAuto": "Turns on with your data",
+  "homeV2EdSecMore": "More widgets",
+  "homeV2EdAutoNote": "These show up by themselves once they have something to show. Turn one on to show it now.",
+  "homeV2EdAutoStories": "Turns on when your first money story is ready",
+  "homeV2EdAutoStats": "Turns on after a week of spending",
+  "homeV2EdAutoAccounts": "Turns on when you add a bank account",
+  "homeV2EdAutoChart": "Turns on after spending on 3 different days",
+  "homeV2EdAutoSms": "Turns on when bank SMS are waiting",
+  "homeV2EdAutoEvents": "Turns on with your first reminder, EMI, SIP or recurring payment",
+  "homeV2EdAutoBudget": "Turns on with your first budget",
+  "homeV2EdAutoNotes": "Turns on with your first note",
+  "homeV2SgNotNow": "Not now",
+  "homeV2SgDismissA11y": "Don't suggest this again",
+  "homeV2SgDismissedSnack": "Okay. Kuber won't suggest this again.",
+  "homeV2SgRecTitle": "{merchant} shows up every month",
+  "@homeV2SgRecTitle": {
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgRecBody": "{amount} around the same date for {months} months. Add it as recurring to see it before it's due.",
+  "@homeV2SgRecBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV2SgRecAct": "Add as recurring",
+  "homeV2SgRecDone": "{merchant} is now a recurring payment.",
+  "@homeV2SgRecDone": {
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgLoanTitle": "Paying an EMI?",
+  "homeV2SgLoanBody": "Your SMS show EMI payments to {lender}. Add the loan to see what's left to pay.",
+  "@homeV2SgLoanBody": {
+    "placeholders": {
+      "lender": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgLoanAct": "Add loan",
+  "homeV2SgLoanDone": "Loan added.",
+  "homeV2SgInvTitle": "Investing through a SIP?",
+  "homeV2SgInvBody": "Your SMS show a SIP of {amount} a month. Add it to see all your investments in one place.",
+  "@homeV2SgInvBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgInvAct": "Add investment",
+  "homeV2SgInvDone": "Investment added.",
+  "homeV2SgLedTitle": "Did you lend money to {name}?",
+  "@homeV2SgLedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgLedBody": "You sent {name} {amount} this month. Keep track of it in Lend and borrow.",
+  "@homeV2SgLedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgLedNoteTitle": "Keep track of money you lent?",
+  "homeV2SgLedNoteBody": "Your note \"{note}\" mentions lending money. Add it to Lend and borrow so you don't forget.",
+  "@homeV2SgLedNoteBody": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgLedAct": "Track it",
+  "homeV2SgLedDone": "Added to Lend and borrow.",
+  "homeV2SgBudTitle": "Set a budget for {category}?",
+  "@homeV2SgBudTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgBudBody": "You spent {amount} on {category} in the last 30 days. A budget tells you when you're close.",
+  "@homeV2SgBudBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgBudAct": "Set budget",
+  "homeV2SgBudDone": "Budget set for {category}.",
+  "@homeV2SgBudDone": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgCcTitle": "Add the billing date for {card}",
+  "@homeV2SgCcTitle": {
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV2SgCcBody": "Kuber can then show this cycle's spending and when the bill is due.",
+  "homeV2SgCcAct": "Set billing date",
+  "homeV2SgCcDone": "Billing date saved.",
+  "homeV2SgAskTitle": "Ask Kuber about your money",
+  "homeV2SgAskBody": "Try a question like \"How much did I spend on food last month?\"",
+  "homeV2SgAskAct": "Ask Kuber",
+  "homeV2SgVoiceTitle": "Add transactions by voice",
+  "homeV2SgVoiceBody": "Tap the mic in Quick Add and say something like \"200 for lunch\".",
+  "homeV2SgVoiceAct": "Try it",
+  "homeV2SgWidgetTitle": "Put Kuber on your home screen",
+  "homeV2SgWidgetBody": "See this month's spending and add a transaction without opening the app.",
+  "homeV2SgWidgetAct": "Add widget",
+  "homeV2SgCardsTitle": "Keep your cards in Kuber Cards",
+  "homeV2SgCardsBody": "Save card details behind your PIN or fingerprint. They stay on this phone.",
+  "homeV2SgCardsAct": "Set up Kuber Cards"
 }

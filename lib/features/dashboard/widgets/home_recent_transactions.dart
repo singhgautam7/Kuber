@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../sms_import/providers/sms_import_provider.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -47,6 +50,9 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
           error: (e, _) =>
               Center(child: Text('${context.l10n.errorLabel}: $e')),
           data: (transactions) {
+            if (transactions.isEmpty && ref.watch(isHomeV2Provider)) {
+              return const _RecentV2Empty();
+            }
             if (transactions.isEmpty) {
               return KuberCard(
                 child: Center(
@@ -153,6 +159,72 @@ class _RecentTransactionsSkeleton extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// SMS permission refused (asked before, or permanently): the Recent
+/// transactions empty action falls back to Add transaction.
+final _smsRefusedProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final requested = ref.watch(homeV2Provider.select((s) => s.smsRequested));
+  if (!ref.read(smsInboxServiceProvider).isSupported) return true;
+  final st = await Permission.sms.status;
+  return st.isPermanentlyDenied || (requested && !st.isGranted);
+});
+
+/// Home v2 empty state (board HV2.6): icon, title, body, and one action
+/// unless Get started is on screen.
+class _RecentV2Empty extends ConsumerWidget {
+  const _RecentV2Empty();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final gsVisible = ref.watch(homeV2Provider.select((s) => s.gsEligible));
+    final refused =
+        !gsVisible && (ref.watch(_smsRefusedProvider).valueOrNull ?? false);
+    return KuberCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const KuberIconTile(
+            icon: Icons.receipt_long_outlined,
+            tone: KuberTone.neutral,
+          ),
+          const SizedBox(width: KuberSpace.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.noTransactionsYet,
+                  style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                ),
+                Text(
+                  l.homeV2WRecentEmptyBody,
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                ),
+                if (!gsVisible)
+                  TextButton.icon(
+                    onPressed: () => context.push(
+                      refused ? '/add-transaction' : '/more/sms-import',
+                    ),
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    icon: Icon(
+                      refused ? Icons.add_rounded : Icons.sms_outlined,
+                      size: 18,
+                    ),
+                    label: Text(
+                      refused ? l.homeV2GsActAdd : l.homeV2WRecentEmptyAct,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

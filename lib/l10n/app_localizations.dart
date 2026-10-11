@@ -9121,6 +9121,552 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Groceries · Today'**
   String get textSizePreviewMeta;
+
+  /// No description provided for @homeV2GsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of 3 done'**
+  String homeV2GsProgress(int done);
+
+  /// No description provided for @homeV2GsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s set up Kuber'**
+  String get homeV2GsTitle;
+
+  /// No description provided for @homeV2GsBodyFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your bank SMS and Kuber adds your transactions for you. Your messages stay on this phone.'**
+  String get homeV2GsBodyFresh;
+
+  /// No description provided for @homeV2GsBodyOneDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Good start. Two more steps to go.'**
+  String get homeV2GsBodyOneDone;
+
+  /// No description provided for @homeV2GsBodyTwoDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there. One more step to go.'**
+  String get homeV2GsBodyTwoDone;
+
+  /// No description provided for @homeV2GsBodyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber needs permission to read bank SMS. Messages are read on this phone and never uploaded.'**
+  String get homeV2GsBodyDenied;
+
+  /// No description provided for @homeV2GsBodyBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS access is turned off for Kuber. You can turn it on in your phone settings or paste a bank SMS.'**
+  String get homeV2GsBodyBlocked;
+
+  /// No description provided for @homeV2GsStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from SMS'**
+  String get homeV2GsStep1;
+
+  /// No description provided for @homeV2GsStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a transaction yourself'**
+  String get homeV2GsStep2;
+
+  /// No description provided for @homeV2GsStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your starting balance'**
+  String get homeV2GsStep3;
+
+  /// No description provided for @homeV2GsStepNeedsPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs SMS permission'**
+  String get homeV2GsStepNeedsPermission;
+
+  /// No description provided for @homeV2GsLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s free imports are used'**
+  String get homeV2GsLimitTitle;
+
+  /// No description provided for @homeV2GsLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more SMS is waiting in SMS import. It stays there until you import it.} other{{count} more SMS are waiting in SMS import. They stay there until you import them.}}'**
+  String homeV2GsLimitBody(int count);
+
+  /// No description provided for @homeV2GsLimitReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Free imports reset on {date}.'**
+  String homeV2GsLimitReset(String date);
+
+  /// No description provided for @homeV2GsDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set'**
+  String get homeV2GsDoneTitle;
+
+  /// No description provided for @homeV2GsDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber will add more to your Home as you use it.'**
+  String get homeV2GsDoneBody;
+
+  /// No description provided for @homeV2GsActImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from SMS'**
+  String get homeV2GsActImport;
+
+  /// No description provided for @homeV2GsActAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add transaction'**
+  String get homeV2GsActAdd;
+
+  /// No description provided for @homeV2GsActQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get homeV2GsActQuick;
+
+  /// No description provided for @homeV2GsActBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Set balance'**
+  String get homeV2GsActBalance;
+
+  /// No description provided for @homeV2GsActAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow SMS access'**
+  String get homeV2GsActAllow;
+
+  /// No description provided for @homeV2GsActSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings'**
+  String get homeV2GsActSettings;
+
+  /// No description provided for @homeV2GsActPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an SMS'**
+  String get homeV2GsActPaste;
+
+  /// No description provided for @homeV2GsActPro.
+  ///
+  /// In en, this message translates to:
+  /// **'See Kuber Pro'**
+  String get homeV2GsActPro;
+
+  /// No description provided for @homeV2GsCloseA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Get started'**
+  String get homeV2GsCloseA11y;
+
+  /// No description provided for @homeV2GsClosedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started is hidden. You can show it again from Settings.'**
+  String get homeV2GsClosedSnack;
+
+  /// No description provided for @homeV2ActUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get homeV2ActUndo;
+
+  /// No description provided for @homeV2SetGsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started card'**
+  String get homeV2SetGsTitle;
+
+  /// No description provided for @homeV2SetGsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Show setup steps on Home'**
+  String get homeV2SetGsSub;
+
+  /// No description provided for @homeV2SetSgTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions on Home'**
+  String get homeV2SetSgTitle;
+
+  /// No description provided for @homeV2SetSgSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips based on your own transactions'**
+  String get homeV2SetSgSub;
+
+  /// No description provided for @homeV2WBalanceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Money in and money out for {month} will show here.'**
+  String homeV2WBalanceEmpty(String month);
+
+  /// No description provided for @homeV2WBalanceEmptyAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add transaction'**
+  String get homeV2WBalanceEmptyAct;
+
+  /// No description provided for @homeV2WRecentEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest transactions will show here.'**
+  String get homeV2WRecentEmptyBody;
+
+  /// No description provided for @homeV2WRecentEmptyAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from SMS'**
+  String get homeV2WRecentEmptyAct;
+
+  /// No description provided for @homeV2WEditMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more widget will turn on when it has something to show.} other{{count} more widgets will turn on when they have something to show.}}'**
+  String homeV2WEditMore(int count);
+
+  /// No description provided for @homeV2EdSecOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On your Home'**
+  String get homeV2EdSecOn;
+
+  /// No description provided for @homeV2EdSgTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get homeV2EdSgTitle;
+
+  /// No description provided for @homeV2EdSgSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips from your own transactions. Always at the top.'**
+  String get homeV2EdSgSub;
+
+  /// No description provided for @homeV2EdSecAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on with your data'**
+  String get homeV2EdSecAuto;
+
+  /// No description provided for @homeV2EdSecMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More widgets'**
+  String get homeV2EdSecMore;
+
+  /// No description provided for @homeV2EdAutoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These show up by themselves once they have something to show. Turn one on to show it now.'**
+  String get homeV2EdAutoNote;
+
+  /// No description provided for @homeV2EdAutoStories.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on when your first money story is ready'**
+  String get homeV2EdAutoStories;
+
+  /// No description provided for @homeV2EdAutoStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on after a week of spending'**
+  String get homeV2EdAutoStats;
+
+  /// No description provided for @homeV2EdAutoAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on when you add a bank account'**
+  String get homeV2EdAutoAccounts;
+
+  /// No description provided for @homeV2EdAutoChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on after spending on 3 different days'**
+  String get homeV2EdAutoChart;
+
+  /// No description provided for @homeV2EdAutoSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on when bank SMS are waiting'**
+  String get homeV2EdAutoSms;
+
+  /// No description provided for @homeV2EdAutoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on with your first reminder, EMI, SIP or recurring payment'**
+  String get homeV2EdAutoEvents;
+
+  /// No description provided for @homeV2EdAutoBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on with your first budget'**
+  String get homeV2EdAutoBudget;
+
+  /// No description provided for @homeV2EdAutoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on with your first note'**
+  String get homeV2EdAutoNotes;
+
+  /// No description provided for @homeV2SgNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get homeV2SgNotNow;
+
+  /// No description provided for @homeV2SgDismissA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t suggest this again'**
+  String get homeV2SgDismissA11y;
+
+  /// No description provided for @homeV2SgDismissedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay. Kuber won\'t suggest this again.'**
+  String get homeV2SgDismissedSnack;
+
+  /// No description provided for @homeV2SgRecTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{merchant} shows up every month'**
+  String homeV2SgRecTitle(String merchant);
+
+  /// No description provided for @homeV2SgRecBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} around the same date for {months} months. Add it as recurring to see it before it\'s due.'**
+  String homeV2SgRecBody(String amount, int months);
+
+  /// No description provided for @homeV2SgRecAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as recurring'**
+  String get homeV2SgRecAct;
+
+  /// No description provided for @homeV2SgRecDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{merchant} is now a recurring payment.'**
+  String homeV2SgRecDone(String merchant);
+
+  /// No description provided for @homeV2SgLoanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paying an EMI?'**
+  String get homeV2SgLoanTitle;
+
+  /// No description provided for @homeV2SgLoanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SMS show EMI payments to {lender}. Add the loan to see what\'s left to pay.'**
+  String homeV2SgLoanBody(String lender);
+
+  /// No description provided for @homeV2SgLoanAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add loan'**
+  String get homeV2SgLoanAct;
+
+  /// No description provided for @homeV2SgLoanDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan added.'**
+  String get homeV2SgLoanDone;
+
+  /// No description provided for @homeV2SgInvTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Investing through a SIP?'**
+  String get homeV2SgInvTitle;
+
+  /// No description provided for @homeV2SgInvBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SMS show a SIP of {amount} a month. Add it to see all your investments in one place.'**
+  String homeV2SgInvBody(String amount);
+
+  /// No description provided for @homeV2SgInvAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add investment'**
+  String get homeV2SgInvAct;
+
+  /// No description provided for @homeV2SgInvDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment added.'**
+  String get homeV2SgInvDone;
+
+  /// No description provided for @homeV2SgLedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you lend money to {name}?'**
+  String homeV2SgLedTitle(String name);
+
+  /// No description provided for @homeV2SgLedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You sent {name} {amount} this month. Keep track of it in Lend and borrow.'**
+  String homeV2SgLedBody(String name, String amount);
+
+  /// No description provided for @homeV2SgLedNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep track of money you lent?'**
+  String get homeV2SgLedNoteTitle;
+
+  /// No description provided for @homeV2SgLedNoteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your note \"{note}\" mentions lending money. Add it to Lend and borrow so you don\'t forget.'**
+  String homeV2SgLedNoteBody(String note);
+
+  /// No description provided for @homeV2SgLedAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Track it'**
+  String get homeV2SgLedAct;
+
+  /// No description provided for @homeV2SgLedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to Lend and borrow.'**
+  String get homeV2SgLedDone;
+
+  /// No description provided for @homeV2SgBudTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a budget for {category}?'**
+  String homeV2SgBudTitle(String category);
+
+  /// No description provided for @homeV2SgBudBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You spent {amount} on {category} in the last 30 days. A budget tells you when you\'re close.'**
+  String homeV2SgBudBody(String amount, String category);
+
+  /// No description provided for @homeV2SgBudAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Set budget'**
+  String get homeV2SgBudAct;
+
+  /// No description provided for @homeV2SgBudDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget set for {category}.'**
+  String homeV2SgBudDone(String category);
+
+  /// No description provided for @homeV2SgCcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the billing date for {card}'**
+  String homeV2SgCcTitle(String card);
+
+  /// No description provided for @homeV2SgCcBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber can then show this cycle\'s spending and when the bill is due.'**
+  String get homeV2SgCcBody;
+
+  /// No description provided for @homeV2SgCcAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Set billing date'**
+  String get homeV2SgCcAct;
+
+  /// No description provided for @homeV2SgCcDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing date saved.'**
+  String get homeV2SgCcDone;
+
+  /// No description provided for @homeV2SgAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber about your money'**
+  String get homeV2SgAskTitle;
+
+  /// No description provided for @homeV2SgAskBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a question like \"How much did I spend on food last month?\"'**
+  String get homeV2SgAskBody;
+
+  /// No description provided for @homeV2SgAskAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber'**
+  String get homeV2SgAskAct;
+
+  /// No description provided for @homeV2SgVoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add transactions by voice'**
+  String get homeV2SgVoiceTitle;
+
+  /// No description provided for @homeV2SgVoiceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the mic in Quick Add and say something like \"200 for lunch\".'**
+  String get homeV2SgVoiceBody;
+
+  /// No description provided for @homeV2SgVoiceAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Try it'**
+  String get homeV2SgVoiceAct;
+
+  /// No description provided for @homeV2SgWidgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put Kuber on your home screen'**
+  String get homeV2SgWidgetTitle;
+
+  /// No description provided for @homeV2SgWidgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See this month\'s spending and add a transaction without opening the app.'**
+  String get homeV2SgWidgetBody;
+
+  /// No description provided for @homeV2SgWidgetAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add widget'**
+  String get homeV2SgWidgetAct;
+
+  /// No description provided for @homeV2SgCardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your cards in Kuber Cards'**
+  String get homeV2SgCardsTitle;
+
+  /// No description provided for @homeV2SgCardsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save card details behind your PIN or fingerprint. They stay on this phone.'**
+  String get homeV2SgCardsBody;
+
+  /// No description provided for @homeV2SgCardsAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Kuber Cards'**
+  String get homeV2SgCardsAct;
 }
 
 class _AppLocalizationsDelegate

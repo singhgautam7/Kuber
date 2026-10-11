@@ -1,5 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
+
+import '../../../shared/widgets/kuber_chips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -168,6 +170,34 @@ class ToolSegmentedControl extends StatelessWidget {
       selected: selectedIndex,
       onSelected: onChanged,
       height: 40,
+    );
+  }
+}
+
+/// A unit choice (Years / Months, Yearly / Monthly, Percent / Amount) as a
+/// dropdown chip: same labels and index as [ToolSegmentedControl], a fraction
+/// of the width. Mode switches (FD / RD, Lumpsum / SIP) stay segmented.
+class ToolUnitDropdown extends StatelessWidget {
+  final List<String> labels;
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+
+  const ToolUnitDropdown({
+    super.key,
+    required this.labels,
+    required this.selectedIndex,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return KuberDropdownChip<int>(
+      value: selectedIndex,
+      options: [
+        for (var i = 0; i < labels.length; i++)
+          KuberDropdownOption(i, labels[i]),
+      ],
+      onChanged: onChanged,
     );
   }
 }

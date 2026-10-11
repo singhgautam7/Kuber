@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import '../../home_v2/providers/home_v2_provider.dart';
 
 import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -40,7 +41,10 @@ class AskKuberScreen extends ConsumerStatefulWidget {
   /// chat / history).
   final String? initialQuery;
 
-  const AskKuberScreen({super.key, this.initialQuery});
+  /// Placed in the input without sending (Home v2 Ask Kuber suggestion).
+  final String? draftQuery;
+
+  const AskKuberScreen({super.key, this.initialQuery, this.draftQuery});
 
   @override
   ConsumerState<AskKuberScreen> createState() => _AskKuberScreenState();
@@ -66,6 +70,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
   @override
   void initState() {
     super.initState();
+    // Home v2: Ask Kuber has been opened (discovery rule D1). No-op on v1.
+    ref.read(homeV2Provider.notifier).markAskOpened();
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
@@ -101,6 +107,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
     // Auto-send the suggestion the user tapped from the home widget, once the
     // chat has finished hydrating. _send applies the same weekly free-tier
     // gate as a manually typed message.
+    final draft = widget.draftQuery?.trim();
+    if (draft != null && draft.isNotEmpty) _controller.text = draft;
     final query = widget.initialQuery?.trim();
     if (query != null && query.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

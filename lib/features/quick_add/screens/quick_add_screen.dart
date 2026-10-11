@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:kuber/shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -103,6 +104,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     }
     _focusNode.unfocus();
     _preVoiceText = _controller.text;
+    // Home v2: voice entry used (discovery rule D2). No-op on v1.
+    ref.read(homeV2Provider.notifier).markVoiceUsed();
     await _voice.start(
       onTranscript: (text) {
         _controller.value = TextEditingValue(

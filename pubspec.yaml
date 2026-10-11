@@ -80,6 +80,7 @@ dependencies:
   # offer tokens / pricing phases (with a depend_on_referenced_packages ignore),
   # so it is intentionally NOT listed here as a direct dependency.
   in_app_purchase: ^3.2.0
+  cupertino_icons: ^2.0.0
 
 dev_dependencies:
   flutter_test:

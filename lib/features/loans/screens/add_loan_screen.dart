@@ -31,7 +31,17 @@ class AddLoanScreen extends ConsumerStatefulWidget {
   /// Pre-fill support for Kuber Notes tap-to-convert (create mode only).
   final double? amountPrefill;
 
-  const AddLoanScreen({super.key, this.existing, this.amountPrefill});
+  /// Optional lender / EMI prefills (Home v2 loan suggestion).
+  final String? lenderPrefill;
+  final double? emiPrefill;
+
+  const AddLoanScreen({
+    super.key,
+    this.existing,
+    this.amountPrefill,
+    this.lenderPrefill,
+    this.emiPrefill,
+  });
 
   @override
   ConsumerState<AddLoanScreen> createState() => _AddLoanScreenState();
@@ -77,6 +87,16 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         _principalController.text = amount == amount.truncateToDouble()
             ? amount.toInt().toString()
             : amount.toStringAsFixed(2);
+      }
+      final lender = widget.lenderPrefill;
+      if (lender != null && lender.isNotEmpty) {
+        _lenderController.text = lender;
+      }
+      final emi = widget.emiPrefill;
+      if (emi != null && emi > 0) {
+        _emiController.text = emi == emi.truncateToDouble()
+            ? emi.toInt().toString()
+            : emi.toStringAsFixed(2);
       }
     }
     final e = widget.existing;

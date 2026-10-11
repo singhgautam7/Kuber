@@ -26,6 +26,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -169,6 +170,12 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     if (name.isEmpty) {
       showKuberSnackBar(context, context.l10n.enterAccountName, isError: true);
       return;
+    }
+
+    // Home v2 step 3: a balance typed counts as "starting balance set", even
+    // when it equals the current one. No-op on v1.
+    if (_typedSigned != null) {
+      ref.read(homeV2Provider.notifier).markBalanceSet();
     }
 
     if (_hasAdjustment) {

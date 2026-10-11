@@ -1,5 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
+import '../../home_v2/data/home_v2_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -424,6 +426,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onTap: () => context.push('/widget-editor/analytics'),
                       trailing: _trailingWidget(context),
                     ),
+                    // Home v2 installs only (board HV2.2 Settings).
+                    ...const _HomeV2SettingsRows().rows(context, ref, cs),
                   ],
                 ),
                 const SizedBox(height: KuberSpace.xl),
@@ -1027,5 +1031,66 @@ class _ShortcutsDiscoveryTip extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Home v2 rows in Settings › Widgets: "Get started card" (for 30 days after
+/// install) and "Suggestions on Home". Nothing for v1.
+class _HomeV2SettingsRows {
+  const _HomeV2SettingsRows();
+
+  List<Widget> rows(BuildContext context, WidgetRef ref, ColorScheme cs) {
+    final s = ref.watch(homeV2Provider);
+    if (!s.isV2) return const [];
+    final l = context.l10n;
+    final installedAt = s.installedAt;
+    final showGs =
+        installedAt == null ||
+        DateTime.now().difference(installedAt) <= const Duration(days: 30);
+    final notifier = ref.read(homeV2Provider.notifier);
+    return [
+      if (showGs) ...[
+        Divider(height: 1, color: cs.outlineVariant),
+        _SettingsTile(
+          icon: Icons.flag_outlined,
+          label: l.homeV2SetGsTitle,
+          subtitle: l.homeV2SetGsSub,
+          onTap: () {},
+          trailing: Switch(
+            value: s.gsEligible,
+            onChanged: (on) => notifier.update(
+              (x) => on
+                  // On: clears graduation; the card returns with current
+                  // progress and re-graduates if everything is done.
+                  ? x.copyWith(
+                      gsSetting: true,
+                      gsGraduatedAt: () => null,
+                      gsGraduationReason: () => null,
+                      gsSuccessShown: false,
+                    )
+                  // Off counts as dismissed.
+                  : x.copyWith(
+                      gsSetting: false,
+                      gsGraduatedAt: () => x.gsGraduatedAt ?? DateTime.now(),
+                      gsGraduationReason: () =>
+                          x.gsGraduationReason ?? GsGraduation.dismissed,
+                      gsSuccessShown: true,
+                    ),
+            ),
+          ),
+        ),
+      ],
+      Divider(height: 1, color: cs.outlineVariant),
+      _SettingsTile(
+        icon: Icons.lightbulb_outline_rounded,
+        label: l.homeV2SetSgTitle,
+        subtitle: l.homeV2SetSgSub,
+        onTap: () {},
+        trailing: Switch(
+          value: s.sgSetting,
+          onChanged: (on) => notifier.update((x) => x.copyWith(sgSetting: on)),
+        ),
+      ),
+    ];
   }
 }

@@ -21,6 +21,8 @@ import '../../recurring/providers/recurring_provider.dart';
 import '../../stories/providers/story_providers.dart';
 import '../../stories/services/welcome_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../home_v2/services/home_v2_restore.dart';
 import '../../../core/utils/prefs_keys.dart';
 
 enum DataOpStatus { initial, loading, success, error }
@@ -356,6 +358,8 @@ class DataController extends StateNotifier<DataState> {
       }
       if (result.error != null) throw Exception(result.error);
       await _refreshData();
+      // Home v2: adopt a restored Home layout, or keep v2 without labels.
+      await onHomeV2DataRestored(_ref, _service.isar);
 
       // A JSON restore may carry encrypted Kuber Cards. They come in locked
       // (they need the PIN from the backup's device). Reset the card session so
