@@ -32,11 +32,15 @@ class AddRecurringScreen extends ConsumerStatefulWidget {
   final double? amountPrefill;
   final int? categoryPrefill;
 
+  /// Optional name prefill (Home v2 recurring suggestion).
+  final String? namePrefill;
+
   const AddRecurringScreen({
     super.key,
     this.existingRule,
     this.amountPrefill,
     this.categoryPrefill,
+    this.namePrefill,
   });
 
   @override
@@ -91,6 +95,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       if (widget.categoryPrefill != null) {
         _selectedCategoryId = widget.categoryPrefill;
       }
+      final name = widget.namePrefill;
+      if (name != null && name.isNotEmpty) _nameController.text = name;
     }
     final rule = widget.existingRule;
     if (rule != null) {

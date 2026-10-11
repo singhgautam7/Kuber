@@ -25,6 +25,7 @@ import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
 import 'features/pro/debug/entitlement_override.dart';
 import 'shared/widgets/kuber_extended_fab.dart';
+import 'features/home_v2/providers/home_v2_provider.dart';
 import 'features/pro/paywall/billing_ui_state.dart';
 import 'features/pro/paywall/pro_state.dart';
 import 'features/pro/services/promo_config_service.dart';
@@ -271,6 +272,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
     }
   }
 
+  DateTime? _backgroundedAt;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -282,6 +285,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
       cardsSession.noteBackgrounded();
     } else if (state == AppLifecycleState.resumed) {
       cardsSession.relockIfExpired();
+    }
+    // Home v2 sessions: a return after 30+ minutes in the background starts
+    // a new Home session (suggestion-rules.md Definitions).
+    if (state == AppLifecycleState.paused) {
+      _backgroundedAt ??= DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      final since = _backgroundedAt;
+      _backgroundedAt = null;
+      if (since != null &&
+          DateTime.now().difference(since) >= const Duration(minutes: 30)) {
+        ref.read(homeSessionProvider.notifier).state++;
+      }
     }
     // When leaving the app (e.g. pressing Home), push the latest data to the
     // home-screen widgets so they reflect any change made this session before

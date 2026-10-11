@@ -26,6 +26,7 @@
 // =============================================================================
 
 import 'package:kuber/core/utils/l10n_ext.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:kuber/core/utils/locale_font.dart' show sentenceCase;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -155,6 +156,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ..billGenerationReminderEnabled = _isCreditCard && _billReminder
       ..paymentDueReminderEnabled = _isCreditCard && _paymentReminder;
 
+    // Home v2 step 3: a new account with an opening balance typed (even 0).
+    // No-op on v1.
+    if (!_isEditing && _balanceController.text.trim().isNotEmpty) {
+      ref.read(homeV2Provider.notifier).markBalanceSet();
+    }
     ref.read(allAccountsProvider.notifier).add(account).then((id) {
       if (!_isEditing) {
         ref.read(pendingAccountSelectionProvider.notifier).state = id;

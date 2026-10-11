@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../shared/widgets/date_separator.dart';
@@ -127,6 +128,9 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   }
 
   Future<void> _requestPermission() async {
+    // Home v2: SMS permission has been asked at least once (Get started
+    // "denied" state). No-op on v1.
+    ref.read(homeV2Provider.notifier).markSmsRequested();
     final status = await Permission.sms.request();
     if (!mounted) return;
     if (status.isGranted) {

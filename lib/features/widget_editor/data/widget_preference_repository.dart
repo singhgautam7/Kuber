@@ -6,7 +6,12 @@ import 'widget_preference.dart';
 
 class WidgetPreferenceRepository {
   final Isar isar;
-  WidgetPreferenceRepository(this.isar);
+
+  /// Home v2 installs seed their own defaults (only the Default class on).
+  /// Returns null for v1, which keeps the catalog defaults.
+  final List<HomeWidgetConfig>? Function()? homeDefaults;
+
+  WidgetPreferenceRepository(this.isar, {this.homeDefaults});
 
   /// Read the ordered widget list for [scope]. Seeds defaults on first read
   /// (no rows) and reconciles against the catalog on subsequent reads —
@@ -20,7 +25,10 @@ class WidgetPreferenceRepository {
         .sortByOrder()
         .findAll();
 
-    final defaults = defaultsForScope(scope);
+    final defaults = (scope == WidgetEditorScope.home
+            ? homeDefaults?.call()
+            : null) ??
+        defaultsForScope(scope);
 
     if (stored.isEmpty) {
       await _seed(scope, defaults);

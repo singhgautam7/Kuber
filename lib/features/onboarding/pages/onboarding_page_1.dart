@@ -301,7 +301,8 @@ class _CoinOrbitPainter extends CustomPainter {
 
     canvas.save();
     canvas.translate(center.dx, center.dy);
-    canvas.rotate(angle * 0.12);
+    // One full turn per loop, so the repeat wraps without a jump.
+    canvas.rotate(angle);
     canvas.translate(-center.dx, -center.dy);
     canvas.drawCircle(center, radius, fill);
     canvas.drawCircle(center, radius, rim);

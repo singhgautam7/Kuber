@@ -113,4 +113,27 @@ class PrefsKeys {
   // path is tree-shaken out of release builds. Never present in production.
   static const debugEntitlementOverride = 'debug_entitlement_override';
   static const debugEntitlementTrialDays = 'debug_entitlement_trial_days';
+
+  // Home v2 (specs/home-v2/plan.md). `homeLayout` is the cohort: written once
+  // on the first launch of the Home v2 build and never changed by the app
+  // afterwards (except by a backup restore that brings its own Home layout).
+  // Every other key is only read or written for the v2 cohort.
+  static const homeLayout = 'home_layout';
+  static const homeV2InstalledAt = 'home_v2_installed_at';
+  static const homeV2SeededAccountIds = 'home_v2_seeded_account_ids';
+  static const homeV2Widgets = 'home_v2_widgets';
+  static const homeV2BalanceSet = 'home_v2_balance_set';
+  static const homeV2SmsRequested = 'home_v2_sms_requested';
+  static const homeV2AskOpened = 'home_v2_ask_opened';
+  static const homeV2VoiceUsed = 'home_v2_voice_used';
+  static const gsGraduatedAt = 'home_v2_gs_graduated_at';
+  static const gsGraduationReason = 'home_v2_gs_graduation_reason';
+  static const gsFirstShownAt = 'home_v2_gs_first_shown_at';
+  static const gsSuccessShown = 'home_v2_gs_success_shown';
+  static const settingHomeGetStarted = 'home_v2_setting_get_started';
+  static const settingHomeSuggestions = 'home_v2_setting_suggestions';
+  static const sgInstances = 'home_v2_sg_instances';
+  static const sgLastNewShownDay = 'home_v2_sg_last_new_shown_day';
+  static const sgLastDismissAt = 'home_v2_sg_last_dismiss_at';
+  static const sgTypeSuppressedUntil = 'home_v2_sg_type_suppressed_until';
 }

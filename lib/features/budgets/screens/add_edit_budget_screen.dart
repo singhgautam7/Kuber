@@ -24,10 +24,14 @@ class AddEditBudgetScreen extends ConsumerStatefulWidget {
   final Budget? existingBudget;
   final Category? preselectedCategory;
 
+  /// Optional amount prefill (Home v2 budget suggestion).
+  final double? amountPrefill;
+
   const AddEditBudgetScreen({
     super.key,
     this.existingBudget,
     this.preselectedCategory,
+    this.amountPrefill,
   });
 
   @override
@@ -65,6 +69,10 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
       });
     } else if (widget.preselectedCategory != null) {
       _selectedCategory = widget.preselectedCategory;
+      final amount = widget.amountPrefill;
+      if (amount != null && amount > 0) {
+        _amountController.text = amount.toStringAsFixed(0);
+      }
     }
   }
 

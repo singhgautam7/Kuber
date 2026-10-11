@@ -11,6 +11,8 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import '../models/home_widget_config.dart';
 import '../data/widget_catalog.dart';
 import '../providers/widget_editor_provider.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
+import '../../home_v2/widgets/home_v2_editor.dart';
 
 /// Full-screen modal for re-ordering and enabling/disabling widgets on
 /// either the home dashboard or the analytics screen. Reads the current
@@ -117,6 +119,11 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Home v2 installs get the grouped editor; v1 and Analytics are unchanged.
+    if (widget.scope == WidgetEditorScope.home &&
+        ref.watch(isHomeV2Provider)) {
+      return const HomeV2EditorScreen();
+    }
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;

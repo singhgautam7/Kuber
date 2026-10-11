@@ -363,6 +363,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           categoryPrefill: int.tryParse(
             state.uri.queryParameters['categoryId'] ?? '',
           ),
+          namePrefill: state.uri.queryParameters['name'],
         ),
       ),
       GoRoute(
@@ -529,8 +530,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     // `extra` carries an optional prompt from the Ask Kuber
                     // home widget's suggestion chips; the screen auto-sends it.
-                    builder: (_, state) =>
-                        AskKuberScreen(initialQuery: state.extra as String?),
+                    builder: (_, state) => AskKuberScreen(
+                      initialQuery: state.extra as String?,
+                      draftQuery: state.uri.queryParameters['draft'],
+                    ),
                   ),
                   GoRoute(
                     path: 'sms-import',
@@ -730,8 +733,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/budgets/add',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, state) =>
-            AddEditBudgetScreen(preselectedCategory: state.extra as Category?),
+        builder: (_, state) => AddEditBudgetScreen(
+          preselectedCategory: state.extra as Category?,
+          amountPrefill: double.tryParse(
+            state.uri.queryParameters['amount'] ?? '',
+          ),
+        ),
       ),
       GoRoute(
         path: '/budgets/edit',
@@ -771,6 +778,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           amountPrefill: double.tryParse(
             state.uri.queryParameters['amount'] ?? '',
           ),
+          lenderPrefill: state.uri.queryParameters['lender'],
+          emiPrefill: double.tryParse(state.uri.queryParameters['emi'] ?? ''),
         ),
       ),
       GoRoute(
@@ -785,6 +794,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           amountPrefill: double.tryParse(
             state.uri.queryParameters['amount'] ?? '',
           ),
+          namePrefill: state.uri.queryParameters['name'],
+          sipPrefill: double.tryParse(state.uri.queryParameters['sip'] ?? ''),
         ),
       ),
       GoRoute(

@@ -16,6 +16,9 @@ import 'core/database/migrations.dart';
 import 'core/database/seed_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/home_v2/data/home_v2_state.dart';
+import 'features/home_v2/data/home_v2_widgets.dart';
+import 'features/home_v2/providers/home_v2_provider.dart';
 import 'core/theme/theme_families.dart' show resolveVariant;
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/backups/data/backup_config.dart';
@@ -143,6 +146,16 @@ Future<void> _bootstrap() async {
     debugPrint('Kuber: boot theme read failed (non-fatal): $e');
   }
 
+  // Home v2 cohort (specs/home-v2/plan.md §1). Decided once, on the first
+  // launch of this build, because it picks the first Home layout. Later
+  // launches: one prefs read. Best-effort: a failure keeps today's Home (v1).
+  var homeV2 = HomeV2Snapshot.v1;
+  try {
+    homeV2 = await resolveHomeCohort(isar, onboarded: onboarded);
+  } catch (e) {
+    debugPrint('Kuber: home cohort read failed (non-fatal): $e');
+  }
+
   // Best-effort on-open processing. A failure here must not prevent launch.
   String? coldStartPayload;
   int missedCount = 0;
@@ -210,6 +223,7 @@ Future<void> _bootstrap() async {
           bootThemeProvider.overrideWithValue(bootTheme),
           bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
           bootTextSizeLevelProvider.overrideWithValue(bootTextSizeLevel),
+          homeV2BootProvider.overrideWithValue(homeV2),
           initialLocationProvider.overrideWithValue(initialLocation),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
           automaticBackupDueProvider.overrideWith((ref) => backupDue),

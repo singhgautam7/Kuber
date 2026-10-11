@@ -31,7 +31,17 @@ class AddInvestmentScreen extends ConsumerStatefulWidget {
   /// Pre-fill support for Kuber Notes tap-to-convert (create mode only).
   final double? amountPrefill;
 
-  const AddInvestmentScreen({super.key, this.existing, this.amountPrefill});
+  /// Optional name / SIP amount prefills (Home v2 investment suggestion).
+  final String? namePrefill;
+  final double? sipPrefill;
+
+  const AddInvestmentScreen({
+    super.key,
+    this.existing,
+    this.amountPrefill,
+    this.namePrefill,
+    this.sipPrefill,
+  });
 
   @override
   ConsumerState<AddInvestmentScreen> createState() =>
@@ -61,6 +71,12 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         _investedController.text = amount == amount.truncateToDouble()
             ? amount.toInt().toString()
             : amount.toStringAsFixed(2);
+      }
+      final name = widget.namePrefill;
+      if (name != null && name.isNotEmpty) _nameController.text = name;
+      final sip = widget.sipPrefill;
+      if (sip != null && sip > 0) {
+        _sipAmountController.text = sip.toStringAsFixed(0);
       }
     }
     final e = widget.existing;

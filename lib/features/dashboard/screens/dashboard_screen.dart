@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -35,6 +36,10 @@ import '../../pro/paywall/pro_state.dart';
 import '../../pro/trial/trial_ending_sheet.dart';
 import '../../upcoming_events/widgets/upcoming_events_widget.dart';
 import '../widgets/quick_add_widget.dart';
+import '../../home_v2/data/home_v2_state.dart';
+import '../../home_v2/providers/home_v2_gates_provider.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
+import '../../home_v2/widgets/home_v2_top_slot.dart';
 import '../../sms_import/widgets/sms_import_home_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
@@ -97,6 +102,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.initState();
     _subtitleIndex = Random().nextInt(7);
     _growReveal();
+    // Home v2: Data-gated widgets turn on by their triggers. The controller
+    // does nothing for v1 or once no widget is waiting.
+    if (ref.read(isHomeV2Provider)) ref.read(homeV2GatesProvider);
 
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.
@@ -212,6 +220,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final textTheme = theme.textTheme;
     final l10n = context.l10n;
     final widgetsAsync = ref.watch(homeWidgetsProvider);
+    final isV2 = ref.watch(isHomeV2Provider);
+    final gsEligible = ref.watch(homeV2Provider.select((s) => s.gsEligible));
 
     // Fixed leading items (header, greeting, promo) followed by the dynamic
     // widget list. We flatten everything into a single index-addressable list
@@ -245,7 +255,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
       const SizedBox(height: KuberSpace.lg),
       // Promo campaign banner — self-hides when no promo, dismissed, or Pro.
-      const HomePromoBanner(),
+      // Home v2 hides it while Get started is eligible (suggestion-rules §1).
+      // Kept as an item either way so the top slot below never shifts index
+      // (which would remount it and lose its animation state).
+      if (!isV2 || !gsEligible)
+        const HomePromoBanner()
+      else
+        const SizedBox.shrink(),
+      // Home v2 top slot: Get started, or one suggestion.
+      if (isV2) const HomeV2TopSlot(),
     ];
 
     final trailing = widgetsAsync.when(
@@ -270,6 +288,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           // widget that self-hides in an empty state leaves no gap.
           for (final c in visible) _buildHomeWidget(c.id),
           const EditWidgetsButton(scope: WidgetEditorScope.home),
+          if (isV2) const _HomeV2WaitingLine(),
         ];
       },
     );
@@ -423,6 +442,47 @@ class _BalanceHeroCard extends ConsumerWidget {
 
     final monthLabel = DateFormat('MMMM').format(DateTime.now()).toUpperCase();
 
+    // Home v2 empty state (board HV2.6): no ₹0, no empty bar; one line and
+    // an Add transaction action unless Get started is on screen.
+    if (total == 0 && ref.watch(isHomeV2Provider)) {
+      final gsVisible = ref.watch(homeV2Provider.select((s) => s.gsEligible));
+      final tt = Theme.of(context).textTheme;
+      return KuberCard(
+        hero: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$monthLabel · ${context.l10n.netLabel}',
+              style: tt.labelMedium!.copyWith(
+                letterSpacing: 0.8,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: KuberSpace.xs),
+            Text(
+              context.l10n.homeV2WBalanceEmpty(
+                DateFormat.MMMM(
+                  Localizations.localeOf(context).toString(),
+                ).format(DateTime.now()),
+              ),
+              style: tt.bodyMedium!.copyWith(color: cs.onSurface),
+            ),
+            if (!gsVisible)
+              Padding(
+                padding: const EdgeInsets.only(top: KuberSpace.xs),
+                child: TextButton.icon(
+                  onPressed: () => context.push('/add-transaction'),
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: Text(context.l10n.homeV2WBalanceEmptyAct),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
     final theme = Theme.of(context);
     // Income in primary, expense in a 40% primary tint (user review round 2);
     // the signs on the legend carry the direction instead of green / red.
@@ -546,6 +606,33 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Home v2: "N more widgets will turn on when they have something to show"
+/// under Edit widgets (board HV2.7). Hidden at 0.
+class _HomeV2WaitingLine extends ConsumerWidget {
+  const _HomeV2WaitingLine();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final waiting = ref.watch(
+      homeV2Provider.select(
+        (s) => s.widgets.values.where((w) => w.vis == WidgetVis.auto).length,
+      ),
+    );
+    if (waiting == 0) return const SizedBox.shrink();
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: KuberSpace.sm),
+      child: Text(
+        context.l10n.homeV2WEditMore(waiting),
+        textAlign: TextAlign.center,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+      ),
     );
   }
 }

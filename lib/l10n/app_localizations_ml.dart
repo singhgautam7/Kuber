@@ -5102,4 +5102,341 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get textSizePreviewMeta => 'പലചരക്ക് · ഇന്ന്';
+
+  @override
+  String homeV2GsProgress(int done) {
+    return '3-ൽ $done പൂർത്തിയായി';
+  }
+
+  @override
+  String get homeV2GsTitle => 'നമുക്ക് Kuber സജ്ജമാക്കാം';
+
+  @override
+  String get homeV2GsBodyFresh =>
+      'നിങ്ങളുടെ ബാങ്ക് SMS ഇമ്പോർട്ട് ചെയ്യൂ, Kuber ഇടപാടുകൾ സ്വയം ചേർക്കും. നിങ്ങളുടെ സന്ദേശങ്ങൾ ഈ ഫോണിൽ തന്നെ നിൽക്കും.';
+
+  @override
+  String get homeV2GsBodyOneDone => 'നല്ല തുടക്കം. ഇനി രണ്ട് ഘട്ടങ്ങൾ കൂടി.';
+
+  @override
+  String get homeV2GsBodyTwoDone => 'ഏകദേശം കഴിഞ്ഞു. ഇനി ഒരു ഘട്ടം കൂടി.';
+
+  @override
+  String get homeV2GsBodyDenied =>
+      'ബാങ്ക് SMS വായിക്കാൻ Kuber-ന് അനുമതി വേണം. സന്ദേശങ്ങൾ ഈ ഫോണിൽ തന്നെ വായിക്കും, ഒരിക്കലും അപ്‌ലോഡ് ചെയ്യില്ല.';
+
+  @override
+  String get homeV2GsBodyBlocked =>
+      'Kuber-ന് SMS ആക്സസ് ഓഫാണ്. ഫോൺ ക്രമീകരണങ്ങളിൽ ഓണാക്കാം അല്ലെങ്കിൽ ഒരു ബാങ്ക് SMS പേസ്റ്റ് ചെയ്യാം.';
+
+  @override
+  String get homeV2GsStep1 => 'SMS-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക';
+
+  @override
+  String get homeV2GsStep2 => 'സ്വയം ഒരു ഇടപാട് ചേർക്കുക';
+
+  @override
+  String get homeV2GsStep3 => 'നിങ്ങളുടെ തുടക്ക ബാലൻസ് സജ്ജമാക്കുക';
+
+  @override
+  String get homeV2GsStepNeedsPermission => 'SMS അനുമതി വേണം';
+
+  @override
+  String get homeV2GsLimitTitle => 'ഈ ആഴ്ചത്തെ സൗജന്യ ഇമ്പോർട്ടുകൾ ഉപയോഗിച്ചു';
+
+  @override
+  String homeV2GsLimitBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'SMS ഇമ്പോർട്ടിൽ $count SMS കൂടി കാത്തിരിക്കുന്നു. ഇമ്പോർട്ട് ചെയ്യുന്നതുവരെ അവ അവിടെ ഉണ്ടാകും.',
+      one:
+          'SMS ഇമ്പോർട്ടിൽ 1 SMS കൂടി കാത്തിരിക്കുന്നു. ഇമ്പോർട്ട് ചെയ്യുന്നതുവരെ അത് അവിടെ ഉണ്ടാകും.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeV2GsLimitReset(String date) {
+    return 'സൗജന്യ ഇമ്പോർട്ടുകൾ $date-ന് പുനഃസജ്ജമാകും.';
+  }
+
+  @override
+  String get homeV2GsDoneTitle => 'നിങ്ങൾ തയ്യാറാണ്';
+
+  @override
+  String get homeV2GsDoneBody =>
+      'നിങ്ങൾ ഉപയോഗിക്കുന്നതിനനുസരിച്ച് Kuber ഹോമിൽ കൂടുതൽ ചേർക്കും.';
+
+  @override
+  String get homeV2GsActImport => 'SMS-ൽ നിന്ന് ഇമ്പോർട്ട്';
+
+  @override
+  String get homeV2GsActAdd => 'ഇടപാട് ചേർക്കുക';
+
+  @override
+  String get homeV2GsActQuick => 'ക്വിക്ക് ആഡ്';
+
+  @override
+  String get homeV2GsActBalance => 'ബാലൻസ് സജ്ജമാക്കുക';
+
+  @override
+  String get homeV2GsActAllow => 'SMS ആക്സസ് അനുവദിക്കുക';
+
+  @override
+  String get homeV2GsActSettings => 'ഫോൺ ക്രമീകരണങ്ങൾ തുറക്കുക';
+
+  @override
+  String get homeV2GsActPaste => 'SMS പേസ്റ്റ് ചെയ്യുക';
+
+  @override
+  String get homeV2GsActPro => 'Kuber Pro കാണുക';
+
+  @override
+  String get homeV2GsCloseA11y => 'തുടങ്ങാം കാർഡ് അടയ്ക്കുക';
+
+  @override
+  String get homeV2GsClosedSnack =>
+      'തുടങ്ങാം കാർഡ് മറച്ചു. ക്രമീകരണങ്ങളിൽ നിന്ന് വീണ്ടും കാണിക്കാം.';
+
+  @override
+  String get homeV2ActUndo => 'പഴയപടിയാക്കുക';
+
+  @override
+  String get homeV2SetGsTitle => 'തുടങ്ങാം കാർഡ്';
+
+  @override
+  String get homeV2SetGsSub => 'ഹോമിൽ സജ്ജീകരണ ഘട്ടങ്ങൾ കാണിക്കുക';
+
+  @override
+  String get homeV2SetSgTitle => 'ഹോമിൽ നിർദ്ദേശങ്ങൾ';
+
+  @override
+  String get homeV2SetSgSub =>
+      'നിങ്ങളുടെ സ്വന്തം ഇടപാടുകളെ അടിസ്ഥാനമാക്കിയ നുറുങ്ങുകൾ';
+
+  @override
+  String homeV2WBalanceEmpty(String month) {
+    return '$month-ലെ വരവും ചെലവും ഇവിടെ കാണാം.';
+  }
+
+  @override
+  String get homeV2WBalanceEmptyAct => 'ഇടപാട് ചേർക്കുക';
+
+  @override
+  String get homeV2WRecentEmptyBody => 'നിങ്ങളുടെ പുതിയ ഇടപാടുകൾ ഇവിടെ കാണാം.';
+
+  @override
+  String get homeV2WRecentEmptyAct => 'SMS-ൽ നിന്ന് ഇമ്പോർട്ട്';
+
+  @override
+  String homeV2WEditMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'കാണിക്കാൻ എന്തെങ്കിലും ആകുമ്പോൾ $count വിജറ്റുകൾ കൂടി ഓണാകും.',
+      one: 'കാണിക്കാൻ എന്തെങ്കിലും ആകുമ്പോൾ 1 വിജറ്റ് കൂടി ഓണാകും.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeV2EdSecOn => 'നിങ്ങളുടെ ഹോമിൽ';
+
+  @override
+  String get homeV2EdSgTitle => 'നിർദ്ദേശങ്ങൾ';
+
+  @override
+  String get homeV2EdSgSub =>
+      'നിങ്ങളുടെ സ്വന്തം ഇടപാടുകളിൽ നിന്നുള്ള നുറുങ്ങുകൾ. എപ്പോഴും മുകളിൽ.';
+
+  @override
+  String get homeV2EdSecAuto => 'നിങ്ങളുടെ ഡാറ്റയ്‌ക്കൊപ്പം ഓണാകും';
+
+  @override
+  String get homeV2EdSecMore => 'കൂടുതൽ വിജറ്റുകൾ';
+
+  @override
+  String get homeV2EdAutoNote =>
+      'കാണിക്കാൻ എന്തെങ്കിലും ആകുമ്പോൾ ഇവ സ്വയം കാണും. ഇപ്പോൾ കാണിക്കാൻ ഒന്ന് ഓണാക്കുക.';
+
+  @override
+  String get homeV2EdAutoStories => 'ആദ്യ മണി സ്റ്റോറി തയ്യാറാകുമ്പോൾ ഓണാകും';
+
+  @override
+  String get homeV2EdAutoStats => 'ഒരാഴ്ചത്തെ ചെലവിന് ശേഷം ഓണാകും';
+
+  @override
+  String get homeV2EdAutoAccounts => 'ബാങ്ക് അക്കൗണ്ട് ചേർക്കുമ്പോൾ ഓണാകും';
+
+  @override
+  String get homeV2EdAutoChart => '3 വ്യത്യസ്ത ദിവസത്തെ ചെലവിന് ശേഷം ഓണാകും';
+
+  @override
+  String get homeV2EdAutoSms => 'ബാങ്ക് SMS കാത്തിരിക്കുമ്പോൾ ഓണാകും';
+
+  @override
+  String get homeV2EdAutoEvents =>
+      'ആദ്യ ഓർമ്മപ്പെടുത്തൽ, EMI, SIP അല്ലെങ്കിൽ ആവർത്തിക്കുന്ന പേയ്മെന്റിനൊപ്പം ഓണാകും';
+
+  @override
+  String get homeV2EdAutoBudget => 'ആദ്യ ബജറ്റിനൊപ്പം ഓണാകും';
+
+  @override
+  String get homeV2EdAutoNotes => 'ആദ്യ കുറിപ്പിനൊപ്പം ഓണാകും';
+
+  @override
+  String get homeV2SgNotNow => 'ഇപ്പോൾ വേണ്ട';
+
+  @override
+  String get homeV2SgDismissA11y => 'ഇത് വീണ്ടും നിർദ്ദേശിക്കരുത്';
+
+  @override
+  String get homeV2SgDismissedSnack =>
+      'ശരി. Kuber ഇത് വീണ്ടും നിർദ്ദേശിക്കില്ല.';
+
+  @override
+  String homeV2SgRecTitle(String merchant) {
+    return '$merchant എല്ലാ മാസവും കാണുന്നു';
+  }
+
+  @override
+  String homeV2SgRecBody(String amount, int months) {
+    return '$months മാസമായി ഏകദേശം ഒരേ തീയതിയിൽ $amount. അടയ്ക്കേണ്ടതിന് മുമ്പ് കാണാൻ ആവർത്തിക്കുന്നതായി ചേർക്കുക.';
+  }
+
+  @override
+  String get homeV2SgRecAct => 'ആവർത്തിക്കുന്നതായി ചേർക്കുക';
+
+  @override
+  String homeV2SgRecDone(String merchant) {
+    return '$merchant ഇപ്പോൾ ആവർത്തിക്കുന്ന പേയ്മെന്റാണ്.';
+  }
+
+  @override
+  String get homeV2SgLoanTitle => 'EMI അടയ്ക്കുന്നുണ്ടോ?';
+
+  @override
+  String homeV2SgLoanBody(String lender) {
+    return 'നിങ്ങളുടെ SMS-ൽ $lender-ന് EMI പേയ്മെന്റുകൾ കാണുന്നു. ബാക്കി അറിയാൻ വായ്പ ചേർക്കുക.';
+  }
+
+  @override
+  String get homeV2SgLoanAct => 'വായ്പ ചേർക്കുക';
+
+  @override
+  String get homeV2SgLoanDone => 'വായ്പ ചേർത്തു.';
+
+  @override
+  String get homeV2SgInvTitle => 'SIP വഴി നിക്ഷേപിക്കുന്നുണ്ടോ?';
+
+  @override
+  String homeV2SgInvBody(String amount) {
+    return 'നിങ്ങളുടെ SMS-ൽ മാസം $amount SIP കാണുന്നു. എല്ലാ നിക്ഷേപങ്ങളും ഒരിടത്ത് കാണാൻ ചേർക്കുക.';
+  }
+
+  @override
+  String get homeV2SgInvAct => 'നിക്ഷേപം ചേർക്കുക';
+
+  @override
+  String get homeV2SgInvDone => 'നിക്ഷേപം ചേർത്തു.';
+
+  @override
+  String homeV2SgLedTitle(String name) {
+    return '$name-ന് പണം കടം കൊടുത്തോ?';
+  }
+
+  @override
+  String homeV2SgLedBody(String name, String amount) {
+    return 'ഈ മാസം $name-ന് $amount അയച്ചു. കടം കൊടുക്കൽ വാങ്ങലിൽ ഇത് രേഖപ്പെടുത്തുക.';
+  }
+
+  @override
+  String get homeV2SgLedNoteTitle => 'കടം കൊടുത്ത പണം രേഖപ്പെടുത്തണോ?';
+
+  @override
+  String homeV2SgLedNoteBody(String note) {
+    return 'നിങ്ങളുടെ കുറിപ്പ് \"$note\" പണം കടം കൊടുത്തതിനെക്കുറിച്ച് പറയുന്നു. മറക്കാതിരിക്കാൻ കടം കൊടുക്കൽ വാങ്ങലിൽ ചേർക്കുക.';
+  }
+
+  @override
+  String get homeV2SgLedAct => 'രേഖപ്പെടുത്തുക';
+
+  @override
+  String get homeV2SgLedDone => 'കടം കൊടുക്കൽ വാങ്ങലിൽ ചേർത്തു.';
+
+  @override
+  String homeV2SgBudTitle(String category) {
+    return '$category-ന് ബജറ്റ് സജ്ജമാക്കണോ?';
+  }
+
+  @override
+  String homeV2SgBudBody(String amount, String category) {
+    return 'കഴിഞ്ഞ 30 ദിവസം $category-ൽ $amount ചെലവഴിച്ചു. പരിധിയോട് അടുക്കുമ്പോൾ ബജറ്റ് അറിയിക്കും.';
+  }
+
+  @override
+  String get homeV2SgBudAct => 'ബജറ്റ് സജ്ജമാക്കുക';
+
+  @override
+  String homeV2SgBudDone(String category) {
+    return '$category-ന് ബജറ്റ് സജ്ജമാക്കി.';
+  }
+
+  @override
+  String homeV2SgCcTitle(String card) {
+    return '$card-ന്റെ ബില്ലിംഗ് തീയതി ചേർക്കുക';
+  }
+
+  @override
+  String get homeV2SgCcBody =>
+      'അപ്പോൾ ഈ സൈക്കിളിലെ ചെലവും ബിൽ അടയ്ക്കേണ്ട തീയതിയും Kuber കാണിക്കും.';
+
+  @override
+  String get homeV2SgCcAct => 'ബില്ലിംഗ് തീയതി സജ്ജമാക്കുക';
+
+  @override
+  String get homeV2SgCcDone => 'ബില്ലിംഗ് തീയതി സംരക്ഷിച്ചു.';
+
+  @override
+  String get homeV2SgAskTitle =>
+      'നിങ്ങളുടെ പണത്തെക്കുറിച്ച് Kuber-നോട് ചോദിക്കൂ';
+
+  @override
+  String get homeV2SgAskBody =>
+      'ഇതുപോലെ ചോദിച്ചു നോക്കൂ: \"കഴിഞ്ഞ മാസം ഭക്ഷണത്തിന് എത്ര ചെലവഴിച്ചു?\"';
+
+  @override
+  String get homeV2SgAskAct => 'Kuber-നോട് ചോദിക്കൂ';
+
+  @override
+  String get homeV2SgVoiceTitle => 'ശബ്ദത്തിലൂടെ ഇടപാടുകൾ ചേർക്കുക';
+
+  @override
+  String get homeV2SgVoiceBody =>
+      'ക്വിക്ക് ആഡിൽ മൈക്ക് ടാപ്പ് ചെയ്ത് ഇങ്ങനെ പറയൂ: \"200 ഉച്ചഭക്ഷണത്തിന്\".';
+
+  @override
+  String get homeV2SgVoiceAct => 'പരീക്ഷിക്കൂ';
+
+  @override
+  String get homeV2SgWidgetTitle => 'Kuber നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ വയ്ക്കൂ';
+
+  @override
+  String get homeV2SgWidgetBody =>
+      'ആപ്പ് തുറക്കാതെ ഈ മാസത്തെ ചെലവ് കാണുകയും ഇടപാട് ചേർക്കുകയും ചെയ്യാം.';
+
+  @override
+  String get homeV2SgWidgetAct => 'വിജറ്റ് ചേർക്കുക';
+
+  @override
+  String get homeV2SgCardsTitle => 'നിങ്ങളുടെ കാർഡുകൾ Kuber Cards-ൽ സൂക്ഷിക്കൂ';
+
+  @override
+  String get homeV2SgCardsBody =>
+      'കാർഡ് വിവരങ്ങൾ PIN അല്ലെങ്കിൽ വിരലടയാളത്തിന് പിന്നിൽ സൂക്ഷിക്കൂ. അവ ഈ ഫോണിൽ തന്നെ നിൽക്കും.';
+
+  @override
+  String get homeV2SgCardsAct => 'Kuber Cards സജ്ജമാക്കുക';
 }

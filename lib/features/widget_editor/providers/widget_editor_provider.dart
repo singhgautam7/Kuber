@@ -3,10 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/isar_service.dart';
 import '../data/widget_preference_repository.dart';
 import '../models/home_widget_config.dart';
+import '../../home_v2/data/home_v2_widgets.dart';
+import '../../home_v2/providers/home_v2_provider.dart';
 
 final widgetPreferenceRepositoryProvider =
     Provider<WidgetPreferenceRepository>((ref) {
-  return WidgetPreferenceRepository(ref.watch(isarProvider));
+  return WidgetPreferenceRepository(
+    ref.watch(isarProvider),
+    // Home v2 installs reseed their own defaults (e.g. after Erase all data).
+    homeDefaults: () {
+      final s = ref.read(homeV2Provider);
+      return s.isV2 ? homeV2ConfigsFrom(s.widgets) : null;
+    },
+  );
 });
 
 /// Ordered widget list for the home dashboard. The dashboard's builder
