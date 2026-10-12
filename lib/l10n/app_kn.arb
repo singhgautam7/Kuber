@@ -1536,7 +1536,7 @@
   "homeV2WBalanceEmptyAct": "ವಹಿವಾಟು ಸೇರಿಸಿ",
   "homeV2WRecentEmptyBody": "ನಿಮ್ಮ ಇತ್ತೀಚಿನ ವಹಿವಾಟುಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
   "homeV2WRecentEmptyAct": "SMS ನಿಂದ ಆಮದು",
-  "homeV2WEditMore": "{count, plural, =1{ತೋರಿಸಲು ಏನಾದರೂ ಇದ್ದಾಗ ಇನ್ನೂ 1 ವಿಜೆಟ್ ಆನ್ ಆಗುತ್ತದೆ.} other{ತೋರಿಸಲು ಏನಾದರೂ ಇದ್ದಾಗ ಇನ್ನೂ {count} ವಿಜೆಟ್‌ಗಳು ಆನ್ ಆಗುತ್ತವೆ.}}",
+  "homeV2WEditMore": "{count, plural, =1{ಇನ್ನೂ 1 ವಿಜೆಟ್ ಲಭ್ಯವಿದೆ.} other{ಇನ್ನೂ {count} ವಿಜೆಟ್‌ಗಳು ಲಭ್ಯವಿವೆ.}}",
   "homeV2EdSecOn": "ನಿಮ್ಮ ಹೋಮ್‌ನಲ್ಲಿ",
   "homeV2EdSgTitle": "ಸಲಹೆಗಳು",
   "homeV2EdSgSub": "ನಿಮ್ಮ ಸ್ವಂತ ವಹಿವಾಟುಗಳಿಂದ ಸಲಹೆಗಳು. ಯಾವಾಗಲೂ ಮೇಲೆ.",

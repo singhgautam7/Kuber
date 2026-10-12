@@ -6,10 +6,9 @@ import android.content.SharedPreferences
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Chart (compact, 7D) (4x2). Pre-rendered PNG bar chart. Tap -> Analytics. */
-class ChartCompactWidgetProvider : HomeWidgetProvider() {
+class ChartCompactWidgetProvider : KuberWidgetProvider() {
 
     override fun onUpdate(
         context: Context,

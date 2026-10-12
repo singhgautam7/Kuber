@@ -70,10 +70,11 @@ void main() {
             .findAll();
         expect(
           {for (final r in rows.where((r) => r.enabled)) r.widgetKey},
-          {'balance_hero', 'quick_add', 'recent_transactions'},
+          {'balance_hero', 'quick_add', 'sms_import_widget'},
         );
         expect(s.widgets['spending_stats']!.vis, WidgetVis.auto);
         expect(s.widgets['ask_kuber_widget']!.vis, WidgetVis.off);
+        expect(s.widgets['recent_transactions']!.vis, WidgetVis.off);
       },
     );
 

@@ -9,13 +9,12 @@ import android.os.Bundle
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /**
  * Account Balance (2x1 compact / 2x2 full). Per-instance account chosen via the
  * configuration activity, stored under "acctwidget_<widgetId>". Tap -> account view.
  */
-class AccountBalanceWidgetProvider : HomeWidgetProvider() {
+class AccountBalanceWidgetProvider : KuberWidgetProvider() {
 
     companion object {
         fun accountKey(widgetId: Int) = "acctwidget_$widgetId"

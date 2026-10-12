@@ -8,7 +8,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.RemoteViews
-import es.antonborri.home_widget.HomeWidgetPlugin
 import org.json.JSONObject
 import java.io.File
 
@@ -16,7 +15,7 @@ import java.io.File
  * Shared helpers for all Kuber home-screen widget providers.
  *
  * Data contract: the Flutter [WidgetSyncService] writes one JSON string per
- * widget (via the home_widget bridge). Amounts arrive pre-formatted as display
+ * widget (via the widgets channel in MainActivity). Amounts arrive pre-formatted as display
  * strings so currency/locale formatting matches the app exactly; providers only
  * bind text and choose income/expense colors from a sign flag.
  */
@@ -25,7 +24,14 @@ object WidgetCommon {
     /** Muted vs colored value handling for the stale state. */
     const val STALE_AFTER_MS = 24L * 60L * 60L * 1000L
 
-    fun data(context: Context): SharedPreferences = HomeWidgetPlugin.getData(context)
+    /**
+     * Widget data store. The file name is the one the home_widget plugin used,
+     * so widgets placed before the switch keep their last data.
+     */
+    const val PREFS = "HomeWidgetPreferences"
+
+    fun data(context: Context): SharedPreferences =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun json(prefs: SharedPreferences, key: String): JSONObject? {
         val raw = prefs.getString(key, null) ?: return null

@@ -1536,7 +1536,7 @@
   "homeV2WBalanceEmptyAct": "ਲੈਣ-ਦੇਣ ਜੋੜੋ",
   "homeV2WRecentEmptyBody": "ਤੁਹਾਡੇ ਤਾਜ਼ਾ ਲੈਣ-ਦੇਣ ਇੱਥੇ ਦਿਖਣਗੇ।",
   "homeV2WRecentEmptyAct": "SMS ਤੋਂ ਇੰਪੋਰਟ",
-  "homeV2WEditMore": "{count, plural, =1{ਦਿਖਾਉਣ ਲਈ ਕੁਝ ਹੋਣ ਉੱਤੇ 1 ਹੋਰ ਵਿਜੇਟ ਚਾਲੂ ਹੋਵੇਗਾ।} other{ਦਿਖਾਉਣ ਲਈ ਕੁਝ ਹੋਣ ਉੱਤੇ {count} ਹੋਰ ਵਿਜੇਟ ਚਾਲੂ ਹੋਣਗੇ।}}",
+  "homeV2WEditMore": "{count, plural, =1{1 ਹੋਰ ਵਿਜੇਟ ਉਪਲਬਧ ਹੈ।} other{{count} ਹੋਰ ਵਿਜੇਟ ਉਪਲਬਧ ਹਨ।}}",
   "homeV2EdSecOn": "ਤੁਹਾਡੇ ਹੋਮ ਉੱਤੇ",
   "homeV2EdSgTitle": "ਸੁਝਾਅ",
   "homeV2EdSgSub": "ਤੁਹਾਡੇ ਆਪਣੇ ਲੈਣ-ਦੇਣ ਤੋਂ ਸੁਝਾਅ। ਹਮੇਸ਼ਾ ਸਭ ਤੋਂ ਉੱਪਰ।",

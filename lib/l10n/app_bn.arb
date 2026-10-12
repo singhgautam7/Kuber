@@ -1536,7 +1536,7 @@
   "homeV2WBalanceEmptyAct": "লেনদেন যোগ করুন",
   "homeV2WRecentEmptyBody": "আপনার সাম্প্রতিক লেনদেন এখানে দেখা যাবে।",
   "homeV2WRecentEmptyAct": "SMS থেকে ইমপোর্ট",
-  "homeV2WEditMore": "{count, plural, =1{দেখানোর মতো কিছু হলে আরও 1টি উইজেট চালু হবে।} other{দেখানোর মতো কিছু হলে আরও {count}টি উইজেট চালু হবে।}}",
+  "homeV2WEditMore": "{count, plural, =1{আরও 1টি উইজেট আছে।} other{আরও {count}টি উইজেট আছে।}}",
   "homeV2EdSecOn": "আপনার হোমে",
   "homeV2EdSgTitle": "পরামর্শ",
   "homeV2EdSgSub": "আপনার নিজের লেনদেন থেকে পরামর্শ। সবসময় উপরে।",

@@ -6,10 +6,9 @@ import android.content.SharedPreferences
 import android.view.View
 import android.widget.RemoteViews
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Budget Status (4x3). Top-3 budgets with state-colored bars. Tap row -> budget. */
-class BudgetStatusWidgetProvider : HomeWidgetProvider() {
+class BudgetStatusWidgetProvider : KuberWidgetProvider() {
 
     private data class RowIds(
         val row: Int, val name: Int, val value: Int,

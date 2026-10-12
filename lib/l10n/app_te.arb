@@ -1536,7 +1536,7 @@
   "homeV2WBalanceEmptyAct": "లావాదేవీ జోడించండి",
   "homeV2WRecentEmptyBody": "మీ తాజా లావాదేవీలు ఇక్కడ కనిపిస్తాయి.",
   "homeV2WRecentEmptyAct": "SMS నుండి దిగుమతి",
-  "homeV2WEditMore": "{count, plural, =1{చూపించడానికి ఏదైనా ఉన్నప్పుడు ఇంకా 1 విడ్జెట్ ఆన్ అవుతుంది.} other{చూపించడానికి ఏదైనా ఉన్నప్పుడు ఇంకా {count} విడ్జెట్‌లు ఆన్ అవుతాయి.}}",
+  "homeV2WEditMore": "{count, plural, =1{ఇంకా 1 విడ్జెట్ అందుబాటులో ఉంది.} other{ఇంకా {count} విడ్జెట్‌లు అందుబాటులో ఉన్నాయి.}}",
   "homeV2EdSecOn": "మీ హోమ్‌లో",
   "homeV2EdSgTitle": "సూచనలు",
   "homeV2EdSgSub": "మీ స్వంత లావాదేవీల నుండి చిట్కాలు. ఎప్పుడూ పైన.",

@@ -6,10 +6,9 @@ import android.content.SharedPreferences
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Monthly Net (2x1 compact / 2x2 full). Tap -> Home. */
-class MonthlyNetWidgetProvider : HomeWidgetProvider() {
+class MonthlyNetWidgetProvider : KuberWidgetProvider() {
 
     override fun onUpdate(
         context: Context,

@@ -19,13 +19,16 @@ const Map<String, HomeWidgetClass> kHomeV2Classes = {
   'spending_stats': HomeWidgetClass.dataGated,
   'quick_add': HomeWidgetClass.defaultOn,
   'ask_kuber_widget': HomeWidgetClass.optIn,
-  'sms_import_widget': HomeWidgetClass.dataGated,
+  // Default, not Data-gated (user review): SMS import is a key feature and
+  // stays reachable if Get started or suggestions are turned off.
+  'sms_import_widget': HomeWidgetClass.defaultOn,
   'home_accounts': HomeWidgetClass.dataGated,
   'seven_day_chart': HomeWidgetClass.dataGated,
   'budget_snapshot': HomeWidgetClass.dataGated,
   'upcoming_events_widget': HomeWidgetClass.dataGated,
   'kuber_notes_widget': HomeWidgetClass.dataGated,
-  'recent_transactions': HomeWidgetClass.defaultOn,
+  // Opt-in, not Default (user review).
+  'recent_transactions': HomeWidgetClass.optIn,
 };
 
 HomeWidgetClass homeV2ClassOf(String id) =>

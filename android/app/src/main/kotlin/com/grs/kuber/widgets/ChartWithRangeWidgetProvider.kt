@@ -8,14 +8,13 @@ import android.content.SharedPreferences
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /**
  * Trends (range switcher) (4x3). Charts for all three ranges are pre-rendered by
  * Flutter; the per-instance selected range lives in "trendswidget_<widgetId>" and
  * is switched by [RangeSwitchReceiver] without a re-render. Tap body -> Analytics.
  */
-class ChartWithRangeWidgetProvider : HomeWidgetProvider() {
+class ChartWithRangeWidgetProvider : KuberWidgetProvider() {
 
     companion object {
         fun rangeKey(widgetId: Int) = "trendswidget_$widgetId"

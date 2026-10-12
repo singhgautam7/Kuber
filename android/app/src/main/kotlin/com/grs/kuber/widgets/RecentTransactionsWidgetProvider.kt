@@ -8,10 +8,9 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Recent Transactions (4x2). Up to 4 fixed rows. Tap row -> txn; footer -> History. */
-class RecentTransactionsWidgetProvider : HomeWidgetProvider() {
+class RecentTransactionsWidgetProvider : KuberWidgetProvider() {
 
     private data class RowIds(val row: Int, val icon: Int, val name: Int, val account: Int, val amount: Int)
 

@@ -5,10 +5,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.widget.RemoteViews
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** SMS Import Badge (2x1). Always visible; 0 -> "All caught up". Tap -> Import SMS. */
-class SmsImportBadgeWidgetProvider : HomeWidgetProvider() {
+class SmsImportBadgeWidgetProvider : KuberWidgetProvider() {
 
     override fun onUpdate(
         context: Context,

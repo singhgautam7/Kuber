@@ -5215,9 +5215,8 @@ class AppLocalizationsTe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'చూపించడానికి ఏదైనా ఉన్నప్పుడు ఇంకా $count విడ్జెట్‌లు ఆన్ అవుతాయి.',
-      one: 'చూపించడానికి ఏదైనా ఉన్నప్పుడు ఇంకా 1 విడ్జెట్ ఆన్ అవుతుంది.',
+      other: 'ఇంకా $count విడ్జెట్‌లు అందుబాటులో ఉన్నాయి.',
+      one: 'ఇంకా 1 విడ్జెట్ అందుబాటులో ఉంది.',
     );
     return '$_temp0';
   }

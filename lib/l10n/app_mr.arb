@@ -1536,7 +1536,7 @@
   "homeV2WBalanceEmptyAct": "व्यवहार जोडा",
   "homeV2WRecentEmptyBody": "तुमचे अलीकडचे व्यवहार इथे दिसतील.",
   "homeV2WRecentEmptyAct": "SMS मधून आयात",
-  "homeV2WEditMore": "{count, plural, =1{दाखवण्यासारखे काही असेल तेव्हा आणखी 1 विजेट चालू होईल.} other{दाखवण्यासारखे काही असेल तेव्हा आणखी {count} विजेट्स चालू होतील.}}",
+  "homeV2WEditMore": "{count, plural, =1{आणखी 1 विजेट उपलब्ध आहे.} other{आणखी {count} विजेट्स उपलब्ध आहेत.}}",
   "homeV2EdSecOn": "तुमच्या होमवर",
   "homeV2EdSgTitle": "सूचना",
   "homeV2EdSgSub": "तुमच्या स्वतःच्या व्यवहारांवरून टिप्स. नेहमी सर्वात वर.",

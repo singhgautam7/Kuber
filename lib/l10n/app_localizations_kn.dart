@@ -5220,8 +5220,8 @@ class AppLocalizationsKn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'ತೋರಿಸಲು ಏನಾದರೂ ಇದ್ದಾಗ ಇನ್ನೂ $count ವಿಜೆಟ್‌ಗಳು ಆನ್ ಆಗುತ್ತವೆ.',
-      one: 'ತೋರಿಸಲು ಏನಾದರೂ ಇದ್ದಾಗ ಇನ್ನೂ 1 ವಿಜೆಟ್ ಆನ್ ಆಗುತ್ತದೆ.',
+      other: 'ಇನ್ನೂ $count ವಿಜೆಟ್‌ಗಳು ಲಭ್ಯವಿವೆ.',
+      one: 'ಇನ್ನೂ 1 ವಿಜೆಟ್ ಲಭ್ಯವಿದೆ.',
     );
     return '$_temp0';
   }

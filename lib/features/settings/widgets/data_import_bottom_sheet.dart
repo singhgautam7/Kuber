@@ -414,15 +414,12 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
 
   Future<void> _startImport() async {
     final ext = _format == _ImportFmt.csv ? 'csv' : 'json';
-    final result = await FilePicker.pickFiles(
+    final picked = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: [ext],
-      allowMultiple: false,
     );
 
-    if (result == null || result.files.isEmpty) return;
-
-    final filePath = result.files.first.path;
+    final filePath = picked?.path;
     if (filePath == null) return;
 
     final content = await File(filePath).readAsString();

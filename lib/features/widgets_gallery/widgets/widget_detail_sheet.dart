@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/services/home_widget_bridge.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../data/widget_catalog.dart';
@@ -108,12 +109,12 @@ class _WidgetDetailSheet extends StatelessWidget {
 
   Future<void> _addToHome(BuildContext context) async {
     final navigator = Navigator.of(context);
-    final supported = await WidgetPinService.isPinSupported();
+    final supported = await HomeWidgetBridge.isPinSupported();
     if (!supported) {
       if (context.mounted) _showFallback(context);
       return;
     }
-    final ok = await WidgetPinService.requestPin(entry.providerClass);
+    final ok = await HomeWidgetBridge.requestPin(entry.providerClass);
     if (!ok) {
       if (context.mounted) _showFallback(context);
       return;

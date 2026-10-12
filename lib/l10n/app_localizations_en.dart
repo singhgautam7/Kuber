@@ -5168,9 +5168,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count more widgets will turn on when they have something to show.',
-      one: '1 more widget will turn on when it has something to show.',
+      other: '$count more widgets available.',
+      one: '1 more widget available.',
     );
     return '$_temp0';
   }

@@ -7,10 +7,9 @@ import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Category Donut (4x3). Pre-rendered donut PNG + top-3 rows. Tap -> Analytics (categories). */
-class CategoryDonutWidgetProvider : HomeWidgetProvider() {
+class CategoryDonutWidgetProvider : KuberWidgetProvider() {
 
     private data class RowIds(val row: Int, val dot: Int, val name: Int, val value: Int)
 

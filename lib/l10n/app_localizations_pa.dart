@@ -5178,8 +5178,8 @@ class AppLocalizationsPa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'ਦਿਖਾਉਣ ਲਈ ਕੁਝ ਹੋਣ ਉੱਤੇ $count ਹੋਰ ਵਿਜੇਟ ਚਾਲੂ ਹੋਣਗੇ।',
-      one: 'ਦਿਖਾਉਣ ਲਈ ਕੁਝ ਹੋਣ ਉੱਤੇ 1 ਹੋਰ ਵਿਜੇਟ ਚਾਲੂ ਹੋਵੇਗਾ।',
+      other: '$count ਹੋਰ ਵਿਜੇਟ ਉਪਲਬਧ ਹਨ।',
+      one: '1 ਹੋਰ ਵਿਜੇਟ ਉਪਲਬਧ ਹੈ।',
     );
     return '$_temp0';
   }

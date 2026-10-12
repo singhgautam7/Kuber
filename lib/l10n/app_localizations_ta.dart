@@ -5256,9 +5256,8 @@ class AppLocalizationsTa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'காட்ட ஏதாவது இருக்கும்போது இன்னும் $count விட்ஜெட்டுகள் இயங்கும்.',
-      one: 'காட்ட ஏதாவது இருக்கும்போது இன்னும் 1 விட்ஜெட் இயங்கும்.',
+      other: 'இன்னும் $count விட்ஜெட்டுகள் உள்ளன.',
+      one: 'இன்னும் 1 விட்ஜெட் உள்ளது.',
     );
     return '$_temp0';
   }

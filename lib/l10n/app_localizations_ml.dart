@@ -5235,8 +5235,8 @@ class AppLocalizationsMl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'കാണിക്കാൻ എന്തെങ്കിലും ആകുമ്പോൾ $count വിജറ്റുകൾ കൂടി ഓണാകും.',
-      one: 'കാണിക്കാൻ എന്തെങ്കിലും ആകുമ്പോൾ 1 വിജറ്റ് കൂടി ഓണാകും.',
+      other: '$count വിജറ്റുകൾ കൂടി ലഭ്യമാണ്.',
+      one: '1 വിജറ്റ് കൂടി ലഭ്യമാണ്.',
     );
     return '$_temp0';
   }

@@ -8,7 +8,7 @@ Design language is **Vault** (see below). App size target: under 17 MB APK.
 
 Flutter · Riverpod 2 (`Notifier` / `AsyncNotifier`; a few legacy `StateNotifier`s remain) ·
 Isar (`isar_community`) · GoRouter · fl_chart · google_fonts (Inter, bundled in
-`assets/google_fonts/`) · in_app_purchase (Play Billing) · home_widget · flutter_quill ·
+`assets/google_fonts/`) · in_app_purchase (Play Billing) · flutter_quill ·
 flutter_local_notifications · shared_preferences.
 
 ## Specs (read before starting a feature)

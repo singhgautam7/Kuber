@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -24,10 +23,11 @@ import '../../features/settings/providers/settings_provider.dart';
 import '../database/isar_service.dart';
 import '../theme/kuber_tokens.dart';
 import '../utils/formatters.dart';
+import 'home_widget_bridge.dart';
 
 /// Owns all Flutter -> native home-screen widget data sync. Computes each
 /// widget's JSON payload from Isar, renders the chart bitmaps, and pushes
-/// everything through the home_widget bridge. Runs post-first-frame and on app
+/// everything through the widgets channel (HomeWidgetBridge). Runs post-first-frame and on app
 /// resume; must never block startup or throw into the caller.
 class WidgetSyncService {
   WidgetSyncService(this.ref);
@@ -141,19 +141,9 @@ class WidgetSyncService {
 
   Future<List<Transaction>> _allTxns() => _isar.transactions.where().findAll();
 
-  /// FQN prefix for our Android widget providers. All appwidget receivers live
-  /// in `com.grs.kuber.widgets.*`; the home_widget plugin's default lookup
-  /// (`context.packageName + "." + androidName`) resolves to `com.grs.kuber.*`
-  /// and fails with ClassNotFoundException. Passing `qualifiedAndroidName`
-  /// bypasses the plugin's own resolution and hits the correct class.
-  static const _androidWidgetPackage = 'com.grs.kuber.widgets';
-
   Future<void> _save(String key, Map<String, dynamic> data, String androidName) async {
-    await HomeWidget.saveWidgetData<String>(key, jsonEncode(data));
-    await HomeWidget.updateWidget(
-      name: androidName,
-      qualifiedAndroidName: '$_androidWidgetPackage.$androidName',
-    );
+    await HomeWidgetBridge.save(key, jsonEncode(data));
+    await HomeWidgetBridge.update(androidName);
   }
 
   String _hex(int argb) => '#${(argb & 0xFFFFFFFF).toRadixString(16).padLeft(8, '0')}';
@@ -164,7 +154,7 @@ class WidgetSyncService {
   /// side (WidgetTheme.kt) maps the family name onto its per-family color
   /// resources; light/dark stays with the OS resource system (values-night).
   Future<void> _syncTheme() async {
-    await HomeWidget.saveWidgetData<String>('theme_family', _activeVariant.name);
+    await HomeWidgetBridge.save('theme_family', _activeVariant.name);
   }
 
   // ---- 1. Monthly Net -----------------------------------------------------
@@ -200,17 +190,14 @@ class WidgetSyncService {
     for (final Account a in accounts) {
       if (a.isDisabled) continue;
       final bal = (balances[a.id] ?? 0).toDouble();
-      await HomeWidget.saveWidgetData<String>('acct_${a.id}', jsonEncode({
+      await HomeWidgetBridge.save('acct_${a.id}', jsonEncode({
         'name': a.name,
         'balance': '${bal < 0 ? '−' : ''}${_money(bal)}',
         'sign': bal < 0 ? 'expense' : 'income',
         'updatedMillis': _nowMs,
       }));
     }
-    await HomeWidget.updateWidget(
-      name: 'AccountBalanceWidgetProvider',
-      qualifiedAndroidName: '$_androidWidgetPackage.AccountBalanceWidgetProvider',
-    );
+    await HomeWidgetBridge.update('AccountBalanceWidgetProvider');
   }
 
   // ---- 3. SMS Import Badge -------------------------------------------------

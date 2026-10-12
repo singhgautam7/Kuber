@@ -3,8 +3,8 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // Kotlin comes from AGP 9's built-in Kotlin (android.builtInKotlin=true).
+    // The Flutter Gradle Plugin must be applied after the Android Gradle plugin.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -47,6 +47,27 @@ android {
         // Optimization: Include only required locales to save space in the App Bundle.
         // This removes translations from various libraries that the app doesn't use.
         resConfigs("en")
+
+        // Package only the ABIs Flutter is building (`--target-platform`).
+        // Flutter's own filter always allows all three, and plugins with native
+        // code (isar_flutter_libs) ship every ABI, so an arm64-only APK carried
+        // ~1.2 MB of unused 32-bit / x86_64 libraries. Needs
+        // `disable-abi-filtering=true` (gradle.properties) so Flutter does not
+        // reset this. No target platform: Flutter's default three, no x86.
+        val abiFor = mapOf(
+            "android-arm" to "armeabi-v7a",
+            "android-arm64" to "arm64-v8a",
+            "android-x64" to "x86_64",
+        )
+        val abis = (project.findProperty("target-platform") as String?)
+            ?.split(",")
+            ?.mapNotNull { abiFor[it.trim()] }
+            ?.takeIf { it.isNotEmpty() }
+            ?: abiFor.values.toList()
+        ndk {
+            abiFilters.clear()
+            abiFilters += abis
+        }
     }
 
     buildTypes {
@@ -67,6 +88,12 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

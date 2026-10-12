@@ -287,12 +287,12 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
   Future<void> _pickPdf() async {
     setState(() => _isPickingFile = true);
     try {
-      final result = await FilePicker.pickFiles(
+      final picked = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
       );
-      if (result != null && result.files.isNotEmpty && mounted) {
-        final path = result.files.single.path;
+      if (picked != null && mounted) {
+        final path = picked.path;
         if (path == null) return;
         final file = File(path);
         final size = await file.length();

@@ -222,13 +222,12 @@ class DataController extends StateNotifier<DataState> {
 
   Future<void> importData() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final picked = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['csv'],
-        allowMultiple: false,
       );
 
-      if (result == null || result.files.isEmpty) return;
+      if (picked == null) return;
 
       state = state.copyWith(
         status: DataOpStatus.loading,
@@ -238,7 +237,7 @@ class DataController extends StateNotifier<DataState> {
       int totalSuccess = 0;
       int totalFailure = 0;
 
-      for (final fileData in result.files) {
+      for (final fileData in [picked]) {
         final file = File(fileData.path!);
         final csvContent = await file.readAsString();
         final importResult = await _service.importData(csvContent);

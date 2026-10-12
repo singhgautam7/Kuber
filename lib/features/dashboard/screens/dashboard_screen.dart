@@ -619,7 +619,8 @@ class _HomeV2WaitingLine extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final waiting = ref.watch(
       homeV2Provider.select(
-        (s) => s.widgets.values.where((w) => w.vis == WidgetVis.auto).length,
+        // Not on Home yet: waiting for data, or added by hand (Ask Kuber).
+        (s) => s.widgets.values.where((w) => w.vis != WidgetVis.on).length,
       ),
     );
     if (waiting == 0) return const SizedBox.shrink();

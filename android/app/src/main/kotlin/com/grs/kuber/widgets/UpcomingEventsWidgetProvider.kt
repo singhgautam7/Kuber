@@ -7,10 +7,9 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Upcoming Events (4x2). Up to 4 fixed rows with source-type pills. */
-class UpcomingEventsWidgetProvider : HomeWidgetProvider() {
+class UpcomingEventsWidgetProvider : KuberWidgetProvider() {
 
     private data class RowIds(val row: Int, val date: Int, val title: Int, val pill: Int, val amount: Int)
 

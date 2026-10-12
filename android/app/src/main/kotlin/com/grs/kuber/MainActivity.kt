@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +24,7 @@ import androidx.core.graphics.drawable.IconCompat
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import com.grs.kuber.widgets.WidgetCommon
 import java.security.KeyStore
 import java.util.concurrent.Executors
 import javax.crypto.Cipher
@@ -61,6 +63,38 @@ class MainActivity : FlutterFragmentActivity() {
         // only, never the deprecated bar-color setters).
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        syncSplashTheme()
+    }
+
+    override fun onStop() {
+        // Theme may have changed this session: set it for the next launch.
+        syncSplashTheme()
+        super.onStop()
+    }
+
+    /**
+     * Android draws the splash before any app code runs, from the manifest
+     * theme, so it follows the phone's dark mode, not Kuber's own Light / Dark
+     * setting. On Android 13+ the system can be told which splash theme to use
+     * next time (persisted, also across updates): Light → KuberSplashLight,
+     * Dark → KuberSplashDark, System → the manifest default.
+     * Reads the theme mode Flutter saved (ThemeMode index under
+     * PrefsKeys.themeMode); the prefs file is already in memory.
+     */
+    private fun syncSplashTheme() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val mode = (getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
+            .all["flutter.theme_mode"] as? Number)?.toInt() ?: 0
+        val theme = when (mode) {
+            1 -> R.style.KuberSplashLight
+            2 -> R.style.KuberSplashDark
+            else -> Resources.ID_NULL
+        }
+        try {
+            splashScreen.setSplashScreenTheme(theme)
+        } catch (_: Throwable) {
+            // Best effort: the splash just keeps following the phone.
+        }
     }
 
     override fun onDestroy() {
@@ -123,6 +157,28 @@ class MainActivity : FlutterFragmentActivity() {
             widgetsChannelName
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "save" -> {
+                    val key = call.argument<String>("key")
+                    if (key == null) {
+                        result.error("bad_args", "Missing widget data key", null)
+                    } else {
+                        // apply(): the in-memory value is visible to the
+                        // widget providers at once; the disk write is async.
+                        WidgetCommon.data(this).edit()
+                            .putString(key, call.argument<String>("value"))
+                            .apply()
+                        result.success(true)
+                    }
+                }
+                "update" -> {
+                    val provider = call.argument<String>("provider")
+                    if (provider == null) {
+                        result.error("bad_args", "Missing widget provider name", null)
+                    } else {
+                        result.success(updateWidget(provider))
+                    }
+                }
+                "hasPlacedWidget" -> result.success(hasPlacedWidget())
                 "isPinSupported" -> result.success(isPinSupported())
                 "requestPin" -> {
                     val provider = call.argument<String>("provider")
@@ -299,6 +355,28 @@ class MainActivity : FlutterFragmentActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
         val mgr = getSystemService(AppWidgetManager::class.java) ?: return false
         return mgr.isRequestPinAppWidgetSupported
+    }
+
+    /** Asks every placed instance of [provider] to redraw from the saved data. */
+    private fun updateWidget(provider: String): Boolean {
+        val component = ComponentName(this, "com.grs.kuber.widgets.$provider")
+        val mgr = AppWidgetManager.getInstance(this)
+        val ids = mgr.getAppWidgetIds(component)
+        if (ids.isEmpty()) return false
+        sendBroadcast(
+            Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                .setComponent(component)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        )
+        return true
+    }
+
+    /** True when at least one Kuber widget is on the home screen. */
+    private fun hasPlacedWidget(): Boolean {
+        val mgr = AppWidgetManager.getInstance(this)
+        return mgr.installedProviders
+            .filter { it.provider.packageName == packageName }
+            .any { mgr.getAppWidgetIds(it.provider).isNotEmpty() }
     }
 
     /** Requests the launcher pin the given widget provider to the home screen. */

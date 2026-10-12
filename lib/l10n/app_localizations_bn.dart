@@ -5194,8 +5194,8 @@ class AppLocalizationsBn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'দেখানোর মতো কিছু হলে আরও $countটি উইজেট চালু হবে।',
-      one: 'দেখানোর মতো কিছু হলে আরও 1টি উইজেট চালু হবে।',
+      other: 'আরও $countটি উইজেট আছে।',
+      one: 'আরও 1টি উইজেট আছে।',
     );
     return '$_temp0';
   }

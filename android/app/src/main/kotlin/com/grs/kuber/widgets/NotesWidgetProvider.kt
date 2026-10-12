@@ -6,10 +6,9 @@ import android.content.SharedPreferences
 import android.view.View
 import android.widget.RemoteViews
 import com.grs.kuber.R
-import es.antonborri.home_widget.HomeWidgetProvider
 
 /** Notes (4x3). Up to 3 recent notes. Add -> new note; row -> editor; footer -> Notes. */
-class NotesWidgetProvider : HomeWidgetProvider() {
+class NotesWidgetProvider : KuberWidgetProvider() {
 
     private data class RowIds(val row: Int, val title: Int, val preview: Int, val time: Int)
 

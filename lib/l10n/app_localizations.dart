@@ -9335,7 +9335,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeV2WEditMore.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 more widget will turn on when it has something to show.} other{{count} more widgets will turn on when they have something to show.}}'**
+  /// **'{count, plural, =1{1 more widget available.} other{{count} more widgets available.}}'**
   String homeV2WEditMore(int count);
 
   /// No description provided for @homeV2EdSecOn.

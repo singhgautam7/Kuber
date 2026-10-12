@@ -1536,7 +1536,7 @@
   "homeV2WBalanceEmptyAct": "लेनदेन जोड़ें",
   "homeV2WRecentEmptyBody": "आपके हाल के लेनदेन यहां दिखेंगे।",
   "homeV2WRecentEmptyAct": "SMS से इम्पोर्ट करें",
-  "homeV2WEditMore": "{count, plural, =1{1 और विजेट तब चालू होगा जब उसके पास दिखाने को कुछ होगा।} other{{count} और विजेट तब चालू होंगे जब उनके पास दिखाने को कुछ होगा।}}",
+  "homeV2WEditMore": "{count, plural, =1{1 और विजेट उपलब्ध है।} other{{count} और विजेट उपलब्ध हैं।}}",
   "homeV2EdSecOn": "आपके होम पर",
   "homeV2EdSgTitle": "सुझाव",
   "homeV2EdSgSub": "आपके अपने लेनदेन से सुझाव। हमेशा सबसे ऊपर।",

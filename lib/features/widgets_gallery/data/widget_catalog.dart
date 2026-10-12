@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../widgets/gallery_previews.dart';
 
@@ -186,30 +185,3 @@ const List<WidgetCatalogEntry> kWidgetCatalog = [
     preview: notesPreview,
   ),
 ];
-
-/// Bridges to the native requestPinAppWidget API (see MainActivity).
-class WidgetPinService {
-  static const _channel = MethodChannel('com.grs.kuber/widgets');
-
-  static Future<bool> isPinSupported() async {
-    try {
-      return await _channel.invokeMethod<bool>('isPinSupported') ?? false;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Requests the launcher pin [providerClass] to the home screen. Returns
-  /// false if unsupported or the request could not be issued.
-  static Future<bool> requestPin(String providerClass) async {
-    try {
-      return await _channel.invokeMethod<bool>(
-            'requestPin',
-            {'provider': providerClass},
-          ) ??
-          false;
-    } catch (_) {
-      return false;
-    }
-  }
-}

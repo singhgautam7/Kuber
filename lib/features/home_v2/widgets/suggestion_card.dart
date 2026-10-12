@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:home_widget/home_widget.dart';
 
+import '../../../core/services/home_widget_bridge.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -202,10 +202,7 @@ class SuggestionCard extends ConsumerWidget {
         await pending;
         return;
       case SgType.homeWidget:
-        await HomeWidget.requestPinWidget(
-          qualifiedAndroidName:
-              'com.grs.kuber.widgets.MonthlyNetWidgetProvider',
-        );
+        await HomeWidgetBridge.requestPin('MonthlyNetWidgetProvider');
         await notifier.afterMainAction(c);
         return;
       case SgType.kuberCards:

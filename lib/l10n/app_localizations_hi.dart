@@ -5181,8 +5181,8 @@ class AppLocalizationsHi extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count और विजेट तब चालू होंगे जब उनके पास दिखाने को कुछ होगा।',
-      one: '1 और विजेट तब चालू होगा जब उसके पास दिखाने को कुछ होगा।',
+      other: '$count और विजेट उपलब्ध हैं।',
+      one: '1 और विजेट उपलब्ध है।',
     );
     return '$_temp0';
   }

@@ -244,11 +244,13 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
           body: rows == null
               ? const Center(child: CircularProgressIndicator())
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(
+                  // Clears the pinned Save bar (12 + button + 24 + nav inset)
+                  // with room to spare under the last card.
+                  padding: EdgeInsets.fromLTRB(
                     KuberSpace.screenMargin,
                     0,
                     KuberSpace.screenMargin,
-                    120,
+                    140 + systemNavBarInset(context),
                   ),
                   children: [
                     Text(

@@ -3,10 +3,10 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/services/home_widget_bridge.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -200,8 +200,8 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
     bool? hasWidget;
     if (isAndroid && installAge >= 7 && all.length >= 15) {
       try {
-        pinSupported = await HomeWidget.isRequestPinWidgetSupported();
-        hasWidget = (await HomeWidget.getInstalledWidgets()).isNotEmpty;
+        pinSupported = await HomeWidgetBridge.isPinSupported();
+        hasWidget = await HomeWidgetBridge.hasPlacedWidget();
       } catch (_) {
         pinSupported = false;
       }
