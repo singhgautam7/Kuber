@@ -6,6 +6,9 @@ import '../../features/categories/data/category_group.dart';
 import '../../features/tags/data/tag.dart';
 
 class SeedService {
+  /// Default Cash account colour (green, like money in hand).
+  static const cashGreen = 0xFF4CAF50;
+
   Future<void> seedInitialData(Isar isar) async {
     final hasAccounts = await isar.accounts.count() > 0;
     final hasCategories = await isar.categorys.count() > 0;
@@ -20,7 +23,7 @@ class SeedService {
           ..name = 'Cash'
           ..type = 'cash'
           ..icon = 'payments_outlined'
-          ..colorValue = 0xFF9E9E9E
+          ..colorValue = cashGreen
           ..initialBalance = 0,
         Account()
           ..name = 'Bank'

@@ -411,6 +411,19 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // 1. Pop from root navigator (bottom sheets, full-screen sub-pages).
     if (await _maybePop(rootNavigatorKey.currentState)) return true;
 
+    // 1b. The Welcome flow is one route with its own pages: let its
+    // PopScope step back a page (it only lets go on the Welcome page).
+    final location = ref
+        .read(routerProvider)
+        .routerDelegate
+        .currentConfiguration
+        .uri
+        .path;
+    if (location.startsWith('/onboarding') &&
+        (await rootNavigatorKey.currentState?.maybePop() ?? false)) {
+      return true;
+    }
+
     // 2. Pop from the active shell branch navigator.
     final currentIndex = ref.read(currentShellTabIndexProvider);
     if (currentIndex >= 0 && currentIndex < shellNavigatorKeys.length) {

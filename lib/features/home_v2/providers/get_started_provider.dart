@@ -1,44 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../pro/paywall/pro_state.dart';
-import '../../sms_import/data/sms_import_usage.dart';
-import '../../sms_import/providers/sms_import_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/home_v2_state.dart';
 import 'home_v2_provider.dart';
 
-/// Get started card states (suggestion-rules.md §2 State resolution).
-enum GsState { fresh, oneDone, twoDone, denied, blocked }
+/// Get started card states (suggestion-rules.md §2). Two steps since
+/// Home v3.3: SMS import has its own intro card (after Quick Add), so the
+/// SMS step, its permission states and the free-limit tile are gone.
+enum GsState { fresh, oneDone }
 
 class GsData {
-  final bool step1;
+  /// Add a transaction yourself (manual or Quick Add). Second on the card.
   final bool step2;
+
+  /// Set up accounts: Accounts opened (or a balance set). First on the card.
   final bool step3;
   final int txCount;
   final GsState state;
 
-  /// Free weekly SMS allowance used up while bank SMS wait (limit tile).
-  final bool limit;
-  final int staged;
-  final DateTime? resetDate;
-  final bool smsGranted;
-
   const GsData({
-    required this.step1,
     required this.step2,
     required this.step3,
     required this.txCount,
     required this.state,
-    this.limit = false,
-    this.staged = 0,
-    this.resetDate,
-    this.smsGranted = false,
   });
 
-  int get done => [step1, step2, step3].where((x) => x).length;
-  bool get allDone => done == 3;
+  int get done => [step2, step3].where((x) => x).length;
+  bool get allDone => done == 2;
 }
 
 /// Step flags from the transactions already in memory for the Balance card.
@@ -78,8 +67,8 @@ GsGraduation? gsGraduationFor(
   return null;
 }
 
-/// Bumped after returning from SMS import / phone settings so permission
-/// and staged counts are read again.
+/// Bumped after returning from Add transaction / the account editor so the
+/// steps are read again.
 final gsRefreshProvider = StateProvider<int>((ref) => 0);
 
 /// Get started data. Null (and no work at all) unless the card is eligible:
@@ -89,51 +78,15 @@ final getStartedProvider = FutureProvider<GsData?>((ref) async {
   if (!eligible) return null;
   ref.watch(gsRefreshProvider);
   final balanceSet = ref.watch(homeV2Provider.select((s) => s.balanceSet));
-  final smsRequested = ref.watch(
-    homeV2Provider.select((s) => s.smsRequested),
-  );
-  final hasPro = ref.watch(
-    kuberProStateProvider.select((s) => s.hasProAccess),
-  );
   final txns = await ref.watch(transactionListProvider.future);
   final steps = gsStepsFrom(txns);
-  final step1 = steps.sms;
   final step2 = steps.manual;
   final step3 = balanceSet || steps.adjusted;
-
-  var granted = false;
-  var permanentlyDenied = false;
-  if (ref.read(smsInboxServiceProvider).isSupported) {
-    final status = await Permission.sms.status;
-    granted = status.isGranted;
-    permanentlyDenied = status.isPermanentlyDenied;
-  }
-  final staged = await ref.read(smsImportRepositoryProvider).countUnreviewed();
-  final remaining = hasPro ? 1 : await SmsImportUsage.remainingThisWeek();
-  final reset = await SmsImportUsage.resetDate();
-
-  final done = [step1, step2, step3].where((x) => x).length;
-  final GsState state;
-  if (!step1 && permanentlyDenied) {
-    state = GsState.blocked;
-  } else if (!step1 && !granted && smsRequested) {
-    state = GsState.denied;
-  } else {
-    state = switch (done) {
-      0 => GsState.fresh,
-      1 => GsState.oneDone,
-      _ => GsState.twoDone,
-    };
-  }
+  final done = [step2, step3].where((x) => x).length;
   return GsData(
-    step1: step1,
     step2: step2,
     step3: step3,
     txCount: txns.length,
-    state: state,
-    limit: !hasPro && remaining == 0 && staged > 0,
-    staged: staged,
-    resetDate: reset,
-    smsGranted: granted,
+    state: done == 0 ? GsState.fresh : GsState.oneDone,
   );
 });

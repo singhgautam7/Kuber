@@ -196,125 +196,11 @@ abstract class AppLocalizations {
   /// **'OFFLINE-FIRST · {version}'**
   String offlineFirstBadge(String version);
 
-  /// No description provided for @privateByDesign.
-  ///
-  /// In en, this message translates to:
-  /// **'Private by design.'**
-  String get privateByDesign;
-
-  /// No description provided for @onboardingPage2Description.
-  ///
-  /// In en, this message translates to:
-  /// **'Your money stays on your device. No telemetry, no syncing, no third parties.'**
-  String get onboardingPage2Description;
-
-  /// No description provided for @fullyOfflineTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Fully offline'**
-  String get fullyOfflineTitle;
-
-  /// No description provided for @fullyOfflineBody.
-  ///
-  /// In en, this message translates to:
-  /// **'No cloud servers. Nothing to breach. Works in airplane mode.'**
-  String get fullyOfflineBody;
-
-  /// No description provided for @noAccountTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No account needed'**
-  String get noAccountTitle;
-
-  /// No description provided for @noAccountBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Open the app and start. Zero signup, zero friction.'**
-  String get noAccountBody;
-
-  /// No description provided for @privacyModeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy mode'**
-  String get privacyModeTitle;
-
-  /// No description provided for @privacyModeBody.
-  ///
-  /// In en, this message translates to:
-  /// **'One tap hides every balance when you hand over your phone.'**
-  String get privacyModeBody;
-
-  /// No description provided for @modulesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'8+ MODULES · ZERO CLUTTER'**
-  String get modulesTitle;
-
-  /// No description provided for @everythingInOnePlace.
-  ///
-  /// In en, this message translates to:
-  /// **'Everything in\none quiet place.'**
-  String get everythingInOnePlace;
-
-  /// No description provided for @onboardingPage3Description.
-  ///
-  /// In en, this message translates to:
-  /// **'Track expenses, plan budgets, monitor portfolios, and ask Kuber for answers.'**
-  String get onboardingPage3Description;
-
-  /// No description provided for @budgetsModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Budgets'**
-  String get budgetsModule;
-
-  /// No description provided for @analyticsModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Analytics'**
-  String get analyticsModule;
-
   /// No description provided for @recurringModule.
   ///
   /// In en, this message translates to:
   /// **'Recurring'**
   String get recurringModule;
-
-  /// No description provided for @lendBorrowModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Lend &\nborrow'**
-  String get lendBorrowModule;
-
-  /// No description provided for @investmentsModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Investments'**
-  String get investmentsModule;
-
-  /// No description provided for @askKuberModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask Kuber AI'**
-  String get askKuberModule;
-
-  /// No description provided for @toolsModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Tools &\nCalculators'**
-  String get toolsModule;
-
-  /// No description provided for @tagsCategoriesModule.
-  ///
-  /// In en, this message translates to:
-  /// **'Tags &\nCategories'**
-  String get tagsCategoriesModule;
-
-  /// No description provided for @andMuchMore.
-  ///
-  /// In en, this message translates to:
-  /// **'••• and much more!'**
-  String get andMuchMore;
 
   /// No description provided for @makeItYours.
   ///
@@ -387,42 +273,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SYSTEM'**
   String get themeSystem;
-
-  /// No description provided for @justSoYouKnow.
-  ///
-  /// In en, this message translates to:
-  /// **'Just so you know'**
-  String get justSoYouKnow;
-
-  /// No description provided for @goToTutorials.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to tutorials'**
-  String get goToTutorials;
-
-  /// No description provided for @exploreAtOwnPace.
-  ///
-  /// In en, this message translates to:
-  /// **'You can explore at your own pace'**
-  String get exploreAtOwnPace;
-
-  /// No description provided for @exploreAtOwnPaceBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Kuber is built to feel familiar, so you can start logging right away.'**
-  String get exploreAtOwnPaceBody;
-
-  /// No description provided for @walkthroughNearby.
-  ///
-  /// In en, this message translates to:
-  /// **'A walkthrough is always nearby'**
-  String get walkthroughNearby;
-
-  /// No description provided for @walkthroughNearbyBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Open More, then App Tutorial, whenever you want a quick guided tour.'**
-  String get walkthroughNearbyBody;
 
   /// No description provided for @settingsTitle.
   ///
@@ -4663,18 +4513,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replay the feature walkthrough'**
   String get menuTutorialDesc;
-
-  /// No description provided for @menuWelcomeTour.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome Tour'**
-  String get menuWelcomeTour;
-
-  /// No description provided for @menuWelcomeTourDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Replay the welcome and setup screens'**
-  String get menuWelcomeTourDesc;
 
   /// No description provided for @menuRateUs.
   ///
@@ -9122,53 +8960,17 @@ abstract class AppLocalizations {
   /// **'Groceries · Today'**
   String get textSizePreviewMeta;
 
-  /// No description provided for @homeV2GsProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'{done} of 3 done'**
-  String homeV2GsProgress(int done);
-
   /// No description provided for @homeV2GsTitle.
   ///
   /// In en, this message translates to:
   /// **'Let\'s set up Kuber'**
   String get homeV2GsTitle;
 
-  /// No description provided for @homeV2GsBodyFresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Import your bank SMS and Kuber adds your transactions for you. Your messages stay on this phone.'**
-  String get homeV2GsBodyFresh;
-
-  /// No description provided for @homeV2GsBodyOneDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Good start. Two more steps to go.'**
-  String get homeV2GsBodyOneDone;
-
   /// No description provided for @homeV2GsBodyTwoDone.
   ///
   /// In en, this message translates to:
   /// **'Almost there. One more step to go.'**
   String get homeV2GsBodyTwoDone;
-
-  /// No description provided for @homeV2GsBodyDenied.
-  ///
-  /// In en, this message translates to:
-  /// **'Kuber needs permission to read bank SMS. Messages are read on this phone and never uploaded.'**
-  String get homeV2GsBodyDenied;
-
-  /// No description provided for @homeV2GsBodyBlocked.
-  ///
-  /// In en, this message translates to:
-  /// **'SMS access is turned off for Kuber. You can turn it on in your phone settings or paste a bank SMS.'**
-  String get homeV2GsBodyBlocked;
-
-  /// No description provided for @homeV2GsStep1.
-  ///
-  /// In en, this message translates to:
-  /// **'Import from SMS'**
-  String get homeV2GsStep1;
 
   /// No description provided for @homeV2GsStep2.
   ///
@@ -9182,30 +8984,6 @@ abstract class AppLocalizations {
   /// **'Set your starting balance'**
   String get homeV2GsStep3;
 
-  /// No description provided for @homeV2GsStepNeedsPermission.
-  ///
-  /// In en, this message translates to:
-  /// **'Needs SMS permission'**
-  String get homeV2GsStepNeedsPermission;
-
-  /// No description provided for @homeV2GsLimitTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This week\'s free imports are used'**
-  String get homeV2GsLimitTitle;
-
-  /// No description provided for @homeV2GsLimitBody.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 more SMS is waiting in SMS import. It stays there until you import it.} other{{count} more SMS are waiting in SMS import. They stay there until you import them.}}'**
-  String homeV2GsLimitBody(int count);
-
-  /// No description provided for @homeV2GsLimitReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Free imports reset on {date}.'**
-  String homeV2GsLimitReset(String date);
-
   /// No description provided for @homeV2GsDoneTitle.
   ///
   /// In en, this message translates to:
@@ -9218,53 +8996,17 @@ abstract class AppLocalizations {
   /// **'Kuber will add more to your Home as you use it.'**
   String get homeV2GsDoneBody;
 
-  /// No description provided for @homeV2GsActImport.
-  ///
-  /// In en, this message translates to:
-  /// **'Import from SMS'**
-  String get homeV2GsActImport;
-
   /// No description provided for @homeV2GsActAdd.
   ///
   /// In en, this message translates to:
   /// **'Add transaction'**
   String get homeV2GsActAdd;
 
-  /// No description provided for @homeV2GsActQuick.
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Add'**
-  String get homeV2GsActQuick;
-
   /// No description provided for @homeV2GsActBalance.
   ///
   /// In en, this message translates to:
   /// **'Set balance'**
   String get homeV2GsActBalance;
-
-  /// No description provided for @homeV2GsActAllow.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow SMS access'**
-  String get homeV2GsActAllow;
-
-  /// No description provided for @homeV2GsActSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Open phone settings'**
-  String get homeV2GsActSettings;
-
-  /// No description provided for @homeV2GsActPaste.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste an SMS'**
-  String get homeV2GsActPaste;
-
-  /// No description provided for @homeV2GsActPro.
-  ///
-  /// In en, this message translates to:
-  /// **'See Kuber Pro'**
-  String get homeV2GsActPro;
 
   /// No description provided for @homeV2GsCloseA11y.
   ///
@@ -9359,7 +9101,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeV2EdSecAuto.
   ///
   /// In en, this message translates to:
-  /// **'Turns on with your data'**
+  /// **'Turns on when you add transactions'**
   String get homeV2EdSecAuto;
 
   /// No description provided for @homeV2EdSecMore.
@@ -9667,6 +9409,666 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set up Kuber Cards'**
   String get homeV2SgCardsAct;
+
+  /// No description provided for @homeV33TourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Why Kuber?'**
+  String get homeV33TourName;
+
+  /// No description provided for @homeV33TourMoreSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How expense tracking works, and how Kuber helps'**
+  String get homeV33TourMoreSub;
+
+  /// No description provided for @homeV33TourCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'How tracking every expense helps, and what Kuber can do.'**
+  String get homeV33TourCardBody;
+
+  /// No description provided for @homeV33TourCardAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Show me'**
+  String get homeV33TourCardAct;
+
+  /// No description provided for @homeV33TourCardHideA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide this card'**
+  String get homeV33TourCardHideA11y;
+
+  /// No description provided for @homeV33TourCardHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You can find Why Kuber? in More.'**
+  String get homeV33TourCardHidden;
+
+  /// No description provided for @homeV33TourNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get homeV33TourNext;
+
+  /// No description provided for @homeV33TourDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get homeV33TourDone;
+
+  /// No description provided for @homeV33TourPageA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {total}'**
+  String homeV33TourPageA11y(int page, int total);
+
+  /// No description provided for @homeV33P1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Make noting every expense a habit.'**
+  String get homeV33P1Title;
+
+  /// No description provided for @homeV33P1SubSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Small expenses count too. Noting is easy, and bank SMS add most of them.'**
+  String get homeV33P1SubSms;
+
+  /// No description provided for @homeV33P1Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Small expenses count too. Kuber makes noting them easy.'**
+  String get homeV33P1Sub;
+
+  /// No description provided for @homeV33P1Try.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a transaction'**
+  String get homeV33P1Try;
+
+  /// No description provided for @homeV33P1ColDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get homeV33P1ColDate;
+
+  /// No description provided for @homeV33P1ColAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get homeV33P1ColAmount;
+
+  /// No description provided for @homeV33P1ColSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent on'**
+  String get homeV33P1ColSpent;
+
+  /// No description provided for @homeV33P1ColCat.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get homeV33P1ColCat;
+
+  /// No description provided for @homeV33P1A11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Three expenses written in a notebook turn into Kuber transactions, each with a category and an account.'**
+  String get homeV33P1A11y;
+
+  /// No description provided for @homeV33DFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food delivery'**
+  String get homeV33DFood;
+
+  /// No description provided for @homeV33DAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto ride'**
+  String get homeV33DAuto;
+
+  /// No description provided for @homeV33DMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie tickets'**
+  String get homeV33DMovie;
+
+  /// No description provided for @homeV33DCoffee.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee'**
+  String get homeV33DCoffee;
+
+  /// No description provided for @homeV33DGroc.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get homeV33DGroc;
+
+  /// No description provided for @homeV33CFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get homeV33CFood;
+
+  /// No description provided for @homeV33CTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get homeV33CTransport;
+
+  /// No description provided for @homeV33CFun.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get homeV33CFun;
+
+  /// No description provided for @homeV33CShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get homeV33CShopping;
+
+  /// No description provided for @homeV33ABank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get homeV33ABank;
+
+  /// No description provided for @homeV33ACash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get homeV33ACash;
+
+  /// No description provided for @homeV33ACard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card'**
+  String get homeV33ACard;
+
+  /// No description provided for @homeV33DBankName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Bank'**
+  String get homeV33DBankName;
+
+  /// No description provided for @homeV33P2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Every account. Even credit cards.'**
+  String get homeV33P2Title;
+
+  /// No description provided for @homeV33P2Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank, cash and cards, with billing cycles and due dates. Add any category.'**
+  String get homeV33P2Sub;
+
+  /// No description provided for @homeV33P2Try.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Accounts'**
+  String get homeV33P2Try;
+
+  /// No description provided for @homeV33P2Balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get homeV33P2Balance;
+
+  /// No description provided for @homeV33P2Due.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get homeV33P2Due;
+
+  /// No description provided for @homeV33P2Cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing cycle {start} to {end}'**
+  String homeV33P2Cycle(String start, String end);
+
+  /// No description provided for @homeV33P2DueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String homeV33P2DueOn(String date);
+
+  /// No description provided for @homeV33P2PetCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet care'**
+  String get homeV33P2PetCare;
+
+  /// No description provided for @homeV33P2A11y.
+  ///
+  /// In en, this message translates to:
+  /// **'A bank account, cash and a credit card show their balances. The card shows its billing cycle and due date. A new category, Pet care, joins the others.'**
+  String get homeV33P2A11y;
+
+  /// No description provided for @homeV33P3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Track more than spending.'**
+  String get homeV33P3Title;
+
+  /// No description provided for @homeV33P3Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets, investments, loans, money lent or borrowed, and subscriptions.'**
+  String get homeV33P3Sub;
+
+  /// No description provided for @homeV33P3Try.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Upcoming events'**
+  String get homeV33P3Try;
+
+  /// No description provided for @homeV33P3Budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Food budget'**
+  String get homeV33P3Budget;
+
+  /// No description provided for @homeV33P3BudgetOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{spent} of {limit}'**
+  String homeV33P3BudgetOf(String spent, String limit);
+
+  /// No description provided for @homeV33P3Inv.
+  ///
+  /// In en, this message translates to:
+  /// **'Investments'**
+  String get homeV33P3Inv;
+
+  /// No description provided for @homeV33P3InvTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'SIPs, stocks, FDs and more'**
+  String get homeV33P3InvTypes;
+
+  /// No description provided for @homeV33P3Loan.
+  ///
+  /// In en, this message translates to:
+  /// **'Home loan'**
+  String get homeV33P3Loan;
+
+  /// No description provided for @homeV33P3LoanSub.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI {amount} · {paid} of {total}'**
+  String homeV33P3LoanSub(String amount, int paid, int total);
+
+  /// No description provided for @homeV33P3Lent.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} owes you'**
+  String homeV33P3Lent(String name);
+
+  /// No description provided for @homeV33P3Borrowed.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {name}'**
+  String homeV33P3Borrowed(String name);
+
+  /// No description provided for @homeV33P3Subs.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaming plan'**
+  String get homeV33P3Subs;
+
+  /// No description provided for @homeV33P3SubsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month'**
+  String homeV33P3SubsSub(String amount);
+
+  /// No description provided for @homeV33P3Renews.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews {date}'**
+  String homeV33P3Renews(String date);
+
+  /// No description provided for @homeV33P3Next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next {date}'**
+  String homeV33P3Next(String date);
+
+  /// No description provided for @homeV33P3A11y.
+  ///
+  /// In en, this message translates to:
+  /// **'A budget fills, an investment grows, a loan EMI is paid, money lent and borrowed shows up, and a subscription renews.'**
+  String get homeV33P3A11y;
+
+  /// No description provided for @homeV33P4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spending, at a glance.'**
+  String get homeV33P4Title;
+
+  /// No description provided for @homeV33P4Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Every transaction in one searchable history, with many ways to analyze it.'**
+  String get homeV33P4Sub;
+
+  /// No description provided for @homeV33P4Try.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Analytics'**
+  String get homeV33P4Try;
+
+  /// No description provided for @homeV33P4Search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get homeV33P4Search;
+
+  /// No description provided for @homeV33P4Query.
+  ///
+  /// In en, this message translates to:
+  /// **'food'**
+  String get homeV33P4Query;
+
+  /// No description provided for @homeV33P4Today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get homeV33P4Today;
+
+  /// No description provided for @homeV33P4Yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get homeV33P4Yesterday;
+
+  /// No description provided for @homeV33P4ByCat.
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get homeV33P4ByCat;
+
+  /// No description provided for @homeV33P4Monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get homeV33P4Monthly;
+
+  /// No description provided for @homeV33P4Compare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get homeV33P4Compare;
+
+  /// No description provided for @homeV33P4A11y.
+  ///
+  /// In en, this message translates to:
+  /// **'A searchable history narrows to food. Then charts show spending by category, by month, and this month against last month.'**
+  String get homeV33P4A11y;
+
+  /// No description provided for @homeV33P5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Go further when you want.'**
+  String get homeV33P5Title;
+
+  /// No description provided for @homeV33P5Ask.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber'**
+  String get homeV33P5Ask;
+
+  /// No description provided for @homeV33P5AskLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about your money, answered on your phone.'**
+  String get homeV33P5AskLine;
+
+  /// No description provided for @homeV33P5Cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Cards'**
+  String get homeV33P5Cards;
+
+  /// No description provided for @homeV33P5CardsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cards, encrypted and kept on your phone.'**
+  String get homeV33P5CardsLine;
+
+  /// No description provided for @homeV33P5Notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Notes'**
+  String get homeV33P5Notes;
+
+  /// No description provided for @homeV33P5NotesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes that do the math and add transactions.'**
+  String get homeV33P5NotesLine;
+
+  /// No description provided for @homeV33P5Calc.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculators and tools'**
+  String get homeV33P5Calc;
+
+  /// No description provided for @homeV33P5CalcLine.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI, SIP, tax and more.'**
+  String get homeV33P5CalcLine;
+
+  /// No description provided for @homeV33P5Rem.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get homeV33P5Rem;
+
+  /// No description provided for @homeV33P5RemLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Never miss a bill.'**
+  String get homeV33P5RemLine;
+
+  /// No description provided for @homeV33P5Try.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Signature tools'**
+  String get homeV33P5Try;
+
+  /// No description provided for @homeV33P5AskQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How much on food this month?'**
+  String get homeV33P5AskQ;
+
+  /// No description provided for @homeV33P5AskA.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} so far, 70% of your Food budget.'**
+  String homeV33P5AskA(String amount);
+
+  /// No description provided for @homeV33P5NoteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Goa trip'**
+  String get homeV33P5NoteName;
+
+  /// No description provided for @homeV33P5Hotel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotel'**
+  String get homeV33P5Hotel;
+
+  /// No description provided for @homeV33P5Taxi.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get homeV33P5Taxi;
+
+  /// No description provided for @homeV33P5Travel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get homeV33P5Travel;
+
+  /// No description provided for @homeV33P5SipCalc.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP calculator'**
+  String get homeV33P5SipCalc;
+
+  /// No description provided for @homeV33P5PerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month'**
+  String homeV33P5PerMonth(String amount);
+
+  /// No description provided for @homeV33P5Rate.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% a year'**
+  String homeV33P5Rate(int rate);
+
+  /// No description provided for @homeV33P5Years.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} years'**
+  String homeV33P5Years(int n);
+
+  /// No description provided for @homeV33P5RemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity bill'**
+  String get homeV33P5RemTitle;
+
+  /// No description provided for @homeV33P5RemDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due tomorrow · {amount}'**
+  String homeV33P5RemDue(String amount);
+
+  /// No description provided for @homeV33P5A11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.'**
+  String get homeV33P5A11y;
+
+  /// No description provided for @homeV3TrkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to track?'**
+  String get homeV3TrkTitle;
+
+  /// No description provided for @homeV3TrkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.'**
+  String get homeV3TrkBody;
+
+  /// No description provided for @homeV31TrkBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get homeV31TrkBudgets;
+
+  /// No description provided for @homeV3TrkLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans and EMIs'**
+  String get homeV3TrkLoans;
+
+  /// No description provided for @homeV3TrkInvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Investments and SIPs'**
+  String get homeV3TrkInvest;
+
+  /// No description provided for @homeV3TrkLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Money lent or borrowed'**
+  String get homeV3TrkLedger;
+
+  /// No description provided for @homeV3TrkSubs.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get homeV3TrkSubs;
+
+  /// No description provided for @homeV33EdNeedsTxn.
+  ///
+  /// In en, this message translates to:
+  /// **'Appears after your first transaction'**
+  String get homeV33EdNeedsTxn;
+
+  /// No description provided for @homeV33SgQuickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add in one line with Quick Add'**
+  String get homeV33SgQuickTitle;
+
+  /// No description provided for @homeV33SgQuickBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type something like \"250 lunch\" or tap the mic and say it. Kuber turns it into a transaction.'**
+  String get homeV33SgQuickBody;
+
+  /// No description provided for @homeV33SgQuickAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Quick Add'**
+  String get homeV33SgQuickAct;
+
+  /// No description provided for @homeV33SgSmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let bank SMS add your expenses'**
+  String get homeV33SgSmsTitle;
+
+  /// No description provided for @homeV33SgSmsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber can read bank SMS on this phone and add most transactions for you. They never leave your phone.'**
+  String get homeV33SgSmsBody;
+
+  /// No description provided for @homeV33SgSmsAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from SMS'**
+  String get homeV33SgSmsAct;
+
+  /// No description provided for @homeV33GsBodyFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your accounts, then add your first transaction. It takes a minute.'**
+  String get homeV33GsBodyFresh;
+
+  /// No description provided for @homeV33GsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of 2 done'**
+  String homeV33GsProgress(int done);
+
+  /// No description provided for @homeV33GsActAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'View accounts'**
+  String get homeV33GsActAccounts;
+
+  /// No description provided for @homeV33GsStepAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up accounts'**
+  String get homeV33GsStepAccounts;
 }
 
 class _AppLocalizationsDelegate

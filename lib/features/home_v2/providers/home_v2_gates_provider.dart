@@ -6,10 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../main.dart' show onOpenBatchReadyProvider;
 import '../../sms_import/providers/sms_import_provider.dart';
-import '../../widget_editor/data/widget_catalog.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../data/home_v2_state.dart';
+import '../data/home_v2_widgets.dart' show kHomeV2Order;
 import '../services/home_v2_gates.dart';
 import 'home_v2_provider.dart';
 
@@ -149,7 +149,7 @@ List<HomeWidgetConfig> insertUnlocked(
   Set<String> ids,
 ) {
   final list = List.of(configs);
-  final catalogIds = [for (final c in kHomeWidgetCatalog) c.id];
+  final catalogIds = kHomeV2Order;
   for (final id in catalogIds.where(ids.contains)) {
     final at = list.indexWhere((c) => c.id == id);
     if (at < 0) continue;

@@ -175,6 +175,27 @@ class SgScheduler {
   /// Global eligibility checks that need no data (suggestion-rules.md §3.1
   /// to 3.5). The provider runs these first, so the rules never run for an
   /// ineligible install or session.
+  /// Why Kuber card (specs/home-v3.3/plan.md §4): every install on the
+  /// widget model, once Get started has graduated (no 24 h wait), until the
+  /// tour is seen or the card is closed. Shown before any other suggestion
+  /// and outside the daily allowance.
+  static bool whyKuberEligible({
+    required bool isV2,
+    required bool gsGraduated,
+    required bool setting,
+    required bool promoVisible,
+    required bool sessionLocked,
+    required bool tourSeen,
+    required bool cardDismissed,
+  }) =>
+      isV2 &&
+      gsGraduated &&
+      setting &&
+      !promoVisible &&
+      !sessionLocked &&
+      !tourSeen &&
+      !cardDismissed;
+
   static bool eligible({
     required bool isV2,
     required DateTime? gsGraduatedAt,
@@ -212,11 +233,15 @@ class SgScheduler {
 
   /// Picks the card for the first Home build of a session from the engine's
   /// [candidates] (instances whose trigger is true now).
+  ///
+  /// [movedBack]: types matching a "What do you want to track?" choice sort
+  /// after every other data type, still before discovery types (v3 §6).
   static SgSelection select(
     SgStore store,
     List<SgCandidate> candidates,
-    DateTime now,
-  ) {
+    DateTime now, {
+    Set<SgType> movedBack = const {},
+  }) {
     var s = store;
     final today = dayStamp(now);
     final byKey = {for (final c in candidates) c.key: c};
@@ -265,6 +290,10 @@ class SgScheduler {
     final data = pool.where((c) => !c.type.isDiscovery).toList();
     final from = data.isNotEmpty ? data : pool;
     from.sort((a, b) {
+      final m = (movedBack.contains(a.type) ? 1 : 0).compareTo(
+        movedBack.contains(b.type) ? 1 : 0,
+      );
+      if (m != 0) return m;
       final p = a.type.priority.compareTo(b.type.priority);
       return p != 0 ? p : b.rank.compareTo(a.rank);
     });

@@ -143,6 +143,18 @@ class DevToolsScreen extends ConsumerWidget {
                 () => runSuggestionRulesNow(context, ref),
               ),
               row(
+                Icons.play_circle_outline_rounded,
+                'Reset Why Kuber',
+                'Clear "tour seen" and the Home card dismissal',
+                () => resetWhyKuber(context, ref),
+              ),
+              row(
+                Icons.sync_alt_rounded,
+                'Re-run update migration',
+                'Treat this install as an existing user and migrate again',
+                () => rerunUpdateMigration(context, ref),
+              ),
+              row(
                 Icons.lightbulb_outline_rounded,
                 'Force suggestion',
                 'Show any suggestion card now with sample data',

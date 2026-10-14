@@ -37,6 +37,8 @@ import '../../pro/trial/trial_ending_sheet.dart';
 import '../../upcoming_events/widgets/upcoming_events_widget.dart';
 import '../widgets/quick_add_widget.dart';
 import '../../home_v2/data/home_v2_state.dart';
+import '../../home_v2/data/home_v2_widgets.dart' show needsTransactions;
+import '../../home_v2/providers/has_transactions_provider.dart';
 import '../../home_v2/providers/home_v2_gates_provider.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import '../../home_v2/widgets/home_v2_top_slot.dart';
@@ -221,6 +223,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final l10n = context.l10n;
     final widgetsAsync = ref.watch(homeWidgetsProvider);
     final isV2 = ref.watch(isHomeV2Provider);
+    final hasTxns = ref.watch(hasTransactionsProvider);
     final gsEligible = ref.watch(homeV2Provider.select((s) => s.gsEligible));
 
     // Fixed leading items (header, greeting, promo) followed by the dynamic
@@ -282,7 +285,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ],
       error: (_, __) => const <Widget>[],
       data: (configs) {
-        final visible = configs.where((c) => c.enabled).toList();
+        // Transaction gate (specs/home-v3.3/plan.md §3): widgets that need
+        // transactions are not built until the first one exists.
+        final visible = configs
+            .where((c) => c.enabled && (hasTxns || !needsTransactions(c.id)))
+            .toList();
         return <Widget>[
           // Each widget owns its own bottom spacing (see _buildHomeWidget) so a
           // widget that self-hides in an empty state leaves no gap.

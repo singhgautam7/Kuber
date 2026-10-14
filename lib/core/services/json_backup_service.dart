@@ -223,6 +223,11 @@ class JsonBackupService {
       // as a locked import so the unlock screen asks for the previous device's
       // PIN (persist first, verify after). See specs/plans/kuber-cards.md §6.3.
       await restore('storedCards', 'cards', isar.storedCards, StoredCard.fromMap);
+      // Home and Analytics layouts (exported since the widget editor
+      // shipped, never restored before). Home rows are then ported onto the
+      // widget model by onHomeV2DataRestored (specs/home-v3.3/plan.md §2).
+      await restore('widgetPreferences', 'widget layout',
+          isar.widgetPreferences, WidgetPreference.fromMap);
       final metaMap = data['cardVaultMeta'];
       if (metaMap is Map<String, dynamic>) {
         final meta = CardVaultMeta.fromMap(metaMap)

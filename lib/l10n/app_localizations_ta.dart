@@ -54,69 +54,7 @@ class AppLocalizationsTa extends AppLocalizations {
   }
 
   @override
-  String get privateByDesign => 'வடிவமைப்பிலேயே தனியுரிமை.';
-
-  @override
-  String get onboardingPage2Description =>
-      'உங்கள் பணம் உங்கள் சாதனத்திலேயே இருக்கும். டெலிமெட்ரி இல்லை, ஒத்திசைவு இல்லை, மூன்றாம் தரப்பினர் இல்லை.';
-
-  @override
-  String get fullyOfflineTitle => 'முழுமையாக ஆஃப்லைன்';
-
-  @override
-  String get fullyOfflineBody =>
-      'கிளவுட் சர்வர்கள் இல்லை. பாதுகாப்பு மீறலுக்கு இடமில்லை. ஏர்பிளேன் மோடிலும் வேலை செய்யும்.';
-
-  @override
-  String get noAccountTitle => 'கணக்கு தேவையில்லை';
-
-  @override
-  String get noAccountBody =>
-      'செயலியைத் திறந்து தொடங்கவும். பூஜ்ஜியப் பதிவுபெறுதல், பூஜ்ஜியச் சிரமம்.';
-
-  @override
-  String get privacyModeTitle => 'தனியுரிமை பயன்முறை';
-
-  @override
-  String get privacyModeBody =>
-      'உங்கள் தொலைபேசியை பிறரிடம் கொடுக்கும்போது, ஒரு தட்டலில் அனைத்து இருப்புகளையும் மறைக்கலாம்.';
-
-  @override
-  String get modulesTitle => '8+ தொகுதிகள் · பூஜ்ஜியக் குழப்பம்';
-
-  @override
-  String get everythingInOnePlace => 'அனைத்தும்\nஒரே அமைதியான இடத்தில்.';
-
-  @override
-  String get onboardingPage3Description =>
-      'செலவுகளைக் கண்காணிக்கவும், பட்ஜெட்களைத் திட்டமிடவும், போர்ட்ஃபோலியோக்களைக் கண்காணிக்கவும் மற்றும் பதில்களுக்கு குபேர்-இடம் கேட்கவும்.';
-
-  @override
-  String get budgetsModule => 'பட்ஜெட்கள்';
-
-  @override
-  String get analyticsModule => 'பகுப்பாய்வு';
-
-  @override
   String get recurringModule => 'மீண்டும் நிகழும் செலவுகள்';
-
-  @override
-  String get lendBorrowModule => 'கடன் கொடுத்தல் &\nவாங்குதல்';
-
-  @override
-  String get investmentsModule => 'முதலீடுகள்';
-
-  @override
-  String get askKuberModule => 'குபேர் AI-இடம் கேட்கவும்';
-
-  @override
-  String get toolsModule => 'கருவிகள் &\nகால்குலேட்டர்கள்';
-
-  @override
-  String get tagsCategoriesModule => 'குறிச்சொற்கள் &\nவகைகள்';
-
-  @override
-  String get andMuchMore => '••• இன்னும் பல!';
 
   @override
   String get makeItYours => 'உங்களுடையதாக்கிக் கொள்ளுங்கள்.';
@@ -155,26 +93,6 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get themeSystem => 'சிஸ்டம்';
-
-  @override
-  String get justSoYouKnow => 'சும்மா தெரிந்துகொள்ள';
-
-  @override
-  String get goToTutorials => 'பயிற்சிகளுக்குச் செல்லவும்';
-
-  @override
-  String get exploreAtOwnPace => 'நீங்கள் உங்கள் சொந்த வேகத்தில் ஆராயலாம்';
-
-  @override
-  String get exploreAtOwnPaceBody =>
-      'குபேர் உங்களுக்குப் பழக்கப்பட்ட ஒன்றாக இருக்கும்படி வடிவமைக்கப்பட்டுள்ளது, எனவே நீங்கள் உடனே பதிவுகளைத் தொடங்கலாம்.';
-
-  @override
-  String get walkthroughNearby => 'வழிகாட்டி எப்போதுமே அருகிலுள்ளது';
-
-  @override
-  String get walkthroughNearbyBody =>
-      'உங்களுக்கு எப்போது வழிகாட்டித் தேவைப்பட்டாலும், \'மேலும்\' என்பதைத் திறந்து, பின் \'செயலி பயிற்சி\'-ஐத் திறக்கவும்.';
 
   @override
   String get settingsTitle => 'அமைப்புகள்';
@@ -2557,13 +2475,6 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get menuTutorialDesc => 'அம்சங்களின் வழிகாட்டியை மீண்டும் பார்க்கவும்';
-
-  @override
-  String get menuWelcomeTour => 'வரவேற்பு சுற்றுலா';
-
-  @override
-  String get menuWelcomeTourDesc =>
-      'வரவேற்பு மற்றும் அமைவு திரைகளை மீண்டும் பார்க்கவும்';
 
   @override
   String get menuRateUs => 'ப்ளே ஸ்டோரில் எங்களை மதிப்பிடுங்கள்';
@@ -5121,66 +5032,17 @@ class AppLocalizationsTa extends AppLocalizations {
   String get textSizePreviewMeta => 'மளிகை · இன்று';
 
   @override
-  String homeV2GsProgress(int done) {
-    return '3-இல் $done முடிந்தது';
-  }
-
-  @override
   String get homeV2GsTitle => 'Kuber-ஐ அமைப்போம்';
-
-  @override
-  String get homeV2GsBodyFresh =>
-      'உங்கள் வங்கி SMS-ஐ இறக்குமதி செய்யுங்கள், Kuber உங்கள் பரிவர்த்தனைகளைத் தானே சேர்க்கும். உங்கள் செய்திகள் இந்த ஃபோனிலேயே இருக்கும்.';
-
-  @override
-  String get homeV2GsBodyOneDone =>
-      'நல்ல தொடக்கம். இன்னும் இரண்டு படிகள் உள்ளன.';
 
   @override
   String get homeV2GsBodyTwoDone =>
       'கிட்டத்தட்ட முடிந்தது. இன்னும் ஒரு படி உள்ளது.';
 
   @override
-  String get homeV2GsBodyDenied =>
-      'வங்கி SMS-ஐப் படிக்க Kuber-க்கு அனுமதி தேவை. செய்திகள் இந்த ஃபோனிலேயே படிக்கப்படும், ஒருபோதும் பதிவேற்றப்படாது.';
-
-  @override
-  String get homeV2GsBodyBlocked =>
-      'Kuber-க்கு SMS அணுகல் முடக்கப்பட்டுள்ளது. ஃபோன் அமைப்புகளில் இயக்கலாம் அல்லது வங்கி SMS-ஐ ஒட்டலாம்.';
-
-  @override
-  String get homeV2GsStep1 => 'SMS-இலிருந்து இறக்குமதி';
-
-  @override
   String get homeV2GsStep2 => 'நீங்களே ஒரு பரிவர்த்தனையைச் சேர்க்கவும்';
 
   @override
   String get homeV2GsStep3 => 'உங்கள் தொடக்க இருப்பை அமைக்கவும்';
-
-  @override
-  String get homeV2GsStepNeedsPermission => 'SMS அனுமதி தேவை';
-
-  @override
-  String get homeV2GsLimitTitle =>
-      'இந்த வாரத்தின் இலவச இறக்குமதிகள் பயன்படுத்தப்பட்டன';
-
-  @override
-  String homeV2GsLimitBody(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'SMS இறக்குமதியில் இன்னும் $count SMS காத்திருக்கின்றன. நீங்கள் இறக்குமதி செய்யும் வரை அவை அங்கேயே இருக்கும்.',
-      one:
-          'SMS இறக்குமதியில் இன்னும் 1 SMS காத்திருக்கிறது. நீங்கள் இறக்குமதி செய்யும் வரை அது அங்கேயே இருக்கும்.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String homeV2GsLimitReset(String date) {
-    return 'இலவச இறக்குமதிகள் $date அன்று மீட்டமைக்கப்படும்.';
-  }
 
   @override
   String get homeV2GsDoneTitle => 'நீங்கள் தயார்';
@@ -5190,28 +5052,10 @@ class AppLocalizationsTa extends AppLocalizations {
       'நீங்கள் பயன்படுத்தும்போது Kuber உங்கள் முகப்பில் மேலும் சேர்க்கும்.';
 
   @override
-  String get homeV2GsActImport => 'SMS-இலிருந்து இறக்குமதி';
-
-  @override
   String get homeV2GsActAdd => 'பரிவர்த்தனை சேர்';
 
   @override
-  String get homeV2GsActQuick => 'விரைவுச் சேர்ப்பு';
-
-  @override
   String get homeV2GsActBalance => 'இருப்பை அமை';
-
-  @override
-  String get homeV2GsActAllow => 'SMS அணுகலை அனுமதி';
-
-  @override
-  String get homeV2GsActSettings => 'ஃபோன் அமைப்புகளைத் திற';
-
-  @override
-  String get homeV2GsActPaste => 'SMS-ஐ ஒட்டு';
-
-  @override
-  String get homeV2GsActPro => 'Kuber Pro-வைப் பார்';
 
   @override
   String get homeV2GsCloseA11y => 'தொடங்குக அட்டையை மூடு';
@@ -5273,7 +5117,7 @@ class AppLocalizationsTa extends AppLocalizations {
       'உங்கள் சொந்தப் பரிவர்த்தனைகளிலிருந்து உதவிக்குறிப்புகள். எப்போதும் மேலே.';
 
   @override
-  String get homeV2EdSecAuto => 'உங்கள் தரவுடன் இயங்கும்';
+  String get homeV2EdSecAuto => 'பரிவர்த்தனைகளைச் சேர்க்கும்போது இயங்கும்';
 
   @override
   String get homeV2EdSecMore => 'மேலும் விட்ஜெட்டுகள்';
@@ -5460,4 +5304,386 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get homeV2SgCardsAct => 'Kuber Cards-ஐ அமை';
+
+  @override
+  String get homeV33TourName => 'ஏன் Kuber?';
+
+  @override
+  String get homeV33TourMoreSub =>
+      'செலவைக் கண்காணிப்பது எப்படி வேலை செய்கிறது, Kuber எப்படி உதவுகிறது';
+
+  @override
+  String get homeV33TourCardBody =>
+      'ஒவ்வொரு செலவையும் கண்காணிப்பது எப்படி உதவுகிறது, Kuber என்ன செய்ய முடியும்.';
+
+  @override
+  String get homeV33TourCardAct => 'காட்டு';
+
+  @override
+  String get homeV33TourCardHideA11y => 'இந்த கார்டை மறை';
+
+  @override
+  String get homeV33TourCardHidden => 'ஏன் Kuber? More-இல் காணலாம்.';
+
+  @override
+  String get homeV33TourNext => 'அடுத்து';
+
+  @override
+  String get homeV33TourDone => 'முடிந்தது';
+
+  @override
+  String homeV33TourPageA11y(int page, int total) {
+    return 'பக்கம் $page / $total';
+  }
+
+  @override
+  String get homeV33P1Title => 'ஒவ்வொரு செலவையும் எழுதுவதைப் பழக்கமாக்குங்கள்.';
+
+  @override
+  String get homeV33P1SubSms =>
+      'சிறிய செலவுகளும் முக்கியம். எழுதுவது எளிது, பெரும்பாலானவற்றை வங்கி SMS சேர்க்கும்.';
+
+  @override
+  String get homeV33P1Sub =>
+      'சிறிய செலவுகளும் முக்கியம். Kuber அவற்றை எழுதுவதை எளிதாக்குகிறது.';
+
+  @override
+  String get homeV33P1Try => 'பரிவர்த்தனை சேர்';
+
+  @override
+  String get homeV33P1ColDate => 'தேதி';
+
+  @override
+  String get homeV33P1ColAmount => 'தொகை';
+
+  @override
+  String get homeV33P1ColSpent => 'எதற்கு';
+
+  @override
+  String get homeV33P1ColCat => 'வகை';
+
+  @override
+  String get homeV33P1A11y =>
+      'நோட்டுப் புத்தகத்தில் எழுதிய மூன்று செலவுகள் Kuber பரிவர்த்தனைகளாக மாறுகின்றன, ஒவ்வொன்றும் ஒரு வகை மற்றும் கணக்குடன்.';
+
+  @override
+  String get homeV33DFood => 'உணவு டெலிவரி';
+
+  @override
+  String get homeV33DAuto => 'ஆட்டோ பயணம்';
+
+  @override
+  String get homeV33DMovie => 'சினிமா டிக்கெட்';
+
+  @override
+  String get homeV33DCoffee => 'காபி';
+
+  @override
+  String get homeV33DGroc => 'மளிகை';
+
+  @override
+  String get homeV33CFood => 'உணவு';
+
+  @override
+  String get homeV33CTransport => 'போக்குவரத்து';
+
+  @override
+  String get homeV33CFun => 'பொழுதுபோக்கு';
+
+  @override
+  String get homeV33CShopping => 'ஷாப்பிங்';
+
+  @override
+  String get homeV33ABank => 'வங்கி';
+
+  @override
+  String get homeV33ACash => 'ரொக்கம்';
+
+  @override
+  String get homeV33ACard => 'கிரெடிட் கார்டு';
+
+  @override
+  String get homeV33DBankName => 'உங்கள் வங்கி';
+
+  @override
+  String get homeV33P2Title => 'ஒவ்வொரு கணக்கும். கிரெடிட் கார்டுகளும்.';
+
+  @override
+  String get homeV33P2Sub =>
+      'வங்கி, ரொக்கம் மற்றும் கார்டுகள், பில்லிங் சுழற்சி மற்றும் செலுத்த வேண்டிய தேதிகளுடன். எந்த வகையையும் சேர்க்கலாம்.';
+
+  @override
+  String get homeV33P2Try => 'கணக்குகளைத் திற';
+
+  @override
+  String get homeV33P2Balance => 'இருப்பு';
+
+  @override
+  String get homeV33P2Due => 'செலுத்த வேண்டியது';
+
+  @override
+  String homeV33P2Cycle(String start, String end) {
+    return 'பில்லிங் சுழற்சி $start முதல் $end வரை';
+  }
+
+  @override
+  String homeV33P2DueOn(String date) {
+    return 'செலுத்த வேண்டிய தேதி $date';
+  }
+
+  @override
+  String get homeV33P2PetCare => 'செல்லப்பிராணி பராமரிப்பு';
+
+  @override
+  String get homeV33P2A11y =>
+      'ஒரு வங்கிக் கணக்கு, ரொக்கம் மற்றும் ஒரு கிரெடிட் கார்டு தங்கள் இருப்பைக் காட்டுகின்றன. கார்டு அதன் பில்லிங் சுழற்சி மற்றும் செலுத்த வேண்டிய தேதியைக் காட்டுகிறது. புதிய வகை, செல்லப்பிராணி பராமரிப்பு, மற்றவற்றுடன் சேர்கிறது.';
+
+  @override
+  String get homeV33P3Title => 'செலவுக்கு மேல் கண்காணியுங்கள்.';
+
+  @override
+  String get homeV33P3Sub =>
+      'பட்ஜெட்கள், முதலீடுகள், கடன்கள், கொடுத்த அல்லது வாங்கிய பணம், சந்தாக்கள்.';
+
+  @override
+  String get homeV33P3Try => 'வரவிருக்கும் நிகழ்வுகளைத் திற';
+
+  @override
+  String get homeV33P3Budget => 'உணவு பட்ஜெட்';
+
+  @override
+  String homeV33P3BudgetOf(String spent, String limit) {
+    return '$limit-இல் $spent';
+  }
+
+  @override
+  String get homeV33P3Inv => 'முதலீடுகள்';
+
+  @override
+  String get homeV33P3InvTypes => 'SIP, பங்குகள், FD மற்றும் பல';
+
+  @override
+  String get homeV33P3Loan => 'வீட்டுக் கடன்';
+
+  @override
+  String homeV33P3LoanSub(String amount, int paid, int total) {
+    return 'EMI $amount · $total-இல் $paid';
+  }
+
+  @override
+  String homeV33P3Lent(String name) {
+    return '$name உங்களுக்குத் தர வேண்டும்';
+  }
+
+  @override
+  String homeV33P3Borrowed(String name) {
+    return 'நீங்கள் $name-க்குத் தர வேண்டும்';
+  }
+
+  @override
+  String get homeV33P3Subs => 'ஸ்ட்ரீமிங் திட்டம்';
+
+  @override
+  String homeV33P3SubsSub(String amount) {
+    return 'மாதம் $amount';
+  }
+
+  @override
+  String homeV33P3Renews(String date) {
+    return '$date அன்று புதுப்பிப்பு';
+  }
+
+  @override
+  String homeV33P3Next(String date) {
+    return 'அடுத்து $date';
+  }
+
+  @override
+  String get homeV33P3A11y =>
+      'ஒரு பட்ஜெட் நிரம்புகிறது, ஒரு முதலீடு வளர்கிறது, கடன் EMI செலுத்தப்படுகிறது, கொடுத்த மற்றும் வாங்கிய பணம் தெரிகிறது, ஒரு சந்தா புதுப்பிக்கப்படுகிறது.';
+
+  @override
+  String get homeV33P4Title => 'உங்கள் செலவு, ஒரே பார்வையில்.';
+
+  @override
+  String get homeV33P4Sub =>
+      'ஒவ்வொரு பரிவர்த்தனையும் தேடக்கூடிய ஒரே வரலாற்றில், பகுப்பாய்வு செய்யப் பல வழிகளுடன்.';
+
+  @override
+  String get homeV33P4Try => 'அனலிட்டிக்ஸ் திற';
+
+  @override
+  String get homeV33P4Search => 'தேடு';
+
+  @override
+  String get homeV33P4Query => 'உணவு';
+
+  @override
+  String get homeV33P4Today => 'இன்று';
+
+  @override
+  String get homeV33P4Yesterday => 'நேற்று';
+
+  @override
+  String get homeV33P4ByCat => 'வகை வாரியாக';
+
+  @override
+  String get homeV33P4Monthly => 'மாதாந்திரம்';
+
+  @override
+  String get homeV33P4Compare => 'ஒப்பீடு';
+
+  @override
+  String get homeV33P4A11y =>
+      'தேடக்கூடிய வரலாறு உணவுக்குச் சுருங்குகிறது. பிறகு வரைபடங்கள் வகை வாரியாக, மாதம் வாரியாக, இந்த மாதம் கடந்த மாதத்துடன் ஒப்பிட்டு செலவைக் காட்டுகின்றன.';
+
+  @override
+  String get homeV33P5Title => 'விரும்பும்போது இன்னும் முன்னேறுங்கள்.';
+
+  @override
+  String get homeV33P5Ask => 'Ask Kuber';
+
+  @override
+  String get homeV33P5AskLine =>
+      'உங்கள் பணம் பற்றிக் கேளுங்கள், பதில் உங்கள் போனிலேயே.';
+
+  @override
+  String get homeV33P5Cards => 'Kuber Cards';
+
+  @override
+  String get homeV33P5CardsLine =>
+      'உங்கள் கார்டுகள், மறைகுறியாக்கப்பட்டு உங்கள் போனிலேயே.';
+
+  @override
+  String get homeV33P5Notes => 'Kuber Notes';
+
+  @override
+  String get homeV33P5NotesLine =>
+      'கணக்கிட்டு பரிவர்த்தனைகளைச் சேர்க்கும் குறிப்புகள்.';
+
+  @override
+  String get homeV33P5Calc => 'கால்குலேட்டர்கள் மற்றும் கருவிகள்';
+
+  @override
+  String get homeV33P5CalcLine => 'EMI, SIP, வரி மற்றும் பல.';
+
+  @override
+  String get homeV33P5Rem => 'நினைவூட்டல்கள்';
+
+  @override
+  String get homeV33P5RemLine => 'எந்த பில்லையும் தவறவிடாதீர்கள்.';
+
+  @override
+  String get homeV33P5Try => 'Signature கருவிகளைத் திற';
+
+  @override
+  String get homeV33P5AskQ => 'இந்த மாதம் உணவுக்கு எவ்வளவு செலவு?';
+
+  @override
+  String homeV33P5AskA(String amount) {
+    return 'இதுவரை $amount, உங்கள் உணவு பட்ஜெட்டின் 70%.';
+  }
+
+  @override
+  String get homeV33P5NoteName => 'கோவா பயணம்';
+
+  @override
+  String get homeV33P5Hotel => 'ஹோட்டல்';
+
+  @override
+  String get homeV33P5Taxi => 'டாக்சி';
+
+  @override
+  String get homeV33P5Travel => 'பயணம்';
+
+  @override
+  String get homeV33P5SipCalc => 'SIP கால்குலேட்டர்';
+
+  @override
+  String homeV33P5PerMonth(String amount) {
+    return 'மாதம் $amount';
+  }
+
+  @override
+  String homeV33P5Rate(int rate) {
+    return 'ஆண்டுக்கு $rate%';
+  }
+
+  @override
+  String homeV33P5Years(int n) {
+    return '$n ஆண்டுகள்';
+  }
+
+  @override
+  String get homeV33P5RemTitle => 'மின்சார பில்';
+
+  @override
+  String homeV33P5RemDue(String amount) {
+    return 'நாளை செலுத்த வேண்டும் · $amount';
+  }
+
+  @override
+  String get homeV33P5A11y =>
+      'Ask Kuber ஒரு கேள்விக்குப் பதில் தருகிறது, ஒரு கார்டு திரும்புகிறது, ஒரு குறிப்பு கூட்டி பரிவர்த்தனையாகிறது, ஒரு கால்குலேட்டர் முடிவைக் காட்டுகிறது, ஒரு பில் நினைவூட்டல் வருகிறது.';
+
+  @override
+  String get homeV3TrkTitle => 'நீங்கள் எதைக் கண்காணிக்க விரும்புகிறீர்கள்?';
+
+  @override
+  String get homeV3TrkBody =>
+      'விரும்பிய அளவு தேர்ந்தெடுங்கள். Kuber பொருந்தும் விட்ஜெட்களை உங்கள் முகப்பில் சேர்க்கும். பிறகு இதை மாற்றலாம்.';
+
+  @override
+  String get homeV31TrkBudgets => 'பட்ஜெட்கள்';
+
+  @override
+  String get homeV3TrkLoans => 'கடன்கள் மற்றும் EMI';
+
+  @override
+  String get homeV3TrkInvest => 'முதலீடுகள் மற்றும் SIP';
+
+  @override
+  String get homeV3TrkLedger => 'கொடுத்த அல்லது வாங்கிய பணம்';
+
+  @override
+  String get homeV3TrkSubs => 'சந்தாக்கள்';
+
+  @override
+  String get homeV33EdNeedsTxn =>
+      'உங்கள் முதல் பரிவர்த்தனைக்குப் பிறகு தெரியும்';
+
+  @override
+  String get homeV33SgQuickTitle => 'Quick Add மூலம் ஒரே வரியில் சேர்';
+
+  @override
+  String get homeV33SgQuickBody =>
+      '\"250 lunch\" போல டைப் செய்யுங்கள் அல்லது மைக்கைத் தொட்டுச் சொல்லுங்கள். Kuber அதைப் பரிவர்த்தனையாக்கும்.';
+
+  @override
+  String get homeV33SgQuickAct => 'Quick Add முயற்சிக்கவும்';
+
+  @override
+  String get homeV33SgSmsTitle => 'வங்கி SMS உங்கள் செலவுகளைச் சேர்க்கட்டும்';
+
+  @override
+  String get homeV33SgSmsBody =>
+      'Kuber இந்த போனில் உள்ள வங்கி SMS-ஐப் படித்து பெரும்பாலான பரிவர்த்தனைகளை உங்களுக்காகச் சேர்க்கும். அவை உங்கள் போனை விட்டு வெளியே போகாது.';
+
+  @override
+  String get homeV33SgSmsAct => 'SMS-இலிருந்து இறக்கு';
+
+  @override
+  String get homeV33GsBodyFresh =>
+      'உங்கள் கணக்குகளைப் பாருங்கள், பிறகு முதல் பரிவர்த்தனையைச் சேருங்கள். ஒரு நிமிடம் போதும்.';
+
+  @override
+  String homeV33GsProgress(int done) {
+    return '2-இல் $done முடிந்தது';
+  }
+
+  @override
+  String get homeV33GsActAccounts => 'கணக்குகளைப் பார்';
+
+  @override
+  String get homeV33GsStepAccounts => 'கணக்குகளை அமை';
 }

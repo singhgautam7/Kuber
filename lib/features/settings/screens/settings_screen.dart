@@ -1044,9 +1044,12 @@ class _HomeV2SettingsRows {
     if (!s.isV2) return const [];
     final l = context.l10n;
     final installedAt = s.installedAt;
+    // Existing users moved over by the update migration never get Get
+    // started (specs/home-v3.3/plan.md §2), so no switch for it either.
     final showGs =
-        installedAt == null ||
-        DateTime.now().difference(installedAt) <= const Duration(days: 30);
+        s.gsGraduationReason != GsGraduation.migrated &&
+        (installedAt == null ||
+            DateTime.now().difference(installedAt) <= const Duration(days: 30));
     final notifier = ref.read(homeV2Provider.notifier);
     return [
       if (showGs) ...[

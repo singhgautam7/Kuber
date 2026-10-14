@@ -7,6 +7,16 @@ library;
 
 /// Suggestion types. Data types 1 to 6, discovery D1 to D4.
 enum SgType {
+  /// The one-time Why Kuber card (specs/home-v3.3/plan.md §4). Never produced
+  /// by [SuggestionEngine]; the provider shows it before the rules run.
+  whyKuber(0),
+
+  /// Quick Add intro (widget, voice and text) from 2 transactions.
+  quickAddIntro(0),
+
+  /// Import from SMS from 3 transactions while SMS permission is not given
+  /// (after the Quick Add intro). Get started covers SMS before that.
+  smsImportIntro(0),
   loans(1),
   creditCard(2),
   recurring(3),
@@ -24,7 +34,30 @@ enum SgType {
   final int priority;
 
   bool get isDiscovery => priority > 100;
+
+  /// One-time intro cards: shown before the rules, outside the daily
+  /// allowance (specs/home-v3.3/plan.md §4).
+  bool get isIntro => priority == 0;
 }
+
+const kWhyKuberCard = SgCandidate(type: SgType.whyKuber, key: 'why_kuber');
+const kQuickAddIntroCard = SgCandidate(
+  type: SgType.quickAddIntro,
+  key: 'quick_add_intro',
+);
+const kSmsIntroCard = SgCandidate(
+  type: SgType.smsImportIntro,
+  key: 'sms_import_intro',
+);
+
+/// Suggestion types moved back by each tracking choice (v3 §6, v3.1 table).
+const Map<String, SgType> kTrackingMovesBack = {
+  'budgets': SgType.budget,
+  'loans': SgType.loans,
+  'investments': SgType.investments,
+  'ledger': SgType.ledger,
+  'subscriptions': SgType.recurring,
+};
 
 /// One transaction, reduced to what the rules read.
 class SgTxn {

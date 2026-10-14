@@ -241,7 +241,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
         // ── IDENTITY ─────────────────────────────────────────────────
         KuberFormSection(
-          label: context.l10n.identity,
+          // The section header names the field (no floating label inside).
+          label: context.l10n.accountNameLabel,
           children: [
             TextField(
               controller: _nameController,
@@ -250,7 +251,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   FocusManager.instance.primaryFocus?.unfocus(),
               style: theme.textTheme.bodyLarge!.copyWith(color: cs.onSurface),
               decoration: InputDecoration(
-                labelText: sentenceCase(context.l10n.accountNameLabel),
                 hintText: _isCreditCard
                     ? context.l10n.creditCardName
                     : _isCash

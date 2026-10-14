@@ -54,69 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get privateByDesign => 'Private by design.';
-
-  @override
-  String get onboardingPage2Description =>
-      'Your money stays on your device. No telemetry, no syncing, no third parties.';
-
-  @override
-  String get fullyOfflineTitle => 'Fully offline';
-
-  @override
-  String get fullyOfflineBody =>
-      'No cloud servers. Nothing to breach. Works in airplane mode.';
-
-  @override
-  String get noAccountTitle => 'No account needed';
-
-  @override
-  String get noAccountBody =>
-      'Open the app and start. Zero signup, zero friction.';
-
-  @override
-  String get privacyModeTitle => 'Privacy mode';
-
-  @override
-  String get privacyModeBody =>
-      'One tap hides every balance when you hand over your phone.';
-
-  @override
-  String get modulesTitle => '8+ MODULES · ZERO CLUTTER';
-
-  @override
-  String get everythingInOnePlace => 'Everything in\none quiet place.';
-
-  @override
-  String get onboardingPage3Description =>
-      'Track expenses, plan budgets, monitor portfolios, and ask Kuber for answers.';
-
-  @override
-  String get budgetsModule => 'Budgets';
-
-  @override
-  String get analyticsModule => 'Analytics';
-
-  @override
   String get recurringModule => 'Recurring';
-
-  @override
-  String get lendBorrowModule => 'Lend &\nborrow';
-
-  @override
-  String get investmentsModule => 'Investments';
-
-  @override
-  String get askKuberModule => 'Ask Kuber AI';
-
-  @override
-  String get toolsModule => 'Tools &\nCalculators';
-
-  @override
-  String get tagsCategoriesModule => 'Tags &\nCategories';
-
-  @override
-  String get andMuchMore => '••• and much more!';
 
   @override
   String get makeItYours => 'Make it yours.';
@@ -153,26 +91,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSystem => 'SYSTEM';
-
-  @override
-  String get justSoYouKnow => 'Just so you know';
-
-  @override
-  String get goToTutorials => 'Go to tutorials';
-
-  @override
-  String get exploreAtOwnPace => 'You can explore at your own pace';
-
-  @override
-  String get exploreAtOwnPaceBody =>
-      'Kuber is built to feel familiar, so you can start logging right away.';
-
-  @override
-  String get walkthroughNearby => 'A walkthrough is always nearby';
-
-  @override
-  String get walkthroughNearbyBody =>
-      'Open More, then App Tutorial, whenever you want a quick guided tour.';
 
   @override
   String get settingsTitle => 'Settings';
@@ -2515,12 +2433,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuTutorialDesc => 'Replay the feature walkthrough';
-
-  @override
-  String get menuWelcomeTour => 'Welcome Tour';
-
-  @override
-  String get menuWelcomeTourDesc => 'Replay the welcome and setup screens';
 
   @override
   String get menuRateUs => 'Rate Us on Play Store';
@@ -5037,63 +4949,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get textSizePreviewMeta => 'Groceries · Today';
 
   @override
-  String homeV2GsProgress(int done) {
-    return '$done of 3 done';
-  }
-
-  @override
   String get homeV2GsTitle => 'Let\'s set up Kuber';
 
   @override
-  String get homeV2GsBodyFresh =>
-      'Import your bank SMS and Kuber adds your transactions for you. Your messages stay on this phone.';
-
-  @override
-  String get homeV2GsBodyOneDone => 'Good start. Two more steps to go.';
-
-  @override
   String get homeV2GsBodyTwoDone => 'Almost there. One more step to go.';
-
-  @override
-  String get homeV2GsBodyDenied =>
-      'Kuber needs permission to read bank SMS. Messages are read on this phone and never uploaded.';
-
-  @override
-  String get homeV2GsBodyBlocked =>
-      'SMS access is turned off for Kuber. You can turn it on in your phone settings or paste a bank SMS.';
-
-  @override
-  String get homeV2GsStep1 => 'Import from SMS';
 
   @override
   String get homeV2GsStep2 => 'Add a transaction yourself';
 
   @override
   String get homeV2GsStep3 => 'Set your starting balance';
-
-  @override
-  String get homeV2GsStepNeedsPermission => 'Needs SMS permission';
-
-  @override
-  String get homeV2GsLimitTitle => 'This week\'s free imports are used';
-
-  @override
-  String homeV2GsLimitBody(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count more SMS are waiting in SMS import. They stay there until you import them.',
-      one:
-          '1 more SMS is waiting in SMS import. It stays there until you import it.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String homeV2GsLimitReset(String date) {
-    return 'Free imports reset on $date.';
-  }
 
   @override
   String get homeV2GsDoneTitle => 'You\'re all set';
@@ -5103,28 +4968,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Kuber will add more to your Home as you use it.';
 
   @override
-  String get homeV2GsActImport => 'Import from SMS';
-
-  @override
   String get homeV2GsActAdd => 'Add transaction';
 
   @override
-  String get homeV2GsActQuick => 'Quick Add';
-
-  @override
   String get homeV2GsActBalance => 'Set balance';
-
-  @override
-  String get homeV2GsActAllow => 'Allow SMS access';
-
-  @override
-  String get homeV2GsActSettings => 'Open phone settings';
-
-  @override
-  String get homeV2GsActPaste => 'Paste an SMS';
-
-  @override
-  String get homeV2GsActPro => 'See Kuber Pro';
 
   @override
   String get homeV2GsCloseA11y => 'Close Get started';
@@ -5185,7 +5032,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tips from your own transactions. Always at the top.';
 
   @override
-  String get homeV2EdSecAuto => 'Turns on with your data';
+  String get homeV2EdSecAuto => 'Turns on when you add transactions';
 
   @override
   String get homeV2EdSecMore => 'More widgets';
@@ -5371,4 +5218,385 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeV2SgCardsAct => 'Set up Kuber Cards';
+
+  @override
+  String get homeV33TourName => 'Why Kuber?';
+
+  @override
+  String get homeV33TourMoreSub =>
+      'How expense tracking works, and how Kuber helps';
+
+  @override
+  String get homeV33TourCardBody =>
+      'How tracking every expense helps, and what Kuber can do.';
+
+  @override
+  String get homeV33TourCardAct => 'Show me';
+
+  @override
+  String get homeV33TourCardHideA11y => 'Hide this card';
+
+  @override
+  String get homeV33TourCardHidden => 'You can find Why Kuber? in More.';
+
+  @override
+  String get homeV33TourNext => 'Next';
+
+  @override
+  String get homeV33TourDone => 'Done';
+
+  @override
+  String homeV33TourPageA11y(int page, int total) {
+    return 'Page $page of $total';
+  }
+
+  @override
+  String get homeV33P1Title => 'Make noting every expense a habit.';
+
+  @override
+  String get homeV33P1SubSms =>
+      'Small expenses count too. Noting is easy, and bank SMS add most of them.';
+
+  @override
+  String get homeV33P1Sub =>
+      'Small expenses count too. Kuber makes noting them easy.';
+
+  @override
+  String get homeV33P1Try => 'Add a transaction';
+
+  @override
+  String get homeV33P1ColDate => 'Date';
+
+  @override
+  String get homeV33P1ColAmount => 'Amount';
+
+  @override
+  String get homeV33P1ColSpent => 'Spent on';
+
+  @override
+  String get homeV33P1ColCat => 'Category';
+
+  @override
+  String get homeV33P1A11y =>
+      'Three expenses written in a notebook turn into Kuber transactions, each with a category and an account.';
+
+  @override
+  String get homeV33DFood => 'Food delivery';
+
+  @override
+  String get homeV33DAuto => 'Auto ride';
+
+  @override
+  String get homeV33DMovie => 'Movie tickets';
+
+  @override
+  String get homeV33DCoffee => 'Coffee';
+
+  @override
+  String get homeV33DGroc => 'Groceries';
+
+  @override
+  String get homeV33CFood => 'Food';
+
+  @override
+  String get homeV33CTransport => 'Transport';
+
+  @override
+  String get homeV33CFun => 'Entertainment';
+
+  @override
+  String get homeV33CShopping => 'Shopping';
+
+  @override
+  String get homeV33ABank => 'Bank';
+
+  @override
+  String get homeV33ACash => 'Cash';
+
+  @override
+  String get homeV33ACard => 'Credit card';
+
+  @override
+  String get homeV33DBankName => 'Your Bank';
+
+  @override
+  String get homeV33P2Title => 'Every account. Even credit cards.';
+
+  @override
+  String get homeV33P2Sub =>
+      'Bank, cash and cards, with billing cycles and due dates. Add any category.';
+
+  @override
+  String get homeV33P2Try => 'Open Accounts';
+
+  @override
+  String get homeV33P2Balance => 'Balance';
+
+  @override
+  String get homeV33P2Due => 'Due';
+
+  @override
+  String homeV33P2Cycle(String start, String end) {
+    return 'Billing cycle $start to $end';
+  }
+
+  @override
+  String homeV33P2DueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String get homeV33P2PetCare => 'Pet care';
+
+  @override
+  String get homeV33P2A11y =>
+      'A bank account, cash and a credit card show their balances. The card shows its billing cycle and due date. A new category, Pet care, joins the others.';
+
+  @override
+  String get homeV33P3Title => 'Track more than spending.';
+
+  @override
+  String get homeV33P3Sub =>
+      'Budgets, investments, loans, money lent or borrowed, and subscriptions.';
+
+  @override
+  String get homeV33P3Try => 'Open Upcoming events';
+
+  @override
+  String get homeV33P3Budget => 'Food budget';
+
+  @override
+  String homeV33P3BudgetOf(String spent, String limit) {
+    return '$spent of $limit';
+  }
+
+  @override
+  String get homeV33P3Inv => 'Investments';
+
+  @override
+  String get homeV33P3InvTypes => 'SIPs, stocks, FDs and more';
+
+  @override
+  String get homeV33P3Loan => 'Home loan';
+
+  @override
+  String homeV33P3LoanSub(String amount, int paid, int total) {
+    return 'EMI $amount · $paid of $total';
+  }
+
+  @override
+  String homeV33P3Lent(String name) {
+    return '$name owes you';
+  }
+
+  @override
+  String homeV33P3Borrowed(String name) {
+    return 'You owe $name';
+  }
+
+  @override
+  String get homeV33P3Subs => 'Streaming plan';
+
+  @override
+  String homeV33P3SubsSub(String amount) {
+    return '$amount a month';
+  }
+
+  @override
+  String homeV33P3Renews(String date) {
+    return 'Renews $date';
+  }
+
+  @override
+  String homeV33P3Next(String date) {
+    return 'Next $date';
+  }
+
+  @override
+  String get homeV33P3A11y =>
+      'A budget fills, an investment grows, a loan EMI is paid, money lent and borrowed shows up, and a subscription renews.';
+
+  @override
+  String get homeV33P4Title => 'Your spending, at a glance.';
+
+  @override
+  String get homeV33P4Sub =>
+      'Every transaction in one searchable history, with many ways to analyze it.';
+
+  @override
+  String get homeV33P4Try => 'Open Analytics';
+
+  @override
+  String get homeV33P4Search => 'Search';
+
+  @override
+  String get homeV33P4Query => 'food';
+
+  @override
+  String get homeV33P4Today => 'Today';
+
+  @override
+  String get homeV33P4Yesterday => 'Yesterday';
+
+  @override
+  String get homeV33P4ByCat => 'By category';
+
+  @override
+  String get homeV33P4Monthly => 'Monthly';
+
+  @override
+  String get homeV33P4Compare => 'Compare';
+
+  @override
+  String get homeV33P4A11y =>
+      'A searchable history narrows to food. Then charts show spending by category, by month, and this month against last month.';
+
+  @override
+  String get homeV33P5Title => 'Go further when you want.';
+
+  @override
+  String get homeV33P5Ask => 'Ask Kuber';
+
+  @override
+  String get homeV33P5AskLine =>
+      'Ask about your money, answered on your phone.';
+
+  @override
+  String get homeV33P5Cards => 'Kuber Cards';
+
+  @override
+  String get homeV33P5CardsLine =>
+      'Your cards, encrypted and kept on your phone.';
+
+  @override
+  String get homeV33P5Notes => 'Kuber Notes';
+
+  @override
+  String get homeV33P5NotesLine =>
+      'Notes that do the math and add transactions.';
+
+  @override
+  String get homeV33P5Calc => 'Calculators and tools';
+
+  @override
+  String get homeV33P5CalcLine => 'EMI, SIP, tax and more.';
+
+  @override
+  String get homeV33P5Rem => 'Reminders';
+
+  @override
+  String get homeV33P5RemLine => 'Never miss a bill.';
+
+  @override
+  String get homeV33P5Try => 'Open Signature tools';
+
+  @override
+  String get homeV33P5AskQ => 'How much on food this month?';
+
+  @override
+  String homeV33P5AskA(String amount) {
+    return '$amount so far, 70% of your Food budget.';
+  }
+
+  @override
+  String get homeV33P5NoteName => 'Goa trip';
+
+  @override
+  String get homeV33P5Hotel => 'Hotel';
+
+  @override
+  String get homeV33P5Taxi => 'Taxi';
+
+  @override
+  String get homeV33P5Travel => 'Travel';
+
+  @override
+  String get homeV33P5SipCalc => 'SIP calculator';
+
+  @override
+  String homeV33P5PerMonth(String amount) {
+    return '$amount a month';
+  }
+
+  @override
+  String homeV33P5Rate(int rate) {
+    return '$rate% a year';
+  }
+
+  @override
+  String homeV33P5Years(int n) {
+    return '$n years';
+  }
+
+  @override
+  String get homeV33P5RemTitle => 'Electricity bill';
+
+  @override
+  String homeV33P5RemDue(String amount) {
+    return 'Due tomorrow · $amount';
+  }
+
+  @override
+  String get homeV33P5A11y =>
+      'Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.';
+
+  @override
+  String get homeV3TrkTitle => 'What do you want to track?';
+
+  @override
+  String get homeV3TrkBody =>
+      'Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.';
+
+  @override
+  String get homeV31TrkBudgets => 'Budgets';
+
+  @override
+  String get homeV3TrkLoans => 'Loans and EMIs';
+
+  @override
+  String get homeV3TrkInvest => 'Investments and SIPs';
+
+  @override
+  String get homeV3TrkLedger => 'Money lent or borrowed';
+
+  @override
+  String get homeV3TrkSubs => 'Subscriptions';
+
+  @override
+  String get homeV33EdNeedsTxn => 'Appears after your first transaction';
+
+  @override
+  String get homeV33SgQuickTitle => 'Add in one line with Quick Add';
+
+  @override
+  String get homeV33SgQuickBody =>
+      'Type something like \"250 lunch\" or tap the mic and say it. Kuber turns it into a transaction.';
+
+  @override
+  String get homeV33SgQuickAct => 'Try Quick Add';
+
+  @override
+  String get homeV33SgSmsTitle => 'Let bank SMS add your expenses';
+
+  @override
+  String get homeV33SgSmsBody =>
+      'Kuber can read bank SMS on this phone and add most transactions for you. They never leave your phone.';
+
+  @override
+  String get homeV33SgSmsAct => 'Import from SMS';
+
+  @override
+  String get homeV33GsBodyFresh =>
+      'Check your accounts, then add your first transaction. It takes a minute.';
+
+  @override
+  String homeV33GsProgress(int done) {
+    return '$done of 2 done';
+  }
+
+  @override
+  String get homeV33GsActAccounts => 'View accounts';
+
+  @override
+  String get homeV33GsStepAccounts => 'Set up accounts';
 }

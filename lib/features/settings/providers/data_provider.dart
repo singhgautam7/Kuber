@@ -356,9 +356,9 @@ class DataController extends StateNotifier<DataState> {
         result = await _service.importData(content, override: override);
       }
       if (result.error != null) throw Exception(result.error);
+      // Before the refresh: the dashboard reseeds missing Home rows on read.
+      await onHomeV2DataRestored(_ref, _service.isar, jsonRestore: isJson);
       await _refreshData();
-      // Home v2: adopt a restored Home layout, or keep v2 without labels.
-      await onHomeV2DataRestored(_ref, _service.isar);
 
       // A JSON restore may carry encrypted Kuber Cards. They come in locked
       // (they need the PIN from the backup's device). Reset the card session so

@@ -18,7 +18,9 @@ class OnboardingSkipButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: KuberSpace.sm),
         child: SizedBox(
           height: 56,
-          child: Center(
+          // Top right on every page (Welcome and the Why Kuber pages).
+          child: Align(
+            alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: onSkip,
               child: Text(

@@ -1,12 +1,14 @@
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/categories/data/category_group.dart';
 import '../../features/stories/data/insight_story.dart';
 import '../../features/transactions/services/suggestion_service.dart';
 import '../../features/widget_editor/data/widget_preference.dart';
 import '../utils/prefs_keys.dart';
+import 'seed_service.dart';
 
 class MigrationService {
   static Future<void> runAll(Isar isar) async {
@@ -66,6 +68,30 @@ class MigrationService {
       await prefs.setInt(PrefsKeys.moreTabLayout, 0); // MoreTabLayout.simple
       await prefs.setBool(PrefsKeys.migratedMoreLayoutClassicV1, true);
     }
+
+    // Migration 9: Cash accounts go green (user review). Only those still on
+    // the old default grey; a colour the user picked is kept.
+    if (!(prefs.getBool(PrefsKeys.migratedCashGreenV1) ?? false)) {
+      await _cashGreen(isar);
+      await prefs.setBool(PrefsKeys.migratedCashGreenV1, true);
+    }
+  }
+
+  static const _oldCashGrey = 0xFF9E9E9E;
+
+  static Future<void> _cashGreen(Isar isar) async {
+    final cash = await isar.accounts
+        .filter()
+        .typeEqualTo('cash')
+        .colorValueEqualTo(_oldCashGrey)
+        .findAll();
+    if (cash.isEmpty) return;
+    await isar.writeTxn(() async {
+      for (final a in cash) {
+        a.colorValue = SeedService.cashGreen;
+      }
+      await isar.accounts.putAll(cash);
+    });
   }
 
   static Future<void> _clearLegacyStories(Isar isar) async {

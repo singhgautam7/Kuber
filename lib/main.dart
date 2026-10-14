@@ -18,6 +18,8 @@ import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/home_v2/data/home_v2_state.dart';
 import 'features/home_v2/data/home_v2_widgets.dart';
+import 'features/home_v2/providers/has_transactions_provider.dart';
+import 'features/transactions/data/transaction.dart';
 import 'features/home_v2/providers/home_v2_provider.dart';
 import 'core/theme/theme_families.dart' show resolveVariant;
 import 'features/notifications/providers/notification_provider.dart';
@@ -155,6 +157,12 @@ Future<void> _bootstrap() async {
   } catch (e) {
     debugPrint('Kuber: home cohort read failed (non-fatal): $e');
   }
+  // Transaction gate seed: one count() so the first frame already hides
+  // transaction-based widgets on an empty install.
+  var hasTransactions = true;
+  try {
+    hasTransactions = await isar.transactions.count() > 0;
+  } catch (_) {}
 
   // Best-effort on-open processing. A failure here must not prevent launch.
   String? coldStartPayload;
@@ -224,6 +232,7 @@ Future<void> _bootstrap() async {
           bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
           bootTextSizeLevelProvider.overrideWithValue(bootTextSizeLevel),
           homeV2BootProvider.overrideWithValue(homeV2),
+          hasTransactionsBootProvider.overrideWithValue(hasTransactions),
           initialLocationProvider.overrideWithValue(initialLocation),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
           automaticBackupDueProvider.overrideWith((ref) => backupDue),

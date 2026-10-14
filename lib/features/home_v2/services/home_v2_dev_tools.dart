@@ -9,6 +9,9 @@ import '../../accounts/data/account.dart';
 import '../../widget_editor/data/widget_preference_repository.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
+import '../../../core/utils/prefs_keys.dart';
+import '../../why_kuber/why_kuber_store.dart';
+import '../data/home_migration.dart';
 import '../data/home_v2_state.dart';
 import '../data/home_v2_widgets.dart';
 import '../engine/suggestion_engine.dart';
@@ -18,8 +21,6 @@ import '../providers/home_v2_gates_provider.dart';
 import '../providers/home_v2_provider.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../core/utils/prefs_keys.dart';
 
 /// Dev tools: make this install a fresh Home v2 install again (keeps data).
 /// Cohort v2, v2 widget defaults, Get started back, suggestion state clear.
@@ -87,6 +88,43 @@ Future<void> runSuggestionRulesNow(BuildContext context, WidgetRef ref) async {
           : 'Picked ${card.key}. Open Home.',
     );
   }
+}
+
+/// Dev tools › Reset Why Kuber: clears "seen" and the card dismissal, then
+/// re-resolves the top slot so the card can show at once.
+Future<void> resetWhyKuber(BuildContext context, WidgetRef ref) async {
+  await WhyKuberStore.reset();
+  await ref.read(homeSuggestionProvider.notifier).runNow();
+  if (context.mounted) {
+    showKuberSnackBar(context, 'Why Kuber reset. Open Home.');
+  }
+}
+
+/// Dev tools › Re-run update migration: makes this install look like an
+/// existing (pre-update) user with its current Home layout, then runs the
+/// migration exactly as the first launch after the update does.
+Future<void> rerunUpdateMigration(BuildContext context, WidgetRef ref) async {
+  final store = await HomeV2Store.open();
+  await store.writeCohort(HomeCohort.v1);
+  await store.prefs.remove(PrefsKeys.homeMigrationVersion);
+  final sw = Stopwatch()..start();
+  final snap = await migrateExistingUser(
+    ref.read(isarProvider),
+    store,
+    waitForWrites: true,
+  );
+  final ms = sw.elapsedMilliseconds;
+  await ref.read(homeV2Provider.notifier).replace(snap);
+  ref.invalidate(homeWidgetsProvider);
+  ref.invalidate(homeSuggestionProvider);
+  if (!context.mounted) return;
+  showKuberSnackBar(
+    context,
+    snap.isV2
+        ? 'Migration ran in $ms ms. Open Home.'
+        : 'Migration failed: ${store.migrationError}',
+    isError: !snap.isV2,
+  );
 }
 
 /// Sample instance per type for "Force suggestion".
