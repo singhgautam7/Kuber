@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
+
+// Sample amounts follow the user's currency + number format.
+String get _sym => AppFormatter.current.symbol;
+String _m(num v) => AppFormatter.current.formatCurrency(v);
 
 // Faithful in-app previews of each native home-screen widget. These reuse the
 // theme roles (income / expense from KuberMoneyColors) so they adapt to
@@ -146,14 +151,14 @@ Widget monthlyNetPreview(BuildContext context) {
                 color: p.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(KuberShape.small),
               ),
-              child: Text('₹', style: _t(p.primary, 10, w: FontWeight.w700)),
+              child: Text(_sym, style: _t(p.primary, 10, w: FontWeight.w700)),
             ),
           ],
         ),
         const Spacer(),
-        Text('+₹18,240', style: _t(p.income, 26, w: FontWeight.w700)),
+        Text('+${_m(18240)}', style: _t(p.income, 26, w: FontWeight.w700)),
         const Spacer(),
-        Text('Income ₹64,200 · Expense ₹45,960', style: _t(p.muted, 10)),
+        Text('Income ${_m(64200)} · Expense ${_m(45960)}', style: _t(p.muted, 10)),
       ],
     ),
   );
@@ -189,7 +194,7 @@ Widget accountBalancePreview(BuildContext context) {
           ],
         ),
         const Spacer(),
-        Text('₹2,84,650', style: _t(p.income, 22, w: FontWeight.w700)),
+        Text(_m(284650), style: _t(p.income, 22, w: FontWeight.w700)),
         const Spacer(),
         Text('Last updated 4m ago', style: _t(p.muted, 10)),
       ],
@@ -282,21 +287,21 @@ Widget upcomingEventsPreview(BuildContext context) {
           'Today',
           'Pay maid salary',
           _pill('REMINDER', p.primary, p.primary.withValues(alpha: 0.12)),
-          '−₹3,000',
+          '−${_m(3000)}',
         ),
         _eventRow(
           context,
           '5 Jul',
           'Home Loan EMI',
           _pill('EMI', p.eventEmi, p.eventEmi.withValues(alpha: 0.12)),
-          '−₹24,600',
+          '−${_m(24600)}',
         ),
         _eventRow(
           context,
           '7 Jul',
           'Nifty Index SIP',
           _pill('SIP', p.income, p.income.withValues(alpha: 0.12)),
-          '−₹5,000',
+          '−${_m(5000)}',
         ),
         const Spacer(),
         _footerLink(context, 'View all'),
@@ -362,7 +367,7 @@ Widget recentTransactionsPreview(BuildContext context) {
           p.warning,
           'Swiggy order',
           'HDFC Savings',
-          '−₹460',
+          '−${_m(460)}',
           p.expense,
         ),
         _txnRow(
@@ -370,7 +375,7 @@ Widget recentTransactionsPreview(BuildContext context) {
           p.income,
           'Salary credit',
           'HDFC Savings',
-          '+₹64,200',
+          '+${_m(64200)}',
           p.income,
         ),
         _txnRow(
@@ -378,7 +383,7 @@ Widget recentTransactionsPreview(BuildContext context) {
           p.primary,
           'Uber ride',
           'ICICI Credit',
-          '−₹212',
+          '−${_m(212)}',
           p.expense,
         ),
         const Spacer(),
@@ -429,7 +434,7 @@ Widget chartCompactPreview(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Last 7 days', style: _t(p.text, 13, w: FontWeight.w700)),
-            Text('−₹8,940', style: _t(p.expense, 12, w: FontWeight.w700)),
+            Text('−${_m(8940)}', style: _t(p.expense, 12, w: FontWeight.w700)),
           ],
         ),
         const SizedBox(height: 8),
@@ -437,9 +442,9 @@ Widget chartCompactPreview(BuildContext context) {
         const SizedBox(height: 6),
         Row(
           children: [
-            Text('Income ₹22,100', style: _t(p.income, 9.5)),
+            Text('Income ${_m(22100)}', style: _t(p.income, 9.5)),
             const SizedBox(width: 14),
-            Text('Expense ₹31,040', style: _t(p.expense, 9.5)),
+            Text('Expense ${_m(31040)}', style: _t(p.expense, 9.5)),
           ],
         ),
       ],
@@ -482,7 +487,7 @@ Widget trendsPreview(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Trends', style: _t(p.text, 13, w: FontWeight.w700)),
-            Text('−₹42,300', style: _t(p.expense, 12, w: FontWeight.w700)),
+            Text('−${_m(42300)}', style: _t(p.expense, 12, w: FontWeight.w700)),
           ],
         ),
         const SizedBox(height: 8),
@@ -504,8 +509,8 @@ Widget trendsPreview(BuildContext context) {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Income ₹22,100', style: _t(p.income, 9)),
-              Text('Expense ₹64,400', style: _t(p.expense, 9)),
+              Text('Income ${_m(22100)}', style: _t(p.income, 9)),
+              Text('Expense ${_m(64400)}', style: _t(p.expense, 9)),
               Text(
                 'View analytics',
                 style: _t(p.primary, 9, w: FontWeight.w700),
@@ -578,9 +583,9 @@ Widget categoryDonutPreview(BuildContext context) {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _legend(context, p.primary, 'Food', '₹19,300 · 42%'),
-                    _legend(context, p.warning, 'Transport', '₹11,900 · 26%'),
-                    _legend(context, p.eventEmi, 'Shopping', '₹7,800 · 17%'),
+                    _legend(context, p.primary, 'Food', '${_m(19300)} · 42%'),
+                    _legend(context, p.warning, 'Transport', '${_m(11900)} · 26%'),
+                    _legend(context, p.eventEmi, 'Shopping', '${_m(7800)} · 17%'),
                   ],
                 ),
               ),
@@ -663,18 +668,18 @@ Widget budgetStatusPreview(BuildContext context) {
         Text('Budget status', style: _t(p.text, 13, w: FontWeight.w700)),
         Text('this month', style: _t(p.muted, 10)),
         const Spacer(),
-        _budgetRow(context, 'Food', '₹19,300 / ₹20,000 · 96%', 0.96, p.warning),
+        _budgetRow(context, 'Food', '${_m(19300)} / ${_m(20000)} · 96%', 0.96, p.warning),
         _budgetRow(
           context,
           'Transport',
-          '₹11,900 / ₹15,000 · 79%',
+          '${_m(11900)} / ${_m(15000)} · 79%',
           0.79,
           p.primary,
         ),
         _budgetRow(
           context,
           'Shopping',
-          '₹9,800 / ₹8,000 · 122%',
+          '${_m(9800)} / ${_m(8000)} · 122%',
           1.0,
           p.expense,
         ),
@@ -799,7 +804,7 @@ Widget notesPreview(BuildContext context) {
         _noteRow(
           context,
           'Trip budget - Goa Aug',
-          'Flights ₹9k, stay ₹14k, buffer 20%…',
+          'Flights ${_sym}9k, stay ${_sym}14k, buffer 20%…',
           '1d ago',
         ),
         _noteRow(

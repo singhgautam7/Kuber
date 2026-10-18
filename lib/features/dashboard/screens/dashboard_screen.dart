@@ -12,7 +12,6 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/formatters.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../shared/widgets/edit_widgets_button.dart';
-import '../../notifications/data/app_notification.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../../notifications/utils/deep_link_handler.dart';
 import '../../notifications/widgets/notifications_sheet.dart';
@@ -32,11 +31,11 @@ import '../widgets/home_recent_transactions.dart';
 import '../../notes/widgets/notes_home_widget.dart';
 import '../../pro/home/ask_kuber_home_widget.dart';
 import '../../pro/promo/home_promo_banner.dart';
-import '../../pro/paywall/pro_state.dart';
-import '../../pro/trial/trial_ending_sheet.dart';
 import '../../upcoming_events/widgets/upcoming_events_widget.dart';
 import '../widgets/quick_add_widget.dart';
 import '../../home_v2/data/home_v2_state.dart';
+import '../../home_v2/data/home_v2_widgets.dart' show needsTransactions;
+import '../../home_v2/providers/has_transactions_provider.dart';
 import '../../home_v2/providers/home_v2_gates_provider.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import '../../home_v2/widgets/home_v2_top_slot.dart';
@@ -111,33 +110,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Trace marker: story generation must start strictly after this point.
       debugPrint('Kuber stories: home first frame painted');
+      // Routed by payload alone: scheduled reminders and credit-card
+      // reminders have no inbox row to match.
       final payload = ref.read(pendingDeeplinkProvider);
       if (payload == null || payload.isEmpty) return;
       ref.read(pendingDeeplinkProvider.notifier).state = null;
-      final repo = ref.read(notificationRepositoryProvider);
-      final all = await repo.list();
-      AppNotification? match;
-      for (final n in all) {
-        if (n.payload == payload) {
-          match = n;
-          break;
-        }
-      }
-      if (!mounted || match == null) return;
-      await handleNotificationTap(context, ref, match);
-    });
-
-    // One-time "your Kuber Pro trial ended" notice, shown on the first frame
-    // after the 14-day window closes. The Isar-backed guard
-    // (shouldShowTrialEndedNotice / markTrialEndedNoticeShown) ensures it
-    // fires at most once per install.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final notifier = ref.read(kuberProStateProvider.notifier);
-      if (notifier.shouldShowTrialEndedNotice()) {
-        showTrialEndingSheet(context);
-        notifier.markTrialEndedNoticeShown();
-      }
+      await handleNotificationTap(ref, payload: payload);
     });
   }
 
@@ -152,7 +131,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         await repo.clearAll();
       },
       onTapNotification: (n) async {
-        await handleNotificationTap(context, ref, n);
+        await repo.markRead(n.id);
+        await handleNotificationTap(ref, payload: n.payload, type: n.type);
       },
     );
     // Mark everything read once the sheet is open / dismissed.
@@ -221,6 +201,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final l10n = context.l10n;
     final widgetsAsync = ref.watch(homeWidgetsProvider);
     final isV2 = ref.watch(isHomeV2Provider);
+    final hasTxns = ref.watch(hasTransactionsProvider);
     final gsEligible = ref.watch(homeV2Provider.select((s) => s.gsEligible));
 
     // Fixed leading items (header, greeting, promo) followed by the dynamic
@@ -282,7 +263,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ],
       error: (_, __) => const <Widget>[],
       data: (configs) {
-        final visible = configs.where((c) => c.enabled).toList();
+        // Transaction gate (specs/home-v3.3/plan.md §3): widgets that need
+        // transactions are not built until the first one exists.
+        final visible = configs
+            .where((c) => c.enabled && (hasTxns || !needsTransactions(c.id)))
+            .toList();
         return <Widget>[
           // Each widget owns its own bottom spacing (see _buildHomeWidget) so a
           // widget that self-hides in an empty state leaves no gap.

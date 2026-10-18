@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 
+import '../../../core/utils/formatters.dart';
+
 // The Advanced Analytics engine. Each analytical section has its own
 // calculator in a sibling file, joined into this one library via `part` so the
 // small shared helpers below (`_summary`, `_monthly`, `_Txn`, ...) stay
@@ -47,6 +49,10 @@ class AnalyticsInput {
   final DateTime now;
   final String mode;
 
+  /// The user's currency formatter, for engine-built copy (anomaly text).
+  /// Passed in because `compute()` isolates don't share [AppFormatter.current].
+  final AppFormatter? formatter;
+
   const AnalyticsInput({
     required this.transactions,
     required this.categories,
@@ -59,6 +65,7 @@ class AnalyticsInput {
     required this.now,
     this.selectedCategoryId,
     this.mode = 'mom',
+    this.formatter,
   });
 }
 

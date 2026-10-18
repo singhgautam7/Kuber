@@ -299,13 +299,17 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                   child: KuberAnswerCard(
                     labelText: context.l10n.monthlyOutflow,
                     labelIcon: Icons.bolt_rounded,
-                    amountText: '$symbol${_formatThousands(_emiAmount)}',
+                    amountText: ref
+                        .watch(formatterProvider)
+                        .formatCurrency(_emiAmount.roundToDouble()),
                     unitText: context.l10n.perMonth,
                     meta: _principalAmount > 0
                         ? [
                             KuberAnswerMeta(
                               key: context.l10n.principal,
-                              value: '$symbol${_compactL(_principalAmount)}',
+                              value: ref
+                                  .watch(formatterProvider)
+                                  .formatCompactCurrency(_principalAmount),
                             ),
                             KuberAnswerMeta(
                               key: context.l10n.tenure,
@@ -663,12 +667,3 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   }
 }
 
-// Number helpers
-String _formatThousands(double v) =>
-    NumberFormat('#,##,##0', 'en_IN').format(v);
-String _compactL(double v) {
-  if (v >= 10000000) return '${(v / 10000000).toStringAsFixed(2)}Cr';
-  if (v >= 100000) return '${(v / 100000).toStringAsFixed(2)}L';
-  if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}K';
-  return v.toStringAsFixed(0);
-}

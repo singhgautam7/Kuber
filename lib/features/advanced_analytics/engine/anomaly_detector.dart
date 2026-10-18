@@ -20,10 +20,9 @@ class AnomalyItem {
   });
 }
 
-final _anomalyInr =
-    NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
-
 AnomalyResult computeAnomalies(AnalyticsInput input) {
+  final fmt = input.formatter ?? AppFormatter();
+  String money(num v) => fmt.formatCurrency(v.round());
   final now = input.now;
   final currentStart = DateTime(now.year, now.month, 1);
   final prevStart = DateTime(now.year, now.month - 1, 1);
@@ -54,8 +53,8 @@ AnomalyResult computeAnomalies(AnalyticsInput input) {
         AnomalyItem(
           title: '${catName(id)} spending is up',
           description:
-              'You spent ${_anomalyInr.format(curr)} on ${catName(id)} this '
-              'month vs ${_anomalyInr.format(prev)} last month.',
+              'You spent ${money(curr)} on ${catName(id)} this '
+              'month vs ${money(prev)} last month.',
           tone: 'warning',
           significance: delta,
         ),
@@ -65,8 +64,8 @@ AnomalyResult computeAnomalies(AnalyticsInput input) {
         AnomalyItem(
           title: '${catName(id)} spending is down',
           description:
-              'You spent ${_anomalyInr.format(curr)} on ${catName(id)} this '
-              'month vs ${_anomalyInr.format(prev)} last month.',
+              'You spent ${money(curr)} on ${catName(id)} this '
+              'month vs ${money(prev)} last month.',
           tone: 'positive',
           significance: prev - curr,
         ),
@@ -97,7 +96,7 @@ AnomalyResult computeAnomalies(AnalyticsInput input) {
         AnomalyItem(
           title: 'Unusually large transaction',
           description:
-              '${_anomalyInr.format(t.amount)} at ${t.name} is much larger '
+              '${money(t.amount)} at ${t.name} is much larger '
               'than your usual ${catName(t.categoryId)} spend.',
           tone: 'warning',
           significance: t.amount - avg,

@@ -6,9 +6,13 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart'
+    show formatterProvider, privacyModeProvider;
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../data/recurring_interval.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
 import '../data/recurring_repository.dart';
@@ -75,6 +79,7 @@ class RecurringDetailSheet extends ConsumerWidget {
         ? context.kuberMoney.income
         : context.kuberMoney.expense;
 
+    final interval = RecurrenceInterval.of(rule);
     final isPaused = rule.isPaused;
     final isExpired = RecurringRepository.isExpired(rule);
 
@@ -82,7 +87,7 @@ class RecurringDetailSheet extends ConsumerWidget {
         ? context.l10n.pausedUpper
         : isExpired
         ? context.l10n.expiredUpper
-        : rule.frequency == 'custom'
+        : interval.presetKey == 'custom'
         ? context.l10n.activeCustomUpper
         : context.l10n.activeUpper;
     final statusColor = isPaused
@@ -91,9 +96,7 @@ class RecurringDetailSheet extends ConsumerWidget {
         ? context.kuberMoney.expense
         : context.kuberMoney.income;
 
-    final frequencyLabel = rule.frequency == 'custom'
-        ? context.l10n.freqEveryNDays('${rule.customDays ?? 1}')
-        : _freqTitle(context, rule.frequency);
+    final frequencyLabel = interval.describe(context.l10n);
 
     final createdDateStr = DateFormat(
       'MMM d, yyyy',
@@ -177,7 +180,7 @@ class RecurringDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: KuberSpace.xs),
           Text(
-            '${isIncome ? '+' : '−'}₹${rule.amount.toStringAsFixed(0)}',
+            '${isIncome ? '+' : '−'}${maskAmount(ref.watch(formatterProvider).formatCurrency(rule.amount), ref.watch(privacyModeProvider))}',
             style: localeFont(
               fontSize: 32,
               fontWeight: FontWeight.w700,
@@ -307,19 +310,6 @@ class RecurringDetailSheet extends ConsumerWidget {
       ),
     );
   }
-}
-
-String _freqTitle(BuildContext context, String value) {
-  final l = context.l10n;
-  return switch (value) {
-    'daily' => l.freqDaily,
-    'weekly' => l.freqWeekly,
-    'biweekly' => l.freqBiweekly,
-    'yearly' => l.freqYearly,
-    'quarterly' => l.freqQuarterly,
-    'custom' => l.freqCustom,
-    _ => l.freqMonthly,
-  };
 }
 
 class _DetailCell extends StatelessWidget {

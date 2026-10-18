@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
@@ -17,3 +19,9 @@ final unreadCountProvider = StreamProvider<int>((ref) {
 /// Set in `main.dart` via `getNotificationAppLaunchDetails()`, consumed once
 /// by the dashboard after first frame.
 final pendingDeeplinkProvider = StateProvider<String?>((ref) => null);
+
+/// System notification taps while the app is already running (background or
+/// foreground). Fed by `NotificationService.init(onTap:)` in `main.dart`,
+/// routed by `KuberApp`. Taps before the app is up have no listener and go
+/// through [pendingDeeplinkProvider] instead.
+final notificationTaps = StreamController<String>.broadcast();

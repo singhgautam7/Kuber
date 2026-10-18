@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart' show onOpenBatchReadyProvider;
+import '../providers/has_transactions_provider.dart';
 import '../providers/home_suggestion_provider.dart';
 import '../providers/home_v2_provider.dart';
 import '../../../shared/widgets/app_scaffold.dart'
@@ -25,11 +26,13 @@ class HomeV2TopSlot extends ConsumerStatefulWidget {
 class _HomeV2TopSlotState extends ConsumerState<HomeV2TopSlot> {
   Timer? _successTimer;
 
-  void _resolve() {
+  void _resolve({bool force = false}) {
     // Never during Home's first frames: wait for the on-open batch gate.
     if (!ref.read(onOpenBatchReadyProvider)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(homeSuggestionProvider.notifier).resolve();
+      if (mounted) {
+        ref.read(homeSuggestionProvider.notifier).resolve(force: force);
+      }
     });
   }
 
@@ -42,12 +45,22 @@ class _HomeV2TopSlotState extends ConsumerState<HomeV2TopSlot> {
       fireImmediately: true,
     );
     ref.listenManual<int>(homeSessionProvider, (_, __) => _resolve());
+    // Intro cards start at 2 (Quick Add) and 3 (SMS import) transactions:
+    // look again when a count crosses one of those.
+    ref.listenManual<AsyncValue<int>>(transactionCountProvider, (prev, next) {
+      final a = prev?.valueOrNull;
+      final b = next.valueOrNull;
+      if (a == null || b == null) return;
+      if ((a < 2 && b >= 2) || (a < 3 && b >= 3)) _resolve(force: true);
+    });
     // Graduation (or the Settings switch) can make suggestions eligible.
+    // Forced: the Why Kuber card shows in the same session (normal
+    // suggestions still wait 24 h after graduation, so none can slip in).
     ref.listenManual<bool>(homeV2Provider.select((s) => s.gsEligible), (
       _,
       eligible,
     ) {
-      if (!eligible) _resolve();
+      if (!eligible) _resolve(force: true);
     });
   }
 

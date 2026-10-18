@@ -14,6 +14,15 @@ import '../pro/feature_gates/pro_gate.dart';
 import '../tutorial/models/tutorial_step_keys.dart';
 import 'screens/more_screen.dart' show launchTutorialFromMore;
 
+/// Bumped to scroll the More tab to its Signature section (Why Kuber page 5
+/// Try it). Each More layout keys its Signature header for this.
+final moreScrollToSignatureProvider = StateProvider<int>((ref) => 0);
+
+/// Signature section headers, one per layout (both can be alive during the
+/// Classic / Modern cross-fade, so they cannot share one key).
+final moreSignatureKeySimple = GlobalKey(debugLabel: 'moreSignatureSimple');
+final moreSignatureKeyModern = GlobalKey(debugLabel: 'moreSignatureModern');
+
 /// A single More-tab entry. This is **content only** — icon, copy, destination,
 /// and a couple of presentation hints. Each layout (`more_screen.dart` classic
 /// list, `more_screen_modern.dart` grids/strips) renders it its own way.
@@ -259,9 +268,10 @@ List<MoreSection> buildMoreSections(
           onTap: () => launchTutorialFromMore(context, ref),
         ),
         MoreEntry(
-          icon: Icons.auto_stories_rounded,
-          label: l10n.menuWelcomeTour,
-          subtitle: l10n.menuWelcomeTourDesc,
+          icon: Icons.play_circle_outline_rounded,
+          label: l10n.homeV33TourName,
+          subtitle: l10n.homeV33TourMoreSub,
+          // Starts at the Welcome screen (coin), then the five pages; no setup.
           onTap: () => context.push('/onboarding?replay=true'),
         ),
       ],
@@ -347,7 +357,8 @@ Future<void> openNotificationsSheet(
       await repo.clearAll();
     },
     onTapNotification: (n) async {
-      await handleNotificationTap(context, ref, n);
+      await repo.markRead(n.id);
+      await handleNotificationTap(ref, payload: n.payload, type: n.type);
     },
   );
   await repo.markAllRead();

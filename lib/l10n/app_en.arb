@@ -34,46 +34,8 @@
       }
     }
   },
-  "privateByDesign": "Private by design.",
-  "@privateByDesign": {},
-  "onboardingPage2Description": "Your money stays on your device. No telemetry, no syncing, no third parties.",
-  "@onboardingPage2Description": {},
-  "fullyOfflineTitle": "Fully offline",
-  "@fullyOfflineTitle": {},
-  "fullyOfflineBody": "No cloud servers. Nothing to breach. Works in airplane mode.",
-  "@fullyOfflineBody": {},
-  "noAccountTitle": "No account needed",
-  "@noAccountTitle": {},
-  "noAccountBody": "Open the app and start. Zero signup, zero friction.",
-  "@noAccountBody": {},
-  "privacyModeTitle": "Privacy mode",
-  "@privacyModeTitle": {},
-  "privacyModeBody": "One tap hides every balance when you hand over your phone.",
-  "@privacyModeBody": {},
-  "modulesTitle": "8+ MODULES · ZERO CLUTTER",
-  "@modulesTitle": {},
-  "everythingInOnePlace": "Everything in\none quiet place.",
-  "@everythingInOnePlace": {},
-  "onboardingPage3Description": "Track expenses, plan budgets, monitor portfolios, and ask Kuber for answers.",
-  "@onboardingPage3Description": {},
-  "budgetsModule": "Budgets",
-  "@budgetsModule": {},
-  "analyticsModule": "Analytics",
-  "@analyticsModule": {},
   "recurringModule": "Recurring",
   "@recurringModule": {},
-  "lendBorrowModule": "Lend &\nborrow",
-  "@lendBorrowModule": {},
-  "investmentsModule": "Investments",
-  "@investmentsModule": {},
-  "askKuberModule": "Ask Kuber AI",
-  "@askKuberModule": {},
-  "toolsModule": "Tools &\nCalculators",
-  "@toolsModule": {},
-  "tagsCategoriesModule": "Tags &\nCategories",
-  "@tagsCategoriesModule": {},
-  "andMuchMore": "••• and much more!",
-  "@andMuchMore": {},
   "makeItYours": "Make it yours.",
   "@makeItYours": {},
   "threeQuickChoices": "Three quick choices and you're in.",
@@ -98,18 +60,6 @@
   "@themeDark": {},
   "themeSystem": "SYSTEM",
   "@themeSystem": {},
-  "justSoYouKnow": "Just so you know",
-  "@justSoYouKnow": {},
-  "goToTutorials": "Go to tutorials",
-  "@goToTutorials": {},
-  "exploreAtOwnPace": "You can explore at your own pace",
-  "@exploreAtOwnPace": {},
-  "exploreAtOwnPaceBody": "Kuber is built to feel familiar, so you can start logging right away.",
-  "@exploreAtOwnPaceBody": {},
-  "walkthroughNearby": "A walkthrough is always nearby",
-  "@walkthroughNearby": {},
-  "walkthroughNearbyBody": "Open More, then App Tutorial, whenever you want a quick guided tour.",
-  "@walkthroughNearbyBody": {},
   "settingsTitle": "Settings",
   "@settingsTitle": {},
   "settingsSubtitle": "Customize how Kuber looks, feels and behaves for you.",
@@ -1547,10 +1497,6 @@
   "@menuTutorial": {},
   "menuTutorialDesc": "Replay the feature walkthrough",
   "@menuTutorialDesc": {},
-  "menuWelcomeTour": "Welcome Tour",
-  "@menuWelcomeTour": {},
-  "menuWelcomeTourDesc": "Replay the welcome and setup screens",
-  "@menuWelcomeTourDesc": {},
   "menuRateUs": "Rate Us on Play Store",
   "@menuRateUs": {},
   "menuRateUsDesc": "Enjoying Kuber? Leave a review",
@@ -2907,51 +2853,14 @@
   "textSizePreviewUpper": "PREVIEW",
   "textSizePreviewBody": "Track your daily expenses, manage budgets, and reach your goals with Kuber.",
   "textSizePreviewMeta": "Groceries · Today",
-  "homeV2GsProgress": "{done} of 3 done",
-  "@homeV2GsProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      }
-    }
-  },
   "homeV2GsTitle": "Let's set up Kuber",
-  "homeV2GsBodyFresh": "Import your bank SMS and Kuber adds your transactions for you. Your messages stay on this phone.",
-  "homeV2GsBodyOneDone": "Good start. Two more steps to go.",
   "homeV2GsBodyTwoDone": "Almost there. One more step to go.",
-  "homeV2GsBodyDenied": "Kuber needs permission to read bank SMS. Messages are read on this phone and never uploaded.",
-  "homeV2GsBodyBlocked": "SMS access is turned off for Kuber. You can turn it on in your phone settings or paste a bank SMS.",
-  "homeV2GsStep1": "Import from SMS",
   "homeV2GsStep2": "Add a transaction yourself",
   "homeV2GsStep3": "Set your starting balance",
-  "homeV2GsStepNeedsPermission": "Needs SMS permission",
-  "homeV2GsLimitTitle": "This week's free imports are used",
-  "homeV2GsLimitBody": "{count, plural, =1{1 more SMS is waiting in SMS import. It stays there until you import it.} other{{count} more SMS are waiting in SMS import. They stay there until you import them.}}",
-  "@homeV2GsLimitBody": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "homeV2GsLimitReset": "Free imports reset on {date}.",
-  "@homeV2GsLimitReset": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "homeV2GsDoneTitle": "You're all set",
   "homeV2GsDoneBody": "Kuber will add more to your Home as you use it.",
-  "homeV2GsActImport": "Import from SMS",
   "homeV2GsActAdd": "Add transaction",
-  "homeV2GsActQuick": "Quick Add",
   "homeV2GsActBalance": "Set balance",
-  "homeV2GsActAllow": "Allow SMS access",
-  "homeV2GsActSettings": "Open phone settings",
-  "homeV2GsActPaste": "Paste an SMS",
-  "homeV2GsActPro": "See Kuber Pro",
   "homeV2GsCloseA11y": "Close Get started",
   "homeV2GsClosedSnack": "Get started is hidden. You can show it again from Settings.",
   "homeV2ActUndo": "Undo",
@@ -2981,7 +2890,7 @@
   "homeV2EdSecOn": "On your Home",
   "homeV2EdSgTitle": "Suggestions",
   "homeV2EdSgSub": "Tips from your own transactions. Always at the top.",
-  "homeV2EdSecAuto": "Turns on with your data",
+  "homeV2EdSecAuto": "Turns on when you add transactions",
   "homeV2EdSecMore": "More widgets",
   "homeV2EdAutoNote": "These show up by themselves once they have something to show. Turn one on to show it now.",
   "homeV2EdAutoStories": "Turns on when your first money story is ready",
@@ -3125,5 +3034,290 @@
   "homeV2SgWidgetAct": "Add widget",
   "homeV2SgCardsTitle": "Keep your cards in Kuber Cards",
   "homeV2SgCardsBody": "Save card details behind your PIN or fingerprint. They stay on this phone.",
-  "homeV2SgCardsAct": "Set up Kuber Cards"
+  "homeV2SgCardsAct": "Set up Kuber Cards",
+  "homeV33TourName": "Why Kuber?",
+  "homeV33TourMoreSub": "How expense tracking works, and how Kuber helps",
+  "homeV33TourCardBody": "How tracking every expense helps, and what Kuber can do.",
+  "homeV33TourCardAct": "Show me",
+  "homeV33TourCardHideA11y": "Hide this card",
+  "homeV33TourCardHidden": "You can find Why Kuber? in More.",
+  "homeV33TourNext": "Next",
+  "homeV33TourDone": "Done",
+  "homeV33TourPageA11y": "Page {page} of {total}",
+  "@homeV33TourPageA11y": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV33P1Title": "Make noting every expense a habit.",
+  "homeV33P1SubSms": "Small expenses count too. Noting is easy, and bank SMS add most of them.",
+  "homeV33P1Sub": "Small expenses count too. Kuber makes noting them easy.",
+  "homeV33P1Try": "Add a transaction",
+  "homeV33P1ColDate": "Date",
+  "homeV33P1ColAmount": "Amount",
+  "homeV33P1ColSpent": "Spent on",
+  "homeV33P1ColCat": "Category",
+  "homeV33P1A11y": "Three expenses written in a notebook turn into Kuber transactions, each with a category and an account.",
+  "homeV33DFood": "Food delivery",
+  "homeV33DAuto": "Auto ride",
+  "homeV33DMovie": "Movie tickets",
+  "homeV33DCoffee": "Coffee",
+  "homeV33DGroc": "Groceries",
+  "homeV33CFood": "Food",
+  "homeV33CTransport": "Transport",
+  "homeV33CFun": "Entertainment",
+  "homeV33CShopping": "Shopping",
+  "homeV33ABank": "Bank",
+  "homeV33ACash": "Cash",
+  "homeV33ACard": "Credit card",
+  "homeV33DBankName": "Your Bank",
+  "homeV33P2Title": "Every account. Even credit cards.",
+  "homeV33P2Sub": "Bank, cash and cards, with billing cycles and due dates. Add any category.",
+  "homeV33P2Try": "Open Accounts",
+  "homeV33P2Balance": "Balance",
+  "homeV33P2Due": "Due",
+  "homeV33P2Cycle": "Billing cycle {start} to {end}",
+  "@homeV33P2Cycle": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P2DueOn": "Due {date}",
+  "@homeV33P2DueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P2PetCare": "Pet care",
+  "homeV33P2A11y": "A bank account, cash and a credit card show their balances. The card shows its billing cycle and due date. A new category, Pet care, joins the others.",
+  "homeV33P3Title": "Track more than spending.",
+  "homeV33P3Sub": "Budgets, investments, loans, money lent or borrowed, and subscriptions.",
+  "homeV33P3Try": "Open Upcoming events",
+  "homeV33P3Budget": "Food budget",
+  "homeV33P3BudgetOf": "{spent} of {limit}",
+  "@homeV33P3BudgetOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P3Inv": "Investments",
+  "homeV33P3InvTypes": "SIPs, stocks, FDs and more",
+  "homeV33P3Loan": "Home loan",
+  "homeV33P3LoanSub": "EMI {amount} · {paid} of {total}",
+  "@homeV33P3LoanSub": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV33P3Lent": "{name} owes you",
+  "@homeV33P3Lent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P3Borrowed": "You owe {name}",
+  "@homeV33P3Borrowed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P3Subs": "Streaming plan",
+  "homeV33P3SubsSub": "{amount} a month",
+  "@homeV33P3SubsSub": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P3Renews": "Renews {date}",
+  "@homeV33P3Renews": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P3Next": "Next {date}",
+  "@homeV33P3Next": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P3A11y": "A budget fills, an investment grows, a loan EMI is paid, money lent and borrowed shows up, and a subscription renews.",
+  "homeV33P4Title": "Your spending, at a glance.",
+  "homeV33P4Sub": "Every transaction in one searchable history, with many ways to analyze it.",
+  "homeV33P4Try": "Open Analytics",
+  "homeV33P4Search": "Search",
+  "homeV33P4Query": "food",
+  "homeV33P4Today": "Today",
+  "homeV33P4Yesterday": "Yesterday",
+  "homeV33P4ByCat": "By category",
+  "homeV33P4Monthly": "Monthly",
+  "homeV33P4Compare": "Compare",
+  "homeV33P4A11y": "A searchable history narrows to food. Then charts show spending by category, by month, and this month against last month.",
+  "homeV33P5Title": "Go further when you want.",
+  "homeV33P5Ask": "Ask Kuber",
+  "homeV33P5AskLine": "Ask about your money, answered on your phone.",
+  "homeV33P5Cards": "Kuber Cards",
+  "homeV33P5CardsLine": "Your cards, encrypted and kept on your phone.",
+  "homeV33P5Notes": "Kuber Notes",
+  "homeV33P5NotesLine": "Notes that do the math and add transactions.",
+  "homeV33P5Calc": "Calculators and tools",
+  "homeV33P5CalcLine": "EMI, SIP, tax and more.",
+  "homeV33P5Rem": "Reminders",
+  "homeV33P5RemLine": "Never miss a bill.",
+  "homeV33P5Try": "Open Signature tools",
+  "homeV33P5AskQ": "How much on food this month?",
+  "homeV33P5AskA": "{amount} so far, 70% of your Food budget.",
+  "@homeV33P5AskA": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P5NoteName": "Goa trip",
+  "homeV33P5Hotel": "Hotel",
+  "homeV33P5Taxi": "Taxi",
+  "homeV33P5Travel": "Travel",
+  "homeV33P5SipCalc": "SIP calculator",
+  "homeV33P5PerMonth": "{amount} a month",
+  "@homeV33P5PerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P5Rate": "{rate}% a year",
+  "@homeV33P5Rate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV33P5Years": "{n} years",
+  "@homeV33P5Years": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV33P5RemTitle": "Electricity bill",
+  "homeV33P5RemDue": "Due tomorrow · {amount}",
+  "@homeV33P5RemDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeV33P5A11y": "Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.",
+  "homeV3TrkTitle": "What do you want to track?",
+  "homeV3TrkBody": "Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.",
+  "homeV31TrkBudgets": "Budgets",
+  "homeV3TrkLoans": "Loans and EMIs",
+  "homeV3TrkInvest": "Investments and SIPs",
+  "homeV3TrkLedger": "Money lent or borrowed",
+  "homeV3TrkSubs": "Subscriptions",
+  "homeV33EdNeedsTxn": "Appears after your first transaction",
+  "homeV33SgQuickTitle": "Add in one line with Quick Add",
+  "homeV33SgQuickBody": "Type something like \"250 lunch\" or tap the mic and say it. Kuber turns it into a transaction.",
+  "homeV33SgQuickAct": "Try Quick Add",
+  "homeV33SgSmsTitle": "Let bank SMS add your expenses",
+  "homeV33SgSmsBody": "Kuber can read bank SMS on this phone and add most transactions for you. They never leave your phone.",
+  "homeV33SgSmsAct": "Import from SMS",
+  "homeV33GsBodyFresh": "Check your accounts, then add your first transaction. It takes a minute.",
+  "homeV33GsProgress": "{done} of 2 done",
+  "@homeV33GsProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      }
+    }
+  },
+  "homeV33GsActAccounts": "View accounts",
+  "homeV33GsStepAccounts": "Set up accounts",
+  "freqEveryNWeeks": "Every {count} weeks",
+  "@freqEveryNWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "freqEveryNMonths": "Every {count} months",
+  "@freqEveryNMonths": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "freqEveryNYears": "Every {count} years",
+  "@freqEveryNYears": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "weeksLabel": "weeks",
+  "monthsLabel": "months",
+  "yearsLabel": "years",
+  "intervalInvalid": "Enter a whole number of 1 or more",
+  "cadenceThen": "then {interval}",
+  "@cadenceThen": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "notifItemMissing": "This item no longer exists.",
+  "nextBackupOn": "Next: {date}, on app open",
+  "@nextBackupOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "nextBackupNextOpen": "Next: on next app open",
+  "backupsAreOn": "Backups are on",
+  "backupsAreOnDesc": "Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately."
 }

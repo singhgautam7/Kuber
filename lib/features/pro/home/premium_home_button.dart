@@ -12,7 +12,7 @@ import '../paywall/pro_state.dart';
 /// screen keeps `KuberAppBar` unchanged). Ask Kuber gets its own dedicated
 /// home widget now (`AskKuberHomeWidget`), so the header's scarce real estate
 /// goes to surfacing Pro status instead. Always taps through to `/pro`; the
-/// paywall itself decides free vs trial vs status view.
+/// paywall itself decides free vs status view.
 ///
 /// Placement per review: sits at the extreme left of the header row (first
 /// child), with the privacy-mode toggle and notification bell pushed to the
@@ -55,29 +55,12 @@ class PremiumHomeButton extends ConsumerWidget {
 
     final proState = ref.watch(kuberProStateProvider);
 
-    // A trial (legacy app trial OR a Play Billing subscription in its
-    // free-trial phase) shows the countdown; otherwise Pro vs the upsell label.
-    final String label;
-    final bool amber;
-    if (proState.inTrialPhase) {
-      label = 'TRIAL · ${proState.trialDaysLeft}d';
-      amber = proState.trialEndingSoon;
-    } else if (proState.isPro) {
-      label = 'PRO';
-      amber = false;
-    } else {
-      label = 'Kuber Pro';
-      amber = false;
-    }
+    // "Pro User", not a bare "PRO": reads as a status, not another upsell.
+    final label = proState.isPro ? 'Pro User' : 'Kuber Pro';
 
     // Board 3.2d: 32 pill, primaryContainer, workspace_premium + labelLarge.
-    // Trial ending soon swaps to the warning container.
-    final bg = amber
-        ? context.kuberMoney.warningContainer
-        : cs.primaryContainer;
-    final fg = amber
-        ? context.kuberMoney.onWarningContainer
-        : cs.onPrimaryContainer;
+    final bg = cs.primaryContainer;
+    final fg = cs.onPrimaryContainer;
 
     return _fade(Semantics(
       key: ValueKey(label),
@@ -102,7 +85,7 @@ class PremiumHomeButton extends ConsumerWidget {
                   style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: label == 'Kuber Pro' ? 0.1 : 0.8,
+                    letterSpacing: 0.1,
                     color: fg,
                   ),
                 ),

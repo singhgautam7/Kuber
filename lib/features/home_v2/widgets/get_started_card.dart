@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -14,9 +12,6 @@ import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
-import '../../accounts/providers/account_provider.dart';
-import '../../settings/providers/settings_provider.dart';
-import '../../sms_import/widgets/paste_sms_sheet.dart';
 import '../data/home_v2_state.dart';
 import '../providers/get_started_provider.dart';
 import '../providers/home_v2_provider.dart';
@@ -31,12 +26,10 @@ class GetStartedCard extends ConsumerStatefulWidget {
   ConsumerState<GetStartedCard> createState() => _GetStartedCardState();
 }
 
-class _GetStartedCardState extends ConsumerState<GetStartedCard>
-    with WidgetsBindingObserver {
+class _GetStartedCardState extends ConsumerState<GetStartedCard> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     // First time the card is on screen (for the 14-day timeout).
     final s = ref.read(homeV2Provider);
     if (s.gsFirstShownAt == null) {
@@ -55,19 +48,6 @@ class _GetStartedCardState extends ConsumerState<GetStartedCard>
       );
       if (reason != null) _graduate(reason);
     }, fireImmediately: true);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  // Back from phone settings or the permission dialog: read permission and
-  // staged counts again.
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _refresh();
   }
 
   void _refresh() => ref.read(gsRefreshProvider.notifier).state++;
@@ -96,32 +76,6 @@ class _GetStartedCardState extends ConsumerState<GetStartedCard>
   Future<void> _push(String route, {Object? extra}) async {
     await context.push(route, extra: extra);
     if (mounted) _refresh();
-  }
-
-  /// Hero "Import from SMS" / "Allow SMS access": ask first if needed, then
-  /// open SMS import.
-  Future<void> _importSms(GsData d) async {
-    if (!d.smsGranted) {
-      await ref.read(homeV2Provider.notifier).markSmsRequested();
-      final status = await Permission.sms.request();
-      _refresh();
-      if (!status.isGranted || !mounted) return;
-    }
-    await _push('/more/sms-import');
-  }
-
-  Future<void> _setBalance() async {
-    final accounts = await ref.read(allAccountsProvider.future);
-    if (!mounted || accounts.isEmpty) return;
-    final defaultId = ref.read(
-      settingsProvider.select((s) => s.valueOrNull?.defaultAccountId),
-    );
-    final enabled = accounts.where((a) => !a.isDisabled).toList();
-    final pick = enabled.firstWhere(
-      (a) => a.id.toString() == defaultId,
-      orElse: () => enabled.isNotEmpty ? enabled.first : accounts.first,
-    );
-    await _push('/accounts/edit', extra: pick);
   }
 
   Future<void> _close() async {
@@ -157,15 +111,8 @@ class _GetStartedCardState extends ConsumerState<GetStartedCard>
                 key: const ValueKey('gs-body'),
                 data: d,
                 onClose: _close,
-                onImport: () => _importSms(d),
                 onAdd: () => _push('/add-transaction'),
-                onQuick: () => _push('/quick-add'),
-                onBalance: _setBalance,
-                onSettings: () async {
-                  await openAppSettings();
-                },
-                onPaste: () => showPasteSmsSheet(context),
-                onPro: () => _push('/pro'),
+                onAccounts: () => _push('/more/accounts'),
               ),
       ),
     );
@@ -195,25 +142,15 @@ class _GsSkeleton extends StatelessWidget {
 class _GsBody extends StatelessWidget {
   final GsData data;
   final VoidCallback onClose;
-  final VoidCallback onImport;
   final VoidCallback onAdd;
-  final VoidCallback onQuick;
-  final VoidCallback onBalance;
-  final VoidCallback onSettings;
-  final VoidCallback onPaste;
-  final VoidCallback onPro;
+  final VoidCallback onAccounts;
 
   const _GsBody({
     super.key,
     required this.data,
     required this.onClose,
-    required this.onImport,
     required this.onAdd,
-    required this.onQuick,
-    required this.onBalance,
-    required this.onSettings,
-    required this.onPaste,
-    required this.onPro,
+    required this.onAccounts,
   });
 
   @override
@@ -223,47 +160,17 @@ class _GsBody extends StatelessWidget {
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
     final d = data;
-    final permissionState =
-        d.state == GsState.denied || d.state == GsState.blocked;
-
     final body = switch (d.state) {
-      GsState.fresh => l.homeV2GsBodyFresh,
-      GsState.oneDone => l.homeV2GsBodyOneDone,
-      GsState.twoDone => l.homeV2GsBodyTwoDone,
-      GsState.denied => l.homeV2GsBodyDenied,
-      GsState.blocked => l.homeV2GsBodyBlocked,
+      GsState.fresh => l.homeV33GsBodyFresh,
+      GsState.oneDone => l.homeV2GsBodyTwoDone,
     };
 
-    // Hero = first incomplete step; secondaries per the action table.
-    final (Widget hero, List<Widget> secondary) = switch (d.state) {
-      GsState.denied => (
-        _hero(l.homeV2GsActAllow, Icons.sms_outlined, onImport),
-        [_out(l.homeV2GsActPaste, onPaste), _out(l.homeV2GsActAdd, onAdd)],
-      ),
-      GsState.blocked => (
-        _hero(l.homeV2GsActSettings, Icons.open_in_new_rounded, onSettings),
-        [_out(l.homeV2GsActPaste, onPaste), _out(l.homeV2GsActAdd, onAdd)],
-      ),
-      _ when !d.step1 => (
-        _hero(l.homeV2GsActImport, Icons.sms_outlined, onImport),
-        [
-          if (!d.step2) _out(l.homeV2GsActAdd, onAdd),
-          _out(l.homeV2GsActQuick, onQuick),
-        ],
-      ),
-      _ when !d.step2 => (
-        _hero(l.homeV2GsActAdd, Icons.add_rounded, onAdd),
-        [_out(l.homeV2GsActQuick, onQuick)],
-      ),
-      _ => (
-        _hero(
-          l.homeV2GsActBalance,
-          Icons.account_balance_wallet_outlined,
-          onBalance,
-        ),
-        <Widget>[],
-      ),
-    };
+    // One button per open step, in step order (user review): View
+    // accounts (outline), then Add transaction (filled), both full height.
+    final buttons = [
+      if (!d.step3) _out(l.homeV33GsActAccounts, onAccounts),
+      if (!d.step2) _hero(l.homeV2GsActAdd, Icons.add_rounded, onAdd),
+    ];
 
     Widget step(String label, bool done, {String? sub}) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -308,7 +215,7 @@ class _GsBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l.homeV2GsProgress(d.done).toUpperCase(),
+                    l.homeV33GsProgress(d.done).toUpperCase(),
                     style: tt.labelMedium!.copyWith(
                       letterSpacing: 0.8,
                       color: cs.primary,
@@ -334,31 +241,12 @@ class _GsBody extends StatelessWidget {
         const SizedBox(height: KuberSpace.xs),
         Text(body, style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
         const SizedBox(height: KuberSpace.md),
-        step(
-          l.homeV2GsStep1,
-          d.step1,
-          sub: permissionState && !d.step1
-              ? l.homeV2GsStepNeedsPermission
-              : null,
-        ),
+        step(l.homeV33GsStepAccounts, d.step3),
         step(l.homeV2GsStep2, d.step2),
-        step(l.homeV2GsStep3, d.step3),
-        if (d.limit) ...[
-          const SizedBox(height: KuberSpace.md),
-          _LimitTile(data: d, onPro: onPro),
-        ],
         const SizedBox(height: KuberSpace.lg),
-        hero,
-        if (secondary.isNotEmpty) ...[
-          const SizedBox(height: KuberSpace.sm),
-          Row(
-            children: [
-              for (final (i, w) in secondary.indexed) ...[
-                if (i > 0) const SizedBox(width: KuberSpace.sm),
-                Expanded(child: w),
-              ],
-            ],
-          ),
+        for (final (i, b) in buttons.indexed) ...[
+          if (i > 0) const SizedBox(height: KuberSpace.sm),
+          b,
         ],
       ],
     );
@@ -377,63 +265,9 @@ class _GsBody extends StatelessWidget {
     label: label,
     type: AppButtonType.outline,
     fullWidth: true,
-    height: 40,
+    height: 48,
     onPressed: onTap,
   );
-}
-
-/// Free weekly SMS allowance used (board HV2.2 "limit"): warning tile with
-/// the waiting count, the reset date, and See Kuber Pro.
-class _LimitTile extends StatelessWidget {
-  final GsData data;
-  final VoidCallback onPro;
-  const _LimitTile({required this.data, required this.onPro});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final tt = Theme.of(context).textTheme;
-    final (bg, fg) = kuberToneColors(context, KuberTone.warning);
-    final reset = data.resetDate;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        KuberSpace.lg,
-        KuberSpace.md,
-        KuberSpace.lg,
-        KuberSpace.xs,
-      ),
-      decoration: BoxDecoration(color: bg, borderRadius: KuberShape.mediumR),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l.homeV2GsLimitTitle, style: tt.titleSmall!.copyWith(color: fg)),
-          const SizedBox(height: 2),
-          Text(
-            l.homeV2GsLimitBody(data.staged),
-            style: tt.bodyMedium!.copyWith(color: fg),
-          ),
-          if (reset != null)
-            Text(
-              l.homeV2GsLimitReset(
-                DateFormat.MMMd(
-                  Localizations.localeOf(context).toString(),
-                ).format(reset),
-              ),
-              style: tt.bodySmall!.copyWith(color: fg),
-            ),
-          TextButton.icon(
-            onPressed: onPro,
-            style: TextButton.styleFrom(
-              foregroundColor: fg,
-              padding: EdgeInsets.zero,
-            ),
-            icon: const Icon(Icons.workspace_premium_outlined, size: 18),
-            label: Text(l.homeV2GsActPro),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// Complete state (board HV2.2): shown once at the first Home build after a

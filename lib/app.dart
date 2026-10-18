@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +25,8 @@ import 'features/history/providers/selection_provider.dart';
 import 'features/transactions/providers/transaction_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
+import 'features/notifications/providers/notification_provider.dart';
+import 'features/notifications/utils/deep_link_handler.dart';
 import 'features/pro/debug/entitlement_override.dart';
 import 'shared/widgets/kuber_extended_fab.dart';
 import 'features/home_v2/providers/home_v2_provider.dart';
@@ -63,10 +67,16 @@ class _KuberAppState extends ConsumerState<KuberApp>
   /// (specs/performance.md startup order).
   static const _onOpenSettleDelay = Duration(milliseconds: 1620);
 
+  StreamSubscription<String>? _notificationTapSub;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // System notification tapped while the app was running: same routing map
+    // as the in-app sheet.
+    _notificationTapSub = notificationTaps.stream
+        .listen((payload) => handleNotificationTap(ref, payload: payload));
     // On-open processing deferred to after the first frame so it never delays
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
@@ -223,34 +233,47 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // keeping frequent resumes from repeating the notification plugin calls.
   DateTime? _lastCreditReminderMaintenanceDay;
 
-  // Timestamp of the last on-resume Play Billing reconcile. Entitlement changes
-  // slowly (a lapse/renewal is a day-scale event), so throttling to once per 15
-  // minutes keeps frequent app switches from re-querying Play needlessly.
+  // Timestamp of the last on-resume Play Billing reconcile. Pro users: once per
+  // 15 minutes (lapse / renewal are day-scale). Free users: not at all on a
+  // normal resume (the cold-start reconcile covers an app reopen); only for
+  // 30 minutes after they tap Restore / Redeem, throttled to 30s, since they
+  // may be redeeming in the Play Store and switching back.
   DateTime? _lastEntitlementReconcile;
 
   /// Asks Play Billing to re-report purchases on resume so entitlement reflects
   /// a lapse / renewal / promo redemption that happened while backgrounded — and
   /// so a purchase Play couldn't yet see on cold start (a cold local cache on a
   /// fresh install) is caught the next time the user returns. Silent (a restored
-  /// purchase never pops a sheet), throttled to once per 15 minutes, and fully
+  /// purchase never pops a sheet), throttled (see [_lastEntitlementReconcile]), and fully
   /// guarded — billing is never allowed to affect the foreground path.
   ///
   /// A per-session cap was deliberately NOT added: a returning owner whose
   /// entitlement hasn't synced yet is exactly who needs another background look,
-  /// and the 15-minute throttle already bounds the work.
+  /// and the throttle already bounds the work.
   Future<void> _reconcileEntitlementOnResume() async {
     // Lifetime never expires and, once known, never needs re-checking.
     if (ref.read(kuberProStateProvider).plan == ProPlan.lifetime) return;
 
-    final now = DateTime.now();
-    final last = _lastEntitlementReconcile;
-    if (last != null && now.difference(last) < const Duration(minutes: 15)) {
+    final isPro = ref.read(kuberProStateProvider).isPro;
+    if (!isPro && !ref.read(purchaseServiceProvider).isWatchingForPurchase) {
       return;
     }
+    final now = DateTime.now();
+    final last = _lastEntitlementReconcile;
+    final throttle =
+        isPro ? const Duration(minutes: 15) : const Duration(seconds: 30);
+    if (last != null && now.difference(last) < throttle) return;
     _lastEntitlementReconcile = now;
 
     try {
-      await ref.read(purchaseServiceProvider).restorePurchases(source: 'resume');
+      final service = ref.read(purchaseServiceProvider);
+      // Play may have come up since launch (the user signed in to the Play
+      // Store to redeem a code); connect now instead of needing a restart.
+      if (!await service.ensureAvailable()) return;
+      await service.restorePurchases(source: 'resume');
+      // A subscription that ended (e.g. a free promo month never paid for)
+      // is dropped only after two confirmed-empty checks; see checkForLapse.
+      await service.checkForLapse(source: 'resume');
     } catch (e, stack) {
       debugPrint('Kuber: on-resume entitlement reconcile failed: $e\n$stack');
     }
@@ -400,6 +423,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
 
   @override
   void dispose() {
+    _notificationTapSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -410,6 +434,19 @@ class _KuberAppState extends ConsumerState<KuberApp>
   Future<bool> didPopRoute() async {
     // 1. Pop from root navigator (bottom sheets, full-screen sub-pages).
     if (await _maybePop(rootNavigatorKey.currentState)) return true;
+
+    // 1b. The Welcome flow is one route with its own pages: let its
+    // PopScope step back a page (it only lets go on the Welcome page).
+    final location = ref
+        .read(routerProvider)
+        .routerDelegate
+        .currentConfiguration
+        .uri
+        .path;
+    if (location.startsWith('/onboarding') &&
+        (await rootNavigatorKey.currentState?.maybePop() ?? false)) {
+      return true;
+    }
 
     // 2. Pop from the active shell branch navigator.
     final currentIndex = ref.read(currentShellTabIndexProvider);

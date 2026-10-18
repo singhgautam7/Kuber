@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
-import '../../../../shared/widgets/timed_snackbar.dart';
-import '../paywall/pro_state.dart';
-import '../purchase_states/purchase_failure_snackbar.dart';
-import '../services/purchase_service.dart';
+import '../purchase_states/restore_purchases_flow.dart';
 
 /// "Redeem promo code" row in Settings > Kuber Pro. Google Play promo codes
 /// are validated by Play itself, not by Kuber, so this collects the code
@@ -32,49 +28,10 @@ void showRedeemPromoCodeSheet(BuildContext context, [WidgetRef? ref]) {
           width: double.infinity,
           height: 52,
           child: FilledButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(ctx);
-              final code = controller.text.trim();
-              final uri = Uri.parse(
-                code.isEmpty
-                    ? 'https://play.google.com/redeem'
-                    : 'https://play.google.com/redeem?code=$code',
-              );
-              final launched = await launchUrl(
-                uri,
-                mode: LaunchMode.externalApplication,
-              );
-              if (!launched && context.mounted) {
-                showPlayStoreUnavailableSnackbar(context);
-                return;
-              }
-
-              // When returning from Play Store, auto-trigger query check.
-              if (ref != null && context.mounted) {
-                showKuberSnackBar(
-                  context,
-                  'Checking for your redemption...',
-                  duration: const Duration(seconds: 3),
-                );
-                try {
-                  await ref
-                      .read(purchaseServiceProvider)
-                      .restorePurchases(
-                        source: 'redeem_sheet_return',
-                        force: true,
-                      );
-                  await pollForProEntitlement(
-                    () => ref.read(kuberProStateProvider).isPro,
-                    timeout: const Duration(milliseconds: 2500),
-                  );
-                  if (context.mounted) {
-                    final current = ref.read(kuberProStateProvider);
-                    if (current.isPro) {
-                      showKuberSnackBar(context, 'Kuber Pro unlocked');
-                    }
-                  }
-                } catch (_) {}
-              }
+              if (ref == null) return;
+              redeemOnPlayStore(context, ref, code: controller.text);
             },
             style: FilledButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -93,7 +50,10 @@ void showRedeemPromoCodeSheet(BuildContext context, [WidgetRef? ref]) {
           children: [
             Text(
               'Enter your code and continue. Google Play handles '
-              'redemption, Kuber just opens the right page.',
+              'redemption, Kuber just opens the right page. Use the Google '
+              'account that is signed in to the Play Store on this phone; '
+              'Play shows it at the top of the redeem page. When you come '
+              'back, Kuber checks for it automatically.',
               style: localeFont(
                 fontSize: 14,
                 color: cs.onSurfaceVariant,

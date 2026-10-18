@@ -15,6 +15,8 @@ import '../../pro/debug/entitlement_override.dart';
 import '../../pro/debug/entitlement_override_sheet.dart';
 import '../../pro/services/billing_diagnostics.dart';
 import '../providers/dev_mode_provider.dart';
+import '../services/dev_notification_tools.dart';
+import '../../../core/database/isar_service.dart';
 
 class DevToolsScreen extends ConsumerWidget {
   const DevToolsScreen({super.key});
@@ -143,10 +145,49 @@ class DevToolsScreen extends ConsumerWidget {
                 () => runSuggestionRulesNow(context, ref),
               ),
               row(
+                Icons.play_circle_outline_rounded,
+                'Reset Why Kuber',
+                'Clear "tour seen" and the Home card dismissal',
+                () => resetWhyKuber(context, ref),
+              ),
+              row(
+                Icons.sync_alt_rounded,
+                'Re-run update migration',
+                'Treat this install as an existing user and migrate again',
+                () => rerunUpdateMigration(context, ref),
+              ),
+              row(
                 Icons.lightbulb_outline_rounded,
                 'Force suggestion',
                 'Show any suggestion card now with sample data',
                 () => showForceSuggestionSheet(context, ref),
+              ),
+            ]),
+            // Notification tap routing (specs/fixes/user-feedback-oct-2026.md).
+            section('NOTIFICATIONS', [
+              row(
+                Icons.notifications_active_outlined,
+                'Seed test notifications',
+                'One of every type, an old-style row and a deleted item',
+                () async {
+                  final n = await seedTestNotifications(ref.read(isarProvider));
+                  if (context.mounted) {
+                    showKuberSnackBar(context, 'Added $n test notifications');
+                  }
+                },
+              ),
+              row(
+                Icons.notification_add_outlined,
+                'Post system notification',
+                'Tap it from the shade to test routing',
+                () async {
+                  final ok =
+                      await postTestSystemNotification(ref.read(isarProvider));
+                  if (context.mounted && !ok) {
+                    showKuberSnackBar(context, 'Load demo data first',
+                        isError: true);
+                  }
+                },
               ),
             ]),
             section('DATABASE', [
@@ -165,7 +206,7 @@ class DevToolsScreen extends ConsumerWidget {
                 row(
                   Icons.workspace_premium_outlined,
                   'Entitlement Override',
-                  'Force Free / Trial / Monthly / Yearly / Lifetime',
+                  'Force Free / Monthly / Yearly / Lifetime',
                   () => showEntitlementOverrideSheet(context),
                 ),
                 row(

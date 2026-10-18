@@ -619,7 +619,8 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
         // ── Identity ─────────────────────────────────────────────────────
         KuberFormSection(
-          label: l10n.identity,
+          // The section header names the field (no floating label inside).
+          label: l10n.accountNameLabel,
           children: [
             TextField(
               controller: _nameController,
@@ -628,7 +629,6 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                   FocusManager.instance.primaryFocus?.unfocus(),
               style: field,
               decoration: InputDecoration(
-                labelText: sentenceCase(l10n.accountNameLabel),
                 hintText: l10n.accountNameHint,
               ),
             ),

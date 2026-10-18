@@ -18,6 +18,7 @@ import '../../features/advanced_analytics/screens/savings_rate_screen.dart';
 import '../../features/history/screens/advanced_filter_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/onboarding/screens/welcome_screen.dart';
+import '../../features/why_kuber/why_kuber_screen.dart';
 import '../../features/tutorial/screens/tutorial_chapter_screen.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
@@ -210,6 +211,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => OnboardingFlow(
           isReplay: state.uri.queryParameters['replay'] == 'true',
         ),
+      ),
+      GoRoute(
+        path: '/tour',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const WhyKuberScreen(),
       ),
       GoRoute(
         path: '/tutorial',

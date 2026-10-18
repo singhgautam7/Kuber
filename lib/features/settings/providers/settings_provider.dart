@@ -18,10 +18,19 @@ import '../../../core/utils/locale_font.dart';
 // force every consumer of them to rebuild. Riverpod short-circuits when the
 // selected value is `==`-equal to the previous.
 
+/// Currency code + number system read from prefs in `_bootstrap`, so the first
+/// frame formats amounts in the user's currency while [settingsProvider]
+/// hydrates (same pattern as [bootThemeProvider]).
+final bootNumberFormatProvider = Provider<(String, NumberSystem)>(
+  (ref) => ('INR', NumberSystem.indian),
+);
+
 final formatterProvider = Provider<AppFormatter>((ref) {
+  final bootSystem = ref.watch(bootNumberFormatProvider).$2;
   final system = ref.watch(settingsProvider
-      .select((s) => s.valueOrNull?.numberSystem ?? NumberSystem.indian));
-  return AppFormatter(system: system);
+      .select((s) => s.valueOrNull?.numberSystem ?? bootSystem));
+  final symbol = ref.watch(currencyProvider).symbol;
+  return AppFormatter.current = AppFormatter(system: system, symbol: symbol);
 });
 
 final appVersionProvider = FutureProvider<String>((ref) async {
@@ -34,8 +43,9 @@ final settingsProvider = AsyncNotifierProvider<SettingsNotifier, SettingsState>(
 );
 
 final currencyProvider = Provider<KuberCurrency>((ref) {
+  final bootCode = ref.watch(bootNumberFormatProvider).$1;
   final code = ref.watch(
-      settingsProvider.select((s) => s.valueOrNull?.currency ?? 'INR'));
+      settingsProvider.select((s) => s.valueOrNull?.currency ?? bootCode));
   return currencyFromCode(code);
 });
 

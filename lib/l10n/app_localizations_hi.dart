@@ -54,69 +54,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get privateByDesign => 'डिज़ाइन से निजी।';
-
-  @override
-  String get onboardingPage2Description =>
-      'आपका पैसा आपके डिवाइस पर रहता है। कोई टेलीमेट्री नहीं, कोई सिंक नहीं, कोई तीसरा पक्ष नहीं।';
-
-  @override
-  String get fullyOfflineTitle => 'पूरी तरह से ऑफ़लाइन';
-
-  @override
-  String get fullyOfflineBody =>
-      'कोई क्लाउड सर्वर नहीं। हैक होने का कोई डर नहीं। हवाई जहाज़ मोड में भी काम करता है।';
-
-  @override
-  String get noAccountTitle => 'किसी खाते की आवश्यकता नहीं';
-
-  @override
-  String get noAccountBody =>
-      'ऐप खोलें और शुरू करें। शून्य साइनअप, शून्य झंझट।';
-
-  @override
-  String get privacyModeTitle => 'गोपनीयता मोड';
-
-  @override
-  String get privacyModeBody =>
-      'जब आप किसी को अपना फ़ोन दें, तो एक टैप में सारा बैलेंस छिपाएं।';
-
-  @override
-  String get modulesTitle => '8+ मॉड्यूल · शून्य अव्यवस्था';
-
-  @override
-  String get everythingInOnePlace => 'सब कुछ\nएक शांत जगह में।';
-
-  @override
-  String get onboardingPage3Description =>
-      'खर्च ट्रैक करें, बजट बनाएं, पोर्टफोलियो की निगरानी करें और कुबेर से उत्तर पूछें।';
-
-  @override
-  String get budgetsModule => 'बजट';
-
-  @override
-  String get analyticsModule => 'विश्लेषण';
-
-  @override
   String get recurringModule => 'आवर्ती खर्च';
-
-  @override
-  String get lendBorrowModule => 'उधार लेना/देना';
-
-  @override
-  String get investmentsModule => 'निवेश';
-
-  @override
-  String get askKuberModule => 'कुबेर एआई से पूछें';
-
-  @override
-  String get toolsModule => 'टूल्स और कैलकुलेटर';
-
-  @override
-  String get tagsCategoriesModule => 'टैग और श्रेणियां';
-
-  @override
-  String get andMuchMore => '••• और भी बहुत कुछ!';
 
   @override
   String get makeItYours => 'इसे अपना बनाएं।';
@@ -153,26 +91,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get themeSystem => 'सिस्टम';
-
-  @override
-  String get justSoYouKnow => 'सिर्फ जानकारी के लिए';
-
-  @override
-  String get goToTutorials => 'ट्यूटोरियल पर जाएं';
-
-  @override
-  String get exploreAtOwnPace => 'आप अपनी गति से एक्सप्लोर कर सकते हैं';
-
-  @override
-  String get exploreAtOwnPaceBody =>
-      'कुबेर को परिचित महसूस कराने के लिए बनाया गया है, ताकि आप तुरंत लॉगिंग शुरू कर सकें।';
-
-  @override
-  String get walkthroughNearby => 'एक वॉकथ्रू हमेशा पास में होता है';
-
-  @override
-  String get walkthroughNearbyBody =>
-      'जब भी आप त्वरित गाइड चाहते हैं, \'अधिक\' खोलें, फिर \'ऐप ट्यूटोरियल\' खोलें।';
 
   @override
   String get settingsTitle => 'सेटिंग्स';
@@ -2518,12 +2436,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get menuTutorialDesc => 'फीचर वॉकथ्रू को फिर से देखें';
-
-  @override
-  String get menuWelcomeTour => 'स्वागत टूर';
-
-  @override
-  String get menuWelcomeTourDesc => 'स्वागत और सेटअप स्क्रीन को फिर से देखें';
 
   @override
   String get menuRateUs => 'प्ले स्टोर पर हमें रेट करें';
@@ -5050,64 +4962,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get textSizePreviewMeta => 'किराना · आज';
 
   @override
-  String homeV2GsProgress(int done) {
-    return '3 में से $done पूरे';
-  }
-
-  @override
   String get homeV2GsTitle => 'चलिए Kuber सेट करें';
 
   @override
-  String get homeV2GsBodyFresh =>
-      'अपने बैंक SMS इम्पोर्ट करें और Kuber आपके लेनदेन खुद जोड़ देगा। आपके मैसेज इसी फ़ोन पर रहते हैं।';
-
-  @override
-  String get homeV2GsBodyOneDone => 'अच्छी शुरुआत। बस दो कदम और।';
-
-  @override
   String get homeV2GsBodyTwoDone => 'बस थोड़ा और। एक कदम बाकी।';
-
-  @override
-  String get homeV2GsBodyDenied =>
-      'Kuber को बैंक SMS पढ़ने की अनुमति चाहिए। मैसेज इसी फ़ोन पर पढ़े जाते हैं और कभी अपलोड नहीं होते।';
-
-  @override
-  String get homeV2GsBodyBlocked =>
-      'Kuber के लिए SMS एक्सेस बंद है। आप इसे फ़ोन की सेटिंग में चालू कर सकते हैं या बैंक SMS पेस्ट कर सकते हैं।';
-
-  @override
-  String get homeV2GsStep1 => 'SMS से इम्पोर्ट करें';
 
   @override
   String get homeV2GsStep2 => 'खुद एक लेनदेन जोड़ें';
 
   @override
   String get homeV2GsStep3 => 'अपना शुरुआती बैलेंस सेट करें';
-
-  @override
-  String get homeV2GsStepNeedsPermission => 'SMS अनुमति चाहिए';
-
-  @override
-  String get homeV2GsLimitTitle =>
-      'इस हफ़्ते के मुफ़्त इम्पोर्ट इस्तेमाल हो चुके हैं';
-
-  @override
-  String homeV2GsLimitBody(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'SMS इम्पोर्ट में $count और SMS इंतज़ार कर रहे हैं। जब तक आप इन्हें इम्पोर्ट नहीं करते, ये वहीं रहेंगे।',
-      one:
-          'SMS इम्पोर्ट में 1 और SMS इंतज़ार कर रहा है। जब तक आप इसे इम्पोर्ट नहीं करते, यह वहीं रहेगा।',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String homeV2GsLimitReset(String date) {
-    return 'मुफ़्त इम्पोर्ट $date को फिर से शुरू होंगे।';
-  }
 
   @override
   String get homeV2GsDoneTitle => 'आप तैयार हैं';
@@ -5117,28 +4981,10 @@ class AppLocalizationsHi extends AppLocalizations {
       'जैसे-जैसे आप इस्तेमाल करेंगे, Kuber आपके होम पर और चीज़ें जोड़ेगा।';
 
   @override
-  String get homeV2GsActImport => 'SMS से इम्पोर्ट करें';
-
-  @override
   String get homeV2GsActAdd => 'लेनदेन जोड़ें';
 
   @override
-  String get homeV2GsActQuick => 'क्विक ऐड';
-
-  @override
   String get homeV2GsActBalance => 'बैलेंस सेट करें';
-
-  @override
-  String get homeV2GsActAllow => 'SMS एक्सेस दें';
-
-  @override
-  String get homeV2GsActSettings => 'फ़ोन सेटिंग खोलें';
-
-  @override
-  String get homeV2GsActPaste => 'SMS पेस्ट करें';
-
-  @override
-  String get homeV2GsActPro => 'Kuber Pro देखें';
 
   @override
   String get homeV2GsCloseA11y => 'शुरुआत करें कार्ड बंद करें';
@@ -5197,7 +5043,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeV2EdSgSub => 'आपके अपने लेनदेन से सुझाव। हमेशा सबसे ऊपर।';
 
   @override
-  String get homeV2EdSecAuto => 'आपके डेटा के साथ चालू होते हैं';
+  String get homeV2EdSecAuto => 'लेन-देन जोड़ने पर चालू होंगे';
 
   @override
   String get homeV2EdSecMore => 'और विजेट';
@@ -5382,4 +5228,435 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get homeV2SgCardsAct => 'Kuber Cards सेट करें';
+
+  @override
+  String get homeV33TourName => 'Kuber क्यों?';
+
+  @override
+  String get homeV33TourMoreSub =>
+      'खर्च ट्रैक करना कैसे काम करता है, और Kuber कैसे मदद करता है';
+
+  @override
+  String get homeV33TourCardBody =>
+      'हर खर्च ट्रैक करने से क्या फ़ायदा है, और Kuber क्या कर सकता है।';
+
+  @override
+  String get homeV33TourCardAct => 'दिखाएँ';
+
+  @override
+  String get homeV33TourCardHideA11y => 'यह कार्ड छिपाएँ';
+
+  @override
+  String get homeV33TourCardHidden => 'Kuber क्यों? आपको More में मिलेगा।';
+
+  @override
+  String get homeV33TourNext => 'आगे';
+
+  @override
+  String get homeV33TourDone => 'हो गया';
+
+  @override
+  String homeV33TourPageA11y(int page, int total) {
+    return 'पेज $page / $total';
+  }
+
+  @override
+  String get homeV33P1Title => 'हर खर्च लिखने की आदत डालें।';
+
+  @override
+  String get homeV33P1SubSms =>
+      'छोटे खर्च भी मायने रखते हैं। लिखना आसान है, और बैंक SMS ज़्यादातर खर्च खुद जोड़ देते हैं।';
+
+  @override
+  String get homeV33P1Sub =>
+      'छोटे खर्च भी मायने रखते हैं। Kuber इन्हें लिखना आसान बनाता है।';
+
+  @override
+  String get homeV33P1Try => 'लेन-देन जोड़ें';
+
+  @override
+  String get homeV33P1ColDate => 'तारीख';
+
+  @override
+  String get homeV33P1ColAmount => 'रकम';
+
+  @override
+  String get homeV33P1ColSpent => 'किस पर';
+
+  @override
+  String get homeV33P1ColCat => 'श्रेणी';
+
+  @override
+  String get homeV33P1A11y =>
+      'नोटबुक में लिखे तीन खर्च Kuber के लेन-देन बन जाते हैं, हर एक श्रेणी और खाते के साथ।';
+
+  @override
+  String get homeV33DFood => 'फ़ूड डिलीवरी';
+
+  @override
+  String get homeV33DAuto => 'ऑटो की सवारी';
+
+  @override
+  String get homeV33DMovie => 'मूवी टिकट';
+
+  @override
+  String get homeV33DCoffee => 'कॉफ़ी';
+
+  @override
+  String get homeV33DGroc => 'किराना';
+
+  @override
+  String get homeV33CFood => 'खाना';
+
+  @override
+  String get homeV33CTransport => 'यात्रा';
+
+  @override
+  String get homeV33CFun => 'मनोरंजन';
+
+  @override
+  String get homeV33CShopping => 'शॉपिंग';
+
+  @override
+  String get homeV33ABank => 'बैंक';
+
+  @override
+  String get homeV33ACash => 'नकद';
+
+  @override
+  String get homeV33ACard => 'क्रेडिट कार्ड';
+
+  @override
+  String get homeV33DBankName => 'आपका बैंक';
+
+  @override
+  String get homeV33P2Title => 'हर खाता। क्रेडिट कार्ड भी।';
+
+  @override
+  String get homeV33P2Sub =>
+      'बैंक, नकद और कार्ड, बिलिंग साइकिल और देय तारीखों के साथ। कोई भी श्रेणी जोड़ें।';
+
+  @override
+  String get homeV33P2Try => 'खाते खोलें';
+
+  @override
+  String get homeV33P2Balance => 'बैलेंस';
+
+  @override
+  String get homeV33P2Due => 'देय';
+
+  @override
+  String homeV33P2Cycle(String start, String end) {
+    return 'बिलिंग साइकिल $start से $end';
+  }
+
+  @override
+  String homeV33P2DueOn(String date) {
+    return 'देय $date';
+  }
+
+  @override
+  String get homeV33P2PetCare => 'पालतू देखभाल';
+
+  @override
+  String get homeV33P2A11y =>
+      'बैंक खाता, नकद और क्रेडिट कार्ड अपना बैलेंस दिखाते हैं। कार्ड अपनी बिलिंग साइकिल और देय तारीख दिखाता है। एक नई श्रेणी, पालतू देखभाल, बाकी श्रेणियों में जुड़ती है।';
+
+  @override
+  String get homeV33P3Title => 'सिर्फ़ खर्च से ज़्यादा ट्रैक करें।';
+
+  @override
+  String get homeV33P3Sub =>
+      'बजट, निवेश, लोन, दिया या लिया पैसा, और सब्सक्रिप्शन।';
+
+  @override
+  String get homeV33P3Try => 'आने वाले इवेंट खोलें';
+
+  @override
+  String get homeV33P3Budget => 'खाने का बजट';
+
+  @override
+  String homeV33P3BudgetOf(String spent, String limit) {
+    return '$limit में से $spent';
+  }
+
+  @override
+  String get homeV33P3Inv => 'निवेश';
+
+  @override
+  String get homeV33P3InvTypes => 'SIP, शेयर, FD और भी बहुत कुछ';
+
+  @override
+  String get homeV33P3Loan => 'होम लोन';
+
+  @override
+  String homeV33P3LoanSub(String amount, int paid, int total) {
+    return 'EMI $amount · $total में से $paid';
+  }
+
+  @override
+  String homeV33P3Lent(String name) {
+    return '$name पर आपका बकाया';
+  }
+
+  @override
+  String homeV33P3Borrowed(String name) {
+    return 'आप पर $name का बकाया';
+  }
+
+  @override
+  String get homeV33P3Subs => 'स्ट्रीमिंग प्लान';
+
+  @override
+  String homeV33P3SubsSub(String amount) {
+    return '$amount प्रति माह';
+  }
+
+  @override
+  String homeV33P3Renews(String date) {
+    return '$date को रिन्यू';
+  }
+
+  @override
+  String homeV33P3Next(String date) {
+    return 'अगला $date';
+  }
+
+  @override
+  String get homeV33P3A11y =>
+      'बजट भरता है, निवेश बढ़ता है, लोन की EMI भरी जाती है, दिया और लिया पैसा दिखता है, और सब्सक्रिप्शन रिन्यू होता है।';
+
+  @override
+  String get homeV33P4Title => 'आपका खर्च, एक नज़र में।';
+
+  @override
+  String get homeV33P4Sub =>
+      'हर लेन-देन एक खोजने लायक हिस्ट्री में, उसे समझने के कई तरीकों के साथ।';
+
+  @override
+  String get homeV33P4Try => 'एनालिटिक्स खोलें';
+
+  @override
+  String get homeV33P4Search => 'खोजें';
+
+  @override
+  String get homeV33P4Query => 'खाना';
+
+  @override
+  String get homeV33P4Today => 'आज';
+
+  @override
+  String get homeV33P4Yesterday => 'कल';
+
+  @override
+  String get homeV33P4ByCat => 'श्रेणी के अनुसार';
+
+  @override
+  String get homeV33P4Monthly => 'मासिक';
+
+  @override
+  String get homeV33P4Compare => 'तुलना';
+
+  @override
+  String get homeV33P4A11y =>
+      'खोजने लायक हिस्ट्री खाने तक सिमट जाती है। फिर चार्ट श्रेणी के अनुसार, महीने के अनुसार, और इस महीने बनाम पिछले महीने का खर्च दिखाते हैं।';
+
+  @override
+  String get homeV33P5Title => 'जब चाहें, और आगे बढ़ें।';
+
+  @override
+  String get homeV33P5Ask => 'Ask Kuber';
+
+  @override
+  String get homeV33P5AskLine =>
+      'अपने पैसे के बारे में पूछें, जवाब आपके फ़ोन पर।';
+
+  @override
+  String get homeV33P5Cards => 'Kuber Cards';
+
+  @override
+  String get homeV33P5CardsLine =>
+      'आपके कार्ड, एन्क्रिप्ट किए हुए और आपके फ़ोन पर रखे हुए।';
+
+  @override
+  String get homeV33P5Notes => 'Kuber Notes';
+
+  @override
+  String get homeV33P5NotesLine =>
+      'नोट्स जो हिसाब लगाते हैं और लेन-देन जोड़ते हैं।';
+
+  @override
+  String get homeV33P5Calc => 'कैलकुलेटर और टूल्स';
+
+  @override
+  String get homeV33P5CalcLine => 'EMI, SIP, टैक्स और भी बहुत कुछ।';
+
+  @override
+  String get homeV33P5Rem => 'रिमाइंडर';
+
+  @override
+  String get homeV33P5RemLine => 'कोई बिल न छूटे।';
+
+  @override
+  String get homeV33P5Try => 'Signature टूल्स खोलें';
+
+  @override
+  String get homeV33P5AskQ => 'इस महीने खाने पर कितना खर्च हुआ?';
+
+  @override
+  String homeV33P5AskA(String amount) {
+    return 'अब तक $amount, आपके खाने के बजट का 70%।';
+  }
+
+  @override
+  String get homeV33P5NoteName => 'गोवा ट्रिप';
+
+  @override
+  String get homeV33P5Hotel => 'होटल';
+
+  @override
+  String get homeV33P5Taxi => 'टैक्सी';
+
+  @override
+  String get homeV33P5Travel => 'यात्रा';
+
+  @override
+  String get homeV33P5SipCalc => 'SIP कैलकुलेटर';
+
+  @override
+  String homeV33P5PerMonth(String amount) {
+    return '$amount प्रति माह';
+  }
+
+  @override
+  String homeV33P5Rate(int rate) {
+    return '$rate% सालाना';
+  }
+
+  @override
+  String homeV33P5Years(int n) {
+    return '$n साल';
+  }
+
+  @override
+  String get homeV33P5RemTitle => 'बिजली का बिल';
+
+  @override
+  String homeV33P5RemDue(String amount) {
+    return 'कल देय · $amount';
+  }
+
+  @override
+  String get homeV33P5A11y =>
+      'Ask Kuber एक सवाल का जवाब देता है, एक कार्ड पलटता है, एक नोट जोड़ लगाकर लेन-देन बनता है, एक कैलकुलेटर नतीजा दिखाता है, और बिल का रिमाइंडर आता है।';
+
+  @override
+  String get homeV3TrkTitle => 'आप क्या ट्रैक करना चाहते हैं?';
+
+  @override
+  String get homeV3TrkBody =>
+      'जितने चाहें चुनें। Kuber उनसे जुड़े विजेट आपके होम पर जोड़ देता है। आप इसे बाद में बदल सकते हैं।';
+
+  @override
+  String get homeV31TrkBudgets => 'बजट';
+
+  @override
+  String get homeV3TrkLoans => 'लोन और EMI';
+
+  @override
+  String get homeV3TrkInvest => 'निवेश और SIP';
+
+  @override
+  String get homeV3TrkLedger => 'दिया या लिया पैसा';
+
+  @override
+  String get homeV3TrkSubs => 'सब्सक्रिप्शन';
+
+  @override
+  String get homeV33EdNeedsTxn => 'आपके पहले लेन-देन के बाद दिखेगा';
+
+  @override
+  String get homeV33SgQuickTitle => 'Quick Add से एक लाइन में जोड़ें';
+
+  @override
+  String get homeV33SgQuickBody =>
+      '\"250 lunch\" जैसा कुछ लिखें या माइक दबाकर बोलें। Kuber उसे लेन-देन बना देता है।';
+
+  @override
+  String get homeV33SgQuickAct => 'Quick Add आज़माएँ';
+
+  @override
+  String get homeV33SgSmsTitle => 'बैंक SMS से खर्च अपने आप जोड़ें';
+
+  @override
+  String get homeV33SgSmsBody =>
+      'Kuber इस फ़ोन पर बैंक SMS पढ़कर ज़्यादातर लेन-देन आपके लिए जोड़ सकता है। वे आपके फ़ोन से बाहर नहीं जाते।';
+
+  @override
+  String get homeV33SgSmsAct => 'SMS से इंपोर्ट करें';
+
+  @override
+  String get homeV33GsBodyFresh =>
+      'अपने खाते देखें, फिर अपना पहला लेन-देन जोड़ें। बस एक मिनट लगेगा।';
+
+  @override
+  String homeV33GsProgress(int done) {
+    return '2 में से $done पूरे';
+  }
+
+  @override
+  String get homeV33GsActAccounts => 'खाते देखें';
+
+  @override
+  String get homeV33GsStepAccounts => 'खाते सेट करें';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'हर $count हफ़्ते';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'हर $count महीने';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'हर $count साल';
+  }
+
+  @override
+  String get weeksLabel => 'हफ़्ते';
+
+  @override
+  String get monthsLabel => 'महीने';
+
+  @override
+  String get yearsLabel => 'साल';
+
+  @override
+  String get intervalInvalid => '1 या उससे बड़ी पूरी संख्या डालें';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'फिर $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'यह आइटम अब मौजूद नहीं है।';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'अगला: $date, ऐप खुलने पर';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'अगला: अगली बार ऐप खुलने पर';
+
+  @override
+  String get backupsAreOn => 'बैकअप चालू है';
+
+  @override
+  String get backupsAreOnDesc =>
+      'पहला शेड्यूल्ड बैकअप अगली बार ऐप खुलने पर चलेगा। या अभी बैकअप लें।';
 }

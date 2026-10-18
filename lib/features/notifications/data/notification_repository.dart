@@ -81,6 +81,15 @@ class NotificationRepository {
     });
   }
 
+  Future<void> markRead(int id) async {
+    await isar.writeTxn(() async {
+      final n = await isar.appNotifications.get(id);
+      if (n == null || n.readAt != null) return;
+      n.readAt = DateTime.now();
+      await isar.appNotifications.put(n);
+    });
+  }
+
   Future<void> clearAll() async {
     await isar.writeTxn(() async {
       await isar.appNotifications.clear();

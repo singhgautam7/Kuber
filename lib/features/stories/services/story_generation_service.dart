@@ -9,7 +9,6 @@ import 'package:isar_community/isar.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../features/settings/providers/settings_provider.dart';
 import '../../categories/data/category.dart';
 import '../../dashboard/providers/insight_engine.dart';
 import '../../insights/models/insight.dart';
@@ -81,6 +80,7 @@ class StoryGenerationService {
       existingMeta: meta,
       lastInvestmentsAt: lastInvestmentsAt,
       locale: AppLocale.current,
+      formatter: AppFormatter.current,
     );
 
     final resolved = await compute(_buildStoryCandidates, input);
@@ -101,6 +101,8 @@ class _StoryGenInput {
   final Map<String, ExistingStoryMeta> existingMeta;
   final DateTime? lastInvestmentsAt;
   final Locale locale;
+  // The user's currency formatter; isolates don't share AppFormatter.current.
+  final AppFormatter formatter;
 
   const _StoryGenInput({
     required this.txns,
@@ -112,6 +114,7 @@ class _StoryGenInput {
     required this.existingMeta,
     required this.lastInvestmentsAt,
     required this.locale,
+    required this.formatter,
   });
 }
 
@@ -140,9 +143,7 @@ Future<List<InsightStory>> _buildStoryCandidates(_StoryGenInput input) async {
   // Date symbol data is per-isolate; load the active locale so DateFormat in
   // story_date_label can render localized month/day names without throwing.
   await initializeDateFormatting(input.locale.languageCode);
-  return _StoryCandidateBuilder(
-    AppFormatter(system: NumberSystem.indian),
-  ).build(input);
+  return _StoryCandidateBuilder(input.formatter).build(input);
 }
 
 class _StoryCandidateBuilder {
@@ -757,7 +758,7 @@ class _StoryCandidateBuilder {
         loans: input.loans,
         ledgers: input.ledgers,
         investments: input.investments,
-        currencySymbol: '₹',
+        currencySymbol: formatter.symbol,
         formatter: formatter,
       );
       final insights = engine

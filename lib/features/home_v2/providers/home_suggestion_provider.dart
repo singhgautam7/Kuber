@@ -22,11 +22,14 @@ import '../../pro/promo/home_promo_banner.dart';
 import '../../recurring/providers/recurring_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../sms_import/data/sms_import_repository.dart';
+import '../../sms_import/providers/sms_import_provider.dart';
 import '../../sms_import/data/sms_transaction.dart';
+import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../engine/suggestion_engine.dart';
 import '../engine/suggestion_scheduler.dart';
+import '../../why_kuber/why_kuber_store.dart';
 import 'home_v2_provider.dart';
 
 /// What the top slot shows for suggestions this session.
@@ -55,13 +58,31 @@ class SuggestionView {
 class HomeSuggestionNotifier extends Notifier<SuggestionView> {
   int? _resolvedSession;
   int? _lockedSession;
+
+  /// Intro cards hidden with Not now, for one session (they do not lock the
+  /// other cards).
+  int? _introHiddenSession;
+  final _introHidden = <SgType>{};
+
+  bool _introHiddenNow(SgType t) =>
+      _introHiddenSession == ref.read(homeSessionProvider) &&
+      _introHidden.contains(t);
   bool _resolving = false;
 
   /// Store before the last dismiss, for Undo.
   SgStore? _beforeDismiss;
 
   @override
-  SuggestionView build() => const SuggestionView();
+  SuggestionView build() {
+    // Tour finished from any entry (More, Welcome): the card goes now.
+    void onSeen() {
+      if (state.card?.type == SgType.whyKuber) _show(null);
+    }
+
+    WhyKuberStore.seenSignal.addListener(onSeen);
+    ref.onDispose(() => WhyKuberStore.seenSignal.removeListener(onSeen));
+    return const SuggestionView();
+  }
 
   bool get _sessionLocked => _lockedSession == ref.read(homeSessionProvider);
 
@@ -105,6 +126,71 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
     );
   }
 
+  /// The intro card for this session, if any (plan §4), in this order: Why
+  /// Kuber; Quick Add intro (2+ transactions, Quick Add on Home); Import from
+  /// SMS (3+ transactions, Android, SMS permission not given). Same gate as
+  /// Why Kuber: Get started graduated, Suggestions on, no promo, no Not now
+  /// this session.
+  Future<SgCandidate?> _introCard() async {
+    final s = ref.read(homeV2Provider);
+    if (!s.isV2 || !s.gsGraduated) return null; // no reads for v1 / day 1
+    final p = await SharedPreferences.getInstance();
+    final base = SgScheduler.whyKuberEligible(
+      isV2: s.isV2,
+      gsGraduated: s.gsGraduated,
+      setting: s.sgSetting,
+      promoVisible: ref.read(homePromoVisibleProvider),
+      sessionLocked: _sessionLocked,
+      tourSeen: false,
+      cardDismissed: false,
+    );
+    if (!base) return null;
+    if (!_introHiddenNow(SgType.whyKuber) &&
+        !await WhyKuberStore.seen() &&
+        !await WhyKuberStore.cardDismissed()) {
+      return kWhyKuberCard;
+    }
+    final count = await ref.read(isarProvider).transactions.count();
+    if (count < 2) return null;
+    final quickOnHome = (ref.read(homeWidgetsProvider).valueOrNull ?? const [])
+        .any((c) => c.id == 'quick_add' && c.enabled);
+    if (quickOnHome &&
+        !_introHiddenNow(SgType.quickAddIntro) &&
+        !(p.getBool(PrefsKeys.introQuickAddDone) ?? false)) {
+      return kQuickAddIntroCard;
+    }
+    if (count >= 3 &&
+        !kIsWeb &&
+        Platform.isAndroid &&
+        !_introHiddenNow(SgType.smsImportIntro) &&
+        !(p.getBool(PrefsKeys.introSmsDone) ?? false) &&
+        !await ref.read(smsInboxServiceProvider).checkPermission()) {
+      return kSmsIntroCard;
+    }
+    return null;
+  }
+
+  /// Close / Undo on an intro card: its own flag.
+  Future<void> _setIntroClosed(SgType t, bool closed) async {
+    final p = await SharedPreferences.getInstance();
+    switch (t) {
+      case SgType.whyKuber:
+        await WhyKuberStore.setCardDismissed(closed);
+      case SgType.smsImportIntro:
+        await p.setBool(PrefsKeys.introSmsDone, closed);
+      default:
+        await p.setBool(PrefsKeys.introQuickAddDone, closed);
+    }
+  }
+
+  Future<Set<SgType>> _movedBack() async {
+    final p = await SharedPreferences.getInstance();
+    return {
+      for (final k in p.getStringList(PrefsKeys.trackingChoices) ?? const [])
+        ?kTrackingMovesBack[k],
+    };
+  }
+
   /// Dev tools: run the rules again now, ignoring this session's lock.
   Future<void> runNow() {
     _lockedSession = null;
@@ -119,6 +205,8 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
     try {
       _resolvedSession = session;
       final now = DateTime.now();
+      final intro = await _introCard();
+      if (intro != null) return _show(intro);
       if (!_eligible(now)) return _show(null);
       var store = await _loadStore();
       if (SgScheduler.activeInstance(store) == null &&
@@ -136,7 +224,12 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
         '${input.totalTxnCount} txns: input $built ms, '
         'rules ${sw.elapsedMilliseconds - built} ms',
       );
-      final r = SgScheduler.select(store, candidates, now);
+      final r = SgScheduler.select(
+        store,
+        candidates,
+        now,
+        movedBack: await _movedBack(),
+      );
       store = r.store;
       await _saveStore(store);
       _show(r.shown);
@@ -173,6 +266,7 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
             fromSms: t.importSource == 'sms',
             smsText: t.importedFromSms,
             note: t.notes,
+            linkedType: t.linkedRuleType,
           ),
     ];
     final categories = await ref.read(categoryListProvider.future);
@@ -241,6 +335,18 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
             active: !r.isPaused,
           ),
       ],
+      automations: [
+        for (final l
+            in await isar.loans.filter().isCompletedEqualTo(false).findAll())
+          SgRule(name: l.name, categoryId: l.categoryId, amount: l.emiAmount),
+        for (final inv in await isar.investments.where().findAll())
+          if ((inv.sipAmount ?? 0) > 0)
+            SgRule(
+              name: inv.name,
+              categoryId: inv.categoryId,
+              amount: inv.sipAmount!,
+            ),
+      ],
       activeBudgetCategoryIds: {
         for (final b in budgets)
           if (b.isActive) b.categoryId,
@@ -275,6 +381,15 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
   /// Main action returned. Data types: accepted only if the flow saved
   /// (the trigger is now false). Discovery types: accepted on tap.
   Future<void> afterMainAction(SgCandidate c) async {
+    if (c.type.isIntro) {
+      // Why Kuber: done once the tour was seen (page 5). Quick Add and SMS
+      // intros: done on tap. Then the next card or the normal pass.
+      if (c.type == SgType.whyKuber && !await WhyKuberStore.seen()) return;
+      if (c.type != SgType.whyKuber) await _setIntroClosed(c.type, true);
+      _show(null);
+      await Future<void>.delayed(const Duration(milliseconds: 830));
+      return resolve(force: true);
+    }
     final now = DateTime.now();
     var store = await _loadStore();
     final before = store;
@@ -307,6 +422,14 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
   }
 
   Future<void> notNow(SgCandidate c) async {
+    if (c.type.isIntro) {
+      // One-time card: Not now only hides this card for this session.
+      final session = ref.read(homeSessionProvider);
+      if (_introHiddenSession != session) _introHidden.clear();
+      _introHiddenSession = session;
+      _introHidden.add(c.type);
+      return _show(null);
+    }
     final store = SgScheduler.notNow(await _loadStore(), c.key, DateTime.now());
     await _saveStore(store);
     _lockedSession = ref.read(homeSessionProvider);
@@ -314,6 +437,10 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
   }
 
   Future<void> dismiss(SgCandidate c) async {
+    if (c.type.isIntro) {
+      await _setIntroClosed(c.type, true);
+      return _show(null);
+    }
     final before = await _loadStore();
     _beforeDismiss = before;
     await _saveStore(SgScheduler.dismiss(before, c.key, DateTime.now()));
@@ -323,6 +450,10 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
 
   /// Undo on the dismiss snackbar: back to active, lock and cooldown cleared.
   Future<void> undoDismiss(SgCandidate c) async {
+    if (c.type.isIntro) {
+      await _setIntroClosed(c.type, false);
+      return _show(c);
+    }
     final before = _beforeDismiss;
     if (before == null) return;
     _beforeDismiss = null;

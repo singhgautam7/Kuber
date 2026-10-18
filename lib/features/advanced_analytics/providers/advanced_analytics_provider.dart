@@ -12,6 +12,7 @@ import '../../categories/providers/category_provider.dart';
 import '../../loans/data/loan.dart';
 import '../../loans/providers/loan_provider.dart';
 import '../../recurring/data/recurring_rule.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../recurring/providers/recurring_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -243,6 +244,7 @@ Future<AnalyticsInput> _input(
     selectedCategoryId: selectedCategoryId,
     now: DateTime.now(),
     mode: mode,
+    formatter: ref.watch(formatterProvider),
   );
 }
 

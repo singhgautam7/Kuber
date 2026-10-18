@@ -36,6 +36,7 @@ class HomeV2Notifier extends Notifier<HomeV2Snapshot> {
     }
   }
 
+  /// Get started › Set up accounts: Accounts opened, or a balance set.
   Future<void> markBalanceSet() async {
     if (state.isV2 && !state.balanceSet) {
       await update((s) => s.copyWith(balanceSet: true));

@@ -13,6 +13,7 @@ import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/reminder.dart';
 import '../providers/reminders_provider.dart';
@@ -268,9 +269,9 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
                   onTapOutside: (_) =>
                       FocusManager.instance.primaryFocus?.unfocus(),
                   style: tt.bodyLarge!.copyWith(color: cs.onSurface),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Amount · optional',
-                    prefixText: '₹',
+                    prefixText: ref.watch(currencyProvider).symbol,
                   ),
                 ),
                 const SizedBox(height: KuberSpace.md),

@@ -21,9 +21,36 @@ import 'more_screen_modern.dart';
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
+  static int _scrolledFor = 0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final layout = ref.watch(moreTabLayoutProvider);
+    // Why Kuber page 5 Try it: bring the Signature section into view.
+    final scrollTo = ref.watch(moreScrollToSignatureProvider);
+    if (scrollTo != _scrolledFor) {
+      _scrolledFor = scrollTo;
+      final key = layout == MoreTabLayout.simple
+          ? moreSignatureKeySimple
+          : moreSignatureKeyModern;
+      final primary = PrimaryScrollController.maybeOf(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // The list builds lazily: scrolled far down, the Signature header
+        // (second section) is not built yet. Back to the top first.
+        if (key.currentContext == null && (primary?.hasClients ?? false)) {
+          primary!.jumpTo(0);
+          await WidgetsBinding.instance.endOfFrame;
+        }
+        final ctx = key.currentContext;
+        if (ctx != null && ctx.mounted) {
+          await Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
+    }
     // Classic <-> Modern cross-fades when the view changes (review round 3).
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
@@ -67,7 +94,12 @@ class MoreScreenSimple extends ConsumerWidget {
                   if (section.id == MoreSectionId.helpUs)
                     MoreHelpUsStrip(section: section)
                   else ...[
-                    KuberSectionHeader(title: section.title),
+                    KuberSectionHeader(
+                      key: section.id == MoreSectionId.signature
+                          ? moreSignatureKeySimple
+                          : null,
+                      title: section.title,
+                    ),
                     KuberGroup(
                       children: [
                         for (final e in section.entries) MoreEntryRow(entry: e),

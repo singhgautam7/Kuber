@@ -26,7 +26,7 @@ const kAboutNotesInfoConfig = KuberInfoConfig(
       example: KuberInfoExample(
         expression: '60, 45, 90',
         trigger: 'total',
-        result: '₹195',
+        result: '195',
       ),
     ),
     KuberInfoItem(

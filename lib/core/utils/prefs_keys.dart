@@ -31,6 +31,8 @@ class PrefsKeys {
   static const migratedSeedLoanInvestmentCategoryV1 =
       'kuber_migrated_seed_loan_investment_category_v1';
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
+  static const migratedCashGreenV1 = 'kuber_migrated_cash_green_v1';
+  static const migratedRecurringIntervalV1 = 'kuber_migrated_recurring_interval_v1';
   static const migratedSuggestionBackfillV1 =
       'kuber_migrated_suggestion_backfill_v1';
   static const migratedStoriesPositionV2 = 'kuber_migrated_stories_position_v2';
@@ -92,6 +94,10 @@ class PrefsKeys {
 
   // Kuber Pro — promo campaign remote config
   static const promoConfigCached = 'kuber_promo_config_cached';
+
+  /// When Play first confirmed no active Pro subscription (ms since epoch).
+  /// Cleared whenever one is seen again. See PurchaseService.checkForLapse.
+  static const proMissingSince = 'kuber_pro_missing_since';
   static const promoConfigFetchedAt = 'kuber_promo_config_fetched_at';
   static const promoBannerSessionDismissed =
       'kuber_promo_banner_session_dismissed';
@@ -112,7 +118,6 @@ class PrefsKeys {
   // Entitlement Override). Only ever read/written under kDebugMode; the code
   // path is tree-shaken out of release builds. Never present in production.
   static const debugEntitlementOverride = 'debug_entitlement_override';
-  static const debugEntitlementTrialDays = 'debug_entitlement_trial_days';
 
   // Home v2 (specs/home-v2/plan.md). `homeLayout` is the cohort: written once
   // on the first launch of the Home v2 build and never changed by the app
@@ -136,4 +141,19 @@ class PrefsKeys {
   static const sgLastNewShownDay = 'home_v2_sg_last_new_shown_day';
   static const sgLastDismissAt = 'home_v2_sg_last_dismiss_at';
   static const sgTypeSuppressedUntil = 'home_v2_sg_type_suppressed_until';
+
+  // Home v3.3 (specs/home-v3.3/plan.md). Update migration: version run last
+  // and the last failure (kept for support, cleared on success).
+  static const homeMigrationVersion = 'home_migration_version';
+  static const homeMigrationError = 'home_migration_error';
+  // Why Kuber tour: reached page 5 at (ISO time), and the Home card closed.
+  static const tourSeenAt = 'tour_seen_at';
+  static const tourCardDismissed = 'tour_card_dismissed';
+  // Intro cards in the suggestion slot (tapped or closed): Quick Add, then
+  // SMS import.
+  static const introQuickAddDone = 'intro_quick_add_done';
+  static const introSmsDone = 'intro_sms_done';
+  // What do you want to track? (Welcome, Edit widgets › What you track).
+  static const trackingChoices = 'home_v3_tracking_choices';
+  static const trackingAnswer = 'home_v3_tracking_answer';
 }

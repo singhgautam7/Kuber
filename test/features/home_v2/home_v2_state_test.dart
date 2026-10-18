@@ -60,7 +60,7 @@ void main() {
               ..type = 'bank',
           ]),
         );
-        final s = await resolveHomeCohort(isar, onboarded: false);
+        final s = await resolveHomeCohort(isar, onboarded: false, waitForWrites: true);
         expect(s.cohort, HomeCohort.v2);
         expect(s.seededAccountIds, hasLength(2));
         final rows = await isar.widgetPreferences
@@ -70,8 +70,13 @@ void main() {
             .findAll();
         expect(
           {for (final r in rows.where((r) => r.enabled)) r.widgetKey},
-          {'balance_hero', 'quick_add', 'sms_import_widget'},
+          {'insight_stories', 'balance_hero', 'quick_add', 'sms_import_widget'},
         );
+        // Money Stories first; Budget, Events, Notes under More widgets.
+        expect(rows.first.widgetKey, 'insight_stories');
+        for (final id in ['budget_snapshot', 'upcoming_events_widget', 'kuber_notes_widget']) {
+          expect(s.widgets[id]!.vis, WidgetVis.off);
+        }
         expect(s.widgets['spending_stats']!.vis, WidgetVis.auto);
         expect(s.widgets['ask_kuber_widget']!.vis, WidgetVis.off);
         expect(s.widgets['recent_transactions']!.vis, WidgetVis.off);
@@ -79,30 +84,26 @@ void main() {
     );
 
     test(
-      'update: onboarded, saved layout or data means v1, untouched',
+      'update: onboarded, saved layout or data means an existing user, '
+      'migrated onto the widget model (home-v3.3)',
       () async {
-        expect(
-          (await resolveHomeCohort(isar, onboarded: true)).cohort,
-          HomeCohort.v1,
-        );
-        expect(await isar.widgetPreferences.count(), 0);
+        final s = await resolveHomeCohort(isar, onboarded: true, waitForWrites: true);
+        expect(s.cohort, HomeCohort.v2);
+        expect(s.gsGraduationReason, GsGraduation.migrated);
 
         SharedPreferences.setMockInitialValues({});
         await isar.writeTxn(() => isar.transactions.put(txn()));
-        expect(
-          (await resolveHomeCohort(isar, onboarded: false)).cohort,
-          HomeCohort.v1,
-        );
+        final withData = await resolveHomeCohort(isar, onboarded: false, waitForWrites: true);
+        expect(withData.gsGraduationReason, GsGraduation.migrated);
       },
     );
 
-    test('decided once: later launches keep the stored cohort', () async {
-      SharedPreferences.setMockInitialValues({PrefsKeys.homeLayout: 'v1'});
-      // Even a "fresh-looking" state stays v1 once decided.
-      expect(
-        (await resolveHomeCohort(isar, onboarded: false)).cohort,
-        HomeCohort.v1,
-      );
+    test('decided once: a stored v2 cohort is kept as is', () async {
+      SharedPreferences.setMockInitialValues({PrefsKeys.homeLayout: 'v2'});
+      await isar.writeTxn(() => isar.transactions.put(txn()));
+      final s = await resolveHomeCohort(isar, onboarded: true, waitForWrites: true);
+      expect(s.cohort, HomeCohort.v2);
+      expect(s.gsGraduated, isFalse); // not re-migrated
     });
 
     test('snapshot round trip through prefs', () async {
@@ -197,12 +198,10 @@ void main() {
     });
 
     GsData data({
-      bool s1 = false,
       bool s2 = false,
       bool s3 = false,
       int n = 0,
     }) => GsData(
-      step1: s1,
       step2: s2,
       step3: s3,
       txCount: n,
@@ -213,11 +212,15 @@ void main() {
       final now = DateTime(2026, 10, 20);
       expect(
         gsGraduationFor(
-          data(s1: true, s2: true, s3: true, n: 2),
+          data(s2: true, s3: true, n: 2),
           firstShownAt: now,
           now: now,
         ),
-        GsGraduation.completed,
+        GsGraduation.completed, // both steps: no SMS step since v3.3
+      );
+      expect(
+        gsGraduationFor(data(s2: true, n: 1), firstShownAt: now, now: now),
+        isNull,
       );
       expect(
         gsGraduationFor(data(n: 10), firstShownAt: now, now: now),

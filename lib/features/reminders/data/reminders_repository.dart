@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 
 import '../../../core/services/notification_service.dart';
+import '../../../core/utils/formatters.dart';
 import '../../notifications/data/app_notification.dart';
 import '../../notifications/data/notification_repository.dart';
 import 'reminder.dart';
@@ -115,7 +116,9 @@ class RemindersRepository {
   String _notificationBody(Reminder reminder) {
     final parts = <String>[];
     if (reminder.amount != null) {
-      parts.add('₹${_plain(reminder.amount!)} due now');
+      // OS notification text is fixed when scheduled; on-open maintenance
+      // reschedules, so a currency change applies from the next app open.
+      parts.add('${AppFormatter.current.formatCurrency(reminder.amount!)} due now');
     }
     final notes = reminder.notes?.trim() ?? '';
     if (notes.isNotEmpty) {
@@ -123,10 +126,6 @@ class RemindersRepository {
     }
     return parts.isEmpty ? 'Reminder due now' : parts.join(' · ');
   }
-
-  String _plain(double v) => v == v.truncateToDouble()
-      ? v.toInt().toString()
-      : v.toStringAsFixed(2);
 
   /// On-open maintenance (post-first-frame, best effort):
   ///  1. Deletes completed reminders older than 7 days.
@@ -160,7 +159,7 @@ class RemindersRepository {
           type: NotificationType.reminderTrigger,
           title: 'Reminder due',
           body: r.amount != null
-              ? '${r.title} · ₹${_plain(r.amount!)} · tap to open'
+              ? '${r.title} · ${AppFormatter.amountToken(r.amount!)} · tap to open'
               : '${r.title} · tap to open',
           payload: 'reminder:${r.id}',
         );

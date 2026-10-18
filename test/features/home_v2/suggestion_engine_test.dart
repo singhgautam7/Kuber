@@ -181,6 +181,52 @@ void main() {
         isEmpty,
       );
     });
+    test('loan EMI / SIP / ledger rows created by the app are skipped', () {
+      List<SgTxn> linked(String name, double amount, String type) => [
+        for (var k = 0; k < 3; k++)
+          SgTxn(
+            at: DateTime(2026, 10 - k, 7),
+            amount: amount,
+            isExpense: true,
+            name: name,
+            categoryId: 'loan',
+            linkedType: type,
+          ),
+      ];
+      final i = SgInput(
+        now: now,
+        txns: [
+          ...linked('EMI - Home Loan', 24500, 'loan'),
+          ...linked('Contribution - Nifty 50', 5000, 'investment'),
+          ...linked('Payment - Rahul', 800, 'lent'),
+          // A hand-entered rent still triggers.
+          ...monthly('Rent', [18000, 18000, 18000], [5, 5, 5]),
+        ],
+      );
+      expect(keys(i), ['recurring:rent']);
+    });
+    test('a hand-logged EMI or SIP matching a tracked loan / SIP is covered',
+        () {
+      final i = SgInput(
+        now: now,
+        txns: [
+          for (var k = 0; k < 3; k++) ...[
+            exp('Car EMI', 11200, DateTime(2026, 10 - k, 7), cat: 'emi'),
+            exp('Index SIP', 5000, DateTime(2026, 10 - k, 5), cat: 'inv'),
+          ],
+        ],
+        automations: const [
+          SgRule(name: 'Maruti Brezza', categoryId: 'emi', amount: 11200),
+          SgRule(name: 'Nifty 50 Index Fund', categoryId: 'inv', amount: 5000),
+        ],
+      );
+      expect(keys(i).where((k) => k.startsWith('recurring')), isEmpty);
+      // Without the tracked loan / SIP, both would be suggested.
+      expect(
+        keys(SgInput(now: now, txns: i.txns)),
+        containsAll(['recurring:car emi', 'recurring:index sip']),
+      );
+    });
     test('an active recurring rule for the merchant suppresses it', () {
       final i = SgInput(
         now: now,

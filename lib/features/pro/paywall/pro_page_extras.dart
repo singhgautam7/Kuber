@@ -45,14 +45,6 @@ const kAboutProInfoConfig = KuberInfoConfig(
           'details. Prices are shown by Play in your local currency.',
     ),
     KuberInfoItem(
-      icon: Icons.timer_outlined,
-      title: 'Free trial',
-      description:
-          'New yearly customers get a 14-day free trial through Google Play. '
-          'You are charged only when the trial ends, and you can cancel before '
-          'then.',
-    ),
-    KuberInfoItem(
       icon: Icons.cancel_outlined,
       title: 'Cancel anytime',
       description:

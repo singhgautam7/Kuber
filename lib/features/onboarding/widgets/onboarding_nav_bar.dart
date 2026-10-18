@@ -14,6 +14,15 @@ class OnboardingNavBar extends StatelessWidget {
   /// Saving state: the primary button reads as disabled and drops its arrow.
   final bool busy;
 
+  /// Dots shown (one per page of the flow).
+  final int pageCount;
+
+  /// Icon-only Back (the last page, where the primary label is long).
+  final bool compactBack;
+
+  /// False: the primary button is disabled (e.g. no pick yet).
+  final bool primaryEnabled;
+
   const OnboardingNavBar({
     super.key,
     required this.currentPage,
@@ -22,12 +31,15 @@ class OnboardingNavBar extends StatelessWidget {
     this.onBack,
     this.showBack = true,
     this.busy = false,
+    this.pageCount = 4,
+    this.compactBack = false,
+    this.primaryEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final backWidth = showBack ? (currentPage == 3 ? 56.0 : 112.0) : 0.0;
+    final backWidth = showBack ? (compactBack ? 56.0 : 112.0) : 0.0;
 
     return SafeArea(
       top: false,
@@ -41,7 +53,10 @@ class OnboardingNavBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            OnboardingDotsIndicator(currentPage: currentPage),
+            OnboardingDotsIndicator(
+              currentPage: currentPage,
+              pageCount: pageCount,
+            ),
             const SizedBox(height: KuberSpace.lg),
             AnimatedSize(
               duration: const Duration(milliseconds: 260),
@@ -70,7 +85,7 @@ class OnboardingNavBar extends StatelessWidget {
                             minimumSize: const Size(56, 56),
                             shape: const StadiumBorder(),
                           ),
-                          child: currentPage == 3
+                          child: compactBack
                               ? const Icon(Icons.arrow_back_rounded, size: 24)
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -101,7 +116,7 @@ class OnboardingNavBar extends StatelessWidget {
                       curve: Curves.easeOutCubic,
                       height: 56,
                       child: FilledButton(
-                        onPressed: onPrimary,
+                        onPressed: primaryEnabled ? onPrimary : null,
                         style: FilledButton.styleFrom(
                           backgroundColor: busy
                               ? cs.onSurface.withValues(alpha: 0.12)

@@ -83,22 +83,12 @@ class KuberProSettingsSection extends ConsumerWidget {
   }
 
   String _title(KuberProState s) {
-    // Covers both a legacy app trial and a Play Billing subscription in its
-    // free-trial phase.
-    if (s.inTrialPhase) return 'Kuber Pro trial · ${s.trialDaysLeft} days left';
     if (s.source == ProSource.purchased) return 'Kuber Pro active';
     if (s.source == ProSource.promo) return 'Kuber Pro (promo)';
     return 'Try Kuber Pro';
   }
 
   String _subtitle(KuberProState s) {
-    if (s.inTrialPhase) {
-      // A Play trial is a real subscription that just hasn't charged yet; a
-      // legacy trial is unpaid and needs a plan chosen.
-      return s.isPro
-          ? 'Your plan begins when the free trial ends'
-          : 'Tap to see plans before it ends';
-    }
     if (s.source == ProSource.purchased) {
       final plan = switch (s.plan) {
         ProPlan.monthly => 'Monthly',
@@ -106,10 +96,8 @@ class KuberProSettingsSection extends ConsumerWidget {
         ProPlan.lifetime => 'Lifetime',
         null => 'Pro',
       };
-      if (s.plan == ProPlan.yearly && s.expiryDate != null) {
-        return '$plan · renews ${_shortDate(s.expiryDate!)}';
-      }
-      return plan;
+      final renewal = s.renewalLabel();
+      return renewal == null ? plan : '$plan · ${renewal[0].toLowerCase()}${renewal.substring(1)}';
     }
     if (s.source == ProSource.promo) {
       return s.promoEndsAt == null

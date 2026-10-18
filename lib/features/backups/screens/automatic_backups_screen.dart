@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/constants/info_constants.dart';
@@ -145,62 +146,74 @@ class _StatusBlock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final money = context.kuberMoney;
+    final l = context.l10n;
+
+    // Board 3.12b chips: when the next run is due and where copies go.
+    final chips = <(IconData, String)>[
+      if (settings.nextBackupAt case final next?)
+        (
+          Icons.event_outlined,
+          next.isAfter(DateUtils.dateOnly(DateTime.now()))
+              ? l.nextBackupOn(DateFormatter.full(next, format: 'MMM d'))
+              : l.nextBackupNextOpen,
+        ),
+      if (settings.folderPath != null)
+        (
+          Icons.folder_outlined,
+          formatBackupFolderUri(settings.folderPath).split(' / ').last,
+        ),
+    ];
+
     switch (settings.status) {
       case BackupStatus.failed:
         return _StatusCard(
-          icon: Icons.error_outline_rounded,
-          tint: cs.error,
-          tintBg: cs.error.withValues(alpha: 0.10),
-          border: cs.error.withValues(alpha: 0.32),
-          title: context.l10n.lastBackupFailed,
-          titleColor: cs.error,
-          description:
-              settings.failureReason ?? context.l10n.backupFolderErrorDesc,
+          icon: Icons.error_rounded,
+          bg: cs.errorContainer,
+          fg: cs.onErrorContainer,
+          title: l.lastBackupFailed,
+          description: settings.failureReason ?? l.backupFolderErrorDesc,
           timestamp: settings.lastAttemptLabel == null
               ? null
-              : context.l10n.attemptedOn(settings.lastAttemptLabel!),
-          action: (
-            context.l10n.chooseNewFolder,
-            Icons.folder_open_rounded,
-            () => ref.read(backupSettingsProvider.notifier).pickFolder(),
+              : l.attemptedOn(settings.lastAttemptLabel!),
+          action: AppButton(
+            label: l.chooseNewFolder,
+            icon: Icons.folder_open_rounded,
+            type: AppButtonType.danger,
+            filled: true,
+            height: 40,
+            onPressed: () =>
+                ref.read(backupSettingsProvider.notifier).pickFolder(),
           ),
         );
       case BackupStatus.succeeded:
         return _StatusCard(
-          icon: Icons.check_circle_outline_rounded,
-          tint: context.kuberMoney.income,
-          tintBg: context.kuberMoney.income.withValues(alpha: 0.10),
-          border: context.kuberMoney.income.withValues(alpha: 0.28),
+          icon: Icons.check_circle_rounded,
+          bg: money.incomeContainer,
+          fg: money.onIncomeContainer,
           title: settings.lastAttemptLabel == null
-              ? context.l10n.backedUp
-              : context.l10n.backedUpOn(settings.lastAttemptLabel!),
-          titleColor: context.kuberMoney.income,
-          description: context.l10n.lastCopySaved('${settings.retention}'),
+              ? l.backedUp
+              : l.backedUpOn(settings.lastAttemptLabel!),
+          description: l.lastCopySaved('${settings.retention}'),
+          chips: chips,
         );
       case BackupStatus.ready:
-        // Turned on with a folder chosen, but no backup has run yet. English
-        // string (like other recently added Kuber features) — a full l10n
-        // entry across every locale can follow.
+        // On with a folder chosen, no backup run yet.
         return _StatusCard(
-          icon: Icons.cloud_done_outlined,
-          tint: context.kuberMoney.income,
-          tintBg: context.kuberMoney.income.withValues(alpha: 0.10),
-          border: context.kuberMoney.income.withValues(alpha: 0.28),
-          title: 'Backups are on',
-          titleColor: context.kuberMoney.income,
-          description:
-              'Your first scheduled backup will run soon. Or back up now to '
-              'save a copy immediately.',
+          icon: Icons.cloud_done_rounded,
+          bg: money.incomeContainer,
+          fg: money.onIncomeContainer,
+          title: l.backupsAreOn,
+          description: l.backupsAreOnDesc,
+          chips: chips,
         );
       case BackupStatus.neverConfigured:
         return _StatusCard(
-          icon: Icons.backup_outlined,
-          tint: cs.primary,
-          tintBg: cs.primary.withValues(alpha: 0.10),
-          border: cs.outlineVariant,
-          title: context.l10n.neverLoseData,
-          titleColor: cs.onSurface,
-          description: context.l10n.neverLoseDataDesc,
+          icon: Icons.backup_rounded,
+          bg: cs.secondaryContainer,
+          fg: cs.onSecondaryContainer,
+          title: l.neverLoseData,
+          description: l.neverLoseDataDesc,
         );
     }
   }
@@ -230,118 +243,112 @@ class _ButtonHelperText extends StatelessWidget {
   }
 }
 
+/// Board 3.12b status card: one tonal container answers "am I safe?". Filled
+/// icon in a 48 tile, titleLarge, bodyMedium, then optional chips, a timestamp
+/// and an action, all in the container's on-colour.
 class _StatusCard extends StatelessWidget {
   final IconData icon;
-  final Color tint;
-  final Color tintBg;
-  final Color border;
-  final Color titleColor;
+  final Color bg;
+  final Color fg;
   final String title;
   final String description;
+  final List<(IconData, String)> chips;
   final String? timestamp;
-  final (String, IconData, VoidCallback)? action;
+  final Widget? action;
 
   const _StatusCard({
     required this.icon,
-    required this.tint,
-    required this.tintBg,
-    required this.border,
+    required this.bg,
+    required this.fg,
     required this.title,
-    required this.titleColor,
     required this.description,
+    this.chips = const [],
     this.timestamp,
     this.action,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpace.lg),
-      decoration: BoxDecoration(
-        color: tintBg,
-        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-        border: Border.all(color: border),
-      ),
-      child: Row(
+      padding: const EdgeInsets.all(KuberSpace.cardPaddingHero),
+      decoration: BoxDecoration(color: bg, borderRadius: KuberShape.cardR),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: tint.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(KuberShape.medium),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 22, color: tint),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: fg.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                ),
+                alignment: Alignment.center,
+                child: Icon(icon, size: 26, color: fg),
+              ),
+              const SizedBox(width: KuberSpace.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: tt.titleLarge!.copyWith(color: fg)),
+                    const SizedBox(height: KuberSpace.xs),
+                    Text(
+                      description,
+                      style: tt.bodyMedium!.copyWith(color: fg),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: KuberSpace.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          if (chips.isNotEmpty) ...[
+            const SizedBox(height: KuberSpace.md),
+            Wrap(
+              spacing: KuberSpace.sm,
+              runSpacing: KuberSpace.sm,
               children: [
-                Text(
-                  title,
-                  style: localeFont(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: titleColor,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  description,
-                  style: localeFont(
-                    fontSize: 12,
-                    height: 1.45,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                if (action != null) ...[
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: action!.$3,
-                    child: Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: tint,
-                        borderRadius: BorderRadius.circular(KuberShape.medium),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(action!.$2, size: 17, color: Colors.white),
-                          const SizedBox(width: 7),
-                          Text(
-                            action!.$1,
-                            style: localeFont(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                for (final (chipIcon, label) in chips)
+                  Container(
+                    height: 28,
+                    padding: const EdgeInsets.only(left: 8, right: 10),
+                    decoration: BoxDecoration(
+                      color: fg.withValues(alpha: 0.10),
+                      borderRadius: KuberShape.fullR,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(chipIcon, size: 16, color: fg),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.labelMedium!.copyWith(color: fg),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-                if (timestamp != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    timestamp!.toUpperCase(),
-                    style: localeFont(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
               ],
             ),
-          ),
+          ],
+          if (timestamp != null) ...[
+            const SizedBox(height: KuberSpace.md),
+            Text(
+              timestamp!.toUpperCase(),
+              style: tt.labelMedium!.copyWith(color: fg, letterSpacing: 0.6),
+            ),
+          ],
+          if (action != null) ...[
+            const SizedBox(height: KuberSpace.md),
+            action!,
+          ],
         ],
       ),
     );

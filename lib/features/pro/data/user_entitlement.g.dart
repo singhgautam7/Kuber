@@ -32,29 +32,34 @@ const UserEntitlementSchema = CollectionSchema(
       name: r'activePurchaseToken',
       type: IsarType.string,
     ),
-    r'firstInstallAt': PropertySchema(
+    r'autoRenewing': PropertySchema(
       id: 3,
+      name: r'autoRenewing',
+      type: IsarType.bool,
+    ),
+    r'firstInstallAt': PropertySchema(
+      id: 4,
       name: r'firstInstallAt',
       type: IsarType.dateTime,
     ),
     r'lastVerifiedAt': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'lastVerifiedAt',
       type: IsarType.dateTime,
     ),
     r'proExpiresAt': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'proExpiresAt',
       type: IsarType.dateTime,
     ),
-    r'tier': PropertySchema(id: 6, name: r'tier', type: IsarType.string),
+    r'tier': PropertySchema(id: 7, name: r'tier', type: IsarType.string),
     r'trialEndedNoticeShown': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'trialEndedNoticeShown',
       type: IsarType.bool,
     ),
     r'trialEndsAt': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'trialEndsAt',
       type: IsarType.dateTime,
     ),
@@ -106,12 +111,13 @@ void _userEntitlementSerialize(
   writer.writeDateTime(offsets[0], object.activatedAt);
   writer.writeString(offsets[1], object.activeProductId);
   writer.writeString(offsets[2], object.activePurchaseToken);
-  writer.writeDateTime(offsets[3], object.firstInstallAt);
-  writer.writeDateTime(offsets[4], object.lastVerifiedAt);
-  writer.writeDateTime(offsets[5], object.proExpiresAt);
-  writer.writeString(offsets[6], object.tier);
-  writer.writeBool(offsets[7], object.trialEndedNoticeShown);
-  writer.writeDateTime(offsets[8], object.trialEndsAt);
+  writer.writeBool(offsets[3], object.autoRenewing);
+  writer.writeDateTime(offsets[4], object.firstInstallAt);
+  writer.writeDateTime(offsets[5], object.lastVerifiedAt);
+  writer.writeDateTime(offsets[6], object.proExpiresAt);
+  writer.writeString(offsets[7], object.tier);
+  writer.writeBool(offsets[8], object.trialEndedNoticeShown);
+  writer.writeDateTime(offsets[9], object.trialEndsAt);
 }
 
 UserEntitlement _userEntitlementDeserialize(
@@ -124,13 +130,14 @@ UserEntitlement _userEntitlementDeserialize(
   object.activatedAt = reader.readDateTimeOrNull(offsets[0]);
   object.activeProductId = reader.readStringOrNull(offsets[1]);
   object.activePurchaseToken = reader.readStringOrNull(offsets[2]);
-  object.firstInstallAt = reader.readDateTime(offsets[3]);
+  object.autoRenewing = reader.readBoolOrNull(offsets[3]);
+  object.firstInstallAt = reader.readDateTime(offsets[4]);
   object.id = id;
-  object.lastVerifiedAt = reader.readDateTimeOrNull(offsets[4]);
-  object.proExpiresAt = reader.readDateTimeOrNull(offsets[5]);
-  object.tier = reader.readString(offsets[6]);
-  object.trialEndedNoticeShown = reader.readBool(offsets[7]);
-  object.trialEndsAt = reader.readDateTimeOrNull(offsets[8]);
+  object.lastVerifiedAt = reader.readDateTimeOrNull(offsets[5]);
+  object.proExpiresAt = reader.readDateTimeOrNull(offsets[6]);
+  object.tier = reader.readString(offsets[7]);
+  object.trialEndedNoticeShown = reader.readBool(offsets[8]);
+  object.trialEndsAt = reader.readDateTimeOrNull(offsets[9]);
   return object;
 }
 
@@ -148,16 +155,18 @@ P _userEntitlementDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 4:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 5:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 7:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 8:
+      return (reader.readBool(offset)) as P;
+    case 9:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -653,6 +662,33 @@ extension UserEntitlementQueryFilter
           property: r'activePurchaseToken',
           value: '',
         ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  autoRenewingIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'autoRenewing'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  autoRenewingIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'autoRenewing'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  autoRenewingEqualTo(bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'autoRenewing', value: value),
       );
     });
   }
@@ -1191,6 +1227,20 @@ extension UserEntitlementQuerySortBy
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByAutoRenewing() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoRenewing', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByAutoRenewingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoRenewing', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
   sortByFirstInstallAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'firstInstallAt', Sort.asc);
@@ -1315,6 +1365,20 @@ extension UserEntitlementQuerySortThenBy
   thenByActivePurchaseTokenDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'activePurchaseToken', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByAutoRenewing() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoRenewing', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByAutoRenewingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoRenewing', Sort.desc);
     });
   }
 
@@ -1444,6 +1508,13 @@ extension UserEntitlementQueryWhereDistinct
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByAutoRenewing() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'autoRenewing');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
   distinctByFirstInstallAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'firstInstallAt');
@@ -1513,6 +1584,13 @@ extension UserEntitlementQueryProperty
   activePurchaseTokenProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'activePurchaseToken');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, bool?, QQueryOperations>
+  autoRenewingProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'autoRenewing');
     });
   }
 

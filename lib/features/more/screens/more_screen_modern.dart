@@ -112,7 +112,10 @@ class MoreScreenModern extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: KuberSpace.sectionGap),
-                KuberSectionHeader(title: byId(MoreSectionId.signature).title),
+                KuberSectionHeader(
+                  key: moreSignatureKeyModern,
+                  title: byId(MoreSectionId.signature).title,
+                ),
                 _Grid(
                   children: [
                     for (final e in byId(MoreSectionId.signature).entries)

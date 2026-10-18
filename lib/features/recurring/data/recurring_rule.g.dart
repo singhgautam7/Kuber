@@ -55,22 +55,27 @@ const RecurringRuleSchema = CollectionSchema(
       name: r'frequency',
       type: IsarType.string,
     ),
-    r'isPaused': PropertySchema(id: 10, name: r'isPaused', type: IsarType.bool),
-    r'name': PropertySchema(id: 11, name: r'name', type: IsarType.string),
+    r'intervalUnit': PropertySchema(
+      id: 10,
+      name: r'intervalUnit',
+      type: IsarType.string,
+    ),
+    r'isPaused': PropertySchema(id: 11, name: r'isPaused', type: IsarType.bool),
+    r'name': PropertySchema(id: 12, name: r'name', type: IsarType.string),
     r'nextDueAt': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'nextDueAt',
       type: IsarType.dateTime,
     ),
-    r'notes': PropertySchema(id: 13, name: r'notes', type: IsarType.string),
+    r'notes': PropertySchema(id: 14, name: r'notes', type: IsarType.string),
     r'startDate': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
-    r'type': PropertySchema(id: 15, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 16, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -115,6 +120,12 @@ int _recurringRuleEstimateSize(
   bytesCount += 3 + object.categoryId.length * 3;
   bytesCount += 3 + object.endType.length * 3;
   bytesCount += 3 + object.frequency.length * 3;
+  {
+    final value = object.intervalUnit;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   {
     final value = object.notes;
@@ -142,13 +153,14 @@ void _recurringRuleSerialize(
   writer.writeString(offsets[7], object.endType);
   writer.writeLong(offsets[8], object.executionCount);
   writer.writeString(offsets[9], object.frequency);
-  writer.writeBool(offsets[10], object.isPaused);
-  writer.writeString(offsets[11], object.name);
-  writer.writeDateTime(offsets[12], object.nextDueAt);
-  writer.writeString(offsets[13], object.notes);
-  writer.writeDateTime(offsets[14], object.startDate);
-  writer.writeString(offsets[15], object.type);
-  writer.writeDateTime(offsets[16], object.updatedAt);
+  writer.writeString(offsets[10], object.intervalUnit);
+  writer.writeBool(offsets[11], object.isPaused);
+  writer.writeString(offsets[12], object.name);
+  writer.writeDateTime(offsets[13], object.nextDueAt);
+  writer.writeString(offsets[14], object.notes);
+  writer.writeDateTime(offsets[15], object.startDate);
+  writer.writeString(offsets[16], object.type);
+  writer.writeDateTime(offsets[17], object.updatedAt);
 }
 
 RecurringRule _recurringRuleDeserialize(
@@ -169,13 +181,14 @@ RecurringRule _recurringRuleDeserialize(
   object.executionCount = reader.readLong(offsets[8]);
   object.frequency = reader.readString(offsets[9]);
   object.id = id;
-  object.isPaused = reader.readBool(offsets[10]);
-  object.name = reader.readString(offsets[11]);
-  object.nextDueAt = reader.readDateTime(offsets[12]);
-  object.notes = reader.readStringOrNull(offsets[13]);
-  object.startDate = reader.readDateTime(offsets[14]);
-  object.type = reader.readString(offsets[15]);
-  object.updatedAt = reader.readDateTime(offsets[16]);
+  object.intervalUnit = reader.readStringOrNull(offsets[10]);
+  object.isPaused = reader.readBool(offsets[11]);
+  object.name = reader.readString(offsets[12]);
+  object.nextDueAt = reader.readDateTime(offsets[13]);
+  object.notes = reader.readStringOrNull(offsets[14]);
+  object.startDate = reader.readDateTime(offsets[15]);
+  object.type = reader.readString(offsets[16]);
+  object.updatedAt = reader.readDateTime(offsets[17]);
   return object;
 }
 
@@ -207,18 +220,20 @@ P _recurringRuleDeserializeProp<P>(
     case 9:
       return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readBool(offset)) as P;
-    case 11:
-      return (reader.readString(offset)) as P;
-    case 12:
-      return (reader.readDateTime(offset)) as P;
-    case 13:
       return (reader.readStringOrNull(offset)) as P;
-    case 14:
-      return (reader.readDateTime(offset)) as P;
-    case 15:
+    case 11:
+      return (reader.readBool(offset)) as P;
+    case 12:
       return (reader.readString(offset)) as P;
+    case 13:
+      return (reader.readDateTime(offset)) as P;
+    case 14:
+      return (reader.readStringOrNull(offset)) as P;
+    case 15:
+      return (reader.readDateTime(offset)) as P;
     case 16:
+      return (reader.readString(offset)) as P;
+    case 17:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1461,6 +1476,165 @@ extension RecurringRuleQueryFilter
   }
 
   QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'intervalUnit'),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'intervalUnit'),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'intervalUnit',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'intervalUnit',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'intervalUnit',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'intervalUnit',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'intervalUnit',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'intervalUnit',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'intervalUnit',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'intervalUnit',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'intervalUnit', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  intervalUnitIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'intervalUnit', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
   isPausedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -2218,6 +2392,20 @@ extension RecurringRuleQuerySortBy
     });
   }
 
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy>
+  sortByIntervalUnit() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervalUnit', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy>
+  sortByIntervalUnitDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervalUnit', Sort.desc);
+    });
+  }
+
   QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> sortByIsPaused() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isPaused', Sort.asc);
@@ -2449,6 +2637,20 @@ extension RecurringRuleQuerySortThenBy
     });
   }
 
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy>
+  thenByIntervalUnit() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervalUnit', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy>
+  thenByIntervalUnitDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervalUnit', Sort.desc);
+    });
+  }
+
   QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> thenByIsPaused() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isPaused', Sort.asc);
@@ -2609,6 +2811,14 @@ extension RecurringRuleQueryWhereDistinct
     });
   }
 
+  QueryBuilder<RecurringRule, RecurringRule, QDistinct> distinctByIntervalUnit({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'intervalUnit', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<RecurringRule, RecurringRule, QDistinct> distinctByIsPaused() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isPaused');
@@ -2723,6 +2933,13 @@ extension RecurringRuleQueryProperty
   QueryBuilder<RecurringRule, String, QQueryOperations> frequencyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'frequency');
+    });
+  }
+
+  QueryBuilder<RecurringRule, String?, QQueryOperations>
+  intervalUnitProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'intervalUnit');
     });
   }
 

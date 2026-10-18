@@ -12,6 +12,8 @@ import '../../widget_editor/data/widget_catalog.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../data/home_v2_state.dart';
+import '../data/home_v2_widgets.dart' show needsTransactions;
+import '../providers/has_transactions_provider.dart';
 import '../providers/home_v2_provider.dart';
 
 /// Edit Home Widgets for v2 installs (board HV2.7): a pinned Suggestions
@@ -27,8 +29,14 @@ class HomeV2EditorScreen extends ConsumerStatefulWidget {
 
 class _Row {
   final String id;
+
+  /// The switch value (what Save writes).
   WidgetVis vis;
-  _Row(this.id, this.vis);
+
+  /// The group the row is drawn in. Follows [vis] a moment after a toggle,
+  /// so the switch animates first and the row then moves.
+  WidgetVis group;
+  _Row(this.id, this.vis) : group = vis;
 }
 
 class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
@@ -36,6 +44,9 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
   String _initialKey = '';
   late bool _sg = ref.read(homeV2Provider).sgSetting;
   late final bool _sgInitial = _sg;
+
+  /// Rows that just moved group: they fade and grow in at their new place.
+  final _justMoved = <String>{};
 
   String _key(List<_Row> r) => r.map((x) => '${x.id}:${x.vis.name}').join(',');
 
@@ -69,7 +80,7 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
   /// Stable regroup: on, then waiting, then off; order kept within a group.
   List<_Row> _grouped(List<_Row> rows) => [
     for (final v in const [WidgetVis.on, WidgetVis.auto, WidgetVis.off])
-      ...rows.where((r) => r.vis == v),
+      ...rows.where((r) => r.group == v),
   ];
 
   bool get _dirty =>
@@ -80,27 +91,36 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
       showKuberSnackBar(context, context.l10n.atLeastOneWidget, isError: true);
       return;
     }
-    setState(() {
-      r.vis = on ? WidgetVis.on : WidgetVis.off;
-      _rows = _grouped(_rows!);
+    // Switch first; the row moves to its new group 220 ms later.
+    setState(() => r.vis = on ? WidgetVis.on : WidgetVis.off);
+    Future<void>.delayed(const Duration(milliseconds: 220), () {
+      if (!mounted || r.group == r.vis) return;
+      setState(() {
+        r.group = r.vis;
+        _justMoved.add(r.id);
+        _rows = _grouped(_rows!);
+      });
     });
   }
 
   void _reorder(WidgetVis group, int oldI, int newI) {
     final rows = _rows!;
-    final members = rows.where((r) => r.vis == group).toList();
+    final members = rows.where((r) => r.group == group).toList();
     final moved = members.removeAt(oldI);
     members.insert(newI, moved);
     setState(() {
       _rows = [
         for (final v in const [WidgetVis.on, WidgetVis.auto, WidgetVis.off])
-          ...(v == group ? members : rows.where((r) => r.vis == v)),
+          ...(v == group ? members : rows.where((r) => r.group == v)),
       ];
     });
   }
 
   Future<void> _save() async {
-    final rows = _rows!;
+    for (final r in _rows!) {
+      r.group = r.vis;
+    }
+    final rows = _grouped(_rows!);
     final byId = {for (final c in kHomeWidgetCatalog) c.id: c};
     await saveWidgetPreferences(ref, WidgetEditorScope.home, [
       for (final r in rows)
@@ -176,6 +196,7 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
     final tt = Theme.of(context).textTheme;
     final rows = _rows;
     final graduated = ref.watch(homeV2Provider.select((s) => s.gsGraduated));
+    final hasTxns = ref.watch(hasTransactionsProvider);
 
     Widget header(String text, {String? note}) => Padding(
       padding: const EdgeInsets.fromLTRB(4, KuberSpace.lg, 4, KuberSpace.sm),
@@ -196,7 +217,7 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
     );
 
     Widget group(WidgetVis vis) {
-      final members = rows!.where((r) => r.vis == vis).toList();
+      final members = rows!.where((r) => r.group == vis).toList();
       if (members.isEmpty) return const SizedBox.shrink();
       return ReorderableListView.builder(
         shrinkWrap: true,
@@ -206,17 +227,24 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
         onReorderItem: (o, n) => _reorder(vis, o, n),
         itemBuilder: (_, i) {
           final r = members[i];
-          return _EditorRow(
-            key: ValueKey(r.id),
+          final row = _EditorRow(
             index: i,
             isFirst: i == 0,
             isLast: i == members.length - 1,
             title: localizedWidgetName(context, r.id),
             subtitle: vis == WidgetVis.auto
                 ? _autoReason(r.id)
-                : localizedWidgetDesc(context, r.id),
+                // Transaction gate: say why it is not on Home yet.
+                : (!hasTxns && needsTransactions(r.id)
+                      ? l.homeV33EdNeedsTxn
+                      : localizedWidgetDesc(context, r.id)),
             value: r.vis == WidgetVis.on,
             onChanged: (v) => _toggle(r, v),
+          );
+          return _Appear(
+            key: ValueKey(r.id),
+            animate: _justMoved.remove(r.id),
+            child: row,
           );
         },
       );
@@ -274,15 +302,29 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
                           onChanged: (v) => setState(() => _sg = v),
                         ),
                       ),
-                    group(WidgetVis.on),
-                    if (rows.any((r) => r.vis == WidgetVis.auto)) ...[
-                      header(l.homeV2EdSecAuto, note: l.homeV2EdAutoNote),
-                      group(WidgetVis.auto),
-                    ],
-                    if (rows.any((r) => r.vis == WidgetVis.off)) ...[
-                      header(l.homeV2EdSecMore),
-                      group(WidgetVis.off),
-                    ],
+                    // Groups resize smoothly when a row moves between them.
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 230),
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          group(WidgetVis.on),
+                          if (rows.any((r) => r.group == WidgetVis.auto)) ...[
+                            header(
+                              l.homeV2EdSecAuto,
+                              note: l.homeV2EdAutoNote,
+                            ),
+                            group(WidgetVis.auto),
+                          ],
+                          if (rows.any((r) => r.group == WidgetVis.off)) ...[
+                            header(l.homeV2EdSecMore),
+                            group(WidgetVis.off),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
         ),
@@ -324,7 +366,6 @@ class _EditorRow extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   const _EditorRow({
-    super.key,
     required this.index,
     required this.isFirst,
     required this.isLast,
@@ -395,6 +436,33 @@ class _EditorRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Fades and grows a row in where it lands after a switch moved it to
+/// another group (reflow 230 ms, easeOutCubic). Rows that did not move
+/// build without animation.
+class _Appear extends StatelessWidget {
+  final bool animate;
+  final Widget child;
+  const _Appear({super.key, required this.animate, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!animate || MediaQuery.disableAnimationsOf(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 230),
+      curve: Curves.easeOutCubic,
+      builder: (context, v, child) => ClipRect(
+        child: Align(
+          alignment: Alignment.topCenter,
+          heightFactor: v,
+          child: Opacity(opacity: v, child: child),
+        ),
+      ),
+      child: child,
     );
   }
 }

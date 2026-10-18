@@ -29,4 +29,11 @@ class WidgetPreference {
     'order': order,
     'enabled': enabled,
   };
+
+  /// Backup restore. The id is left to Isar (rows are keyed by scope + key).
+  static WidgetPreference fromMap(Map<String, dynamic> m) => WidgetPreference()
+    ..scope = m['scope'] as String
+    ..widgetKey = m['widgetKey'] as String
+    ..order = (m['order'] as num).toInt()
+    ..enabled = m['enabled'] as bool;
 }

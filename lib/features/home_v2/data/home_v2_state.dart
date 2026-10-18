@@ -10,8 +10,10 @@ enum HomeCohort { v1, v2 }
 /// Stored visibility of one Home widget in the v2 cohort.
 enum WidgetVis { auto, on, off }
 
-/// Get started graduation reasons (suggestion-rules.md §2).
-enum GsGraduation { completed, transactions, dismissed, timeout }
+/// Get started graduation reasons (suggestion-rules.md §2). `migrated`: an
+/// existing user moved onto the widget model by the update migration
+/// (specs/home-v3.3/plan.md §2); they never see the card.
+enum GsGraduation { completed, transactions, dismissed, timeout, migrated }
 
 /// v2-only per-widget state: visibility and when it unlocked.
 class HomeV2WidgetState {
@@ -184,31 +186,47 @@ class HomeV2Store {
     Future<void> date(String k, DateTime? v) =>
         v == null ? prefs.remove(k) : prefs.setString(k, v.toIso8601String());
     await writeCohort(s.cohort);
-    await date(PrefsKeys.homeV2InstalledAt, s.installedAt);
-    await prefs.setStringList(
-      PrefsKeys.homeV2SeededAccountIds,
-      [for (final id in s.seededAccountIds) '$id'],
-    );
-    await prefs.setString(
-      PrefsKeys.homeV2Widgets,
-      jsonEncode({for (final e in s.widgets.entries) e.key: e.value.toJson()}),
-    );
-    await date(PrefsKeys.gsGraduatedAt, s.gsGraduatedAt);
     final reason = s.gsGraduationReason;
-    if (reason == null) {
-      await prefs.remove(PrefsKeys.gsGraduationReason);
-    } else {
-      await prefs.setString(PrefsKeys.gsGraduationReason, reason.name);
-    }
-    await date(PrefsKeys.gsFirstShownAt, s.gsFirstShownAt);
-    await prefs.setBool(PrefsKeys.gsSuccessShown, s.gsSuccessShown);
-    await prefs.setBool(PrefsKeys.settingHomeGetStarted, s.gsSetting);
-    await prefs.setBool(PrefsKeys.settingHomeSuggestions, s.sgSetting);
-    await prefs.setBool(PrefsKeys.homeV2BalanceSet, s.balanceSet);
-    await prefs.setBool(PrefsKeys.homeV2SmsRequested, s.smsRequested);
-    await prefs.setBool(PrefsKeys.homeV2AskOpened, s.askOpened);
-    await prefs.setBool(PrefsKeys.homeV2VoiceUsed, s.voiceUsed);
+    // Independent keys: written together (each is a platform-channel round
+    // trip, so one after another costs ~5 ms each on a cold start).
+    await Future.wait([
+      date(PrefsKeys.homeV2InstalledAt, s.installedAt),
+      prefs.setStringList(PrefsKeys.homeV2SeededAccountIds, [
+        for (final id in s.seededAccountIds) '$id',
+      ]),
+      prefs.setString(
+        PrefsKeys.homeV2Widgets,
+        jsonEncode({for (final e in s.widgets.entries) e.key: e.value.toJson()}),
+      ),
+      date(PrefsKeys.gsGraduatedAt, s.gsGraduatedAt),
+      reason == null
+          ? prefs.remove(PrefsKeys.gsGraduationReason)
+          : prefs.setString(PrefsKeys.gsGraduationReason, reason.name),
+      date(PrefsKeys.gsFirstShownAt, s.gsFirstShownAt),
+      prefs.setBool(PrefsKeys.gsSuccessShown, s.gsSuccessShown),
+      prefs.setBool(PrefsKeys.settingHomeGetStarted, s.gsSetting),
+      prefs.setBool(PrefsKeys.settingHomeSuggestions, s.sgSetting),
+      prefs.setBool(PrefsKeys.homeV2BalanceSet, s.balanceSet),
+      prefs.setBool(PrefsKeys.homeV2SmsRequested, s.smsRequested),
+      prefs.setBool(PrefsKeys.homeV2AskOpened, s.askOpened),
+      prefs.setBool(PrefsKeys.homeV2VoiceUsed, s.voiceUsed),
+    ]);
   }
+
+  /// Update migration version last completed (0 = never).
+  int get migrationVersion => prefs.getInt(PrefsKeys.homeMigrationVersion) ?? 0;
+
+  Future<void> setMigrationVersion(int v) async {
+    await prefs.setInt(PrefsKeys.homeMigrationVersion, v);
+    await prefs.remove(PrefsKeys.homeMigrationError);
+  }
+
+  Future<void> recordMigrationError(DateTime at, Object e) => prefs.setString(
+    PrefsKeys.homeMigrationError,
+    '${at.toIso8601String()} $e',
+  );
+
+  String? get migrationError => prefs.getString(PrefsKeys.homeMigrationError);
 
   /// Dev tools reset: drop every v2 key (suggestion state included).
   Future<void> clearV2State() async {

@@ -21,7 +21,7 @@ class TutorialMockDataService {
         ..name = '${_prefix}Wallet'
         ..type = 'cash'
         ..icon = 'payments_outlined'
-        ..colorValue = 0xFF9E9E9E
+        ..colorValue = SeedService.cashGreen
         ..initialBalance = 5000;
       final bank = Account()
         ..name = '${_prefix}HDFC Bank'

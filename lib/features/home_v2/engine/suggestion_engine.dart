@@ -7,6 +7,16 @@ library;
 
 /// Suggestion types. Data types 1 to 6, discovery D1 to D4.
 enum SgType {
+  /// The one-time Why Kuber card (specs/home-v3.3/plan.md §4). Never produced
+  /// by [SuggestionEngine]; the provider shows it before the rules run.
+  whyKuber(0),
+
+  /// Quick Add intro (widget, voice and text) from 2 transactions.
+  quickAddIntro(0),
+
+  /// Import from SMS from 3 transactions while SMS permission is not given
+  /// (after the Quick Add intro). Get started covers SMS before that.
+  smsImportIntro(0),
   loans(1),
   creditCard(2),
   recurring(3),
@@ -24,7 +34,30 @@ enum SgType {
   final int priority;
 
   bool get isDiscovery => priority > 100;
+
+  /// One-time intro cards: shown before the rules, outside the daily
+  /// allowance (specs/home-v3.3/plan.md §4).
+  bool get isIntro => priority == 0;
 }
+
+const kWhyKuberCard = SgCandidate(type: SgType.whyKuber, key: 'why_kuber');
+const kQuickAddIntroCard = SgCandidate(
+  type: SgType.quickAddIntro,
+  key: 'quick_add_intro',
+);
+const kSmsIntroCard = SgCandidate(
+  type: SgType.smsImportIntro,
+  key: 'sms_import_intro',
+);
+
+/// Suggestion types moved back by each tracking choice (v3 §6, v3.1 table).
+const Map<String, SgType> kTrackingMovesBack = {
+  'budgets': SgType.budget,
+  'loans': SgType.loans,
+  'investments': SgType.investments,
+  'ledger': SgType.ledger,
+  'subscriptions': SgType.recurring,
+};
 
 /// One transaction, reduced to what the rules read.
 class SgTxn {
@@ -43,6 +76,10 @@ class SgTxn {
   /// Transaction note, if any.
   final String? note;
 
+  /// `Transaction.linkedRuleType`: 'recurring' | 'loan' | 'investment' |
+  /// 'lent' | 'borrowed', or null for a hand-entered row.
+  final String? linkedType;
+
   const SgTxn({
     required this.at,
     required this.amount,
@@ -54,6 +91,7 @@ class SgTxn {
     this.fromSms = false,
     this.smsText,
     this.note,
+    this.linkedType,
   });
 }
 
@@ -116,6 +154,10 @@ class SgInput {
   final Map<String, String> categoryNames;
   final List<SgAccount> accounts;
   final List<SgRule> rules;
+
+  /// Loans and SIPs the app already tracks (EMI / SIP amount, category). A
+  /// monthly charge matching one is not suggested as a recurring rule.
+  final List<SgRule> automations;
   final Set<String> activeBudgetCategoryIds;
   final int loanCount;
   final int investmentCount;
@@ -143,6 +185,7 @@ class SgInput {
     this.categoryNames = const {},
     this.accounts = const [],
     this.rules = const [],
+    this.automations = const [],
     this.activeBudgetCategoryIds = const {},
     this.loanCount = 0,
     this.investmentCount = 0,
@@ -395,6 +438,8 @@ class SuggestionEngine {
     return null;
   }
 
+  static const _automatedLinks = {'loan', 'investment', 'lent', 'borrowed'};
+
   static List<SgCandidate> _recurring(SgInput i) {
     // Grouping key per raw name, looked up once per distinct name: a
     // subscription service's display name, else the merchant key.
@@ -413,6 +458,8 @@ class SuggestionEngine {
     final byMerchant = <String, Map<int, SgTxn>>{};
     for (final t in i.txns) {
       if (!t.isExpense || t.isTransfer) continue;
+      // Rows a loan, SIP or lend / borrow entry created are already automated.
+      if (_automatedLinks.contains(t.linkedType)) continue;
       final key = groupKey(t.name);
       if (key.length < 2) continue;
       final months = byMerchant.putIfAbsent(key, () => {});
@@ -439,8 +486,8 @@ class SuggestionEngine {
       final days = [for (final t in charges) _clampedDay(t.at).toDouble()];
       final medDay = _median(days);
       if (days.any((d) => (d - medDay).abs() > 3)) return;
-      // Already covered by an active recurring rule?
-      final covered = i.rules.any(
+      // Already covered by an active recurring rule, loan EMI or SIP?
+      final covered = [...i.rules, ...i.automations].any(
         (r) =>
             r.active &&
             (groupKey(r.name) == key ||

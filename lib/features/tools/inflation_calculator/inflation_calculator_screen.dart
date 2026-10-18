@@ -156,7 +156,7 @@ class _InflationCalculatorScreenState
                     sub: "to keep today's purchasing power",
                   ),
                   right: HeroSide(
-                    label: "Real Value of Today's ₹",
+                    label: "Real Value of Today's ${currency.symbol}",
                     value: money(result.realValueOfToday),
                     color: cs.onSurfaceVariant,
                     sub: 'what it buys after $_years years',

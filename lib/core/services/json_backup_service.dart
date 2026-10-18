@@ -223,6 +223,11 @@ class JsonBackupService {
       // as a locked import so the unlock screen asks for the previous device's
       // PIN (persist first, verify after). See specs/plans/kuber-cards.md §6.3.
       await restore('storedCards', 'cards', isar.storedCards, StoredCard.fromMap);
+      // Home and Analytics layouts (exported since the widget editor
+      // shipped, never restored before). Home rows are then ported onto the
+      // widget model by onHomeV2DataRestored (specs/home-v3.3/plan.md §2).
+      await restore('widgetPreferences', 'widget layout',
+          isar.widgetPreferences, WidgetPreference.fromMap);
       final metaMap = data['cardVaultMeta'];
       if (metaMap is Map<String, dynamic>) {
         final meta = CardVaultMeta.fromMap(metaMap)
@@ -345,6 +350,7 @@ class JsonBackupService {
     'notes': r.notes,
     'frequency': r.frequency,
     'customDays': r.customDays,
+    'intervalUnit': r.intervalUnit,
     'startDate': r.startDate.toIso8601String(),
     'nextDueAt': r.nextDueAt.toIso8601String(),
     'executionCount': r.executionCount,
@@ -543,6 +549,8 @@ class JsonBackupService {
     ..notes = m['notes'] as String?
     ..frequency = m['frequency'] as String
     ..customDays = m['customDays'] as int?
+    // Absent in older backups: RecurrenceInterval.legacy reads frequency.
+    ..intervalUnit = m['intervalUnit'] as String?
     ..startDate = DateTime.parse(m['startDate'] as String)
     ..nextDueAt = DateTime.parse(m['nextDueAt'] as String)
     ..executionCount = (m['executionCount'] as int?) ?? 0

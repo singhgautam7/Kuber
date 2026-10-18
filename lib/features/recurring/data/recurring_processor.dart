@@ -40,8 +40,8 @@ class RecurringProcessor {
 
         // Create transactions for each missed due date
         while (dueDate.isBefore(now)) {
-          // Check if rule has expired after incrementing execution count
-          if (RecurringRepository.isExpired(rule)) break;
+          // Stop at the end date (inclusive) or once the count is used up.
+          if (RecurringRepository.isExpired(rule, dueDate)) break;
 
           final combinedDate = DateTime(
             dueDate.year,
@@ -74,7 +74,7 @@ class RecurringProcessor {
           rule.executionCount++;
           dueDate = RecurringRepository.computeNextDue(rule, dueDate);
 
-          if (RecurringRepository.isExpired(rule)) break;
+          if (RecurringRepository.isExpired(rule, dueDate)) break;
         }
 
         if (created > 0) {

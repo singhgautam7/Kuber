@@ -19,6 +19,7 @@ import '../../features/tools/bill_splitter/data/person.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
 import '../../features/kuber_cards/data/card_vault_service.dart';
 import '../database/seed_service.dart';
+import '../utils/formatters.dart';
 
 class MockDataService {
   static Future<void> generate(Isar isar) async {
@@ -571,23 +572,35 @@ class MockDataService {
             ..lastUsed = now.subtract(Duration(hours: i * 7))
             ..useCount = 6 - i,
       ]);
+      // Payloads point at the demo items above so a tap opens their sheets.
+      // The last row has no payload on purpose: the old-style (pre-id) case.
       await isar.appNotifications.putAll([
         AppNotification()
           ..type = NotificationType.budgetAlert
-          ..title = 'Groceries budget exceeded'
-          ..body = 'You have spent more than your Groceries budget this month.'
+          ..title = 'Travel budget exceeded'
+          ..body = 'You have spent more than your Travel budget this month.'
+          ..payload = 'budget:${travelBudget.id}'
           ..createdAt = now.subtract(const Duration(hours: 5)),
         AppNotification()
           ..type = NotificationType.loanEmi
           ..title = 'EMI due tomorrow'
-          ..body = 'Maruti Brezza EMI of ₹11,200 is due tomorrow.'
+          ..body =
+              'Maruti Brezza EMI of ${AppFormatter.amountToken(11200)} is due tomorrow.'
+          ..payload = 'loan:${uid('loan_Maruti Brezza')}'
           ..createdAt = now.subtract(const Duration(days: 1)),
         AppNotification()
           ..type = NotificationType.recurringTransaction
           ..title = 'Monthly Salary added'
           ..body = 'Your recurring income was recorded.'
+          ..payload = 'recurring:${salaryRule.id}'
           ..createdAt = now.subtract(const Duration(days: 6))
           ..readAt = now.subtract(const Duration(days: 5)),
+        AppNotification()
+          ..type = NotificationType.ledgerReminder
+          ..title = 'Money to collect'
+          ..body = 'A lend entry is due. Open Lend / Borrow to review.'
+          ..createdAt = now.subtract(const Duration(days: 7))
+          ..readAt = now.subtract(const Duration(days: 7)),
       ]);
     });
 

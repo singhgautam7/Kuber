@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../../../core/services/json_backup_service.dart';
@@ -29,6 +30,10 @@ class BackupSettings {
   final String? lastAttemptLabel;
   final DateTime? lastBackupAt;
 
+  /// Day the next scheduled backup is due (it runs on the first app open on
+  /// or after it), or null when automatic backups are off / have no folder.
+  final DateTime? nextBackupAt;
+
   const BackupSettings({
     this.enabled = false,
     this.frequency = BackupFrequency.weekly,
@@ -38,6 +43,7 @@ class BackupSettings {
     this.failureReason,
     this.lastAttemptLabel,
     this.lastBackupAt,
+    this.nextBackupAt,
   });
 
   bool get backupJustCompleted {
@@ -251,11 +257,27 @@ BackupSettings _toSettings(BackupConfig config) {
     failureReason: config.lastFailureReason == null
         ? null
         : _failureMessage(_failureFromString(config.lastFailureReason!)),
-    lastAttemptLabel: _lastAttemptLabel(
+    lastAttemptLabel: lastAttemptLabel(
       config.lastAttemptAt ?? config.lastBackupAt,
     ),
     lastBackupAt: config.lastBackupAt,
+    nextBackupAt: nextBackupDay(config),
   );
+}
+
+/// Same rule as [BackupSettingsNotifier.isDue]: [frequency] days after the day
+/// of the last backup, or today when none has run yet.
+DateTime? nextBackupDay(BackupConfig config, {DateTime? now}) {
+  if (!config.enabled || config.folderUri == null) return null;
+  final n = now ?? DateTime.now();
+  final last = config.lastBackupAt?.toLocal();
+  if (last == null) return DateTime(n.year, n.month, n.day);
+  final days = switch (_frequencyFromString(config.frequency)) {
+    BackupFrequency.daily => 1,
+    BackupFrequency.weekly => 7,
+    BackupFrequency.monthly => 30,
+  };
+  return DateTime(last.year, last.month, last.day + days);
 }
 
 BackupFrequency _frequencyFromString(String value) {
@@ -295,10 +317,22 @@ String _failureMessage(BackupFailureReason reason) {
   };
 }
 
-String? _lastAttemptLabel(DateTime? date) {
+/// "today, 9:41 AM" / "yesterday, 9:41 AM" / "Oct 5, 9:41 AM" (board 3.12b).
+/// A clock time instead of "N minutes ago", which went stale while the screen
+/// stayed open (and read "1 minutes ago").
+@visibleForTesting
+String? lastAttemptLabel(DateTime? date, {DateTime? now}) {
   if (date == null) return null;
-  final diff = DateTime.now().difference(date);
-  if (diff.inMinutes < 60) return '${diff.inMinutes.clamp(1, 59)} minutes ago';
-  if (diff.inHours < 24) return '${diff.inHours} hours ago';
-  return '${date.day}/${date.month}/${date.year}';
+  final local = date.toLocal();
+  final n = now ?? DateTime.now();
+  final days = DateTime(n.year, n.month, n.day)
+      .difference(DateTime(local.year, local.month, local.day))
+      .inDays;
+  final time = DateFormat.jm().format(local);
+  if (days == 0) return 'today, $time';
+  if (days == 1) return 'yesterday, $time';
+  final day = local.year == n.year
+      ? DateFormat.MMMd().format(local)
+      : DateFormat.yMMMd().format(local);
+  return '$day, $time';
 }

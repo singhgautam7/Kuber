@@ -32,6 +32,24 @@ _SgCopy _copyFor(BuildContext context, WidgetRef ref, SgCandidate c) {
   String money(Object? v) => fmt.formatCurrency((v as num?)?.toDouble() ?? 0);
   String str(String k) => (c.data[k] as String?) ?? '';
   return switch (c.type) {
+    SgType.whyKuber => _SgCopy(
+      Icons.play_circle_outline_rounded,
+      l.homeV33TourName,
+      l.homeV33TourCardBody,
+      l.homeV33TourCardAct,
+    ),
+    SgType.quickAddIntro => _SgCopy(
+      Icons.bolt_rounded,
+      l.homeV33SgQuickTitle,
+      l.homeV33SgQuickBody,
+      l.homeV33SgQuickAct,
+    ),
+    SgType.smsImportIntro => _SgCopy(
+      Icons.sms_outlined,
+      l.homeV33SgSmsTitle,
+      l.homeV33SgSmsBody,
+      l.homeV33SgSmsAct,
+    ),
     SgType.loans => _SgCopy(
       Icons.account_balance_outlined,
       l.homeV2SgLoanTitle,
@@ -142,6 +160,18 @@ class SuggestionCard extends ConsumerWidget {
       },
     );
     switch (c.type) {
+      case SgType.whyKuber:
+        await context.push('/tour');
+      case SgType.smsImportIntro:
+        final pending = context.push('/more/sms-import');
+        await notifier.afterMainAction(c);
+        await pending;
+        return;
+      case SgType.quickAddIntro:
+        final pending = context.push('/quick-add');
+        await notifier.afterMainAction(c);
+        await pending;
+        return;
       case SgType.loans:
         await context.push(
           route('/loans/add', {
@@ -221,7 +251,9 @@ class SuggestionCard extends ConsumerWidget {
     final overlay = Navigator.of(context, rootNavigator: true).overlay;
     showKuberSnackBar(
       context,
-      l.homeV2SgDismissedSnack,
+      candidate.type == SgType.whyKuber
+          ? l.homeV33TourCardHidden
+          : l.homeV2SgDismissedSnack,
       overlay: overlay,
       actionLabel: l.homeV2ActUndo,
       onAction: () => notifier.undoDismiss(candidate),
@@ -285,7 +317,9 @@ class SuggestionCard extends ConsumerWidget {
                         icon: Icons.close_rounded,
                         kind: AppIconButtonKind.plain,
                         size: 40,
-                        semanticLabel: l.homeV2SgDismissA11y,
+                        semanticLabel: candidate.type == SgType.whyKuber
+                            ? l.homeV33TourCardHideA11y
+                            : l.homeV2SgDismissA11y,
                         onPressed: () => _dismiss(context, ref),
                       ),
                     ],

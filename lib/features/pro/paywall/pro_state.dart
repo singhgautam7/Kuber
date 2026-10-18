@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,7 +16,9 @@ import '../debug/entitlement_override.dart';
 enum ProPlan { monthly, yearly, lifetime }
 
 /// How the current device came to have Pro. `free` means no Pro at all.
-enum ProSource { free, trial, promo, purchased }
+/// There is no trial: free months come from Play promo codes, which arrive as
+/// a normal subscription purchase.
+enum ProSource { free, promo, purchased }
 
 /// Local-only Kuber Pro entitlement snapshot. Immutable value object every
 /// widget consumes via [kuberProStateProvider]. The durable half of the
@@ -26,34 +29,24 @@ enum ProSource { free, trial, promo, purchased }
 class KuberProState {
   final ProSource source;
   final ProPlan? plan; // set when source == purchased
-
-  /// Trial window end. Two producers now:
-  ///   - LEGACY app-managed trial (`source == trial`): install + 14 days.
-  ///   - Play Billing free-trial phase (`source == purchased`): the yearly
-  ///     subscription's free-trial phase end. See [inTrialPhase].
-  /// Null means the user is not in any trial.
-  final DateTime? trialEndsAt;
   final DateTime? promoEndsAt; // set when source == promo, null = free forever
   final DateTime?
   expiryDate; // set when source == purchased && plan != lifetime
   final DateTime?
   activatedAt; // when Pro/promo first turned on, for "N days as Pro"
 
+  /// False once a subscription was cancelled: Pro stays until [expiryDate]
+  /// (the end of the paid period) and then expires. Null when unknown.
+  final bool? autoRenewing;
+
   const KuberProState({
     this.source = ProSource.free,
     this.plan,
-    this.trialEndsAt,
     this.promoEndsAt,
     this.expiryDate,
     this.activatedAt,
+    this.autoRenewing,
   });
-
-  /// Legacy app-managed trial. No longer created for new installs (that was an
-  /// abusable "reinstall for another 14 days" hole); retained only to
-  /// grandfather users who still have a `trial` row. See
-  /// `ensureEntitlementBootstrap`.
-  factory KuberProState.trial({required DateTime endsAt}) =>
-      KuberProState(source: ProSource.trial, trialEndsAt: endsAt);
 
   factory KuberProState.promo({DateTime? endsAt, DateTime? activatedAt}) =>
       KuberProState(
@@ -66,41 +59,48 @@ class KuberProState {
     required ProPlan plan,
     DateTime? expiryDate,
     DateTime? activatedAt,
-    DateTime? trialEndsAt,
+    bool? autoRenewing,
   }) => KuberProState(
     source: ProSource.purchased,
     plan: plan,
     expiryDate: expiryDate,
     activatedAt: activatedAt ?? DateTime.now(),
-    trialEndsAt: trialEndsAt,
+    autoRenewing: autoRenewing,
   );
 
   bool get isPro => source == ProSource.purchased || source == ProSource.promo;
-
-  /// Legacy app-managed trial only (unpaid). A Play Billing free trial is a
-  /// real active subscription, so it reads as [isPro], not [isTrial].
-  bool get isTrial => source == ProSource.trial;
   bool get isFree => source == ProSource.free;
-
-  /// Whether trial UI (the countdown pill, the "TRIAL" button label) should
-  /// show. True for a legacy app trial AND for a Play Billing subscription
-  /// currently in its free-trial phase — both carry a future [trialEndsAt].
-  bool get inTrialPhase =>
-      trialEndsAt != null && trialEndsAt!.isAfter(DateTime.now());
 
   /// Whether the user may use Pro-gated features right now. Every gate in the
   /// app routes through this getter (via `proGate`), so it is the single
   /// on/off switch for Pro.
   ///
-  /// True when the user has a real paid/promo entitlement ([isPro]), is in a
-  /// grandfathered app-managed trial ([isTrial]), or a QA build was compiled
-  /// with `--dart-define=KUBER_UNLOCK_PRO=true`. The paywall's manage-vs-sell
+  /// True when the user has a real paid/promo entitlement ([isPro]), or a QA
+  /// build was compiled with `--dart-define=KUBER_UNLOCK_PRO=true`. The paywall's manage-vs-sell
   /// decision keys off [isPro] (real entitlement), not this getter.
   ///
   /// See `specs/pro-gating-enabled.md` for the full list of gated features and
   /// their free-tier limits.
   bool get hasProAccess =>
-      const bool.fromEnvironment('KUBER_UNLOCK_PRO') || isPro || isTrial;
+      const bool.fromEnvironment('KUBER_UNLOCK_PRO') || isPro;
+
+  /// "Renews on DATE", or "Expires on DATE" once cancelled, for a monthly /
+  /// yearly subscription; null when unknown (lifetime, promo, an older build's
+  /// row before its next Play check). A renewal date that passed while
+  /// offline rolls forward to the next anniversary.
+  String? renewalLabel({DateTime? now}) {
+    final date = expiryDate;
+    if (date == null || plan == null || plan == ProPlan.lifetime) return null;
+    final n = now ?? DateTime.now();
+    String fmt(DateTime d) => DateFormat('d MMM yyyy').format(d);
+    if (autoRenewing == false) {
+      return date.isAfter(n)
+          ? 'Expires on ${fmt(date)}'
+          : 'Expired on ${fmt(date)}';
+    }
+    final next = date.isAfter(n) ? date : nextRenewalDate(date, plan!, n);
+    return 'Renews on ${fmt(next)}';
+  }
 
   /// Whole days since Pro/promo was activated. Used by the manage-state hero
   /// as a small badge of pride, not a functional countdown.
@@ -109,13 +109,27 @@ class KuberProState {
     return DateTime.now().difference(activatedAt!).inDays;
   }
 
-  int get trialDaysLeft {
-    if (trialEndsAt == null) return 0;
-    final hours = trialEndsAt!.difference(DateTime.now()).inHours;
-    return (hours / 24).ceil().clamp(0, 14);
-  }
+  // Value equality, so re-applying an unchanged purchase (every resume
+  // reconcile re-delivers it) doesn't rebuild every Pro-aware widget.
+  @override
+  bool operator ==(Object other) =>
+      other is KuberProState &&
+      other.source == source &&
+      other.plan == plan &&
+      other.promoEndsAt == promoEndsAt &&
+      other.expiryDate == expiryDate &&
+      other.activatedAt == activatedAt &&
+      other.autoRenewing == autoRenewing;
 
-  bool get trialEndingSoon => inTrialPhase && trialDaysLeft <= 3;
+  @override
+  int get hashCode => Object.hash(
+    source,
+    plan,
+    promoEndsAt,
+    expiryDate,
+    activatedAt,
+    autoRenewing,
+  );
 }
 
 /// Reads / writes the [UserEntitlement] singleton and converts it to and from
@@ -124,8 +138,8 @@ class KuberProState {
 ///
 /// The Notifier is the only place that touches the Isar row. Anything else in
 /// the app that needs to mutate Pro state calls one of the intent-named
-/// methods below ([applyPurchase], [applyPromo], [revoke],
-/// [markTrialEndedNoticeShown]); nothing writes `state =` directly. That
+/// methods below ([applyPurchase], [applyPromo], [revoke]); nothing writes
+/// `state =` directly. That
 /// keeps the persistence side effect co-located with the state transition.
 class KuberProStateNotifier extends Notifier<KuberProState> {
   Isar get _isar => ref.read(isarProvider);
@@ -143,14 +157,9 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
 
     switch (tier) {
       case EntitlementTier.trial:
-        // Expired trial: transient in-memory downgrade. The persistent row
-        // is not rewritten here — the row stays `trial` so the "trial ended
-        // notice" logic can still find it. Rendering as free is enough to
-        // gate the UI.
-        if (row.trialEndsAt == null || row.trialEndsAt!.isBefore(now)) {
-          return const KuberProState(source: ProSource.free);
-        }
-        return KuberProState.trial(endsAt: row.trialEndsAt!);
+        // Legacy app-managed trial (install + 14 days). New installs stopped
+        // getting it on 2026-07-11, so every one has ended: reads as free.
+        return const KuberProState(source: ProSource.free);
 
       case EntitlementTier.proPromo:
         // LEGACY / MIGRATION (Round 2 security refactor): the in-app promo
@@ -170,28 +179,21 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
         );
 
       case EntitlementTier.proMonthly:
-        if (row.proExpiresAt != null && row.proExpiresAt!.isBefore(now)) {
-          return const KuberProState(source: ProSource.free);
-        }
-        return KuberProState.purchased(
-          plan: ProPlan.monthly,
-          expiryDate: row.proExpiresAt,
-          activatedAt: row.activatedAt,
-        );
-
       case EntitlementTier.proYearly:
-        if (row.proExpiresAt != null && row.proExpiresAt!.isBefore(now)) {
+        // The date is refreshed on every Play check, so it only goes stale
+        // offline: a paying user offline past renewal day keeps Pro for
+        // [kRenewalGrace] before reading as free.
+        if (row.proExpiresAt != null &&
+            row.proExpiresAt!.add(kRenewalGrace).isBefore(now)) {
           return const KuberProState(source: ProSource.free);
         }
-        // The yearly base plan carries Play Billing's 14-day free trial phase.
-        // `trialEndsAt` (set by `applyPurchase` from the purchase date) drives
-        // the trial pill; `inTrialPhase` ignores it once it's in the past, so a
-        // restored older subscription reads as plain Pro.
         return KuberProState.purchased(
-          plan: ProPlan.yearly,
-          trialEndsAt: row.trialEndsAt,
+          plan: tier == EntitlementTier.proMonthly
+              ? ProPlan.monthly
+              : ProPlan.yearly,
           expiryDate: row.proExpiresAt,
           activatedAt: row.activatedAt,
+          autoRenewing: row.autoRenewing,
         );
 
       case EntitlementTier.proLifetime:
@@ -204,6 +206,10 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
         return const KuberProState(source: ProSource.free);
     }
   }
+
+  @override
+  bool updateShouldNotify(KuberProState previous, KuberProState next) =>
+      previous != next;
 
   @override
   KuberProState build() {
@@ -243,7 +249,7 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
     String? productId,
     String? purchaseToken,
     DateTime? activatedAt,
-    DateTime? trialEndsAt,
+    bool? autoRenewing,
   }) {
     _writeRow((r) {
       r.tier = switch (plan) {
@@ -252,10 +258,9 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
         ProPlan.lifetime => EntitlementTier.proLifetime,
       };
       r.proExpiresAt = plan == ProPlan.lifetime ? null : expiryDate;
-      // Play Billing free-trial phase end for the subscription (yearly). The
-      // row field is reused (it was the legacy app-trial end); on a purchased
-      // row it means "this subscription's trial ends here". Null clears it.
-      r.trialEndsAt = trialEndsAt;
+      r.autoRenewing = plan == ProPlan.lifetime ? null : autoRenewing;
+      // No trials: clears the client-side trial estimate older builds wrote.
+      r.trialEndsAt = null;
       // Prefer the real purchase timestamp when one is known (restore of an
       // older purchase), but never overwrite an activation we already recorded
       // — "N days as Pro" should count from the earliest known activation.
@@ -283,32 +288,38 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
 
   /// Drops the user back to the free tier. Called when Play Billing reports
   /// no active purchases (or on manual revocation for testing). Never touches
-  /// [UserEntitlement.firstInstallAt] or [UserEntitlement.trialEndedNoticeShown]
-  /// — those are per-install facts.
+  /// [UserEntitlement.firstInstallAt], a per-install fact.
   void revoke() {
     _writeRow((r) {
       r.tier = EntitlementTier.free;
       r.proExpiresAt = null;
+      r.autoRenewing = null;
       r.activeProductId = null;
       r.activePurchaseToken = null;
       r.lastVerifiedAt = DateTime.now();
     });
   }
 
-  /// Marks the one-shot "your trial ended" bottom sheet as shown.
-  void markTrialEndedNoticeShown() {
-    _writeRow((r) => r.trialEndedNoticeShown = true);
-  }
+}
 
-  /// True once, right after the trial window closes but before the notice has
-  /// been shown. The app calls this on cold start and, if it returns true,
-  /// shows the sheet then calls [markTrialEndedNoticeShown].
-  bool shouldShowTrialEndedNotice() {
-    final row = _readRow();
-    if (row.trialEndedNoticeShown) return false;
-    if (row.tier != EntitlementTier.trial) return false;
-    if (row.trialEndsAt == null) return false;
-    return row.trialEndsAt!.isBefore(DateTime.now());
+/// How long a monthly / yearly subscription stays Pro past its stored renewal
+/// date when the app couldn't re-check with Play (offline).
+const kRenewalGrace = Duration(days: 3);
+
+/// Next renewal of a subscription bought at [purchaseTime]: the first monthly
+/// / yearly anniversary after [now]. Play renews on the purchase's day of the
+/// month (clamped to short months), and a promo free month / year counts from
+/// redemption, so this matches the "Renews on" Play shows. Play's exact date
+/// is only available server-side, which Kuber does not have.
+DateTime nextRenewalDate(DateTime purchaseTime, ProPlan plan, DateTime now) {
+  final step = plan == ProPlan.yearly ? 12 : 1;
+  final p = purchaseTime.toLocal();
+  for (var k = 1; ; k++) {
+    final first = DateTime(p.year, p.month + k * step, 1);
+    final days = DateTime(first.year, first.month + 1, 0).day;
+    final d = DateTime(first.year, first.month,
+        p.day > days ? days : p.day, p.hour, p.minute, p.second);
+    if (d.isAfter(now)) return d;
   }
 }
 
@@ -322,15 +333,9 @@ final kuberProStateProvider =
 /// Ensures the [UserEntitlement] singleton exists. Call from bootstrap on
 /// every launch.
 ///
-/// SECURITY (Round 2): a new install now starts on the **free** tier, NOT an
-/// app-managed 14-day trial. The old app trial (14 days from `firstInstallAt`,
-/// tracked locally) could be reset indefinitely by reinstalling or clearing
-/// app data — an unbounded-free-Pro hole. The 14-day trial is now Play
-/// Billing's own free-trial phase on the yearly subscription: it is tied to the
-/// user's Google account, so it can't be farmed by wiping local state.
-///
-/// Existing users who already hold a `trial` row are untouched here and keep
-/// their app trial to its natural end (see `_stateFromRow`'s `trial` case).
+/// A new install starts on the free tier. There is no trial: the old
+/// app-managed 14-day trial (resettable by reinstalling) was removed on
+/// 2026-07-11, and free months now come from Play promo codes.
 ///
 /// Kept as a top-level function rather than a Notifier method so it can be
 /// awaited in `_bootstrap()` before the first frame — we want the row to exist

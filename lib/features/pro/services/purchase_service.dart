@@ -7,8 +7,10 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 // offer token to the purchase (GooglePlayPurchaseParam).
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/router/app_router.dart';
+import '../../../core/utils/prefs_keys.dart';
 import '../paywall/billing_ui_state.dart';
 import '../paywall/pro_state.dart';
 import '../paywall/subscription_offer.dart';
@@ -90,6 +92,19 @@ class PurchaseService {
   bool _available = false;
   bool _initialized = false;
 
+  /// Set when the user taps Restore or Redeem. Until then a free user is only
+  /// checked once per app launch; inside the window every return to the app
+  /// re-checks (see `KuberApp._reconcileEntitlementOnResume`).
+  DateTime? _watchUntil;
+
+  /// The user just started a restore / redemption: re-check purchases on each
+  /// return to the app for [kPurchaseWatchWindow].
+  void watchForPurchase() =>
+      _watchUntil = DateTime.now().add(kPurchaseWatchWindow);
+
+  bool get isWatchingForPurchase =>
+      _watchUntil?.isAfter(DateTime.now()) ?? false;
+
   /// True once Play Billing reported itself available on this device.
   bool get isAvailable => _available;
 
@@ -127,7 +142,33 @@ class PurchaseService {
       await loadProducts(kAllProductIds);
       return;
     }
+    await _connect();
+  }
 
+  /// Re-checks Play Billing when it was unavailable at launch (Play Store
+  /// signed out, Play services updating) and connects if it is up now, so
+  /// Restore / a redemption work without restarting the app. True when
+  /// billing is available.
+  Future<bool> ensureAvailable() async {
+    if (_available) return true;
+    // Before the on-open batch has initialized billing, don't pull that work
+    // forward (specs/performance.md startup order); it runs shortly anyway.
+    if (!_initialized) return false;
+    try {
+      _available = await _iap.isAvailable();
+    } catch (e) {
+      BillingDiagnostics.instance.recordError('ensureAvailable', e);
+      _available = false;
+    }
+    BillingDiagnostics.instance.log('INIT', 'Re-check availability: $_available');
+    if (_available) await _connect();
+    return _available;
+  }
+
+  /// Listens to the purchase stream, loads products and reconciles. Runs once,
+  /// the first time billing is available.
+  Future<void> _connect() async {
+    if (_sub != null) return; // concurrent ensureAvailable calls
     _sub = _iap.purchaseStream.listen(
       _onPurchaseUpdated,
       onError: (Object e, StackTrace s) {
@@ -150,8 +191,74 @@ class PurchaseService {
   Future<void> _startupReconcile() async {
     try {
       await reconcileWithRetries(source: 'startup');
+      await checkForLapse(source: 'startup');
     } catch (e) {
       debugPrint('Kuber: startup restore failed (non-fatal): $e');
+    }
+  }
+
+  /// Drops a subscription (monthly / yearly) that Play no longer reports, e.g.
+  /// a free month from a promo code that ended without a payment. Restore and
+  /// the purchase stream only ever *grant*, so without this a lapsed
+  /// subscription stayed Pro forever.
+  ///
+  /// Safe by construction (see [decideLapse]): only a successful Play query
+  /// counts, any active or pending Pro purchase resets it, and Pro is revoked
+  /// only after two empty answers at least [kLapseConfirmGap] apart. Lifetime
+  /// and the legacy promo tier are never touched.
+  Future<void> checkForLapse({required String source}) async {
+    if (!_available) return;
+    final state = _ref.read(kuberProStateProvider);
+    final prefs = await SharedPreferences.getInstance();
+    if (!isRevocableSubscription(state)) {
+      await prefs.remove(PrefsKeys.proMissingSince);
+      return;
+    }
+
+    bool queryOk;
+    var hasActivePro = false;
+    try {
+      final resp = await _iap
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>()
+          .queryPastPurchases()
+          .timeout(const Duration(seconds: 10));
+      queryOk = resp.error == null;
+      final active = resp.pastPurchases.where(isActiveProPurchase);
+      hasActivePro = active.isNotEmpty;
+      // Keep "Renews on" / auto-renew current: re-apply what Play reports
+      // (a no-op rebuild-wise when nothing changed).
+      for (final p in active) {
+        if (p.status != PurchaseStatus.pending) _deliver(p, restored: true);
+      }
+    } catch (e) {
+      BillingDiagnostics.instance.recordError('checkForLapse', e);
+      queryOk = false;
+    }
+
+    final raw = prefs.getInt(PrefsKeys.proMissingSince);
+    final now = DateTime.now();
+    final action = decideLapse(
+      queryOk: queryOk,
+      hasActivePro: hasActivePro,
+      missingSince:
+          raw == null ? null : DateTime.fromMillisecondsSinceEpoch(raw),
+      now: now,
+    );
+    BillingDiagnostics.instance.log('LAPSE_CHECK', action.name, {
+      'source': source,
+      'queryOk': queryOk,
+      'hasActivePro': hasActivePro,
+    });
+    switch (action) {
+      case LapseAction.keep:
+        break;
+      case LapseAction.clear:
+        await prefs.remove(PrefsKeys.proMissingSince);
+      case LapseAction.markMissing:
+        await prefs.setInt(PrefsKeys.proMissingSince, now.millisecondsSinceEpoch);
+      case LapseAction.revoke:
+        await prefs.remove(PrefsKeys.proMissingSince);
+        _ref.read(kuberProStateProvider.notifier).revoke();
     }
   }
 
@@ -388,6 +495,7 @@ class PurchaseService {
   /// Returns true as soon as Pro is detected. Best-effort: individual query
   /// failures are logged and do not abort the ladder.
   Future<bool> reconcileWithRetries({required String source}) async {
+    if (!_available) return _ref.read(kuberProStateProvider).isPro;
     const retryDelays = <Duration>[
       Duration.zero,
       Duration(seconds: 3),
@@ -558,11 +666,15 @@ class PurchaseService {
         .read(kuberProStateProvider.notifier)
         .applyPurchase(
           plan: plan,
-          expiryDate: _expiryFor(plan, activatedAt, restored: restored),
+          expiryDate: plan == ProPlan.lifetime
+              ? null
+              : nextRenewalDate(activatedAt, plan, DateTime.now()),
           productId: productId,
           purchaseToken: purchase.verificationData.serverVerificationData,
           activatedAt: activatedAt,
-          trialEndsAt: _trialEndFor(plan, activatedAt),
+          autoRenewing: purchase is GooglePlayPurchaseDetails
+              ? purchase.billingClientPurchase.isAutoRenewing
+              : null,
         );
 
     // A fresh purchase gets the celebratory success sheet; a silent cold-start
@@ -635,48 +747,51 @@ class PurchaseService {
     }
     return DateTime.now();
   }
-
-  /// Client-side expiry used only for the "Renews …" label on the manage
-  /// screen. Deliberately null on restore: Play only ever restores an active
-  /// subscription, but we can't know its true next-renewal date from the
-  /// client, and a stale computed date would wrongly read as expired. Null
-  /// renders as "Active" and never downgrades the user.
-  DateTime? _expiryFor(
-    ProPlan plan,
-    DateTime activatedAt, {
-    required bool restored,
-  }) {
-    if (plan == ProPlan.lifetime) return null;
-    if (restored) return null;
-    return switch (plan) {
-      ProPlan.monthly => activatedAt.add(const Duration(days: 30)),
-      ProPlan.yearly => activatedAt.add(const Duration(days: 365)),
-      ProPlan.lifetime => null,
-    };
-  }
-
-  /// End of the Play Billing free-trial phase for a subscription, derived as
-  /// `purchaseDate + kProTrialDuration`. Only the yearly base plan carries the
-  /// trial (configured in Play Console), so only it gets a value.
-  ///
-  /// LIMITATION: `in_app_purchase` does not expose, cross-platform, whether a
-  /// given purchase is actually in its free-trial phase (that needs the Play
-  /// Developer API server-side, `paymentState == 2`). So this is a client-side
-  /// estimate. It is correct for the two common cases — a fresh first-time
-  /// yearly purchase (trial end in the future) and a restored older
-  /// subscription (trial end already in the past, so `inTrialPhase` reads
-  /// false = plain Pro). It can only be wrong for a rare resubscribe-without-a-
-  /// -new-trial, where the pill would cosmetically show "trial" for 14 days;
-  /// entitlement is unaffected. Verify precisely server-side in a future round.
-  DateTime? _trialEndFor(ProPlan plan, DateTime activatedAt) {
-    if (plan != ProPlan.yearly) return null;
-    return activatedAt.add(kProTrialDuration);
-  }
 }
 
-/// Play Billing free-trial length configured on the yearly base plan in Play
-/// Console. Keep in sync with that configuration.
-const kProTrialDuration = Duration(days: 14);
+/// How long after tapping Restore / Redeem a free user is re-checked on every
+/// return to the app (they may be redeeming in the Play Store meanwhile).
+const kPurchaseWatchWindow = Duration(minutes: 30);
+
+/// Two "no active subscription" answers from Play must be at least this far
+/// apart before Pro is revoked, so a one-off empty answer from a cold Play
+/// cache never drops a paying user.
+const kLapseConfirmGap = Duration(hours: 1);
+
+/// Outcome of one lapse check. See [decideLapse].
+enum LapseAction { keep, clear, markMissing, revoke }
+
+/// Only Play subscriptions can lapse. Lifetime never does, and the legacy
+/// promo tier expires on its own date.
+bool isRevocableSubscription(KuberProState s) =>
+    s.source == ProSource.purchased &&
+    (s.plan == ProPlan.monthly || s.plan == ProPlan.yearly);
+
+/// A Pro product Play still reports as owned. Pending (e.g. a UPI renewal in
+/// progress) counts as owned so it never triggers a revoke.
+bool isActiveProPurchase(PurchaseDetails p) =>
+    kProProductIds.contains(p.productID) &&
+    (p.status == PurchaseStatus.purchased ||
+        p.status == PurchaseStatus.restored ||
+        p.status == PurchaseStatus.pending);
+
+/// Pure decision for [PurchaseService.checkForLapse].
+LapseAction decideLapse({
+  required bool queryOk,
+  required bool hasActivePro,
+  required DateTime? missingSince,
+  required DateTime now,
+  Duration gap = kLapseConfirmGap,
+}) {
+  if (!queryOk) return LapseAction.keep; // a failed query proves nothing
+  if (hasActivePro) {
+    return missingSince == null ? LapseAction.keep : LapseAction.clear;
+  }
+  if (missingSince == null) return LapseAction.markMissing;
+  return now.difference(missingSince) >= gap
+      ? LapseAction.revoke
+      : LapseAction.keep;
+}
 
 /// Polls [isPro] every [interval] until it returns true or [timeout] elapses,
 /// returning the final value. Restored purchases grant entitlement

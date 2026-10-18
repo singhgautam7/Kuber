@@ -8,8 +8,8 @@ import 'subscription_offer.dart';
 
 /// True until the app's one-time Pro entitlement bootstrap
 /// (`ensureEntitlementBootstrap()` + the first `kuberProStateProvider` read)
-/// has completed. Gates the Settings "Kuber Pro" card skeleton and keeps the
-/// Home trial pill hidden (never shown as a skeleton — see spec) until real
+/// has completed. Gates the Settings "Kuber Pro" card skeleton and the Home
+/// header Pro badge (a pill skeleton) until real
 /// state is known. Set to `false` once from `app.dart`'s startup sequence,
 /// never toggled back to `true`.
 final proBootstrapLoadingProvider = StateProvider<bool>((ref) => true);

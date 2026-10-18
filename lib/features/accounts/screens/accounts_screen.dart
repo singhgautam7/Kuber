@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../home_v2/providers/home_v2_provider.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
@@ -47,6 +48,10 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    // Home v2 Get started › Set up accounts is done once Accounts was opened.
+    if (!ref.read(homeV2Provider).balanceSet) {
+      Future.microtask(() => ref.read(homeV2Provider.notifier).markBalanceSet());
+    }
     // Manage Accounts shows every account, including disabled ones, so the user
     // can re-enable them. Net worth still excludes disabled balances (below).
     final accountsAsync = ref.watch(allAccountsProvider);

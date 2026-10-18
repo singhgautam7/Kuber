@@ -8,6 +8,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/timed_snackbar.dart';
 import '../paywall/pro_state.dart';
+import 'purchase_failure_snackbar.dart';
 import '../services/billing_diagnostics.dart';
 import '../services/purchase_service.dart';
 
@@ -22,7 +23,21 @@ final restoreFailedSessionProvider = StateProvider<bool>((ref) => false);
 /// purchase stream and re-grant entitlement there; this flow drives the query,
 /// dynamically awaits the stream event, and provides user feedback with
 /// full timeout & exception safety.
-Future<void> restorePurchases(BuildContext context, WidgetRef ref) async {
+Future<void> restorePurchases(
+  BuildContext context,
+  WidgetRef ref, {
+  String successMessage = 'Purchase restored',
+  String notFoundMessage = 'No previous purchase found',
+}) async {
+  final service = ref.read(purchaseServiceProvider)..watchForPurchase();
+  // No Play Billing (no Play services / Play Store signed out), even after a
+  // fresh re-check: say so now instead of spinning through every retry.
+  if (!await service.ensureAvailable()) {
+    if (context.mounted) showPlayStoreUnavailableSnackbar(context);
+    return;
+  }
+  if (!context.mounted) return;
+
   showDialog<void>(
     context: context,
     barrierDismissible: false,
@@ -39,7 +54,6 @@ Future<void> restorePurchases(BuildContext context, WidgetRef ref) async {
   bool isTimeout = false;
   Object? caughtError;
 
-  final service = ref.read(purchaseServiceProvider);
   try {
     // 1. First query — a forced, fresh Play reconcile. Surfacing connectivity
     //    failures (offline / Play timeout) explicitly here keeps them from
@@ -100,12 +114,12 @@ Future<void> restorePurchases(BuildContext context, WidgetRef ref) async {
 
   if (success) {
     ref.read(restoreFailedSessionProvider.notifier).state = false;
-    showKuberSnackBar(context, 'Purchase restored');
+    showKuberSnackBar(context, successMessage);
   } else {
     ref.read(restoreFailedSessionProvider.notifier).state = true;
     showKuberSnackBar(
       context,
-      'No previous purchase found',
+      notFoundMessage,
       isError: false,
       actionLabel: 'Help',
       onAction: () {
@@ -115,6 +129,68 @@ Future<void> restorePurchases(BuildContext context, WidgetRef ref) async {
       },
     );
   }
+}
+
+/// Opens Google Play's redeem page (with [code] prefilled when given) and,
+/// once the user comes back to Kuber, runs the full [restorePurchases] flow so
+/// the redemption shows up without restarting the app.
+///
+/// `launchUrl` returns as soon as Play opens, not when the user returns, so
+/// the check waits for the app to go to the background and come back first.
+Future<void> redeemOnPlayStore(
+  BuildContext context,
+  WidgetRef ref, {
+  String? code,
+}) async {
+  final c = code?.trim() ?? '';
+  final uri = Uri.parse(
+    c.isEmpty
+        ? 'https://play.google.com/redeem'
+        : 'https://play.google.com/redeem?code=${Uri.encodeQueryComponent(c)}',
+  );
+  ref.read(purchaseServiceProvider).watchForPurchase();
+  final returned = waitForReturnToApp();
+  final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!launched) {
+    returned.ignore();
+    if (context.mounted) showPlayStoreUnavailableSnackbar(context);
+    return;
+  }
+  // If the screen that opened the sheet is gone, its `ref` is too; the
+  // app-level resume reconcile (app.dart) still picks the redemption up.
+  if (!await returned || !context.mounted) return;
+  await checkRedemption(context, ref);
+}
+
+/// The [restorePurchases] flow worded for a promo-code redemption.
+Future<void> checkRedemption(BuildContext context, WidgetRef ref) {
+  return restorePurchases(
+    context,
+    ref,
+    successMessage: 'Kuber Pro unlocked',
+    notFoundMessage: "Couldn't find your redemption yet",
+  );
+}
+
+/// Completes true when the app goes to the background and then comes back to
+/// the foreground, or false after [timeout]. A resume without a prior
+/// background (a dialog, a chooser) does not count.
+Future<bool> waitForReturnToApp({
+  Duration timeout = const Duration(minutes: 30),
+}) {
+  final done = Completer<bool>();
+  var wentAway = false;
+  late final AppLifecycleListener listener;
+  listener = AppLifecycleListener(
+    onHide: () => wentAway = true,
+    onPause: () => wentAway = true,
+    onResume: () {
+      if (wentAway && !done.isCompleted) done.complete(true);
+    },
+  );
+  return done.future
+      .timeout(timeout, onTimeout: () => false)
+      .whenComplete(listener.dispose);
 }
 
 /// Information dialog shown when restore returns "No previous purchase found",
