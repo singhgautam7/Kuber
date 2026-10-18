@@ -116,6 +116,28 @@ class KuberProState {
   }
 
   bool get trialEndingSoon => inTrialPhase && trialDaysLeft <= 3;
+
+  // Value equality, so re-applying an unchanged purchase (every resume
+  // reconcile re-delivers it) doesn't rebuild every Pro-aware widget.
+  @override
+  bool operator ==(Object other) =>
+      other is KuberProState &&
+      other.source == source &&
+      other.plan == plan &&
+      other.trialEndsAt == trialEndsAt &&
+      other.promoEndsAt == promoEndsAt &&
+      other.expiryDate == expiryDate &&
+      other.activatedAt == activatedAt;
+
+  @override
+  int get hashCode => Object.hash(
+    source,
+    plan,
+    trialEndsAt,
+    promoEndsAt,
+    expiryDate,
+    activatedAt,
+  );
 }
 
 /// Reads / writes the [UserEntitlement] singleton and converts it to and from
@@ -204,6 +226,10 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
         return const KuberProState(source: ProSource.free);
     }
   }
+
+  @override
+  bool updateShouldNotify(KuberProState previous, KuberProState next) =>
+      previous != next;
 
   @override
   KuberProState build() {

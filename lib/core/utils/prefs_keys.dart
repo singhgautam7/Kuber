@@ -94,6 +94,10 @@ class PrefsKeys {
 
   // Kuber Pro — promo campaign remote config
   static const promoConfigCached = 'kuber_promo_config_cached';
+
+  /// When Play first confirmed no active Pro subscription (ms since epoch).
+  /// Cleared whenever one is seen again. See PurchaseService.checkForLapse.
+  static const proMissingSince = 'kuber_pro_missing_since';
   static const promoConfigFetchedAt = 'kuber_promo_config_fetched_at';
   static const promoBannerSessionDismissed =
       'kuber_promo_banner_session_dismissed';

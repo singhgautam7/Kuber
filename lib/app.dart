@@ -233,34 +233,45 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // keeping frequent resumes from repeating the notification plugin calls.
   DateTime? _lastCreditReminderMaintenanceDay;
 
-  // Timestamp of the last on-resume Play Billing reconcile. Entitlement changes
-  // slowly (a lapse/renewal is a day-scale event), so throttling to once per 15
-  // minutes keeps frequent app switches from re-querying Play needlessly.
+  // Timestamp of the last on-resume Play Billing reconcile. For a Pro user the
+  // changes are day-scale (lapse / renewal), so once per 15 minutes. A free
+  // user may have just redeemed a promo code in the Play Store and switched
+  // back, so they get a short throttle that only absorbs rapid app switching.
+  // The query is a cheap local Play cache read; nothing is written unless a
+  // purchase comes back.
   DateTime? _lastEntitlementReconcile;
 
   /// Asks Play Billing to re-report purchases on resume so entitlement reflects
   /// a lapse / renewal / promo redemption that happened while backgrounded — and
   /// so a purchase Play couldn't yet see on cold start (a cold local cache on a
   /// fresh install) is caught the next time the user returns. Silent (a restored
-  /// purchase never pops a sheet), throttled to once per 15 minutes, and fully
+  /// purchase never pops a sheet), throttled (see [_lastEntitlementReconcile]), and fully
   /// guarded — billing is never allowed to affect the foreground path.
   ///
   /// A per-session cap was deliberately NOT added: a returning owner whose
   /// entitlement hasn't synced yet is exactly who needs another background look,
-  /// and the 15-minute throttle already bounds the work.
+  /// and the throttle already bounds the work.
   Future<void> _reconcileEntitlementOnResume() async {
     // Lifetime never expires and, once known, never needs re-checking.
     if (ref.read(kuberProStateProvider).plan == ProPlan.lifetime) return;
 
     final now = DateTime.now();
     final last = _lastEntitlementReconcile;
-    if (last != null && now.difference(last) < const Duration(minutes: 15)) {
-      return;
-    }
+    final throttle = ref.read(kuberProStateProvider).isPro
+        ? const Duration(minutes: 15)
+        : const Duration(seconds: 30);
+    if (last != null && now.difference(last) < throttle) return;
     _lastEntitlementReconcile = now;
 
     try {
-      await ref.read(purchaseServiceProvider).restorePurchases(source: 'resume');
+      final service = ref.read(purchaseServiceProvider);
+      // Play may have come up since launch (the user signed in to the Play
+      // Store to redeem a code); connect now instead of needing a restart.
+      if (!await service.ensureAvailable()) return;
+      await service.restorePurchases(source: 'resume');
+      // A subscription that ended (e.g. a free promo month never paid for)
+      // is dropped only after two confirmed-empty checks; see checkForLapse.
+      await service.checkForLapse(source: 'resume');
     } catch (e, stack) {
       debugPrint('Kuber: on-resume entitlement reconcile failed: $e\n$stack');
     }

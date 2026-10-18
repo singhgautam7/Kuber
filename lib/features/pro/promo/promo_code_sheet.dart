@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../shared/widgets/timed_snackbar.dart';
 import '../paywall/pro_state.dart';
-import '../purchase_states/purchase_failure_snackbar.dart';
-import '../services/purchase_service.dart';
+import '../purchase_states/restore_purchases_flow.dart';
 
 /// Opened from the Home promo banner's "Get code" and the paywall's promo
 /// section. Replaces `promo_claim_modal.dart`'s local grant entirely — this
@@ -49,46 +47,9 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
               width: double.infinity,
               height: 52,
               child: FilledButton(
-                onPressed: () async {
+                onPressed: () {
                   Navigator.pop(ctx);
-                  final uri = Uri.parse(
-                    'https://play.google.com/redeem?code=$code',
-                  );
-                  final launched = await launchUrl(
-                    uri,
-                    mode: LaunchMode.externalApplication,
-                  );
-                  if (!launched && context.mounted) {
-                    showPlayStoreUnavailableSnackbar(context);
-                    return;
-                  }
-
-                  // Auto-reconcile on returning from the external Play Store activity.
-                  if (context.mounted) {
-                    showKuberSnackBar(
-                      context,
-                      'Checking for your redemption...',
-                      duration: const Duration(seconds: 3),
-                    );
-                    try {
-                      await ref
-                          .read(purchaseServiceProvider)
-                          .restorePurchases(
-                            source: 'promo_return',
-                            force: true,
-                          );
-                      await pollForProEntitlement(
-                        () => ref.read(kuberProStateProvider).isPro,
-                        timeout: const Duration(milliseconds: 2500),
-                      );
-                      if (context.mounted) {
-                        final current = ref.read(kuberProStateProvider);
-                        if (current.isPro) {
-                          showKuberSnackBar(context, 'Kuber Pro unlocked');
-                        }
-                      }
-                    } catch (_) {}
-                  }
+                  redeemOnPlayStore(context, ref, code: code);
                 },
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -106,34 +67,9 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
               width: double.infinity,
               height: 48,
               child: OutlinedButton(
-                onPressed: () async {
+                onPressed: () {
                   Navigator.pop(ctx);
-                  showKuberSnackBar(
-                    context,
-                    'Checking for your redemption...',
-                    duration: const Duration(seconds: 3),
-                  );
-                  try {
-                    await ref
-                        .read(purchaseServiceProvider)
-                        .restorePurchases(
-                          source: 'promo_already_redeemed',
-                          force: true,
-                        );
-                    await pollForProEntitlement(
-                      () => ref.read(kuberProStateProvider).isPro,
-                      timeout: const Duration(milliseconds: 2500),
-                    );
-                  } catch (_) {}
-                  if (!context.mounted) return;
-                  final current = ref.read(kuberProStateProvider);
-                  showKuberSnackBar(
-                    context,
-                    current.isPro
-                        ? 'Kuber Pro unlocked'
-                        : "Didn't find a redeemed code yet",
-                    isError: !current.isPro,
-                  );
+                  checkRedemption(context, ref);
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: cs.outlineVariant),

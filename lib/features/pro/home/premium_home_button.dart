@@ -63,7 +63,8 @@ class PremiumHomeButton extends ConsumerWidget {
       label = 'TRIAL · ${proState.trialDaysLeft}d';
       amber = proState.trialEndingSoon;
     } else if (proState.isPro) {
-      label = 'PRO';
+      // "Pro User", not a bare "PRO": reads as a status, not another upsell.
+      label = 'Pro User';
       amber = false;
     } else {
       label = 'Kuber Pro';
@@ -102,7 +103,7 @@ class PremiumHomeButton extends ConsumerWidget {
                   style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: label == 'Kuber Pro' ? 0.1 : 0.8,
+                    letterSpacing: label.startsWith('TRIAL') ? 0.8 : 0.1,
                     color: fg,
                   ),
                 ),
