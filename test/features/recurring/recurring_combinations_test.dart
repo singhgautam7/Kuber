@@ -114,10 +114,46 @@ void main() {
       expect(RecurringRepository.isExpired(await reload(r)), isFalse);
     });
 
-    test('end date already passed: nothing runs (existing behaviour)', () async {
-      await insert(rule(1, RecurrenceUnit.month,
+    test('end date already passed: missed occurrences before it still run',
+        () async {
+      final r = await insert(rule(1, RecurrenceUnit.month,
           start: daysAgo(40), endType: 'date', endDate: daysAgo(1)));
+      expect(await RecurringProcessor(isar).processAll(), 2);
+      expect(RecurringRepository.isExpired(await reload(r)), isTrue);
       expect(await RecurringProcessor(isar).processAll(), 0);
+    });
+
+    test('daily catch-up across the end date stops on the end day', () async {
+      final r = await insert(rule(1, RecurrenceUnit.day,
+          start: daysAgo(10), endType: 'date', endDate: daysAgo(5)));
+      expect(await RecurringProcessor(isar).processAll(), 6);
+      expect(await txnDays(r), [for (var d = 10; d >= 5; d--) daysAgo(d)]);
+      final after = await reload(r);
+      expect(after.nextDueAt, daysAgo(4));
+      expect(RecurringRepository.isExpired(after), isTrue);
+    });
+
+    test('monthly from 31 Oct ending 31 Jan records 31 Jan', () async {
+      final r = await insert(rule(1, RecurrenceUnit.month,
+          start: DateTime(2025, 10, 31),
+          endType: 'date',
+          endDate: DateTime(2026, 1, 31)));
+      expect(await RecurringProcessor(isar).processAll(), 4);
+      expect(await txnDays(r), [
+        DateTime(2025, 10, 31),
+        DateTime(2025, 11, 30),
+        DateTime(2025, 12, 31),
+        DateTime(2026, 1, 31),
+      ]);
+      expect(RecurringRepository.isExpired(await reload(r)), isTrue);
+    });
+
+    test('occurrence on an end date of today (midnight) runs', () async {
+      final r = await insert(rule(1, RecurrenceUnit.week,
+          start: daysAgo(14), endType: 'date', endDate: today));
+      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect((await txnDays(r)).last, today);
+      expect(RecurringRepository.isExpired(await reload(r)), isTrue);
     });
 
     test('future start date: nothing runs yet', () async {

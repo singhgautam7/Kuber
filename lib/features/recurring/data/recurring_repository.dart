@@ -117,14 +117,20 @@ class RecurringRepository extends BaseRepository<RecurringRule> {
     return next;
   }
 
-  /// Returns true if the rule has expired based on its endType.
-  static bool isExpired(RecurringRule rule) {
+  /// True once the rule will record nothing more: its occurrence count is
+  /// used up, or (end date) [dueDate] (default: its stored nextDueAt) falls on
+  /// a day after the end date. The end date is inclusive, and a rule whose
+  /// end date has passed still catches up occurrences missed before it.
+  static bool isExpired(RecurringRule rule, [DateTime? dueDate]) {
     switch (rule.endType) {
       case 'occurrences':
         return rule.endAfter != null && rule.executionCount >= rule.endAfter!;
       case 'date':
-        return rule.endDate != null &&
-            DateTime.now().isAfter(rule.endDate!);
+        final end = rule.endDate;
+        if (end == null) return false;
+        final due = dueDate ?? rule.nextDueAt;
+        return DateTime(due.year, due.month, due.day)
+            .isAfter(DateTime(end.year, end.month, end.day));
       case 'never':
       default:
         return false;
