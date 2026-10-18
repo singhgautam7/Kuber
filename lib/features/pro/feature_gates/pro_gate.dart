@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../paywall/pro_state.dart';
 
 /// Central Kuber Pro feature gate. Returns true when the user may use a gated
-/// feature right now (Pro or in-trial) and false otherwise, showing [gate] as
+/// feature right now (Pro) and false otherwise, showing [gate] as
 /// a side effect so the caller can simply bail.
 ///
-/// Every gated entry point routes through here so the "trial counts as Pro"
+/// Every gated entry point routes through here so the "who has Pro"
 /// rule ([KuberProState.hasProAccess]) lives in exactly one place:
 ///
 /// ```dart

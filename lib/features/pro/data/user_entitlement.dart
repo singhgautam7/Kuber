@@ -31,8 +31,9 @@ class UserEntitlement {
   /// can be added without a schema bump.
   late String tier;
 
-  /// End of the 14-day trial window. Set when [tier] transitions to 'trial'
-  /// (typically at first install). Ignored once [tier] leaves 'trial'.
+  /// LEGACY: end of the old app-managed trial (removed 2026-07-11), later
+  /// reused for a client-side trial estimate. No longer read; cleared on the
+  /// next purchase write. Kept so existing databases open unchanged.
   DateTime? trialEndsAt;
 
   /// Expiry of the current Pro grant. Null means Pro forever (lifetime, or a
@@ -60,7 +61,7 @@ class UserEntitlement {
   /// stale-but-acceptable when Play is offline.
   DateTime? lastVerifiedAt;
 
-  /// True once the one-shot "your trial ended" bottom sheet has been shown.
+  /// LEGACY: the removed "your trial ended" sheet. No longer read.
   /// Prevents nagging on every open after day 14.
   bool trialEndedNoticeShown = false;
 

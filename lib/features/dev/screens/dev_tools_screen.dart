@@ -206,7 +206,7 @@ class DevToolsScreen extends ConsumerWidget {
                 row(
                   Icons.workspace_premium_outlined,
                   'Entitlement Override',
-                  'Force Free / Trial / Monthly / Yearly / Lifetime',
+                  'Force Free / Monthly / Yearly / Lifetime',
                   () => showEntitlementOverrideSheet(context),
                 ),
                 row(

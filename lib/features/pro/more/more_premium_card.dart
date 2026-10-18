@@ -6,13 +6,12 @@ import '../../../../core/theme/app_theme.dart';
 import '../paywall/pro_state.dart';
 
 /// Slim Kuber Pro strip (board 3.7, both More layouts): icon + "Kuber Pro"
-/// on the left, the state on the right ("Upgrade" for free users, days left
-/// on a trial, "Active" / "Promo" otherwise).
+/// on the left, the state on the right ("Upgrade" for free users, "Active" /
+/// "Promo" otherwise).
 class MorePremiumHeroCard extends ConsumerWidget {
   const MorePremiumHeroCard({super.key});
 
   static String _status(KuberProState s) {
-    if (s.inTrialPhase) return '${s.trialDaysLeft}d left';
     if (s.source == ProSource.purchased) return 'Active';
     if (s.source == ProSource.promo) return 'Promo';
     return 'Upgrade';

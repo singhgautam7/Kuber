@@ -92,6 +92,19 @@ class PurchaseService {
   bool _available = false;
   bool _initialized = false;
 
+  /// Set when the user taps Restore or Redeem. Until then a free user is only
+  /// checked once per app launch; inside the window every return to the app
+  /// re-checks (see `KuberApp._reconcileEntitlementOnResume`).
+  DateTime? _watchUntil;
+
+  /// The user just started a restore / redemption: re-check purchases on each
+  /// return to the app for [kPurchaseWatchWindow].
+  void watchForPurchase() =>
+      _watchUntil = DateTime.now().add(kPurchaseWatchWindow);
+
+  bool get isWatchingForPurchase =>
+      _watchUntil?.isAfter(DateTime.now()) ?? false;
+
   /// True once Play Billing reported itself available on this device.
   bool get isAvailable => _available;
 
@@ -192,7 +205,7 @@ class PurchaseService {
   /// Safe by construction (see [decideLapse]): only a successful Play query
   /// counts, any active or pending Pro purchase resets it, and Pro is revoked
   /// only after two empty answers at least [kLapseConfirmGap] apart. Lifetime
-  /// and the legacy promo / trial tiers are never touched.
+  /// and the legacy promo tier are never touched.
   Future<void> checkForLapse({required String source}) async {
     if (!_available) return;
     final state = _ref.read(kuberProStateProvider);
@@ -651,7 +664,6 @@ class PurchaseService {
           productId: productId,
           purchaseToken: purchase.verificationData.serverVerificationData,
           activatedAt: activatedAt,
-          trialEndsAt: _trialEndFor(plan, activatedAt),
         );
 
     // A fresh purchase gets the celebratory success sheet; a silent cold-start
@@ -743,25 +755,11 @@ class PurchaseService {
       ProPlan.lifetime => null,
     };
   }
-
-  /// End of the Play Billing free-trial phase for a subscription, derived as
-  /// `purchaseDate + kProTrialDuration`. Only the yearly base plan carries the
-  /// trial (configured in Play Console), so only it gets a value.
-  ///
-  /// LIMITATION: `in_app_purchase` does not expose, cross-platform, whether a
-  /// given purchase is actually in its free-trial phase (that needs the Play
-  /// Developer API server-side, `paymentState == 2`). So this is a client-side
-  /// estimate. It is correct for the two common cases — a fresh first-time
-  /// yearly purchase (trial end in the future) and a restored older
-  /// subscription (trial end already in the past, so `inTrialPhase` reads
-  /// false = plain Pro). It can only be wrong for a rare resubscribe-without-a-
-  /// -new-trial, where the pill would cosmetically show "trial" for 14 days;
-  /// entitlement is unaffected. Verify precisely server-side in a future round.
-  DateTime? _trialEndFor(ProPlan plan, DateTime activatedAt) {
-    if (plan != ProPlan.yearly) return null;
-    return activatedAt.add(kProTrialDuration);
-  }
 }
+
+/// How long after tapping Restore / Redeem a free user is re-checked on every
+/// return to the app (they may be redeeming in the Play Store meanwhile).
+const kPurchaseWatchWindow = Duration(minutes: 30);
 
 /// Two "no active subscription" answers from Play must be at least this far
 /// apart before Pro is revoked, so a one-off empty answer from a cold Play
@@ -772,7 +770,7 @@ const kLapseConfirmGap = Duration(hours: 1);
 enum LapseAction { keep, clear, markMissing, revoke }
 
 /// Only Play subscriptions can lapse. Lifetime never does, and the legacy
-/// promo / app-trial tiers expire on their own dates.
+/// promo tier expires on its own date.
 bool isRevocableSubscription(KuberProState s) =>
     s.source == ProSource.purchased &&
     (s.plan == ProPlan.monthly || s.plan == ProPlan.yearly);
@@ -802,10 +800,6 @@ LapseAction decideLapse({
       ? LapseAction.revoke
       : LapseAction.keep;
 }
-
-/// Play Billing free-trial length configured on the yearly base plan in Play
-/// Console. Keep in sync with that configuration.
-const kProTrialDuration = Duration(days: 14);
 
 /// Polls [isPro] every [interval] until it returns true or [timeout] elapses,
 /// returning the final value. Restored purchases grant entitlement

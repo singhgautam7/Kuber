@@ -36,4 +36,21 @@ void main() {
     expect(nextBackupDay(config(frequency: 'monthly', last: last), now: now),
         DateTime(2026, 11, 18));
   });
+
+  group('lastAttemptLabel', () {
+    // intl puts a narrow no-break space before AM/PM; compare with a space.
+    String? label(DateTime? d) =>
+        lastAttemptLabel(d, now: now)?.replaceAll('\u202f', ' ');
+    test('today / yesterday / earlier, never "1 minutes ago"', () {
+      expect(label(DateTime(2026, 10, 19, 9, 41)),
+          'today, 9:41 AM');
+      expect(label(DateTime(2026, 10, 18, 21, 5)),
+          'yesterday, 9:05 PM');
+      expect(label(DateTime(2026, 10, 5, 8, 12)),
+          'Oct 5, 8:12 AM');
+      expect(label(DateTime(2025, 12, 31, 8, 12)),
+          'Dec 31, 2025, 8:12 AM');
+      expect(label(null), isNull);
+    });
+  });
 }

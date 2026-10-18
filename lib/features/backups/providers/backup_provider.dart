@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../../../core/services/json_backup_service.dart';
@@ -256,7 +257,7 @@ BackupSettings _toSettings(BackupConfig config) {
     failureReason: config.lastFailureReason == null
         ? null
         : _failureMessage(_failureFromString(config.lastFailureReason!)),
-    lastAttemptLabel: _lastAttemptLabel(
+    lastAttemptLabel: lastAttemptLabel(
       config.lastAttemptAt ?? config.lastBackupAt,
     ),
     lastBackupAt: config.lastBackupAt,
@@ -316,10 +317,22 @@ String _failureMessage(BackupFailureReason reason) {
   };
 }
 
-String? _lastAttemptLabel(DateTime? date) {
+/// "today, 9:41 AM" / "yesterday, 9:41 AM" / "Oct 5, 9:41 AM" (board 3.12b).
+/// A clock time instead of "N minutes ago", which went stale while the screen
+/// stayed open (and read "1 minutes ago").
+@visibleForTesting
+String? lastAttemptLabel(DateTime? date, {DateTime? now}) {
   if (date == null) return null;
-  final diff = DateTime.now().difference(date);
-  if (diff.inMinutes < 60) return '${diff.inMinutes.clamp(1, 59)} minutes ago';
-  if (diff.inHours < 24) return '${diff.inHours} hours ago';
-  return '${date.day}/${date.month}/${date.year}';
+  final local = date.toLocal();
+  final n = now ?? DateTime.now();
+  final days = DateTime(n.year, n.month, n.day)
+      .difference(DateTime(local.year, local.month, local.day))
+      .inDays;
+  final time = DateFormat.jm().format(local);
+  if (days == 0) return 'today, $time';
+  if (days == 1) return 'yesterday, $time';
+  final day = local.year == n.year
+      ? DateFormat.MMMd().format(local)
+      : DateFormat.yMMMd().format(local);
+  return '$day, $time';
 }

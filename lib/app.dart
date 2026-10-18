@@ -233,12 +233,11 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // keeping frequent resumes from repeating the notification plugin calls.
   DateTime? _lastCreditReminderMaintenanceDay;
 
-  // Timestamp of the last on-resume Play Billing reconcile. For a Pro user the
-  // changes are day-scale (lapse / renewal), so once per 15 minutes. A free
-  // user may have just redeemed a promo code in the Play Store and switched
-  // back, so they get a short throttle that only absorbs rapid app switching.
-  // The query is a cheap local Play cache read; nothing is written unless a
-  // purchase comes back.
+  // Timestamp of the last on-resume Play Billing reconcile. Pro users: once per
+  // 15 minutes (lapse / renewal are day-scale). Free users: not at all on a
+  // normal resume (the cold-start reconcile covers an app reopen); only for
+  // 30 minutes after they tap Restore / Redeem, throttled to 30s, since they
+  // may be redeeming in the Play Store and switching back.
   DateTime? _lastEntitlementReconcile;
 
   /// Asks Play Billing to re-report purchases on resume so entitlement reflects
@@ -255,11 +254,14 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // Lifetime never expires and, once known, never needs re-checking.
     if (ref.read(kuberProStateProvider).plan == ProPlan.lifetime) return;
 
+    final isPro = ref.read(kuberProStateProvider).isPro;
+    if (!isPro && !ref.read(purchaseServiceProvider).isWatchingForPurchase) {
+      return;
+    }
     final now = DateTime.now();
     final last = _lastEntitlementReconcile;
-    final throttle = ref.read(kuberProStateProvider).isPro
-        ? const Duration(minutes: 15)
-        : const Duration(seconds: 30);
+    final throttle =
+        isPro ? const Duration(minutes: 15) : const Duration(seconds: 30);
     if (last != null && now.difference(last) < throttle) return;
     _lastEntitlementReconcile = now;
 

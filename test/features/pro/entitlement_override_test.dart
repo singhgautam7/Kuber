@@ -24,12 +24,12 @@ void main() {
     expect(s.hasProAccess, isFalse);
   });
 
-  test('force trial yields access with trial UI and clamped days', () async {
-    await DebugEntitlementOverride.set(DebugForcedTier.trial, trialDaysLeft: 7);
-    final s = DebugEntitlementOverride.state!;
-    expect(s.isTrial, isTrue);
-    expect(s.hasProAccess, isTrue);
-    expect(s.trialDaysLeft, inInclusiveRange(6, 7));
+  test('a persisted "trial" override from an older build is ignored', () async {
+    SharedPreferences.setMockInitialValues({
+      'debug_entitlement_override': 'trial',
+    });
+    await DebugEntitlementOverride.hydrate();
+    expect(DebugEntitlementOverride.state, isNull);
   });
 
   test('force lifetime yields full Pro, no expiry', () async {
@@ -40,12 +40,11 @@ void main() {
     expect(s.expiryDate, isNull);
   });
 
-  test('force yearly is Pro and in its trial phase', () async {
+  test('force yearly is plain Pro (no trial phase)', () async {
     await DebugEntitlementOverride.set(DebugForcedTier.yearly);
     final s = DebugEntitlementOverride.state!;
     expect(s.isPro, isTrue);
     expect(s.plan, ProPlan.yearly);
-    expect(s.inTrialPhase, isTrue);
   });
 
   test('override persists across a hydrate (simulated restart)', () async {

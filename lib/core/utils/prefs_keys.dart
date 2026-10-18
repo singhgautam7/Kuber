@@ -118,7 +118,6 @@ class PrefsKeys {
   // Entitlement Override). Only ever read/written under kDebugMode; the code
   // path is tree-shaken out of release builds. Never present in production.
   static const debugEntitlementOverride = 'debug_entitlement_override';
-  static const debugEntitlementTrialDays = 'debug_entitlement_trial_days';
 
   // Home v2 (specs/home-v2/plan.md). `homeLayout` is the cohort: written once
   // on the first launch of the Home v2 build and never changed by the app

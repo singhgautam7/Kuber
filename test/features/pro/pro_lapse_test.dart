@@ -86,12 +86,6 @@ void main() {
         isFalse,
       );
       expect(isRevocableSubscription(KuberProState.promo()), isFalse);
-      expect(
-        isRevocableSubscription(
-          KuberProState.trial(endsAt: t0.add(const Duration(days: 3))),
-        ),
-        isFalse,
-      );
       expect(isRevocableSubscription(const KuberProState()), isFalse);
     });
   });

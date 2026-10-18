@@ -15,7 +15,7 @@ import 'pro_state.dart';
 const _kAndroidPackage = 'com.grs.kuber';
 
 /// Manage mode: shown to a user who already holds a real entitlement (paid
-/// monthly / yearly / lifetime, a Play Billing trial, or a promo grant). Leads
+/// monthly / yearly / lifetime, or a promo grant). Leads
 /// with the animated status hero, then read-only plan details, then hand-offs
 /// to Play (Kuber never touches billing state directly).
 class PaywallManageSection extends ConsumerWidget {
@@ -28,7 +28,6 @@ class PaywallManageSection extends ConsumerWidget {
     final prices = ref.watch(cachedProductPricesProvider);
     final plan = proState.plan;
     final isPromo = proState.source == ProSource.promo;
-    final inTrial = proState.inTrialPhase;
 
     final planLabel = switch (plan) {
       ProPlan.monthly => 'Monthly',
@@ -48,7 +47,7 @@ class PaywallManageSection extends ConsumerWidget {
     // The status row swaps by state (only truthful states — scheduled-cancel is
     // not detectable from in_app_purchase, so it is omitted; Play shows it).
     final (String statusLabel, String statusValue, Color statusColor) =
-        _statusRow(cs, context.kuberMoney.income, plan, inTrial, isPromo);
+        _statusRow(cs, context.kuberMoney.income, plan, isPromo);
 
     final rows = <InfoTableRow>[
       InfoTableDataRow(label: 'Plan', value: planValue),
@@ -72,21 +71,6 @@ class PaywallManageSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _StatusHero(proState: proState, planLabel: planLabel),
-        if (inTrial) ...[
-          const SizedBox(height: KuberSpace.md),
-          Center(child: _TrialCountdownPill(daysLeft: proState.trialDaysLeft)),
-          const SizedBox(height: KuberSpace.sm),
-          Text(
-            'You won\'t be charged until the trial ends. Cancel anytime in '
-            'Play Store.',
-            textAlign: TextAlign.center,
-            style: localeFont(
-              fontSize: 12,
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-        ],
         const SizedBox(height: KuberSpace.xl),
         Text(
           'Your plan',
@@ -154,18 +138,10 @@ class PaywallManageSection extends ConsumerWidget {
     ColorScheme cs,
     Color income,
     ProPlan? plan,
-    bool inTrial,
     bool isPromo,
   ) {
     if (plan == ProPlan.lifetime) {
       return ('Status', 'Lifetime access, no expiry', cs.onSurface);
-    }
-    if (inTrial && proState.trialEndsAt != null) {
-      return (
-        'First charge',
-        'Free trial ends ${_shortDate(proState.trialEndsAt!)}. You\'ll be charged then.',
-        cs.primary,
-      );
     }
     if (isPromo) {
       final v = proState.promoEndsAt == null
@@ -173,13 +149,9 @@ class PaywallManageSection extends ConsumerWidget {
           : 'Active until ${_shortDate(proState.promoEndsAt!)}';
       return ('Status', v, income);
     }
-    if (proState.expiryDate != null) {
-      return (
-        'Status',
-        'Renews on ${_shortDate(proState.expiryDate!)}',
-        income,
-      );
-    }
+    // No "Renews on" date: the app only has its own estimate (purchase date
+    // + 30 / 365 days), which is wrong for a free promo month. Play's
+    // subscriptions page (Manage on Play below) shows the real date.
     return ('Status', 'Active', income);
   }
 
@@ -194,35 +166,6 @@ class PaywallManageSection extends ConsumerWidget {
 
   String _price(String id, Map<String, String> cached, String fallback) =>
       cached[id] ?? fallback;
-}
-
-class _TrialCountdownPill extends StatelessWidget {
-  final int daysLeft;
-  const _TrialCountdownPill({required this.daysLeft});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpace.md,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberShape.full),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        daysLeft == 1 ? 'Trial ends in 1 day' : 'Trial ends in $daysLeft days',
-        style: localeFont(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: cs.primary,
-        ),
-      ),
-    );
-  }
 }
 
 /// Animated status card: a slow pulsing glow behind a crown mark, "N days as
@@ -260,7 +203,6 @@ class _StatusHeroState extends State<_StatusHero>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final trial = widget.proState.inTrialPhase;
     final days = widget.proState.daysSincePremium;
 
     return RepaintBoundary(
@@ -308,16 +250,14 @@ class _StatusHeroState extends State<_StatusHero>
             ),
             const SizedBox(height: KuberSpace.md),
             Text(
-              trial ? 'You\'re on a free trial' : 'You\'re on Kuber Pro',
+              'You\'re on Kuber Pro',
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall!.copyWith(color: cs.onSurface),
             ),
             const SizedBox(height: 4),
             Text(
-              trial
-                  ? '${widget.planLabel} plan · trial'
-                  : days > 0
+              days > 0
                   ? '${widget.planLabel} · $days ${days == 1 ? 'day' : 'days'} as Pro'
                   : '${widget.planLabel} · active today',
               style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),

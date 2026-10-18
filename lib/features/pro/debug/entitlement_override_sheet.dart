@@ -34,20 +34,15 @@ class _EntitlementOverrideSheet extends ConsumerStatefulWidget {
 class _EntitlementOverrideSheetState
     extends ConsumerState<_EntitlementOverrideSheet> {
   late DebugForcedTier? _selected;
-  late double _trialDays;
 
   @override
   void initState() {
     super.initState();
     _selected = DebugEntitlementOverride.tier;
-    _trialDays = DebugEntitlementOverride.trialDaysLeft.toDouble();
   }
 
   Future<void> _apply() async {
-    await DebugEntitlementOverride.set(
-      _selected,
-      trialDaysLeft: _trialDays.round(),
-    );
+    await DebugEntitlementOverride.set(_selected);
     ref.invalidate(kuberProStateProvider);
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -61,7 +56,6 @@ class _EntitlementOverrideSheetState
 
   String _label(DebugForcedTier t) => switch (t) {
     DebugForcedTier.free => 'Free',
-    DebugForcedTier.trial => 'Trial',
     DebugForcedTier.monthly => 'Monthly',
     DebugForcedTier.yearly => 'Yearly',
     DebugForcedTier.lifetime => 'Lifetime',
@@ -121,25 +115,6 @@ class _EntitlementOverrideSheetState
               selected: _selected == tier,
               onTap: () => setState(() => _selected = tier),
             ),
-          if (_selected == DebugForcedTier.trial) ...[
-            const SizedBox(height: KuberSpace.md),
-            Text(
-              'Trial days remaining: ${_trialDays.round()}',
-              style: localeFont(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-            Slider(
-              value: _trialDays,
-              min: 1,
-              max: 14,
-              divisions: 13,
-              label: '${_trialDays.round()}',
-              onChanged: (v) => setState(() => _trialDays = v),
-            ),
-          ],
         ],
       ),
     );
@@ -147,9 +122,8 @@ class _EntitlementOverrideSheetState
 
   String _subtitleFor(DebugForcedTier tier) => switch (tier) {
     DebugForcedTier.free => 'All gates engaged',
-    DebugForcedTier.trial => 'Full access, trial UI',
     DebugForcedTier.monthly => 'Full Pro, 30-day expiry',
-    DebugForcedTier.yearly => 'Full Pro, 14-day trial phase',
+    DebugForcedTier.yearly => 'Full Pro, 365-day expiry',
     DebugForcedTier.lifetime => 'Full Pro, no expiry',
   };
 }

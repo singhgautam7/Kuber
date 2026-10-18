@@ -29,9 +29,8 @@ const _kAndroidPackage = 'com.grs.kuber';
 
 /// Route: `/pro`. A single full-screen page that adapts to every entitlement
 /// state, split into two macro-modes (see specs pro-page-redesign):
-///  - **Sell** (free / lapsed) and the grandfathered legacy trial: pitch + plan
-///    cards + a sticky Continue.
-///  - **Manage** (paid active / Play Billing trial / promo): status hero +
+///  - **Sell** (free / lapsed): pitch + plan cards + a sticky Continue.
+///  - **Manage** (paid active / promo): status hero +
 ///    read-only plan details + hand-offs to Play.
 /// The manage-vs-sell decision keys off `isPro` (a real entitlement), not
 /// `hasProAccess`.
@@ -54,7 +53,6 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
     final yearlyOffer = offers[kProYearlyId];
 
     final isManage = proState.isPro; // purchased or promo
-    final isGrandfathered = proState.isTrial; // legacy app trial (unpaid)
     final subscribed = proState.isPro && proState.plan != null;
     final restoreFailed = ref.watch(restoreFailedSessionProvider);
 
@@ -111,8 +109,6 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
                     delegate: SliverChildListDelegate(
                       isManage
                           ? _manageBody(proState)
-                          : isGrandfathered
-                          ? _grandfatheredBody(proState)
                           : _sellBody(proState, yearlyOffer),
                     ),
                   ),
@@ -128,13 +124,10 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
     );
   }
 
-  String _headerSubtitle(KuberProState s) {
-    if (s.isPro) {
-      return s.inTrialPhase ? 'Trial active' : 'You\'re on Pro';
-    }
-    if (s.isTrial) return 'Legacy trial';
-    return 'Unlock everything Kuber offers';
-  }
+  // Pro users get no subtitle: the "You're on Kuber Pro" card right below
+  // already says it.
+  String? _headerSubtitle(KuberProState s) =>
+      s.isPro ? null : 'Unlock everything Kuber offers';
 
   // ── Sell mode (free / lapsed) ───────────────────────────────────────────
   List<Widget> _sellBody(KuberProState proState, SubscriptionOfferInfo? offer) {
@@ -164,27 +157,12 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
     ];
   }
 
-  // ── Manage mode (paid / Play trial / promo) ─────────────────────────────
+  // ── Manage mode (paid / promo) ─────────────────────────────
   List<Widget> _manageBody(KuberProState proState) {
     return [
       PaywallManageSection(proState: proState),
       const SizedBox(height: KuberSpace.xl),
       _sectionTitle('What Pro includes'),
-      const SizedBox(height: KuberSpace.sm),
-      const KuberComparisonTable(rows: kProComparisonRows),
-    ];
-  }
-
-  // ── Grandfathered legacy trial (manage-lite + sell plans) ───────────────
-  List<Widget> _grandfatheredBody(KuberProState proState) {
-    return [
-      _LegacyTrialCard(proState: proState),
-      const SizedBox(height: KuberSpace.lg),
-      _sectionLabel('SUBSCRIBE TO KEEP PRO'),
-      const SizedBox(height: KuberSpace.sm),
-      ..._planCards(ref.watch(subscriptionOffersProvider)[kProYearlyId]),
-      const SizedBox(height: KuberSpace.xl),
-      _sectionTitle('What you get with Pro'),
       const SizedBox(height: KuberSpace.sm),
       const KuberComparisonTable(rows: kProComparisonRows),
     ];
@@ -458,85 +436,6 @@ class _WelcomeBackCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _LegacyTrialCard extends StatelessWidget {
-  final KuberProState proState;
-  const _LegacyTrialCard({required this.proState});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberMoney.warning;
-    final endsLabel = proState.trialEndsAt != null
-        ? 'Access ends on ${_shortDate(proState.trialEndsAt!)}'
-        : 'Your legacy trial is ending soon';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: KuberSpace.xl,
-            horizontal: KuberSpace.lg,
-          ),
-          decoration: BoxDecoration(
-            color: warning.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-            border: Border.all(color: warning),
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: warning.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.schedule_rounded, color: warning, size: 26),
-              ),
-              const SizedBox(height: KuberSpace.md),
-              Text(
-                'You\'re on a legacy trial',
-                style: localeFont(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                endsLabel,
-                style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: KuberSpace.md),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.info_outline_rounded,
-              size: 16,
-              color: cs.onSurfaceVariant,
-            ),
-            const SizedBox(width: KuberSpace.sm),
-            Expanded(
-              child: Text(
-                'Legacy trial from an earlier version. No card required.',
-                style: localeFont(
-                  fontSize: 12,
-                  color: cs.onSurfaceVariant,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
@@ -857,20 +756,3 @@ class _OfferBadge extends StatelessWidget {
   }
 }
 
-String _shortDate(DateTime d) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${d.day} ${months[d.month - 1]} ${d.year}';
-}

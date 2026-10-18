@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/features/pro/data/user_entitlement.dart';
 import 'package:kuber/features/pro/paywall/pro_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kuber/core/database/isar_service.dart';
 
 import '../../helpers/isar_test_helper.dart';
 
 void main() {
-  group('ensureEntitlementBootstrap (Round 2: no app-managed trial)', () {
+  group('ensureEntitlementBootstrap', () {
     late Isar isar;
 
     setUp(() async {
@@ -42,43 +44,48 @@ void main() {
     });
   });
 
-  group('KuberProState trial phase', () {
-    test('a purchased sub in its Play free-trial phase reads as Pro + in trial',
-        () {
-      final s = KuberProState.purchased(
-        plan: ProPlan.yearly,
-        trialEndsAt: DateTime.now().add(const Duration(days: 10)),
-      );
-      expect(s.isPro, isTrue); // a Play trial is a real subscription
-      expect(s.inTrialPhase, isTrue); // ... currently in its trial phase
-      expect(s.hasProAccess, isTrue);
-      expect(s.trialDaysLeft, greaterThan(0));
-    });
+  group('no trial concept', () {
+    late Isar isar;
+    setUp(() async => isar = await openTestIsar());
+    tearDown(() async => isar.close(deleteFromDisk: true));
 
-    test('a restored older sub (trial end in the past) is plain Pro', () {
-      final s = KuberProState.purchased(
-        plan: ProPlan.yearly,
-        trialEndsAt: DateTime.now().subtract(const Duration(days: 1)),
+    test('a legacy trial row (even "unexpired") reads as free', () async {
+      await isar.writeTxn(() => isar.collection<UserEntitlement>().put(
+            UserEntitlement()
+              ..firstInstallAt = DateTime.now()
+              ..tier = EntitlementTier.trial
+              ..trialEndsAt = DateTime.now().add(const Duration(days: 5)),
+          ));
+      final container = ProviderContainer(
+        overrides: [isarProvider.overrideWithValue(isar)],
       );
-      expect(s.isPro, isTrue);
-      expect(s.inTrialPhase, isFalse);
-    });
-
-    test('legacy app trial: unpaid but full access, shows trial UI', () {
-      final s = KuberProState.trial(
-        endsAt: DateTime.now().add(const Duration(days: 5)),
-      );
-      expect(s.isPro, isFalse); // unpaid
-      expect(s.isTrial, isTrue);
-      expect(s.inTrialPhase, isTrue);
-      expect(s.hasProAccess, isTrue);
-    });
-
-    test('free state is never in a trial phase', () {
-      const s = KuberProState();
-      expect(s.inTrialPhase, isFalse);
-      // Gating is live: a free user has no Pro access.
+      addTearDown(container.dispose);
+      final s = container.read(kuberProStateProvider);
+      expect(s.isFree, isTrue);
       expect(s.hasProAccess, isFalse);
+    });
+
+    test('a yearly purchase clears the old client trial estimate', () async {
+      await isar.writeTxn(() => isar.collection<UserEntitlement>().put(
+            UserEntitlement()
+              ..firstInstallAt = DateTime.now()
+              ..tier = EntitlementTier.free
+              ..trialEndsAt = DateTime.now().add(const Duration(days: 14)),
+          ));
+      final container = ProviderContainer(
+        overrides: [isarProvider.overrideWithValue(isar)],
+      );
+      addTearDown(container.dispose);
+      container
+          .read(kuberProStateProvider.notifier)
+          .applyPurchase(plan: ProPlan.yearly);
+      final row = await isar.collection<UserEntitlement>().get(0);
+      expect(row!.trialEndsAt, isNull);
+      expect(container.read(kuberProStateProvider).isPro, isTrue);
+    });
+
+    test('free state has no Pro access', () {
+      expect(const KuberProState().hasProAccess, isFalse);
     });
   });
 }

@@ -29,7 +29,7 @@ Future<void> restorePurchases(
   String successMessage = 'Purchase restored',
   String notFoundMessage = 'No previous purchase found',
 }) async {
-  final service = ref.read(purchaseServiceProvider);
+  final service = ref.read(purchaseServiceProvider)..watchForPurchase();
   // No Play Billing (no Play services / Play Store signed out), even after a
   // fresh re-check: say so now instead of spinning through every retry.
   if (!await service.ensureAvailable()) {
@@ -148,6 +148,7 @@ Future<void> redeemOnPlayStore(
         ? 'https://play.google.com/redeem'
         : 'https://play.google.com/redeem?code=${Uri.encodeQueryComponent(c)}',
   );
+  ref.read(purchaseServiceProvider).watchForPurchase();
   final returned = waitForReturnToApp();
   final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
   if (!launched) {

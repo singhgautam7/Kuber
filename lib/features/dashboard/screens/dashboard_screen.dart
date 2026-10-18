@@ -31,8 +31,6 @@ import '../widgets/home_recent_transactions.dart';
 import '../../notes/widgets/notes_home_widget.dart';
 import '../../pro/home/ask_kuber_home_widget.dart';
 import '../../pro/promo/home_promo_banner.dart';
-import '../../pro/paywall/pro_state.dart';
-import '../../pro/trial/trial_ending_sheet.dart';
 import '../../upcoming_events/widgets/upcoming_events_widget.dart';
 import '../widgets/quick_add_widget.dart';
 import '../../home_v2/data/home_v2_state.dart';
@@ -119,19 +117,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ref.read(pendingDeeplinkProvider.notifier).state = null;
       if (!mounted) return;
       await handleNotificationTap(ref, payload: payload);
-    });
-
-    // One-time "your Kuber Pro trial ended" notice, shown on the first frame
-    // after the 14-day window closes. The Isar-backed guard
-    // (shouldShowTrialEndedNotice / markTrialEndedNoticeShown) ensures it
-    // fires at most once per install.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final notifier = ref.read(kuberProStateProvider.notifier);
-      if (notifier.shouldShowTrialEndedNotice()) {
-        showTrialEndingSheet(context);
-        notifier.markTrialEndedNoticeShown();
-      }
     });
   }
 
