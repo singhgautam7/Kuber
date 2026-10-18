@@ -5599,4 +5599,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'Set up accounts';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'Every $count weeks';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'Every $count months';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'Every $count years';
+  }
+
+  @override
+  String get weeksLabel => 'weeks';
+
+  @override
+  String get monthsLabel => 'months';
+
+  @override
+  String get yearsLabel => 'years';
+
+  @override
+  String get intervalInvalid => 'Enter a whole number of 1 or more';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'then $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'This item no longer exists.';
 }

@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "ನಿಮ್ಮ ಖಾತೆಗಳನ್ನು ನೋಡಿ, ನಂತರ ಮೊದಲ ವಹಿವಾಟು ಸೇರಿಸಿ. ಒಂದು ನಿಮಿಷ ಸಾಕು.",
   "homeV33GsProgress": "2 ರಲ್ಲಿ {done} ಮುಗಿದಿದೆ",
   "homeV33GsActAccounts": "ಖಾತೆಗಳನ್ನು ನೋಡಿ",
-  "homeV33GsStepAccounts": "ಖಾತೆಗಳನ್ನು ಹೊಂದಿಸಿ"
+  "homeV33GsStepAccounts": "ಖಾತೆಗಳನ್ನು ಹೊಂದಿಸಿ",
+  "freqEveryNWeeks": "ಪ್ರತಿ {count} ವಾರಗಳಿಗೊಮ್ಮೆ",
+  "freqEveryNMonths": "ಪ್ರತಿ {count} ತಿಂಗಳಿಗೊಮ್ಮೆ",
+  "freqEveryNYears": "ಪ್ರತಿ {count} ವರ್ಷಗಳಿಗೊಮ್ಮೆ",
+  "weeksLabel": "ವಾರಗಳು",
+  "monthsLabel": "ತಿಂಗಳುಗಳು",
+  "yearsLabel": "ವರ್ಷಗಳು",
+  "intervalInvalid": "1 ಅಥವಾ ಹೆಚ್ಚಿನ ಪೂರ್ಣ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
+  "cadenceThen": "ನಂತರ {interval}",
+  "notifItemMissing": "ಈ ಐಟಂ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ."
 }

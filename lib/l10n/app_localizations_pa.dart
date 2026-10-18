@@ -5607,4 +5607,39 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'ਖਾਤੇ ਸੈੱਟ ਕਰੋ';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'ਹਰ $count ਹਫ਼ਤੇ';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'ਹਰ $count ਮਹੀਨੇ';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'ਹਰ $count ਸਾਲ';
+  }
+
+  @override
+  String get weeksLabel => 'ਹਫ਼ਤੇ';
+
+  @override
+  String get monthsLabel => 'ਮਹੀਨੇ';
+
+  @override
+  String get yearsLabel => 'ਸਾਲ';
+
+  @override
+  String get intervalInvalid => '1 ਜਾਂ ਵੱਧ ਪੂਰੀ ਸੰਖਿਆ ਦਰਜ ਕਰੋ';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'ਫਿਰ $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'ਇਹ ਆਈਟਮ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।';
 }

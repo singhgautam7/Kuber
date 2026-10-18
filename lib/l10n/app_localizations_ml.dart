@@ -5667,4 +5667,40 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'അക്കൗണ്ടുകൾ സജ്ജമാക്കുക';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'ഓരോ $count ആഴ്ചയിലും';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'ഓരോ $count മാസത്തിലും';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'ഓരോ $count വർഷത്തിലും';
+  }
+
+  @override
+  String get weeksLabel => 'ആഴ്ചകൾ';
+
+  @override
+  String get monthsLabel => 'മാസങ്ങൾ';
+
+  @override
+  String get yearsLabel => 'വർഷങ്ങൾ';
+
+  @override
+  String get intervalInvalid =>
+      '1 അല്ലെങ്കിൽ അതിൽ കൂടുതലുള്ള പൂർണ്ണസംഖ്യ നൽകുക';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'പിന്നെ $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'ഈ ഇനം ഇപ്പോൾ നിലവിലില്ല.';
 }

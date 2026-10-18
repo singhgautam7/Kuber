@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "మీ ఖాతాలు చూడండి, తర్వాత మొదటి లావాదేవీ జోడించండి. ఒక్క నిమిషం చాలు.",
   "homeV33GsProgress": "2 లో {done} పూర్తయ్యాయి",
   "homeV33GsActAccounts": "ఖాతాలు చూడండి",
-  "homeV33GsStepAccounts": "ఖాతాలు సెటప్ చేయండి"
+  "homeV33GsStepAccounts": "ఖాతాలు సెటప్ చేయండి",
+  "freqEveryNWeeks": "ప్రతి {count} వారాలకు",
+  "freqEveryNMonths": "ప్రతి {count} నెలలకు",
+  "freqEveryNYears": "ప్రతి {count} సంవత్సరాలకు",
+  "weeksLabel": "వారాలు",
+  "monthsLabel": "నెలలు",
+  "yearsLabel": "సంవత్సరాలు",
+  "intervalInvalid": "1 లేదా అంతకంటే ఎక్కువ పూర్ణ సంఖ్యను నమోదు చేయండి",
+  "cadenceThen": "తర్వాత {interval}",
+  "notifItemMissing": "ఈ అంశం ఇప్పుడు లేదు."
 }

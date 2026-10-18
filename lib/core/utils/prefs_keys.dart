@@ -32,6 +32,7 @@ class PrefsKeys {
       'kuber_migrated_seed_loan_investment_category_v1';
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
   static const migratedCashGreenV1 = 'kuber_migrated_cash_green_v1';
+  static const migratedRecurringIntervalV1 = 'kuber_migrated_recurring_interval_v1';
   static const migratedSuggestionBackfillV1 =
       'kuber_migrated_suggestion_backfill_v1';
   static const migratedStoriesPositionV2 = 'kuber_migrated_stories_position_v2';

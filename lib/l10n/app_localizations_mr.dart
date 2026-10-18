@@ -5618,4 +5618,39 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'खाती सेट करा';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'दर $count आठवड्यांनी';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'दर $count महिन्यांनी';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'दर $count वर्षांनी';
+  }
+
+  @override
+  String get weeksLabel => 'आठवडे';
+
+  @override
+  String get monthsLabel => 'महिने';
+
+  @override
+  String get yearsLabel => 'वर्षे';
+
+  @override
+  String get intervalInvalid => '1 किंवा त्याहून मोठी पूर्ण संख्या टाका';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'मग $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'ही नोंद आता अस्तित्वात नाही.';
 }

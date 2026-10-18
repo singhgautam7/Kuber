@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "तुमची खाती पाहा, मग पहिला व्यवहार जोडा. एक मिनिट लागेल.",
   "homeV33GsProgress": "2 पैकी {done} पूर्ण",
   "homeV33GsActAccounts": "खाती पाहा",
-  "homeV33GsStepAccounts": "खाती सेट करा"
+  "homeV33GsStepAccounts": "खाती सेट करा",
+  "freqEveryNWeeks": "दर {count} आठवड्यांनी",
+  "freqEveryNMonths": "दर {count} महिन्यांनी",
+  "freqEveryNYears": "दर {count} वर्षांनी",
+  "weeksLabel": "आठवडे",
+  "monthsLabel": "महिने",
+  "yearsLabel": "वर्षे",
+  "intervalInvalid": "1 किंवा त्याहून मोठी पूर्ण संख्या टाका",
+  "cadenceThen": "मग {interval}",
+  "notifItemMissing": "ही नोंद आता अस्तित्वात नाही."
 }

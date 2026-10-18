@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "നിങ്ങളുടെ അക്കൗണ്ടുകൾ നോക്കൂ, പിന്നെ ആദ്യ ഇടപാട് ചേർക്കൂ. ഒരു മിനിറ്റ് മതി.",
   "homeV33GsProgress": "2-ൽ {done} പൂർത്തിയായി",
   "homeV33GsActAccounts": "അക്കൗണ്ടുകൾ കാണുക",
-  "homeV33GsStepAccounts": "അക്കൗണ്ടുകൾ സജ്ജമാക്കുക"
+  "homeV33GsStepAccounts": "അക്കൗണ്ടുകൾ സജ്ജമാക്കുക",
+  "freqEveryNWeeks": "ഓരോ {count} ആഴ്ചയിലും",
+  "freqEveryNMonths": "ഓരോ {count} മാസത്തിലും",
+  "freqEveryNYears": "ഓരോ {count} വർഷത്തിലും",
+  "weeksLabel": "ആഴ്ചകൾ",
+  "monthsLabel": "മാസങ്ങൾ",
+  "yearsLabel": "വർഷങ്ങൾ",
+  "intervalInvalid": "1 അല്ലെങ്കിൽ അതിൽ കൂടുതലുള്ള പൂർണ്ണസംഖ്യ നൽകുക",
+  "cadenceThen": "പിന്നെ {interval}",
+  "notifItemMissing": "ഈ ഇനം ഇപ്പോൾ നിലവിലില്ല."
 }

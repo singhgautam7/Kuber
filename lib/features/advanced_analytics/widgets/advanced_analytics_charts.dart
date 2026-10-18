@@ -1,14 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/locale_font.dart';
 
-final _chartInr = NumberFormat.currency(
-  locale: 'en_IN',
-  symbol: '₹',
-  decimalDigits: 0,
-);
+String _chartMoney(num v) => AppFormatter.current.formatCurrency(v.round());
 
 /// One x-position's tooltip content.
 class AaTapPoint {
@@ -537,7 +533,7 @@ class ForecastZoneChart extends StatelessWidget {
             AaTapPoint('Day ${i + 1}', [
               AaTapRow(
                 i < actuals.length ? 'Spent so far' : 'Projected',
-                _chartInr.format(all[i]),
+                _chartMoney(all[i]),
                 cs.primary,
               ),
             ]),
@@ -722,17 +718,17 @@ class CashFlowAreaChart extends StatelessWidget {
                 AaTapPoint(i < labels.length ? labels[i] : 'Month ${i + 1}', [
                   AaTapRow(
                     'Income',
-                    _chartInr.format(incomes[i]),
+                    _chartMoney(incomes[i]),
                     context.kuberMoney.income,
                   ),
                   AaTapRow(
                     'Expense',
-                    _chartInr.format(expenses[i]),
+                    _chartMoney(expenses[i]),
                     context.kuberMoney.expense,
                   ),
                   AaTapRow(
                     'Net',
-                    '${nets[i] >= 0 ? '+' : ''}${_chartInr.format(nets[i])}',
+                    '${nets[i] >= 0 ? '+' : ''}${_chartMoney(nets[i])}',
                     nets[i] >= 0
                         ? context.kuberMoney.income
                         : context.kuberMoney.expense,

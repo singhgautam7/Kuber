@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_extended_fab.dart';
@@ -238,11 +239,7 @@ class _BillRow extends StatelessWidget {
         statusLabel = '';
     }
 
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: '₹',
-      decimalDigits: 0,
-    );
+    final formatter = AppFormatter.current;
 
     return GestureDetector(
       onTap: onTap,
@@ -444,12 +441,12 @@ class _BillRow extends StatelessWidget {
 
   String _signedShare(
     BillStatus status,
-    NumberFormat formatter,
+    AppFormatter formatter,
     double amount,
   ) {
     return switch (status) {
-      BillStatus.youLent => '+${formatter.format(amount)}',
-      BillStatus.youOwe => '-${formatter.format(amount)}',
+      BillStatus.youLent => '+${formatter.formatCurrency(amount.round())}',
+      BillStatus.youOwe => '-${formatter.formatCurrency(amount.round())}',
       BillStatus.settled => '—',
       BillStatus.notInvolved => '',
     };

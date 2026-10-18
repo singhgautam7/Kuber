@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +25,8 @@ import 'features/history/providers/selection_provider.dart';
 import 'features/transactions/providers/transaction_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
+import 'features/notifications/providers/notification_provider.dart';
+import 'features/notifications/utils/deep_link_handler.dart';
 import 'features/pro/debug/entitlement_override.dart';
 import 'shared/widgets/kuber_extended_fab.dart';
 import 'features/home_v2/providers/home_v2_provider.dart';
@@ -63,10 +67,16 @@ class _KuberAppState extends ConsumerState<KuberApp>
   /// (specs/performance.md startup order).
   static const _onOpenSettleDelay = Duration(milliseconds: 1620);
 
+  StreamSubscription<String>? _notificationTapSub;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // System notification tapped while the app was running: same routing map
+    // as the in-app sheet.
+    _notificationTapSub = notificationTaps.stream
+        .listen((payload) => handleNotificationTap(ref, payload: payload));
     // On-open processing deferred to after the first frame so it never delays
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
@@ -400,6 +410,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
 
   @override
   void dispose() {
+    _notificationTapSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

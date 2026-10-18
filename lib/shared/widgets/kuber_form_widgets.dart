@@ -637,6 +637,7 @@ class KuberChipGrid<T> extends StatelessWidget {
                   ],
                   Text(
                     opt.label,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelMedium!.copyWith(
                         color: isSelected
                             ? cs.onSecondaryContainer

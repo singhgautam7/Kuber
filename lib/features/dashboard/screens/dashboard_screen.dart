@@ -12,7 +12,6 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/formatters.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../shared/widgets/edit_widgets_button.dart';
-import '../../notifications/data/app_notification.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../../notifications/utils/deep_link_handler.dart';
 import '../../notifications/widgets/notifications_sheet.dart';
@@ -113,20 +112,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Trace marker: story generation must start strictly after this point.
       debugPrint('Kuber stories: home first frame painted');
+      // Routed by payload alone: scheduled reminders and credit-card
+      // reminders have no inbox row to match.
       final payload = ref.read(pendingDeeplinkProvider);
       if (payload == null || payload.isEmpty) return;
       ref.read(pendingDeeplinkProvider.notifier).state = null;
-      final repo = ref.read(notificationRepositoryProvider);
-      final all = await repo.list();
-      AppNotification? match;
-      for (final n in all) {
-        if (n.payload == payload) {
-          match = n;
-          break;
-        }
-      }
-      if (!mounted || match == null) return;
-      await handleNotificationTap(context, ref, match);
+      if (!mounted) return;
+      await handleNotificationTap(ref, payload: payload);
     });
 
     // One-time "your Kuber Pro trial ended" notice, shown on the first frame
@@ -154,7 +146,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         await repo.clearAll();
       },
       onTapNotification: (n) async {
-        await handleNotificationTap(context, ref, n);
+        await repo.markRead(n.id);
+        await handleNotificationTap(ref, payload: n.payload, type: n.type);
       },
     );
     // Mark everything read once the sheet is open / dismissed.

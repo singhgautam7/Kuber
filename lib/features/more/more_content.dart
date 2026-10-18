@@ -357,7 +357,8 @@ Future<void> openNotificationsSheet(
       await repo.clearAll();
     },
     onTapNotification: (n) async {
-      await handleNotificationTap(context, ref, n);
+      await repo.markRead(n.id);
+      await handleNotificationTap(ref, payload: n.payload, type: n.type);
     },
   );
   await repo.markAllRead();

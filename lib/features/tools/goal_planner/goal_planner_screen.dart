@@ -198,7 +198,7 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
               controller: _savingsCtrl,
               label: 'CURRENT SAVINGS',
               prefix: currency.symbol,
-              helper: 'Optional — defaults to ₹0',
+              helper: 'Optional — defaults to ${currency.symbol}0',
               formatAsAmount: true,
               onChanged: recompute,
               min: 0,
@@ -223,7 +223,7 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(
-                          'Already on track — ₹0/mo needed',
+                          'Already on track — ${currency.symbol}0/mo needed',
                           style: localeFont(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

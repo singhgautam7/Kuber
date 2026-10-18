@@ -105,7 +105,7 @@ class LedgerHero extends ConsumerWidget {
             children: [
               Text(
                 isFlat
-                    ? '₹0'
+                    ? fmt.formatCurrency(0)
                     : '${isFavour ? '+' : '−'}'
                           '${maskAmount(fmt.formatCurrency(net.abs()), masked)}',
                 style: tt.headlineMedium!.copyWith(color: netColor),

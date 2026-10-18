@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "अपने खाते देखें, फिर अपना पहला लेन-देन जोड़ें। बस एक मिनट लगेगा।",
   "homeV33GsProgress": "2 में से {done} पूरे",
   "homeV33GsActAccounts": "खाते देखें",
-  "homeV33GsStepAccounts": "खाते सेट करें"
+  "homeV33GsStepAccounts": "खाते सेट करें",
+  "freqEveryNWeeks": "हर {count} हफ़्ते",
+  "freqEveryNMonths": "हर {count} महीने",
+  "freqEveryNYears": "हर {count} साल",
+  "weeksLabel": "हफ़्ते",
+  "monthsLabel": "महीने",
+  "yearsLabel": "साल",
+  "intervalInvalid": "1 या उससे बड़ी पूरी संख्या डालें",
+  "cadenceThen": "फिर {interval}",
+  "notifItemMissing": "यह आइटम अब मौजूद नहीं है।"
 }

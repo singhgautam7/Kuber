@@ -216,7 +216,7 @@ class ThemeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: KuberSpace.xs),
                   Text(
-                    '+₹43,457',
+                    '+${ref.watch(formatterProvider).formatCurrency(43457)}',
                     style: theme.textTheme.headlineMedium!.copyWith(
                       color: context.kuberMoney.income,
                     ),

@@ -5642,4 +5642,40 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'ఖాతాలు సెటప్ చేయండి';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'ప్రతి $count వారాలకు';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'ప్రతి $count నెలలకు';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'ప్రతి $count సంవత్సరాలకు';
+  }
+
+  @override
+  String get weeksLabel => 'వారాలు';
+
+  @override
+  String get monthsLabel => 'నెలలు';
+
+  @override
+  String get yearsLabel => 'సంవత్సరాలు';
+
+  @override
+  String get intervalInvalid =>
+      '1 లేదా అంతకంటే ఎక్కువ పూర్ణ సంఖ్యను నమోదు చేయండి';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'తర్వాత $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'ఈ అంశం ఇప్పుడు లేదు.';
 }

@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "உங்கள் கணக்குகளைப் பாருங்கள், பிறகு முதல் பரிவர்த்தனையைச் சேருங்கள். ஒரு நிமிடம் போதும்.",
   "homeV33GsProgress": "2-இல் {done} முடிந்தது",
   "homeV33GsActAccounts": "கணக்குகளைப் பார்",
-  "homeV33GsStepAccounts": "கணக்குகளை அமை"
+  "homeV33GsStepAccounts": "கணக்குகளை அமை",
+  "freqEveryNWeeks": "ஒவ்வொரு {count} வாரங்களுக்கும்",
+  "freqEveryNMonths": "ஒவ்வொரு {count} மாதங்களுக்கும்",
+  "freqEveryNYears": "ஒவ்வொரு {count} ஆண்டுகளுக்கும்",
+  "weeksLabel": "வாரங்கள்",
+  "monthsLabel": "மாதங்கள்",
+  "yearsLabel": "ஆண்டுகள்",
+  "intervalInvalid": "1 அல்லது அதற்கு மேற்பட்ட முழு எண்ணை உள்ளிடவும்",
+  "cadenceThen": "பிறகு {interval}",
+  "notifItemMissing": "இந்த உருப்படி இப்போது இல்லை."
 }

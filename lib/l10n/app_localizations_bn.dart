@@ -5621,4 +5621,39 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'অ্যাকাউন্ট সেট করুন';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'প্রতি $count সপ্তাহ';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'প্রতি $count মাস';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'প্রতি $count বছর';
+  }
+
+  @override
+  String get weeksLabel => 'সপ্তাহ';
+
+  @override
+  String get monthsLabel => 'মাস';
+
+  @override
+  String get yearsLabel => 'বছর';
+
+  @override
+  String get intervalInvalid => '1 বা তার বেশি একটি পূর্ণ সংখ্যা দিন';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'তারপর $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'এই আইটেমটি আর নেই।';
 }

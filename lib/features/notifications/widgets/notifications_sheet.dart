@@ -2,6 +2,9 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:kuber/core/utils/date_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../settings/providers/settings_provider.dart'
+    show formatterProvider, privacyModeProvider;
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import 'package:intl/intl.dart';
@@ -526,14 +529,14 @@ class _Group extends StatelessWidget {
   }
 }
 
-class _Row extends StatelessWidget {
+class _Row extends ConsumerWidget {
   final AppNotification item;
   final String lang;
   final VoidCallback onTap;
   const _Row({required this.item, required this.lang, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final unread = item.readAt == null;
@@ -568,7 +571,10 @@ class _Row extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      item.body,
+                      ref.watch(formatterProvider).renderAmountTokens(
+                            item.body,
+                            isPrivate: ref.watch(privacyModeProvider),
+                          ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium!.copyWith(

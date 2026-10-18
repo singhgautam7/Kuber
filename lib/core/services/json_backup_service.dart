@@ -350,6 +350,7 @@ class JsonBackupService {
     'notes': r.notes,
     'frequency': r.frequency,
     'customDays': r.customDays,
+    'intervalUnit': r.intervalUnit,
     'startDate': r.startDate.toIso8601String(),
     'nextDueAt': r.nextDueAt.toIso8601String(),
     'executionCount': r.executionCount,
@@ -548,6 +549,8 @@ class JsonBackupService {
     ..notes = m['notes'] as String?
     ..frequency = m['frequency'] as String
     ..customDays = m['customDays'] as int?
+    // Absent in older backups: RecurrenceInterval.legacy reads frequency.
+    ..intervalUnit = m['intervalUnit'] as String?
     ..startDate = DateTime.parse(m['startDate'] as String)
     ..nextDueAt = DateTime.parse(m['nextDueAt'] as String)
     ..executionCount = (m['executionCount'] as int?) ?? 0

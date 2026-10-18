@@ -15,6 +15,8 @@ import '../../pro/debug/entitlement_override.dart';
 import '../../pro/debug/entitlement_override_sheet.dart';
 import '../../pro/services/billing_diagnostics.dart';
 import '../providers/dev_mode_provider.dart';
+import '../services/dev_notification_tools.dart';
+import '../../../core/database/isar_service.dart';
 
 class DevToolsScreen extends ConsumerWidget {
   const DevToolsScreen({super.key});
@@ -159,6 +161,33 @@ class DevToolsScreen extends ConsumerWidget {
                 'Force suggestion',
                 'Show any suggestion card now with sample data',
                 () => showForceSuggestionSheet(context, ref),
+              ),
+            ]),
+            // Notification tap routing (specs/fixes/user-feedback-oct-2026.md).
+            section('NOTIFICATIONS', [
+              row(
+                Icons.notifications_active_outlined,
+                'Seed test notifications',
+                'One of every type, an old-style row and a deleted item',
+                () async {
+                  final n = await seedTestNotifications(ref.read(isarProvider));
+                  if (context.mounted) {
+                    showKuberSnackBar(context, 'Added $n test notifications');
+                  }
+                },
+              ),
+              row(
+                Icons.notification_add_outlined,
+                'Post system notification',
+                'Tap it from the shade to test routing',
+                () async {
+                  final ok =
+                      await postTestSystemNotification(ref.read(isarProvider));
+                  if (context.mounted && !ok) {
+                    showKuberSnackBar(context, 'Load demo data first',
+                        isError: true);
+                  }
+                },
               ),
             ]),
             section('DATABASE', [

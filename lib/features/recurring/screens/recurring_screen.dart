@@ -17,6 +17,7 @@ import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/info_provider.dart';
+import '../data/recurring_interval.dart';
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
@@ -38,20 +39,8 @@ final recurringMonthlyCostProvider =
       final active = rules
           .where((r) => !r.isPaused && !RecurringRepository.isExpired(r))
           .toList();
-      double monthlyEquivalent(RecurringRule rule) {
-        return switch (rule.frequency) {
-          'daily' => rule.amount * 30,
-          'weekly' => rule.amount * 4.33,
-          'biweekly' => rule.amount * 2.17,
-          'quarterly' => rule.amount / 3,
-          'yearly' => rule.amount / 12,
-          'custom' =>
-            rule.customDays == null || rule.customDays == 0
-                ? rule.amount
-                : rule.amount * (30 / rule.customDays!),
-          _ => rule.amount,
-        };
-      }
+      double monthlyEquivalent(RecurringRule rule) =>
+          rule.amount * RecurrenceInterval.of(rule).monthlyFactor;
 
       final upcoming =
           active
@@ -237,10 +226,9 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                               opacity: rule.isPaused ? 0.5 : 1,
                               child: RecurringRuleCard(
                                 ruleName: rule.name,
-                                frequencyLabel: _frequencyLabelLocalized(
-                                  context,
-                                  rule.frequency,
-                                ),
+                                frequencyLabel: RecurrenceInterval.of(rule)
+                                    .describe(context.l10n)
+                                    .toUpperCase(),
                                 accountName: accountName,
                                 icon: cat != null
                                     ? IconMapper.fromString(cat.icon)
@@ -332,18 +320,4 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
       ),
     );
   }
-}
-
-String _frequencyLabelLocalized(BuildContext context, String frequency) {
-  final l = context.l10n;
-  final label = switch (frequency) {
-    'daily' => l.freqDaily,
-    'weekly' => l.freqWeekly,
-    'biweekly' => l.freqBiweekly,
-    'quarterly' => l.freqQuarterly,
-    'yearly' => l.freqYearly,
-    'custom' => l.freqCustom,
-    _ => l.freqMonthly,
-  };
-  return label.toUpperCase();
 }

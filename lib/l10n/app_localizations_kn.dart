@@ -5646,4 +5646,39 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'ಖಾತೆಗಳನ್ನು ಹೊಂದಿಸಿ';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'ಪ್ರತಿ $count ವಾರಗಳಿಗೊಮ್ಮೆ';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'ಪ್ರತಿ $count ತಿಂಗಳಿಗೊಮ್ಮೆ';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'ಪ್ರತಿ $count ವರ್ಷಗಳಿಗೊಮ್ಮೆ';
+  }
+
+  @override
+  String get weeksLabel => 'ವಾರಗಳು';
+
+  @override
+  String get monthsLabel => 'ತಿಂಗಳುಗಳು';
+
+  @override
+  String get yearsLabel => 'ವರ್ಷಗಳು';
+
+  @override
+  String get intervalInvalid => '1 ಅಥವಾ ಹೆಚ್ಚಿನ ಪೂರ್ಣ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'ನಂತರ $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'ಈ ಐಟಂ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.';
 }

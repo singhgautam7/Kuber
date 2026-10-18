@@ -22,6 +22,8 @@ import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
+import '../data/recurring_interval.dart';
+import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
 
@@ -58,13 +60,25 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   int? _selectedCategoryId;
   int? _selectedAccountId;
   DateTime _startDate = DateTime.now();
-  String _frequency = 'monthly';
+  String _frequency = 'monthly'; // preset key from kRecurrencePresets / 'custom'
+  RecurrenceUnit _customUnit = RecurrenceUnit.day;
   String _endType = 'never';
   DateTime? _endDate;
 
   bool get _isEdit => widget.existingRule != null;
 
+  /// Custom "every N" count: a whole number >= 1, else null.
+  int? get _customCount {
+    final n = int.tryParse(_customDaysController.text.trim());
+    return n != null && n >= 1 ? n : null;
+  }
+
+  RecurrenceInterval get _interval => _frequency == 'custom'
+      ? RecurrenceInterval(_customCount ?? 1, _customUnit)
+      : kRecurrencePresets[_frequency]!;
+
   bool get _canSave =>
+      (_frequency != 'custom' || _customCount != null) &&
       _nameController.text.trim().isNotEmpty &&
       _amountController.text.trim().isNotEmpty &&
       double.tryParse(_amountController.text.trim().replaceAll(',', '')) !=
@@ -72,15 +86,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       _selectedCategoryId != null &&
       _selectedAccountId != null;
 
-  // PRESERVED ── frequencies tuple identical to today
-  static const _frequencies = <(String, String)>[
-    ('daily', 'Daily'),
-    ('weekly', 'Weekly'),
-    ('monthly', 'Monthly'),
-    ('biweekly', 'Biweekly'),
-    ('yearly', 'Yearly'),
-    ('custom', 'Custom'),
-  ];
 
   @override
   void initState() {
@@ -109,10 +114,13 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       _selectedCategoryId = int.tryParse(rule.categoryId);
       _selectedAccountId = int.tryParse(rule.accountId);
       _startDate = rule.startDate;
-      _frequency = rule.frequency;
+      // A rule whose interval matches a preset shows that chip selected.
+      final interval = RecurrenceInterval.of(rule);
+      _frequency = interval.presetKey;
       _endType = rule.endType;
-      if (rule.customDays != null) {
-        _customDaysController.text = rule.customDays.toString();
+      if (_frequency == 'custom') {
+        _customDaysController.text = '${interval.count}';
+        _customUnit = interval.unit;
       }
       if (rule.endAfter != null) {
         _endAfterController.text = rule.endAfter.toString();
@@ -223,14 +231,20 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     selected: _frequency,
                     onChanged: (v) => setState(() => _frequency = v),
                     options: [
-                      for (final (val, _) in _frequencies)
+                      for (final e in kRecurrencePresets.entries)
                         KuberChipOption(
-                          value: val,
-                          label: _freqTitle(context, val),
+                          value: e.key,
+                          label: e.key == 'quarterly'
+                              ? context.l10n.freqQuarterly
+                              : e.value.describe(context.l10n),
                         ),
+                      KuberChipOption(
+                        value: 'custom',
+                        label: context.l10n.freqCustom,
+                      ),
                     ],
                   ),
-                  // PRESERVED — Every-X-days only when frequency == 'custom'
+                  // Custom: "Every [N] [unit]", N a whole number >= 1.
                   AnimatedSize(
                     duration: const Duration(milliseconds: 180),
                     curve: Curves.easeOutCubic,
@@ -238,36 +252,74 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                         ? const SizedBox.shrink()
                         : Padding(
                             padding: const EdgeInsets.only(top: 10),
-                            child: Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text(
-                                  context.l10n.everyLabel,
-                                  style: localeFont(color: cs.onSurfaceVariant),
+                                Row(
+                                  children: [
+                                    Text(
+                                      context.l10n.everyLabel,
+                                      style: localeFont(
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    SizedBox(
+                                      width: 80,
+                                      child: TextField(
+                                        key: const Key('recurring_custom_count'),
+                                        controller: _customDaysController,
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (_) => setState(() {}),
+                                        onTapOutside: (_) => FocusManager
+                                            .instance
+                                            .primaryFocus
+                                            ?.unfocus(),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                          LengthLimitingTextInputFormatter(3),
+                                        ],
+                                        textAlign: TextAlign.center,
+                                        style: localeFont(
+                                          color: cs.onSurface,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        _unitLabel(context, _customUnit),
+                                        style: localeFont(
+                                          color: cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 10),
-                                SizedBox(
-                                  width: 80,
-                                  child: TextField(
-                                    controller: _customDaysController,
-                                    keyboardType: TextInputType.number,
-                                    onTapOutside: (_) => FocusManager
-                                        .instance
-                                        .primaryFocus
-                                        ?.unfocus(),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    textAlign: TextAlign.center,
+                                if (_customCount == null) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    context.l10n.intervalInvalid,
                                     style: localeFont(
-                                      color: cs.onSurface,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: cs.error,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  context.l10n.daysLabel,
-                                  style: localeFont(color: cs.onSurfaceVariant),
+                                ],
+                                const SizedBox(height: 10),
+                                KuberSegmented<RecurrenceUnit>(
+                                  groupValue: _customUnit,
+                                  onChanged: (u) =>
+                                      setState(() => _customUnit = u),
+                                  segments: [
+                                    for (final u in RecurrenceUnit.values)
+                                      KuberSegment(
+                                        value: u,
+                                        label: _unitLabel(context, u),
+                                      ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -350,8 +402,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                   const SizedBox(height: 4),
                   _NextOccurrencePreview(
                     startDate: _startDate,
-                    frequency: _frequency,
-                    endType: _endType,
+                    interval: _interval,
                   ),
                 ],
               ),
@@ -515,9 +566,12 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     if (picked != null) setState(() => _endDate = picked);
   }
 
-  // PRESERVED VERBATIM ─────────────────────────────────────────────
   Future<void> _save() async {
     final rule = widget.existingRule ?? RecurringRule();
+    // The schedule before this edit; `rule` is updated in place below.
+    final before = _isEdit
+        ? (rule.startDate, RecurrenceInterval.of(rule), rule.nextDueAt)
+        : null;
     rule
       ..name = _nameController.text.trim()
       ..amount = double.parse(_amountController.text.trim().replaceAll(',', ''))
@@ -528,16 +582,22 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           ? null
           : _notesController.text.trim()
       ..frequency = _frequency
-      ..customDays = _frequency == 'custom'
-          ? int.tryParse(_customDaysController.text.trim())
-          : null
+      ..customDays = _interval.count
+      ..intervalUnit = _interval.unit.name
       ..startDate = _startDate
       ..endType = _endType
       ..endAfter = _endType == 'occurrences'
           ? int.tryParse(_endAfterController.text.trim())
           : null
       ..endDate = _endType == 'date' ? _endDate : null;
-    rule.nextDueAt = _startDate;
+    rule.nextDueAt = before == null
+        ? _startDate
+        : RecurringRepository.nextDueAfterEdit(
+            rule,
+            oldStartDate: before.$1,
+            oldInterval: before.$2,
+            oldNextDueAt: before.$3,
+          );
 
     if (_isEdit) {
       await ref.read(recurringListProvider.notifier).updateRule(rule);
@@ -548,29 +608,23 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   }
 }
 
-// Localized title-case frequency label by value.
-String _freqTitle(BuildContext context, String value) {
+String _unitLabel(BuildContext context, RecurrenceUnit unit) {
   final l = context.l10n;
-  return switch (value) {
-    'daily' => l.freqDaily,
-    'weekly' => l.freqWeekly,
-    'biweekly' => l.freqBiweekly,
-    'yearly' => l.freqYearly,
-    'quarterly' => l.freqQuarterly,
-    'custom' => l.freqCustom,
-    _ => l.freqMonthly,
+  return switch (unit) {
+    RecurrenceUnit.day => l.daysLabel,
+    RecurrenceUnit.week => l.weeksLabel,
+    RecurrenceUnit.month => l.monthsLabel,
+    RecurrenceUnit.year => l.yearsLabel,
   };
 }
 
 // ─── Next-occurrence preview strip ──────────────────────────────────
 class _NextOccurrencePreview extends StatelessWidget {
   final DateTime startDate;
-  final String frequency;
-  final String endType;
+  final RecurrenceInterval interval;
   const _NextOccurrencePreview({
     required this.startDate,
-    required this.frequency,
-    required this.endType,
+    required this.interval,
   });
 
   @override
@@ -578,15 +632,22 @@ class _NextOccurrencePreview extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final l = context.l10n;
     final next = DateFormat('d MMM yyyy').format(startDate);
-    final cadence = switch (frequency) {
-      'daily' => l.cadenceDaily,
-      'weekly' => l.cadenceWeekly,
-      'biweekly' => l.cadenceBiweekly,
-      'monthly' => l.cadenceMonthly,
-      'yearly' => l.cadenceYearly,
-      'custom' => l.cadenceCustom,
-      _ => '',
-    };
+    final String cadence;
+    if (interval.count == 1) {
+      cadence = switch (interval.unit) {
+        RecurrenceUnit.day => l.cadenceDaily,
+        RecurrenceUnit.week => l.cadenceWeekly,
+        RecurrenceUnit.month => l.cadenceMonthly,
+        RecurrenceUnit.year => l.cadenceYearly,
+      };
+    } else {
+      // "then every 3 months": English sentence case mid-sentence.
+      final desc = interval.describe(l);
+      cadence = l.cadenceThen(Localizations.localeOf(context).languageCode ==
+              'en'
+          ? desc.replaceFirst('E', 'e')
+          : desc);
+    }
     return Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

@@ -3271,5 +3271,42 @@
     }
   },
   "homeV33GsActAccounts": "View accounts",
-  "homeV33GsStepAccounts": "Set up accounts"
+  "homeV33GsStepAccounts": "Set up accounts",
+  "freqEveryNWeeks": "Every {count} weeks",
+  "@freqEveryNWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "freqEveryNMonths": "Every {count} months",
+  "@freqEveryNMonths": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "freqEveryNYears": "Every {count} years",
+  "@freqEveryNYears": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "weeksLabel": "weeks",
+  "monthsLabel": "months",
+  "yearsLabel": "years",
+  "intervalInvalid": "Enter a whole number of 1 or more",
+  "cadenceThen": "then {interval}",
+  "@cadenceThen": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "notifItemMissing": "This item no longer exists."
 }

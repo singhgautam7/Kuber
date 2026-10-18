@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_chips.dart';
@@ -13,13 +13,8 @@ import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../categories/providers/category_provider.dart';
 import '../providers/advanced_analytics_provider.dart';
 
-final _moneyFormat = NumberFormat.currency(
-  locale: 'en_IN',
-  symbol: '₹',
-  decimalDigits: 0,
-);
-
-String aaMoney(double amount) => _moneyFormat.format(amount);
+String aaMoney(double amount) =>
+    AppFormatter.current.formatCurrency(amount.round());
 String aaPercent(double value) => '${value.toStringAsFixed(1)}%';
 
 /// One block of an Advanced Analytics screen (board "Trends"): a caps

@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "আপনার অ্যাকাউন্টগুলো দেখুন, তারপর প্রথম লেনদেন যোগ করুন। এক মিনিট লাগবে।",
   "homeV33GsProgress": "2টির মধ্যে {done}টি সম্পন্ন",
   "homeV33GsActAccounts": "অ্যাকাউন্ট দেখুন",
-  "homeV33GsStepAccounts": "অ্যাকাউন্ট সেট করুন"
+  "homeV33GsStepAccounts": "অ্যাকাউন্ট সেট করুন",
+  "freqEveryNWeeks": "প্রতি {count} সপ্তাহ",
+  "freqEveryNMonths": "প্রতি {count} মাস",
+  "freqEveryNYears": "প্রতি {count} বছর",
+  "weeksLabel": "সপ্তাহ",
+  "monthsLabel": "মাস",
+  "yearsLabel": "বছর",
+  "intervalInvalid": "1 বা তার বেশি একটি পূর্ণ সংখ্যা দিন",
+  "cadenceThen": "তারপর {interval}",
+  "notifItemMissing": "এই আইটেমটি আর নেই।"
 }

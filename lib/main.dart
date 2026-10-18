@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'core/router/app_router.dart' show initialLocationProvider;
 import 'core/utils/frame_budget_monitor.dart';
+import 'core/utils/currency_data.dart';
+import 'core/utils/formatters.dart';
 import 'core/utils/prefs_keys.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'core/database/isar_service.dart';
@@ -129,6 +131,7 @@ Future<void> _bootstrap() async {
   var onboarded = false;
   var bootThemeOptions = const ThemeOptions();
   var bootTextSizeLevel = 3;
+  var bootNumberFormat = ('INR', NumberSystem.indian);
   try {
     final prefs = await SharedPreferences.getInstance();
     bootThemeOptions = ThemeOptions(
@@ -144,6 +147,18 @@ Future<void> _bootstrap() async {
     );
     bootTextSizeLevel = prefs.getInt(PrefsKeys.textSizeLevel) ?? 3;
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
+    final systemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
+    bootNumberFormat = (
+      prefs.getString(PrefsKeys.currency) ?? 'INR',
+      NumberSystem
+          .values[systemIndex.clamp(0, NumberSystem.values.length - 1)],
+    );
+    // Amounts formatted before the provider tree exists (reminder action
+    // notifications below) use the user's currency, not the INR default.
+    AppFormatter.current = AppFormatter(
+      system: bootNumberFormat.$2,
+      symbol: currencyFromCode(bootNumberFormat.$1).symbol,
+    );
   } catch (e) {
     debugPrint('Kuber: boot theme read failed (non-fatal): $e');
   }
@@ -174,7 +189,10 @@ Future<void> _bootstrap() async {
     // `pendingDeeplinkProvider` which the dashboard consumes after first frame.
     String? capturedPayload;
     await NotificationService().init(
-      onTap: (payload) => capturedPayload = payload,
+      onTap: (payload) {
+        capturedPayload = payload;
+        notificationTaps.add(payload);
+      },
       // Reminder notification action buttons (Mark done / Snooze 1 hour)
       // apply directly, matching quick-action semantics.
       onAction: (actionId, payload) {
@@ -231,6 +249,7 @@ Future<void> _bootstrap() async {
           bootThemeProvider.overrideWithValue(bootTheme),
           bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
           bootTextSizeLevelProvider.overrideWithValue(bootTextSizeLevel),
+          bootNumberFormatProvider.overrideWithValue(bootNumberFormat),
           homeV2BootProvider.overrideWithValue(homeV2),
           hasTransactionsBootProvider.overrideWithValue(hasTransactions),
           initialLocationProvider.overrideWithValue(initialLocation),

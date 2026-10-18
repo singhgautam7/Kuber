@@ -10069,6 +10069,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set up accounts'**
   String get homeV33GsStepAccounts;
+
+  /// No description provided for @freqEveryNWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} weeks'**
+  String freqEveryNWeeks(String count);
+
+  /// No description provided for @freqEveryNMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} months'**
+  String freqEveryNMonths(String count);
+
+  /// No description provided for @freqEveryNYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} years'**
+  String freqEveryNYears(String count);
+
+  /// No description provided for @weeksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get weeksLabel;
+
+  /// No description provided for @monthsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get monthsLabel;
+
+  /// No description provided for @yearsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get yearsLabel;
+
+  /// No description provided for @intervalInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number of 1 or more'**
+  String get intervalInvalid;
+
+  /// No description provided for @cadenceThen.
+  ///
+  /// In en, this message translates to:
+  /// **'then {interval}'**
+  String cadenceThen(String interval);
+
+  /// No description provided for @notifItemMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This item no longer exists.'**
+  String get notifItemMissing;
 }
 
 class _AppLocalizationsDelegate

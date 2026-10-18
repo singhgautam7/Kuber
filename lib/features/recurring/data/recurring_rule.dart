@@ -15,8 +15,19 @@ class RecurringRule {
 
   String? notes;
 
-  late String frequency; // 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly' | 'custom'
-  int? customDays; // only used when frequency == 'custom'
+  // Preset key, kept for CSV / backups: 'daily' | 'weekly' | 'monthly' |
+  // 'quarterly' | 'half_yearly' | 'yearly' | 'custom' (legacy: 'biweekly').
+  // The schedule comes from RecurrenceInterval.of(rule), not this string.
+  late String frequency;
+
+  /// Interval count ("every N units"). Legacy rules (intervalUnit == null)
+  /// only set it for frequency == 'custom', where the unit was days. The
+  /// field keeps its original name so old databases and backups read as-is.
+  int? customDays;
+
+  /// 'day' | 'week' | 'month' | 'year'. Null on rules saved before intervals
+  /// existed; RecurrenceInterval.legacy maps those (migration 10 backfills).
+  String? intervalUnit;
 
   late DateTime startDate;
 
@@ -44,6 +55,7 @@ class RecurringRule {
     'notes': notes,
     'frequency': frequency,
     'customDays': customDays,
+    'intervalUnit': intervalUnit,
     'startDate': startDate.toIso8601String(),
     'nextDueAt': nextDueAt.toIso8601String(),
     'executionCount': executionCount,

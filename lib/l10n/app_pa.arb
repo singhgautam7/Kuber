@@ -1658,5 +1658,14 @@
   "homeV33GsBodyFresh": "ਆਪਣੇ ਖਾਤੇ ਵੇਖੋ, ਫਿਰ ਪਹਿਲਾ ਲੈਣ-ਦੇਣ ਜੋੜੋ। ਬੱਸ ਇੱਕ ਮਿੰਟ ਲੱਗੇਗਾ।",
   "homeV33GsProgress": "2 ਵਿੱਚੋਂ {done} ਪੂਰੇ",
   "homeV33GsActAccounts": "ਖਾਤੇ ਵੇਖੋ",
-  "homeV33GsStepAccounts": "ਖਾਤੇ ਸੈੱਟ ਕਰੋ"
+  "homeV33GsStepAccounts": "ਖਾਤੇ ਸੈੱਟ ਕਰੋ",
+  "freqEveryNWeeks": "ਹਰ {count} ਹਫ਼ਤੇ",
+  "freqEveryNMonths": "ਹਰ {count} ਮਹੀਨੇ",
+  "freqEveryNYears": "ਹਰ {count} ਸਾਲ",
+  "weeksLabel": "ਹਫ਼ਤੇ",
+  "monthsLabel": "ਮਹੀਨੇ",
+  "yearsLabel": "ਸਾਲ",
+  "intervalInvalid": "1 ਜਾਂ ਵੱਧ ਪੂਰੀ ਸੰਖਿਆ ਦਰਜ ਕਰੋ",
+  "cadenceThen": "ਫਿਰ {interval}",
+  "notifItemMissing": "ਇਹ ਆਈਟਮ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।"
 }

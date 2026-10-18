@@ -5686,4 +5686,40 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get homeV33GsStepAccounts => 'கணக்குகளை அமை';
+
+  @override
+  String freqEveryNWeeks(String count) {
+    return 'ஒவ்வொரு $count வாரங்களுக்கும்';
+  }
+
+  @override
+  String freqEveryNMonths(String count) {
+    return 'ஒவ்வொரு $count மாதங்களுக்கும்';
+  }
+
+  @override
+  String freqEveryNYears(String count) {
+    return 'ஒவ்வொரு $count ஆண்டுகளுக்கும்';
+  }
+
+  @override
+  String get weeksLabel => 'வாரங்கள்';
+
+  @override
+  String get monthsLabel => 'மாதங்கள்';
+
+  @override
+  String get yearsLabel => 'ஆண்டுகள்';
+
+  @override
+  String get intervalInvalid =>
+      '1 அல்லது அதற்கு மேற்பட்ட முழு எண்ணை உள்ளிடவும்';
+
+  @override
+  String cadenceThen(String interval) {
+    return 'பிறகு $interval';
+  }
+
+  @override
+  String get notifItemMissing => 'இந்த உருப்படி இப்போது இல்லை.';
 }

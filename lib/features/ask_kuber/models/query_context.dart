@@ -128,7 +128,7 @@ class QueryContext {
     List<Category> categories = const [],
     SettingsState settings = const SettingsState(),
     AppFormatter? formatter,
-    String currencySymbol = '₹',
+    String? currencySymbol,
     DateTime? now,
   }) {
     final n = now ?? DateTime.now();
@@ -142,7 +142,7 @@ class QueryContext {
       categories: categories,
       settings: settings,
       formatter: formatter ?? AppFormatter(),
-      currencySymbol: currencySymbol,
+      currencySymbol: currencySymbol ?? (formatter ?? AppFormatter()).symbol,
       extractor: const ParameterExtractor(),
       now: n,
       today: today,

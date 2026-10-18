@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/categories/data/category_group.dart';
+import '../../features/recurring/data/recurring_interval.dart';
+import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/stories/data/insight_story.dart';
 import '../../features/transactions/services/suggestion_service.dart';
 import '../../features/widget_editor/data/widget_preference.dart';
@@ -75,6 +78,29 @@ class MigrationService {
       await _cashGreen(isar);
       await prefs.setBool(PrefsKeys.migratedCashGreenV1, true);
     }
+
+    // Migration 10: recurring rules get an explicit "every N units" interval.
+    // Each legacy frequency maps to the equivalent count + unit, so next
+    // dates are unchanged; nextDueAt and every other field stay as stored.
+    if (!(prefs.getBool(PrefsKeys.migratedRecurringIntervalV1) ?? false)) {
+      await migrateRecurringIntervals(isar);
+      await prefs.setBool(PrefsKeys.migratedRecurringIntervalV1, true);
+    }
+  }
+
+  @visibleForTesting
+  static Future<void> migrateRecurringIntervals(Isar isar) async {
+    await isar.writeTxn(() async {
+      final legacy =
+          await isar.recurringRules.filter().intervalUnitIsNull().findAll();
+      for (final r in legacy) {
+        final interval = RecurrenceInterval.legacy(r.frequency, r.customDays);
+        r
+          ..customDays = interval.count
+          ..intervalUnit = interval.unit.name;
+      }
+      await isar.recurringRules.putAll(legacy);
+    });
   }
 
   static const _oldCashGrey = 0xFF9E9E9E;

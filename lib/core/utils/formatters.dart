@@ -5,7 +5,30 @@ import '../../features/settings/providers/settings_provider.dart';
 class AppFormatter {
   final NumberSystem system;
 
-  AppFormatter({this.system = NumberSystem.indian});
+  /// The selected currency's symbol. Every amount in the app is formatted
+  /// with it unless a caller passes an explicit `symbol:` (currency converter).
+  final String symbol;
+
+  AppFormatter({this.system = NumberSystem.indian, this.symbol = '₹'});
+
+  /// The formatter for the current settings, for code that has no `ref`
+  /// (notification bodies, stories isolate input). Seeded from prefs in
+  /// `_bootstrap` and refreshed whenever `formatterProvider` rebuilds.
+  static AppFormatter current = AppFormatter();
+
+  /// Token stored in persisted text (in-app notification bodies) in place of a
+  /// formatted amount, so it renders in the currency selected at display time.
+  static String amountToken(num amount) => '{amt:$amount}';
+
+  static final RegExp _amountTokenRe = RegExp(r'\{amt:(-?[\d.]+)\}');
+
+  /// Replaces [amountToken]s in [text] with formatted amounts, or `****` when
+  /// [isPrivate]. Text without tokens (older rows) is returned unchanged.
+  String renderAmountTokens(String text, {bool isPrivate = false}) =>
+      text.replaceAllMapped(_amountTokenRe, (m) {
+        if (isPrivate) return '****';
+        return formatCurrency(double.tryParse(m[1]!) ?? 0);
+      });
 
   static final Map<String, NumberFormat> _cache = {};
 
@@ -25,7 +48,8 @@ class AppFormatter {
     return _cache[key]!;
   }
 
-  String formatCurrency(num amount, {String symbol = '₹'}) {
+  String formatCurrency(num amount, {String? symbol}) {
+    symbol ??= this.symbol;
     final locale = system == NumberSystem.indian ? 'en_IN' : 'en_US';
     final formatter = _getFormatter(
       locale: locale,
@@ -38,7 +62,8 @@ class AppFormatter {
     return amount < 0 ? '-$formatted' : formatted;
   }
 
-  String formatCompactCurrency(num amount, {String symbol = '₹'}) {
+  String formatCompactCurrency(num amount, {String? symbol}) {
+    symbol ??= this.symbol;
     if (amount == 0) return '${symbol}0';
     final isNegative = amount < 0;
     final absAmount = amount.abs();

@@ -4,6 +4,7 @@ import 'package:kuber/l10n/app_localizations.dart' show lookupAppLocalizations;
 import '../data/budget.dart';
 import '../data/budget_repository.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/utils/formatters.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../notifications/data/app_notification.dart';
 import '../../notifications/providers/notification_provider.dart';
@@ -83,9 +84,12 @@ class BudgetService {
           if (alert.type == BudgetAlertType.percentage) {
             body = loc.notifBudgetReachedBody('${alert.value.toInt()}', cat.name);
           } else {
+            // Stored with an amount token so the inbox renders it in the
+            // currency selected at display time; the OS copy is formatted now.
             body = loc.notifBudgetSpentBody(
-                ref.read(formatterProvider).formatCurrency(alert.value), cat.name);
+                AppFormatter.amountToken(alert.value), cat.name);
           }
+          final osBody = ref.read(formatterProvider).renderAmountTokens(body);
 
           final payload = 'budget:${budget.id}';
           final inserted =
@@ -102,7 +106,7 @@ class BudgetService {
                   type: NotificationType.budgetAlert,
                   id: notificationId,
                   title: title,
-                  body: body,
+                  body: osBody,
                   payload: payload,
                 );
           }
