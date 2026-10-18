@@ -3308,5 +3308,16 @@
       }
     }
   },
-  "notifItemMissing": "This item no longer exists."
+  "notifItemMissing": "This item no longer exists.",
+  "nextBackupOn": "Next: {date}, on app open",
+  "@nextBackupOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "nextBackupNextOpen": "Next: on next app open",
+  "backupsAreOn": "Backups are on",
+  "backupsAreOnDesc": "Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately."
 }

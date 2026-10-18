@@ -1667,5 +1667,9 @@
   "yearsLabel": "ਸਾਲ",
   "intervalInvalid": "1 ਜਾਂ ਵੱਧ ਪੂਰੀ ਸੰਖਿਆ ਦਰਜ ਕਰੋ",
   "cadenceThen": "ਫਿਰ {interval}",
-  "notifItemMissing": "ਇਹ ਆਈਟਮ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।"
+  "notifItemMissing": "ਇਹ ਆਈਟਮ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।",
+  "nextBackupOn": "ਅਗਲਾ: {date}, ਐਪ ਖੋਲ੍ਹਣ 'ਤੇ",
+  "nextBackupNextOpen": "ਅਗਲਾ: ਅਗਲੀ ਵਾਰ ਐਪ ਖੋਲ੍ਹਣ 'ਤੇ",
+  "backupsAreOn": "ਬੈਕਅੱਪ ਚਾਲੂ ਹੈ",
+  "backupsAreOnDesc": "ਪਹਿਲਾ ਤੈਅ ਬੈਕਅੱਪ ਅਗਲੀ ਵਾਰ ਐਪ ਖੋਲ੍ਹਣ 'ਤੇ ਚੱਲੇਗਾ। ਜਾਂ ਹੁਣੇ ਬੈਕਅੱਪ ਲਓ।"
 }

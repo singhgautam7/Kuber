@@ -266,6 +266,7 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
             fromSms: t.importSource == 'sms',
             smsText: t.importedFromSms,
             note: t.notes,
+            linkedType: t.linkedRuleType,
           ),
     ];
     final categories = await ref.read(categoryListProvider.future);
@@ -333,6 +334,18 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
             amount: r.amount,
             active: !r.isPaused,
           ),
+      ],
+      automations: [
+        for (final l
+            in await isar.loans.filter().isCompletedEqualTo(false).findAll())
+          SgRule(name: l.name, categoryId: l.categoryId, amount: l.emiAmount),
+        for (final inv in await isar.investments.where().findAll())
+          if ((inv.sipAmount ?? 0) > 0)
+            SgRule(
+              name: inv.name,
+              categoryId: inv.categoryId,
+              amount: inv.sipAmount!,
+            ),
       ],
       activeBudgetCategoryIds: {
         for (final b in budgets)

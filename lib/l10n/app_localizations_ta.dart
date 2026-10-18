@@ -5722,4 +5722,20 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'இந்த உருப்படி இப்போது இல்லை.';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'அடுத்தது: $date, ஆப்பைத் திறக்கும்போது';
+  }
+
+  @override
+  String get nextBackupNextOpen =>
+      'அடுத்தது: அடுத்த முறை ஆப்பைத் திறக்கும்போது';
+
+  @override
+  String get backupsAreOn => 'காப்புப்பிரதி இயக்கத்தில் உள்ளது';
+
+  @override
+  String get backupsAreOnDesc =>
+      'முதல் திட்டமிட்ட காப்புப்பிரதி அடுத்த முறை ஆப்பைத் திறக்கும்போது இயங்கும். அல்லது இப்போதே காப்புப்பிரதி எடுக்கவும்.';
 }

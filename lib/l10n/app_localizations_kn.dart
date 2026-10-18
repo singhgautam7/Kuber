@@ -5681,4 +5681,19 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'ಈ ಐಟಂ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'ಮುಂದಿನದು: $date, ಆ್ಯಪ್ ತೆರೆದಾಗ';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'ಮುಂದಿನದು: ಮುಂದಿನ ಬಾರಿ ಆ್ಯಪ್ ತೆರೆದಾಗ';
+
+  @override
+  String get backupsAreOn => 'ಬ್ಯಾಕಪ್ ಆನ್ ಆಗಿದೆ';
+
+  @override
+  String get backupsAreOnDesc =>
+      'ಮೊದಲ ನಿಗದಿತ ಬ್ಯಾಕಪ್ ಮುಂದಿನ ಬಾರಿ ಆ್ಯಪ್ ತೆರೆದಾಗ ನಡೆಯುತ್ತದೆ. ಅಥವಾ ಈಗಲೇ ಬ್ಯಾಕಪ್ ಮಾಡಿ.';
 }

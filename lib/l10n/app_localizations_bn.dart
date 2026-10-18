@@ -5656,4 +5656,19 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'এই আইটেমটি আর নেই।';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'পরবর্তী: $date, অ্যাপ খুললে';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'পরবর্তী: পরের বার অ্যাপ খুললে';
+
+  @override
+  String get backupsAreOn => 'ব্যাকআপ চালু আছে';
+
+  @override
+  String get backupsAreOnDesc =>
+      'প্রথম নির্ধারিত ব্যাকআপ পরের বার অ্যাপ খুললে চলবে। অথবা এখনই ব্যাকআপ নিন।';
 }

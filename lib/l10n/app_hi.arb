@@ -1667,5 +1667,9 @@
   "yearsLabel": "साल",
   "intervalInvalid": "1 या उससे बड़ी पूरी संख्या डालें",
   "cadenceThen": "फिर {interval}",
-  "notifItemMissing": "यह आइटम अब मौजूद नहीं है।"
+  "notifItemMissing": "यह आइटम अब मौजूद नहीं है।",
+  "nextBackupOn": "अगला: {date}, ऐप खुलने पर",
+  "nextBackupNextOpen": "अगला: अगली बार ऐप खुलने पर",
+  "backupsAreOn": "बैकअप चालू है",
+  "backupsAreOnDesc": "पहला शेड्यूल्ड बैकअप अगली बार ऐप खुलने पर चलेगा। या अभी बैकअप लें।"
 }

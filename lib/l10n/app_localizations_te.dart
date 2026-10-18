@@ -5678,4 +5678,19 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'ఈ అంశం ఇప్పుడు లేదు.';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'తదుపరి: $date, యాప్ తెరిచినప్పుడు';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'తదుపరి: తదుపరి సారి యాప్ తెరిచినప్పుడు';
+
+  @override
+  String get backupsAreOn => 'బ్యాకప్ ఆన్‌లో ఉంది';
+
+  @override
+  String get backupsAreOnDesc =>
+      'మొదటి షెడ్యూల్డ్ బ్యాకప్ తదుపరి సారి యాప్ తెరిచినప్పుడు జరుగుతుంది. లేదా ఇప్పుడే బ్యాకప్ చేయండి.';
 }

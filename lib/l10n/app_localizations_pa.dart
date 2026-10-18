@@ -5642,4 +5642,19 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'ਇਹ ਆਈਟਮ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'ਅਗਲਾ: $date, ਐਪ ਖੋਲ੍ਹਣ \'ਤੇ';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'ਅਗਲਾ: ਅਗਲੀ ਵਾਰ ਐਪ ਖੋਲ੍ਹਣ \'ਤੇ';
+
+  @override
+  String get backupsAreOn => 'ਬੈਕਅੱਪ ਚਾਲੂ ਹੈ';
+
+  @override
+  String get backupsAreOnDesc =>
+      'ਪਹਿਲਾ ਤੈਅ ਬੈਕਅੱਪ ਅਗਲੀ ਵਾਰ ਐਪ ਖੋਲ੍ਹਣ \'ਤੇ ਚੱਲੇਗਾ। ਜਾਂ ਹੁਣੇ ਬੈਕਅੱਪ ਲਓ।';
 }

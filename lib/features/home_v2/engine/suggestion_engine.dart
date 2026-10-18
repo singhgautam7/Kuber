@@ -76,6 +76,10 @@ class SgTxn {
   /// Transaction note, if any.
   final String? note;
 
+  /// `Transaction.linkedRuleType`: 'recurring' | 'loan' | 'investment' |
+  /// 'lent' | 'borrowed', or null for a hand-entered row.
+  final String? linkedType;
+
   const SgTxn({
     required this.at,
     required this.amount,
@@ -87,6 +91,7 @@ class SgTxn {
     this.fromSms = false,
     this.smsText,
     this.note,
+    this.linkedType,
   });
 }
 
@@ -149,6 +154,10 @@ class SgInput {
   final Map<String, String> categoryNames;
   final List<SgAccount> accounts;
   final List<SgRule> rules;
+
+  /// Loans and SIPs the app already tracks (EMI / SIP amount, category). A
+  /// monthly charge matching one is not suggested as a recurring rule.
+  final List<SgRule> automations;
   final Set<String> activeBudgetCategoryIds;
   final int loanCount;
   final int investmentCount;
@@ -176,6 +185,7 @@ class SgInput {
     this.categoryNames = const {},
     this.accounts = const [],
     this.rules = const [],
+    this.automations = const [],
     this.activeBudgetCategoryIds = const {},
     this.loanCount = 0,
     this.investmentCount = 0,
@@ -428,6 +438,8 @@ class SuggestionEngine {
     return null;
   }
 
+  static const _automatedLinks = {'loan', 'investment', 'lent', 'borrowed'};
+
   static List<SgCandidate> _recurring(SgInput i) {
     // Grouping key per raw name, looked up once per distinct name: a
     // subscription service's display name, else the merchant key.
@@ -446,6 +458,8 @@ class SuggestionEngine {
     final byMerchant = <String, Map<int, SgTxn>>{};
     for (final t in i.txns) {
       if (!t.isExpense || t.isTransfer) continue;
+      // Rows a loan, SIP or lend / borrow entry created are already automated.
+      if (_automatedLinks.contains(t.linkedType)) continue;
       final key = groupKey(t.name);
       if (key.length < 2) continue;
       final months = byMerchant.putIfAbsent(key, () => {});
@@ -472,8 +486,8 @@ class SuggestionEngine {
       final days = [for (final t in charges) _clampedDay(t.at).toDouble()];
       final medDay = _median(days);
       if (days.any((d) => (d - medDay).abs() > 3)) return;
-      // Already covered by an active recurring rule?
-      final covered = i.rules.any(
+      // Already covered by an active recurring rule, loan EMI or SIP?
+      final covered = [...i.rules, ...i.automations].any(
         (r) =>
             r.active &&
             (groupKey(r.name) == key ||

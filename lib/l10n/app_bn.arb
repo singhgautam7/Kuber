@@ -1667,5 +1667,9 @@
   "yearsLabel": "বছর",
   "intervalInvalid": "1 বা তার বেশি একটি পূর্ণ সংখ্যা দিন",
   "cadenceThen": "তারপর {interval}",
-  "notifItemMissing": "এই আইটেমটি আর নেই।"
+  "notifItemMissing": "এই আইটেমটি আর নেই।",
+  "nextBackupOn": "পরবর্তী: {date}, অ্যাপ খুললে",
+  "nextBackupNextOpen": "পরবর্তী: পরের বার অ্যাপ খুললে",
+  "backupsAreOn": "ব্যাকআপ চালু আছে",
+  "backupsAreOnDesc": "প্রথম নির্ধারিত ব্যাকআপ পরের বার অ্যাপ খুললে চলবে। অথবা এখনই ব্যাকআপ নিন।"
 }

@@ -1667,5 +1667,9 @@
   "yearsLabel": "वर्षे",
   "intervalInvalid": "1 किंवा त्याहून मोठी पूर्ण संख्या टाका",
   "cadenceThen": "मग {interval}",
-  "notifItemMissing": "ही नोंद आता अस्तित्वात नाही."
+  "notifItemMissing": "ही नोंद आता अस्तित्वात नाही.",
+  "nextBackupOn": "पुढील: {date}, ॲप उघडल्यावर",
+  "nextBackupNextOpen": "पुढील: पुढच्या वेळी ॲप उघडल्यावर",
+  "backupsAreOn": "बॅकअप चालू आहे",
+  "backupsAreOnDesc": "पहिला नियोजित बॅकअप पुढच्या वेळी ॲप उघडल्यावर होईल. किंवा आत्ताच बॅकअप घ्या."
 }

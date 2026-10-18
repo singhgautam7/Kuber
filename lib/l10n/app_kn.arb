@@ -1667,5 +1667,9 @@
   "yearsLabel": "ವರ್ಷಗಳು",
   "intervalInvalid": "1 ಅಥವಾ ಹೆಚ್ಚಿನ ಪೂರ್ಣ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
   "cadenceThen": "ನಂತರ {interval}",
-  "notifItemMissing": "ಈ ಐಟಂ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ."
+  "notifItemMissing": "ಈ ಐಟಂ ಈಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.",
+  "nextBackupOn": "ಮುಂದಿನದು: {date}, ಆ್ಯಪ್ ತೆರೆದಾಗ",
+  "nextBackupNextOpen": "ಮುಂದಿನದು: ಮುಂದಿನ ಬಾರಿ ಆ್ಯಪ್ ತೆರೆದಾಗ",
+  "backupsAreOn": "ಬ್ಯಾಕಪ್ ಆನ್ ಆಗಿದೆ",
+  "backupsAreOnDesc": "ಮೊದಲ ನಿಗದಿತ ಬ್ಯಾಕಪ್ ಮುಂದಿನ ಬಾರಿ ಆ್ಯಪ್ ತೆರೆದಾಗ ನಡೆಯುತ್ತದೆ. ಅಥವಾ ಈಗಲೇ ಬ್ಯಾಕಪ್ ಮಾಡಿ."
 }

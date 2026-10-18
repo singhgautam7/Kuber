@@ -5653,4 +5653,19 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'ही नोंद आता अस्तित्वात नाही.';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'पुढील: $date, ॲप उघडल्यावर';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'पुढील: पुढच्या वेळी ॲप उघडल्यावर';
+
+  @override
+  String get backupsAreOn => 'बॅकअप चालू आहे';
+
+  @override
+  String get backupsAreOnDesc =>
+      'पहिला नियोजित बॅकअप पुढच्या वेळी ॲप उघडल्यावर होईल. किंवा आत्ताच बॅकअप घ्या.';
 }

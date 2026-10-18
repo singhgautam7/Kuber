@@ -10123,6 +10123,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This item no longer exists.'**
   String get notifItemMissing;
+
+  /// No description provided for @nextBackupOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date}, on app open'**
+  String nextBackupOn(String date);
+
+  /// No description provided for @nextBackupNextOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: on next app open'**
+  String get nextBackupNextOpen;
+
+  /// No description provided for @backupsAreOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups are on'**
+  String get backupsAreOn;
+
+  /// No description provided for @backupsAreOnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately.'**
+  String get backupsAreOnDesc;
 }
 
 class _AppLocalizationsDelegate

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:kuber/shared/widgets/kuber_list.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/loading_widgets.dart';
 
 // ---------------------------------------------------------------------------
@@ -133,53 +134,23 @@ class ConfirmActionSheet extends StatelessWidget {
             ),
           const SizedBox(height: KuberSpace.xl),
 
-          // Confirm button
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                onConfirm();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: destructive ? cs.error : cs.primary,
-                foregroundColor: destructive ? cs.onError : cs.onPrimary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberShape.medium),
-                ),
-              ),
-              child: Text(
-                confirmLabel,
-                style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-            ),
+          // Shared stadium buttons (board 2i), same as every other sheet.
+          AppButton(
+            label: confirmLabel,
+            type: destructive ? AppButtonType.danger : AppButtonType.primary,
+            filled: destructive,
+            fullWidth: true,
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
           ),
           const SizedBox(height: KuberSpace.md),
-
-          // Cancel button
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: cs.surfaceContainerHigh,
-                foregroundColor: cs.onSurface,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberShape.medium),
-                  side: BorderSide(
-                    color: cs.outlineVariant.withValues(alpha: 0.1),
-                  ),
-                ),
-              ),
-              child: Text(
-                context.l10n.cancelLabel,
-                style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-            ),
+          AppButton(
+            label: context.l10n.cancelLabel,
+            type: AppButtonType.outline,
+            fullWidth: true,
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),

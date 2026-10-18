@@ -5703,4 +5703,19 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'ഈ ഇനം ഇപ്പോൾ നിലവിലില്ല.';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'അടുത്തത്: $date, ആപ്പ് തുറക്കുമ്പോൾ';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'അടുത്തത്: അടുത്ത തവണ ആപ്പ് തുറക്കുമ്പോൾ';
+
+  @override
+  String get backupsAreOn => 'ബാക്കപ്പ് ഓണാണ്';
+
+  @override
+  String get backupsAreOnDesc =>
+      'ആദ്യ ഷെഡ്യൂൾ ചെയ്ത ബാക്കപ്പ് അടുത്ത തവണ ആപ്പ് തുറക്കുമ്പോൾ നടക്കും. അല്ലെങ്കിൽ ഇപ്പോൾ തന്നെ ബാക്കപ്പ് ചെയ്യുക.';
 }

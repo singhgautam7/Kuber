@@ -29,6 +29,10 @@ class BackupSettings {
   final String? lastAttemptLabel;
   final DateTime? lastBackupAt;
 
+  /// Day the next scheduled backup is due (it runs on the first app open on
+  /// or after it), or null when automatic backups are off / have no folder.
+  final DateTime? nextBackupAt;
+
   const BackupSettings({
     this.enabled = false,
     this.frequency = BackupFrequency.weekly,
@@ -38,6 +42,7 @@ class BackupSettings {
     this.failureReason,
     this.lastAttemptLabel,
     this.lastBackupAt,
+    this.nextBackupAt,
   });
 
   bool get backupJustCompleted {
@@ -255,7 +260,23 @@ BackupSettings _toSettings(BackupConfig config) {
       config.lastAttemptAt ?? config.lastBackupAt,
     ),
     lastBackupAt: config.lastBackupAt,
+    nextBackupAt: nextBackupDay(config),
   );
+}
+
+/// Same rule as [BackupSettingsNotifier.isDue]: [frequency] days after the day
+/// of the last backup, or today when none has run yet.
+DateTime? nextBackupDay(BackupConfig config, {DateTime? now}) {
+  if (!config.enabled || config.folderUri == null) return null;
+  final n = now ?? DateTime.now();
+  final last = config.lastBackupAt?.toLocal();
+  if (last == null) return DateTime(n.year, n.month, n.day);
+  final days = switch (_frequencyFromString(config.frequency)) {
+    BackupFrequency.daily => 1,
+    BackupFrequency.weekly => 7,
+    BackupFrequency.monthly => 30,
+  };
+  return DateTime(last.year, last.month, last.day + days);
 }
 
 BackupFrequency _frequencyFromString(String value) {

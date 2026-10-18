@@ -5634,4 +5634,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifItemMissing => 'This item no longer exists.';
+
+  @override
+  String nextBackupOn(String date) {
+    return 'Next: $date, on app open';
+  }
+
+  @override
+  String get nextBackupNextOpen => 'Next: on next app open';
+
+  @override
+  String get backupsAreOn => 'Backups are on';
+
+  @override
+  String get backupsAreOnDesc =>
+      'Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately.';
 }
