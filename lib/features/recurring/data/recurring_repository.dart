@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 
 import '../../../core/database/base_repository.dart';
+import '../../transactions/data/transaction.dart';
 import 'recurring_interval.dart';
 import 'recurring_rule.dart';
 
@@ -72,17 +73,30 @@ class RecurringRepository extends BaseRepository<RecurringRule> {
     }
   }
 
+  /// When this rule last recorded a transaction, or null if never.
+  Future<DateTime?> lastRecordedAt(int ruleId) async {
+    final t = await isar.transactions
+        .filter()
+        .linkedRuleIdEqualTo('$ruleId')
+        .linkedRuleTypeEqualTo('recurring')
+        .sortByCreatedAtDesc()
+        .findFirst();
+    return t?.createdAt;
+  }
+
   /// The next due date for an edited [rule] (already holding the new values).
   ///
   /// Same start date and interval as before: the stored [oldNextDueAt] is
   /// kept, so editing a name or amount never re-runs past occurrences. A
   /// changed schedule restarts from the start date, skipping occurrences
-  /// before today so no back-dated catch-up transactions are created.
+  /// before today (no back-dated catch-up) and on or before the day of
+  /// [lastRecordedAt] (no second transaction for a day that already ran).
   static DateTime nextDueAfterEdit(
     RecurringRule rule, {
     required DateTime oldStartDate,
     required RecurrenceInterval oldInterval,
     required DateTime oldNextDueAt,
+    DateTime? lastRecordedAt,
     DateTime? now,
   }) {
     if (rule.startDate == oldStartDate &&
@@ -90,9 +104,14 @@ class RecurringRepository extends BaseRepository<RecurringRule> {
       return oldNextDueAt;
     }
     final n = now ?? DateTime.now();
-    final today = DateTime(n.year, n.month, n.day);
+    var floor = DateTime(n.year, n.month, n.day);
+    final last = lastRecordedAt;
+    if (last != null) {
+      final dayAfterLast = DateTime(last.year, last.month, last.day + 1);
+      if (dayAfterLast.isAfter(floor)) floor = dayAfterLast;
+    }
     var next = rule.startDate;
-    while (next.isBefore(today)) {
+    while (next.isBefore(floor)) {
       next = computeNextDue(rule, next);
     }
     return next;

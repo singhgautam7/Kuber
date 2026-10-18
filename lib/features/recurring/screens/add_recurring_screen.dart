@@ -597,6 +597,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             oldStartDate: before.$1,
             oldInterval: before.$2,
             oldNextDueAt: before.$3,
+            lastRecordedAt: await ref
+                .read(recurringRepositoryProvider)
+                .lastRecordedAt(rule.id),
           );
 
     if (_isEdit) {
