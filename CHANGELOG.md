@@ -11,6 +11,13 @@
   their schedule.
 - Tapping a notification now opens the related page and the item it is
   about, both inside the app and from your phone's notification shade.
+- Redeeming a Kuber Pro promo code now unlocks Pro as soon as you come
+  back to the app, and Restore purchases works without restarting.
+- Kuber Pro shows when your plan renews, or when it expires if you
+  cancelled. The home badge now reads "Pro User".
+- Automatic Backups shows when the next backup is due and the folder it
+  saves to.
+- Home suggestions no longer offer to add loan EMIs or SIPs as recurring.
 
 ## 5.1.0+53 — Kuber Pro launch
 

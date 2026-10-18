@@ -47,7 +47,13 @@ class PaywallManageSection extends ConsumerWidget {
     // The status row swaps by state (only truthful states — scheduled-cancel is
     // not detectable from in_app_purchase, so it is omitted; Play shows it).
     final (String statusLabel, String statusValue, Color statusColor) =
-        _statusRow(cs, context.kuberMoney.income, plan, isPromo);
+        _statusRow(
+          cs,
+          context.kuberMoney.income,
+          context.kuberMoney.warning,
+          plan,
+          isPromo,
+        );
 
     final rows = <InfoTableRow>[
       InfoTableDataRow(label: 'Plan', value: planValue),
@@ -137,6 +143,7 @@ class PaywallManageSection extends ConsumerWidget {
   (String, String, Color) _statusRow(
     ColorScheme cs,
     Color income,
+    Color warning,
     ProPlan? plan,
     bool isPromo,
   ) {
@@ -149,9 +156,12 @@ class PaywallManageSection extends ConsumerWidget {
           : 'Active until ${_shortDate(proState.promoEndsAt!)}';
       return ('Status', v, income);
     }
-    // No "Renews on" date: the app only has its own estimate (purchase date
-    // + 30 / 365 days), which is wrong for a free promo month. Play's
-    // subscriptions page (Manage on Play below) shows the real date.
+    final renewal = proState.renewalLabel();
+    if (renewal != null) {
+      // Cancelled: still Pro until the date, in warning colour.
+      final cancelled = proState.autoRenewing == false;
+      return ('Status', renewal, cancelled ? warning : income);
+    }
     return ('Status', 'Active', income);
   }
 

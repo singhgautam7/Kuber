@@ -37,9 +37,15 @@ class UserEntitlement {
   DateTime? trialEndsAt;
 
   /// Expiry of the current Pro grant. Null means Pro forever (lifetime, or a
-  /// free-forever promo). For a monthly / yearly subscription this mirrors
-  /// the Play Billing purchase expiry.
+  /// free-forever promo). For a monthly / yearly subscription: the next
+  /// renewal (or end, see [autoRenewing]) computed from the Play purchase
+  /// time, refreshed on every Play check.
   DateTime? proExpiresAt;
+
+  /// Play's `isAutoRenewing` for the subscription: false once the user
+  /// cancelled (Pro until [proExpiresAt], then it ends). Null when unknown
+  /// (lifetime, promo, or written by an older build).
+  bool? autoRenewing;
 
   /// The moment Pro was first activated for this install (purchased or
   /// promo). Feeds "N days as Pro" on the manage-state hero. Null until Pro
@@ -72,6 +78,7 @@ class UserEntitlement {
         'firstInstallAt': firstInstallAt.toIso8601String(),
         'tier': tier,
         'trialEndsAt': trialEndsAt?.toIso8601String(),
+        'autoRenewing': autoRenewing,
         'proExpiresAt': proExpiresAt?.toIso8601String(),
         'activatedAt': activatedAt?.toIso8601String(),
         'activePurchaseToken': activePurchaseToken,

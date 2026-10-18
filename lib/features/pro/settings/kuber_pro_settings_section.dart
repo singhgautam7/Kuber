@@ -96,8 +96,8 @@ class KuberProSettingsSection extends ConsumerWidget {
         ProPlan.lifetime => 'Lifetime',
         null => 'Pro',
       };
-      // No renewal date: only a client estimate is known (see the manage page).
-      return plan;
+      final renewal = s.renewalLabel();
+      return renewal == null ? plan : '$plan · ${renewal[0].toLowerCase()}${renewal.substring(1)}';
     }
     if (s.source == ProSource.promo) {
       return s.promoEndsAt == null

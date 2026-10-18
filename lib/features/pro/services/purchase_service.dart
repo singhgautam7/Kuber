@@ -223,7 +223,13 @@ class PurchaseService {
           .queryPastPurchases()
           .timeout(const Duration(seconds: 10));
       queryOk = resp.error == null;
-      hasActivePro = resp.pastPurchases.any(isActiveProPurchase);
+      final active = resp.pastPurchases.where(isActiveProPurchase);
+      hasActivePro = active.isNotEmpty;
+      // Keep "Renews on" / auto-renew current: re-apply what Play reports
+      // (a no-op rebuild-wise when nothing changed).
+      for (final p in active) {
+        if (p.status != PurchaseStatus.pending) _deliver(p, restored: true);
+      }
     } catch (e) {
       BillingDiagnostics.instance.recordError('checkForLapse', e);
       queryOk = false;
@@ -660,10 +666,15 @@ class PurchaseService {
         .read(kuberProStateProvider.notifier)
         .applyPurchase(
           plan: plan,
-          expiryDate: _expiryFor(plan, activatedAt, restored: restored),
+          expiryDate: plan == ProPlan.lifetime
+              ? null
+              : nextRenewalDate(activatedAt, plan, DateTime.now()),
           productId: productId,
           purchaseToken: purchase.verificationData.serverVerificationData,
           activatedAt: activatedAt,
+          autoRenewing: purchase is GooglePlayPurchaseDetails
+              ? purchase.billingClientPurchase.isAutoRenewing
+              : null,
         );
 
     // A fresh purchase gets the celebratory success sheet; a silent cold-start
@@ -735,25 +746,6 @@ class PurchaseService {
       if (ms != null) return DateTime.fromMillisecondsSinceEpoch(ms);
     }
     return DateTime.now();
-  }
-
-  /// Client-side expiry used only for the "Renews …" label on the manage
-  /// screen. Deliberately null on restore: Play only ever restores an active
-  /// subscription, but we can't know its true next-renewal date from the
-  /// client, and a stale computed date would wrongly read as expired. Null
-  /// renders as "Active" and never downgrades the user.
-  DateTime? _expiryFor(
-    ProPlan plan,
-    DateTime activatedAt, {
-    required bool restored,
-  }) {
-    if (plan == ProPlan.lifetime) return null;
-    if (restored) return null;
-    return switch (plan) {
-      ProPlan.monthly => activatedAt.add(const Duration(days: 30)),
-      ProPlan.yearly => activatedAt.add(const Duration(days: 365)),
-      ProPlan.lifetime => null,
-    };
   }
 }
 

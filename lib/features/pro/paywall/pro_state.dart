@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,12 +35,17 @@ class KuberProState {
   final DateTime?
   activatedAt; // when Pro/promo first turned on, for "N days as Pro"
 
+  /// False once a subscription was cancelled: Pro stays until [expiryDate]
+  /// (the end of the paid period) and then expires. Null when unknown.
+  final bool? autoRenewing;
+
   const KuberProState({
     this.source = ProSource.free,
     this.plan,
     this.promoEndsAt,
     this.expiryDate,
     this.activatedAt,
+    this.autoRenewing,
   });
 
   factory KuberProState.promo({DateTime? endsAt, DateTime? activatedAt}) =>
@@ -53,11 +59,13 @@ class KuberProState {
     required ProPlan plan,
     DateTime? expiryDate,
     DateTime? activatedAt,
+    bool? autoRenewing,
   }) => KuberProState(
     source: ProSource.purchased,
     plan: plan,
     expiryDate: expiryDate,
     activatedAt: activatedAt ?? DateTime.now(),
+    autoRenewing: autoRenewing,
   );
 
   bool get isPro => source == ProSource.purchased || source == ProSource.promo;
@@ -76,6 +84,24 @@ class KuberProState {
   bool get hasProAccess =>
       const bool.fromEnvironment('KUBER_UNLOCK_PRO') || isPro;
 
+  /// "Renews on DATE", or "Expires on DATE" once cancelled, for a monthly /
+  /// yearly subscription; null when unknown (lifetime, promo, an older build's
+  /// row before its next Play check). A renewal date that passed while
+  /// offline rolls forward to the next anniversary.
+  String? renewalLabel({DateTime? now}) {
+    final date = expiryDate;
+    if (date == null || plan == null || plan == ProPlan.lifetime) return null;
+    final n = now ?? DateTime.now();
+    String fmt(DateTime d) => DateFormat('d MMM yyyy').format(d);
+    if (autoRenewing == false) {
+      return date.isAfter(n)
+          ? 'Expires on ${fmt(date)}'
+          : 'Expired on ${fmt(date)}';
+    }
+    final next = date.isAfter(n) ? date : nextRenewalDate(date, plan!, n);
+    return 'Renews on ${fmt(next)}';
+  }
+
   /// Whole days since Pro/promo was activated. Used by the manage-state hero
   /// as a small badge of pride, not a functional countdown.
   int get daysSincePremium {
@@ -92,7 +118,8 @@ class KuberProState {
       other.plan == plan &&
       other.promoEndsAt == promoEndsAt &&
       other.expiryDate == expiryDate &&
-      other.activatedAt == activatedAt;
+      other.activatedAt == activatedAt &&
+      other.autoRenewing == autoRenewing;
 
   @override
   int get hashCode => Object.hash(
@@ -101,6 +128,7 @@ class KuberProState {
     promoEndsAt,
     expiryDate,
     activatedAt,
+    autoRenewing,
   );
 }
 
@@ -151,23 +179,21 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
         );
 
       case EntitlementTier.proMonthly:
-        if (row.proExpiresAt != null && row.proExpiresAt!.isBefore(now)) {
-          return const KuberProState(source: ProSource.free);
-        }
-        return KuberProState.purchased(
-          plan: ProPlan.monthly,
-          expiryDate: row.proExpiresAt,
-          activatedAt: row.activatedAt,
-        );
-
       case EntitlementTier.proYearly:
-        if (row.proExpiresAt != null && row.proExpiresAt!.isBefore(now)) {
+        // The date is refreshed on every Play check, so it only goes stale
+        // offline: a paying user offline past renewal day keeps Pro for
+        // [kRenewalGrace] before reading as free.
+        if (row.proExpiresAt != null &&
+            row.proExpiresAt!.add(kRenewalGrace).isBefore(now)) {
           return const KuberProState(source: ProSource.free);
         }
         return KuberProState.purchased(
-          plan: ProPlan.yearly,
+          plan: tier == EntitlementTier.proMonthly
+              ? ProPlan.monthly
+              : ProPlan.yearly,
           expiryDate: row.proExpiresAt,
           activatedAt: row.activatedAt,
+          autoRenewing: row.autoRenewing,
         );
 
       case EntitlementTier.proLifetime:
@@ -223,6 +249,7 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
     String? productId,
     String? purchaseToken,
     DateTime? activatedAt,
+    bool? autoRenewing,
   }) {
     _writeRow((r) {
       r.tier = switch (plan) {
@@ -231,6 +258,7 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
         ProPlan.lifetime => EntitlementTier.proLifetime,
       };
       r.proExpiresAt = plan == ProPlan.lifetime ? null : expiryDate;
+      r.autoRenewing = plan == ProPlan.lifetime ? null : autoRenewing;
       // No trials: clears the client-side trial estimate older builds wrote.
       r.trialEndsAt = null;
       // Prefer the real purchase timestamp when one is known (restore of an
@@ -265,12 +293,34 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
     _writeRow((r) {
       r.tier = EntitlementTier.free;
       r.proExpiresAt = null;
+      r.autoRenewing = null;
       r.activeProductId = null;
       r.activePurchaseToken = null;
       r.lastVerifiedAt = DateTime.now();
     });
   }
 
+}
+
+/// How long a monthly / yearly subscription stays Pro past its stored renewal
+/// date when the app couldn't re-check with Play (offline).
+const kRenewalGrace = Duration(days: 3);
+
+/// Next renewal of a subscription bought at [purchaseTime]: the first monthly
+/// / yearly anniversary after [now]. Play renews on the purchase's day of the
+/// month (clamped to short months), and a promo free month / year counts from
+/// redemption, so this matches the "Renews on" Play shows. Play's exact date
+/// is only available server-side, which Kuber does not have.
+DateTime nextRenewalDate(DateTime purchaseTime, ProPlan plan, DateTime now) {
+  final step = plan == ProPlan.yearly ? 12 : 1;
+  final p = purchaseTime.toLocal();
+  for (var k = 1; ; k++) {
+    final first = DateTime(p.year, p.month + k * step, 1);
+    final days = DateTime(first.year, first.month + 1, 0).day;
+    final d = DateTime(first.year, first.month,
+        p.day > days ? days : p.day, p.hour, p.minute, p.second);
+    if (d.isAfter(now)) return d;
+  }
 }
 
 /// Kuber Pro state, hydrated from Isar. Every widget reads this; only
