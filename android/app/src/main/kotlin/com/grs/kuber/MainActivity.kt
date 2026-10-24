@@ -33,7 +33,9 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class MainActivity : FlutterFragmentActivity() {
-    private val channelName = "com.grs.kuber/saf_backups"
+    private val channelName = SafBackupHandler.CHANNEL
+    private val backgroundChannelName = "com.grs.kuber/background_tasks"
+    private val safHandler by lazy { SafBackupHandler(applicationContext) }
     private val smsChannelName = "com.grs.kuber/sms"
     private val widgetsChannelName = "com.grs.kuber/widgets"
     private val shortcutsChannelName = "com.grs.kuber/shortcuts"
@@ -99,6 +101,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onDestroy() {
         smsExecutor.shutdown()
+        safHandler.shutdown()
         super.onDestroy()
     }
 
@@ -120,34 +123,24 @@ class MainActivity : FlutterFragmentActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             channelName
         ).setMethodCallHandler { call, result ->
+            // Folder I/O runs off the main thread (SafBackupHandler).
+            if (call.method == "pickFolder") {
+                pickFolder(result)
+            } else if (!safHandler.handle(call.method, call.arguments, result)) {
+                result.notImplemented()
+            }
+        }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            backgroundChannelName
+        ).setMethodCallHandler { call, result ->
             when (call.method) {
-                "pickFolder" -> pickFolder(result)
-                "writeText" -> {
-                    val folderUri = call.argument<String>("folderUri")
-                    val fileName = call.argument<String>("fileName")
-                    val contents = call.argument<String>("contents")
-                    if (folderUri == null || fileName == null || contents == null) {
-                        result.error("bad_args", "Missing backup write arguments", null)
-                    } else {
-                        writeText(folderUri, fileName, contents, result)
-                    }
-                }
-                "listFileNames" -> {
-                    val folderUri = call.arguments as? String
-                    if (folderUri == null) {
-                        result.error("bad_args", "Missing folder URI", null)
-                    } else {
-                        listFileNames(folderUri, result)
-                    }
-                }
-                "deleteFile" -> {
-                    val folderUri = call.argument<String>("folderUri")
-                    val fileName = call.argument<String>("fileName")
-                    if (folderUri == null || fileName == null) {
-                        result.error("bad_args", "Missing delete arguments", null)
-                    } else {
-                        deleteFile(folderUri, fileName, result)
-                    }
+                "enqueue" -> {
+                    BackgroundTasksWorker.enqueue(
+                        applicationContext,
+                        call.argument<String>("trigger") ?: "coldStart"
+                    )
+                    result.success(null)
                 }
                 else -> result.notImplemented()
             }
@@ -200,6 +193,15 @@ class MainActivity : FlutterFragmentActivity() {
             when (call.method) {
                 "isPinShortcutSupported" ->
                     result.success(ShortcutManagerCompat.isRequestPinShortcutSupported(this))
+                // Optional app-drawer entries (LauncherEntryActivity).
+                "launcherEntries" -> result.success(LauncherEntryActivity.states(this))
+                "setLauncherEntry" -> result.success(
+                    LauncherEntryActivity.set(
+                        this,
+                        call.argument<String>("id"),
+                        call.argument<Boolean>("enabled") == true
+                    )
+                )
                 "pinShortcut" -> {
                     try {
                         result.success(
@@ -476,110 +478,7 @@ class MainActivity : FlutterFragmentActivity() {
         result.success(uri.toString())
     }
 
-    private fun writeText(
-        folderUriString: String,
-        fileName: String,
-        contents: String,
-        result: MethodChannel.Result
-    ) {
-        try {
-            val folderUri = Uri.parse(folderUriString)
-            val treeDocumentId = DocumentsContract.getTreeDocumentId(folderUri)
-            val parentUri = DocumentsContract.buildDocumentUriUsingTree(
-                folderUri,
-                treeDocumentId
-            )
-            val existing = findChild(folderUri, fileName)
-            if (existing != null) {
-                DocumentsContract.deleteDocument(contentResolver, existing)
-            }
-            val fileUri = DocumentsContract.createDocument(
-                contentResolver,
-                parentUri,
-                "application/json",
-                fileName
-            ) ?: throw IllegalStateException("Could not create backup file")
-            contentResolver.openOutputStream(fileUri, "w")?.use { stream ->
-                stream.write(contents.toByteArray(Charsets.UTF_8))
-            } ?: throw IllegalStateException("Could not open backup file")
-            result.success(null)
-        } catch (security: SecurityException) {
-            result.error("folder_revoked", security.message, null)
-        } catch (error: Throwable) {
-            result.error("write_error", error.message, null)
-        }
-    }
 
-    private fun listFileNames(folderUriString: String, result: MethodChannel.Result) {
-        try {
-            val folderUri = Uri.parse(folderUriString)
-            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                folderUri,
-                DocumentsContract.getTreeDocumentId(folderUri)
-            )
-            val names = mutableListOf<String>()
-            contentResolver.query(
-                childrenUri,
-                arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
-                null,
-                null,
-                null
-            )?.use { cursor ->
-                while (cursor.moveToNext()) {
-                    names.add(cursor.getString(0))
-                }
-            }
-            result.success(names)
-        } catch (security: SecurityException) {
-            result.error("folder_revoked", security.message, null)
-        } catch (error: Throwable) {
-            result.error("unknown", error.message, null)
-        }
-    }
 
-    private fun deleteFile(
-        folderUriString: String,
-        fileName: String,
-        result: MethodChannel.Result
-    ) {
-        try {
-            val folderUri = Uri.parse(folderUriString)
-            val child = findChild(folderUri, fileName)
-            if (child != null) {
-                DocumentsContract.deleteDocument(contentResolver, child)
-            }
-            result.success(null)
-        } catch (security: SecurityException) {
-            result.error("folder_revoked", security.message, null)
-        } catch (error: Throwable) {
-            result.error("unknown", error.message, null)
-        }
-    }
 
-    private fun findChild(folderUri: Uri, fileName: String): Uri? {
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-            folderUri,
-            DocumentsContract.getTreeDocumentId(folderUri)
-        )
-        contentResolver.query(
-            childrenUri,
-            arrayOf(
-                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME
-            ),
-            null,
-            null,
-            null
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                if (cursor.getString(1) == fileName) {
-                    return DocumentsContract.buildDocumentUriUsingTree(
-                        folderUri,
-                        cursor.getString(0)
-                    )
-                }
-            }
-        }
-        return null
-    }
 }

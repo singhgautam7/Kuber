@@ -1,18 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/database/isar_service.dart';
-import '../../../core/services/json_backup_service.dart';
-import '../../../features/notifications/data/app_notification.dart';
-import '../../../features/notifications/data/notification_repository.dart';
 import '../data/backup_config.dart';
 import '../data/backup_repository.dart';
 import '../services/saf_backup_store.dart';
+import '../services/scheduled_backup.dart';
 
 enum BackupFrequency { daily, weekly, monthly }
 
@@ -157,78 +153,12 @@ class BackupSettingsNotifier extends AsyncNotifier<BackupSettings> {
   }
 
   Future<void> runBackup(BackupConfig config, {bool manual = false}) async {
-    final repo = ref.read(backupRepositoryProvider);
-    final now = DateTime.now();
-    config.lastAttemptAt = now;
-    if (config.folderUri == null || config.folderUri!.isEmpty) {
-      await _recordFailure(config, BackupFailureReason.folderRevoked);
-      return;
-    }
-    try {
-      await JsonBackupService().writeScheduledBackup(
-        isar: ref.read(isarProvider),
-        folderUri: config.folderUri!,
-        retention: config.retention,
-        store: ref.read(safBackupStoreProvider),
-      );
-      config.lastBackupAt = now;
-      config.lastFailureReason = null;
-      await repo.save(config);
-    } catch (error) {
-      debugPrint('Kuber backup failed: $error');
-      await _recordFailure(config, _classify(error));
-    }
+    await ScheduledBackup.run(
+        ref.read(isarProvider), ref.read(safBackupStoreProvider));
   }
 
-  bool isDue(BackupConfig config, DateTime now) {
-    if (!config.enabled || config.folderUri == null) return false;
-    final last = config.lastBackupAt;
-    if (last == null) return true;
-    final days = switch (_frequencyFromString(config.frequency)) {
-      BackupFrequency.daily => 1,
-      BackupFrequency.weekly => 7,
-      BackupFrequency.monthly => 30,
-    };
-    final lastLocal = last.toLocal();
-    final lastMidnight = DateTime(lastLocal.year, lastLocal.month, lastLocal.day);
-    final nowMidnight = DateTime(now.year, now.month, now.day);
-    return nowMidnight.difference(lastMidnight).inDays >= days;
-  }
-
-  Future<void> _recordFailure(
-    BackupConfig config,
-    BackupFailureReason reason,
-  ) async {
-    config.lastFailureReason = _failureToString(reason);
-    config.lastAttemptAt = DateTime.now();
-    await ref.read(backupRepositoryProvider).save(config);
-    await NotificationRepository(ref.read(isarProvider)).add(
-      type: NotificationType.backup,
-      title: 'Automatic backup failed',
-      body: _failureMessage(reason),
-      payload: 'backup:${_failureToString(reason)}',
-      iconHint: 'backup',
-      createdAt: config.lastAttemptAt,
-    );
-  }
-
-  BackupFailureReason _classify(Object error) {
-    final text = error.toString().toLowerCase();
-    if (error is FileSystemException && text.contains('space')) {
-      return BackupFailureReason.diskFull;
-    }
-    if (error is PlatformException && error.code == 'folder_revoked') {
-      return BackupFailureReason.folderRevoked;
-    }
-    if (text.contains('no space') || text.contains('enospc')) {
-      return BackupFailureReason.diskFull;
-    }
-    if (text.contains('permission') || text.contains('not found')) {
-      return BackupFailureReason.folderRevoked;
-    }
-    if (text.contains('write')) return BackupFailureReason.writeError;
-    return BackupFailureReason.unknown;
-  }
+  bool isDue(BackupConfig config, DateTime now) =>
+      ScheduledBackup.isDue(config, now);
 }
 
 final backupSettingsProvider =
@@ -296,14 +226,6 @@ BackupFailureReason _failureFromString(String value) {
   };
 }
 
-String _failureToString(BackupFailureReason reason) {
-  return switch (reason) {
-    BackupFailureReason.folderRevoked => 'folder_revoked',
-    BackupFailureReason.diskFull => 'disk_full',
-    BackupFailureReason.writeError => 'write_error',
-    BackupFailureReason.unknown => 'unknown',
-  };
-}
 
 String _failureMessage(BackupFailureReason reason) {
   return switch (reason) {

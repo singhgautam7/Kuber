@@ -29,7 +29,7 @@ flutter_local_notifications · shared_preferences.
 flutter run                          # Android device / emulator
 flutter run -d chrome                # web
 flutter run --dart-define=KUBER_UNLOCK_PRO=true   # QA build with Pro unlocked
-flutter build apk                    # release APK
+flutter build apk --split-debug-info=build/symbols   # release APK (symbols kept out of the APK: -1.4 MB; keep build/symbols per release for `flutter symbolize`)
 flutter test                         # all tests
 flutter analyze                      # must be clean before committing
 dart run build_runner build          # regenerate Isar schemas after model changes
@@ -124,16 +124,20 @@ specs/                 see table above
 
 Startup order:
 - `main.dart:_bootstrap` runs only what decides the first frame (DB open, migrations,
-  entitlement row, theme prefs, recurring processor for splash routing). ~50 ms total.
+  entitlement row, theme prefs). ~50 ms total. There is no recurring loader any more.
 - The splash is native (`flutter_native_splash`, config in `pubspec.yaml`, art from
   `tool/generate_icons_test.dart`) and the engine drops it on the first frame. Home's first
   frames still get ~1.6 s (`_onOpenSettleDelay`) of UI isolate to themselves. So:
 - All on-app-open work lives in `app.dart:_runOnOpenBatch`, which runs only when
-  `onOpenBatchReadyProvider` flips true (settle delay passed, and on a first-of-day start the
-  recurring loader has handed off). Never call it from a post-frame callback or
+  `onOpenBatchReadyProvider` flips true (settle delay passed). Never call it from a post-frame callback or
   `_bootstrap`. Any widget that wants to do work "on app open" (like the Home SMS card's
   background scan) reads / `listenManual`s `onOpenBatchReadyProvider` first.
 - The tab pre-warm (`_warmTabProviders`) is scheduled from the batch, 1.5 s later.
+- Recurring / EMI / SIP postings, FD maturity and the automatic backup run in the background
+  task queue (`lib/core/background/`), started from the batch: a WorkManager job on Android
+  (`BackgroundTasksWorker.kt` → `backgroundMain`), in-process elsewhere. Schedules use the
+  shared engine in `lib/core/schedule/`; exactly-once posting goes through the
+  `ProcessedOccurrence` ledger. Plan and decisions: `specs/vnext/`.
 
 UI-isolate budget: 8.3 ms at 120 Hz. Anything synchronous over ~10 ms on a large
 ledger is a visible hitch if it lands during an animation. Known heavy passes and how

@@ -1,5 +1,8 @@
 import 'dart:math';
 
+import 'fd_rd_engine.dart';
+import '../../../core/money_math/loan_math.dart';
+
 /// Month-granularity schedule rows for the Yearly/Monthly table toggle. Each
 /// row is a list of doubles whose first element is the 1-based month index; the
 /// remaining columns mirror the corresponding engine's yearly columns. Screens
@@ -15,9 +18,7 @@ List<List<double>> emiMonthlyRows(
   double extraMonthly = 0,
 }) {
   final r = annualRatePercent / 100 / 12;
-  final emi = r == 0
-      ? principal / months
-      : principal * r * pow(1 + r, months) / (pow(1 + r, months) - 1);
+  final emi = calculateEmi(principal, annualRatePercent, months);
   double bal = principal;
   final rows = <List<double>>[];
   for (var m = 1; m <= months && bal > 0; m++) {
@@ -53,3 +54,43 @@ List<List<double>> sipMonthlyRows(
   }
   return rows;
 }
+
+/// FD: [month, opening, interest, closing], compounding [freq] (moved from
+/// the FD/RD screen).
+List<List<double>> fdMonthlyRows(
+  double amount,
+  double rate,
+  int years,
+  CompoundingFrequency freq,
+) {
+  final months = years * 12;
+  final rows = <List<double>>[];
+  final f = freq.perYear;
+  final pr = rate / 100 / f;
+  double prev = amount;
+  for (var m = 1; m <= months; m++) {
+    final bal = amount * pow(1 + pr, f * m / 12);
+    rows.add([m.toDouble(), prev, bal - prev, bal]);
+    prev = bal.toDouble();
+  }
+  return rows;
+}
+
+/// RD: [month, opening, interest, closing] (moved from the FD/RD screen).
+List<List<double>> rdMonthlyRows(double amount, double rate, int years) {
+  final months = years * 12;
+  final rows = <List<double>>[];
+  final r = rate / 100 / 12;
+  double bal = 0;
+  for (var m = 1; m <= months; m++) {
+    final opening = bal;
+    bal = (bal + amount) * (1 + r);
+    rows.add([m.toDouble(), opening, bal - opening - amount, bal]);
+  }
+  return rows;
+}
+
+/// Lump sum value after [month] months (moved from the Lump sum vs SIP
+/// screen).
+double lumpsumValueAtMonth(double total, double rate, int month) =>
+    (total * pow(1 + rate / 100, month / 12)).toDouble();

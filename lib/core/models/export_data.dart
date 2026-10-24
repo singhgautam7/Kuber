@@ -18,6 +18,13 @@ class TransactionRow {
   final String? fromAccountName;
   final String? toAccountName;
 
+  /// vNext: sub type value ('loan_repayment', ...), the schedule / holding
+  /// it came from ("Loan: Home loan") and the EMI split.
+  final String? subType;
+  final String? source;
+  final double? principalPart;
+  final double? interestPart;
+
   const TransactionRow({
     required this.date,
     required this.name,
@@ -29,6 +36,10 @@ class TransactionRow {
     this.isTransfer = false,
     this.fromAccountName,
     this.toAccountName,
+    this.subType,
+    this.source,
+    this.principalPart,
+    this.interestPart,
   });
 }
 

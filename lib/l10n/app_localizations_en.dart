@@ -5649,4 +5649,2095 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupsAreOnDesc =>
       'Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately.';
+
+  @override
+  String get msWhenTitle => 'When';
+
+  @override
+  String get msWhenTitleEmi => 'EMI schedule';
+
+  @override
+  String get msWhenTitleReminder => 'Repeat';
+
+  @override
+  String get msWhenDaily => 'Daily';
+
+  @override
+  String get msWhenWeekly => 'Weekly';
+
+  @override
+  String get msWhenMonthly => 'Monthly';
+
+  @override
+  String get msWhenQuarterly => 'Quarterly';
+
+  @override
+  String get msWhenHalfYearly => 'Every 6 months';
+
+  @override
+  String get msWhenYearly => 'Yearly';
+
+  @override
+  String get msWhenCustom => 'Custom';
+
+  @override
+  String get msWhenOnce => 'Once';
+
+  @override
+  String get msWhenEvery => 'Every';
+
+  @override
+  String get msWhenUnitDays => 'Days';
+
+  @override
+  String get msWhenUnitWeeks => 'Weeks';
+
+  @override
+  String get msWhenUnitMonths => 'Months';
+
+  @override
+  String get msWhenUnitYears => 'Years';
+
+  @override
+  String get msWhenStartsOn => 'Starts on';
+
+  @override
+  String get msWhenOnDay => 'On day';
+
+  @override
+  String msWhenOnDayValue(String ordinal) {
+    return '$ordinal of the month';
+  }
+
+  @override
+  String get msWhenOn => 'On';
+
+  @override
+  String get msWhenEnds => 'Ends';
+
+  @override
+  String get msWhenEndsNever => 'Never';
+
+  @override
+  String get msWhenEndsOnDate => 'On a date';
+
+  @override
+  String get msWhenEndsAfter => 'After';
+
+  @override
+  String get msWhenEndDate => 'End date';
+
+  @override
+  String get msWhenTimes => 'times';
+
+  @override
+  String get msWhenLockedMonthly => 'Repeats every month';
+
+  @override
+  String get msWhenLockedHint => 'EMIs are monthly';
+
+  @override
+  String get msWhenFirstEmi => 'First EMI';
+
+  @override
+  String get msWhenEmiDay => 'EMI day';
+
+  @override
+  String msWhenEmiDayValue(String ordinal) {
+    return '$ordinal of every month';
+  }
+
+  @override
+  String get msWhenNumberOfEmis => 'Number of EMIs';
+
+  @override
+  String get msWhenLastEmi => 'Last EMI';
+
+  @override
+  String get msWhenEveryUnitDay => 'Every day';
+
+  @override
+  String get msWhenEveryUnitWeek => 'Every week';
+
+  @override
+  String get msWhenEveryUnitMonth => 'Every month';
+
+  @override
+  String get msWhenEveryUnitYear => 'Every year';
+
+  @override
+  String msWhenEveryNDays(String n) {
+    return 'Every $n days';
+  }
+
+  @override
+  String msWhenEveryNWeeks(String n) {
+    return 'Every $n weeks';
+  }
+
+  @override
+  String msWhenEveryNMonths(String n) {
+    return 'Every $n months';
+  }
+
+  @override
+  String msWhenEveryNYears(String n) {
+    return 'Every $n years';
+  }
+
+  @override
+  String msWhenAnchorWeekday(String weekday) {
+    return 'on $weekday';
+  }
+
+  @override
+  String msWhenAnchorDay(String ordinal) {
+    return 'on the $ordinal';
+  }
+
+  @override
+  String msWhenAnchorDate(String date) {
+    return 'on $date';
+  }
+
+  @override
+  String msWhenSentence(
+    String interval,
+    String anchor,
+    String start,
+    String end,
+  ) {
+    return '$interval$anchor, from $start, $end.';
+  }
+
+  @override
+  String get msWhenEndNever => 'no end';
+
+  @override
+  String msWhenEndUntil(String date) {
+    return 'until $date';
+  }
+
+  @override
+  String msWhenEndTimes(String n) {
+    return '$n times';
+  }
+
+  @override
+  String msWhenEndEmis(String n) {
+    return '$n EMIs';
+  }
+
+  @override
+  String msWhenOnceSentence(String date) {
+    return 'On $date.';
+  }
+
+  @override
+  String msWhenLastOn(String date) {
+    return 'Last on $date';
+  }
+
+  @override
+  String msWhenLastEmiOn(String date) {
+    return 'Last EMI $date';
+  }
+
+  @override
+  String msWhenCountTotal(String n) {
+    return '$n times in all';
+  }
+
+  @override
+  String get msWhenFlagNext => 'next';
+
+  @override
+  String get msWhenFlagToday => 'due today';
+
+  @override
+  String get msWhenFlagLastDay => 'last day';
+
+  @override
+  String get msWhenMonthEnd => 'In shorter months, this falls on the last day.';
+
+  @override
+  String get msWhenErrEndBeforeStart =>
+      'End date must be after the start date.';
+
+  @override
+  String get msWhenErrCount => 'Enter 1 or more.';
+
+  @override
+  String get msWhenErrCountPreview => 'Enter how many times, 1 or more.';
+
+  @override
+  String get msCalculated => 'Calculated';
+
+  @override
+  String get msViewDetails => 'View details';
+
+  @override
+  String get msOpenInCalculator => 'Open in a calculator';
+
+  @override
+  String get msAdvanced => 'Advanced options';
+
+  @override
+  String get msAdvancedSubLoan =>
+      'Interest type, loan numbers, already running, spending';
+
+  @override
+  String get msAlreadyRunning => 'Already running?';
+
+  @override
+  String get msAlreadyRunningSubLoan => 'This loan started before today';
+
+  @override
+  String get msAlreadyRunningSubInv => 'I invested before today';
+
+  @override
+  String get msOpeningNote =>
+      'Opening values never change any account balance.';
+
+  @override
+  String get msFromLoans => 'From Loans';
+
+  @override
+  String get msFromInvestments => 'From Investments';
+
+  @override
+  String msSource(String name) {
+    return 'From $name';
+  }
+
+  @override
+  String msSourceRule(String name) {
+    return 'From $name · Recurring';
+  }
+
+  @override
+  String msFilledFrom(String name) {
+    return 'Filled from $name';
+  }
+
+  @override
+  String msFromCalculator(String calculator) {
+    return 'From $calculator';
+  }
+
+  @override
+  String get msPaused => 'Paused';
+
+  @override
+  String get msEnded => 'Ended';
+
+  @override
+  String get msClosed => 'Closed';
+
+  @override
+  String get msExample => 'Example';
+
+  @override
+  String get msBusy => 'Processing, try again in a moment';
+
+  @override
+  String get msLoansTotalOutstanding => 'Total outstanding';
+
+  @override
+  String get msLoansMonthlyEmis => 'Monthly EMIs';
+
+  @override
+  String msLoansNextEmiLine(String date, String name, String amount) {
+    return 'Next EMI $date · $name · $amount';
+  }
+
+  @override
+  String get msLoansActive => 'Active';
+
+  @override
+  String msLoansRowSub(String amount, String date) {
+    return '$amount EMI · next $date';
+  }
+
+  @override
+  String get msLoansLeft => 'left';
+
+  @override
+  String msLoansProgress(String paid, String total) {
+    return '$paid of $total EMIs paid';
+  }
+
+  @override
+  String msLoansPaidCount(String paid) {
+    return '$paid EMIs paid';
+  }
+
+  @override
+  String get msLoansEmptyTitle => 'No loans yet';
+
+  @override
+  String get msLoansEmptyBody =>
+      'Add a loan to track its EMIs, what you still owe, and the interest you pay.';
+
+  @override
+  String get msLoansFab => 'Add loan';
+
+  @override
+  String get msLoansAdd => 'Add loan';
+
+  @override
+  String get msLoansEdit => 'Edit loan';
+
+  @override
+  String get msLoansType => 'Loan type';
+
+  @override
+  String get msLoansName => 'Loan name';
+
+  @override
+  String get msLoansLender => 'Lender';
+
+  @override
+  String get msLoansEmiAmount => 'EMI amount';
+
+  @override
+  String get msLoansPayFrom => 'Pay from';
+
+  @override
+  String get msLoansRecordEmis => 'Record EMIs';
+
+  @override
+  String get msLoansRecordAuto => 'Automatically';
+
+  @override
+  String msLoansRecordAutoHelp(String account) {
+    return 'On the EMI day, Kuber records the EMI from $account.';
+  }
+
+  @override
+  String get msLoansRecordManual => 'I record them myself';
+
+  @override
+  String get msLoansSave => 'Save loan';
+
+  @override
+  String get msLoansSaveChanges => 'Save changes';
+
+  @override
+  String get msLoansInterestType => 'Interest type';
+
+  @override
+  String get msLoansReducing => 'Reducing balance';
+
+  @override
+  String get msLoansReducingSub => 'Most bank loans';
+
+  @override
+  String get msLoansFlat => 'Flat rate';
+
+  @override
+  String get msLoansFlatSub => 'Many car, personal and consumer loans';
+
+  @override
+  String get msLoansIo => 'Interest-only period first';
+
+  @override
+  String get msLoansIoSub => 'Pre-EMI, then regular EMIs';
+
+  @override
+  String get msLoansIoMonths => 'Interest-only months';
+
+  @override
+  String msLoansIoNotice(String io, String date, String emi, String n) {
+    return '$io a month until $date, then $emi a month for $n months.';
+  }
+
+  @override
+  String get msLoansNumbers => 'Loan numbers';
+
+  @override
+  String get msLoansPrincipal => 'Principal';
+
+  @override
+  String get msLoansRate => 'Interest rate';
+
+  @override
+  String get msLoansTenure => 'Tenure';
+
+  @override
+  String get msLoansEmi => 'EMI';
+
+  @override
+  String get msLoansYears => 'Years';
+
+  @override
+  String get msLoansMonths => 'Months';
+
+  @override
+  String get msLoansTotalPayable => 'Total payable · optional';
+
+  @override
+  String get msLoansTotalPayableHint => 'Use instead of the rate';
+
+  @override
+  String msLoansOrderHelp(String a, String b, String c) {
+    return 'Filled in order: $a, $b, $c.';
+  }
+
+  @override
+  String msLoansSwapHelp(String field, String other) {
+    return 'You typed the $field, so $other (filled first) is now calculated.';
+  }
+
+  @override
+  String msLoansPreview(String emi, String month, String interest) {
+    return 'EMI $emi · ends $month · total interest $interest';
+  }
+
+  @override
+  String msLoansPreviewZero(String emi, String month) {
+    return 'EMI $emi · ends $month · no interest';
+  }
+
+  @override
+  String msLoansMismatchMore(String diff) {
+    return 'Your EMI is $diff more than calculated. We\'ll use your EMI.';
+  }
+
+  @override
+  String msLoansMismatchLess(String diff) {
+    return 'Your EMI is $diff less than calculated. We\'ll use your EMI.';
+  }
+
+  @override
+  String get msLoansErrNeverEnds =>
+      'This EMI doesn\'t cover the interest, so the loan would never end.';
+
+  @override
+  String msLoansErrNeverEndsPreview(String interest) {
+    return 'Monthly interest is $interest. Enter an EMI above that.';
+  }
+
+  @override
+  String get msLoansErrTotalLow =>
+      'This is less than the principal. Check the numbers.';
+
+  @override
+  String get msLoansRun1 => 'I know the original loan details';
+
+  @override
+  String get msLoansRun1Sub => 'Kuber works out what you\'ve paid';
+
+  @override
+  String get msLoansRun2 => 'I know what\'s outstanding today';
+
+  @override
+  String get msLoansRun2Sub => 'From a bank statement';
+
+  @override
+  String get msLoansRun3 => 'Just track the EMI';
+
+  @override
+  String get msLoansRun3Sub => 'No principal and interest split';
+
+  @override
+  String get msLoansEmisPaid => 'EMIs paid';
+
+  @override
+  String get msLoansPrincipalPaid => 'Principal paid';
+
+  @override
+  String get msLoansInterestPaid => 'Interest paid';
+
+  @override
+  String get msLoansOutstandingToday => 'Outstanding today';
+
+  @override
+  String msLoansRun1Help(String date) {
+    return 'Worked out from the loan numbers and your first EMI, $date. Tap any value to change it.';
+  }
+
+  @override
+  String msLoansAdjustment(String diff) {
+    return 'We\'ll use your figure and add the difference as an adjustment: $diff.';
+  }
+
+  @override
+  String get msLoansEmisLeft => 'EMIs left';
+
+  @override
+  String msLoansEmisLeftValue(String n, String month) {
+    return '$n · last in $month';
+  }
+
+  @override
+  String get msLoansPastTotals => 'Past totals · optional';
+
+  @override
+  String get msLoansPastTotalsSub => 'Principal and interest paid';
+
+  @override
+  String msLoansRun3Notice(String emi, String ordinal) {
+    return 'Kuber records each $emi EMI on the $ordinal. You won\'t see principal, interest or what you owe until you add the loan numbers.';
+  }
+
+  @override
+  String get msLoansSpending => 'Spending';
+
+  @override
+  String get msLoansOnlyInterest => 'Count only interest as expense';
+
+  @override
+  String get msLoansOnlyInterestHelp =>
+      'Principal is counted as a transfer to this loan. Your bank balance still goes down by the full EMI.';
+
+  @override
+  String get msLoansFutureOnly =>
+      'This applies to future EMIs only. EMIs already recorded keep the way they were counted.';
+
+  @override
+  String get msLoansOutstanding => 'Outstanding';
+
+  @override
+  String msLoansEndsOn(String month) {
+    return 'Ends $month';
+  }
+
+  @override
+  String msLoansNextEmi(String date) {
+    return 'Next EMI · $date';
+  }
+
+  @override
+  String get msLoansSplit => 'EMI split';
+
+  @override
+  String get msLoansPrincipalL => 'Principal';
+
+  @override
+  String get msLoansInterestL => 'Interest';
+
+  @override
+  String get msLoansTotalInterest => 'Total interest';
+
+  @override
+  String get msLoansRecordExtra => 'Record extra payment';
+
+  @override
+  String get msLoansChangeRate => 'Change interest rate';
+
+  @override
+  String get msLoansCloseLoan => 'Close loan';
+
+  @override
+  String get msLoansOutstandingTab => 'Outstanding';
+
+  @override
+  String get msLoansSplitTab => 'Principal vs interest';
+
+  @override
+  String get msLoansMonth => 'Month';
+
+  @override
+  String get msLoansYear => 'Year';
+
+  @override
+  String get msLoansBeforeKuber => 'Before Kuber';
+
+  @override
+  String get msLoansNext => 'Next';
+
+  @override
+  String msLoansRowSplit(String principal, String interest) {
+    return 'P $principal · I $interest';
+  }
+
+  @override
+  String msLoansRowBal(String balance) {
+    return 'Bal $balance';
+  }
+
+  @override
+  String get msLoansInterestOnly => 'Interest only';
+
+  @override
+  String msLoansEventExtra(String amount, String date) {
+    return 'Extra payment $amount · $date';
+  }
+
+  @override
+  String msLoansEventExtraSubTenure(String balance) {
+    return 'Reduce tenure · balance after $balance';
+  }
+
+  @override
+  String msLoansEventExtraSubEmi(String balance) {
+    return 'Reduce EMI · balance after $balance';
+  }
+
+  @override
+  String msLoansEventRate(String oldRate, String newRate, String date) {
+    return 'Rate $oldRate → $newRate · from $date';
+  }
+
+  @override
+  String msLoansEventRateSubTenure(String emi) {
+    return 'Adjust tenure · EMI stays $emi';
+  }
+
+  @override
+  String msLoansEventRateSubEmi(String emi) {
+    return 'Adjust EMI · new EMI $emi';
+  }
+
+  @override
+  String msLoansEventCharge(String amount, String date) {
+    return 'Charge $amount · $date';
+  }
+
+  @override
+  String msLoansEventRegular(String date) {
+    return 'Regular EMIs start · $date';
+  }
+
+  @override
+  String msLoansYearSub(String n, String paid) {
+    return '$n EMIs · $paid paid';
+  }
+
+  @override
+  String get msLoansYearEnd => 'balance at year end';
+
+  @override
+  String msLoansChartNote(String year, String amount) {
+    return 'The drop in $year is your $amount extra payment.';
+  }
+
+  @override
+  String msLoansIoBanner(String month, String io, String emi, String date) {
+    return 'Interest only until $month: $io a month. Regular EMIs of $emi start on $date.';
+  }
+
+  @override
+  String get msLoansExtraTitle => 'Extra payment';
+
+  @override
+  String get msLoansExtraQ => 'Does this go toward principal?';
+
+  @override
+  String get msLoansExtraYes => 'Yes';
+
+  @override
+  String get msLoansExtraNo => 'No, it\'s a fee or charge';
+
+  @override
+  String get msLoansReduceTenure => 'Reduce tenure';
+
+  @override
+  String get msLoansReduceTenureSub => 'Same EMI, loan ends sooner';
+
+  @override
+  String get msLoansReduceEmi => 'Reduce EMI';
+
+  @override
+  String get msLoansReduceEmiSub => 'Same end date, lower EMI';
+
+  @override
+  String get msLoansSavesMore => 'Saves more interest';
+
+  @override
+  String msLoansExtraPreviewTenure(String amount, String n) {
+    return 'Saves $amount interest · ends $n months earlier';
+  }
+
+  @override
+  String msLoansExtraPreviewEmi(String amount, String emi) {
+    return 'Saves $amount interest · EMI becomes $emi';
+  }
+
+  @override
+  String get msLoansPrepayCharge => 'Prepayment charge · optional';
+
+  @override
+  String get msLoansPrepayChargeHint => 'Amount or %';
+
+  @override
+  String msLoansFeeNotice(String outstanding) {
+    return 'Recorded as an expense in Loan charges. What you owe stays $outstanding.';
+  }
+
+  @override
+  String get msLoansLoanCharges => 'Loan charges';
+
+  @override
+  String get msLoansNoNumbersPreview =>
+      'Add the loan numbers to see what this saves.';
+
+  @override
+  String get msLoansNewRate => 'New rate';
+
+  @override
+  String get msLoansEffectiveFrom => 'Effective from';
+
+  @override
+  String get msLoansThen => 'Then';
+
+  @override
+  String get msLoansAdjustEmi => 'Adjust EMI';
+
+  @override
+  String get msLoansAdjustTenure => 'Adjust tenure';
+
+  @override
+  String msLoansRatePreviewEmi(String emi, String date) {
+    return 'New EMI $emi from $date';
+  }
+
+  @override
+  String msLoansRatePreviewEmiSub(String month, String amount) {
+    return 'Ends $month as before · saves $amount interest';
+  }
+
+  @override
+  String msLoansRatePreviewTenure(String emi, String month) {
+    return 'EMI stays $emi · ends $month';
+  }
+
+  @override
+  String msLoansRatePreviewTenureSub(String n, String amount) {
+    return '$n months earlier · saves $amount interest';
+  }
+
+  @override
+  String msLoansRatePreviewTenureSubLater(String n, String amount) {
+    return '$n months later · costs $amount more interest';
+  }
+
+  @override
+  String get msLoansFloatingHelp =>
+      'Floating-rate loans change with the lender\'s benchmark. Record each change here.';
+
+  @override
+  String msLoansPaidOff(String name) {
+    return '$name is fully paid';
+  }
+
+  @override
+  String msLoansCloseTitle(String name) {
+    return 'Close $name?';
+  }
+
+  @override
+  String get msLoansCloseBody =>
+      'It moves to Closed. Its EMIs stop and its history stays.';
+
+  @override
+  String msLoansExtraName(String name) {
+    return 'Extra payment · $name';
+  }
+
+  @override
+  String msLoansChargeName(String name) {
+    return 'Loan charge · $name';
+  }
+
+  @override
+  String get msLoansSaved => 'Loan saved';
+
+  @override
+  String get msLoansRateSaved => 'Rate change saved';
+
+  @override
+  String get msLoansExtraSaved => 'Extra payment recorded';
+
+  @override
+  String get msInvPortfolio => 'Portfolio value';
+
+  @override
+  String get msInvInvested => 'Invested';
+
+  @override
+  String get msInvGain => 'Gain';
+
+  @override
+  String get msInvXirr => 'XIRR';
+
+  @override
+  String msInvOverall(String pct) {
+    return '$pct overall';
+  }
+
+  @override
+  String get msInvUpdateValues => 'Update values';
+
+  @override
+  String get msInvGroupMutualFunds => 'Mutual funds';
+
+  @override
+  String get msInvGroupStocks => 'Stocks';
+
+  @override
+  String get msInvGroupGold => 'Gold';
+
+  @override
+  String get msInvGroupCrypto => 'Crypto';
+
+  @override
+  String get msInvGroupFixed => 'Fixed return';
+
+  @override
+  String get msInvGroupOther => 'Property and other';
+
+  @override
+  String msInvStale(String n) {
+    return 'Updated $n days ago';
+  }
+
+  @override
+  String msInvUpdatedOn(String month) {
+    return 'Updated $month';
+  }
+
+  @override
+  String get msInvEmptyTitle => 'No investments yet';
+
+  @override
+  String get msInvEmptyBody =>
+      'Add a fund, stock, FD or anything else you own. Kuber shows what it\'s worth and how much you\'ve gained.';
+
+  @override
+  String get msInvFab => 'Add investment';
+
+  @override
+  String get msInvAdd => 'Add investment';
+
+  @override
+  String get msInvEdit => 'Edit investment';
+
+  @override
+  String get msInvSave => 'Save investment';
+
+  @override
+  String get msInvPickIntro =>
+      'What kind of investment is it? The form adapts to how its value changes.';
+
+  @override
+  String get msInvPickMarket => 'Value changes with the market';
+
+  @override
+  String get msInvPickMarketSub => 'You update the value now and then';
+
+  @override
+  String get msInvPickFixed => 'Fixed return';
+
+  @override
+  String get msInvPickFixedSub => 'Kuber calculates the value for you';
+
+  @override
+  String get msInvPickOther => 'Other';
+
+  @override
+  String get msInvPickOtherSub => 'You update the value rarely';
+
+  @override
+  String get msInvTypeMutualFund => 'Mutual fund';
+
+  @override
+  String get msInvTypeStocks => 'Stocks';
+
+  @override
+  String get msInvTypeEtf => 'ETF';
+
+  @override
+  String get msInvTypeGold => 'Gold';
+
+  @override
+  String get msInvTypeCrypto => 'Crypto';
+
+  @override
+  String get msInvTypeFd => 'Fixed deposit';
+
+  @override
+  String get msInvTypeRd => 'Recurring deposit';
+
+  @override
+  String get msInvTypePpf => 'PPF';
+
+  @override
+  String get msInvTypeBonds => 'Bonds';
+
+  @override
+  String get msInvTypeProperty => 'Property';
+
+  @override
+  String get msInvTypeCollectibles => 'Collectibles';
+
+  @override
+  String get msInvTypeCustom => 'Custom';
+
+  @override
+  String get msInvName => 'Name';
+
+  @override
+  String get msInvHow => 'How do you invest?';
+
+  @override
+  String get msInvOneTime => 'One time';
+
+  @override
+  String get msInvSip => 'SIP';
+
+  @override
+  String get msInvAmountInvested => 'Amount invested';
+
+  @override
+  String get msInvCurrentValue => 'Current value';
+
+  @override
+  String get msInvUnits => 'Units · optional';
+
+  @override
+  String get msInvUnitsHint => 'e.g. 612.4';
+
+  @override
+  String get msInvSipAmount => 'SIP amount';
+
+  @override
+  String get msInvFromAccount => 'From account';
+
+  @override
+  String get msInvStepUp => 'Yearly step-up';
+
+  @override
+  String get msInvStepUpSwitch => 'Increase every year';
+
+  @override
+  String get msInvStepUpField => 'Step-up';
+
+  @override
+  String msInvStepUpNotice(
+    String a,
+    String b,
+    String date1,
+    String c,
+    String date2,
+  ) {
+    return '$a now, $b from $date1, $c from $date2.';
+  }
+
+  @override
+  String get msInvPrincipal => 'Principal';
+
+  @override
+  String get msInvInstallment => 'Installment';
+
+  @override
+  String get msInvTerms => 'Terms';
+
+  @override
+  String get msInvRate => 'Interest rate';
+
+  @override
+  String get msInvStartDate => 'Start date';
+
+  @override
+  String get msInvTenure => 'Tenure';
+
+  @override
+  String get msInvCompounding => 'Compounding';
+
+  @override
+  String get msInvCompMonthly => 'Monthly';
+
+  @override
+  String get msInvCompQuarterly => 'Quarterly';
+
+  @override
+  String get msInvCompHalfYearly => 'Half-yearly';
+
+  @override
+  String get msInvCompYearly => 'Yearly';
+
+  @override
+  String get msInvPayout => 'Payout type';
+
+  @override
+  String get msInvPayCumulative => 'Cumulative';
+
+  @override
+  String get msInvPayMonthly => 'Monthly';
+
+  @override
+  String get msInvPayQuarterly => 'Quarterly';
+
+  @override
+  String get msInvPayYearly => 'Yearly';
+
+  @override
+  String get msInvAtMaturity => 'At maturity';
+
+  @override
+  String msInvMaturityLine(String date, String amount) {
+    return 'on $date · interest $amount';
+  }
+
+  @override
+  String msInvMaturityLineRd(String date, String amount) {
+    return 'on $date · you deposit $amount';
+  }
+
+  @override
+  String get msInvAutoValue =>
+      'Kuber calculates the value every day. You never need to update it.';
+
+  @override
+  String get msInvInvestedSoFar => 'Invested so far';
+
+  @override
+  String get msInvUnrealized => 'Unrealized';
+
+  @override
+  String get msInvRealized => 'Realized gain';
+
+  @override
+  String get msInvWithdrawn => 'Withdrawn';
+
+  @override
+  String get msInvLastUpdated => 'Last updated';
+
+  @override
+  String msInvSipLine(String amount, String ordinal) {
+    return '$amount on the $ordinal';
+  }
+
+  @override
+  String msInvSipLineStep(String amount, String ordinal, String pct) {
+    return '$amount on the $ordinal · +$pct yearly';
+  }
+
+  @override
+  String get msInvUpdateValue => 'Update value';
+
+  @override
+  String get msInvAddMoney => 'Add money';
+
+  @override
+  String get msInvWithdraw => 'Withdraw';
+
+  @override
+  String get msInvValueToday => 'Value today';
+
+  @override
+  String msInvMatures(String date) {
+    return 'Matures $date';
+  }
+
+  @override
+  String get msInvWithdrawEarly => 'Withdraw early';
+
+  @override
+  String get msInvLegendValue => 'Current value';
+
+  @override
+  String get msInvLegendInvested => 'Amount invested';
+
+  @override
+  String get msInvLegendGain => 'Gain';
+
+  @override
+  String get msInvActivity => 'Activity';
+
+  @override
+  String get msInvActValue => 'Value updated';
+
+  @override
+  String get msInvActSip => 'SIP installment';
+
+  @override
+  String get msInvActTopUp => 'Top-up';
+
+  @override
+  String get msInvActWithdrawal => 'Withdrawal';
+
+  @override
+  String get msInvActOpening => 'Opening value';
+
+  @override
+  String get msInvActInterest => 'Interest added';
+
+  @override
+  String get msInvActOpened => 'Deposit opened';
+
+  @override
+  String get msInvTransaction => 'Transaction';
+
+  @override
+  String get msInvAddPast => 'Add a value for a past date';
+
+  @override
+  String get msInvAddPastTitle => 'Add a past value';
+
+  @override
+  String get msInvValueOnDate => 'Value on that date';
+
+  @override
+  String get msInvPastHelp =>
+      'Past values fill in the chart. They don\'t change the current value or any balance.';
+
+  @override
+  String get msInvInterestLocked =>
+      'Interest entries are calculated and can\'t be edited.';
+
+  @override
+  String msInvUpdSub(String n) {
+    return '$n holdings · about 30 seconds';
+  }
+
+  @override
+  String get msInvUpdHelp =>
+      'Fixed deposits and PPF update themselves, so they aren\'t listed.';
+
+  @override
+  String get msInvNewValue => 'New value';
+
+  @override
+  String msInvSaveN(String n) {
+    return 'Save $n values';
+  }
+
+  @override
+  String get msInvSaveEmpty => 'Save';
+
+  @override
+  String msInvSaved(String n, String amount) {
+    return '$n values updated. Portfolio $amount.';
+  }
+
+  @override
+  String get msInvWithdrawAll => 'Withdraw everything';
+
+  @override
+  String msInvValueLine(String amount) {
+    return 'Value $amount';
+  }
+
+  @override
+  String get msInvRedeemed => 'Amount redeemed';
+
+  @override
+  String get msInvExitLoad => 'Exit load · optional';
+
+  @override
+  String get msInvTax => 'Tax · optional';
+
+  @override
+  String get msInvReceived => 'Amount received';
+
+  @override
+  String get msInvToAccount => 'To account';
+
+  @override
+  String get msInvDate => 'Date';
+
+  @override
+  String get msInvAfter => 'After this withdrawal';
+
+  @override
+  String msInvCloseTitle(String name) {
+    return 'Close $name?';
+  }
+
+  @override
+  String msInvCloseBody(String amount) {
+    return 'You received $amount. Here\'s how it did.';
+  }
+
+  @override
+  String get msInvCloseInvested => 'Invested';
+
+  @override
+  String get msInvCloseReceived => 'Received';
+
+  @override
+  String get msInvCloseReturn => 'Final return';
+
+  @override
+  String get msInvCloseXirr => 'XIRR';
+
+  @override
+  String get msInvCloseHeld => 'Held';
+
+  @override
+  String msInvHeldValue(String n) {
+    return '$n months';
+  }
+
+  @override
+  String get msInvCloseHelp =>
+      'It moves to Closed. You can still open it and see its history.';
+
+  @override
+  String get msInvCloseCta => 'Close holding';
+
+  @override
+  String get msInvBack => 'Back';
+
+  @override
+  String get msInvPenalty => 'Penalty rate';
+
+  @override
+  String get msInvPenaltySupport =>
+      'Your bank\'s penalty for withdrawing before maturity';
+
+  @override
+  String get msInvRateAfterPenalty => 'Rate after penalty';
+
+  @override
+  String get msInvInterestEarned => 'Interest earned';
+
+  @override
+  String get msInvLessThanToday => 'Less than value today';
+
+  @override
+  String get msInvWithdrawClose => 'Withdraw and close';
+
+  @override
+  String msInvMatured(String amount, String account) {
+    return 'Your FD matured: $amount. Move it to $account?';
+  }
+
+  @override
+  String msInvMaturedSub(String name, String date) {
+    return '$name · matured $date';
+  }
+
+  @override
+  String get msInvRenew => 'Renew';
+
+  @override
+  String msInvMove(String account) {
+    return 'Move to $account';
+  }
+
+  @override
+  String msInvNotifTitle(String amount) {
+    return 'Your FD matured: $amount';
+  }
+
+  @override
+  String msInvNotifBody(String account) {
+    return 'Move it to $account?';
+  }
+
+  @override
+  String get msInvNotifLater => 'Not now';
+
+  @override
+  String msInvWithdrawName(String name) {
+    return 'Withdrawal · $name';
+  }
+
+  @override
+  String msInvMaturityName(String name) {
+    return 'Maturity · $name';
+  }
+
+  @override
+  String msInvTopUpName(String name) {
+    return 'Top-up · $name';
+  }
+
+  @override
+  String get msInvValuesUpdated => 'Value updated';
+
+  @override
+  String msInvClosedSnack(String name) {
+    return '$name moved to Closed';
+  }
+
+  @override
+  String get msRecEveryMonth => 'Every month';
+
+  @override
+  String get msRecOut => 'out';
+
+  @override
+  String get msRecIn => 'in';
+
+  @override
+  String get msRecBills => 'Bills and subscriptions';
+
+  @override
+  String get msRecEmis => 'EMIs';
+
+  @override
+  String get msRecSips => 'SIPs';
+
+  @override
+  String get msRecIncome => 'Income';
+
+  @override
+  String get msRecActive => 'Active';
+
+  @override
+  String get msRecPaused => 'Paused';
+
+  @override
+  String get msRecProcessed => 'Recently processed';
+
+  @override
+  String get msRecEnded => 'Ended';
+
+  @override
+  String msRecRowSub(String interval, String date) {
+    return '$interval · next $date';
+  }
+
+  @override
+  String msRecNextOnly(String date) {
+    return 'next $date';
+  }
+
+  @override
+  String msRecDue(String interval, String account) {
+    return '$interval · due today · $account';
+  }
+
+  @override
+  String msRecPausedSince(String interval, String month) {
+    return '$interval · paused since $month';
+  }
+
+  @override
+  String get msRecViewHistory => 'View in History';
+
+  @override
+  String get msRecEmptyTitle => 'Nothing repeats yet';
+
+  @override
+  String get msRecEmptyBody =>
+      'Add rent, bills, subscriptions or income that repeats. Loan EMIs and SIPs show up here on their own.';
+
+  @override
+  String get msRecFab => 'Add recurring';
+
+  @override
+  String get msRecNew => 'New recurring';
+
+  @override
+  String get msRecEdit => 'Edit recurring';
+
+  @override
+  String get msRecExpense => 'Expense';
+
+  @override
+  String get msRecIncomeType => 'Income';
+
+  @override
+  String get msRecAmount => 'Amount';
+
+  @override
+  String get msRecName => 'Name';
+
+  @override
+  String get msRecCategory => 'Category';
+
+  @override
+  String get msRecAccount => 'Account';
+
+  @override
+  String msRecSkipNext(String date) {
+    return 'Skip next · $date';
+  }
+
+  @override
+  String get msRecSkipNextShort => 'Skip next';
+
+  @override
+  String get msRecPause => 'Pause';
+
+  @override
+  String get msRecResume => 'Resume';
+
+  @override
+  String get msRecSave => 'Save recurring';
+
+  @override
+  String get msRecSaveChanges => 'Save changes';
+
+  @override
+  String get msRecFutureTitle => 'Apply changes to future occurrences only?';
+
+  @override
+  String msRecFutureBody(String name, String n) {
+    return '$name has run $n times. Those transactions stay as they are. The new amount and schedule start from the next occurrence.';
+  }
+
+  @override
+  String get msRecFutureCta => 'Apply to future';
+
+  @override
+  String msRecSkipped(String date, String date2) {
+    return 'Skipped $date. Next on $date2.';
+  }
+
+  @override
+  String msRecSkippedEnd(String date) {
+    return 'Skipped $date.';
+  }
+
+  @override
+  String get msRecUsually => 'Usually';
+
+  @override
+  String get msRecLast12 => 'Last 12 months';
+
+  @override
+  String get msRecMonthlyAvg => 'Monthly avg';
+
+  @override
+  String get msRecProcessedKv => 'Processed';
+
+  @override
+  String msRecProcessedN(String n) {
+    return '$n times';
+  }
+
+  @override
+  String get msRecMonthlyTotal => 'Monthly total';
+
+  @override
+  String msRecAvgCaption(String amount) {
+    return 'last 12 months · avg $amount';
+  }
+
+  @override
+  String get msRecSkippedRow => 'Skipped';
+
+  @override
+  String get msRecRange12 => '12 months';
+
+  @override
+  String get msRecRangeAll => 'All';
+
+  @override
+  String msRecDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get msRecDeleteBody =>
+      'It stops repeating. Transactions it already added stay in History.';
+
+  @override
+  String msRecPausedSnack(String name) {
+    return '$name paused';
+  }
+
+  @override
+  String msRecResumedSnack(String name, String date) {
+    return '$name resumed. Next on $date.';
+  }
+
+  @override
+  String get msRecSaved => 'Recurring saved';
+
+  @override
+  String get msCalcSave => 'Save';
+
+  @override
+  String get msCalcAddLoan => 'Add as loan';
+
+  @override
+  String get msCalcStartSip => 'Start this SIP';
+
+  @override
+  String get msCalcAddFd => 'Add this FD';
+
+  @override
+  String get msCalcAddRd => 'Add this RD';
+
+  @override
+  String get msCalcAddInvestments => 'Add to investments';
+
+  @override
+  String get msCalcEmi => 'EMI calculator';
+
+  @override
+  String get msCalcPrepay => 'Loan Prepayment';
+
+  @override
+  String get msCalcSipAmount => 'SIP Amount';
+
+  @override
+  String get msCalcGoal => 'Goal Planner';
+
+  @override
+  String get msCalcReturns => 'Investment Returns';
+
+  @override
+  String get msCalcInflation => 'Inflation';
+
+  @override
+  String get msCalcFdRd => 'FD / RD';
+
+  @override
+  String get msCalcPpf => 'PPF Calculator';
+
+  @override
+  String get msTxnSourceAuto => 'Recorded automatically';
+
+  @override
+  String get msTxnSourceSip => 'SIP installment';
+
+  @override
+  String get msTxnSourceLabel => 'Source';
+
+  @override
+  String get msTxnSplit => 'EMI split';
+
+  @override
+  String get msTxnDeletedLoan => 'From a deleted loan';
+
+  @override
+  String get msTxnDeletedInvestment => 'From a deleted investment';
+
+  @override
+  String get msTxnDeletedRule => 'From a deleted recurring rule';
+
+  @override
+  String bgStepProcessing(String n) {
+    return 'Adding $n recurring transactions…';
+  }
+
+  @override
+  String get bgStepProcessingOne => 'Adding 1 recurring transaction…';
+
+  @override
+  String get bgStepMaturity => 'Checking deposits…';
+
+  @override
+  String get bgStepBackup => 'Backing up…';
+
+  @override
+  String get bgStepStarting => 'Catching up…';
+
+  @override
+  String get bgContinues => 'Continues in the background';
+
+  @override
+  String bgResultRecurring(String n) {
+    return '$n recurring added';
+  }
+
+  @override
+  String get bgResultRecurringOne => '1 recurring added';
+
+  @override
+  String get bgResultBackup => 'Backup done';
+
+  @override
+  String bgResultMatured(String n) {
+    return '$n deposits matured';
+  }
+
+  @override
+  String get bgFailBackup => 'Backup failed';
+
+  @override
+  String bgFailRecurring(String n) {
+    return 'Couldn\'t add $n recurring transactions';
+  }
+
+  @override
+  String get bgFailRecurringOne => 'Couldn\'t add 1 recurring transaction';
+
+  @override
+  String get bgRetry => 'Retry';
+
+  @override
+  String get bgView => 'View';
+
+  @override
+  String get bgChannelName => 'Background tasks';
+
+  @override
+  String get bgChannelDesc =>
+      'Recurring transactions, EMIs, SIPs and backups added in the background';
+
+  @override
+  String get bgNotifTitle => 'Kuber is catching up';
+
+  @override
+  String get bgNotifFailedTitle => 'A background task failed';
+
+  @override
+  String get numFormatAutomatic => 'Automatic';
+
+  @override
+  String get numFormatAutomaticSub =>
+      'Lakh for rupees, standard for other currencies';
+
+  @override
+  String get showCurrencyCode => 'Show currency code instead of symbol';
+
+  @override
+  String get showCurrencyCodeSub =>
+      'Useful when currencies share a symbol, like C\$ and A\$';
+
+  @override
+  String get currencySuggested => 'Suggested';
+
+  @override
+  String get currencyAll => 'All currencies';
+
+  @override
+  String get currencySearchHint => 'Search by name, code or country';
+
+  @override
+  String get currencyNoMatch => 'No currency matches';
+
+  @override
+  String converterUnavailable(String code) {
+    return '$code isn\'t in the converter. Its rates come from the European Central Bank list, which doesn\'t include it.';
+  }
+
+  @override
+  String get msInfoReducingTitle => 'Reducing balance';
+
+  @override
+  String get msInfoReducingLine =>
+      'Most bank loans. Interest is charged only on what you still owe, so each EMI pays off a little more principal than the last.';
+
+  @override
+  String msInfoReducingEx(String p, String r, String y, String emi) {
+    return '$p at $r for $y years has an EMI of $emi.';
+  }
+
+  @override
+  String get msInfoReducingRow1 => 'Month 1 interest';
+
+  @override
+  String get msInfoReducingRow2 => 'Month 1 principal';
+
+  @override
+  String get msInfoReducingAfter =>
+      'By the end, almost all of the EMI is principal.';
+
+  @override
+  String get msInfoFlatTitle => 'Flat rate';
+
+  @override
+  String get msInfoFlatLine =>
+      'Many car, personal and consumer loans. Interest is charged on the original amount for the whole tenure, even as you repay.';
+
+  @override
+  String msInfoFlatEx(String p, String r, String y) {
+    return '$p at $r flat for $y years.';
+  }
+
+  @override
+  String get msInfoFlatRow1 => 'Interest every year';
+
+  @override
+  String get msInfoFlatRow2 => 'Total interest';
+
+  @override
+  String get msInfoFlatRow3 => 'EMI';
+
+  @override
+  String msInfoFlatAfter(String r, String amount) {
+    return 'At $r reducing balance, the same loan would cost $amount in interest.';
+  }
+
+  @override
+  String get msInfoIoTitle => 'With an interest-only period first';
+
+  @override
+  String get msInfoIoLine =>
+      'Also called pre-EMI. For the first few months you pay only the interest. Regular EMIs start after that.';
+
+  @override
+  String msInfoIoEx(String p, String r, String n) {
+    return '$p at $r with $n interest-only months.';
+  }
+
+  @override
+  String msInfoIoRow1(String n) {
+    return 'Months 1 to $n';
+  }
+
+  @override
+  String msInfoIoRow2(String n) {
+    return 'Then, for $n months';
+  }
+
+  @override
+  String msInfoIoRowValue(String amount) {
+    return '$amount a month';
+  }
+
+  @override
+  String get msInfoIoAfter =>
+      'The interest-only months don\'t reduce what you owe.';
+
+  @override
+  String get msInfoCalculatedTitle => 'Calculated fields';
+
+  @override
+  String get msInfoCalculatedLine =>
+      'Fill in any 3 of principal, rate, tenure and EMI. Kuber works out the 4th and marks it Calculated.';
+
+  @override
+  String get msInfoCalculatedAfter =>
+      'Type over a calculated field to use your own figure. The field you filled in first then becomes the calculated one.';
+
+  @override
+  String get msInfoMismatchTitle => 'Why your EMI is different';
+
+  @override
+  String get msInfoMismatchLine =>
+      'Banks often round the EMI, add loan insurance to it, or charge interest for the days before your first EMI. Kuber always uses the EMI you enter.';
+
+  @override
+  String get msInfoMismatchRow1 => 'Calculated EMI';
+
+  @override
+  String get msInfoMismatchRow2 => 'Your EMI';
+
+  @override
+  String get msInfoMismatchRow3 => 'Difference';
+
+  @override
+  String get msInfoRun1Title => 'I know the original loan details';
+
+  @override
+  String get msInfoRun1Line =>
+      'Enter the loan as it was sanctioned. Kuber works out everything you\'ve paid until today.';
+
+  @override
+  String get msInfoRun2Title => 'I know what\'s outstanding today';
+
+  @override
+  String get msInfoRun2Line =>
+      'Use the outstanding amount from your latest bank statement. Kuber works out how many EMIs are left.';
+
+  @override
+  String get msInfoRun2After =>
+      'Past totals are optional. Add them if you want lifetime interest to be complete.';
+
+  @override
+  String get msInfoRun3Title => 'Just track the EMI';
+
+  @override
+  String get msInfoRun3Line =>
+      'Kuber records each EMI on its day without splitting it into principal and interest. You can add the loan numbers later.';
+
+  @override
+  String get msInfoAdjustmentTitle => 'Adjustment';
+
+  @override
+  String get msInfoAdjustmentLine =>
+      'When your figure is different from Kuber\'s, Kuber keeps yours and records the difference as an opening adjustment on the loan.';
+
+  @override
+  String get msInfoAdjustmentRow1 => 'Kuber calculated';
+
+  @override
+  String get msInfoAdjustmentRow2 => 'You entered';
+
+  @override
+  String get msInfoAdjustmentAfter =>
+      'Adjustments only change the loan. No account balance changes.';
+
+  @override
+  String get msInfoInterestOnlyTitle => 'Count only interest as expense';
+
+  @override
+  String get msInfoInterestOnlyLine =>
+      'Only the interest part of each EMI counts as spending in Analytics and Budgets. The principal is counted as a transfer to this loan.';
+
+  @override
+  String get msInfoInterestOnlyRow1 => 'Interest, counted as expense';
+
+  @override
+  String get msInfoInterestOnlyRow2 => 'Principal, counted as transfer';
+
+  @override
+  String get msInfoInterestOnlyAfter =>
+      'Your bank balance goes down by the full EMI either way. Changing this applies to future EMIs only.';
+
+  @override
+  String get msInfoTenureEmiTitle => 'Reduce tenure or reduce EMI';
+
+  @override
+  String get msInfoTenureEmiLine =>
+      'Reduce tenure keeps your EMI the same and ends the loan sooner. Reduce EMI keeps the end date and lowers each EMI. Reducing tenure saves more interest.';
+
+  @override
+  String get msInfoPrepayChargeTitle => 'Prepayment charge';
+
+  @override
+  String get msInfoPrepayChargeLine =>
+      'Some lenders charge a fee when you pay extra. Kuber records it as an expense. It doesn\'t reduce what you owe. Floating-rate home loans usually have none.';
+
+  @override
+  String get msInfoPrepayRow1 => 'Goes to principal';
+
+  @override
+  String get msInfoPrepayRow2 => 'Charge, recorded as expense';
+
+  @override
+  String get msInfoPrepayRow3 => 'Leaves your account';
+
+  @override
+  String get msInfoFloatingTitle => 'Floating rate';
+
+  @override
+  String get msInfoFloatingLine =>
+      'A floating rate moves with the lender\'s benchmark, so it can change during the loan. When your lender changes it, record it here so the schedule stays right.';
+
+  @override
+  String get msInfoXirrTitle => 'XIRR';
+
+  @override
+  String get msInfoXirrLine =>
+      'Your yearly return, taking into account when each amount went in and came out. It lets you compare a SIP with an FD fairly.';
+
+  @override
+  String msInfoXirrEx(String amount, String invested, String value) {
+    return '$amount every month for 3 years is $invested invested. It\'s worth $value today.';
+  }
+
+  @override
+  String get msInfoXirrRow1 => 'Total gain';
+
+  @override
+  String get msInfoXirrRow2 => 'XIRR';
+
+  @override
+  String msInfoXirrValue(String pct) {
+    return '$pct a year';
+  }
+
+  @override
+  String get msInfoRealizedTitle => 'Unrealized and realized gain';
+
+  @override
+  String get msInfoRealizedLine =>
+      'Unrealized gain is on paper: what you would gain if you sold everything today. Realized gain is what you actually made on money you\'ve already withdrawn.';
+
+  @override
+  String get msInfoProportionalTitle => 'How withdrawals are counted';
+
+  @override
+  String get msInfoProportionalLine =>
+      'When you withdraw part of a holding, the invested amount goes down in the same proportion as the value you took out.';
+
+  @override
+  String msInfoProportionalEx(String value, String invested, String amount) {
+    return 'Value $value with $invested invested. You withdraw $amount, which is 20% of the value.';
+  }
+
+  @override
+  String get msInfoProportionalRow1 => 'Invested goes down by';
+
+  @override
+  String get msInfoProportionalRow2 => 'Realized gain';
+
+  @override
+  String get msInfoProportionalRow3 => 'Left invested';
+
+  @override
+  String get msInfoStepupTitle => 'Yearly step-up';
+
+  @override
+  String get msInfoStepupLine =>
+      'Your SIP grows by a fixed percentage or amount once a year, usually in line with your salary.';
+
+  @override
+  String msInfoStepupEx(String amount) {
+    return '$amount a month with a 10% step-up.';
+  }
+
+  @override
+  String msInfoStepupRow(String n) {
+    return 'Year $n';
+  }
+
+  @override
+  String get msInfoCompoundingTitle => 'Compounding';
+
+  @override
+  String get msInfoCompoundingLine =>
+      'How often interest is added to your deposit so that it starts earning interest too. More often means a little more.';
+
+  @override
+  String msInfoCompoundingEx(String amount) {
+    return '$amount at 7% for 5 years.';
+  }
+
+  @override
+  String get msInfoPayoutTitle => 'Payout type';
+
+  @override
+  String get msInfoPayoutLine =>
+      'Cumulative adds the interest to the deposit and pays everything at maturity. Payout sends the interest to your bank account every month, quarter or year.';
+
+  @override
+  String get msInfoPayoutRow1 => 'Cumulative, at maturity';
+
+  @override
+  String get msInfoPayoutRow2 => 'Quarterly payout';
+
+  @override
+  String msInfoPayoutRow2Value(String amount) {
+    return '$amount every quarter';
+  }
+
+  @override
+  String get msInfoPayoutRow3 => 'Quarterly payout, at maturity';
+
+  @override
+  String get msInfoAccruedTitle => 'Value today';
+
+  @override
+  String get msInfoAccruedLine =>
+      'What a fixed deposit is worth today, including interest earned so far that hasn\'t been paid yet. Kuber works it out every day, so you never update it.';
+
+  @override
+  String get msInfoUpdatedTitle => 'Last updated';
+
+  @override
+  String get msInfoUpdatedLine =>
+      'Market prices change every day, but Kuber only knows the value you last entered. Values older than 30 days are marked so you know which ones to update.';
+
+  @override
+  String get msInfoMonthlyTitle => 'How the monthly amount works';
+
+  @override
+  String get msInfoMonthlyLine =>
+      'Anything that isn\'t monthly is converted to what it costs per month. Each item is counted once, even if it also appears in Loans or Investments.';
+
+  @override
+  String msInfoMonthlyRow1(String amount) {
+    return '$amount every year';
+  }
+
+  @override
+  String msInfoMonthlyRow2(String amount) {
+    return '$amount every 3 months';
+  }
+
+  @override
+  String msInfoMonthlyRow3(String amount) {
+    return '$amount every week';
+  }
+
+  @override
+  String get msInfoMonthlyAfter =>
+      'Weeks use 52 weeks ÷ 12. Daily items use 30 days a month.';
+
+  @override
+  String get msRecUndo => 'Undo';
+
+  @override
+  String get msLoansFirstEmiDate => 'First EMI date';
+
+  @override
+  String get msLoansNextEmiDate => 'Next EMI date';
+
+  @override
+  String get appDrawerSection => 'App drawer';
+
+  @override
+  String get appDrawerDescription =>
+      'Give Kuber Cards, Notes or Reminders their own icon in your phone\'s app list.';
+
+  @override
+  String get appDrawerAdd => 'Add to app drawer';
+
+  @override
+  String get appDrawerRemove => 'Remove from app drawer';
+
+  @override
+  String get appDrawerCards => 'Kuber Cards';
+
+  @override
+  String get appDrawerNotes => 'Kuber Notes';
+
+  @override
+  String get appDrawerReminders => 'Reminders';
+
+  @override
+  String appDrawerAdded(String name) {
+    return '$name added to your app drawer. It can take a moment to show up.';
+  }
+
+  @override
+  String appDrawerRemoved(String name) {
+    return '$name removed from your app drawer';
+  }
+
+  @override
+  String get appDrawerFailed => 'Could not change the app drawer. Try again.';
+
+  @override
+  String get msLoansChangeRateShort => 'Change rate';
+
+  @override
+  String msLoansPageOf(String n, String total) {
+    return 'Year $n of $total';
+  }
+
+  @override
+  String get msLoansPrevYear => 'Previous year';
+
+  @override
+  String get msLoansNextYear => 'Next year';
+
+  @override
+  String get msLoansRecordAutoHelpNoAccount =>
+      'On the EMI day, Kuber records the EMI from the account you pay from.';
+
+  @override
+  String get betaTag => 'Beta';
+
+  @override
+  String get appDrawerCardsSub => 'Add Kuber Cards to your app drawer';
+
+  @override
+  String get appDrawerNotesSub => 'Add Kuber Notes to your app drawer';
+
+  @override
+  String get appDrawerRemindersSub => 'Add Reminders to your app drawer';
+
+  @override
+  String get msLoansViewSchedule => 'View EMI schedule';
+
+  @override
+  String get msLoansExtraChoose => 'What should change?';
+
+  @override
+  String get msLoansExtraHelp =>
+      'Paying extra lowers what you owe, so you pay less interest from now on. Pick how you want that saving.';
+
+  @override
+  String msLoansReduceTenureHow(String emi) {
+    return 'Keep paying $emi a month. The loan ends sooner.';
+  }
+
+  @override
+  String get msLoansReduceEmiHow =>
+      'Keep the same end date. Each EMI gets smaller.';
+
+  @override
+  String msLoansReduceTenureResult(String emi, String month, String n) {
+    return 'EMI stays $emi · ends $month, $n months sooner';
+  }
+
+  @override
+  String msLoansReduceEmiResult(String month, String emi) {
+    return 'Ends $month as now · EMI becomes $emi';
+  }
 }

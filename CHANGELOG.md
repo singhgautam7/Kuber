@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Loans, investments and recurring payments got a big upgrade. Loans show what
+  you still owe, the interest in every EMI, and let you record extra payments
+  or rate changes. Investments track value, gains and XIRR, and FDs work out
+  their own value every day. Recurring shows everything that repeats, including
+  EMIs and SIPs, with a monthly total.
+- One simple schedule picker everywhere: daily, weekly, monthly, quarterly,
+  yearly or custom, with a clear preview of the next dates.
+- The app opens straight to Home. Recurring transactions, EMIs, SIPs and
+  backups now run in the background, even if you close the app.
+- Every world currency is supported, with search and an option to show the
+  currency code instead of the symbol. Number format follows the currency and
+  can still be changed in Settings.
+- Calculators can fill in from your loans and investments, and you can add a
+  loan or an investment straight from a result. All amounts use commas.
+- Kuber Cards, Notes and Reminders can have their own icon in your app drawer.
+- Fixes: the bottom bar fits on small screens with large text, and first-time
+  setup screens start in light mode.
+
 - Your chosen currency now shows everywhere. Accounts, budgets, charts,
   notifications, widgets and every other screen use the same symbol and
   number format you picked in Settings.

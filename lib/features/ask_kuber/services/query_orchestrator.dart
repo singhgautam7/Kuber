@@ -20,6 +20,7 @@ import '../handlers/notes_handler.dart';
 import '../handlers/query_handler.dart';
 import '../handlers/recent_transactions_handler.dart';
 import '../handlers/savings_handler.dart';
+import '../handlers/schedules_handler.dart';
 import '../handlers/spending_handler.dart';
 import '../handlers/top_category_handler.dart';
 import '../models/handler_result.dart';
@@ -64,6 +65,7 @@ class QueryOrchestrator {
           NotesHandler(),
           // Entity-scoped lookups run before the spending/counts handlers so
           // "how many times…" and "when did I last…" aren't swallowed by them.
+          SchedulesHandler(),
           FrequencyHandler(),
           LastSpentHandler(),
           // Data handlers - same precedence as the original monolith.

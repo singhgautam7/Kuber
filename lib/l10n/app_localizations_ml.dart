@@ -5718,4 +5718,2100 @@ class AppLocalizationsMl extends AppLocalizations {
   @override
   String get backupsAreOnDesc =>
       'ആദ്യ ഷെഡ്യൂൾ ചെയ്ത ബാക്കപ്പ് അടുത്ത തവണ ആപ്പ് തുറക്കുമ്പോൾ നടക്കും. അല്ലെങ്കിൽ ഇപ്പോൾ തന്നെ ബാക്കപ്പ് ചെയ്യുക.';
+
+  @override
+  String get msWhenTitle => 'എപ്പോൾ';
+
+  @override
+  String get msWhenTitleEmi => 'EMI ഷെഡ്യൂൾ';
+
+  @override
+  String get msWhenTitleReminder => 'ആവർത്തനം';
+
+  @override
+  String get msWhenDaily => 'ദിവസവും';
+
+  @override
+  String get msWhenWeekly => 'ആഴ്ചതോറും';
+
+  @override
+  String get msWhenMonthly => 'മാസംതോറും';
+
+  @override
+  String get msWhenQuarterly => 'ത്രൈമാസത്തിൽ';
+
+  @override
+  String get msWhenHalfYearly => 'ഓരോ 6 മാസത്തിലും';
+
+  @override
+  String get msWhenYearly => 'വർഷംതോറും';
+
+  @override
+  String get msWhenCustom => 'ഇഷ്ടാനുസൃതം';
+
+  @override
+  String get msWhenOnce => 'ഒരിക്കൽ';
+
+  @override
+  String get msWhenEvery => 'ഓരോ';
+
+  @override
+  String get msWhenUnitDays => 'ദിവസം';
+
+  @override
+  String get msWhenUnitWeeks => 'ആഴ്ച';
+
+  @override
+  String get msWhenUnitMonths => 'മാസം';
+
+  @override
+  String get msWhenUnitYears => 'വർഷം';
+
+  @override
+  String get msWhenStartsOn => 'തുടക്കം';
+
+  @override
+  String get msWhenOnDay => 'തീയതി';
+
+  @override
+  String msWhenOnDayValue(String ordinal) {
+    return 'മാസത്തിലെ $ordinal-ാം തീയതി';
+  }
+
+  @override
+  String get msWhenOn => 'ദിവസം';
+
+  @override
+  String get msWhenEnds => 'അവസാനം';
+
+  @override
+  String get msWhenEndsNever => 'ഒരിക്കലും ഇല്ല';
+
+  @override
+  String get msWhenEndsOnDate => 'ഒരു തീയതിയിൽ';
+
+  @override
+  String get msWhenEndsAfter => 'ഇത്ര തവണയ്ക്ക് ശേഷം';
+
+  @override
+  String get msWhenEndDate => 'അവസാന തീയതി';
+
+  @override
+  String get msWhenTimes => 'തവണ';
+
+  @override
+  String get msWhenLockedMonthly => 'എല്ലാ മാസവും ആവർത്തിക്കും';
+
+  @override
+  String get msWhenLockedHint => 'EMI മാസംതോറുമാണ്';
+
+  @override
+  String get msWhenFirstEmi => 'ആദ്യ EMI';
+
+  @override
+  String get msWhenEmiDay => 'EMI തീയതി';
+
+  @override
+  String msWhenEmiDayValue(String ordinal) {
+    return 'എല്ലാ മാസവും $ordinal-ാം തീയതി';
+  }
+
+  @override
+  String get msWhenNumberOfEmis => 'EMI കളുടെ എണ്ണം';
+
+  @override
+  String get msWhenLastEmi => 'അവസാന EMI';
+
+  @override
+  String get msWhenEveryUnitDay => 'ദിവസവും';
+
+  @override
+  String get msWhenEveryUnitWeek => 'ആഴ്ചതോറും';
+
+  @override
+  String get msWhenEveryUnitMonth => 'മാസംതോറും';
+
+  @override
+  String get msWhenEveryUnitYear => 'വർഷംതോറും';
+
+  @override
+  String msWhenEveryNDays(String n) {
+    return 'ഓരോ $n ദിവസത്തിലും';
+  }
+
+  @override
+  String msWhenEveryNWeeks(String n) {
+    return 'ഓരോ $n ആഴ്ചയിലും';
+  }
+
+  @override
+  String msWhenEveryNMonths(String n) {
+    return 'ഓരോ $n മാസത്തിലും';
+  }
+
+  @override
+  String msWhenEveryNYears(String n) {
+    return 'ഓരോ $n വർഷത്തിലും';
+  }
+
+  @override
+  String msWhenAnchorWeekday(String weekday) {
+    return '$weekday ദിവസം';
+  }
+
+  @override
+  String msWhenAnchorDay(String ordinal) {
+    return '$ordinal-ാം തീയതി';
+  }
+
+  @override
+  String msWhenAnchorDate(String date) {
+    return '$date ന്';
+  }
+
+  @override
+  String msWhenSentence(
+    String interval,
+    String anchor,
+    String start,
+    String end,
+  ) {
+    return '$interval$anchor, $start മുതൽ, $end.';
+  }
+
+  @override
+  String get msWhenEndNever => 'അവസാനമില്ല';
+
+  @override
+  String msWhenEndUntil(String date) {
+    return '$date വരെ';
+  }
+
+  @override
+  String msWhenEndTimes(String n) {
+    return '$n തവണ';
+  }
+
+  @override
+  String msWhenEndEmis(String n) {
+    return '$n EMI';
+  }
+
+  @override
+  String msWhenOnceSentence(String date) {
+    return '$date ന്.';
+  }
+
+  @override
+  String msWhenLastOn(String date) {
+    return 'അവസാനം $date ന്';
+  }
+
+  @override
+  String msWhenLastEmiOn(String date) {
+    return 'അവസാന EMI $date';
+  }
+
+  @override
+  String msWhenCountTotal(String n) {
+    return 'ആകെ $n തവണ';
+  }
+
+  @override
+  String get msWhenFlagNext => 'അടുത്തത്';
+
+  @override
+  String get msWhenFlagToday => 'ഇന്ന് അടയ്ക്കണം';
+
+  @override
+  String get msWhenFlagLastDay => 'അവസാന ദിവസം';
+
+  @override
+  String get msWhenMonthEnd =>
+      'കുറവ് ദിവസങ്ങളുള്ള മാസങ്ങളിൽ ഇത് അവസാന ദിവസം വരും.';
+
+  @override
+  String get msWhenErrEndBeforeStart =>
+      'അവസാന തീയതി തുടക്ക തീയതിക്ക് ശേഷമായിരിക്കണം.';
+
+  @override
+  String get msWhenErrCount => '1 അല്ലെങ്കിൽ അതിൽ കൂടുതൽ നൽകുക.';
+
+  @override
+  String get msWhenErrCountPreview =>
+      'എത്ര തവണ എന്ന് നൽകുക (1 അല്ലെങ്കിൽ കൂടുതൽ).';
+
+  @override
+  String get msCalculated => 'കണക്കാക്കിയത്';
+
+  @override
+  String get msViewDetails => 'വിശദാംശങ്ങൾ കാണുക';
+
+  @override
+  String get msOpenInCalculator => 'കാൽക്കുലേറ്ററിൽ തുറക്കുക';
+
+  @override
+  String get msAdvanced => 'വിപുലമായ ഓപ്ഷനുകൾ';
+
+  @override
+  String get msAdvancedSubLoan =>
+      'പലിശ തരം, വായ്പാ സംഖ്യകൾ, ഇതിനകം നടക്കുന്നു, ചെലവ്';
+
+  @override
+  String get msAlreadyRunning => 'ഇതിനകം നടക്കുന്നുണ്ടോ?';
+
+  @override
+  String get msAlreadyRunningSubLoan => 'ഈ വായ്പ ഇന്നേക്ക് മുമ്പ് തുടങ്ങി';
+
+  @override
+  String get msAlreadyRunningSubInv => 'ഞാൻ ഇന്നേക്ക് മുമ്പ് നിക്ഷേപിച്ചു';
+
+  @override
+  String get msOpeningNote =>
+      'പ്രാരംഭ മൂല്യങ്ങൾ ഒരു അക്കൗണ്ടിന്റെയും ബാലൻസ് മാറ്റില്ല.';
+
+  @override
+  String get msFromLoans => 'വായ്പകളിൽ നിന്ന്';
+
+  @override
+  String get msFromInvestments => 'നിക്ഷേപങ്ങളിൽ നിന്ന്';
+
+  @override
+  String msSource(String name) {
+    return '$name ൽ നിന്ന്';
+  }
+
+  @override
+  String msSourceRule(String name) {
+    return '$name ൽ നിന്ന് · ആവർത്തനം';
+  }
+
+  @override
+  String msFilledFrom(String name) {
+    return '$name ൽ നിന്ന് പൂരിപ്പിച്ചത്';
+  }
+
+  @override
+  String msFromCalculator(String calculator) {
+    return '$calculator ൽ നിന്ന്';
+  }
+
+  @override
+  String get msPaused => 'താൽക്കാലികമായി നിർത്തി';
+
+  @override
+  String get msEnded => 'അവസാനിച്ചു';
+
+  @override
+  String get msClosed => 'അടച്ചു';
+
+  @override
+  String get msExample => 'ഉദാഹരണം';
+
+  @override
+  String get msBusy =>
+      'പ്രോസസ്സ് ചെയ്യുന്നു, അൽപ്പം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക';
+
+  @override
+  String get msLoansTotalOutstanding => 'ആകെ ബാക്കി';
+
+  @override
+  String get msLoansMonthlyEmis => 'പ്രതിമാസ EMI';
+
+  @override
+  String msLoansNextEmiLine(String date, String name, String amount) {
+    return 'അടുത്ത EMI $date · $name · $amount';
+  }
+
+  @override
+  String get msLoansActive => 'സജീവം';
+
+  @override
+  String msLoansRowSub(String amount, String date) {
+    return '$amount EMI · അടുത്തത് $date';
+  }
+
+  @override
+  String get msLoansLeft => 'ബാക്കി';
+
+  @override
+  String msLoansProgress(String paid, String total) {
+    return '$total ൽ $paid EMI അടച്ചു';
+  }
+
+  @override
+  String msLoansPaidCount(String paid) {
+    return '$paid EMI അടച്ചു';
+  }
+
+  @override
+  String get msLoansEmptyTitle => 'ഇതുവരെ വായ്പകളില്ല';
+
+  @override
+  String get msLoansEmptyBody =>
+      'വായ്പ ചേർത്ത് അതിന്റെ EMI, ബാക്കി തുക, അടച്ച പലിശ എന്നിവ കാണുക.';
+
+  @override
+  String get msLoansFab => 'വായ്പ ചേർക്കുക';
+
+  @override
+  String get msLoansAdd => 'വായ്പ ചേർക്കുക';
+
+  @override
+  String get msLoansEdit => 'വായ്പ എഡിറ്റ് ചെയ്യുക';
+
+  @override
+  String get msLoansType => 'വായ്പാ തരം';
+
+  @override
+  String get msLoansName => 'വായ്പയുടെ പേര്';
+
+  @override
+  String get msLoansLender => 'വായ്പ നൽകുന്നയാൾ';
+
+  @override
+  String get msLoansEmiAmount => 'EMI തുക';
+
+  @override
+  String get msLoansPayFrom => 'ഏത് അക്കൗണ്ടിൽ നിന്ന്';
+
+  @override
+  String get msLoansRecordEmis => 'EMI രേഖപ്പെടുത്തുക';
+
+  @override
+  String get msLoansRecordAuto => 'സ്വയമേവ';
+
+  @override
+  String msLoansRecordAutoHelp(String account) {
+    return 'EMI ദിവസം Kuber $account ൽ നിന്ന് EMI രേഖപ്പെടുത്തും.';
+  }
+
+  @override
+  String get msLoansRecordManual => 'ഞാൻ തന്നെ രേഖപ്പെടുത്തും';
+
+  @override
+  String get msLoansSave => 'വായ്പ സേവ് ചെയ്യുക';
+
+  @override
+  String get msLoansSaveChanges => 'മാറ്റങ്ങൾ സേവ് ചെയ്യുക';
+
+  @override
+  String get msLoansInterestType => 'പലിശ തരം';
+
+  @override
+  String get msLoansReducing => 'കുറയുന്ന ബാലൻസ്';
+
+  @override
+  String get msLoansReducingSub => 'മിക്ക ബാങ്ക് വായ്പകളും';
+
+  @override
+  String get msLoansFlat => 'ഫ്ലാറ്റ് നിരക്ക്';
+
+  @override
+  String get msLoansFlatSub => 'പല കാർ, വ്യക്തിഗത, ഉപഭോക്തൃ വായ്പകൾ';
+
+  @override
+  String get msLoansIo => 'ആദ്യം പലിശ മാത്രം കാലയളവ്';
+
+  @override
+  String get msLoansIoSub => 'ആദ്യം പ്രീ-EMI, പിന്നെ സാധാരണ EMI';
+
+  @override
+  String get msLoansIoMonths => 'പലിശ മാത്രം മാസങ്ങൾ';
+
+  @override
+  String msLoansIoNotice(String io, String date, String emi, String n) {
+    return '$date വരെ മാസം $io, പിന്നെ $n മാസം മാസം $emi.';
+  }
+
+  @override
+  String get msLoansNumbers => 'വായ്പാ സംഖ്യകൾ';
+
+  @override
+  String get msLoansPrincipal => 'മുതൽ';
+
+  @override
+  String get msLoansRate => 'പലിശ നിരക്ക്';
+
+  @override
+  String get msLoansTenure => 'കാലാവധി';
+
+  @override
+  String get msLoansEmi => 'EMI';
+
+  @override
+  String get msLoansYears => 'വർഷം';
+
+  @override
+  String get msLoansMonths => 'മാസം';
+
+  @override
+  String get msLoansTotalPayable => 'ആകെ അടയ്ക്കേണ്ടത് · ഓപ്ഷണൽ';
+
+  @override
+  String get msLoansTotalPayableHint => 'നിരക്കിന് പകരം ഇത് ഉപയോഗിക്കുക';
+
+  @override
+  String msLoansOrderHelp(String a, String b, String c) {
+    return 'പൂരിപ്പിച്ച ക്രമം: $a, $b, $c.';
+  }
+
+  @override
+  String msLoansSwapHelp(String field, String other) {
+    return 'നിങ്ങൾ $field നൽകി, അതിനാൽ $other (ആദ്യം പൂരിപ്പിച്ചത്) ഇപ്പോൾ കണക്കാക്കും.';
+  }
+
+  @override
+  String msLoansPreview(String emi, String month, String interest) {
+    return 'EMI $emi · $month ൽ അവസാനിക്കും · ആകെ പലിശ $interest';
+  }
+
+  @override
+  String msLoansPreviewZero(String emi, String month) {
+    return 'EMI $emi · $month ൽ അവസാനിക്കും · പലിശയില്ല';
+  }
+
+  @override
+  String msLoansMismatchMore(String diff) {
+    return 'നിങ്ങളുടെ EMI കണക്കാക്കിയതിനേക്കാൾ $diff കൂടുതലാണ്. ഞങ്ങൾ നിങ്ങളുടെ EMI ഉപയോഗിക്കും.';
+  }
+
+  @override
+  String msLoansMismatchLess(String diff) {
+    return 'നിങ്ങളുടെ EMI കണക്കാക്കിയതിനേക്കാൾ $diff കുറവാണ്. ഞങ്ങൾ നിങ്ങളുടെ EMI ഉപയോഗിക്കും.';
+  }
+
+  @override
+  String get msLoansErrNeverEnds =>
+      'ഈ EMI പലിശ പോലും നികത്തുന്നില്ല, അതിനാൽ വായ്പ ഒരിക്കലും അവസാനിക്കില്ല.';
+
+  @override
+  String msLoansErrNeverEndsPreview(String interest) {
+    return 'പ്രതിമാസ പലിശ $interest. അതിൽ കൂടുതൽ EMI നൽകുക.';
+  }
+
+  @override
+  String get msLoansErrTotalLow =>
+      'ഇത് മുതലിനേക്കാൾ കുറവാണ്. സംഖ്യകൾ പരിശോധിക്കുക.';
+
+  @override
+  String get msLoansRun1 => 'വായ്പയുടെ യഥാർത്ഥ വിവരങ്ങൾ എനിക്കറിയാം';
+
+  @override
+  String get msLoansRun1Sub => 'നിങ്ങൾ എത്ര അടച്ചുവെന്ന് Kuber കണക്കാക്കും';
+
+  @override
+  String get msLoansRun2 => 'ഇന്നത്തെ ബാക്കി എനിക്കറിയാം';
+
+  @override
+  String get msLoansRun2Sub => 'ബാങ്ക് സ്റ്റേറ്റ്മെന്റിൽ നിന്ന്';
+
+  @override
+  String get msLoansRun3 => 'EMI മാത്രം ട്രാക്ക് ചെയ്യുക';
+
+  @override
+  String get msLoansRun3Sub => 'മുതൽ, പലിശ വിഭജനം ഇല്ല';
+
+  @override
+  String get msLoansEmisPaid => 'അടച്ച EMI';
+
+  @override
+  String get msLoansPrincipalPaid => 'അടച്ച മുതൽ';
+
+  @override
+  String get msLoansInterestPaid => 'അടച്ച പലിശ';
+
+  @override
+  String get msLoansOutstandingToday => 'ഇന്നത്തെ ബാക്കി';
+
+  @override
+  String msLoansRun1Help(String date) {
+    return 'വായ്പാ സംഖ്യകളിൽ നിന്നും നിങ്ങളുടെ ആദ്യ EMI ($date) യിൽ നിന്നും കണക്കാക്കിയത്. മാറ്റാൻ ഏതെങ്കിലും മൂല്യത്തിൽ ടാപ്പ് ചെയ്യുക.';
+  }
+
+  @override
+  String msLoansAdjustment(String diff) {
+    return 'ഞങ്ങൾ നിങ്ങളുടെ സംഖ്യ ഉപയോഗിച്ച് വ്യത്യാസം ക്രമീകരണമായി ചേർക്കും: $diff.';
+  }
+
+  @override
+  String get msLoansEmisLeft => 'ബാക്കി EMI';
+
+  @override
+  String msLoansEmisLeftValue(String n, String month) {
+    return '$n · അവസാനത്തേത് $month ൽ';
+  }
+
+  @override
+  String get msLoansPastTotals => 'മുൻകാല ആകെ · ഓപ്ഷണൽ';
+
+  @override
+  String get msLoansPastTotalsSub => 'അടച്ച മുതലും പലിശയും';
+
+  @override
+  String msLoansRun3Notice(String emi, String ordinal) {
+    return 'Kuber എല്ലാ മാസവും $ordinal-ാം തീയതി $emi EMI രേഖപ്പെടുത്തും. വായ്പാ സംഖ്യകൾ ചേർക്കുന്നത് വരെ മുതൽ, പലിശ, ബാക്കി എന്നിവ കാണില്ല.';
+  }
+
+  @override
+  String get msLoansSpending => 'ചെലവ്';
+
+  @override
+  String get msLoansOnlyInterest => 'പലിശ മാത്രം ചെലവായി കണക്കാക്കുക';
+
+  @override
+  String get msLoansOnlyInterestHelp =>
+      'മുതൽ ഈ വായ്പയിലേക്കുള്ള ട്രാൻസ്ഫറായി കണക്കാക്കും. നിങ്ങളുടെ ബാങ്ക് ബാലൻസ് എന്നാലും മുഴുവൻ EMI കുറയും.';
+
+  @override
+  String get msLoansFutureOnly =>
+      'ഇത് ഭാവി EMI കൾക്ക് മാത്രം ബാധകം. ഇതിനകം രേഖപ്പെടുത്തിയ EMI കൾ അതുപോലെ കണക്കാക്കും.';
+
+  @override
+  String get msLoansOutstanding => 'ബാക്കി';
+
+  @override
+  String msLoansEndsOn(String month) {
+    return '$month ൽ അവസാനിക്കും';
+  }
+
+  @override
+  String msLoansNextEmi(String date) {
+    return 'അടുത്ത EMI · $date';
+  }
+
+  @override
+  String get msLoansSplit => 'EMI വിഭജനം';
+
+  @override
+  String get msLoansPrincipalL => 'മുതൽ';
+
+  @override
+  String get msLoansInterestL => 'പലിശ';
+
+  @override
+  String get msLoansTotalInterest => 'ആകെ പലിശ';
+
+  @override
+  String get msLoansRecordExtra => 'അധിക പേയ്മെന്റ് രേഖപ്പെടുത്തുക';
+
+  @override
+  String get msLoansChangeRate => 'പലിശ നിരക്ക് മാറ്റുക';
+
+  @override
+  String get msLoansCloseLoan => 'വായ്പ അടയ്ക്കുക';
+
+  @override
+  String get msLoansOutstandingTab => 'ബാക്കി';
+
+  @override
+  String get msLoansSplitTab => 'മുതൽ vs പലിശ';
+
+  @override
+  String get msLoansMonth => 'മാസം';
+
+  @override
+  String get msLoansYear => 'വർഷം';
+
+  @override
+  String get msLoansBeforeKuber => 'Kuber ന് മുമ്പ്';
+
+  @override
+  String get msLoansNext => 'അടുത്തത്';
+
+  @override
+  String msLoansRowSplit(String principal, String interest) {
+    return 'മു $principal · പ $interest';
+  }
+
+  @override
+  String msLoansRowBal(String balance) {
+    return 'ബാക്കി $balance';
+  }
+
+  @override
+  String get msLoansInterestOnly => 'പലിശ മാത്രം';
+
+  @override
+  String msLoansEventExtra(String amount, String date) {
+    return 'അധിക പേയ്മെന്റ് $amount · $date';
+  }
+
+  @override
+  String msLoansEventExtraSubTenure(String balance) {
+    return 'കാലാവധി കുറയ്ക്കുക · പിന്നീട് ബാക്കി $balance';
+  }
+
+  @override
+  String msLoansEventExtraSubEmi(String balance) {
+    return 'EMI കുറയ്ക്കുക · പിന്നീട് ബാക്കി $balance';
+  }
+
+  @override
+  String msLoansEventRate(String oldRate, String newRate, String date) {
+    return 'നിരക്ക് $oldRate → $newRate · $date മുതൽ';
+  }
+
+  @override
+  String msLoansEventRateSubTenure(String emi) {
+    return 'കാലാവധി ക്രമീകരിക്കുക · EMI $emi ആയി തുടരും';
+  }
+
+  @override
+  String msLoansEventRateSubEmi(String emi) {
+    return 'EMI ക്രമീകരിക്കുക · പുതിയ EMI $emi';
+  }
+
+  @override
+  String msLoansEventCharge(String amount, String date) {
+    return 'ചാർജ് $amount · $date';
+  }
+
+  @override
+  String msLoansEventRegular(String date) {
+    return 'സാധാരണ EMI തുടക്കം · $date';
+  }
+
+  @override
+  String msLoansYearSub(String n, String paid) {
+    return '$n EMI · $paid അടച്ചു';
+  }
+
+  @override
+  String get msLoansYearEnd => 'വർഷാവസാന ബാക്കി';
+
+  @override
+  String msLoansChartNote(String year, String amount) {
+    return '$year ലെ ഇടിവ് നിങ്ങളുടെ $amount അധിക പേയ്മെന്റ് മൂലമാണ്.';
+  }
+
+  @override
+  String msLoansIoBanner(String month, String io, String emi, String date) {
+    return '$month വരെ പലിശ മാത്രം: മാസം $io. $emi സാധാരണ EMI $date മുതൽ തുടങ്ങും.';
+  }
+
+  @override
+  String get msLoansExtraTitle => 'അധിക പേയ്മെന്റ്';
+
+  @override
+  String get msLoansExtraQ => 'ഇത് മുതലിലേക്ക് പോകുമോ?';
+
+  @override
+  String get msLoansExtraYes => 'അതെ';
+
+  @override
+  String get msLoansExtraNo => 'ഇല്ല, ഇത് ഫീസ് അല്ലെങ്കിൽ ചാർജ്';
+
+  @override
+  String get msLoansReduceTenure => 'കാലാവധി കുറയ്ക്കുക';
+
+  @override
+  String get msLoansReduceTenureSub => 'അതേ EMI, വായ്പ നേരത്തെ അവസാനിക്കും';
+
+  @override
+  String get msLoansReduceEmi => 'EMI കുറയ്ക്കുക';
+
+  @override
+  String get msLoansReduceEmiSub => 'അതേ അവസാന തീയതി, കുറഞ്ഞ EMI';
+
+  @override
+  String get msLoansSavesMore => 'കൂടുതൽ പലിശ ലാഭിക്കും';
+
+  @override
+  String msLoansExtraPreviewTenure(String amount, String n) {
+    return '$amount പലിശ ലാഭം · $n മാസം നേരത്തെ അവസാനിക്കും';
+  }
+
+  @override
+  String msLoansExtraPreviewEmi(String amount, String emi) {
+    return '$amount പലിശ ലാഭം · EMI $emi ആകും';
+  }
+
+  @override
+  String get msLoansPrepayCharge => 'മുൻകൂർ പേയ്മെന്റ് ചാർജ് · ഓപ്ഷണൽ';
+
+  @override
+  String get msLoansPrepayChargeHint => 'തുക അല്ലെങ്കിൽ %';
+
+  @override
+  String msLoansFeeNotice(String outstanding) {
+    return 'വായ്പാ ചാർജുകളിൽ ചെലവായി രേഖപ്പെടുത്തി. നിങ്ങളുടെ ബാക്കി $outstanding ആയി തുടരും.';
+  }
+
+  @override
+  String get msLoansLoanCharges => 'വായ്പാ ചാർജുകൾ';
+
+  @override
+  String get msLoansNoNumbersPreview =>
+      'ഇത് എത്ര ലാഭിക്കുമെന്ന് കാണാൻ വായ്പാ സംഖ്യകൾ ചേർക്കുക.';
+
+  @override
+  String get msLoansNewRate => 'പുതിയ നിരക്ക്';
+
+  @override
+  String get msLoansEffectiveFrom => 'പ്രാബല്യ തീയതി';
+
+  @override
+  String get msLoansThen => 'പിന്നെ';
+
+  @override
+  String get msLoansAdjustEmi => 'EMI ക്രമീകരിക്കുക';
+
+  @override
+  String get msLoansAdjustTenure => 'കാലാവധി ക്രമീകരിക്കുക';
+
+  @override
+  String msLoansRatePreviewEmi(String emi, String date) {
+    return '$date മുതൽ പുതിയ EMI $emi';
+  }
+
+  @override
+  String msLoansRatePreviewEmiSub(String month, String amount) {
+    return 'മുമ്പത്തെപ്പോലെ $month ൽ അവസാനിക്കും · $amount പലിശ ലാഭം';
+  }
+
+  @override
+  String msLoansRatePreviewTenure(String emi, String month) {
+    return 'EMI $emi ആയി തുടരും · $month ൽ അവസാനിക്കും';
+  }
+
+  @override
+  String msLoansRatePreviewTenureSub(String n, String amount) {
+    return '$n മാസം നേരത്തെ · $amount പലിശ ലാഭം';
+  }
+
+  @override
+  String msLoansRatePreviewTenureSubLater(String n, String amount) {
+    return '$n മാസം വൈകി · $amount അധിക പലിശ';
+  }
+
+  @override
+  String get msLoansFloatingHelp =>
+      'ഫ്ലോട്ടിംഗ് നിരക്ക് വായ്പകൾ വായ്പ നൽകുന്നയാളുടെ ബെഞ്ച്മാർക്കിനൊപ്പം മാറും. ഓരോ മാറ്റവും ഇവിടെ രേഖപ്പെടുത്തുക.';
+
+  @override
+  String msLoansPaidOff(String name) {
+    return '$name പൂർണ്ണമായി അടച്ചു';
+  }
+
+  @override
+  String msLoansCloseTitle(String name) {
+    return '$name അടയ്ക്കണോ?';
+  }
+
+  @override
+  String get msLoansCloseBody =>
+      'ഇത് അടച്ചവ വിഭാഗത്തിലേക്ക് മാറും. EMI നിൽക്കും, ചരിത്രം നിലനിൽക്കും.';
+
+  @override
+  String msLoansExtraName(String name) {
+    return 'അധിക പേയ്മെന്റ് · $name';
+  }
+
+  @override
+  String msLoansChargeName(String name) {
+    return 'വായ്പാ ചാർജ് · $name';
+  }
+
+  @override
+  String get msLoansSaved => 'വായ്പ സേവ് ചെയ്തു';
+
+  @override
+  String get msLoansRateSaved => 'നിരക്ക് മാറ്റം സേവ് ചെയ്തു';
+
+  @override
+  String get msLoansExtraSaved => 'അധിക പേയ്മെന്റ് രേഖപ്പെടുത്തി';
+
+  @override
+  String get msInvPortfolio => 'പോർട്ട്ഫോളിയോ മൂല്യം';
+
+  @override
+  String get msInvInvested => 'നിക്ഷേപിച്ചത്';
+
+  @override
+  String get msInvGain => 'നേട്ടം';
+
+  @override
+  String get msInvXirr => 'XIRR';
+
+  @override
+  String msInvOverall(String pct) {
+    return 'ആകെ $pct';
+  }
+
+  @override
+  String get msInvUpdateValues => 'മൂല്യങ്ങൾ അപ്ഡേറ്റ് ചെയ്യുക';
+
+  @override
+  String get msInvGroupMutualFunds => 'മ്യൂച്വൽ ഫണ്ടുകൾ';
+
+  @override
+  String get msInvGroupStocks => 'ഓഹരികൾ';
+
+  @override
+  String get msInvGroupGold => 'സ്വർണ്ണം';
+
+  @override
+  String get msInvGroupCrypto => 'ക്രിപ്റ്റോ';
+
+  @override
+  String get msInvGroupFixed => 'സ്ഥിര വരുമാനം';
+
+  @override
+  String get msInvGroupOther => 'വസ്തുവും മറ്റുള്ളവയും';
+
+  @override
+  String msInvStale(String n) {
+    return '$n ദിവസം മുമ്പ് അപ്ഡേറ്റ് ചെയ്തു';
+  }
+
+  @override
+  String msInvUpdatedOn(String month) {
+    return '$month ൽ അപ്ഡേറ്റ് ചെയ്തു';
+  }
+
+  @override
+  String get msInvEmptyTitle => 'ഇതുവരെ നിക്ഷേപങ്ങളില്ല';
+
+  @override
+  String get msInvEmptyBody =>
+      'ഫണ്ട്, ഓഹരി, FD അല്ലെങ്കിൽ നിങ്ങളുടെ ഏത് സ്വത്തും ചേർക്കുക. അതിന്റെ മൂല്യവും നേട്ടവും Kuber കാണിക്കും.';
+
+  @override
+  String get msInvFab => 'നിക്ഷേപം ചേർക്കുക';
+
+  @override
+  String get msInvAdd => 'നിക്ഷേപം ചേർക്കുക';
+
+  @override
+  String get msInvEdit => 'നിക്ഷേപം എഡിറ്റ് ചെയ്യുക';
+
+  @override
+  String get msInvSave => 'നിക്ഷേപം സേവ് ചെയ്യുക';
+
+  @override
+  String get msInvPickIntro =>
+      'ഇത് ഏത് തരം നിക്ഷേപമാണ്? മൂല്യം മാറുന്ന രീതിക്കനുസരിച്ച് ഫോം മാറും.';
+
+  @override
+  String get msInvPickMarket => 'മൂല്യം വിപണിക്കൊപ്പം മാറും';
+
+  @override
+  String get msInvPickMarketSub => 'നിങ്ങൾ ഇടയ്ക്കിടെ മൂല്യം അപ്ഡേറ്റ് ചെയ്യും';
+
+  @override
+  String get msInvPickFixed => 'സ്ഥിര വരുമാനം';
+
+  @override
+  String get msInvPickFixedSub => 'Kuber നിങ്ങൾക്കായി മൂല്യം കണക്കാക്കും';
+
+  @override
+  String get msInvPickOther => 'മറ്റുള്ളവ';
+
+  @override
+  String get msInvPickOtherSub => 'നിങ്ങൾ അപൂർവമായി മൂല്യം അപ്ഡേറ്റ് ചെയ്യും';
+
+  @override
+  String get msInvTypeMutualFund => 'മ്യൂച്വൽ ഫണ്ട്';
+
+  @override
+  String get msInvTypeStocks => 'ഓഹരികൾ';
+
+  @override
+  String get msInvTypeEtf => 'ETF';
+
+  @override
+  String get msInvTypeGold => 'സ്വർണ്ണം';
+
+  @override
+  String get msInvTypeCrypto => 'ക്രിപ്റ്റോ';
+
+  @override
+  String get msInvTypeFd => 'സ്ഥിര നിക്ഷേപം';
+
+  @override
+  String get msInvTypeRd => 'ആവർത്തന നിക്ഷേപം';
+
+  @override
+  String get msInvTypePpf => 'PPF';
+
+  @override
+  String get msInvTypeBonds => 'ബോണ്ടുകൾ';
+
+  @override
+  String get msInvTypeProperty => 'വസ്തു';
+
+  @override
+  String get msInvTypeCollectibles => 'ശേഖരണ വസ്തുക്കൾ';
+
+  @override
+  String get msInvTypeCustom => 'ഇഷ്ടാനുസൃതം';
+
+  @override
+  String get msInvName => 'പേര്';
+
+  @override
+  String get msInvHow => 'നിങ്ങൾ എങ്ങനെ നിക്ഷേപിക്കുന്നു?';
+
+  @override
+  String get msInvOneTime => 'ഒരിക്കൽ';
+
+  @override
+  String get msInvSip => 'SIP';
+
+  @override
+  String get msInvAmountInvested => 'നിക്ഷേപിച്ച തുക';
+
+  @override
+  String get msInvCurrentValue => 'നിലവിലെ മൂല്യം';
+
+  @override
+  String get msInvUnits => 'യൂണിറ്റുകൾ · ഓപ്ഷണൽ';
+
+  @override
+  String get msInvUnitsHint => 'ഉദാ. 612.4';
+
+  @override
+  String get msInvSipAmount => 'SIP തുക';
+
+  @override
+  String get msInvFromAccount => 'ഏത് അക്കൗണ്ടിൽ നിന്ന്';
+
+  @override
+  String get msInvStepUp => 'വാർഷിക സ്റ്റെപ്പ്-അപ്പ്';
+
+  @override
+  String get msInvStepUpSwitch => 'എല്ലാ വർഷവും കൂട്ടുക';
+
+  @override
+  String get msInvStepUpField => 'സ്റ്റെപ്പ്-അപ്പ്';
+
+  @override
+  String msInvStepUpNotice(
+    String a,
+    String b,
+    String date1,
+    String c,
+    String date2,
+  ) {
+    return 'ഇപ്പോൾ $a, $date1 മുതൽ $b, $date2 മുതൽ $c.';
+  }
+
+  @override
+  String get msInvPrincipal => 'മുതൽ';
+
+  @override
+  String get msInvInstallment => 'തവണ';
+
+  @override
+  String get msInvTerms => 'നിബന്ധനകൾ';
+
+  @override
+  String get msInvRate => 'പലിശ നിരക്ക്';
+
+  @override
+  String get msInvStartDate => 'തുടക്ക തീയതി';
+
+  @override
+  String get msInvTenure => 'കാലാവധി';
+
+  @override
+  String get msInvCompounding => 'കൂട്ടുപലിശ';
+
+  @override
+  String get msInvCompMonthly => 'പ്രതിമാസം';
+
+  @override
+  String get msInvCompQuarterly => 'ത്രൈമാസം';
+
+  @override
+  String get msInvCompHalfYearly => 'അർദ്ധവാർഷികം';
+
+  @override
+  String get msInvCompYearly => 'വാർഷികം';
+
+  @override
+  String get msInvPayout => 'പേഔട്ട് തരം';
+
+  @override
+  String get msInvPayCumulative => 'സഞ്ചിതം';
+
+  @override
+  String get msInvPayMonthly => 'പ്രതിമാസം';
+
+  @override
+  String get msInvPayQuarterly => 'ത്രൈമാസം';
+
+  @override
+  String get msInvPayYearly => 'വാർഷികം';
+
+  @override
+  String get msInvAtMaturity => 'കാലാവധി പൂർത്തിയാകുമ്പോൾ';
+
+  @override
+  String msInvMaturityLine(String date, String amount) {
+    return '$date ന് · പലിശ $amount';
+  }
+
+  @override
+  String msInvMaturityLineRd(String date, String amount) {
+    return '$date ന് · നിങ്ങൾ $amount നിക്ഷേപിക്കും';
+  }
+
+  @override
+  String get msInvAutoValue =>
+      'Kuber ദിവസവും മൂല്യം കണക്കാക്കും. നിങ്ങൾ ഇത് ഒരിക്കലും അപ്ഡേറ്റ് ചെയ്യേണ്ടതില്ല.';
+
+  @override
+  String get msInvInvestedSoFar => 'ഇതുവരെ നിക്ഷേപം';
+
+  @override
+  String get msInvUnrealized => 'യാഥാർത്ഥ്യമാകാത്തത്';
+
+  @override
+  String get msInvRealized => 'യാഥാർത്ഥ്യമായ നേട്ടം';
+
+  @override
+  String get msInvWithdrawn => 'പിൻവലിച്ചത്';
+
+  @override
+  String get msInvLastUpdated => 'അവസാന അപ്ഡേറ്റ്';
+
+  @override
+  String msInvSipLine(String amount, String ordinal) {
+    return '$ordinal-ാം തീയതി $amount';
+  }
+
+  @override
+  String msInvSipLineStep(String amount, String ordinal, String pct) {
+    return '$ordinal-ാം തീയതി $amount · വർഷം +$pct';
+  }
+
+  @override
+  String get msInvUpdateValue => 'മൂല്യം അപ്ഡേറ്റ് ചെയ്യുക';
+
+  @override
+  String get msInvAddMoney => 'പണം ചേർക്കുക';
+
+  @override
+  String get msInvWithdraw => 'പിൻവലിക്കുക';
+
+  @override
+  String get msInvValueToday => 'ഇന്നത്തെ മൂല്യം';
+
+  @override
+  String msInvMatures(String date) {
+    return '$date ന് കാലാവധി';
+  }
+
+  @override
+  String get msInvWithdrawEarly => 'നേരത്തെ പിൻവലിക്കുക';
+
+  @override
+  String get msInvLegendValue => 'നിലവിലെ മൂല്യം';
+
+  @override
+  String get msInvLegendInvested => 'നിക്ഷേപിച്ച തുക';
+
+  @override
+  String get msInvLegendGain => 'നേട്ടം';
+
+  @override
+  String get msInvActivity => 'പ്രവർത്തനം';
+
+  @override
+  String get msInvActValue => 'മൂല്യം അപ്ഡേറ്റ് ചെയ്തു';
+
+  @override
+  String get msInvActSip => 'SIP തവണ';
+
+  @override
+  String get msInvActTopUp => 'ടോപ്പ്-അപ്പ്';
+
+  @override
+  String get msInvActWithdrawal => 'പിൻവലിക്കൽ';
+
+  @override
+  String get msInvActOpening => 'പ്രാരംഭ മൂല്യം';
+
+  @override
+  String get msInvActInterest => 'പലിശ ചേർത്തു';
+
+  @override
+  String get msInvActOpened => 'നിക്ഷേപം തുറന്നു';
+
+  @override
+  String get msInvTransaction => 'ഇടപാട്';
+
+  @override
+  String get msInvAddPast => 'മുൻ തീയതിക്കുള്ള മൂല്യം ചേർക്കുക';
+
+  @override
+  String get msInvAddPastTitle => 'മുൻകാല മൂല്യം ചേർക്കുക';
+
+  @override
+  String get msInvValueOnDate => 'ആ തീയതിയിലെ മൂല്യം';
+
+  @override
+  String get msInvPastHelp =>
+      'മുൻകാല മൂല്യങ്ങൾ ചാർട്ട് നിറയ്ക്കും. അവ നിലവിലെ മൂല്യമോ ഒരു ബാലൻസോ മാറ്റില്ല.';
+
+  @override
+  String get msInvInterestLocked =>
+      'പലിശ എൻട്രികൾ കണക്കാക്കുന്നതാണ്, എഡിറ്റ് ചെയ്യാനാവില്ല.';
+
+  @override
+  String msInvUpdSub(String n) {
+    return '$n ഹോൾഡിംഗുകൾ · ഏകദേശം 30 സെക്കൻഡ്';
+  }
+
+  @override
+  String get msInvUpdHelp =>
+      'സ്ഥിര നിക്ഷേപങ്ങളും PPF ഉം സ്വയം അപ്ഡേറ്റ് ആകും, അതിനാൽ ഇവിടെ ഇല്ല.';
+
+  @override
+  String get msInvNewValue => 'പുതിയ മൂല്യം';
+
+  @override
+  String msInvSaveN(String n) {
+    return '$n മൂല്യങ്ങൾ സേവ് ചെയ്യുക';
+  }
+
+  @override
+  String get msInvSaveEmpty => 'സേവ് ചെയ്യുക';
+
+  @override
+  String msInvSaved(String n, String amount) {
+    return '$n മൂല്യങ്ങൾ അപ്ഡേറ്റ് ചെയ്തു. പോർട്ട്ഫോളിയോ $amount.';
+  }
+
+  @override
+  String get msInvWithdrawAll => 'എല്ലാം പിൻവലിക്കുക';
+
+  @override
+  String msInvValueLine(String amount) {
+    return 'മൂല്യം $amount';
+  }
+
+  @override
+  String get msInvRedeemed => 'പിൻവലിച്ച തുക';
+
+  @override
+  String get msInvExitLoad => 'എക്സിറ്റ് ലോഡ് · ഓപ്ഷണൽ';
+
+  @override
+  String get msInvTax => 'നികുതി · ഓപ്ഷണൽ';
+
+  @override
+  String get msInvReceived => 'ലഭിച്ച തുക';
+
+  @override
+  String get msInvToAccount => 'ഏത് അക്കൗണ്ടിലേക്ക്';
+
+  @override
+  String get msInvDate => 'തീയതി';
+
+  @override
+  String get msInvAfter => 'ഈ പിൻവലിക്കലിന് ശേഷം';
+
+  @override
+  String msInvCloseTitle(String name) {
+    return '$name അടയ്ക്കണോ?';
+  }
+
+  @override
+  String msInvCloseBody(String amount) {
+    return 'നിങ്ങൾക്ക് $amount ലഭിച്ചു. ഇതിന്റെ പ്രകടനം ഇതാ.';
+  }
+
+  @override
+  String get msInvCloseInvested => 'നിക്ഷേപിച്ചത്';
+
+  @override
+  String get msInvCloseReceived => 'ലഭിച്ചത്';
+
+  @override
+  String get msInvCloseReturn => 'അന്തിമ വരുമാനം';
+
+  @override
+  String get msInvCloseXirr => 'XIRR';
+
+  @override
+  String get msInvCloseHeld => 'കൈവശം വെച്ച കാലം';
+
+  @override
+  String msInvHeldValue(String n) {
+    return '$n മാസം';
+  }
+
+  @override
+  String get msInvCloseHelp =>
+      'ഇത് അടച്ചവ വിഭാഗത്തിലേക്ക് മാറും. തുറന്ന് ചരിത്രം കാണാം.';
+
+  @override
+  String get msInvCloseCta => 'ഹോൾഡിംഗ് അടയ്ക്കുക';
+
+  @override
+  String get msInvBack => 'തിരികെ';
+
+  @override
+  String get msInvPenalty => 'പിഴ നിരക്ക്';
+
+  @override
+  String get msInvPenaltySupport =>
+      'കാലാവധിക്ക് മുമ്പ് പിൻവലിച്ചാൽ നിങ്ങളുടെ ബാങ്കിന്റെ പിഴ';
+
+  @override
+  String get msInvRateAfterPenalty => 'പിഴയ്ക്ക് ശേഷമുള്ള നിരക്ക്';
+
+  @override
+  String get msInvInterestEarned => 'നേടിയ പലിശ';
+
+  @override
+  String get msInvLessThanToday => 'ഇന്നത്തെ മൂല്യത്തേക്കാൾ കുറവ്';
+
+  @override
+  String get msInvWithdrawClose => 'പിൻവലിച്ച് അടയ്ക്കുക';
+
+  @override
+  String msInvMatured(String amount, String account) {
+    return 'നിങ്ങളുടെ FD കാലാവധി പൂർത്തിയായി: $amount. ഇത് $account ലേക്ക് മാറ്റണോ?';
+  }
+
+  @override
+  String msInvMaturedSub(String name, String date) {
+    return '$name · $date ന് കാലാവധി പൂർത്തിയായി';
+  }
+
+  @override
+  String get msInvRenew => 'പുതുക്കുക';
+
+  @override
+  String msInvMove(String account) {
+    return '$account ലേക്ക് മാറ്റുക';
+  }
+
+  @override
+  String msInvNotifTitle(String amount) {
+    return 'നിങ്ങളുടെ FD കാലാവധി പൂർത്തിയായി: $amount';
+  }
+
+  @override
+  String msInvNotifBody(String account) {
+    return 'ഇത് $account ലേക്ക് മാറ്റണോ?';
+  }
+
+  @override
+  String get msInvNotifLater => 'ഇപ്പോൾ വേണ്ട';
+
+  @override
+  String msInvWithdrawName(String name) {
+    return 'പിൻവലിക്കൽ · $name';
+  }
+
+  @override
+  String msInvMaturityName(String name) {
+    return 'കാലാവധി · $name';
+  }
+
+  @override
+  String msInvTopUpName(String name) {
+    return 'ടോപ്പ്-അപ്പ് · $name';
+  }
+
+  @override
+  String get msInvValuesUpdated => 'മൂല്യം അപ്ഡേറ്റ് ചെയ്തു';
+
+  @override
+  String msInvClosedSnack(String name) {
+    return '$name അടച്ചവയിലേക്ക് മാറ്റി';
+  }
+
+  @override
+  String get msRecEveryMonth => 'എല്ലാ മാസവും';
+
+  @override
+  String get msRecOut => 'ചെലവ്';
+
+  @override
+  String get msRecIn => 'വരവ്';
+
+  @override
+  String get msRecBills => 'ബില്ലുകളും സബ്സ്ക്രിപ്ഷനുകളും';
+
+  @override
+  String get msRecEmis => 'EMI';
+
+  @override
+  String get msRecSips => 'SIP';
+
+  @override
+  String get msRecIncome => 'വരുമാനം';
+
+  @override
+  String get msRecActive => 'സജീവം';
+
+  @override
+  String get msRecPaused => 'നിർത്തിവെച്ചവ';
+
+  @override
+  String get msRecProcessed => 'അടുത്തിടെ പ്രോസസ്സ് ചെയ്തവ';
+
+  @override
+  String get msRecEnded => 'അവസാനിച്ചവ';
+
+  @override
+  String msRecRowSub(String interval, String date) {
+    return '$interval · അടുത്തത് $date';
+  }
+
+  @override
+  String msRecNextOnly(String date) {
+    return 'അടുത്തത് $date';
+  }
+
+  @override
+  String msRecDue(String interval, String account) {
+    return '$interval · ഇന്ന് അടയ്ക്കണം · $account';
+  }
+
+  @override
+  String msRecPausedSince(String interval, String month) {
+    return '$interval · $month മുതൽ നിർത്തിവെച്ചു';
+  }
+
+  @override
+  String get msRecViewHistory => 'ചരിത്രത്തിൽ കാണുക';
+
+  @override
+  String get msRecEmptyTitle => 'ഇതുവരെ ഒന്നും ആവർത്തിക്കുന്നില്ല';
+
+  @override
+  String get msRecEmptyBody =>
+      'വാടക, ബില്ലുകൾ, സബ്സ്ക്രിപ്ഷനുകൾ അല്ലെങ്കിൽ ആവർത്തിക്കുന്ന വരുമാനം ചേർക്കുക. വായ്പാ EMI യും SIP യും ഇവിടെ സ്വയം കാണിക്കും.';
+
+  @override
+  String get msRecFab => 'ആവർത്തനം ചേർക്കുക';
+
+  @override
+  String get msRecNew => 'പുതിയ ആവർത്തനം';
+
+  @override
+  String get msRecEdit => 'ആവർത്തനം എഡിറ്റ് ചെയ്യുക';
+
+  @override
+  String get msRecExpense => 'ചെലവ്';
+
+  @override
+  String get msRecIncomeType => 'വരുമാനം';
+
+  @override
+  String get msRecAmount => 'തുക';
+
+  @override
+  String get msRecName => 'പേര്';
+
+  @override
+  String get msRecCategory => 'വിഭാഗം';
+
+  @override
+  String get msRecAccount => 'അക്കൗണ്ട്';
+
+  @override
+  String msRecSkipNext(String date) {
+    return 'അടുത്തത് ഒഴിവാക്കുക · $date';
+  }
+
+  @override
+  String get msRecSkipNextShort => 'അടുത്തത് ഒഴിവാക്കുക';
+
+  @override
+  String get msRecPause => 'നിർത്തിവെക്കുക';
+
+  @override
+  String get msRecResume => 'പുനരാരംഭിക്കുക';
+
+  @override
+  String get msRecSave => 'ആവർത്തനം സേവ് ചെയ്യുക';
+
+  @override
+  String get msRecSaveChanges => 'മാറ്റങ്ങൾ സേവ് ചെയ്യുക';
+
+  @override
+  String get msRecFutureTitle => 'മാറ്റങ്ങൾ ഭാവിയിലേക്ക് മാത്രം ബാധകമാക്കണോ?';
+
+  @override
+  String msRecFutureBody(String name, String n) {
+    return '$name $n തവണ പ്രവർത്തിച്ചു. ആ ഇടപാടുകൾ അതുപോലെ നിലനിൽക്കും. പുതിയ തുകയും ഷെഡ്യൂളും അടുത്ത തവണ മുതൽ തുടങ്ങും.';
+  }
+
+  @override
+  String get msRecFutureCta => 'ഭാവിയിലേക്ക് ബാധകമാക്കുക';
+
+  @override
+  String msRecSkipped(String date, String date2) {
+    return '$date ഒഴിവാക്കി. അടുത്തത് $date2 ന്.';
+  }
+
+  @override
+  String msRecSkippedEnd(String date) {
+    return '$date ഒഴിവാക്കി.';
+  }
+
+  @override
+  String get msRecUsually => 'സാധാരണയായി';
+
+  @override
+  String get msRecLast12 => 'കഴിഞ്ഞ 12 മാസം';
+
+  @override
+  String get msRecMonthlyAvg => 'പ്രതിമാസ ശരാശരി';
+
+  @override
+  String get msRecProcessedKv => 'പ്രോസസ്സ് ചെയ്തവ';
+
+  @override
+  String msRecProcessedN(String n) {
+    return '$n തവണ';
+  }
+
+  @override
+  String get msRecMonthlyTotal => 'പ്രതിമാസ ആകെ';
+
+  @override
+  String msRecAvgCaption(String amount) {
+    return 'കഴിഞ്ഞ 12 മാസം · ശരാശരി $amount';
+  }
+
+  @override
+  String get msRecSkippedRow => 'ഒഴിവാക്കി';
+
+  @override
+  String get msRecRange12 => '12 മാസം';
+
+  @override
+  String get msRecRangeAll => 'എല്ലാം';
+
+  @override
+  String msRecDeleteTitle(String name) {
+    return '$name ഇല്ലാതാക്കണോ?';
+  }
+
+  @override
+  String get msRecDeleteBody =>
+      'ഇത് ആവർത്തിക്കുന്നത് നിർത്തും. ഇതിനകം ചേർത്ത ഇടപാടുകൾ ചരിത്രത്തിൽ നിലനിൽക്കും.';
+
+  @override
+  String msRecPausedSnack(String name) {
+    return '$name നിർത്തിവെച്ചു';
+  }
+
+  @override
+  String msRecResumedSnack(String name, String date) {
+    return '$name പുനരാരംഭിച്ചു. അടുത്തത് $date ന്.';
+  }
+
+  @override
+  String get msRecSaved => 'ആവർത്തനം സേവ് ചെയ്തു';
+
+  @override
+  String get msCalcSave => 'സേവ് ചെയ്യുക';
+
+  @override
+  String get msCalcAddLoan => 'വായ്പയായി ചേർക്കുക';
+
+  @override
+  String get msCalcStartSip => 'ഈ SIP തുടങ്ങുക';
+
+  @override
+  String get msCalcAddFd => 'ഈ FD ചേർക്കുക';
+
+  @override
+  String get msCalcAddRd => 'ഈ RD ചേർക്കുക';
+
+  @override
+  String get msCalcAddInvestments => 'നിക്ഷേപങ്ങളിൽ ചേർക്കുക';
+
+  @override
+  String get msCalcEmi => 'EMI കാൽക്കുലേറ്റർ';
+
+  @override
+  String get msCalcPrepay => 'വായ്പ മുൻകൂർ പേയ്മെന്റ്';
+
+  @override
+  String get msCalcSipAmount => 'SIP തുക';
+
+  @override
+  String get msCalcGoal => 'ലക്ഷ്യ ആസൂത്രണം';
+
+  @override
+  String get msCalcReturns => 'നിക്ഷേപ വരുമാനം';
+
+  @override
+  String get msCalcInflation => 'പണപ്പെരുപ്പം';
+
+  @override
+  String get msCalcFdRd => 'FD / RD';
+
+  @override
+  String get msCalcPpf => 'PPF കാൽക്കുലേറ്റർ';
+
+  @override
+  String get msTxnSourceAuto => 'സ്വയമേവ രേഖപ്പെടുത്തി';
+
+  @override
+  String get msTxnSourceSip => 'SIP തവണ';
+
+  @override
+  String get msTxnSourceLabel => 'ഉറവിടം';
+
+  @override
+  String get msTxnSplit => 'EMI വിഭജനം';
+
+  @override
+  String get msTxnDeletedLoan => 'ഇല്ലാതാക്കിയ വായ്പയിൽ നിന്ന്';
+
+  @override
+  String get msTxnDeletedInvestment => 'ഇല്ലാതാക്കിയ നിക്ഷേപത്തിൽ നിന്ന്';
+
+  @override
+  String get msTxnDeletedRule => 'ഇല്ലാതാക്കിയ ആവർത്തന നിയമത്തിൽ നിന്ന്';
+
+  @override
+  String bgStepProcessing(String n) {
+    return '$n ആവർത്തന ഇടപാടുകൾ ചേർക്കുന്നു…';
+  }
+
+  @override
+  String get bgStepProcessingOne => '1 ആവർത്തന ഇടപാട് ചേർക്കുന്നു…';
+
+  @override
+  String get bgStepMaturity => 'നിക്ഷേപങ്ങൾ പരിശോധിക്കുന്നു…';
+
+  @override
+  String get bgStepBackup => 'ബാക്കപ്പ് ചെയ്യുന്നു…';
+
+  @override
+  String get bgStepStarting => 'അപ്ഡേറ്റ് ചെയ്യുന്നു…';
+
+  @override
+  String get bgContinues => 'പശ്ചാത്തലത്തിൽ തുടരും';
+
+  @override
+  String bgResultRecurring(String n) {
+    return '$n ആവർത്തനങ്ങൾ ചേർത്തു';
+  }
+
+  @override
+  String get bgResultRecurringOne => '1 ആവർത്തനം ചേർത്തു';
+
+  @override
+  String get bgResultBackup => 'ബാക്കപ്പ് പൂർത്തിയായി';
+
+  @override
+  String bgResultMatured(String n) {
+    return '$n നിക്ഷേപങ്ങളുടെ കാലാവധി പൂർത്തിയായി';
+  }
+
+  @override
+  String get bgFailBackup => 'ബാക്കപ്പ് പരാജയപ്പെട്ടു';
+
+  @override
+  String bgFailRecurring(String n) {
+    return '$n ആവർത്തന ഇടപാടുകൾ ചേർക്കാനായില്ല';
+  }
+
+  @override
+  String get bgFailRecurringOne => '1 ആവർത്തന ഇടപാട് ചേർക്കാനായില്ല';
+
+  @override
+  String get bgRetry => 'വീണ്ടും ശ്രമിക്കുക';
+
+  @override
+  String get bgView => 'കാണുക';
+
+  @override
+  String get bgChannelName => 'പശ്ചാത്തല ജോലികൾ';
+
+  @override
+  String get bgChannelDesc =>
+      'പശ്ചാത്തലത്തിൽ ചേർത്ത ആവർത്തന ഇടപാടുകൾ, EMI, SIP, ബാക്കപ്പുകൾ';
+
+  @override
+  String get bgNotifTitle => 'Kuber അപ്ഡേറ്റ് ആകുന്നു';
+
+  @override
+  String get bgNotifFailedTitle => 'ഒരു പശ്ചാത്തല ജോലി പരാജയപ്പെട്ടു';
+
+  @override
+  String get numFormatAutomatic => 'സ്വയമേവ';
+
+  @override
+  String get numFormatAutomaticSub =>
+      'രൂപയ്ക്ക് ലക്ഷം, മറ്റ് കറൻസികൾക്ക് സാധാരണ';
+
+  @override
+  String get showCurrencyCode => 'ചിഹ്നത്തിന് പകരം കറൻസി കോഡ് കാണിക്കുക';
+
+  @override
+  String get showCurrencyCodeSub =>
+      'കറൻസികൾക്ക് ഒരേ ചിഹ്നമുള്ളപ്പോൾ ഉപകാരപ്രദം, ഉദാ. C\$, A\$';
+
+  @override
+  String get currencySuggested => 'നിർദ്ദേശിച്ചവ';
+
+  @override
+  String get currencyAll => 'എല്ലാ കറൻസികളും';
+
+  @override
+  String get currencySearchHint => 'പേര്, കോഡ് അല്ലെങ്കിൽ രാജ്യം വഴി തിരയുക';
+
+  @override
+  String get currencyNoMatch => 'ഒരു കറൻസിയും പൊരുത്തപ്പെട്ടില്ല';
+
+  @override
+  String converterUnavailable(String code) {
+    return '$code കൺവെർട്ടറിൽ ഇല്ല. ഇതിന്റെ നിരക്കുകൾ യൂറോപ്യൻ സെൻട്രൽ ബാങ്കിന്റെ പട്ടികയിൽ നിന്നാണ്, അതിൽ ഇത് ഇല്ല.';
+  }
+
+  @override
+  String get msInfoReducingTitle => 'കുറയുന്ന ബാലൻസ്';
+
+  @override
+  String get msInfoReducingLine =>
+      'മിക്ക ബാങ്ക് വായ്പകളും. ബാക്കിയുള്ള തുകയ്ക്ക് മാത്രം പലിശ, അതിനാൽ ഓരോ EMI യും മുമ്പത്തേതിനേക്കാൾ അൽപ്പം കൂടുതൽ മുതൽ അടയ്ക്കും.';
+
+  @override
+  String msInfoReducingEx(String p, String r, String y, String emi) {
+    return '$p, $r നിരക്കിൽ, $y വർഷത്തേക്ക്, EMI $emi.';
+  }
+
+  @override
+  String get msInfoReducingRow1 => 'ആദ്യ മാസത്തെ പലിശ';
+
+  @override
+  String get msInfoReducingRow2 => 'ആദ്യ മാസത്തെ മുതൽ';
+
+  @override
+  String get msInfoReducingAfter =>
+      'അവസാനമാകുമ്പോൾ ഏകദേശം മുഴുവൻ EMI യും മുതലാണ്.';
+
+  @override
+  String get msInfoFlatTitle => 'ഫ്ലാറ്റ് നിരക്ക്';
+
+  @override
+  String get msInfoFlatLine =>
+      'പല കാർ, വ്യക്തിഗത, ഉപഭോക്തൃ വായ്പകൾ. നിങ്ങൾ അടച്ചുകൊണ്ടിരുന്നാലും മുഴുവൻ കാലാവധിക്കും യഥാർത്ഥ തുകയ്ക്ക് പലിശ.';
+
+  @override
+  String msInfoFlatEx(String p, String r, String y) {
+    return '$p, $r ഫ്ലാറ്റ്, $y വർഷത്തേക്ക്.';
+  }
+
+  @override
+  String get msInfoFlatRow1 => 'ഓരോ വർഷത്തെയും പലിശ';
+
+  @override
+  String get msInfoFlatRow2 => 'ആകെ പലിശ';
+
+  @override
+  String get msInfoFlatRow3 => 'EMI';
+
+  @override
+  String msInfoFlatAfter(String r, String amount) {
+    return '$r കുറയുന്ന ബാലൻസിൽ ഇതേ വായ്പയ്ക്ക് പലിശ $amount ആകുമായിരുന്നു.';
+  }
+
+  @override
+  String get msInfoIoTitle => 'ആദ്യം പലിശ മാത്രം കാലയളവോടെ';
+
+  @override
+  String get msInfoIoLine =>
+      'ഇതിനെ പ്രീ-EMI എന്നും പറയും. ആദ്യ കുറച്ച് മാസം പലിശ മാത്രം അടയ്ക്കും. അതിന് ശേഷം സാധാരണ EMI തുടങ്ങും.';
+
+  @override
+  String msInfoIoEx(String p, String r, String n) {
+    return '$p, $r നിരക്കിൽ, $n മാസം പലിശ മാത്രം.';
+  }
+
+  @override
+  String msInfoIoRow1(String n) {
+    return 'മാസം 1 മുതൽ $n വരെ';
+  }
+
+  @override
+  String msInfoIoRow2(String n) {
+    return 'പിന്നെ, $n മാസം';
+  }
+
+  @override
+  String msInfoIoRowValue(String amount) {
+    return 'മാസം $amount';
+  }
+
+  @override
+  String get msInfoIoAfter => 'പലിശ മാത്രം മാസങ്ങളിൽ ബാക്കി കുറയില്ല.';
+
+  @override
+  String get msInfoCalculatedTitle => 'കണക്കാക്കുന്ന ഫീൽഡുകൾ';
+
+  @override
+  String get msInfoCalculatedLine =>
+      'മുതൽ, നിരക്ക്, കാലാവധി, EMI ഇവയിൽ ഏതെങ്കിലും 3 പൂരിപ്പിക്കുക. Kuber നാലാമത്തേത് കണക്കാക്കി \"കണക്കാക്കിയത്\" എന്ന് അടയാളപ്പെടുത്തും.';
+
+  @override
+  String get msInfoCalculatedAfter =>
+      'നിങ്ങളുടെ സംഖ്യ ഉപയോഗിക്കാൻ കണക്കാക്കിയ ഫീൽഡിൽ ടൈപ്പ് ചെയ്യുക. അപ്പോൾ നിങ്ങൾ ആദ്യം പൂരിപ്പിച്ച ഫീൽഡ് കണക്കാക്കും.';
+
+  @override
+  String get msInfoMismatchTitle =>
+      'നിങ്ങളുടെ EMI വ്യത്യസ്തമാകുന്നത് എന്തുകൊണ്ട്';
+
+  @override
+  String get msInfoMismatchLine =>
+      'ബാങ്കുകൾ പലപ്പോഴും EMI റൗണ്ട് ചെയ്യുകയോ വായ്പാ ഇൻഷുറൻസ് ചേർക്കുകയോ ആദ്യ EMI ക്ക് മുമ്പുള്ള ദിവസങ്ങൾക്ക് പലിശ ഈടാക്കുകയോ ചെയ്യും. Kuber എപ്പോഴും നിങ്ങൾ നൽകിയ EMI ഉപയോഗിക്കും.';
+
+  @override
+  String get msInfoMismatchRow1 => 'കണക്കാക്കിയ EMI';
+
+  @override
+  String get msInfoMismatchRow2 => 'നിങ്ങളുടെ EMI';
+
+  @override
+  String get msInfoMismatchRow3 => 'വ്യത്യാസം';
+
+  @override
+  String get msInfoRun1Title => 'വായ്പയുടെ യഥാർത്ഥ വിവരങ്ങൾ എനിക്കറിയാം';
+
+  @override
+  String get msInfoRun1Line =>
+      'വായ്പ അനുവദിച്ചത് പോലെ നൽകുക. ഇന്ന് വരെ നിങ്ങൾ അടച്ചതെല്ലാം Kuber കണക്കാക്കും.';
+
+  @override
+  String get msInfoRun2Title => 'ഇന്നത്തെ ബാക്കി എനിക്കറിയാം';
+
+  @override
+  String get msInfoRun2Line =>
+      'ഏറ്റവും പുതിയ ബാങ്ക് സ്റ്റേറ്റ്മെന്റിലെ ബാക്കി തുക ഉപയോഗിക്കുക. എത്ര EMI ബാക്കിയുണ്ടെന്ന് Kuber കണക്കാക്കും.';
+
+  @override
+  String get msInfoRun2After =>
+      'മുൻകാല ആകെ ഓപ്ഷണലാണ്. ആജീവനാന്ത പലിശ പൂർണ്ണമാകണമെങ്കിൽ ചേർക്കുക.';
+
+  @override
+  String get msInfoRun3Title => 'EMI മാത്രം ട്രാക്ക് ചെയ്യുക';
+
+  @override
+  String get msInfoRun3Line =>
+      'Kuber ഓരോ EMI യും അതിന്റെ ദിവസം മുതലും പലിശയുമായി വിഭജിക്കാതെ രേഖപ്പെടുത്തും. വായ്പാ സംഖ്യകൾ പിന്നീട് ചേർക്കാം.';
+
+  @override
+  String get msInfoAdjustmentTitle => 'ക്രമീകരണം';
+
+  @override
+  String get msInfoAdjustmentLine =>
+      'നിങ്ങളുടെ സംഖ്യ Kuber ന്റേതിൽ നിന്ന് വ്യത്യസ്തമാണെങ്കിൽ, Kuber നിങ്ങളുടേത് സൂക്ഷിച്ച് വ്യത്യാസം വായ്പയിൽ പ്രാരംഭ ക്രമീകരണമായി രേഖപ്പെടുത്തും.';
+
+  @override
+  String get msInfoAdjustmentRow1 => 'Kuber കണക്കാക്കിയത്';
+
+  @override
+  String get msInfoAdjustmentRow2 => 'നിങ്ങൾ നൽകിയത്';
+
+  @override
+  String get msInfoAdjustmentAfter =>
+      'ക്രമീകരണങ്ങൾ വായ്പയെ മാത്രം മാറ്റും. ഒരു അക്കൗണ്ട് ബാലൻസും മാറില്ല.';
+
+  @override
+  String get msInfoInterestOnlyTitle => 'പലിശ മാത്രം ചെലവായി കണക്കാക്കുക';
+
+  @override
+  String get msInfoInterestOnlyLine =>
+      'Analytics, ബജറ്റുകൾ എന്നിവയിൽ ഓരോ EMI യുടെയും പലിശ ഭാഗം മാത്രം ചെലവായി കണക്കാക്കും. മുതൽ ഈ വായ്പയിലേക്കുള്ള ട്രാൻസ്ഫറായി കണക്കാക്കും.';
+
+  @override
+  String get msInfoInterestOnlyRow1 => 'പലിശ, ചെലവായി';
+
+  @override
+  String get msInfoInterestOnlyRow2 => 'മുതൽ, ട്രാൻസ്ഫറായി';
+
+  @override
+  String get msInfoInterestOnlyAfter =>
+      'ഏത് രീതിയിലായാലും ബാങ്ക് ബാലൻസ് മുഴുവൻ EMI കുറയും. ഈ മാറ്റം ഭാവി EMI കൾക്ക് മാത്രം.';
+
+  @override
+  String get msInfoTenureEmiTitle => 'കാലാവധി കുറയ്ക്കണോ EMI കുറയ്ക്കണോ';
+
+  @override
+  String get msInfoTenureEmiLine =>
+      'കാലാവധി കുറച്ചാൽ EMI അതേപടി നിലനിൽക്കും, വായ്പ നേരത്തെ അവസാനിക്കും. EMI കുറച്ചാൽ അവസാന തീയതി അതേപടി, ഓരോ EMI യും കുറയും. കാലാവധി കുറയ്ക്കുന്നത് കൂടുതൽ പലിശ ലാഭിക്കും.';
+
+  @override
+  String get msInfoPrepayChargeTitle => 'മുൻകൂർ പേയ്മെന്റ് ചാർജ്';
+
+  @override
+  String get msInfoPrepayChargeLine =>
+      'ചില വായ്പാദാതാക്കൾ അധിക പേയ്മെന്റിന് ഫീസ് ഈടാക്കും. Kuber അത് ചെലവായി രേഖപ്പെടുത്തും. അത് ബാക്കി കുറയ്ക്കില്ല. ഫ്ലോട്ടിംഗ് നിരക്ക് ഭവന വായ്പകൾക്ക് സാധാരണ ഇത് ഇല്ല.';
+
+  @override
+  String get msInfoPrepayRow1 => 'മുതലിലേക്ക് പോകുന്നു';
+
+  @override
+  String get msInfoPrepayRow2 => 'ചാർജ്, ചെലവായി രേഖപ്പെടുത്തി';
+
+  @override
+  String get msInfoPrepayRow3 => 'നിങ്ങളുടെ അക്കൗണ്ടിൽ നിന്ന് പോകുന്നു';
+
+  @override
+  String get msInfoFloatingTitle => 'ഫ്ലോട്ടിംഗ് നിരക്ക്';
+
+  @override
+  String get msInfoFloatingLine =>
+      'ഫ്ലോട്ടിംഗ് നിരക്ക് വായ്പാദാതാവിന്റെ ബെഞ്ച്മാർക്കിനൊപ്പം മാറും, അതിനാൽ വായ്പക്കാലത്ത് മാറാം. അവർ മാറ്റുമ്പോൾ ഇവിടെ രേഖപ്പെടുത്തിയാൽ ഷെഡ്യൂൾ ശരിയായിരിക്കും.';
+
+  @override
+  String get msInfoXirrTitle => 'XIRR';
+
+  @override
+  String get msInfoXirrLine =>
+      'ഓരോ തുകയും എപ്പോൾ വന്നു, എപ്പോൾ പോയി എന്ന് കണക്കിലെടുത്ത നിങ്ങളുടെ വാർഷിക വരുമാനം. ഇതുവഴി SIP യും FD യും ന്യായമായി താരതമ്യം ചെയ്യാം.';
+
+  @override
+  String msInfoXirrEx(String amount, String invested, String value) {
+    return '3 വർഷം മാസം $amount എന്നാൽ $invested നിക്ഷേപം. ഇന്ന് ഇതിന്റെ മൂല്യം $value.';
+  }
+
+  @override
+  String get msInfoXirrRow1 => 'ആകെ നേട്ടം';
+
+  @override
+  String get msInfoXirrRow2 => 'XIRR';
+
+  @override
+  String msInfoXirrValue(String pct) {
+    return 'വർഷം $pct';
+  }
+
+  @override
+  String get msInfoRealizedTitle =>
+      'യാഥാർത്ഥ്യമാകാത്തതും യാഥാർത്ഥ്യമായതുമായ നേട്ടം';
+
+  @override
+  String get msInfoRealizedLine =>
+      'യാഥാർത്ഥ്യമാകാത്ത നേട്ടം കടലാസിലാണ്: ഇന്ന് എല്ലാം വിറ്റാൽ കിട്ടുന്ന നേട്ടം. യാഥാർത്ഥ്യമായ നേട്ടം ഇതിനകം പിൻവലിച്ച പണത്തിൽ നിങ്ങൾ യഥാർത്ഥത്തിൽ നേടിയതാണ്.';
+
+  @override
+  String get msInfoProportionalTitle => 'പിൻവലിക്കലുകൾ എങ്ങനെ കണക്കാക്കുന്നു';
+
+  @override
+  String get msInfoProportionalLine =>
+      'ഒരു ഹോൾഡിംഗിന്റെ ഭാഗം പിൻവലിക്കുമ്പോൾ, പിൻവലിച്ച മൂല്യത്തിന്റെ അതേ അനുപാതത്തിൽ നിക്ഷേപ തുക കുറയും.';
+
+  @override
+  String msInfoProportionalEx(String value, String invested, String amount) {
+    return 'മൂല്യം $value, നിക്ഷേപം $invested. നിങ്ങൾ $amount പിൻവലിക്കുന്നു, ഇത് മൂല്യത്തിന്റെ 20% ആണ്.';
+  }
+
+  @override
+  String get msInfoProportionalRow1 => 'നിക്ഷേപം ഇത്ര കുറയും';
+
+  @override
+  String get msInfoProportionalRow2 => 'യാഥാർത്ഥ്യമായ നേട്ടം';
+
+  @override
+  String get msInfoProportionalRow3 => 'ബാക്കി നിക്ഷേപം';
+
+  @override
+  String get msInfoStepupTitle => 'വാർഷിക സ്റ്റെപ്പ്-അപ്പ്';
+
+  @override
+  String get msInfoStepupLine =>
+      'നിങ്ങളുടെ SIP വർഷത്തിലൊരിക്കൽ നിശ്ചിത ശതമാനം അല്ലെങ്കിൽ തുക കൂടും, സാധാരണ നിങ്ങളുടെ ശമ്പളത്തോടൊപ്പം.';
+
+  @override
+  String msInfoStepupEx(String amount) {
+    return 'മാസം $amount, 10% സ്റ്റെപ്പ്-അപ്പോടെ.';
+  }
+
+  @override
+  String msInfoStepupRow(String n) {
+    return 'വർഷം $n';
+  }
+
+  @override
+  String get msInfoCompoundingTitle => 'കൂട്ടുപലിശ';
+
+  @override
+  String get msInfoCompoundingLine =>
+      'നിങ്ങളുടെ നിക്ഷേപത്തിൽ പലിശ എത്ര തവണ ചേർക്കുന്നു, അതിനും പലിശ കിട്ടും. കൂടുതൽ തവണ എന്നാൽ അൽപ്പം കൂടുതൽ.';
+
+  @override
+  String msInfoCompoundingEx(String amount) {
+    return '$amount, 7% നിരക്കിൽ 5 വർഷത്തേക്ക്.';
+  }
+
+  @override
+  String get msInfoPayoutTitle => 'പേഔട്ട് തരം';
+
+  @override
+  String get msInfoPayoutLine =>
+      'സഞ്ചിതത്തിൽ പലിശ നിക്ഷേപത്തിൽ ചേർന്ന് എല്ലാം കാലാവധിയിൽ ലഭിക്കും. പേഔട്ടിൽ പലിശ മാസം, ത്രൈമാസം അല്ലെങ്കിൽ വർഷം തോറും ബാങ്ക് അക്കൗണ്ടിലേക്ക് വരും.';
+
+  @override
+  String get msInfoPayoutRow1 => 'സഞ്ചിതം, കാലാവധിയിൽ';
+
+  @override
+  String get msInfoPayoutRow2 => 'ത്രൈമാസ പേഔട്ട്';
+
+  @override
+  String msInfoPayoutRow2Value(String amount) {
+    return 'ഓരോ ത്രൈമാസവും $amount';
+  }
+
+  @override
+  String get msInfoPayoutRow3 => 'ത്രൈമാസ പേഔട്ട്, കാലാവധിയിൽ';
+
+  @override
+  String get msInfoAccruedTitle => 'ഇന്നത്തെ മൂല്യം';
+
+  @override
+  String get msInfoAccruedLine =>
+      'ഇതുവരെ നേടിയെങ്കിലും ഇനിയും നൽകാത്ത പലിശ ഉൾപ്പെടെ സ്ഥിര നിക്ഷേപത്തിന്റെ ഇന്നത്തെ മൂല്യം. Kuber ദിവസവും കണക്കാക്കുന്നതിനാൽ നിങ്ങൾ അപ്ഡേറ്റ് ചെയ്യേണ്ടതില്ല.';
+
+  @override
+  String get msInfoUpdatedTitle => 'അവസാന അപ്ഡേറ്റ്';
+
+  @override
+  String get msInfoUpdatedLine =>
+      'വിപണി വിലകൾ ദിവസവും മാറും, പക്ഷേ നിങ്ങൾ അവസാനം നൽകിയ മൂല്യം മാത്രമേ Kuber ന് അറിയൂ. 30 ദിവസത്തിൽ കൂടുതൽ പഴയ മൂല്യങ്ങൾ അടയാളപ്പെടുത്തും, ഏതൊക്കെ അപ്ഡേറ്റ് ചെയ്യണമെന്ന് അറിയാം.';
+
+  @override
+  String get msInfoMonthlyTitle => 'പ്രതിമാസ തുക എങ്ങനെ കണക്കാക്കുന്നു';
+
+  @override
+  String get msInfoMonthlyLine =>
+      'പ്രതിമാസമല്ലാത്തവ മാസച്ചെലവായി മാറ്റും. വായ്പകളിലോ നിക്ഷേപങ്ങളിലോ കണ്ടാലും ഓരോന്നും ഒരിക്കൽ മാത്രം കണക്കാക്കും.';
+
+  @override
+  String msInfoMonthlyRow1(String amount) {
+    return 'വർഷം $amount';
+  }
+
+  @override
+  String msInfoMonthlyRow2(String amount) {
+    return 'ഓരോ 3 മാസവും $amount';
+  }
+
+  @override
+  String msInfoMonthlyRow3(String amount) {
+    return 'ആഴ്ചതോറും $amount';
+  }
+
+  @override
+  String get msInfoMonthlyAfter =>
+      'ആഴ്ചകൾക്ക് 52 ആഴ്ച ÷ 12. ദിവസേനയുള്ളവയ്ക്ക് മാസം 30 ദിവസം.';
+
+  @override
+  String get msRecUndo => 'പഴയപടിയാക്കുക';
+
+  @override
+  String get msLoansFirstEmiDate => 'ആദ്യ EMI തീയതി';
+
+  @override
+  String get msLoansNextEmiDate => 'അടുത്ത EMI തീയതി';
+
+  @override
+  String get appDrawerSection => 'ആപ്പ് ഡ്രോയർ';
+
+  @override
+  String get appDrawerDescription =>
+      'Kuber Cards, Notes അല്ലെങ്കിൽ Reminders ന് ഫോണിന്റെ ആപ്പ് പട്ടികയിൽ സ്വന്തം ഐക്കൺ നൽകുക.';
+
+  @override
+  String get appDrawerAdd => 'ആപ്പ് ഡ്രോയറിൽ ചേർക്കുക';
+
+  @override
+  String get appDrawerRemove => 'ആപ്പ് ഡ്രോയറിൽ നിന്ന് നീക്കുക';
+
+  @override
+  String get appDrawerCards => 'Kuber Cards';
+
+  @override
+  String get appDrawerNotes => 'Kuber Notes';
+
+  @override
+  String get appDrawerReminders => 'ഓർമ്മപ്പെടുത്തലുകൾ';
+
+  @override
+  String appDrawerAdded(String name) {
+    return '$name ആപ്പ് ഡ്രോയറിൽ ചേർത്തു. കാണാൻ അൽപ്പം സമയമെടുത്തേക്കാം.';
+  }
+
+  @override
+  String appDrawerRemoved(String name) {
+    return '$name ആപ്പ് ഡ്രോയറിൽ നിന്ന് നീക്കി';
+  }
+
+  @override
+  String get appDrawerFailed =>
+      'ആപ്പ് ഡ്രോയർ മാറ്റാനായില്ല. വീണ്ടും ശ്രമിക്കുക.';
+
+  @override
+  String get msLoansChangeRateShort => 'നിരക്ക് മാറ്റുക';
+
+  @override
+  String msLoansPageOf(String n, String total) {
+    return 'വർഷം $n / $total';
+  }
+
+  @override
+  String get msLoansPrevYear => 'മുൻ വർഷം';
+
+  @override
+  String get msLoansNextYear => 'അടുത്ത വർഷം';
+
+  @override
+  String get msLoansRecordAutoHelpNoAccount =>
+      'EMI ദിവസം നിങ്ങൾ അടയ്ക്കുന്ന അക്കൗണ്ടിൽ നിന്ന് Kuber EMI രേഖപ്പെടുത്തും.';
+
+  @override
+  String get betaTag => 'ബീറ്റ';
+
+  @override
+  String get appDrawerCardsSub => 'Kuber Cards ആപ്പ് ഡ്രോയറിൽ ചേർക്കുക';
+
+  @override
+  String get appDrawerNotesSub => 'Kuber Notes ആപ്പ് ഡ്രോയറിൽ ചേർക്കുക';
+
+  @override
+  String get appDrawerRemindersSub =>
+      'ഓർമ്മപ്പെടുത്തലുകൾ ആപ്പ് ഡ്രോയറിൽ ചേർക്കുക';
+
+  @override
+  String get msLoansViewSchedule => 'EMI ഷെഡ്യൂൾ കാണുക';
+
+  @override
+  String get msLoansExtraChoose => 'എന്താണ് മാറേണ്ടത്?';
+
+  @override
+  String get msLoansExtraHelp =>
+      'അധിക പേയ്മെന്റ് ബാക്കി കുറയ്ക്കും, അതിനാൽ ഇനി മുതൽ പലിശ കുറവ്. ആ ലാഭം എങ്ങനെ വേണമെന്ന് തിരഞ്ഞെടുക്കുക.';
+
+  @override
+  String msLoansReduceTenureHow(String emi) {
+    return 'മാസം $emi അടച്ചുകൊണ്ടിരിക്കുക. വായ്പ നേരത്തെ അവസാനിക്കും.';
+  }
+
+  @override
+  String get msLoansReduceEmiHow => 'അവസാന തീയതി അതേപടി. ഓരോ EMI യും കുറയും.';
+
+  @override
+  String msLoansReduceTenureResult(String emi, String month, String n) {
+    return 'EMI $emi ആയി തുടരും · $month ൽ അവസാനിക്കും, $n മാസം നേരത്തെ';
+  }
+
+  @override
+  String msLoansReduceEmiResult(String month, String emi) {
+    return 'ഇപ്പോഴത്തെപ്പോലെ $month ൽ അവസാനിക്കും · EMI $emi ആകും';
+  }
 }

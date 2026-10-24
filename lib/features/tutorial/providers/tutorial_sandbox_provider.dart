@@ -1,3 +1,4 @@
+import '../../../core/schedule/processed_occurrence.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -42,6 +43,7 @@ Future<Isar> openSandboxIsar() async {
       TransactionSuggestionSchema,
       PersonSchema,
       BillSchema,
+      ProcessedOccurrenceSchema,
     ],
     name: 'tutorial_sandbox',
     directory: dir.path,

@@ -190,6 +190,20 @@ class DevToolsScreen extends ConsumerWidget {
                 },
               ),
             ]),
+            section('MONEY SCHEDULES', [
+              row(
+                Icons.event_repeat_rounded,
+                'Schedule debug',
+                'Every rule, EMI and SIP: sentence, next 12 dates, migration status',
+                () => context.push('/more/dev-tools/schedule-debug'),
+              ),
+              row(
+                Icons.sync_rounded,
+                'Background tasks',
+                'Last runs, durations, failures. Run now',
+                () => context.push('/more/dev-tools/background-tasks'),
+              ),
+            ]),
             section('DATABASE', [
               row(
                 Icons.storage_outlined,

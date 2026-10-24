@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../accounts/widgets/account_detail_sheet.dart';
 import '../../ledger/widgets/ledger_detail_sheet.dart';
-import '../../loans/widgets/loan_detail_sheet.dart';
-import '../../recurring/widgets/recurring_detail_sheet.dart';
+import '../../loans/widgets/loan_sheet.dart';
+import '../../investments/widgets/holding_sheet.dart';
+import '../../recurring/widgets/rule_sheet.dart';
 import '../../reminders/widgets/reminder_view_sheet.dart';
 import '../engine/event_aggregator.dart';
 
@@ -39,18 +39,11 @@ void openUpcomingEventSource(
     case ReminderEvent(:final reminder):
       showReminderViewSheet(context, reminder);
     case LoanEmiEvent(:final loan):
-      showModalBottomSheet(
-        context: context,
-        useRootNavigator: true,
-        isScrollControlled: true,
-        useSafeArea: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => LoanDetailSheet(loan: loan),
-      );
-    case InvestmentSipEvent():
-      context.push('/more/investments');
+      showLoanSheet(context, ref, loan);
+    case InvestmentSipEvent(:final investment):
+      showHoldingSheet(context, ref, investment);
     case RecurringEvent(:final rule):
-      showRecurringDetailSheet(context, ref, rule);
+      showRuleSheet(context, ref, rule);
     case LedgerEvent(:final ledger):
       showModalBottomSheet(
         context: context,

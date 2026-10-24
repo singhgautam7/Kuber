@@ -84,7 +84,7 @@ class BudgetRepository {
 
     double total = 0.0;
     for (final tx in txns) {
-      total += tx.amount;
+      total += tx.spendAmount;
     }
     return total;
   }

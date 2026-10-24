@@ -267,6 +267,86 @@ class NotificationService {
     }
   }
 
+  // ── Background tasks (vNext) ────────────────────────────────────────────
+
+  static const backgroundChannelId = 'kuber_background';
+  static const backgroundNotificationId = 7300;
+  static const backgroundRetryAction = 'background_retry';
+
+  /// The ongoing "Background tasks" notification for a run: current step and
+  /// progress. Posting silently does nothing when notifications are denied
+  /// (Android 13+); the work still runs.
+  Future<void> showBackgroundProgress({
+    required String channelName,
+    required String channelDescription,
+    required String title,
+    required String body,
+    int done = 0,
+    int total = 0,
+  }) async {
+    final android = AndroidNotificationDetails(
+      backgroundChannelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.low,
+      priority: Priority.low,
+      ongoing: true,
+      onlyAlertOnce: true,
+      showProgress: true,
+      maxProgress: total <= 0 ? 0 : total,
+      progress: done.clamp(0, total <= 0 ? 0 : total),
+      indeterminate: total <= 0,
+      autoCancel: false,
+    );
+    try {
+      await _notificationsPlugin.show(
+        id: backgroundNotificationId,
+        title: title,
+        body: body,
+        notificationDetails: NotificationDetails(android: android),
+        payload: 'background:recurring',
+      );
+    } catch (_) {}
+  }
+
+  Future<void> clearBackground() => cancel(backgroundNotificationId);
+
+  /// A short failure notification with a Retry action. [payload] routes
+  /// through the notification routing map (background:backup / :recurring).
+  Future<void> showBackgroundFailure({
+    required String channelName,
+    required String channelDescription,
+    required String title,
+    required String body,
+    required String retryLabel,
+    required String payload,
+  }) async {
+    final android = AndroidNotificationDetails(
+      backgroundChannelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      autoCancel: true,
+      actions: [
+        AndroidNotificationAction(
+          backgroundRetryAction,
+          retryLabel,
+          showsUserInterface: true,
+        ),
+      ],
+    );
+    try {
+      await _notificationsPlugin.show(
+        id: backgroundNotificationId,
+        title: title,
+        body: body,
+        notificationDetails: NotificationDetails(android: android),
+        payload: payload,
+      );
+    } catch (_) {}
+  }
+
   Future<void> showExportNotification({
     required int id,
     required String title,

@@ -87,7 +87,7 @@ final last7DaysSummaryProvider = FutureProvider<List<DaySummary>>((ref) async {
       dayMap[key] = DaySummary(
         date: existing.date,
         income: existing.income + (t.type == 'income' ? t.amount : 0),
-        expense: existing.expense + (t.type == 'expense' ? t.amount : 0),
+        expense: existing.expense + (t.type == 'expense' ? t.spendAmount : 0),
       );
     }
   }

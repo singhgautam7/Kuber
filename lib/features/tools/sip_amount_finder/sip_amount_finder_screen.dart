@@ -18,7 +18,8 @@ import '../widgets/tool_accents.dart';
 
 class SipAmountFinderScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const SipAmountFinderScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const SipAmountFinderScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<SipAmountFinderScreen> createState() =>
@@ -50,6 +51,8 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
   String get toolKey => 'sip-amount-finder';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName => 'Goal SIP';
   @override
@@ -111,6 +114,8 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
       infoConfig: InfoConstants.sipAmountFinder,
       overflowConfig: savedOverflowConfig('SIP'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

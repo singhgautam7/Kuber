@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../l10n/app_localizations.dart';
 
 import '../../shared/widgets/timed_snackbar.dart';
 
@@ -96,6 +100,63 @@ Future<void> requestPinShortcut(
     ok
         ? 'Shortcut request sent to your launcher'
         : 'Could not add the shortcut. Try again.',
+    isError: !ok,
+  );
+}
+
+/// Screens the user can add to the phone's app drawer as their own icon
+/// (`LauncherEntryActivity.kt`). Android only.
+enum AppDrawerEntry { cards, notes, reminders }
+
+class AppDrawerEntries {
+  static const MethodChannel _channel = MethodChannel('com.grs.kuber/shortcuts');
+
+  static bool get supported => !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  static Future<Set<AppDrawerEntry>> enabled() async {
+    if (!supported) return const {};
+    try {
+      final m = await _channel.invokeMapMethod<String, bool>('launcherEntries') ?? const {};
+      return {
+        for (final e in AppDrawerEntry.values)
+          if (m[e.name] == true) e,
+      };
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  static Future<bool> set(AppDrawerEntry entry, bool enabled) async {
+    try {
+      return await _channel.invokeMethod<bool>(
+              'setLauncherEntry', {'id': entry.name, 'enabled': enabled}) ??
+          false;
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+/// Which entries are in the app drawer right now.
+final appDrawerEntriesProvider =
+    FutureProvider<Set<AppDrawerEntry>>((ref) => AppDrawerEntries.enabled());
+
+/// Adds or removes [entry] and says so; shared by the screens' overflow and
+/// Settings.
+Future<void> toggleAppDrawerEntry(
+    BuildContext context, WidgetRef ref, AppDrawerEntry entry, bool enable) async {
+  final l = AppLocalizations.of(context)!;
+  final name = switch (entry) {
+    AppDrawerEntry.cards => l.appDrawerCards,
+    AppDrawerEntry.notes => l.appDrawerNotes,
+    AppDrawerEntry.reminders => l.appDrawerReminders,
+  };
+  final ok = await AppDrawerEntries.set(entry, enable);
+  ref.invalidate(appDrawerEntriesProvider);
+  if (!context.mounted) return;
+  showKuberSnackBar(
+    context,
+    !ok ? l.appDrawerFailed : (enable ? l.appDrawerAdded(name) : l.appDrawerRemoved(name)),
     isError: !ok,
   );
 }

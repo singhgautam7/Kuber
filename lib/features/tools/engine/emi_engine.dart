@@ -1,5 +1,9 @@
 import 'dart:math';
 
+import '../../../core/money_math/loan_math.dart';
+
+export '../../../core/money_math/loan_math.dart' show calculateEmi;
+
 /// One year-row of an amortization schedule.
 class EmiYearRow {
   final int year;
@@ -44,16 +48,6 @@ class EmiResult {
     required this.balanceSeries,
     required this.interestSeries,
   });
-}
-
-/// EMI = P·r·(1+r)^n / ((1+r)^n − 1)
-/// where r = monthly interest rate, n = total months.
-double calculateEmi(double principal, double annualRatePercent, int tenureMonths) {
-  if (tenureMonths <= 0) return 0;
-  final r = annualRatePercent / 100 / 12;
-  if (r == 0) return principal / tenureMonths;
-  final factor = pow(1 + r, tenureMonths);
-  return principal * r * factor / (factor - 1);
 }
 
 /// Amortize a loan month-by-month and aggregate into a year-wise schedule.

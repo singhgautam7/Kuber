@@ -60,6 +60,9 @@ class SettingsTile extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
 
+  /// Shown right after the label (a Beta pill).
+  final Widget? labelTag;
+
   const SettingsTile({
     super.key,
     required this.icon,
@@ -67,6 +70,7 @@ class SettingsTile extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.onTap,
+    this.labelTag,
   });
 
   @override
@@ -91,9 +95,19 @@ class SettingsTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                        ),
+                      ),
+                      if (labelTag case final Widget tag) ...[
+                        const SizedBox(width: KuberSpace.sm),
+                        tag,
+                      ],
+                    ],
                   ),
                   if (subtitle case final s?)
                     Text(

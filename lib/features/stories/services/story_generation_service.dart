@@ -902,7 +902,7 @@ class _StoryCandidateBuilder {
       if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) continue;
       if (t.createdAt.isBefore(start) || !t.createdAt.isBefore(end)) continue;
       final d = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
-      totals[d] = (totals[d] ?? 0) + t.amount;
+      totals[d] = (totals[d] ?? 0) + t.spendAmount;
     }
     if (totals.isEmpty) return null;
     final best = totals.entries.reduce((a, b) => a.value >= b.value ? a : b);

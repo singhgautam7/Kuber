@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/info_config.dart';
@@ -33,12 +34,26 @@ class ToolScreenScaffold extends ConsumerWidget {
   final KuberOverflowConfig? overflowConfig;
   final Widget? banner;
 
+  /// "Filled from {name}" input chip (opened from a loan or investment);
+  /// its close restores the defaults.
+  final String? filledFrom;
+  final VoidCallback? onClearFilled;
+
+  /// Result button that starts tracking ("Add as loan", "Start this SIP").
+  /// Hidden while [filledFrom] shows.
+  final String? trackLabel;
+  final VoidCallback? onTrack;
+
   const ToolScreenScaffold({
     super.key,
     required this.title,
     required this.subtitle,
     required this.sections,
     required this.onSave,
+    this.filledFrom,
+    this.onClearFilled,
+    this.trackLabel,
+    this.onTrack,
     this.canSave = true,
     this.isSavedView = false,
     this.isModified = false,
@@ -119,6 +134,20 @@ class ToolScreenScaffold extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (filledFrom != null) ...[
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: InputChip(
+                              avatar: Icon(Icons.link_rounded,
+                                  size: 18, color: cs.onSecondaryContainer),
+                              label: Text(context.l10n.msFilledFrom(filledFrom!)),
+                              selected: true,
+                              showCheckmark: false,
+                              onDeleted: onClearFilled,
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpace.lg),
+                        ],
                         for (final (i, section) in sections.indexed) ...[
                           if (i > 0) const SizedBox(height: KuberSpace.lg),
                           _AppearOnce(
@@ -137,6 +166,25 @@ class ToolScreenScaffold extends ConsumerWidget {
                             label: 'Update this calculation',
                             disabledLabel: 'No changes to update',
                           )
+                        else if (trackLabel != null && filledFrom == null)
+                          Row(children: [
+                            AppButton(
+                              label: context.l10n.msCalcSave,
+                              icon: Icons.bookmark_add_outlined,
+                              type: AppButtonType.outline,
+                              onPressed: canSave ? onSave : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: AppButton(
+                                label: trackLabel!,
+                                icon: Icons.add_rounded,
+                                type: AppButtonType.primary,
+                                fullWidth: true,
+                                onPressed: canSave ? onTrack : null,
+                              ),
+                            ),
+                          ])
                         else
                           _SaveBar(
                             onTap: onSave,

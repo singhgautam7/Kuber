@@ -25,12 +25,19 @@ final bootNumberFormatProvider = Provider<(String, NumberSystem)>(
   (ref) => ('INR', NumberSystem.indian),
 );
 
+/// "Show currency code instead of symbol", read in `_bootstrap`.
+final bootShowCurrencyCodeProvider = Provider<bool>((ref) => false);
+
 final formatterProvider = Provider<AppFormatter>((ref) {
   final bootSystem = ref.watch(bootNumberFormatProvider).$2;
   final system = ref.watch(settingsProvider
       .select((s) => s.valueOrNull?.numberSystem ?? bootSystem));
-  final symbol = ref.watch(currencyProvider).symbol;
-  return AppFormatter.current = AppFormatter(system: system, symbol: symbol);
+  final currency = ref.watch(currencyProvider);
+  final bootCode = ref.watch(bootShowCurrencyCodeProvider);
+  final showCode = ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.showCurrencyCode ?? bootCode));
+  return AppFormatter.current =
+      AppFormatter(system: system, currency: currency, showCode: showCode);
 });
 
 final appVersionProvider = FutureProvider<String>((ref) async {
@@ -118,7 +125,9 @@ final textScaleProvider = Provider<double>((ref) {
   return kTextSizeScales[(level - 1).clamp(0, 4)];
 });
 
-enum NumberSystem { indian, international }
+/// Number format setting. [automatic] (vNext default when never chosen):
+/// Indian grouping for INR, international otherwise. Stored by index.
+enum NumberSystem { indian, international, automatic }
 
 enum SwipeMode { changeTabs, performActions }
 
@@ -184,6 +193,7 @@ class SettingsState {
   final List<String> quickActionShortcuts;
   final List<String> addMenuActions;
   final int textSizeLevel;
+  final bool showCurrencyCode;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -204,6 +214,7 @@ class SettingsState {
     this.quickActionShortcuts = kDefaultQuickActionShortcuts,
     this.addMenuActions = kDefaultAddMenuActions,
     this.textSizeLevel = 3,
+    this.showCurrencyCode = false,
   });
 
   SettingsState copyWith({
@@ -224,6 +235,7 @@ class SettingsState {
     List<String>? quickActionShortcuts,
     List<String>? addMenuActions,
     int? textSizeLevel,
+    bool? showCurrencyCode,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -244,6 +256,7 @@ class SettingsState {
       quickActionShortcuts: quickActionShortcuts ?? this.quickActionShortcuts,
       addMenuActions: addMenuActions ?? this.addMenuActions,
       textSizeLevel: textSizeLevel ?? this.textSizeLevel,
+      showCurrencyCode: showCurrencyCode ?? this.showCurrencyCode,
     );
   }
 }
@@ -253,7 +266,11 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
   FutureOr<SettingsState> build() async {
     ref.keepAlive();
     final prefs = await SharedPreferences.getInstance();
-    final themeModeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
+    // Same default as main.dart: light on a fresh install until onboarding.
+    final themeModeIndex = prefs.getInt(PrefsKeys.themeMode) ??
+        (prefs.getBool(PrefsKeys.onboarded) ?? false
+            ? ThemeMode.system.index
+            : ThemeMode.light.index);
     final themeVariantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
     final currency = prefs.getString(PrefsKeys.currency) ?? 'INR';
     final dateFormat = prefs.getString('date_format') ?? 'dd/MM/yyyy';
@@ -261,7 +278,11 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final swipeModeIndex = prefs.getInt(PrefsKeys.swipeMode) ?? 0;
     final biometricsEnabled =
         prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
-    final numberSystemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
+    // Never chosen -> Automatic (approved vNext default); an explicit
+    // Indian / International choice is kept.
+    final numberSystemIndex =
+        prefs.getInt(PrefsKeys.numberSystem) ?? NumberSystem.automatic.index;
+    final showCurrencyCode = prefs.getBool(PrefsKeys.showCurrencyCode) ?? false;
     final defaultAccountId = prefs.getString(PrefsKeys.defaultAccountId);
     final privacyMode = prefs.getBool(PrefsKeys.privacyMode) ?? false;
     final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
@@ -290,7 +311,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       userName: userName,
       swipeMode: SwipeMode.values[swipeModeIndex],
       biometricsEnabled: biometricsEnabled,
-      numberSystem: NumberSystem.values[numberSystemIndex],
+      numberSystem: NumberSystem.values[
+          numberSystemIndex.clamp(0, NumberSystem.values.length - 1)],
+      showCurrencyCode: showCurrencyCode,
       defaultAccountId: defaultAccountId,
       privacyMode: privacyMode,
       thresholdFloor: thresholdFloor,
@@ -419,10 +442,18 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     });
   }
 
+  /// Also switches the number format to match (lakh for rupees, standard
+  /// otherwise); the user can still change it afterwards. "Automatic"
+  /// already follows the currency, so it is left alone.
   Future<void> setCurrency(String currency) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(PrefsKeys.currency, currency);
-    state = AsyncData(state.requireValue.copyWith(currency: currency));
+    var system = state.requireValue.numberSystem;
+    if (system != NumberSystem.automatic) {
+      system = currency == 'INR' ? NumberSystem.indian : NumberSystem.international;
+      await prefs.setInt(PrefsKeys.numberSystem, system.index);
+    }
+    state = AsyncData(state.requireValue.copyWith(currency: currency, numberSystem: system));
   }
 
   Future<void> setDateFormat(String format) async {
@@ -472,6 +503,12 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefsKeys.numberSystem, system.index);
     state = AsyncData(state.requireValue.copyWith(numberSystem: system));
+  }
+
+  Future<void> setShowCurrencyCode(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PrefsKeys.showCurrencyCode, value);
+    state = AsyncData(state.requireValue.copyWith(showCurrencyCode: value));
   }
 
   Future<void> clearAllData() async {

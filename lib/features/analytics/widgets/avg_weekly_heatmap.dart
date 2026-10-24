@@ -247,7 +247,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
 
     for (final tx in expenses) {
       final day = DateFormat('EEEE').format(tx.createdAt.toLocal());
-      dayAmounts[day]?.add(tx.amount);
+      dayAmounts[day]?.add(tx.spendAmount);
     }
 
     return dayAmounts.map((day, amounts) {

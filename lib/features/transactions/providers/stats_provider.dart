@@ -17,7 +17,7 @@ final burnRateProvider = FutureProvider<({double avgDaily, double projected})>((
     return t.type == 'expense' && !t.isTransfer && !t.isBalanceAdjustment && t.linkedRuleType == null && t.createdAt.isAfter(monthStart.subtract(const Duration(seconds: 1)));
   }).toList();
 
-  final totalSpend = monthlyExpenses.fold<double>(0, (sum, t) => sum + t.amount);
+  final totalSpend = monthlyExpenses.fold<double>(0, (sum, t) => sum + t.spendAmount);
   
   final avgDaily = daysElapsed > 0 ? totalSpend / daysElapsed : 0.0;
   final projected = avgDaily * daysInMonth;
@@ -44,8 +44,8 @@ final analyticsCategoryStatsProvider = FutureProvider<List<CategoryStat>>((ref) 
       if (t.type != 'expense' || t.isBalanceAdjustment) continue;
       final catId = int.tryParse(t.categoryId) ?? -1;
       if (catId == -1) continue;
-      totals[catId] = (totals[catId] ?? 0) + t.amount;
-      overallTotal += t.amount;
+      totals[catId] = (totals[catId] ?? 0) + t.spendAmount;
+      overallTotal += t.spendAmount;
     }
 
     final stats = totals.entries
@@ -90,8 +90,8 @@ final analyticsGroupStatsProvider = FutureProvider<List<GroupStat>>((ref) async 
       if (cat == null) continue;
       
       final groupName = (cat.groupId != null) ? (groupMap[cat.groupId] ?? 'Other') : 'Other';
-      totals[groupName] = (totals[groupName] ?? 0) + t.amount;
-      overallTotal += t.amount;
+      totals[groupName] = (totals[groupName] ?? 0) + t.spendAmount;
+      overallTotal += t.spendAmount;
     }
 
     final stats = totals.entries

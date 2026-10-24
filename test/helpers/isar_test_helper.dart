@@ -29,6 +29,8 @@ import 'package:kuber/features/pro/data/user_entitlement.dart';
 import 'package:kuber/features/kuber_cards/data/stored_card.dart';
 import 'package:kuber/features/kuber_cards/data/card_vault_meta.dart';
 import 'package:kuber/features/search/data/recent_search.dart';
+import 'package:kuber/core/schedule/processed_occurrence.dart';
+import 'package:kuber/core/background/background_task_run.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -60,6 +62,8 @@ const _allSchemas = [
   StoredCardSchema,
   CardVaultMetaSchema,
   RecentSearchSchema,
+  ProcessedOccurrenceSchema,
+  BackgroundTaskRunSchema,
 ];
 
 bool _isarInitialized = false;
@@ -70,12 +74,13 @@ Future<void> initialiseIsarForTests() async {
   _isarInitialized = true;
 }
 
-Future<Isar> openTestIsar() async {
-  final dir = Directory.systemTemp.createTempSync('isar_test_');
+/// [directory] / [name] open an existing database file (upgrade checks).
+Future<Isar> openTestIsar({String? directory, String? name}) async {
+  final dir = directory ?? Directory.systemTemp.createTempSync('isar_test_').path;
   return Isar.open(
     _allSchemas,
-    directory: dir.path,
-    name: 'test_${DateTime.now().microsecondsSinceEpoch}',
+    directory: dir,
+    name: name ?? 'test_${DateTime.now().microsecondsSinceEpoch}',
   );
 }
 

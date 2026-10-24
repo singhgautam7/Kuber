@@ -811,7 +811,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDateOnly.isAfter(today) ? today : initialDateOnly,
-      firstDate: DateTime(2020),
+      firstDate: DateTime(1900),
       lastDate: today,
     );
     if (picked != null && mounted) {

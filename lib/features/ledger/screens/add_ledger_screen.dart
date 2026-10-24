@@ -381,7 +381,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     final date = await showDatePicker(
       context: context,
       initialDate: _date,
-      firstDate: DateTime(2020),
+      firstDate: DateTime(1900),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     ).unfocusOnComplete(context);
     if (date == null || !mounted) return;

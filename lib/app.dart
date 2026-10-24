@@ -11,6 +11,9 @@ import 'main.dart' show onOpenBatchReadyProvider;
 import 'features/settings/providers/theme_options_provider.dart';
 import 'features/kuber_cards/providers/kuber_cards_provider.dart';
 import 'core/database/isar_service.dart';
+import 'core/background/background_run_controller.dart';
+import 'core/background/background_tasks.dart';
+import 'core/utils/locale_font.dart' show AppLocale;
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
 import 'features/accounts/data/credit_card_reminder_service.dart';
@@ -18,7 +21,6 @@ import 'core/services/widget_sync_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/analytics/providers/analytics_provider.dart';
 import 'features/auth/screens/lock_screen.dart';
-import 'features/backups/providers/backup_provider.dart';
 import 'features/budgets/services/budget_service.dart';
 import 'features/history/providers/history_view_provider.dart';
 import 'features/history/providers/selection_provider.dart';
@@ -80,33 +82,17 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // On-open processing deferred to after the first frame so it never delays
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
-    // On a first-of-day cold start the app opens on the recurring/backup
-    // loader, not Home, and the loader flips `onOpenBatchReadyProvider` when
-    // it hands off. Wait for that too; otherwise the splash alone gates the
-    // batch (see _onSplashFinished).
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => Future.delayed(_onOpenSettleDelay, _onSplashFinished));
-    _loaderHandedOff =
-        ref.read(initialLocationProvider) != '/recurring-loader';
-    if (!_loaderHandedOff) {
-      ref.listenManual<bool>(onOpenBatchReadyProvider, (prev, next) {
-        if (next) {
-          _loaderHandedOff = true;
-          _maybeRunOnOpenBatch();
-        }
-      });
-    }
   }
 
   bool _splashFinished = false;
-  late bool _loaderHandedOff;
   bool _onOpenBatchRan = false;
 
   /// Runs the on-open batch once, and only after the cold-start splash has
-  /// fully faded AND (first-of-day) the loader has handed off to Home. Anything
-  /// earlier competes with the splash / loader animation for the UI thread.
+  /// fully faded. Anything earlier competes with Home's first frames.
   void _maybeRunOnOpenBatch() {
-    if (_onOpenBatchRan || !_splashFinished || !_loaderHandedOff) return;
+    if (_onOpenBatchRan || !_splashFinished) return;
     _onOpenBatchRan = true;
     // Publish "interactive" for other on-app-open work (Home SMS scan etc).
     ref.read(onOpenBatchReadyProvider.notifier).state = true;
@@ -123,9 +109,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
   /// guarded. Runs once per cold start, after the splash has finished (see
   /// _maybeRunOnOpenBatch).
   void _runOnOpenBatch() {
-    ref.read(budgetServiceProvider).checkAllOnAppOpen();
+    _runBudgetMaintenance();
     _runOnOpenLedgerReminders();
-    _runDueBackup();
+    _startBackgroundTasks('coldStart');
     _runSmsCleanup();
     _runReminderMaintenance();
     _runCreditCardReminderMaintenance();
@@ -225,7 +211,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // Date (y/m/d) of the last scheduled-backup check, so resume doesn't re-check
   // on every foreground. The shortest backup interval is 1 day, so checking at
   // most once per calendar day is sufficient and cheap.
-  DateTime? _lastBackupCheckDay;
+  DateTime? _lastBackgroundCheckDay;
 
   // Date (y/m/d) of the last credit-card billing re-arm. Bill/due dates change
   // at most daily, and the account save path re-arms immediately on any edit,
@@ -279,19 +265,33 @@ class _KuberAppState extends ConsumerState<KuberApp>
     }
   }
 
-  /// Runs a scheduled backup if one is due. Called on first frame (cold start)
-  /// and on the first resume of each new day, because Android usually keeps the
-  /// process warm — the cold-start loader path alone almost never fires
-  /// day-to-day, so "daily" would never trigger. Silent + best-effort +
-  /// internally guarded against concurrent runs (can't double-fire with the
-  /// cold-start loader).
-  Future<void> _runDueBackup() async {
-    final now = DateTime.now();
-    _lastBackupCheckDay = DateTime(now.year, now.month, now.day);
+  /// Budget period roll-over (was run by the old recurring loader on
+  /// first-of-day starts) and the alert check.
+  Future<void> _runBudgetMaintenance() async {
     try {
-      await ref.read(backupSettingsProvider.notifier).runDueBackup();
+      final budgets = ref.read(budgetServiceProvider);
+      await budgets.init();
+      await budgets.checkAllOnAppOpen();
     } catch (e, stack) {
-      debugPrint('Kuber: on-open backup check failed (non-fatal): $e\n$stack');
+      debugPrint('Kuber: budget maintenance failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  /// Starts the launch task queue (due recurring / EMIs / SIPs, maturity
+  /// checks, automatic backup) in the background. Cold start, and the first
+  /// resume of each new day (Android keeps the process warm, so a cold start
+  /// alone could skip days). Nothing starts when nothing is due.
+  Future<void> _startBackgroundTasks(String trigger) async {
+    final now = DateTime.now();
+    _lastBackgroundCheckDay = DateTime(now.year, now.month, now.day);
+    try {
+      final started = await BackgroundTasks.start(
+          ref.read(isarProvider), lookupAppLocalizations(AppLocale.current),
+          trigger: trigger);
+      debugPrint('Kuber: background tasks ($trigger): ${started ? 'started' : 'nothing due'}');
+      if (started) ref.read(backgroundRunWatchProvider.notifier).watchFrom(now);
+    } catch (e, stack) {
+      debugPrint('Kuber: background tasks failed to start (non-fatal): $e\n$stack');
     }
   }
 
@@ -344,17 +344,17 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // have lapsed, renewed, or a promo code been redeemed in Play while we were
     // backgrounded. Silent + throttled + best-effort.
     _reconcileEntitlementOnResume();
-    // Already checked backup today? A daily (or longer) backup can't be due
-    // again, so skip — avoids a DB read on every foreground.
+    // Already started today? Occurrences are daily at most, and a daily (or
+    // longer) backup can't be due again, so skip: no DB read per foreground.
     final now = DateTime.now();
-    final last = _lastBackupCheckDay;
+    final last = _lastBackgroundCheckDay;
     if (last != null &&
         last.year == now.year &&
         last.month == now.month &&
         last.day == now.day) {
       return;
     }
-    _runDueBackup();
+    _startBackgroundTasks('resume');
   }
 
   /// Prunes reviewed (imported / dismissed) SMS staging rows older than 90

@@ -1,39 +1,49 @@
-// =============================================================================
-// add_loan_screen.dart  — POLISHED
-//
-// Drop-in replacement for lib/features/loans/screens/add_loan_screen.dart.
-// =============================================================================
+// Add / edit loan (design L.2 to L.4).
+// Simple form: type, name, lender, EMI, pay from, EMI schedule (When EMI
+// variant), record EMIs. Advanced options: interest type, loan numbers (any 3
+// of principal / rate / tenure / EMI give the 4th, total payable can replace
+// the rate, swap keeps the fill order), "Already running?" with three starting
+// points, and "Count only interest as expense".
 
-import 'package:kuber/core/utils/locale_font.dart';
-import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+import '../../../core/database/isar_service.dart';
+import '../../../core/money_math/loan_math.dart';
+import '../../../core/schedule/schedule.dart';
+import '../../../core/schedule/schedule_engine.dart';
+import '../../../core/schedule/schedule_text.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/icon_mapper.dart';
-import '../../../core/utils/formatters.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
+import '../../../core/utils/l10n_ext.dart';
+import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
-import '../../../shared/widgets/kuber_calculator.dart';
+import '../../../shared/widgets/money_info_sheets.dart';
+import '../../../shared/widgets/money_widgets.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../shared/widgets/when_picker.dart';
 import '../../accounts/providers/account_provider.dart';
-import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider, NumberSystem;
-import '../../transactions/widgets/account_picker_sheet.dart';
+import '../../settings/providers/settings_provider.dart';
+import '../../transactions/widgets/entity_picker_rows.dart';
 import '../data/loan.dart';
+import '../domain/loan_engine.dart';
+import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
+import '../widgets/loan_sheet.dart';
 
 class AddLoanScreen extends ConsumerStatefulWidget {
   final Loan? existing;
 
-  /// Pre-fill support for Kuber Notes tap-to-convert (create mode only).
+  /// Prefills: Kuber Notes amount (principal), Home v2 lender / EMI, the EMI
+  /// calculator's "Add as loan" (principal, rate, months, from).
   final double? amountPrefill;
-
-  /// Optional lender / EMI prefills (Home v2 loan suggestion).
   final String? lenderPrefill;
   final double? emiPrefill;
+  final double? ratePrefill;
+  final int? monthsPrefill;
+  final String? fromCalculator;
 
   const AddLoanScreen({
     super.key,
@@ -41,6 +51,9 @@ class AddLoanScreen extends ConsumerStatefulWidget {
     this.amountPrefill,
     this.lenderPrefill,
     this.emiPrefill,
+    this.ratePrefill,
+    this.monthsPrefill,
+    this.fromCalculator,
   });
 
   @override
@@ -48,622 +61,891 @@ class AddLoanScreen extends ConsumerStatefulWidget {
 }
 
 class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
-  final _principalController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _lenderController = TextEditingController();
-  final _refController = TextEditingController();
-  final _emiController = TextEditingController();
-  final _interestController = TextEditingController();
-  final _notesController = TextEditingController();
+  final _name = TextEditingController();
+  final _lender = TextEditingController();
+  final _emi = TextEditingController();
+  final _principal = TextEditingController();
+  final _rate = TextEditingController();
+  final _tenure = TextEditingController();
+  final _total = TextEditingController();
+  final _ioMonths = TextEditingController();
+  final _outstanding = TextEditingController(); // run 1 override / run 2 input
+  final _pastPrincipal = TextEditingController();
+  final _pastInterest = TextEditingController();
 
-  String _loanType = 'personal';
-  String? _rateType; // null = unset
-  DateTime? _loanStartDate; // optional disbursement
-  DateTime _startDate = DateTime.now(); // required repayment start
-  int _billDate = 1;
-  String? _selectedAccountId;
-  bool _autoAddTransaction = false;
-  bool _isEditing = false;
+  String _type = 'personal';
+  int? _accountId;
+  late WhenValue _when;
+  bool _autoRecord = true;
+  bool _advanced = false;
+  LoanInterestType _interest = LoanInterestType.reducingBalance;
+  bool _tenureYears = true;
+  bool _running = false;
+  LoanStartingPoint _start = LoanStartingPoint.originalDetails;
+  bool _onlyInterest = false;
+  bool _saving = false;
+  String? _fromCalc;
 
-  double get _principalAmount =>
-      double.tryParse(_principalController.text.trim().replaceAll(',', '')) ??
-      0;
-  double get _emiAmount =>
-      double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0;
+  /// Fill order of the loan numbers (most recent last), at most 3; the
+  /// missing one is calculated. All 4 present = mismatch check.
+  final List<LoanField> _order = [];
+  String? _swapHelp;
+  bool _programmatic = false;
 
-  bool get _canSave =>
-      _principalAmount > 0 &&
-      _nameController.text.trim().isNotEmpty &&
-      _lenderController.text.trim().isNotEmpty &&
-      _emiAmount > 0 &&
-      _selectedAccountId != null;
+  Loan? get _existing => widget.existing;
 
   @override
   void initState() {
     super.initState();
-    if (widget.existing == null) {
-      final amount = widget.amountPrefill;
-      if (amount != null && amount > 0) {
-        _principalController.text = amount == amount.truncateToDouble()
-            ? amount.toInt().toString()
-            : amount.toStringAsFixed(2);
+    final l = _existing;
+    _when = WhenValue(
+      start: DateUtils.dateOnly(DateTime.now()),
+      unit: ScheduleUnit.month,
+      endType: ScheduleEnd.afterCount,
+      endCount: 12,
+    );
+    if (l != null) {
+      _type = l.loanType;
+      _name.text = l.name;
+      _lender.text = l.lenderName;
+      _accountId = int.tryParse(l.accountId);
+      if (l.emiAmount > 0) _emi.text = _amt(l.emiAmount);
+      if (l.schedule != null) _when = WhenValue.fromSchedule(l.schedule!);
+      _autoRecord = l.schedule?.autoRecord ?? l.autoAddTransaction;
+      _interest = l.interestType;
+      _running = l.alreadyRunning;
+      _start = l.startingPoint;
+      _onlyInterest = l.countOnlyInterest;
+      if (l.interestOnlyMonths > 0) _ioMonths.text = '${l.interestOnlyMonths}';
+      final hasNumbers = hasLoanNumbers(l);
+      if (hasNumbers) {
+        _advanced = true;
+        if (l.principalAmount > 0) _principal.text = _amt(l.principalAmount);
+        if (l.annualRate != null) _rate.text = _num(l.annualRate!);
+        final months = l.tenureMonths!;
+        _tenureYears = months % 12 == 0;
+        _tenure.text = _tenureYears ? '${months ~/ 12}' : '$months';
+        _order.addAll([LoanField.principal, LoanField.rate, LoanField.tenure, LoanField.emi]);
       }
-      final lender = widget.lenderPrefill;
-      if (lender != null && lender.isNotEmpty) {
-        _lenderController.text = lender;
+      if (l.outstandingAtStart != null) {
+        _outstanding.text = _amt(l.outstandingAtStart!);
+        _outstandingEdited = true;
       }
-      final emi = widget.emiPrefill;
-      if (emi != null && emi > 0) {
-        _emiController.text = emi == emi.truncateToDouble()
-            ? emi.toInt().toString()
-            : emi.toStringAsFixed(2);
+      if (l.principalPaidBefore > 0) _pastPrincipal.text = _amt(l.principalPaidBefore);
+      if (l.interestPaidBefore > 0) _pastInterest.text = _amt(l.interestPaidBefore);
+    } else {
+      if (widget.lenderPrefill != null) _lender.text = widget.lenderPrefill!;
+      if ((widget.emiPrefill ?? 0) > 0) {
+        _emi.text = _amt(widget.emiPrefill!);
+        _order.add(LoanField.emi);
       }
-    }
-    final e = widget.existing;
-    if (e != null) {
-      _isEditing = true;
-      _nameController.text = e.name;
-      _lenderController.text = e.lenderName;
-      _refController.text = e.referenceNumber ?? '';
-      _principalController.text =
-          e.principalAmount == e.principalAmount.truncateToDouble()
-          ? e.principalAmount.toStringAsFixed(0)
-          : e.principalAmount.toStringAsFixed(2);
-      _emiController.text = e.emiAmount.toStringAsFixed(0);
-      if (e.interestRate != null) {
-        _interestController.text = e.interestRate!.toString();
+      if ((widget.amountPrefill ?? 0) > 0) {
+        _advanced = true;
+        _principal.text = _amt(widget.amountPrefill!);
+        _order.add(LoanField.principal);
       }
-      _loanType = e.loanType;
-      _rateType = e.rateType;
-      _loanStartDate = e.loanStartDate;
-      _billDate = e.billDate;
-      _startDate = e.startDate;
-      _selectedAccountId = e.accountId;
-      _autoAddTransaction = e.autoAddTransaction;
-      _notesController.text = e.notes ?? '';
+      if (widget.ratePrefill != null) {
+        _advanced = true;
+        _rate.text = _num(widget.ratePrefill!);
+        _order.add(LoanField.rate);
+      }
+      if (widget.monthsPrefill != null) {
+        _advanced = true;
+        final m = widget.monthsPrefill!;
+        _tenureYears = m % 12 == 0;
+        _tenure.text = _tenureYears ? '${m ~/ 12}' : '$m';
+        _order.add(LoanField.tenure);
+      }
+      _fromCalc = widget.fromCalculator;
+      while (_order.length > 3) {
+        _order.removeAt(0);
+      }
+      _recompute();
     }
   }
 
   @override
   void dispose() {
-    _principalController.dispose();
-    _nameController.dispose();
-    _lenderController.dispose();
-    _refController.dispose();
-    _emiController.dispose();
-    _interestController.dispose();
-    _notesController.dispose();
+    for (final c in [
+      _name, _lender, _emi, _principal, _rate, _tenure, _total, _ioMonths,
+      _outstanding, _pastPrincipal, _pastInterest
+    ]) {
+      c.dispose();
+    }
     super.dispose();
+  }
+
+  static String _num(double v) => v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+
+  /// Amount text as the user would type it, grouped per the number format.
+  String _amt(num v) => CurrencyInputFormatter(
+          isIndian: ref.read(formatterProvider).system == NumberSystem.indian)
+      .format(_num(v.toDouble()));
+
+  /// Run 1: "Outstanding today" follows the calculated value until the user
+  /// types their own figure.
+  bool _outstandingEdited = false;
+  double? _val(TextEditingController c) {
+    final v = double.tryParse(c.text.replaceAll(',', '').trim());
+    return v;
+  }
+
+  int? get _months {
+    final t = _val(_tenure);
+    if (t == null || t <= 0) return null;
+    return _tenureYears ? (t * 12).round() : t.round();
+  }
+
+  int get _io =>
+      _interest == LoanInterestType.interestOnlyFirst ? (int.tryParse(_ioMonths.text) ?? 0) : 0;
+
+  RateKind get _kind => switch (_interest) {
+        LoanInterestType.reducingBalance => RateKind.reducing,
+        LoanInterestType.flatRate => RateKind.flat,
+        LoanInterestType.interestOnlyFirst => RateKind.interestOnlyFirst,
+      };
+
+  LoanField? get _calculated {
+    if (_val(_total) != null && (_val(_total) ?? 0) > 0) return LoanField.rate;
+    if (_order.length != 3) return null;
+    return LoanField.values.firstWhere((f) => !_order.contains(f));
+  }
+
+  TextEditingController _ctrl(LoanField f) => switch (f) {
+        LoanField.principal => _principal,
+        LoanField.rate => _rate,
+        LoanField.tenure => _tenure,
+        LoanField.emi => _emi,
+      };
+
+  String _fieldName(LoanField f) {
+    final l = context.l10n;
+    return switch (f) {
+      LoanField.principal => l.msLoansPrincipal.toLowerCase(),
+      LoanField.rate => l.msLoansRate.toLowerCase(),
+      LoanField.tenure => l.msLoansTenure.toLowerCase(),
+      LoanField.emi => l.msLoansEmi,
+    };
+  }
+
+  void _typed(LoanField f) {
+    if (_programmatic) return;
+    _order.remove(f);
+    if (_ctrl(f).text.trim().isNotEmpty) _order.add(f);
+    _swapHelp = null;
+    while (_order.length > 3) {
+      final out = _order.removeAt(0);
+      _swapHelp = context.l10n.msLoansSwapHelp(_fieldName(f), _fieldName(out));
+    }
+    _recompute();
+  }
+
+  LoanSolution? _solution;
+
+  /// Solves the missing number and writes it into its field.
+  void _recompute() {
+    final calc = _calculated;
+    final total = _val(_total);
+    LoanSolution? s;
+    if (total != null && total > 0) {
+      s = solveLoan(
+          principal: _val(_principal),
+          months: _months,
+          totalPayable: total,
+          emi: _order.contains(LoanField.emi) ? _val(_emi) : null,
+          kind: _kind,
+          ioMonths: _io);
+    } else if (calc != null || _order.length == 4) {
+      s = solveLoan(
+        principal: calc == LoanField.principal ? null : _val(_principal),
+        rate: calc == LoanField.rate ? null : _val(_rate),
+        months: calc == LoanField.tenure ? null : _months,
+        emi: calc == LoanField.emi ? null : _val(_emi),
+        kind: _kind,
+        ioMonths: _io,
+      );
+    }
+    _solution = s;
+    if (s != null && s.ok) {
+      _programmatic = true;
+      switch (calc) {
+        case LoanField.principal:
+          _principal.text = _amt(s.principal.round());
+        case LoanField.rate:
+          _rate.text = s.rate.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+          if (total != null && !_order.contains(LoanField.emi)) {
+            _emi.text = _amt(s.emi.round());
+          }
+        case LoanField.tenure:
+          _tenureYears = s.months % 12 == 0;
+          _tenure.text = _tenureYears ? '${s.months ~/ 12}' : '${s.months}';
+        case LoanField.emi:
+          _emi.text = _amt(s.emi.round());
+        case null:
+          break;
+      }
+      _programmatic = false;
+      // The EMI schedule follows the tenure.
+      if (_when.endType == ScheduleEnd.afterCount && s.months > 0 && !_running) {
+        _when = _when.copyWith(endCount: s.months);
+      }
+    }
+    if (mounted) setState(() {});
+  }
+
+  /// The loan as the form describes it (also drives the previews).
+  Loan _draft() {
+    final l = _existing?.copy() ?? Loan();
+    final s = _solution;
+    final numbers = _advanced && s != null && s.ok;
+    l
+      ..name = _name.text.trim()
+      ..loanType = _type
+      ..lenderName = _lender.text.trim()
+      ..accountId = '${_accountId ?? ''}'
+      ..emiAmount = _val(_emi) ?? (numbers ? s.emi : 0)
+      ..mode = numbers ? LoanMode.advanced : LoanMode.simple
+      ..interestType = _interest
+      ..interestOnlyMonths = _io
+      ..alreadyRunning = _running
+      ..countOnlyInterest = numbers && _onlyInterest
+      ..countOnlyInterestFrom = numbers && _onlyInterest
+          ? (_existing?.countOnlyInterest == true
+              ? _existing!.countOnlyInterestFrom
+              : DateUtils.dateOnly(DateTime.now()))
+          : null;
+    if (!numbers || (_running && _start == LoanStartingPoint.trackEmiOnly)) {
+      l
+        ..startingPoint = LoanStartingPoint.trackEmiOnly
+        ..principalAmount = numbers ? s.principal : (l.principalAmount)
+        ..annualRate = numbers ? s.rate : null
+        ..tenureMonths = _when.endType == ScheduleEnd.afterCount ? _when.endCount : null;
+    } else if (_running && _start == LoanStartingPoint.outstandingToday) {
+      final o = _val(_outstanding) ?? 0;
+      l
+        ..startingPoint = LoanStartingPoint.outstandingToday
+        ..outstandingAtStart = o
+        ..annualRate = s.rate
+        ..principalAmount = s.principal
+        ..tenureMonths = emisLeftFor(o, s.rate, l.emiAmount,
+                kind: _kind == RateKind.flat ? RateKind.flat : RateKind.reducing) ??
+            s.months
+        ..principalPaidBefore = _val(_pastPrincipal) ?? 0
+        ..interestPaidBefore = _val(_pastInterest) ?? 0;
+    } else {
+      l
+        ..startingPoint = LoanStartingPoint.originalDetails
+        ..principalAmount = s.principal
+        ..annualRate = s.rate
+        ..tenureMonths = s.months;
+    }
+    l.createdAt = _existing?.createdAt ?? DateTime.now();
+    l.schedule = _schedule(l);
+    // Run 1: an overridden outstanding is stored as an opening adjustment.
+    if (numbers && _running && _start == LoanStartingPoint.originalDetails) {
+      final calc = LoanService.openingValues(l)?.outstanding;
+      final entered = _val(_outstanding);
+      l.adjustment = calc != null && entered != null && (entered - calc).abs() >= 1
+          ? outstandingAdjustment(calc, entered)
+          : 0;
+    } else {
+      l.adjustment = 0;
+    }
+    return l;
+  }
+
+  Schedule _schedule(Loan l) {
+    if (l.startingPoint == LoanStartingPoint.outstandingToday) {
+      return scheduleFrom(
+        start: _nextEmiFromToday(),
+        unit: ScheduleUnit.month,
+        anchorDay: _when.effectiveAnchor,
+        endType: ScheduleEnd.afterCount,
+        endCount: l.tenureMonths,
+      )..autoRecord = _autoRecord;
+    }
+    final s = _when.copyWith(unit: ScheduleUnit.month, count: 1).toSchedule()
+      ..autoRecord = _autoRecord;
+    if (l.tenureMonths != null && l.startingPoint != LoanStartingPoint.trackEmiOnly) {
+      s
+        ..endType = ScheduleEnd.afterCount
+        ..endCount = l.tenureMonths
+        ..endDate = null;
+    }
+    return s;
+  }
+
+  /// Outstanding-today loans: the next EMI on or after today (and after the
+  /// picked date) on the EMI day.
+  DateTime _nextEmiFromToday() {
+    final today = DateUtils.dateOnly(DateTime.now());
+    return firstMonthlyOnOrAfter(_when.start.isBefore(today) ? today : _when.start, _when.effectiveAnchor);
+  }
+
+  bool get _canSave =>
+      !_saving &&
+      _name.text.trim().isNotEmpty &&
+      _accountId != null &&
+      (_val(_emi) ?? 0) > 0 &&
+      _when.error(context.l10n) == null &&
+      !(_advanced && _solution != null && !_solution!.ok);
+
+  /// Back to where the form was opened from; opened by a link or shortcut
+  /// there is nothing below it, so go to Loans.
+  void _leave() => context.canPop() ? context.pop() : context.go('/more/loans');
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      final draft = _draft();
+      final service = LoanService(ref.read(isarProvider));
+      await service.save(draft, draft.schedule!, isNew: _existing == null);
+      ref.invalidate(loanListProvider);
+      if (mounted) {
+        showKuberSnackBar(context, context.l10n.msLoansSaved);
+        _leave();
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
-    final symbol = ref.watch(currencyProvider).symbol;
-    final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
-
+    final fmt = ref.watch(formatterProvider);
+    final indian = fmt.system == NumberSystem.indian;
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: KuberAppBar(
         showBack: true,
         closeIcon: true,
-        onBack: () => context.pop(),
-        title: _isEditing ? context.l10n.editLoan : context.l10n.newLoan,
+        onBack: _leave,
+        title: _existing == null ? l.msLoansAdd : l.msLoansEdit,
+        actions: [
+          if (_existing != null)
+            IconButton(
+              icon: Icon(Icons.delete_outline_rounded, color: cs.error),
+              onPressed: () async {
+                final deleted = await confirmDeleteLoan(context, ref, _existing!);
+                if (deleted && context.mounted) context.pop();
+              },
+            ),
+        ],
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              KuberFormSection(
-                label: context.l10n.loanAmount,
-                topGap: 0,
-                children: [
-                  KuberHeroAmountInput(
-                    label: context.l10n.totalPrincipal,
-                    currencySymbol: symbol,
-                    controller: _principalController,
-                    inputFormatters: [
-                      CurrencyInputFormatter(isIndian: isIndian),
-                    ],
-                    onChanged: (_) => setState(() {}),
-                    onCalculatorTap: () =>
-                        _openCalculatorFor(_principalController),
-                  ),
-                ],
-              ),
-              KuberFormSection(
-                label: context.l10n.loanType,
-                children: [
-                  KuberChipGrid<String>(
-                    columns: 3,
-                    selected: _loanType,
-                    onChanged: (v) => setState(() => _loanType = v),
-                    options: [
-                      KuberChipOption(
-                        value: 'home',
-                        label: context.l10n.loanTypeHome,
-                        icon: Icons.home_outlined,
-                      ),
-                      KuberChipOption(
-                        value: 'vehicle',
-                        label: context.l10n.loanTypeVehicle,
-                        icon: Icons.directions_car_outlined,
-                      ),
-                      KuberChipOption(
-                        value: 'personal',
-                        label: context.l10n.loanTypePersonal,
-                        icon: Icons.person_outline_rounded,
-                      ),
-                      KuberChipOption(
-                        value: 'education',
-                        label: context.l10n.loanTypeEducation,
-                        icon: Icons.school_outlined,
-                      ),
-                      KuberChipOption(
-                        value: 'credit_card',
-                        label: context.l10n.creditCardLabel,
-                        icon: Icons.credit_card_outlined,
-                      ),
-                      KuberChipOption(
-                        value: 'other',
-                        label: context.l10n.loanTypeOther,
-                        icon: Icons.more_horiz_rounded,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              KuberFormSection(
-                label: context.l10n.identity,
-                children: [
-                  KuberFieldLabel(context.l10n.loanName),
-                  TextField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    onChanged: (_) => setState(() {}),
-                    style: localeFont(color: cs.onSurface, fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.loanNameHint,
-                    ),
-                  ),
-                  KuberFieldLabel(context.l10n.lenderField),
-                  TextField(
-                    controller: _lenderController,
-                    textCapitalization: TextCapitalization.words,
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    onChanged: (_) => setState(() {}),
-                    style: localeFont(color: cs.onSurface, fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.lenderHint,
-                    ),
-                  ),
-                  KuberFieldLabel(context.l10n.referenceNumber, optional: true),
-                  TextField(
-                    controller: _refController,
-                    onChanged: (_) => setState(() {}),
-                    style: localeFont(color: cs.onSurface, fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.referenceNumberHint,
-                    ),
-                  ),
-                ],
-              ),
-              KuberFormSection(
-                label: context.l10n.termsLabel,
-                children: [
-                  KuberFieldLabel(context.l10n.monthlyEmi),
-                  _amountFieldWithCalc(
-                    controller: _emiController,
-                    symbol: symbol,
-                    isIndian: isIndian,
-                  ),
-                  KuberFieldLabel(context.l10n.interestRate, optional: true),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _interestController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          onTapOutside: (_) =>
-                              FocusManager.instance.primaryFocus?.unfocus(),
-                          onChanged: (_) => setState(() {}),
-                          style: localeFont(color: cs.onSurface, fontSize: 16),
-                          decoration: const InputDecoration(
-                            hintText: 'e.g. 8.45',
-                            suffixText: '%',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      _ratePill(context.l10n.rateFixed, 'fixed'),
-                      const SizedBox(width: 6),
-                      _ratePill(context.l10n.rateFloating, 'floating'),
-                    ],
-                  ),
-                ],
-              ),
-
-              // ── ANSWER CARD ──────────────────────────────────────────
-              if (_emiAmount > 0)
-                Padding(
-                  padding: const EdgeInsets.only(top: 22),
-                  child: KuberAnswerCard(
-                    labelText: context.l10n.monthlyOutflow,
-                    labelIcon: Icons.bolt_rounded,
-                    amountText: ref
-                        .watch(formatterProvider)
-                        .formatCurrency(_emiAmount.roundToDouble()),
-                    unitText: context.l10n.perMonth,
-                    meta: _principalAmount > 0
-                        ? [
-                            KuberAnswerMeta(
-                              key: context.l10n.principal,
-                              value: ref
-                                  .watch(formatterProvider)
-                                  .formatCompactCurrency(_principalAmount),
-                            ),
-                            KuberAnswerMeta(
-                              key: context.l10n.tenure,
-                              value: '— mo',
-                            ),
-                            KuberAnswerMeta(
-                              key: context.l10n.interestLabel,
-                              value: '—',
-                            ),
-                          ]
-                        : const [],
+              if (_fromCalc != null) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: InputChip(
+                    avatar: Icon(Icons.link_rounded, size: 18, color: cs.onSecondaryContainer),
+                    label: Text(l.msFromCalculator(_fromCalc!)),
+                    selected: true,
+                    showCheckmark: false,
+                    onDeleted: () => setState(() => _fromCalc = null),
                   ),
                 ),
-
-              // ── SCHEDULE (tinted) ────────────────────────────────────
+                const SizedBox(height: 12),
+              ],
               KuberFormSection(
-                label: context.l10n.schedule,
-                tinted: true,
+                label: l.msLoansType,
+                topGap: 0,
                 children: [
-                  KuberFieldLabel(context.l10n.loanStartDate, optional: true),
-                  _loanStartDateRow(),
-                  KuberFieldLabel(context.l10n.repaymentStart),
-                  _dateRow(
-                    label: context.l10n.firstEmiOn,
-                    date: _startDate,
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) {
-                        setState(() => _startDate = picked);
-                      }
-                    },
-                  ),
-                  KuberFieldLabel(context.l10n.monthlyBillDate),
-                  KuberDayGrid(
-                    selected: _billDate,
-                    onChanged: (v) => setState(() => _billDate = v),
+                  KuberChipGrid<String>(
+                    selected: _type,
+                    onChanged: (v) => setState(() => _type = v),
+                    options: [
+                      KuberChipOption(value: 'home', label: l.loanTypeHome, icon: Icons.home_outlined),
+                      KuberChipOption(value: 'vehicle', label: l.loanTypeVehicle, icon: Icons.directions_car_outlined),
+                      KuberChipOption(value: 'personal', label: l.loanTypePersonal, icon: Icons.person_outline_rounded),
+                      KuberChipOption(value: 'education', label: l.loanTypeEducation, icon: Icons.school_outlined),
+                      KuberChipOption(value: 'credit_card', label: l.creditCardLabel, icon: Icons.credit_card_outlined),
+                      KuberChipOption(value: 'other', label: l.loanTypeOther, icon: Icons.more_horiz_rounded),
+                    ],
                   ),
                 ],
               ),
-
-              KuberFormSection(
-                label: context.l10n.sourceAccount,
-                children: [
-                  _accountPickerRow(),
-                  KuberSwitchRow(
-                    icon: Icons.bolt_rounded,
-                    name: context.l10n.autoAddTransactions,
-                    sub: context.l10n.autoAddTransactionsSub,
-                    value: _autoAddTransaction,
-                    onChanged: (v) => setState(() => _autoAddTransaction = v),
-                  ),
-                ],
+              const SizedBox(height: 20),
+              KuberTextField(
+                label: l.msLoansName,
+                controller: _name,
+                hint: l.loanNameHint,
+                textCapitalization: TextCapitalization.words,
+                onChanged: (_) => setState(() {}),
               ),
-
-              KuberFormSection(
-                label: context.l10n.notesLabel,
-                children: [
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 3,
-                    minLines: 1,
-                    textCapitalization: TextCapitalization.sentences,
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    style: localeFont(color: cs.onSurface, fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.loanNotesHint,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              KuberTextField(
+                label: l.msLoansLender,
+                controller: _lender,
+                hint: l.lenderHint,
+                optional: true,
+                textCapitalization: TextCapitalization.words,
               ),
+              const SizedBox(height: 16),
+              KuberHeroAmountInput(
+                label: l.msLoansEmiAmount,
+                currencySymbol: fmt.symbol,
+                controller: _emi,
+                inputFormatters: [CurrencyInputFormatter(isIndian: indian)],
+                onChanged: (_) => _typed(LoanField.emi),
+              ),
+              const SizedBox(height: 16),
+              AccountPickerRow(
+                label: l.msLoansPayFrom,
+                selectedId: _accountId,
+                onChanged: (id) => setState(() => _accountId = id),
+              ),
+              const SizedBox(height: 24),
+              if (!(_running && _start == LoanStartingPoint.outstandingToday))
+                KuberWhenPicker(
+                  variant: WhenVariant.emi,
+                  value: _when,
+                  onChanged: (v) => setState(() {
+                    _when = v;
+                    if (v.endType == ScheduleEnd.afterCount && v.endCount != null &&
+                        _order.contains(LoanField.tenure) == false && _advanced) {
+                      _tenureYears = false;
+                      _tenure.text = '${v.endCount}';
+                    }
+                  }),
+                ),
+              const SizedBox(height: 12),
+              KuberSwitchRow(
+                icon: Icons.bolt_rounded,
+                name: l.msLoansRecordEmis,
+                sub: _accountName().isEmpty
+                    ? l.msLoansRecordAutoHelpNoAccount
+                    : l.msLoansRecordAutoHelp(_accountName()),
+                value: _autoRecord,
+                onChanged: (v) => setState(() => _autoRecord = v),
+              ),
+              const SizedBox(height: 24),
+              _AdvancedRow(
+                open: _advanced,
+                onTap: () => setState(() => _advanced = !_advanced),
+              ),
+              if (_advanced) ..._advancedSection(context),
             ],
           ),
         ),
       ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEditing
-            ? context.l10n.saveChanges
-            : context.l10n.confirmAddLoan,
+        label: _existing == null ? l.msLoansSave : l.msLoansSaveChanges,
+        loading: _saving,
         onPressed: _canSave ? _save : null,
       ),
     );
   }
 
-  // ── widgets ─────────────────────────────────────────────────────
-  Widget _amountFieldWithCalc({
-    required TextEditingController controller,
-    required String symbol,
-    required bool isIndian,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
-      onChanged: (_) => setState(() {}),
-      style: localeFont(color: cs.onSurface, fontSize: 16),
-      decoration: InputDecoration(
-        prefixText: '$symbol ',
-        prefixStyle: localeFont(color: cs.onSurfaceVariant),
-        suffixIcon: IconButton(
-          icon: Icon(
-            Icons.calculate_outlined,
-            size: 18,
-            color: cs.onSurfaceVariant,
-          ),
-          onPressed: () => _openCalculatorFor(controller),
-        ),
-      ),
-    );
+  String _accountName() {
+    return ref.watch(accountMapProvider).valueOrNull?[_accountId]?.name ?? '';
   }
 
-  Widget _ratePill(String label, String value) {
-    final cs = Theme.of(context).colorScheme;
-    final selected = _rateType == value;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => setState(() {
-          _rateType = selected ? null : value;
-        }),
-        borderRadius: BorderRadius.circular(KuberShape.full),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: selected
-                ? cs.primary.withValues(alpha: 0.12)
-                : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberShape.full),
-            border: Border.all(
-              color: selected ? cs.primary : cs.outlineVariant,
+  List<Widget> _advancedSection(BuildContext context) {
+    final l = context.l10n;
+    final fmt = ref.watch(formatterProvider);
+    final indian = fmt.system == NumberSystem.indian;
+    final s = _solution;
+    final calc = _calculated;
+    String m(num v) => fmt.formatCurrency(v.round());
+    final ioMonths = _io;
+    final widgets = <Widget>[
+      const SizedBox(height: 24),
+      CapsLabel(l.msLoansInterestType),
+      const SizedBox(height: 8),
+      for (final t in LoanInterestType.values) ...[
+        KuberSelectCard(
+          title: switch (t) {
+            LoanInterestType.reducingBalance => l.msLoansReducing,
+            LoanInterestType.flatRate => l.msLoansFlat,
+            LoanInterestType.interestOnlyFirst => l.msLoansIo,
+          },
+          subtitle: switch (t) {
+            LoanInterestType.reducingBalance => l.msLoansReducingSub,
+            LoanInterestType.flatRate => l.msLoansFlatSub,
+            LoanInterestType.interestOnlyFirst => l.msLoansIoSub,
+          },
+          selected: _interest == t,
+          onTap: () {
+            _interest = t;
+            _recompute();
+          },
+          onInfo: () => showMoneyInfo(context, ref, switch (t) {
+            LoanInterestType.reducingBalance => MoneyInfo.reducing,
+            LoanInterestType.flatRate => MoneyInfo.flat,
+            LoanInterestType.interestOnlyFirst => MoneyInfo.io,
+          }),
+        ),
+        const SizedBox(height: 8),
+      ],
+      if (_interest == LoanInterestType.interestOnlyFirst) ...[
+        KuberTextField.number(
+          label: l.msLoansIoMonths,
+          controller: _ioMonths,
+          decimal: false,
+          onChanged: (_) => _recompute(),
+        ),
+        if (s != null && s.ok && ioMonths > 0) ...[
+          const SizedBox(height: 8),
+          KuberCallout.text(
+            l.msLoansIoNotice(
+                m(s.ioEmi),
+                fmtMonthYear(DateTime(_when.firstOccurrence.year, _when.firstOccurrence.month + ioMonths - 1)),
+                m(s.emi),
+                '${s.months - ioMonths}'),
+            tone: KuberCalloutTone.info,
+          ),
+        ],
+      ],
+      const SizedBox(height: 24),
+      CapsLabel(l.msLoansNumbers,
+          trailing: KuberInfoGlyph(onTap: () => showMoneyInfo(context, ref, MoneyInfo.calculated))),
+      if (_swapHelp != null || _order.isNotEmpty) ...[
+        const SizedBox(height: 4),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(Icons.touch_app_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              _swapHelp ??
+                  (_order.length >= 3
+                      ? l.msLoansOrderHelp(_fieldName(_order[0]), _fieldName(_order[1]), _fieldName(_order[2]))
+                      : ''),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
-          child: Text(
-            label.toUpperCase(),
-            style: localeFont(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
-              color: selected ? cs.primary : cs.onSurfaceVariant,
-            ),
+        ]),
+      ],
+      const SizedBox(height: 8),
+      KuberAmountField(
+        label: l.msLoansPrincipal,
+        controller: _principal,
+        symbol: fmt.symbol,
+        indianGrouping: indian,
+        calculatedLabel: calc == LoanField.principal ? l.msCalculated : null,
+        onChanged: (_) => _typed(LoanField.principal),
+      ),
+      const SizedBox(height: 12),
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(
+          child: KuberTextField.number(
+            label: l.msLoansRate,
+            controller: _rate,
+            suffixText: '%',
+            calculatedLabel: calc == LoanField.rate ? l.msCalculated : null,
+            onChanged: (_) => _typed(LoanField.rate),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _loanStartDateRow() {
-    final cs = Theme.of(context).colorScheme;
-    if (_loanStartDate == null) {
-      return KuberPickerRow(
-        leading: KuberLeadingSwatch(
-          color: cs.surfaceContainerHigh,
-          icon: Icons.calendar_today_rounded,
-          empty: true,
+        const SizedBox(width: 12),
+        Expanded(
+          child: KuberAmountField(
+            label: l.msLoansEmi,
+            controller: _emi,
+            symbol: fmt.symbol,
+            indianGrouping: indian,
+            calculatedLabel: calc == LoanField.emi ? l.msCalculated : null,
+            errorText: s?.error == LoanError.emiTooLow ? l.msLoansErrNeverEnds : null,
+            onChanged: (_) => _typed(LoanField.emi),
+          ),
         ),
-        label: context.l10n.disbursedOn,
-        value: context.l10n.notSetTapToAdd,
-        valueIsPlaceholder: true,
-        onTap: _pickLoanStartDate,
-      );
-    }
-    return KuberPickerRow(
-      leading: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-          border: Border.all(color: cs.outlineVariant),
+      ]),
+      const SizedBox(height: 12),
+      Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        Expanded(
+          child: KuberTextField.number(
+            label: l.msLoansTenure,
+            controller: _tenure,
+            decimal: false,
+            calculatedLabel: calc == LoanField.tenure ? l.msCalculated : null,
+            onChanged: (_) => _typed(LoanField.tenure),
+          ),
         ),
-        child: Icon(
-          Icons.calendar_today_rounded,
-          size: 16,
-          color: cs.onSurface,
-        ),
-      ),
-      label: context.l10n.disbursedOn,
-      value: DateFormat('d MMM yyyy').format(_loanStartDate!),
-      onTap: _pickLoanStartDate,
-      clearable: true,
-      onClear: () => setState(() => _loanStartDate = null),
-    );
-  }
-
-  Widget _dateRow({
-    required String label,
-    required DateTime date,
-    required VoidCallback onTap,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    return KuberPickerRow(
-      leading: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-          border: Border.all(color: cs.outlineVariant),
-        ),
-        child: Icon(
-          Icons.calendar_today_rounded,
-          size: 16,
-          color: cs.onSurface,
-        ),
-      ),
-      label: label,
-      value: DateFormat('d MMM yyyy').format(date),
-      onTap: onTap,
-    );
-  }
-
-  Widget _accountPickerRow() {
-    final accs = ref.watch(accountListProvider).valueOrNull ?? [];
-    final acc = _selectedAccountId == null
-        ? null
-        : accs.where((a) => a.id.toString() == _selectedAccountId).firstOrNull;
-    return KuberPickerRow(
-      leading: acc == null
-          ? KuberLeadingSwatch(
-              color: Colors.transparent,
-              icon: Icons.account_balance_outlined,
-              empty: true,
-            )
-          : KuberLeadingSwatch(
-              color: Color(acc.colorValue ?? 0xFF3B82F6),
-              icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
-            ),
-      label: context.l10n.emiDebitedFrom,
-      value: acc?.name ?? context.l10n.selectAccountTitle,
-      valueIsPlaceholder: acc == null,
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          builder: (_) => AccountPickerSheet(
-            selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
-            onSelected: (id) {
-              setState(() => _selectedAccountId = id.toString());
-              Navigator.pop(context);
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 180,
+          child: KuberSegmented<bool>(
+            groupValue: _tenureYears,
+            onChanged: (v) {
+              final months = _months;
+              _tenureYears = v;
+              if (months != null) {
+                _programmatic = true;
+                _tenure.text = v ? _num(months / 12) : '$months';
+                _programmatic = false;
+              }
+              _recompute();
             },
+            segments: [
+              KuberSegment(value: true, label: l.msLoansYears),
+              KuberSegment(value: false, label: l.msLoansMonths),
+            ],
           ),
-        ).unfocusOnComplete(context);
-      },
-    );
-  }
-
-  // ── PRESERVED handlers ──────────────────────────────────────────
-  Future<void> _pickLoanStartDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _loanStartDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    ).unfocusOnComplete(context);
-    if (picked != null) setState(() => _loanStartDate = picked);
-  }
-
-  void _openCalculatorFor(TextEditingController controller) {
-    FocusScope.of(context).unfocus();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberShape.extraLarge),
         ),
+      ]),
+      const SizedBox(height: 12),
+      KuberAmountField(
+        label: l.msLoansTotalPayable,
+        controller: _total,
+        symbol: fmt.symbol,
+        indianGrouping: indian,
+        helperText: l.msLoansTotalPayableHint,
+        onChanged: (_) => _recompute(),
       ),
-      builder: (_) => KuberCalculator(
-        initialValue:
-            double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
-        onConfirm: (result) {
-          setState(() {
-            controller.text = result == result.truncateToDouble()
-                ? result.toInt().toString()
-                : result.toStringAsFixed(2);
-          });
+      const SizedBox(height: 12),
+      ..._previewOrNotice(context, s),
+      const SizedBox(height: 24),
+      KuberSwitchRow(
+        icon: Icons.history_rounded,
+        name: l.msAlreadyRunning,
+        sub: l.msAlreadyRunningSubLoan,
+        value: _running,
+        onChanged: (v) {
+          _running = v;
+          _recompute();
         },
       ),
-    ).then((_) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) FocusScope.of(context).unfocus();
-      });
-    });
+      if (_running) ..._runningSection(context),
+      const SizedBox(height: 24),
+      CapsLabel(l.msLoansSpending),
+      const SizedBox(height: 8),
+      KuberSwitchRow(
+        icon: Icons.pie_chart_outline_rounded,
+        name: l.msLoansOnlyInterest,
+        sub: l.msLoansOnlyInterestHelp,
+        value: _onlyInterest,
+        enabled: s != null && s.ok && _start != LoanStartingPoint.trackEmiOnly,
+        onChanged: (v) => setState(() => _onlyInterest = v),
+        onInfo: () => showMoneyInfo(context, ref, MoneyInfo.interestOnly),
+      ),
+      if (_existing != null && _onlyInterest != (_existing!.countOnlyInterest))
+        KuberCallout.text(l.msLoansFutureOnly, tone: KuberCalloutTone.warning),
+    ];
+    return widgets;
   }
 
-  // PRESERVED VERBATIM ─────────────────────────────────────────────
-  Future<void> _save() async {
-    final cats = await ref.read(categoryRepositoryProvider).getAll();
-    final emiCategory = cats.firstWhere(
-      (c) => c.name == 'Loan EMI',
-      orElse: () => cats.first,
-    );
-
-    final emi = _emiAmount;
-    final interest = double.tryParse(
-      _interestController.text.trim().replaceAll(',', ''),
-    );
-
-    if (_isEditing) {
-      final loan = widget.existing!
-        ..name = _nameController.text.trim()
-        ..loanType = _loanType
-        ..lenderName = _lenderController.text.trim()
-        ..referenceNumber = _refController.text.trim().isEmpty
-            ? null
-            : _refController.text.trim()
-        ..principalAmount = _principalAmount
-        ..emiAmount = emi
-        ..rateType = _rateType
-        ..interestRate = interest
-        ..loanStartDate = _loanStartDate
-        ..billDate = _billDate
-        ..startDate = _startDate
-        ..accountId = _selectedAccountId!
-        ..categoryId = emiCategory.id.toString()
-        ..autoAddTransaction = _autoAddTransaction
-        ..notes = _notesController.text.trim().isEmpty
-            ? null
-            : _notesController.text.trim();
-
-      await ref.read(loanListProvider.notifier).updateLoan(loan);
-    } else {
-      await ref
-          .read(loanListProvider.notifier)
-          .addLoan(
-            name: _nameController.text.trim(),
-            loanType: _loanType,
-            lenderName: _lenderController.text.trim(),
-            referenceNumber: _refController.text.trim().isEmpty
-                ? null
-                : _refController.text.trim(),
-            principalAmount: _principalAmount,
-            emiAmount: emi,
-            rateType: _rateType,
-            interestRate: interest,
-            loanStartDate: _loanStartDate,
-            billDate: _billDate,
-            startDate: _startDate,
-            accountId: _selectedAccountId!,
-            categoryId: emiCategory.id.toString(),
-            autoAddTransaction: _autoAddTransaction,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
-          );
+  List<Widget> _previewOrNotice(BuildContext context, LoanSolution? s) {
+    final l = context.l10n;
+    final fmt = ref.watch(formatterProvider);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    String m(num v) => fmt.formatCurrency(v.round());
+    if (s == null) return const [];
+    if (s.error == LoanError.emiTooLow) {
+      return [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(color: cs.surfaceContainerHigh, borderRadius: KuberShape.largeR),
+          child: Text(l.msLoansErrNeverEndsPreview(m(s.firstMonthInterest)), style: tt.titleSmall),
+        ),
+      ];
     }
-    if (mounted) context.pop();
+    if (s.error == LoanError.totalTooLow) {
+      return [KuberCallout.text(l.msLoansErrTotalLow, tone: KuberCalloutTone.error)];
+    }
+    if (!s.ok) return const [];
+    final end = DateTime(_when.firstOccurrence.year, _when.firstOccurrence.month + s.months - 1);
+    final totalInterest = s.emi * (s.months - _io) + s.ioEmi * _io - s.principal;
+    final widgets = <Widget>[];
+    if (s.mismatch.abs() >= 1) {
+      final diff = m(s.mismatch.abs());
+      widgets
+        ..add(KuberCallout.text(
+          s.mismatch > 0 ? l.msLoansMismatchMore(diff) : l.msLoansMismatchLess(diff),
+          tone: KuberCalloutTone.warning,
+          onInfo: () => showMoneyInfo(context, ref, MoneyInfo.mismatch),
+        ))
+        ..add(const SizedBox(height: 8));
+    }
+    widgets.add(Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.largeR),
+      child: Text(
+        s.rate == 0
+            ? l.msLoansPreviewZero(m(s.emi), fmtMonthYear(end))
+            : l.msLoansPreview(m(s.emi), fmtMonthYear(end), m(totalInterest)),
+        style: tt.titleSmall!.copyWith(color: cs.onSecondaryContainer),
+      ),
+    ));
+    return widgets;
+  }
+
+  List<Widget> _runningSection(BuildContext context) {
+    final l = context.l10n;
+    final fmt = ref.watch(formatterProvider);
+    final indian = fmt.system == NumberSystem.indian;
+    String m(num v) => fmt.formatCurrency(v.round());
+    final cards = <(LoanStartingPoint, String, String, MoneyInfo)>[
+      (LoanStartingPoint.originalDetails, l.msLoansRun1, l.msLoansRun1Sub, MoneyInfo.run1),
+      (LoanStartingPoint.outstandingToday, l.msLoansRun2, l.msLoansRun2Sub, MoneyInfo.run2),
+      (LoanStartingPoint.trackEmiOnly, l.msLoansRun3, l.msLoansRun3Sub, MoneyInfo.run3),
+    ];
+    final out = <Widget>[const SizedBox(height: 12)];
+    for (final c in cards) {
+      out
+        ..add(KuberSelectCard(
+          title: c.$2,
+          subtitle: c.$3,
+          selected: _start == c.$1,
+          onTap: () {
+            _start = c.$1;
+            _recompute();
+          },
+          onInfo: () => showMoneyInfo(context, ref, c.$4),
+        ))
+        ..add(const SizedBox(height: 8));
+    }
+    // The start date lives in the EMI schedule above; with a running loan it
+    // is asked here too (first EMI in the past, or the next EMI when only
+    // today's outstanding is known, where the schedule block is hidden).
+    final today = DateUtils.dateOnly(DateTime.now());
+    void setStart(DateTime d) {
+      _when = _when.copyWith(start: d, anchorDay: d.day);
+      _recompute();
+    }
+
+    out
+      ..add(_start == LoanStartingPoint.outstandingToday
+          ? DatePickerRow(
+              label: l.msLoansNextEmiDate,
+              value: fmtDayLong(_nextEmiFromToday()),
+              initial: _nextEmiFromToday(),
+              first: today,
+              onChanged: setStart,
+            )
+          : DatePickerRow(
+              label: l.msLoansFirstEmiDate,
+              value: fmtDayLong(_when.start),
+              initial: _when.start.isAfter(today) ? today : _when.start,
+              last: today,
+              onChanged: setStart,
+            ))
+      ..add(const SizedBox(height: 12));
+    final s = _solution;
+    switch (_start) {
+      case LoanStartingPoint.originalDetails:
+        final draft = s != null && s.ok ? _draft() : null;
+        final o = draft == null ? null : LoanService.openingValues(draft);
+        if (o != null) {
+          if (!_outstandingEdited) {
+            final calc = _amt(o.outstanding.round());
+            if (_outstanding.text != calc) _outstanding.text = calc;
+          }
+          out.addAll([
+            Text(l.msLoansRun1Help(fmtDayLong(_when.firstOccurrence)),
+                style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 12),
+            KvGrid(columns: 3, items: [
+              KvItem(l.msLoansEmisPaid, '${o.emisPaid}'),
+              KvItem(l.msLoansPrincipalPaid, m(o.principalPaid)),
+              KvItem(l.msLoansInterestPaid, m(o.interestPaid)),
+            ]),
+            const SizedBox(height: 12),
+            KuberAmountField(
+              label: l.msLoansOutstandingToday,
+              controller: _outstanding,
+              symbol: fmt.symbol,
+              indianGrouping: indian,
+              onChanged: (_) => setState(() => _outstandingEdited = true),
+            ),
+          ]);
+          final entered = _val(_outstanding);
+          if (entered != null && (entered - o.outstanding).abs() >= 1) {
+            out
+              ..add(const SizedBox(height: 8))
+              ..add(KuberCallout.text(
+                l.msLoansAdjustment(m(entered - o.outstanding)),
+                tone: KuberCalloutTone.info,
+                onInfo: () => showMoneyInfo(context, ref, MoneyInfo.adjustment),
+              ));
+          }
+        }
+      case LoanStartingPoint.outstandingToday:
+        out.add(KuberAmountField(
+          label: l.msLoansOutstanding,
+          controller: _outstanding,
+          symbol: fmt.symbol,
+          indianGrouping: indian,
+          onChanged: (_) => setState(() => _outstandingEdited = true),
+        ));
+        final o = _val(_outstanding);
+        final rate = _val(_rate);
+        final emi = _val(_emi);
+        if (o != null && rate != null && emi != null) {
+          final left = emisLeftFor(o, rate, emi);
+          if (left != null) {
+            final first = _nextEmiFromToday();
+            out
+              ..add(const SizedBox(height: 12))
+              ..add(KvGrid(columns: 1, items: [
+                KvItem(l.msLoansEmisLeft,
+                    l.msLoansEmisLeftValue('$left', fmtMonthYear(DateTime(first.year, first.month + left - 1)))),
+              ]));
+          }
+        }
+        out.addAll([
+          const SizedBox(height: 12),
+          CapsLabel(l.msLoansPastTotals),
+          Text(l.msLoansPastTotalsSub, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              child: KuberAmountField(
+                  label: l.msLoansPrincipalPaid,
+                  controller: _pastPrincipal,
+                  symbol: fmt.symbol,
+                  indianGrouping: indian,
+                  optional: true),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: KuberAmountField(
+                  label: l.msLoansInterestPaid,
+                  controller: _pastInterest,
+                  symbol: fmt.symbol,
+                  indianGrouping: indian,
+                  optional: true),
+            ),
+          ]),
+        ]);
+      case LoanStartingPoint.trackEmiOnly:
+        out.add(KuberCallout.text(
+          l.msLoansRun3Notice(m(_val(_emi) ?? 0), ordinalFor(_when.effectiveAnchor)),
+          tone: KuberCalloutTone.info,
+        ));
+    }
+    out
+      ..add(const SizedBox(height: 12))
+      ..add(Text(l.msOpeningNote,
+          style: localeFont(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)));
+    return out;
   }
 }
 
+class _AdvancedRow extends StatelessWidget {
+  final bool open;
+  final VoidCallback onTap;
+  const _AdvancedRow({required this.open, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    return KuberPickerRow(
+      leading: DecoratedBox(
+        decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.mediumR),
+        child: Icon(Icons.tune_rounded, size: 20, color: cs.onSecondaryContainer),
+      ),
+      label: l.msAdvancedSubLoan,
+      value: l.msAdvanced,
+      onTap: onTap,
+    );
+  }
+}

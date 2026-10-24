@@ -1,31 +1,31 @@
-// =============================================================================
-// add_recurring_screen.dart  — POLISHED
-//
-// Drop-in replacement for
-//   lib/features/recurring/screens/add_recurring_screen.dart
-// =============================================================================
+// Add / edit recurring (design R.3): Expense | Income · Amount · Name ·
+// Category · Account · When · (edit) Skip next and Pause · Save. Saving a
+// change to amount, account, category or schedule on a rule that has run asks
+// "Apply changes to future occurrences only?". Past transactions are never
+// edited.
 
-import 'package:kuber/core/utils/locale_font.dart';
-import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/icon_mapper.dart';
+import '../../../core/database/isar_service.dart';
+import '../../../core/schedule/schedule_engine.dart';
+import '../../../core/schedule/schedule_text.dart';
+import '../../../core/utils/l10n_ext.dart';
+import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
-import '../../accounts/providers/account_provider.dart';
-import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
-import '../../transactions/widgets/account_picker_sheet.dart';
-import '../../transactions/widgets/category_picker_sheet.dart';
-import '../data/recurring_interval.dart';
-import '../data/recurring_repository.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../shared/widgets/when_picker.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
+import '../../settings/providers/settings_provider.dart'
+    show NumberSystem, currencyProvider, formatterProvider;
+import '../../transactions/widgets/entity_picker_rows.dart';
 import '../data/recurring_rule.dart';
+import '../domain/recurring_service.dart';
 import '../providers/recurring_provider.dart';
+import '../widgets/rule_sheet.dart';
 
 class AddRecurringScreen extends ConsumerStatefulWidget {
   final RecurringRule? existingRule;
@@ -50,647 +50,258 @@ class AddRecurringScreen extends ConsumerStatefulWidget {
 }
 
 class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
-  final _nameController = TextEditingController();
-  final _amountController = TextEditingController();
-  final _notesController = TextEditingController();
-  final _customDaysController = TextEditingController();
-  final _endAfterController = TextEditingController();
-
+  final _name = TextEditingController();
+  final _amount = TextEditingController();
+  final _notes = TextEditingController();
   String _type = 'expense';
-  int? _selectedCategoryId;
-  int? _selectedAccountId;
-  DateTime _startDate = DateTime.now();
-  String _frequency = 'monthly'; // preset key from kRecurrencePresets / 'custom'
-  RecurrenceUnit _customUnit = RecurrenceUnit.day;
-  String _endType = 'never';
-  DateTime? _endDate;
+  int? _categoryId;
+  int? _accountId;
+  late WhenValue _when;
+  bool _saving = false;
 
-  bool get _isEdit => widget.existingRule != null;
-
-  /// Custom "every N" count: a whole number >= 1, else null.
-  int? get _customCount {
-    final n = int.tryParse(_customDaysController.text.trim());
-    return n != null && n >= 1 ? n : null;
-  }
-
-  RecurrenceInterval get _interval => _frequency == 'custom'
-      ? RecurrenceInterval(_customCount ?? 1, _customUnit)
-      : kRecurrencePresets[_frequency]!;
-
-  bool get _canSave =>
-      (_frequency != 'custom' || _customCount != null) &&
-      _nameController.text.trim().isNotEmpty &&
-      _amountController.text.trim().isNotEmpty &&
-      double.tryParse(_amountController.text.trim().replaceAll(',', '')) !=
-          null &&
-      _selectedCategoryId != null &&
-      _selectedAccountId != null;
-
+  RecurringRule? get _rule => widget.existingRule;
+  bool get _isEdit => _rule != null;
 
   @override
   void initState() {
     super.initState();
-    if (widget.existingRule == null) {
-      final amount = widget.amountPrefill;
-      if (amount != null && amount > 0) {
-        _amountController.text = amount == amount.truncateToDouble()
-            ? amount.toInt().toString()
-            : amount.toStringAsFixed(2);
-      }
-      if (widget.categoryPrefill != null) {
-        _selectedCategoryId = widget.categoryPrefill;
-      }
-      final name = widget.namePrefill;
-      if (name != null && name.isNotEmpty) _nameController.text = name;
-    }
-    final rule = widget.existingRule;
-    if (rule != null) {
-      _nameController.text = rule.name;
-      _amountController.text = rule.amount % 1 == 0
-          ? rule.amount.toStringAsFixed(0)
-          : rule.amount.toStringAsFixed(2);
-      _notesController.text = rule.notes ?? '';
-      _type = rule.type;
-      _selectedCategoryId = int.tryParse(rule.categoryId);
-      _selectedAccountId = int.tryParse(rule.accountId);
-      _startDate = rule.startDate;
-      // A rule whose interval matches a preset shows that chip selected.
-      final interval = RecurrenceInterval.of(rule);
-      _frequency = interval.presetKey;
-      _endType = rule.endType;
-      if (_frequency == 'custom') {
-        _customDaysController.text = '${interval.count}';
-        _customUnit = interval.unit;
-      }
-      if (rule.endAfter != null) {
-        _endAfterController.text = rule.endAfter.toString();
-      }
-      _endDate = rule.endDate;
+    final r = _rule;
+    if (r != null) {
+      _name.text = r.name;
+      _amount.text = r.amount % 1 == 0 ? r.amount.toStringAsFixed(0) : '${r.amount}';
+      _notes.text = r.notes ?? '';
+      _type = r.type;
+      _categoryId = int.tryParse(r.categoryId);
+      _accountId = int.tryParse(r.accountId);
+      _when = WhenValue.fromSchedule(r.schedule!);
+    } else {
+      _when = WhenValue(start: DateUtils.dateOnly(DateTime.now()));
+      final a = widget.amountPrefill;
+      if (a != null && a > 0) _amount.text = a % 1 == 0 ? a.toStringAsFixed(0) : '$a';
+      _categoryId = widget.categoryPrefill;
+      if (widget.namePrefill?.isNotEmpty ?? false) _name.text = widget.namePrefill!;
     }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _amountController.dispose();
-    _notesController.dispose();
-    _customDaysController.dispose();
-    _endAfterController.dispose();
+    _name.dispose();
+    _amount.dispose();
+    _notes.dispose();
     super.dispose();
+  }
+
+  double get _amountValue => KuberAmountField.valueOf(_amount);
+
+  bool get _canSave =>
+      !_saving &&
+      _name.text.trim().isNotEmpty &&
+      _amountValue > 0 &&
+      _categoryId != null &&
+      _accountId != null &&
+      _when.error(context.l10n) == null;
+
+  Future<void> _save() async {
+    final l = context.l10n;
+    setState(() => _saving = true);
+    final service = RecurringService(ref.read(isarProvider));
+    final schedule = _when.toSchedule();
+    final notes = _notes.text.trim().isEmpty ? null : _notes.text.trim();
+    try {
+      final r = _rule;
+      if (r == null) {
+        await service.create(
+          RecurringRule()
+            ..name = _name.text.trim()
+            ..amount = _amountValue
+            ..type = _type
+            ..categoryId = '$_categoryId'
+            ..accountId = '$_accountId'
+            ..notes = notes,
+          schedule,
+        );
+      } else {
+        final termsChanged = _amountValue != r.amount ||
+            '$_categoryId' != r.categoryId ||
+            '$_accountId' != r.accountId ||
+            !RecurringService.sameRule(r.schedule!, schedule);
+        if (termsChanged && r.schedule!.postedCount > 0) {
+          final ok = await _confirmFuture(r);
+          if (ok != true) return;
+        }
+        await service.edit(r,
+            name: _name.text.trim(),
+            amount: _amountValue,
+            type: _type,
+            categoryId: '$_categoryId',
+            accountId: '$_accountId',
+            notes: notes,
+            schedule: schedule);
+      }
+      ref.invalidate(recurringListProvider);
+      if (mounted) {
+        showKuberSnackBar(context, l.msRecSaved);
+        context.pop();
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<bool?> _confirmFuture(RecurringRule r) {
+    final l = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.msRecFutureTitle, style: localeFont(fontWeight: FontWeight.w600)),
+        content: Text(l.msRecFutureBody(r.name, '${r.schedule!.postedCount}'), style: localeFont()),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancelLabel)),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.msRecFutureCta)),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
-    final symbol = ref.watch(currencyProvider).symbol;
-
+    final symbol = ref.watch(formatterProvider).symbol;
+    ref.watch(currencyProvider);
+    final r = _rule;
+    final next = r == null ? null : nextDate(r.schedule!);
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: () => context.pop(),
-        title: _isEdit ? context.l10n.editRecurring : context.l10n.newRecurring,
+        title: _isEdit ? l.msRecEdit : l.msRecNew,
+        actions: [
+          if (r != null)
+            IconButton(
+              icon: Icon(Icons.delete_outline_rounded, color: cs.error),
+              onPressed: () async {
+                await confirmDeleteRule(context, ref, r);
+                if (context.mounted) context.pop();
+              },
+            ),
+        ],
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── TRANSACTION ──────────────────────────────────────────
-              KuberFormSection(
-                label: context.l10n.transactionLabel,
-                topGap: 0,
-                children: [
-                  KuberSegmented<String>(
-                    groupValue: _type,
-                    onChanged: (v) => setState(() {
-                      _type = v;
-                      // PRESERVED: nulling category when type flips
-                      _selectedCategoryId = null;
-                    }),
-                    segments: [
-                      KuberSegment(
-                        value: 'expense',
-                        label: context.l10n.expenseLabel,
-                        icon: Icons.arrow_outward_rounded,
-                        tone: SegmentTone.expense,
-                      ),
-                      KuberSegment(
-                        value: 'income',
-                        label: context.l10n.incomeLabel,
-                        icon: Icons.south_west_rounded,
-                        tone: SegmentTone.income,
-                      ),
-                    ],
-                  ),
-                  KuberHeroAmountInput(
-                    label: context.l10n.amountTitle,
-                    currencySymbol: symbol,
-                    controller: _amountController,
-                    tone: _type == 'income'
-                        ? HeroAmountTone.income
-                        : HeroAmountTone.expense,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    onChanged: (_) => setState(() {}),
-                    style: localeFont(color: cs.onSurface, fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.recurringNameHint,
+              KuberSegmented<String>(
+                groupValue: _type,
+                onChanged: (v) => setState(() {
+                  _type = v;
+                  _categoryId = null;
+                }),
+                segments: [
+                  KuberSegment(
+                      value: 'expense',
+                      label: l.msRecExpense,
+                      icon: Icons.arrow_outward_rounded,
+                      tone: SegmentTone.expense),
+                  KuberSegment(
+                      value: 'income',
+                      label: l.msRecIncomeType,
+                      icon: Icons.south_west_rounded,
+                      tone: SegmentTone.income),
+                ],
+              ),
+              const SizedBox(height: 16),
+              KuberHeroAmountInput(
+                label: l.msRecAmount,
+                currencySymbol: symbol,
+                controller: _amount,
+                tone: _type == 'income' ? HeroAmountTone.income : HeroAmountTone.expense,
+                inputFormatters: [
+                  CurrencyInputFormatter(
+                      isIndian: ref.watch(formatterProvider).system == NumberSystem.indian)
+                ],
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 16),
+              KuberTextField(
+                label: l.msRecName,
+                controller: _name,
+                textCapitalization: TextCapitalization.words,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 16),
+              CategoryPickerRow(
+                selectedId: _categoryId,
+                type: _type,
+                onChanged: (id) => setState(() => _categoryId = id),
+              ),
+              const SizedBox(height: 10),
+              AccountPickerRow(
+                selectedId: _accountId,
+                onChanged: (id) => setState(() => _accountId = id),
+              ),
+              const SizedBox(height: 24),
+              KuberWhenPicker(value: _when, onChanged: (v) => setState(() => _when = v)),
+              if (r != null && !r.schedule!.paused && next != null) ...[
+                const SizedBox(height: 16),
+                Row(children: [
+                  Expanded(
+                    child: AppButton(
+                      label: l.msRecSkipNext(fmtDayShort(dayOf(next))),
+                      type: AppButtonType.normal,
+                      onPressed: () async {
+                        await skipNextOccurrence(context, ref, r);
+                        setState(() {});
+                      },
                     ),
                   ),
-                ],
-              ),
-
-              // ── WHERE ────────────────────────────────────────────────
-              KuberFormSection(
-                label: context.l10n.whereLabel,
-                children: [
-                  _categoryRow(context, ref),
-                  _accountRow(context, ref),
-                ],
-              ),
-
-              // ── SCHEDULE (tinted) ────────────────────────────────────
-              KuberFormSection(
-                label: context.l10n.schedule,
-                sublabel: context.l10n.scheduleSublabel,
-                tinted: true,
-                children: [
-                  KuberFieldLabel(context.l10n.frequencyLabel),
-                  KuberChipGrid<String>(
-                    columns: 3,
-                    selected: _frequency,
-                    onChanged: (v) => setState(() => _frequency = v),
-                    options: [
-                      for (final e in kRecurrencePresets.entries)
-                        KuberChipOption(
-                          value: e.key,
-                          label: e.key == 'quarterly'
-                              ? context.l10n.freqQuarterly
-                              : e.value.describe(context.l10n),
-                        ),
-                      KuberChipOption(
-                        value: 'custom',
-                        label: context.l10n.freqCustom,
-                      ),
-                    ],
-                  ),
-                  // Custom: "Every [N] [unit]", N a whole number >= 1.
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOutCubic,
-                    child: _frequency != 'custom'
-                        ? const SizedBox.shrink()
-                        : Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      context.l10n.everyLabel,
-                                      style: localeFont(
-                                        color: cs.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    SizedBox(
-                                      width: 80,
-                                      child: TextField(
-                                        key: const Key('recurring_custom_count'),
-                                        controller: _customDaysController,
-                                        keyboardType: TextInputType.number,
-                                        onChanged: (_) => setState(() {}),
-                                        onTapOutside: (_) => FocusManager
-                                            .instance
-                                            .primaryFocus
-                                            ?.unfocus(),
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                          LengthLimitingTextInputFormatter(3),
-                                        ],
-                                        textAlign: TextAlign.center,
-                                        style: localeFont(
-                                          color: cs.onSurface,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        _unitLabel(context, _customUnit),
-                                        style: localeFont(
-                                          color: cs.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if (_customCount == null) ...[
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    context.l10n.intervalInvalid,
-                                    style: localeFont(
-                                      fontSize: 12,
-                                      color: cs.error,
-                                    ),
-                                  ),
-                                ],
-                                const SizedBox(height: 10),
-                                KuberSegmented<RecurrenceUnit>(
-                                  groupValue: _customUnit,
-                                  onChanged: (u) =>
-                                      setState(() => _customUnit = u),
-                                  segments: [
-                                    for (final u in RecurrenceUnit.values)
-                                      KuberSegment(
-                                        value: u,
-                                        label: _unitLabel(context, u),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                  KuberFieldLabel(context.l10n.startsOn),
-                  _dateRow(
-                    label: context.l10n.startDate,
-                    date: _startDate,
-                    onTap: _pickStartDate,
-                  ),
-                  KuberFieldLabel(context.l10n.endsLabel),
-                  KuberSegmented<String>(
-                    groupValue: _endType,
-                    onChanged: (v) => setState(() => _endType = v),
-                    segments: [
-                      KuberSegment(
-                        value: 'never',
-                        label: context.l10n.neverLabel,
-                      ),
-                      KuberSegment(
-                        value: 'occurrences',
-                        label: context.l10n.afterN,
-                      ),
-                      KuberSegment(value: 'date', label: context.l10n.onDate),
-                    ],
-                  ),
-                  // PRESERVED — conditional end-type fields
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOutCubic,
-                    child: switch (_endType) {
-                      'occurrences' => Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Row(
-                          children: [
-                            Text(
-                              context.l10n.afterLabel,
-                              style: localeFont(color: cs.onSurfaceVariant),
-                            ),
-                            const SizedBox(width: 10),
-                            SizedBox(
-                              width: 80,
-                              child: TextField(
-                                controller: _endAfterController,
-                                keyboardType: TextInputType.number,
-                                onTapOutside: (_) => FocusManager
-                                    .instance
-                                    .primaryFocus
-                                    ?.unfocus(),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                textAlign: TextAlign.center,
-                                style: localeFont(
-                                  color: cs.onSurface,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              context.l10n.occurrencesLabel,
-                              style: localeFont(color: cs.onSurfaceVariant),
-                            ),
-                          ],
-                        ),
-                      ),
-                      'date' => Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: _dateRow(
-                          label: context.l10n.endDate,
-                          date: _endDate ?? _startDate,
-                          onTap: _pickEndDate,
-                        ),
-                      ),
-                      _ => const SizedBox.shrink(),
-                    },
-                  ),
-                  const SizedBox(height: 4),
-                  _NextOccurrencePreview(
-                    startDate: _startDate,
-                    interval: _interval,
-                  ),
-                ],
-              ),
-
-              // ── NOTES ────────────────────────────────────────────────
-              KuberFormSection(
-                label: context.l10n.notesLabel,
-                children: [
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 3,
-                    minLines: 1,
-                    textCapitalization: TextCapitalization.sentences,
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    style: localeFont(color: cs.onSurface, fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.recurringNotesHint,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppButton(
+                      label: l.msRecPause,
+                      type: AppButtonType.outline,
+                      onPressed: () async {
+                        await togglePauseRule(context, ref, r);
+                        if (context.mounted) context.pop();
+                      },
                     ),
                   ),
-                ],
+                ]),
+              ],
+              if (r != null && r.schedule!.paused) ...[
+                const SizedBox(height: 16),
+                AppButton(
+                  label: l.msRecResume,
+                  type: AppButtonType.outline,
+                  fullWidth: true,
+                  onPressed: () async {
+                    await togglePauseRule(context, ref, r);
+                    if (context.mounted) context.pop();
+                  },
+                ),
+              ],
+              const SizedBox(height: 24),
+              KuberTextField(
+                label: l.notesLabel,
+                optional: true,
+                controller: _notes,
+                hint: l.recurringNotesHint,
+                textCapitalization: TextCapitalization.sentences,
               ),
             ],
           ),
         ),
       ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEdit ? context.l10n.saveChanges : context.l10n.saveRecurring,
+        label: _isEdit ? l.msRecSaveChanges : l.msRecSave,
+        loading: _saving,
         onPressed: _canSave ? _save : null,
-      ),
-    );
-  }
-
-  // ── Category row (reads picker + renders the chosen cat) ─────────
-  Widget _categoryRow(BuildContext context, WidgetRef ref) {
-    final cats = ref.watch(categoryListProvider).valueOrNull ?? [];
-    final cat = _selectedCategoryId == null
-        ? null
-        : cats.where((c) => c.id == _selectedCategoryId).firstOrNull;
-    return KuberPickerRow(
-      leading: cat == null
-          ? KuberLeadingSwatch(
-              color: Colors.transparent,
-              icon: Icons.bookmark_border_rounded,
-              empty: true,
-            )
-          : KuberLeadingSwatch(
-              color: Color(cat.colorValue),
-              icon: IconMapper.fromString(cat.icon),
-            ),
-      label: context.l10n.categoryLabel,
-      value: cat?.name ?? context.l10n.selectCategoryTitle,
-      valueIsPlaceholder: cat == null,
-      onTap: _openCategoryPicker,
-    );
-  }
-
-  // ── Account row ─────────────────────────────────────────────────
-  Widget _accountRow(BuildContext context, WidgetRef ref) {
-    final accs = ref.watch(accountListProvider).valueOrNull ?? [];
-    final acc = _selectedAccountId == null
-        ? null
-        : accs.where((a) => a.id == _selectedAccountId).firstOrNull;
-    return KuberPickerRow(
-      leading: acc == null
-          ? KuberLeadingSwatch(
-              color: Colors.transparent,
-              icon: Icons.account_balance_outlined,
-              empty: true,
-            )
-          : KuberLeadingSwatch(
-              color: Color(acc.colorValue ?? 0xFF3B82F6),
-              icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
-            ),
-      label: context.l10n.accountTitle,
-      value: acc?.name ?? context.l10n.selectAccountTitle,
-      valueIsPlaceholder: acc == null,
-      onTap: _openAccountPicker,
-    );
-  }
-
-  Widget _dateRow({
-    required String label,
-    required DateTime date,
-    required VoidCallback onTap,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    return KuberPickerRow(
-      leading: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-          border: Border.all(color: cs.outlineVariant),
-        ),
-        child: Icon(
-          Icons.calendar_today_rounded,
-          size: 16,
-          color: cs.onSurface,
-        ),
-      ),
-      label: label,
-      value: DateFormat('d MMM yyyy').format(date),
-      onTap: onTap,
-    );
-  }
-
-  // ── PRESERVED handlers ──────────────────────────────────────────
-  void _openCategoryPicker() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => CategoryPickerSheet(
-        selectedCategoryId: _selectedCategoryId,
-        onSelected: (id) {
-          setState(() => _selectedCategoryId = id);
-          Navigator.pop(context);
-        },
-        defaultType: _type,
-      ),
-    ).unfocusOnComplete(context);
-  }
-
-  void _openAccountPicker() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => AccountPickerSheet(
-        selectedAccountId: _selectedAccountId,
-        onSelected: (id) {
-          setState(() => _selectedAccountId = id);
-          Navigator.pop(context);
-        },
-      ),
-    ).unfocusOnComplete(context);
-  }
-
-  Future<void> _pickStartDate() async {
-    final now = DateUtils.dateOnly(DateTime.now());
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _startDate.isBefore(now) ? now : _startDate,
-      firstDate: now,
-      lastDate: DateTime(2100),
-    ).unfocusOnComplete(context);
-    if (picked != null) setState(() => _startDate = picked);
-  }
-
-  Future<void> _pickEndDate() async {
-    final now = DateUtils.dateOnly(DateTime.now());
-    final earliest = _startDate.isBefore(now) ? now : _startDate;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: (_endDate != null && !_endDate!.isBefore(earliest))
-          ? _endDate!
-          : earliest,
-      firstDate: earliest,
-      lastDate: DateTime(2100),
-    ).unfocusOnComplete(context);
-    if (picked != null) setState(() => _endDate = picked);
-  }
-
-  Future<void> _save() async {
-    final rule = widget.existingRule ?? RecurringRule();
-    // The schedule before this edit; `rule` is updated in place below.
-    final before = _isEdit
-        ? (rule.startDate, RecurrenceInterval.of(rule), rule.nextDueAt)
-        : null;
-    rule
-      ..name = _nameController.text.trim()
-      ..amount = double.parse(_amountController.text.trim().replaceAll(',', ''))
-      ..type = _type
-      ..categoryId = _selectedCategoryId.toString()
-      ..accountId = _selectedAccountId.toString()
-      ..notes = _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim()
-      ..frequency = _frequency
-      ..customDays = _interval.count
-      ..intervalUnit = _interval.unit.name
-      ..startDate = _startDate
-      ..endType = _endType
-      ..endAfter = _endType == 'occurrences'
-          ? int.tryParse(_endAfterController.text.trim())
-          : null
-      ..endDate = _endType == 'date' ? _endDate : null;
-    rule.nextDueAt = before == null
-        ? _startDate
-        : RecurringRepository.nextDueAfterEdit(
-            rule,
-            oldStartDate: before.$1,
-            oldInterval: before.$2,
-            oldNextDueAt: before.$3,
-            lastRecordedAt: await ref
-                .read(recurringRepositoryProvider)
-                .lastRecordedAt(rule.id),
-          );
-
-    if (_isEdit) {
-      await ref.read(recurringListProvider.notifier).updateRule(rule);
-    } else {
-      await ref.read(recurringListProvider.notifier).add(rule);
-    }
-    if (mounted) context.pop();
-  }
-}
-
-String _unitLabel(BuildContext context, RecurrenceUnit unit) {
-  final l = context.l10n;
-  return switch (unit) {
-    RecurrenceUnit.day => l.daysLabel,
-    RecurrenceUnit.week => l.weeksLabel,
-    RecurrenceUnit.month => l.monthsLabel,
-    RecurrenceUnit.year => l.yearsLabel,
-  };
-}
-
-// ─── Next-occurrence preview strip ──────────────────────────────────
-class _NextOccurrencePreview extends StatelessWidget {
-  final DateTime startDate;
-  final RecurrenceInterval interval;
-  const _NextOccurrencePreview({
-    required this.startDate,
-    required this.interval,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final l = context.l10n;
-    final next = DateFormat('d MMM yyyy').format(startDate);
-    final String cadence;
-    if (interval.count == 1) {
-      cadence = switch (interval.unit) {
-        RecurrenceUnit.day => l.cadenceDaily,
-        RecurrenceUnit.week => l.cadenceWeekly,
-        RecurrenceUnit.month => l.cadenceMonthly,
-        RecurrenceUnit.year => l.cadenceYearly,
-      };
-    } else {
-      // "then every 3 months": English sentence case mid-sentence.
-      final desc = interval.describe(l);
-      cadence = l.cadenceThen(Localizations.localeOf(context).languageCode ==
-              'en'
-          ? desc.replaceFirst('E', 'e')
-          : desc);
-    }
-    return Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-        border: Border.all(
-          color: cs.primary.withValues(alpha: 0.40),
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.event_repeat_rounded, size: 16, color: cs.primary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '${l.nextOccurrenceLabel} ',
-                    style: localeFont(fontSize: 12, color: cs.onSurface),
-                  ),
-                  TextSpan(
-                    text: next,
-                    style: localeFont(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' · $cadence',
-                    style: localeFont(fontSize: 12, color: cs.onSurface),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

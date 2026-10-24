@@ -276,7 +276,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2020),
+      firstDate: DateTime(1900),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null) {

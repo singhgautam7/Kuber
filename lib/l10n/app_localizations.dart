@@ -10147,6 +10147,3539 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately.'**
   String get backupsAreOnDesc;
+
+  /// No description provided for @msWhenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get msWhenTitle;
+
+  /// No description provided for @msWhenTitleEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI schedule'**
+  String get msWhenTitleEmi;
+
+  /// No description provided for @msWhenTitleReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get msWhenTitleReminder;
+
+  /// No description provided for @msWhenDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get msWhenDaily;
+
+  /// No description provided for @msWhenWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get msWhenWeekly;
+
+  /// No description provided for @msWhenMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get msWhenMonthly;
+
+  /// No description provided for @msWhenQuarterly.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get msWhenQuarterly;
+
+  /// No description provided for @msWhenHalfYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 6 months'**
+  String get msWhenHalfYearly;
+
+  /// No description provided for @msWhenYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get msWhenYearly;
+
+  /// No description provided for @msWhenCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get msWhenCustom;
+
+  /// No description provided for @msWhenOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get msWhenOnce;
+
+  /// No description provided for @msWhenEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get msWhenEvery;
+
+  /// No description provided for @msWhenUnitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get msWhenUnitDays;
+
+  /// No description provided for @msWhenUnitWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Weeks'**
+  String get msWhenUnitWeeks;
+
+  /// No description provided for @msWhenUnitMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get msWhenUnitMonths;
+
+  /// No description provided for @msWhenUnitYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get msWhenUnitYears;
+
+  /// No description provided for @msWhenStartsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts on'**
+  String get msWhenStartsOn;
+
+  /// No description provided for @msWhenOnDay.
+  ///
+  /// In en, this message translates to:
+  /// **'On day'**
+  String get msWhenOnDay;
+
+  /// No description provided for @msWhenOnDayValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{ordinal} of the month'**
+  String msWhenOnDayValue(String ordinal);
+
+  /// No description provided for @msWhenOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get msWhenOn;
+
+  /// No description provided for @msWhenEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get msWhenEnds;
+
+  /// No description provided for @msWhenEndsNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get msWhenEndsNever;
+
+  /// No description provided for @msWhenEndsOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'On a date'**
+  String get msWhenEndsOnDate;
+
+  /// No description provided for @msWhenEndsAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get msWhenEndsAfter;
+
+  /// No description provided for @msWhenEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get msWhenEndDate;
+
+  /// No description provided for @msWhenTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'times'**
+  String get msWhenTimes;
+
+  /// No description provided for @msWhenLockedMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats every month'**
+  String get msWhenLockedMonthly;
+
+  /// No description provided for @msWhenLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs are monthly'**
+  String get msWhenLockedHint;
+
+  /// No description provided for @msWhenFirstEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'First EMI'**
+  String get msWhenFirstEmi;
+
+  /// No description provided for @msWhenEmiDay.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI day'**
+  String get msWhenEmiDay;
+
+  /// No description provided for @msWhenEmiDayValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{ordinal} of every month'**
+  String msWhenEmiDayValue(String ordinal);
+
+  /// No description provided for @msWhenNumberOfEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of EMIs'**
+  String get msWhenNumberOfEmis;
+
+  /// No description provided for @msWhenLastEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Last EMI'**
+  String get msWhenLastEmi;
+
+  /// No description provided for @msWhenEveryUnitDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get msWhenEveryUnitDay;
+
+  /// No description provided for @msWhenEveryUnitWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Every week'**
+  String get msWhenEveryUnitWeek;
+
+  /// No description provided for @msWhenEveryUnitMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get msWhenEveryUnitMonth;
+
+  /// No description provided for @msWhenEveryUnitYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Every year'**
+  String get msWhenEveryUnitYear;
+
+  /// No description provided for @msWhenEveryNDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {n} days'**
+  String msWhenEveryNDays(String n);
+
+  /// No description provided for @msWhenEveryNWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {n} weeks'**
+  String msWhenEveryNWeeks(String n);
+
+  /// No description provided for @msWhenEveryNMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {n} months'**
+  String msWhenEveryNMonths(String n);
+
+  /// No description provided for @msWhenEveryNYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {n} years'**
+  String msWhenEveryNYears(String n);
+
+  /// No description provided for @msWhenAnchorWeekday.
+  ///
+  /// In en, this message translates to:
+  /// **'on {weekday}'**
+  String msWhenAnchorWeekday(String weekday);
+
+  /// No description provided for @msWhenAnchorDay.
+  ///
+  /// In en, this message translates to:
+  /// **'on the {ordinal}'**
+  String msWhenAnchorDay(String ordinal);
+
+  /// No description provided for @msWhenAnchorDate.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String msWhenAnchorDate(String date);
+
+  /// No description provided for @msWhenSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'{interval}{anchor}, from {start}, {end}.'**
+  String msWhenSentence(
+    String interval,
+    String anchor,
+    String start,
+    String end,
+  );
+
+  /// No description provided for @msWhenEndNever.
+  ///
+  /// In en, this message translates to:
+  /// **'no end'**
+  String get msWhenEndNever;
+
+  /// No description provided for @msWhenEndUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'until {date}'**
+  String msWhenEndUntil(String date);
+
+  /// No description provided for @msWhenEndTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} times'**
+  String msWhenEndTimes(String n);
+
+  /// No description provided for @msWhenEndEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} EMIs'**
+  String msWhenEndEmis(String n);
+
+  /// No description provided for @msWhenOnceSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'On {date}.'**
+  String msWhenOnceSentence(String date);
+
+  /// No description provided for @msWhenLastOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Last on {date}'**
+  String msWhenLastOn(String date);
+
+  /// No description provided for @msWhenLastEmiOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Last EMI {date}'**
+  String msWhenLastEmiOn(String date);
+
+  /// No description provided for @msWhenCountTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} times in all'**
+  String msWhenCountTotal(String n);
+
+  /// No description provided for @msWhenFlagNext.
+  ///
+  /// In en, this message translates to:
+  /// **'next'**
+  String get msWhenFlagNext;
+
+  /// No description provided for @msWhenFlagToday.
+  ///
+  /// In en, this message translates to:
+  /// **'due today'**
+  String get msWhenFlagToday;
+
+  /// No description provided for @msWhenFlagLastDay.
+  ///
+  /// In en, this message translates to:
+  /// **'last day'**
+  String get msWhenFlagLastDay;
+
+  /// No description provided for @msWhenMonthEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'In shorter months, this falls on the last day.'**
+  String get msWhenMonthEnd;
+
+  /// No description provided for @msWhenErrEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End date must be after the start date.'**
+  String get msWhenErrEndBeforeStart;
+
+  /// No description provided for @msWhenErrCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 or more.'**
+  String get msWhenErrCount;
+
+  /// No description provided for @msWhenErrCountPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter how many times, 1 or more.'**
+  String get msWhenErrCountPreview;
+
+  /// No description provided for @msCalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated'**
+  String get msCalculated;
+
+  /// No description provided for @msViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get msViewDetails;
+
+  /// No description provided for @msOpenInCalculator.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in a calculator'**
+  String get msOpenInCalculator;
+
+  /// No description provided for @msAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced options'**
+  String get msAdvanced;
+
+  /// No description provided for @msAdvancedSubLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest type, loan numbers, already running, spending'**
+  String get msAdvancedSubLoan;
+
+  /// No description provided for @msAlreadyRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Already running?'**
+  String get msAlreadyRunning;
+
+  /// No description provided for @msAlreadyRunningSubLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'This loan started before today'**
+  String get msAlreadyRunningSubLoan;
+
+  /// No description provided for @msAlreadyRunningSubInv.
+  ///
+  /// In en, this message translates to:
+  /// **'I invested before today'**
+  String get msAlreadyRunningSubInv;
+
+  /// No description provided for @msOpeningNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening values never change any account balance.'**
+  String get msOpeningNote;
+
+  /// No description provided for @msFromLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'From Loans'**
+  String get msFromLoans;
+
+  /// No description provided for @msFromInvestments.
+  ///
+  /// In en, this message translates to:
+  /// **'From Investments'**
+  String get msFromInvestments;
+
+  /// No description provided for @msSource.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}'**
+  String msSource(String name);
+
+  /// No description provided for @msSourceRule.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name} · Recurring'**
+  String msSourceRule(String name);
+
+  /// No description provided for @msFilledFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled from {name}'**
+  String msFilledFrom(String name);
+
+  /// No description provided for @msFromCalculator.
+  ///
+  /// In en, this message translates to:
+  /// **'From {calculator}'**
+  String msFromCalculator(String calculator);
+
+  /// No description provided for @msPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get msPaused;
+
+  /// No description provided for @msEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get msEnded;
+
+  /// No description provided for @msClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get msClosed;
+
+  /// No description provided for @msExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get msExample;
+
+  /// No description provided for @msBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing, try again in a moment'**
+  String get msBusy;
+
+  /// No description provided for @msLoansTotalOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Total outstanding'**
+  String get msLoansTotalOutstanding;
+
+  /// No description provided for @msLoansMonthlyEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly EMIs'**
+  String get msLoansMonthlyEmis;
+
+  /// No description provided for @msLoansNextEmiLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Next EMI {date} · {name} · {amount}'**
+  String msLoansNextEmiLine(String date, String name, String amount);
+
+  /// No description provided for @msLoansActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get msLoansActive;
+
+  /// No description provided for @msLoansRowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} EMI · next {date}'**
+  String msLoansRowSub(String amount, String date);
+
+  /// No description provided for @msLoansLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get msLoansLeft;
+
+  /// No description provided for @msLoansProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {total} EMIs paid'**
+  String msLoansProgress(String paid, String total);
+
+  /// No description provided for @msLoansPaidCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} EMIs paid'**
+  String msLoansPaidCount(String paid);
+
+  /// No description provided for @msLoansEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No loans yet'**
+  String get msLoansEmptyTitle;
+
+  /// No description provided for @msLoansEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a loan to track its EMIs, what you still owe, and the interest you pay.'**
+  String get msLoansEmptyBody;
+
+  /// No description provided for @msLoansFab.
+  ///
+  /// In en, this message translates to:
+  /// **'Add loan'**
+  String get msLoansFab;
+
+  /// No description provided for @msLoansAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add loan'**
+  String get msLoansAdd;
+
+  /// No description provided for @msLoansEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit loan'**
+  String get msLoansEdit;
+
+  /// No description provided for @msLoansType.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan type'**
+  String get msLoansType;
+
+  /// No description provided for @msLoansName.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan name'**
+  String get msLoansName;
+
+  /// No description provided for @msLoansLender.
+  ///
+  /// In en, this message translates to:
+  /// **'Lender'**
+  String get msLoansLender;
+
+  /// No description provided for @msLoansEmiAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI amount'**
+  String get msLoansEmiAmount;
+
+  /// No description provided for @msLoansPayFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay from'**
+  String get msLoansPayFrom;
+
+  /// No description provided for @msLoansRecordEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'Record EMIs'**
+  String get msLoansRecordEmis;
+
+  /// No description provided for @msLoansRecordAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically'**
+  String get msLoansRecordAuto;
+
+  /// No description provided for @msLoansRecordAutoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'On the EMI day, Kuber records the EMI from {account}.'**
+  String msLoansRecordAutoHelp(String account);
+
+  /// No description provided for @msLoansRecordManual.
+  ///
+  /// In en, this message translates to:
+  /// **'I record them myself'**
+  String get msLoansRecordManual;
+
+  /// No description provided for @msLoansSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save loan'**
+  String get msLoansSave;
+
+  /// No description provided for @msLoansSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get msLoansSaveChanges;
+
+  /// No description provided for @msLoansInterestType.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest type'**
+  String get msLoansInterestType;
+
+  /// No description provided for @msLoansReducing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reducing balance'**
+  String get msLoansReducing;
+
+  /// No description provided for @msLoansReducingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Most bank loans'**
+  String get msLoansReducingSub;
+
+  /// No description provided for @msLoansFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat rate'**
+  String get msLoansFlat;
+
+  /// No description provided for @msLoansFlatSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Many car, personal and consumer loans'**
+  String get msLoansFlatSub;
+
+  /// No description provided for @msLoansIo.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest-only period first'**
+  String get msLoansIo;
+
+  /// No description provided for @msLoansIoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-EMI, then regular EMIs'**
+  String get msLoansIoSub;
+
+  /// No description provided for @msLoansIoMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest-only months'**
+  String get msLoansIoMonths;
+
+  /// No description provided for @msLoansIoNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{io} a month until {date}, then {emi} a month for {n} months.'**
+  String msLoansIoNotice(String io, String date, String emi, String n);
+
+  /// No description provided for @msLoansNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan numbers'**
+  String get msLoansNumbers;
+
+  /// No description provided for @msLoansPrincipal.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get msLoansPrincipal;
+
+  /// No description provided for @msLoansRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest rate'**
+  String get msLoansRate;
+
+  /// No description provided for @msLoansTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenure'**
+  String get msLoansTenure;
+
+  /// No description provided for @msLoansEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI'**
+  String get msLoansEmi;
+
+  /// No description provided for @msLoansYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get msLoansYears;
+
+  /// No description provided for @msLoansMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get msLoansMonths;
+
+  /// No description provided for @msLoansTotalPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'Total payable · optional'**
+  String get msLoansTotalPayable;
+
+  /// No description provided for @msLoansTotalPayableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use instead of the rate'**
+  String get msLoansTotalPayableHint;
+
+  /// No description provided for @msLoansOrderHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled in order: {a}, {b}, {c}.'**
+  String msLoansOrderHelp(String a, String b, String c);
+
+  /// No description provided for @msLoansSwapHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'You typed the {field}, so {other} (filled first) is now calculated.'**
+  String msLoansSwapHelp(String field, String other);
+
+  /// No description provided for @msLoansPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI {emi} · ends {month} · total interest {interest}'**
+  String msLoansPreview(String emi, String month, String interest);
+
+  /// No description provided for @msLoansPreviewZero.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI {emi} · ends {month} · no interest'**
+  String msLoansPreviewZero(String emi, String month);
+
+  /// No description provided for @msLoansMismatchMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Your EMI is {diff} more than calculated. We\'ll use your EMI.'**
+  String msLoansMismatchMore(String diff);
+
+  /// No description provided for @msLoansMismatchLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your EMI is {diff} less than calculated. We\'ll use your EMI.'**
+  String msLoansMismatchLess(String diff);
+
+  /// No description provided for @msLoansErrNeverEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'This EMI doesn\'t cover the interest, so the loan would never end.'**
+  String get msLoansErrNeverEnds;
+
+  /// No description provided for @msLoansErrNeverEndsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly interest is {interest}. Enter an EMI above that.'**
+  String msLoansErrNeverEndsPreview(String interest);
+
+  /// No description provided for @msLoansErrTotalLow.
+  ///
+  /// In en, this message translates to:
+  /// **'This is less than the principal. Check the numbers.'**
+  String get msLoansErrTotalLow;
+
+  /// No description provided for @msLoansRun1.
+  ///
+  /// In en, this message translates to:
+  /// **'I know the original loan details'**
+  String get msLoansRun1;
+
+  /// No description provided for @msLoansRun1Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber works out what you\'ve paid'**
+  String get msLoansRun1Sub;
+
+  /// No description provided for @msLoansRun2.
+  ///
+  /// In en, this message translates to:
+  /// **'I know what\'s outstanding today'**
+  String get msLoansRun2;
+
+  /// No description provided for @msLoansRun2Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'From a bank statement'**
+  String get msLoansRun2Sub;
+
+  /// No description provided for @msLoansRun3.
+  ///
+  /// In en, this message translates to:
+  /// **'Just track the EMI'**
+  String get msLoansRun3;
+
+  /// No description provided for @msLoansRun3Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'No principal and interest split'**
+  String get msLoansRun3Sub;
+
+  /// No description provided for @msLoansEmisPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs paid'**
+  String get msLoansEmisPaid;
+
+  /// No description provided for @msLoansPrincipalPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal paid'**
+  String get msLoansPrincipalPaid;
+
+  /// No description provided for @msLoansInterestPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest paid'**
+  String get msLoansInterestPaid;
+
+  /// No description provided for @msLoansOutstandingToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding today'**
+  String get msLoansOutstandingToday;
+
+  /// No description provided for @msLoansRun1Help.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked out from the loan numbers and your first EMI, {date}. Tap any value to change it.'**
+  String msLoansRun1Help(String date);
+
+  /// No description provided for @msLoansAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll use your figure and add the difference as an adjustment: {diff}.'**
+  String msLoansAdjustment(String diff);
+
+  /// No description provided for @msLoansEmisLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs left'**
+  String get msLoansEmisLeft;
+
+  /// No description provided for @msLoansEmisLeftValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} · last in {month}'**
+  String msLoansEmisLeftValue(String n, String month);
+
+  /// No description provided for @msLoansPastTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'Past totals · optional'**
+  String get msLoansPastTotals;
+
+  /// No description provided for @msLoansPastTotalsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal and interest paid'**
+  String get msLoansPastTotalsSub;
+
+  /// No description provided for @msLoansRun3Notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber records each {emi} EMI on the {ordinal}. You won\'t see principal, interest or what you owe until you add the loan numbers.'**
+  String msLoansRun3Notice(String emi, String ordinal);
+
+  /// No description provided for @msLoansSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get msLoansSpending;
+
+  /// No description provided for @msLoansOnlyInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Count only interest as expense'**
+  String get msLoansOnlyInterest;
+
+  /// No description provided for @msLoansOnlyInterestHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal is counted as a transfer to this loan. Your bank balance still goes down by the full EMI.'**
+  String get msLoansOnlyInterestHelp;
+
+  /// No description provided for @msLoansFutureOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This applies to future EMIs only. EMIs already recorded keep the way they were counted.'**
+  String get msLoansFutureOnly;
+
+  /// No description provided for @msLoansOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get msLoansOutstanding;
+
+  /// No description provided for @msLoansEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {month}'**
+  String msLoansEndsOn(String month);
+
+  /// No description provided for @msLoansNextEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Next EMI · {date}'**
+  String msLoansNextEmi(String date);
+
+  /// No description provided for @msLoansSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI split'**
+  String get msLoansSplit;
+
+  /// No description provided for @msLoansPrincipalL.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get msLoansPrincipalL;
+
+  /// No description provided for @msLoansInterestL.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get msLoansInterestL;
+
+  /// No description provided for @msLoansTotalInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Total interest'**
+  String get msLoansTotalInterest;
+
+  /// No description provided for @msLoansRecordExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Record extra payment'**
+  String get msLoansRecordExtra;
+
+  /// No description provided for @msLoansChangeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Change interest rate'**
+  String get msLoansChangeRate;
+
+  /// No description provided for @msLoansCloseLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Close loan'**
+  String get msLoansCloseLoan;
+
+  /// No description provided for @msLoansOutstandingTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get msLoansOutstandingTab;
+
+  /// No description provided for @msLoansSplitTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal vs interest'**
+  String get msLoansSplitTab;
+
+  /// No description provided for @msLoansMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get msLoansMonth;
+
+  /// No description provided for @msLoansYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get msLoansYear;
+
+  /// No description provided for @msLoansBeforeKuber.
+  ///
+  /// In en, this message translates to:
+  /// **'Before Kuber'**
+  String get msLoansBeforeKuber;
+
+  /// No description provided for @msLoansNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get msLoansNext;
+
+  /// No description provided for @msLoansRowSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'P {principal} · I {interest}'**
+  String msLoansRowSplit(String principal, String interest);
+
+  /// No description provided for @msLoansRowBal.
+  ///
+  /// In en, this message translates to:
+  /// **'Bal {balance}'**
+  String msLoansRowBal(String balance);
+
+  /// No description provided for @msLoansInterestOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest only'**
+  String get msLoansInterestOnly;
+
+  /// No description provided for @msLoansEventExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra payment {amount} · {date}'**
+  String msLoansEventExtra(String amount, String date);
+
+  /// No description provided for @msLoansEventExtraSubTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce tenure · balance after {balance}'**
+  String msLoansEventExtraSubTenure(String balance);
+
+  /// No description provided for @msLoansEventExtraSubEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce EMI · balance after {balance}'**
+  String msLoansEventExtraSubEmi(String balance);
+
+  /// No description provided for @msLoansEventRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate {oldRate} → {newRate} · from {date}'**
+  String msLoansEventRate(String oldRate, String newRate, String date);
+
+  /// No description provided for @msLoansEventRateSubTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust tenure · EMI stays {emi}'**
+  String msLoansEventRateSubTenure(String emi);
+
+  /// No description provided for @msLoansEventRateSubEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust EMI · new EMI {emi}'**
+  String msLoansEventRateSubEmi(String emi);
+
+  /// No description provided for @msLoansEventCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge {amount} · {date}'**
+  String msLoansEventCharge(String amount, String date);
+
+  /// No description provided for @msLoansEventRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular EMIs start · {date}'**
+  String msLoansEventRegular(String date);
+
+  /// No description provided for @msLoansYearSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} EMIs · {paid} paid'**
+  String msLoansYearSub(String n, String paid);
+
+  /// No description provided for @msLoansYearEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'balance at year end'**
+  String get msLoansYearEnd;
+
+  /// No description provided for @msLoansChartNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The drop in {year} is your {amount} extra payment.'**
+  String msLoansChartNote(String year, String amount);
+
+  /// No description provided for @msLoansIoBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest only until {month}: {io} a month. Regular EMIs of {emi} start on {date}.'**
+  String msLoansIoBanner(String month, String io, String emi, String date);
+
+  /// No description provided for @msLoansExtraTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra payment'**
+  String get msLoansExtraTitle;
+
+  /// No description provided for @msLoansExtraQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Does this go toward principal?'**
+  String get msLoansExtraQ;
+
+  /// No description provided for @msLoansExtraYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get msLoansExtraYes;
+
+  /// No description provided for @msLoansExtraNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, it\'s a fee or charge'**
+  String get msLoansExtraNo;
+
+  /// No description provided for @msLoansReduceTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce tenure'**
+  String get msLoansReduceTenure;
+
+  /// No description provided for @msLoansReduceTenureSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Same EMI, loan ends sooner'**
+  String get msLoansReduceTenureSub;
+
+  /// No description provided for @msLoansReduceEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce EMI'**
+  String get msLoansReduceEmi;
+
+  /// No description provided for @msLoansReduceEmiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Same end date, lower EMI'**
+  String get msLoansReduceEmiSub;
+
+  /// No description provided for @msLoansSavesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves more interest'**
+  String get msLoansSavesMore;
+
+  /// No description provided for @msLoansExtraPreviewTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves {amount} interest · ends {n} months earlier'**
+  String msLoansExtraPreviewTenure(String amount, String n);
+
+  /// No description provided for @msLoansExtraPreviewEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves {amount} interest · EMI becomes {emi}'**
+  String msLoansExtraPreviewEmi(String amount, String emi);
+
+  /// No description provided for @msLoansPrepayCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepayment charge · optional'**
+  String get msLoansPrepayCharge;
+
+  /// No description provided for @msLoansPrepayChargeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount or %'**
+  String get msLoansPrepayChargeHint;
+
+  /// No description provided for @msLoansFeeNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded as an expense in Loan charges. What you owe stays {outstanding}.'**
+  String msLoansFeeNotice(String outstanding);
+
+  /// No description provided for @msLoansLoanCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan charges'**
+  String get msLoansLoanCharges;
+
+  /// No description provided for @msLoansNoNumbersPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the loan numbers to see what this saves.'**
+  String get msLoansNoNumbersPreview;
+
+  /// No description provided for @msLoansNewRate.
+  ///
+  /// In en, this message translates to:
+  /// **'New rate'**
+  String get msLoansNewRate;
+
+  /// No description provided for @msLoansEffectiveFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective from'**
+  String get msLoansEffectiveFrom;
+
+  /// No description provided for @msLoansThen.
+  ///
+  /// In en, this message translates to:
+  /// **'Then'**
+  String get msLoansThen;
+
+  /// No description provided for @msLoansAdjustEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust EMI'**
+  String get msLoansAdjustEmi;
+
+  /// No description provided for @msLoansAdjustTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust tenure'**
+  String get msLoansAdjustTenure;
+
+  /// No description provided for @msLoansRatePreviewEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'New EMI {emi} from {date}'**
+  String msLoansRatePreviewEmi(String emi, String date);
+
+  /// No description provided for @msLoansRatePreviewEmiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {month} as before · saves {amount} interest'**
+  String msLoansRatePreviewEmiSub(String month, String amount);
+
+  /// No description provided for @msLoansRatePreviewTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI stays {emi} · ends {month}'**
+  String msLoansRatePreviewTenure(String emi, String month);
+
+  /// No description provided for @msLoansRatePreviewTenureSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} months earlier · saves {amount} interest'**
+  String msLoansRatePreviewTenureSub(String n, String amount);
+
+  /// No description provided for @msLoansRatePreviewTenureSubLater.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} months later · costs {amount} more interest'**
+  String msLoansRatePreviewTenureSubLater(String n, String amount);
+
+  /// No description provided for @msLoansFloatingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating-rate loans change with the lender\'s benchmark. Record each change here.'**
+  String get msLoansFloatingHelp;
+
+  /// No description provided for @msLoansPaidOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is fully paid'**
+  String msLoansPaidOff(String name);
+
+  /// No description provided for @msLoansCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close {name}?'**
+  String msLoansCloseTitle(String name);
+
+  /// No description provided for @msLoansCloseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It moves to Closed. Its EMIs stop and its history stays.'**
+  String get msLoansCloseBody;
+
+  /// No description provided for @msLoansExtraName.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra payment · {name}'**
+  String msLoansExtraName(String name);
+
+  /// No description provided for @msLoansChargeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan charge · {name}'**
+  String msLoansChargeName(String name);
+
+  /// No description provided for @msLoansSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan saved'**
+  String get msLoansSaved;
+
+  /// No description provided for @msLoansRateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate change saved'**
+  String get msLoansRateSaved;
+
+  /// No description provided for @msLoansExtraSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra payment recorded'**
+  String get msLoansExtraSaved;
+
+  /// No description provided for @msInvPortfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio value'**
+  String get msInvPortfolio;
+
+  /// No description provided for @msInvInvested.
+  ///
+  /// In en, this message translates to:
+  /// **'Invested'**
+  String get msInvInvested;
+
+  /// No description provided for @msInvGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain'**
+  String get msInvGain;
+
+  /// No description provided for @msInvXirr.
+  ///
+  /// In en, this message translates to:
+  /// **'XIRR'**
+  String get msInvXirr;
+
+  /// No description provided for @msInvOverall.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct} overall'**
+  String msInvOverall(String pct);
+
+  /// No description provided for @msInvUpdateValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Update values'**
+  String get msInvUpdateValues;
+
+  /// No description provided for @msInvGroupMutualFunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Mutual funds'**
+  String get msInvGroupMutualFunds;
+
+  /// No description provided for @msInvGroupStocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocks'**
+  String get msInvGroupStocks;
+
+  /// No description provided for @msInvGroupGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get msInvGroupGold;
+
+  /// No description provided for @msInvGroupCrypto.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto'**
+  String get msInvGroupCrypto;
+
+  /// No description provided for @msInvGroupFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed return'**
+  String get msInvGroupFixed;
+
+  /// No description provided for @msInvGroupOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Property and other'**
+  String get msInvGroupOther;
+
+  /// No description provided for @msInvStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {n} days ago'**
+  String msInvStale(String n);
+
+  /// No description provided for @msInvUpdatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {month}'**
+  String msInvUpdatedOn(String month);
+
+  /// No description provided for @msInvEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No investments yet'**
+  String get msInvEmptyTitle;
+
+  /// No description provided for @msInvEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a fund, stock, FD or anything else you own. Kuber shows what it\'s worth and how much you\'ve gained.'**
+  String get msInvEmptyBody;
+
+  /// No description provided for @msInvFab.
+  ///
+  /// In en, this message translates to:
+  /// **'Add investment'**
+  String get msInvFab;
+
+  /// No description provided for @msInvAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add investment'**
+  String get msInvAdd;
+
+  /// No description provided for @msInvEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit investment'**
+  String get msInvEdit;
+
+  /// No description provided for @msInvSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save investment'**
+  String get msInvSave;
+
+  /// No description provided for @msInvPickIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of investment is it? The form adapts to how its value changes.'**
+  String get msInvPickIntro;
+
+  /// No description provided for @msInvPickMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Value changes with the market'**
+  String get msInvPickMarket;
+
+  /// No description provided for @msInvPickMarketSub.
+  ///
+  /// In en, this message translates to:
+  /// **'You update the value now and then'**
+  String get msInvPickMarketSub;
+
+  /// No description provided for @msInvPickFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed return'**
+  String get msInvPickFixed;
+
+  /// No description provided for @msInvPickFixedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber calculates the value for you'**
+  String get msInvPickFixedSub;
+
+  /// No description provided for @msInvPickOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get msInvPickOther;
+
+  /// No description provided for @msInvPickOtherSub.
+  ///
+  /// In en, this message translates to:
+  /// **'You update the value rarely'**
+  String get msInvPickOtherSub;
+
+  /// No description provided for @msInvTypeMutualFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Mutual fund'**
+  String get msInvTypeMutualFund;
+
+  /// No description provided for @msInvTypeStocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocks'**
+  String get msInvTypeStocks;
+
+  /// No description provided for @msInvTypeEtf.
+  ///
+  /// In en, this message translates to:
+  /// **'ETF'**
+  String get msInvTypeEtf;
+
+  /// No description provided for @msInvTypeGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get msInvTypeGold;
+
+  /// No description provided for @msInvTypeCrypto.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto'**
+  String get msInvTypeCrypto;
+
+  /// No description provided for @msInvTypeFd.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed deposit'**
+  String get msInvTypeFd;
+
+  /// No description provided for @msInvTypeRd.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring deposit'**
+  String get msInvTypeRd;
+
+  /// No description provided for @msInvTypePpf.
+  ///
+  /// In en, this message translates to:
+  /// **'PPF'**
+  String get msInvTypePpf;
+
+  /// No description provided for @msInvTypeBonds.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonds'**
+  String get msInvTypeBonds;
+
+  /// No description provided for @msInvTypeProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get msInvTypeProperty;
+
+  /// No description provided for @msInvTypeCollectibles.
+  ///
+  /// In en, this message translates to:
+  /// **'Collectibles'**
+  String get msInvTypeCollectibles;
+
+  /// No description provided for @msInvTypeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get msInvTypeCustom;
+
+  /// No description provided for @msInvName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get msInvName;
+
+  /// No description provided for @msInvHow.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you invest?'**
+  String get msInvHow;
+
+  /// No description provided for @msInvOneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'One time'**
+  String get msInvOneTime;
+
+  /// No description provided for @msInvSip.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP'**
+  String get msInvSip;
+
+  /// No description provided for @msInvAmountInvested.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount invested'**
+  String get msInvAmountInvested;
+
+  /// No description provided for @msInvCurrentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Current value'**
+  String get msInvCurrentValue;
+
+  /// No description provided for @msInvUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Units · optional'**
+  String get msInvUnits;
+
+  /// No description provided for @msInvUnitsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 612.4'**
+  String get msInvUnitsHint;
+
+  /// No description provided for @msInvSipAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP amount'**
+  String get msInvSipAmount;
+
+  /// No description provided for @msInvFromAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'From account'**
+  String get msInvFromAccount;
+
+  /// No description provided for @msInvStepUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly step-up'**
+  String get msInvStepUp;
+
+  /// No description provided for @msInvStepUpSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase every year'**
+  String get msInvStepUpSwitch;
+
+  /// No description provided for @msInvStepUpField.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-up'**
+  String get msInvStepUpField;
+
+  /// No description provided for @msInvStepUpNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} now, {b} from {date1}, {c} from {date2}.'**
+  String msInvStepUpNotice(
+    String a,
+    String b,
+    String date1,
+    String c,
+    String date2,
+  );
+
+  /// No description provided for @msInvPrincipal.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get msInvPrincipal;
+
+  /// No description provided for @msInvInstallment.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment'**
+  String get msInvInstallment;
+
+  /// No description provided for @msInvTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get msInvTerms;
+
+  /// No description provided for @msInvRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest rate'**
+  String get msInvRate;
+
+  /// No description provided for @msInvStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get msInvStartDate;
+
+  /// No description provided for @msInvTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenure'**
+  String get msInvTenure;
+
+  /// No description provided for @msInvCompounding.
+  ///
+  /// In en, this message translates to:
+  /// **'Compounding'**
+  String get msInvCompounding;
+
+  /// No description provided for @msInvCompMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get msInvCompMonthly;
+
+  /// No description provided for @msInvCompQuarterly.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get msInvCompQuarterly;
+
+  /// No description provided for @msInvCompHalfYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Half-yearly'**
+  String get msInvCompHalfYearly;
+
+  /// No description provided for @msInvCompYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get msInvCompYearly;
+
+  /// No description provided for @msInvPayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout type'**
+  String get msInvPayout;
+
+  /// No description provided for @msInvPayCumulative.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative'**
+  String get msInvPayCumulative;
+
+  /// No description provided for @msInvPayMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get msInvPayMonthly;
+
+  /// No description provided for @msInvPayQuarterly.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get msInvPayQuarterly;
+
+  /// No description provided for @msInvPayYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get msInvPayYearly;
+
+  /// No description provided for @msInvAtMaturity.
+  ///
+  /// In en, this message translates to:
+  /// **'At maturity'**
+  String get msInvAtMaturity;
+
+  /// No description provided for @msInvMaturityLine.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date} · interest {amount}'**
+  String msInvMaturityLine(String date, String amount);
+
+  /// No description provided for @msInvMaturityLineRd.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date} · you deposit {amount}'**
+  String msInvMaturityLineRd(String date, String amount);
+
+  /// No description provided for @msInvAutoValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber calculates the value every day. You never need to update it.'**
+  String get msInvAutoValue;
+
+  /// No description provided for @msInvInvestedSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Invested so far'**
+  String get msInvInvestedSoFar;
+
+  /// No description provided for @msInvUnrealized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrealized'**
+  String get msInvUnrealized;
+
+  /// No description provided for @msInvRealized.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized gain'**
+  String get msInvRealized;
+
+  /// No description provided for @msInvWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get msInvWithdrawn;
+
+  /// No description provided for @msInvLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get msInvLastUpdated;
+
+  /// No description provided for @msInvSipLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} on the {ordinal}'**
+  String msInvSipLine(String amount, String ordinal);
+
+  /// No description provided for @msInvSipLineStep.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} on the {ordinal} · +{pct} yearly'**
+  String msInvSipLineStep(String amount, String ordinal, String pct);
+
+  /// No description provided for @msInvUpdateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Update value'**
+  String get msInvUpdateValue;
+
+  /// No description provided for @msInvAddMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Add money'**
+  String get msInvAddMoney;
+
+  /// No description provided for @msInvWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get msInvWithdraw;
+
+  /// No description provided for @msInvValueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Value today'**
+  String get msInvValueToday;
+
+  /// No description provided for @msInvMatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Matures {date}'**
+  String msInvMatures(String date);
+
+  /// No description provided for @msInvWithdrawEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw early'**
+  String get msInvWithdrawEarly;
+
+  /// No description provided for @msInvLegendValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Current value'**
+  String get msInvLegendValue;
+
+  /// No description provided for @msInvLegendInvested.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount invested'**
+  String get msInvLegendInvested;
+
+  /// No description provided for @msInvLegendGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain'**
+  String get msInvLegendGain;
+
+  /// No description provided for @msInvActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get msInvActivity;
+
+  /// No description provided for @msInvActValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value updated'**
+  String get msInvActValue;
+
+  /// No description provided for @msInvActSip.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP installment'**
+  String get msInvActSip;
+
+  /// No description provided for @msInvActTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up'**
+  String get msInvActTopUp;
+
+  /// No description provided for @msInvActWithdrawal.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal'**
+  String get msInvActWithdrawal;
+
+  /// No description provided for @msInvActOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening value'**
+  String get msInvActOpening;
+
+  /// No description provided for @msInvActInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest added'**
+  String get msInvActInterest;
+
+  /// No description provided for @msInvActOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit opened'**
+  String get msInvActOpened;
+
+  /// No description provided for @msInvTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get msInvTransaction;
+
+  /// No description provided for @msInvAddPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a value for a past date'**
+  String get msInvAddPast;
+
+  /// No description provided for @msInvAddPastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a past value'**
+  String get msInvAddPastTitle;
+
+  /// No description provided for @msInvValueOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Value on that date'**
+  String get msInvValueOnDate;
+
+  /// No description provided for @msInvPastHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Past values fill in the chart. They don\'t change the current value or any balance.'**
+  String get msInvPastHelp;
+
+  /// No description provided for @msInvInterestLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest entries are calculated and can\'t be edited.'**
+  String get msInvInterestLocked;
+
+  /// No description provided for @msInvUpdSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} holdings · about 30 seconds'**
+  String msInvUpdSub(String n);
+
+  /// No description provided for @msInvUpdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed deposits and PPF update themselves, so they aren\'t listed.'**
+  String get msInvUpdHelp;
+
+  /// No description provided for @msInvNewValue.
+  ///
+  /// In en, this message translates to:
+  /// **'New value'**
+  String get msInvNewValue;
+
+  /// No description provided for @msInvSaveN.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {n} values'**
+  String msInvSaveN(String n);
+
+  /// No description provided for @msInvSaveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get msInvSaveEmpty;
+
+  /// No description provided for @msInvSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} values updated. Portfolio {amount}.'**
+  String msInvSaved(String n, String amount);
+
+  /// No description provided for @msInvWithdrawAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw everything'**
+  String get msInvWithdrawAll;
+
+  /// No description provided for @msInvValueLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Value {amount}'**
+  String msInvValueLine(String amount);
+
+  /// No description provided for @msInvRedeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount redeemed'**
+  String get msInvRedeemed;
+
+  /// No description provided for @msInvExitLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit load · optional'**
+  String get msInvExitLoad;
+
+  /// No description provided for @msInvTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax · optional'**
+  String get msInvTax;
+
+  /// No description provided for @msInvReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get msInvReceived;
+
+  /// No description provided for @msInvToAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'To account'**
+  String get msInvToAccount;
+
+  /// No description provided for @msInvDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get msInvDate;
+
+  /// No description provided for @msInvAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After this withdrawal'**
+  String get msInvAfter;
+
+  /// No description provided for @msInvCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close {name}?'**
+  String msInvCloseTitle(String name);
+
+  /// No description provided for @msInvCloseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You received {amount}. Here\'s how it did.'**
+  String msInvCloseBody(String amount);
+
+  /// No description provided for @msInvCloseInvested.
+  ///
+  /// In en, this message translates to:
+  /// **'Invested'**
+  String get msInvCloseInvested;
+
+  /// No description provided for @msInvCloseReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get msInvCloseReceived;
+
+  /// No description provided for @msInvCloseReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Final return'**
+  String get msInvCloseReturn;
+
+  /// No description provided for @msInvCloseXirr.
+  ///
+  /// In en, this message translates to:
+  /// **'XIRR'**
+  String get msInvCloseXirr;
+
+  /// No description provided for @msInvCloseHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Held'**
+  String get msInvCloseHeld;
+
+  /// No description provided for @msInvHeldValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} months'**
+  String msInvHeldValue(String n);
+
+  /// No description provided for @msInvCloseHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'It moves to Closed. You can still open it and see its history.'**
+  String get msInvCloseHelp;
+
+  /// No description provided for @msInvCloseCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Close holding'**
+  String get msInvCloseCta;
+
+  /// No description provided for @msInvBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get msInvBack;
+
+  /// No description provided for @msInvPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty rate'**
+  String get msInvPenalty;
+
+  /// No description provided for @msInvPenaltySupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank\'s penalty for withdrawing before maturity'**
+  String get msInvPenaltySupport;
+
+  /// No description provided for @msInvRateAfterPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate after penalty'**
+  String get msInvRateAfterPenalty;
+
+  /// No description provided for @msInvInterestEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest earned'**
+  String get msInvInterestEarned;
+
+  /// No description provided for @msInvLessThanToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than value today'**
+  String get msInvLessThanToday;
+
+  /// No description provided for @msInvWithdrawClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw and close'**
+  String get msInvWithdrawClose;
+
+  /// No description provided for @msInvMatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Your FD matured: {amount}. Move it to {account}?'**
+  String msInvMatured(String amount, String account);
+
+  /// No description provided for @msInvMaturedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · matured {date}'**
+  String msInvMaturedSub(String name, String date);
+
+  /// No description provided for @msInvRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew'**
+  String get msInvRenew;
+
+  /// No description provided for @msInvMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to {account}'**
+  String msInvMove(String account);
+
+  /// No description provided for @msInvNotifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your FD matured: {amount}'**
+  String msInvNotifTitle(String amount);
+
+  /// No description provided for @msInvNotifBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Move it to {account}?'**
+  String msInvNotifBody(String account);
+
+  /// No description provided for @msInvNotifLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get msInvNotifLater;
+
+  /// No description provided for @msInvWithdrawName.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal · {name}'**
+  String msInvWithdrawName(String name);
+
+  /// No description provided for @msInvMaturityName.
+  ///
+  /// In en, this message translates to:
+  /// **'Maturity · {name}'**
+  String msInvMaturityName(String name);
+
+  /// No description provided for @msInvTopUpName.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up · {name}'**
+  String msInvTopUpName(String name);
+
+  /// No description provided for @msInvValuesUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Value updated'**
+  String get msInvValuesUpdated;
+
+  /// No description provided for @msInvClosedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} moved to Closed'**
+  String msInvClosedSnack(String name);
+
+  /// No description provided for @msRecEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get msRecEveryMonth;
+
+  /// No description provided for @msRecOut.
+  ///
+  /// In en, this message translates to:
+  /// **'out'**
+  String get msRecOut;
+
+  /// No description provided for @msRecIn.
+  ///
+  /// In en, this message translates to:
+  /// **'in'**
+  String get msRecIn;
+
+  /// No description provided for @msRecBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills and subscriptions'**
+  String get msRecBills;
+
+  /// No description provided for @msRecEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs'**
+  String get msRecEmis;
+
+  /// No description provided for @msRecSips.
+  ///
+  /// In en, this message translates to:
+  /// **'SIPs'**
+  String get msRecSips;
+
+  /// No description provided for @msRecIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get msRecIncome;
+
+  /// No description provided for @msRecActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get msRecActive;
+
+  /// No description provided for @msRecPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get msRecPaused;
+
+  /// No description provided for @msRecProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently processed'**
+  String get msRecProcessed;
+
+  /// No description provided for @msRecEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get msRecEnded;
+
+  /// No description provided for @msRecRowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{interval} · next {date}'**
+  String msRecRowSub(String interval, String date);
+
+  /// No description provided for @msRecNextOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'next {date}'**
+  String msRecNextOnly(String date);
+
+  /// No description provided for @msRecDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{interval} · due today · {account}'**
+  String msRecDue(String interval, String account);
+
+  /// No description provided for @msRecPausedSince.
+  ///
+  /// In en, this message translates to:
+  /// **'{interval} · paused since {month}'**
+  String msRecPausedSince(String interval, String month);
+
+  /// No description provided for @msRecViewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View in History'**
+  String get msRecViewHistory;
+
+  /// No description provided for @msRecEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing repeats yet'**
+  String get msRecEmptyTitle;
+
+  /// No description provided for @msRecEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rent, bills, subscriptions or income that repeats. Loan EMIs and SIPs show up here on their own.'**
+  String get msRecEmptyBody;
+
+  /// No description provided for @msRecFab.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recurring'**
+  String get msRecFab;
+
+  /// No description provided for @msRecNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New recurring'**
+  String get msRecNew;
+
+  /// No description provided for @msRecEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recurring'**
+  String get msRecEdit;
+
+  /// No description provided for @msRecExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get msRecExpense;
+
+  /// No description provided for @msRecIncomeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get msRecIncomeType;
+
+  /// No description provided for @msRecAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get msRecAmount;
+
+  /// No description provided for @msRecName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get msRecName;
+
+  /// No description provided for @msRecCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get msRecCategory;
+
+  /// No description provided for @msRecAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get msRecAccount;
+
+  /// No description provided for @msRecSkipNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip next · {date}'**
+  String msRecSkipNext(String date);
+
+  /// No description provided for @msRecSkipNextShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip next'**
+  String get msRecSkipNextShort;
+
+  /// No description provided for @msRecPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get msRecPause;
+
+  /// No description provided for @msRecResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get msRecResume;
+
+  /// No description provided for @msRecSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recurring'**
+  String get msRecSave;
+
+  /// No description provided for @msRecSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get msRecSaveChanges;
+
+  /// No description provided for @msRecFutureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply changes to future occurrences only?'**
+  String get msRecFutureTitle;
+
+  /// No description provided for @msRecFutureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has run {n} times. Those transactions stay as they are. The new amount and schedule start from the next occurrence.'**
+  String msRecFutureBody(String name, String n);
+
+  /// No description provided for @msRecFutureCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to future'**
+  String get msRecFutureCta;
+
+  /// No description provided for @msRecSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped {date}. Next on {date2}.'**
+  String msRecSkipped(String date, String date2);
+
+  /// No description provided for @msRecSkippedEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped {date}.'**
+  String msRecSkippedEnd(String date);
+
+  /// No description provided for @msRecUsually.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually'**
+  String get msRecUsually;
+
+  /// No description provided for @msRecLast12.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get msRecLast12;
+
+  /// No description provided for @msRecMonthlyAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly avg'**
+  String get msRecMonthlyAvg;
+
+  /// No description provided for @msRecProcessedKv.
+  ///
+  /// In en, this message translates to:
+  /// **'Processed'**
+  String get msRecProcessedKv;
+
+  /// No description provided for @msRecProcessedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} times'**
+  String msRecProcessedN(String n);
+
+  /// No description provided for @msRecMonthlyTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly total'**
+  String get msRecMonthlyTotal;
+
+  /// No description provided for @msRecAvgCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'last 12 months · avg {amount}'**
+  String msRecAvgCaption(String amount);
+
+  /// No description provided for @msRecSkippedRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get msRecSkippedRow;
+
+  /// No description provided for @msRecRange12.
+  ///
+  /// In en, this message translates to:
+  /// **'12 months'**
+  String get msRecRange12;
+
+  /// No description provided for @msRecRangeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get msRecRangeAll;
+
+  /// No description provided for @msRecDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String msRecDeleteTitle(String name);
+
+  /// No description provided for @msRecDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It stops repeating. Transactions it already added stay in History.'**
+  String get msRecDeleteBody;
+
+  /// No description provided for @msRecPausedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} paused'**
+  String msRecPausedSnack(String name);
+
+  /// No description provided for @msRecResumedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} resumed. Next on {date}.'**
+  String msRecResumedSnack(String name, String date);
+
+  /// No description provided for @msRecSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring saved'**
+  String get msRecSaved;
+
+  /// No description provided for @msCalcSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get msCalcSave;
+
+  /// No description provided for @msCalcAddLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as loan'**
+  String get msCalcAddLoan;
+
+  /// No description provided for @msCalcStartSip.
+  ///
+  /// In en, this message translates to:
+  /// **'Start this SIP'**
+  String get msCalcStartSip;
+
+  /// No description provided for @msCalcAddFd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this FD'**
+  String get msCalcAddFd;
+
+  /// No description provided for @msCalcAddRd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this RD'**
+  String get msCalcAddRd;
+
+  /// No description provided for @msCalcAddInvestments.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to investments'**
+  String get msCalcAddInvestments;
+
+  /// No description provided for @msCalcEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI calculator'**
+  String get msCalcEmi;
+
+  /// No description provided for @msCalcPrepay.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Prepayment'**
+  String get msCalcPrepay;
+
+  /// No description provided for @msCalcSipAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP Amount'**
+  String get msCalcSipAmount;
+
+  /// No description provided for @msCalcGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Planner'**
+  String get msCalcGoal;
+
+  /// No description provided for @msCalcReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Returns'**
+  String get msCalcReturns;
+
+  /// No description provided for @msCalcInflation.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflation'**
+  String get msCalcInflation;
+
+  /// No description provided for @msCalcFdRd.
+  ///
+  /// In en, this message translates to:
+  /// **'FD / RD'**
+  String get msCalcFdRd;
+
+  /// No description provided for @msCalcPpf.
+  ///
+  /// In en, this message translates to:
+  /// **'PPF Calculator'**
+  String get msCalcPpf;
+
+  /// No description provided for @msTxnSourceAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded automatically'**
+  String get msTxnSourceAuto;
+
+  /// No description provided for @msTxnSourceSip.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP installment'**
+  String get msTxnSourceSip;
+
+  /// No description provided for @msTxnSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get msTxnSourceLabel;
+
+  /// No description provided for @msTxnSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI split'**
+  String get msTxnSplit;
+
+  /// No description provided for @msTxnDeletedLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'From a deleted loan'**
+  String get msTxnDeletedLoan;
+
+  /// No description provided for @msTxnDeletedInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'From a deleted investment'**
+  String get msTxnDeletedInvestment;
+
+  /// No description provided for @msTxnDeletedRule.
+  ///
+  /// In en, this message translates to:
+  /// **'From a deleted recurring rule'**
+  String get msTxnDeletedRule;
+
+  /// No description provided for @bgStepProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding {n} recurring transactions…'**
+  String bgStepProcessing(String n);
+
+  /// No description provided for @bgStepProcessingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding 1 recurring transaction…'**
+  String get bgStepProcessingOne;
+
+  /// No description provided for @bgStepMaturity.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking deposits…'**
+  String get bgStepMaturity;
+
+  /// No description provided for @bgStepBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up…'**
+  String get bgStepBackup;
+
+  /// No description provided for @bgStepStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Catching up…'**
+  String get bgStepStarting;
+
+  /// No description provided for @bgContinues.
+  ///
+  /// In en, this message translates to:
+  /// **'Continues in the background'**
+  String get bgContinues;
+
+  /// No description provided for @bgResultRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} recurring added'**
+  String bgResultRecurring(String n);
+
+  /// No description provided for @bgResultRecurringOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 recurring added'**
+  String get bgResultRecurringOne;
+
+  /// No description provided for @bgResultBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup done'**
+  String get bgResultBackup;
+
+  /// No description provided for @bgResultMatured.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} deposits matured'**
+  String bgResultMatured(String n);
+
+  /// No description provided for @bgFailBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed'**
+  String get bgFailBackup;
+
+  /// No description provided for @bgFailRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add {n} recurring transactions'**
+  String bgFailRecurring(String n);
+
+  /// No description provided for @bgFailRecurringOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add 1 recurring transaction'**
+  String get bgFailRecurringOne;
+
+  /// No description provided for @bgRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get bgRetry;
+
+  /// No description provided for @bgView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get bgView;
+
+  /// No description provided for @bgChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Background tasks'**
+  String get bgChannelName;
+
+  /// No description provided for @bgChannelDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transactions, EMIs, SIPs and backups added in the background'**
+  String get bgChannelDesc;
+
+  /// No description provided for @bgNotifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber is catching up'**
+  String get bgNotifTitle;
+
+  /// No description provided for @bgNotifFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A background task failed'**
+  String get bgNotifFailedTitle;
+
+  /// No description provided for @numFormatAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get numFormatAutomatic;
+
+  /// No description provided for @numFormatAutomaticSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Lakh for rupees, standard for other currencies'**
+  String get numFormatAutomaticSub;
+
+  /// No description provided for @showCurrencyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show currency code instead of symbol'**
+  String get showCurrencyCode;
+
+  /// No description provided for @showCurrencyCodeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful when currencies share a symbol, like C\$ and A\$'**
+  String get showCurrencyCodeSub;
+
+  /// No description provided for @currencySuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get currencySuggested;
+
+  /// No description provided for @currencyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All currencies'**
+  String get currencyAll;
+
+  /// No description provided for @currencySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, code or country'**
+  String get currencySearchHint;
+
+  /// No description provided for @currencyNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No currency matches'**
+  String get currencyNoMatch;
+
+  /// No description provided for @converterUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{code} isn\'t in the converter. Its rates come from the European Central Bank list, which doesn\'t include it.'**
+  String converterUnavailable(String code);
+
+  /// No description provided for @msInfoReducingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reducing balance'**
+  String get msInfoReducingTitle;
+
+  /// No description provided for @msInfoReducingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Most bank loans. Interest is charged only on what you still owe, so each EMI pays off a little more principal than the last.'**
+  String get msInfoReducingLine;
+
+  /// No description provided for @msInfoReducingEx.
+  ///
+  /// In en, this message translates to:
+  /// **'{p} at {r} for {y} years has an EMI of {emi}.'**
+  String msInfoReducingEx(String p, String r, String y, String emi);
+
+  /// No description provided for @msInfoReducingRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Month 1 interest'**
+  String get msInfoReducingRow1;
+
+  /// No description provided for @msInfoReducingRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Month 1 principal'**
+  String get msInfoReducingRow2;
+
+  /// No description provided for @msInfoReducingAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'By the end, almost all of the EMI is principal.'**
+  String get msInfoReducingAfter;
+
+  /// No description provided for @msInfoFlatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat rate'**
+  String get msInfoFlatTitle;
+
+  /// No description provided for @msInfoFlatLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Many car, personal and consumer loans. Interest is charged on the original amount for the whole tenure, even as you repay.'**
+  String get msInfoFlatLine;
+
+  /// No description provided for @msInfoFlatEx.
+  ///
+  /// In en, this message translates to:
+  /// **'{p} at {r} flat for {y} years.'**
+  String msInfoFlatEx(String p, String r, String y);
+
+  /// No description provided for @msInfoFlatRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest every year'**
+  String get msInfoFlatRow1;
+
+  /// No description provided for @msInfoFlatRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Total interest'**
+  String get msInfoFlatRow2;
+
+  /// No description provided for @msInfoFlatRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI'**
+  String get msInfoFlatRow3;
+
+  /// No description provided for @msInfoFlatAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'At {r} reducing balance, the same loan would cost {amount} in interest.'**
+  String msInfoFlatAfter(String r, String amount);
+
+  /// No description provided for @msInfoIoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'With an interest-only period first'**
+  String get msInfoIoTitle;
+
+  /// No description provided for @msInfoIoLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Also called pre-EMI. For the first few months you pay only the interest. Regular EMIs start after that.'**
+  String get msInfoIoLine;
+
+  /// No description provided for @msInfoIoEx.
+  ///
+  /// In en, this message translates to:
+  /// **'{p} at {r} with {n} interest-only months.'**
+  String msInfoIoEx(String p, String r, String n);
+
+  /// No description provided for @msInfoIoRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Months 1 to {n}'**
+  String msInfoIoRow1(String n);
+
+  /// No description provided for @msInfoIoRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Then, for {n} months'**
+  String msInfoIoRow2(String n);
+
+  /// No description provided for @msInfoIoRowValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month'**
+  String msInfoIoRowValue(String amount);
+
+  /// No description provided for @msInfoIoAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'The interest-only months don\'t reduce what you owe.'**
+  String get msInfoIoAfter;
+
+  /// No description provided for @msInfoCalculatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated fields'**
+  String get msInfoCalculatedTitle;
+
+  /// No description provided for @msInfoCalculatedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in any 3 of principal, rate, tenure and EMI. Kuber works out the 4th and marks it Calculated.'**
+  String get msInfoCalculatedLine;
+
+  /// No description provided for @msInfoCalculatedAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Type over a calculated field to use your own figure. The field you filled in first then becomes the calculated one.'**
+  String get msInfoCalculatedAfter;
+
+  /// No description provided for @msInfoMismatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why your EMI is different'**
+  String get msInfoMismatchTitle;
+
+  /// No description provided for @msInfoMismatchLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Banks often round the EMI, add loan insurance to it, or charge interest for the days before your first EMI. Kuber always uses the EMI you enter.'**
+  String get msInfoMismatchLine;
+
+  /// No description provided for @msInfoMismatchRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated EMI'**
+  String get msInfoMismatchRow1;
+
+  /// No description provided for @msInfoMismatchRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Your EMI'**
+  String get msInfoMismatchRow2;
+
+  /// No description provided for @msInfoMismatchRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get msInfoMismatchRow3;
+
+  /// No description provided for @msInfoRun1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'I know the original loan details'**
+  String get msInfoRun1Title;
+
+  /// No description provided for @msInfoRun1Line.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the loan as it was sanctioned. Kuber works out everything you\'ve paid until today.'**
+  String get msInfoRun1Line;
+
+  /// No description provided for @msInfoRun2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'I know what\'s outstanding today'**
+  String get msInfoRun2Title;
+
+  /// No description provided for @msInfoRun2Line.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the outstanding amount from your latest bank statement. Kuber works out how many EMIs are left.'**
+  String get msInfoRun2Line;
+
+  /// No description provided for @msInfoRun2After.
+  ///
+  /// In en, this message translates to:
+  /// **'Past totals are optional. Add them if you want lifetime interest to be complete.'**
+  String get msInfoRun2After;
+
+  /// No description provided for @msInfoRun3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Just track the EMI'**
+  String get msInfoRun3Title;
+
+  /// No description provided for @msInfoRun3Line.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber records each EMI on its day without splitting it into principal and interest. You can add the loan numbers later.'**
+  String get msInfoRun3Line;
+
+  /// No description provided for @msInfoAdjustmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment'**
+  String get msInfoAdjustmentTitle;
+
+  /// No description provided for @msInfoAdjustmentLine.
+  ///
+  /// In en, this message translates to:
+  /// **'When your figure is different from Kuber\'s, Kuber keeps yours and records the difference as an opening adjustment on the loan.'**
+  String get msInfoAdjustmentLine;
+
+  /// No description provided for @msInfoAdjustmentRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber calculated'**
+  String get msInfoAdjustmentRow1;
+
+  /// No description provided for @msInfoAdjustmentRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'You entered'**
+  String get msInfoAdjustmentRow2;
+
+  /// No description provided for @msInfoAdjustmentAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustments only change the loan. No account balance changes.'**
+  String get msInfoAdjustmentAfter;
+
+  /// No description provided for @msInfoInterestOnlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Count only interest as expense'**
+  String get msInfoInterestOnlyTitle;
+
+  /// No description provided for @msInfoInterestOnlyLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the interest part of each EMI counts as spending in Analytics and Budgets. The principal is counted as a transfer to this loan.'**
+  String get msInfoInterestOnlyLine;
+
+  /// No description provided for @msInfoInterestOnlyRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest, counted as expense'**
+  String get msInfoInterestOnlyRow1;
+
+  /// No description provided for @msInfoInterestOnlyRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal, counted as transfer'**
+  String get msInfoInterestOnlyRow2;
+
+  /// No description provided for @msInfoInterestOnlyAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank balance goes down by the full EMI either way. Changing this applies to future EMIs only.'**
+  String get msInfoInterestOnlyAfter;
+
+  /// No description provided for @msInfoTenureEmiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce tenure or reduce EMI'**
+  String get msInfoTenureEmiTitle;
+
+  /// No description provided for @msInfoTenureEmiLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce tenure keeps your EMI the same and ends the loan sooner. Reduce EMI keeps the end date and lowers each EMI. Reducing tenure saves more interest.'**
+  String get msInfoTenureEmiLine;
+
+  /// No description provided for @msInfoPrepayChargeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepayment charge'**
+  String get msInfoPrepayChargeTitle;
+
+  /// No description provided for @msInfoPrepayChargeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Some lenders charge a fee when you pay extra. Kuber records it as an expense. It doesn\'t reduce what you owe. Floating-rate home loans usually have none.'**
+  String get msInfoPrepayChargeLine;
+
+  /// No description provided for @msInfoPrepayRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes to principal'**
+  String get msInfoPrepayRow1;
+
+  /// No description provided for @msInfoPrepayRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge, recorded as expense'**
+  String get msInfoPrepayRow2;
+
+  /// No description provided for @msInfoPrepayRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaves your account'**
+  String get msInfoPrepayRow3;
+
+  /// No description provided for @msInfoFloatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating rate'**
+  String get msInfoFloatingTitle;
+
+  /// No description provided for @msInfoFloatingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'A floating rate moves with the lender\'s benchmark, so it can change during the loan. When your lender changes it, record it here so the schedule stays right.'**
+  String get msInfoFloatingLine;
+
+  /// No description provided for @msInfoXirrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'XIRR'**
+  String get msInfoXirrTitle;
+
+  /// No description provided for @msInfoXirrLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Your yearly return, taking into account when each amount went in and came out. It lets you compare a SIP with an FD fairly.'**
+  String get msInfoXirrLine;
+
+  /// No description provided for @msInfoXirrEx.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every month for 3 years is {invested} invested. It\'s worth {value} today.'**
+  String msInfoXirrEx(String amount, String invested, String value);
+
+  /// No description provided for @msInfoXirrRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Total gain'**
+  String get msInfoXirrRow1;
+
+  /// No description provided for @msInfoXirrRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'XIRR'**
+  String get msInfoXirrRow2;
+
+  /// No description provided for @msInfoXirrValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct} a year'**
+  String msInfoXirrValue(String pct);
+
+  /// No description provided for @msInfoRealizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrealized and realized gain'**
+  String get msInfoRealizedTitle;
+
+  /// No description provided for @msInfoRealizedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrealized gain is on paper: what you would gain if you sold everything today. Realized gain is what you actually made on money you\'ve already withdrawn.'**
+  String get msInfoRealizedLine;
+
+  /// No description provided for @msInfoProportionalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How withdrawals are counted'**
+  String get msInfoProportionalTitle;
+
+  /// No description provided for @msInfoProportionalLine.
+  ///
+  /// In en, this message translates to:
+  /// **'When you withdraw part of a holding, the invested amount goes down in the same proportion as the value you took out.'**
+  String get msInfoProportionalLine;
+
+  /// No description provided for @msInfoProportionalEx.
+  ///
+  /// In en, this message translates to:
+  /// **'Value {value} with {invested} invested. You withdraw {amount}, which is 20% of the value.'**
+  String msInfoProportionalEx(String value, String invested, String amount);
+
+  /// No description provided for @msInfoProportionalRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Invested goes down by'**
+  String get msInfoProportionalRow1;
+
+  /// No description provided for @msInfoProportionalRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized gain'**
+  String get msInfoProportionalRow2;
+
+  /// No description provided for @msInfoProportionalRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Left invested'**
+  String get msInfoProportionalRow3;
+
+  /// No description provided for @msInfoStepupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly step-up'**
+  String get msInfoStepupTitle;
+
+  /// No description provided for @msInfoStepupLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SIP grows by a fixed percentage or amount once a year, usually in line with your salary.'**
+  String get msInfoStepupLine;
+
+  /// No description provided for @msInfoStepupEx.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month with a 10% step-up.'**
+  String msInfoStepupEx(String amount);
+
+  /// No description provided for @msInfoStepupRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Year {n}'**
+  String msInfoStepupRow(String n);
+
+  /// No description provided for @msInfoCompoundingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compounding'**
+  String get msInfoCompoundingTitle;
+
+  /// No description provided for @msInfoCompoundingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'How often interest is added to your deposit so that it starts earning interest too. More often means a little more.'**
+  String get msInfoCompoundingLine;
+
+  /// No description provided for @msInfoCompoundingEx.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} at 7% for 5 years.'**
+  String msInfoCompoundingEx(String amount);
+
+  /// No description provided for @msInfoPayoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout type'**
+  String get msInfoPayoutTitle;
+
+  /// No description provided for @msInfoPayoutLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative adds the interest to the deposit and pays everything at maturity. Payout sends the interest to your bank account every month, quarter or year.'**
+  String get msInfoPayoutLine;
+
+  /// No description provided for @msInfoPayoutRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative, at maturity'**
+  String get msInfoPayoutRow1;
+
+  /// No description provided for @msInfoPayoutRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly payout'**
+  String get msInfoPayoutRow2;
+
+  /// No description provided for @msInfoPayoutRow2Value.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every quarter'**
+  String msInfoPayoutRow2Value(String amount);
+
+  /// No description provided for @msInfoPayoutRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly payout, at maturity'**
+  String get msInfoPayoutRow3;
+
+  /// No description provided for @msInfoAccruedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Value today'**
+  String get msInfoAccruedTitle;
+
+  /// No description provided for @msInfoAccruedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'What a fixed deposit is worth today, including interest earned so far that hasn\'t been paid yet. Kuber works it out every day, so you never update it.'**
+  String get msInfoAccruedLine;
+
+  /// No description provided for @msInfoUpdatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get msInfoUpdatedTitle;
+
+  /// No description provided for @msInfoUpdatedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Market prices change every day, but Kuber only knows the value you last entered. Values older than 30 days are marked so you know which ones to update.'**
+  String get msInfoUpdatedLine;
+
+  /// No description provided for @msInfoMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How the monthly amount works'**
+  String get msInfoMonthlyTitle;
+
+  /// No description provided for @msInfoMonthlyLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything that isn\'t monthly is converted to what it costs per month. Each item is counted once, even if it also appears in Loans or Investments.'**
+  String get msInfoMonthlyLine;
+
+  /// No description provided for @msInfoMonthlyRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every year'**
+  String msInfoMonthlyRow1(String amount);
+
+  /// No description provided for @msInfoMonthlyRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every 3 months'**
+  String msInfoMonthlyRow2(String amount);
+
+  /// No description provided for @msInfoMonthlyRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every week'**
+  String msInfoMonthlyRow3(String amount);
+
+  /// No description provided for @msInfoMonthlyAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Weeks use 52 weeks ÷ 12. Daily items use 30 days a month.'**
+  String get msInfoMonthlyAfter;
+
+  /// No description provided for @msRecUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get msRecUndo;
+
+  /// No description provided for @msLoansFirstEmiDate.
+  ///
+  /// In en, this message translates to:
+  /// **'First EMI date'**
+  String get msLoansFirstEmiDate;
+
+  /// No description provided for @msLoansNextEmiDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next EMI date'**
+  String get msLoansNextEmiDate;
+
+  /// No description provided for @appDrawerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App drawer'**
+  String get appDrawerSection;
+
+  /// No description provided for @appDrawerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Give Kuber Cards, Notes or Reminders their own icon in your phone\'s app list.'**
+  String get appDrawerDescription;
+
+  /// No description provided for @appDrawerAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to app drawer'**
+  String get appDrawerAdd;
+
+  /// No description provided for @appDrawerRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from app drawer'**
+  String get appDrawerRemove;
+
+  /// No description provided for @appDrawerCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Cards'**
+  String get appDrawerCards;
+
+  /// No description provided for @appDrawerNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Notes'**
+  String get appDrawerNotes;
+
+  /// No description provided for @appDrawerReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get appDrawerReminders;
+
+  /// No description provided for @appDrawerAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to your app drawer. It can take a moment to show up.'**
+  String appDrawerAdded(String name);
+
+  /// No description provided for @appDrawerRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed from your app drawer'**
+  String appDrawerRemoved(String name);
+
+  /// No description provided for @appDrawerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change the app drawer. Try again.'**
+  String get appDrawerFailed;
+
+  /// No description provided for @msLoansChangeRateShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Change rate'**
+  String get msLoansChangeRateShort;
+
+  /// No description provided for @msLoansPageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Year {n} of {total}'**
+  String msLoansPageOf(String n, String total);
+
+  /// No description provided for @msLoansPrevYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year'**
+  String get msLoansPrevYear;
+
+  /// No description provided for @msLoansNextYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Next year'**
+  String get msLoansNextYear;
+
+  /// No description provided for @msLoansRecordAutoHelpNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'On the EMI day, Kuber records the EMI from the account you pay from.'**
+  String get msLoansRecordAutoHelpNoAccount;
+
+  /// No description provided for @betaTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Beta'**
+  String get betaTag;
+
+  /// No description provided for @appDrawerCardsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Kuber Cards to your app drawer'**
+  String get appDrawerCardsSub;
+
+  /// No description provided for @appDrawerNotesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Kuber Notes to your app drawer'**
+  String get appDrawerNotesSub;
+
+  /// No description provided for @appDrawerRemindersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Reminders to your app drawer'**
+  String get appDrawerRemindersSub;
+
+  /// No description provided for @msLoansViewSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'View EMI schedule'**
+  String get msLoansViewSchedule;
+
+  /// No description provided for @msLoansExtraChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'What should change?'**
+  String get msLoansExtraChoose;
+
+  /// No description provided for @msLoansExtraHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Paying extra lowers what you owe, so you pay less interest from now on. Pick how you want that saving.'**
+  String get msLoansExtraHelp;
+
+  /// No description provided for @msLoansReduceTenureHow.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep paying {emi} a month. The loan ends sooner.'**
+  String msLoansReduceTenureHow(String emi);
+
+  /// No description provided for @msLoansReduceEmiHow.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the same end date. Each EMI gets smaller.'**
+  String get msLoansReduceEmiHow;
+
+  /// No description provided for @msLoansReduceTenureResult.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI stays {emi} · ends {month}, {n} months sooner'**
+  String msLoansReduceTenureResult(String emi, String month, String n);
+
+  /// No description provided for @msLoansReduceEmiResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {month} as now · EMI becomes {emi}'**
+  String msLoansReduceEmiResult(String month, String emi);
 }
 
 class _AppLocalizationsDelegate

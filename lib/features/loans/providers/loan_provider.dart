@@ -10,7 +10,7 @@ import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/loan.dart';
 import '../data/loan_repository.dart';
-import '../utils/loan_calculations.dart' as calc;
+import '../domain/loan_engine.dart';
 
 final loanRepositoryProvider = Provider<LoanRepository>((ref) {
   return LoanRepository(ref.watch(isarProvider));
@@ -196,8 +196,16 @@ final loanSummaryProvider =
     FutureProvider<({double outstanding, double totalPaid})>((ref) async {
       final loans = await ref.watch(loanListProvider.future);
       final txns = await ref.watch(transactionListProvider.future);
-      return (
-        outstanding: calc.totalOutstanding(loans, txns),
-        totalPaid: calc.totalPaidAllLoans(loans, txns),
-      );
+      // vNext (approved fix L3): outstanding from each loan's schedule;
+      // loans tracked by EMI only have no outstanding.
+      var outstanding = 0.0, paid = 0.0;
+      for (final l in loans) {
+        final linked = txns
+            .where((t) => t.linkedRuleType == 'loan' && t.linkedRuleId == l.uid)
+            .toList();
+        paid += linked.fold(0.0, (s, t) => s + t.amount);
+        final st = loanStatus(l, linked);
+        if (!st.closed) outstanding += st.outstanding ?? 0;
+      }
+      return (outstanding: outstanding, totalPaid: paid);
     });

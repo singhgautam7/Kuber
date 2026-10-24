@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/features/recurring/data/recurring_interval.dart';
-import 'package:kuber/features/recurring/data/recurring_processor.dart';
+import '../../helpers/process_due.dart';
 import 'package:kuber/features/recurring/data/recurring_repository.dart';
 import 'package:kuber/features/recurring/data/recurring_rule.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
@@ -96,7 +96,7 @@ void main() {
       await RecurringRepository(isar).save(rule);
 
       expect(rule.nextDueAt, future);
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
       expect(await isar.transactions.count(), 0);
     });
   });

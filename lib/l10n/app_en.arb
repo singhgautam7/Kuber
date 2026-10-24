@@ -3319,5 +3319,2172 @@
   },
   "nextBackupNextOpen": "Next: on next app open",
   "backupsAreOn": "Backups are on",
-  "backupsAreOnDesc": "Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately."
+  "backupsAreOnDesc": "Your first scheduled backup runs on your next app open. Or back up now to save a copy immediately.",
+  "msWhenTitle": "When",
+  "@msWhenTitle": {},
+  "msWhenTitleEmi": "EMI schedule",
+  "@msWhenTitleEmi": {},
+  "msWhenTitleReminder": "Repeat",
+  "@msWhenTitleReminder": {},
+  "msWhenDaily": "Daily",
+  "@msWhenDaily": {},
+  "msWhenWeekly": "Weekly",
+  "@msWhenWeekly": {},
+  "msWhenMonthly": "Monthly",
+  "@msWhenMonthly": {},
+  "msWhenQuarterly": "Quarterly",
+  "@msWhenQuarterly": {},
+  "msWhenHalfYearly": "Every 6 months",
+  "@msWhenHalfYearly": {},
+  "msWhenYearly": "Yearly",
+  "@msWhenYearly": {},
+  "msWhenCustom": "Custom",
+  "@msWhenCustom": {},
+  "msWhenOnce": "Once",
+  "@msWhenOnce": {},
+  "msWhenEvery": "Every",
+  "@msWhenEvery": {},
+  "msWhenUnitDays": "Days",
+  "@msWhenUnitDays": {},
+  "msWhenUnitWeeks": "Weeks",
+  "@msWhenUnitWeeks": {},
+  "msWhenUnitMonths": "Months",
+  "@msWhenUnitMonths": {},
+  "msWhenUnitYears": "Years",
+  "@msWhenUnitYears": {},
+  "msWhenStartsOn": "Starts on",
+  "@msWhenStartsOn": {},
+  "msWhenOnDay": "On day",
+  "@msWhenOnDay": {},
+  "msWhenOnDayValue": "{ordinal} of the month",
+  "@msWhenOnDayValue": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenOn": "On",
+  "@msWhenOn": {},
+  "msWhenEnds": "Ends",
+  "@msWhenEnds": {},
+  "msWhenEndsNever": "Never",
+  "@msWhenEndsNever": {},
+  "msWhenEndsOnDate": "On a date",
+  "@msWhenEndsOnDate": {},
+  "msWhenEndsAfter": "After",
+  "@msWhenEndsAfter": {},
+  "msWhenEndDate": "End date",
+  "@msWhenEndDate": {},
+  "msWhenTimes": "times",
+  "@msWhenTimes": {},
+  "msWhenLockedMonthly": "Repeats every month",
+  "@msWhenLockedMonthly": {},
+  "msWhenLockedHint": "EMIs are monthly",
+  "@msWhenLockedHint": {},
+  "msWhenFirstEmi": "First EMI",
+  "@msWhenFirstEmi": {},
+  "msWhenEmiDay": "EMI day",
+  "@msWhenEmiDay": {},
+  "msWhenEmiDayValue": "{ordinal} of every month",
+  "@msWhenEmiDayValue": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenNumberOfEmis": "Number of EMIs",
+  "@msWhenNumberOfEmis": {},
+  "msWhenLastEmi": "Last EMI",
+  "@msWhenLastEmi": {},
+  "msWhenEveryUnitDay": "Every day",
+  "@msWhenEveryUnitDay": {},
+  "msWhenEveryUnitWeek": "Every week",
+  "@msWhenEveryUnitWeek": {},
+  "msWhenEveryUnitMonth": "Every month",
+  "@msWhenEveryUnitMonth": {},
+  "msWhenEveryUnitYear": "Every year",
+  "@msWhenEveryUnitYear": {},
+  "msWhenEveryNDays": "Every {n} days",
+  "@msWhenEveryNDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenEveryNWeeks": "Every {n} weeks",
+  "@msWhenEveryNWeeks": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenEveryNMonths": "Every {n} months",
+  "@msWhenEveryNMonths": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenEveryNYears": "Every {n} years",
+  "@msWhenEveryNYears": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenAnchorWeekday": "on {weekday}",
+  "@msWhenAnchorWeekday": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenAnchorDay": "on the {ordinal}",
+  "@msWhenAnchorDay": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenAnchorDate": "on {date}",
+  "@msWhenAnchorDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenSentence": "{interval}{anchor}, from {start}, {end}.",
+  "@msWhenSentence": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      },
+      "anchor": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenEndNever": "no end",
+  "@msWhenEndNever": {},
+  "msWhenEndUntil": "until {date}",
+  "@msWhenEndUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenEndTimes": "{n} times",
+  "@msWhenEndTimes": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenEndEmis": "{n} EMIs",
+  "@msWhenEndEmis": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenOnceSentence": "On {date}.",
+  "@msWhenOnceSentence": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenLastOn": "Last on {date}",
+  "@msWhenLastOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenLastEmiOn": "Last EMI {date}",
+  "@msWhenLastEmiOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenCountTotal": "{n} times in all",
+  "@msWhenCountTotal": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msWhenFlagNext": "next",
+  "@msWhenFlagNext": {},
+  "msWhenFlagToday": "due today",
+  "@msWhenFlagToday": {},
+  "msWhenFlagLastDay": "last day",
+  "@msWhenFlagLastDay": {},
+  "msWhenMonthEnd": "In shorter months, this falls on the last day.",
+  "@msWhenMonthEnd": {},
+  "msWhenErrEndBeforeStart": "End date must be after the start date.",
+  "@msWhenErrEndBeforeStart": {},
+  "msWhenErrCount": "Enter 1 or more.",
+  "@msWhenErrCount": {},
+  "msWhenErrCountPreview": "Enter how many times, 1 or more.",
+  "@msWhenErrCountPreview": {},
+  "msCalculated": "Calculated",
+  "@msCalculated": {},
+  "msViewDetails": "View details",
+  "@msViewDetails": {},
+  "msOpenInCalculator": "Open in a calculator",
+  "@msOpenInCalculator": {},
+  "msAdvanced": "Advanced options",
+  "@msAdvanced": {},
+  "msAdvancedSubLoan": "Interest type, loan numbers, already running, spending",
+  "@msAdvancedSubLoan": {},
+  "msAlreadyRunning": "Already running?",
+  "@msAlreadyRunning": {},
+  "msAlreadyRunningSubLoan": "This loan started before today",
+  "@msAlreadyRunningSubLoan": {},
+  "msAlreadyRunningSubInv": "I invested before today",
+  "@msAlreadyRunningSubInv": {},
+  "msOpeningNote": "Opening values never change any account balance.",
+  "@msOpeningNote": {},
+  "msFromLoans": "From Loans",
+  "@msFromLoans": {},
+  "msFromInvestments": "From Investments",
+  "@msFromInvestments": {},
+  "msSource": "From {name}",
+  "@msSource": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msSourceRule": "From {name} · Recurring",
+  "@msSourceRule": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msFilledFrom": "Filled from {name}",
+  "@msFilledFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msFromCalculator": "From {calculator}",
+  "@msFromCalculator": {
+    "placeholders": {
+      "calculator": {
+        "type": "String"
+      }
+    }
+  },
+  "msPaused": "Paused",
+  "@msPaused": {},
+  "msEnded": "Ended",
+  "@msEnded": {},
+  "msClosed": "Closed",
+  "@msClosed": {},
+  "msExample": "Example",
+  "@msExample": {},
+  "msBusy": "Processing, try again in a moment",
+  "@msBusy": {},
+  "msLoansTotalOutstanding": "Total outstanding",
+  "@msLoansTotalOutstanding": {},
+  "msLoansMonthlyEmis": "Monthly EMIs",
+  "@msLoansMonthlyEmis": {},
+  "msLoansNextEmiLine": "Next EMI {date} · {name} · {amount}",
+  "@msLoansNextEmiLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansActive": "Active",
+  "@msLoansActive": {},
+  "msLoansRowSub": "{amount} EMI · next {date}",
+  "@msLoansRowSub": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansLeft": "left",
+  "@msLoansLeft": {},
+  "msLoansProgress": "{paid} of {total} EMIs paid",
+  "@msLoansProgress": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPaidCount": "{paid} EMIs paid",
+  "@msLoansPaidCount": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEmptyTitle": "No loans yet",
+  "@msLoansEmptyTitle": {},
+  "msLoansEmptyBody": "Add a loan to track its EMIs, what you still owe, and the interest you pay.",
+  "@msLoansEmptyBody": {},
+  "msLoansFab": "Add loan",
+  "@msLoansFab": {},
+  "msLoansAdd": "Add loan",
+  "@msLoansAdd": {},
+  "msLoansEdit": "Edit loan",
+  "@msLoansEdit": {},
+  "msLoansType": "Loan type",
+  "@msLoansType": {},
+  "msLoansName": "Loan name",
+  "@msLoansName": {},
+  "msLoansLender": "Lender",
+  "@msLoansLender": {},
+  "msLoansEmiAmount": "EMI amount",
+  "@msLoansEmiAmount": {},
+  "msLoansPayFrom": "Pay from",
+  "@msLoansPayFrom": {},
+  "msLoansRecordEmis": "Record EMIs",
+  "@msLoansRecordEmis": {},
+  "msLoansRecordAuto": "Automatically",
+  "@msLoansRecordAuto": {},
+  "msLoansRecordAutoHelp": "On the EMI day, Kuber records the EMI from {account}.",
+  "@msLoansRecordAutoHelp": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRecordManual": "I record them myself",
+  "@msLoansRecordManual": {},
+  "msLoansSave": "Save loan",
+  "@msLoansSave": {},
+  "msLoansSaveChanges": "Save changes",
+  "@msLoansSaveChanges": {},
+  "msLoansInterestType": "Interest type",
+  "@msLoansInterestType": {},
+  "msLoansReducing": "Reducing balance",
+  "@msLoansReducing": {},
+  "msLoansReducingSub": "Most bank loans",
+  "@msLoansReducingSub": {},
+  "msLoansFlat": "Flat rate",
+  "@msLoansFlat": {},
+  "msLoansFlatSub": "Many car, personal and consumer loans",
+  "@msLoansFlatSub": {},
+  "msLoansIo": "Interest-only period first",
+  "@msLoansIo": {},
+  "msLoansIoSub": "Pre-EMI, then regular EMIs",
+  "@msLoansIoSub": {},
+  "msLoansIoMonths": "Interest-only months",
+  "@msLoansIoMonths": {},
+  "msLoansIoNotice": "{io} a month until {date}, then {emi} a month for {n} months.",
+  "@msLoansIoNotice": {
+    "placeholders": {
+      "io": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "emi": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansNumbers": "Loan numbers",
+  "@msLoansNumbers": {},
+  "msLoansPrincipal": "Principal",
+  "@msLoansPrincipal": {},
+  "msLoansRate": "Interest rate",
+  "@msLoansRate": {},
+  "msLoansTenure": "Tenure",
+  "@msLoansTenure": {},
+  "msLoansEmi": "EMI",
+  "@msLoansEmi": {},
+  "msLoansYears": "Years",
+  "@msLoansYears": {},
+  "msLoansMonths": "Months",
+  "@msLoansMonths": {},
+  "msLoansTotalPayable": "Total payable · optional",
+  "@msLoansTotalPayable": {},
+  "msLoansTotalPayableHint": "Use instead of the rate",
+  "@msLoansTotalPayableHint": {},
+  "msLoansOrderHelp": "Filled in order: {a}, {b}, {c}.",
+  "@msLoansOrderHelp": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "c": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansSwapHelp": "You typed the {field}, so {other} (filled first) is now calculated.",
+  "@msLoansSwapHelp": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPreview": "EMI {emi} · ends {month} · total interest {interest}",
+  "@msLoansPreview": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPreviewZero": "EMI {emi} · ends {month} · no interest",
+  "@msLoansPreviewZero": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansMismatchMore": "Your EMI is {diff} more than calculated. We'll use your EMI.",
+  "@msLoansMismatchMore": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansMismatchLess": "Your EMI is {diff} less than calculated. We'll use your EMI.",
+  "@msLoansMismatchLess": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansErrNeverEnds": "This EMI doesn't cover the interest, so the loan would never end.",
+  "@msLoansErrNeverEnds": {},
+  "msLoansErrNeverEndsPreview": "Monthly interest is {interest}. Enter an EMI above that.",
+  "@msLoansErrNeverEndsPreview": {
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansErrTotalLow": "This is less than the principal. Check the numbers.",
+  "@msLoansErrTotalLow": {},
+  "msLoansRun1": "I know the original loan details",
+  "@msLoansRun1": {},
+  "msLoansRun1Sub": "Kuber works out what you've paid",
+  "@msLoansRun1Sub": {},
+  "msLoansRun2": "I know what's outstanding today",
+  "@msLoansRun2": {},
+  "msLoansRun2Sub": "From a bank statement",
+  "@msLoansRun2Sub": {},
+  "msLoansRun3": "Just track the EMI",
+  "@msLoansRun3": {},
+  "msLoansRun3Sub": "No principal and interest split",
+  "@msLoansRun3Sub": {},
+  "msLoansEmisPaid": "EMIs paid",
+  "@msLoansEmisPaid": {},
+  "msLoansPrincipalPaid": "Principal paid",
+  "@msLoansPrincipalPaid": {},
+  "msLoansInterestPaid": "Interest paid",
+  "@msLoansInterestPaid": {},
+  "msLoansOutstandingToday": "Outstanding today",
+  "@msLoansOutstandingToday": {},
+  "msLoansRun1Help": "Worked out from the loan numbers and your first EMI, {date}. Tap any value to change it.",
+  "@msLoansRun1Help": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansAdjustment": "We'll use your figure and add the difference as an adjustment: {diff}.",
+  "@msLoansAdjustment": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEmisLeft": "EMIs left",
+  "@msLoansEmisLeft": {},
+  "msLoansEmisLeftValue": "{n} · last in {month}",
+  "@msLoansEmisLeftValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPastTotals": "Past totals · optional",
+  "@msLoansPastTotals": {},
+  "msLoansPastTotalsSub": "Principal and interest paid",
+  "@msLoansPastTotalsSub": {},
+  "msLoansRun3Notice": "Kuber records each {emi} EMI on the {ordinal}. You won't see principal, interest or what you owe until you add the loan numbers.",
+  "@msLoansRun3Notice": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "ordinal": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansSpending": "Spending",
+  "@msLoansSpending": {},
+  "msLoansOnlyInterest": "Count only interest as expense",
+  "@msLoansOnlyInterest": {},
+  "msLoansOnlyInterestHelp": "Principal is counted as a transfer to this loan. Your bank balance still goes down by the full EMI.",
+  "@msLoansOnlyInterestHelp": {},
+  "msLoansFutureOnly": "This applies to future EMIs only. EMIs already recorded keep the way they were counted.",
+  "@msLoansFutureOnly": {},
+  "msLoansOutstanding": "Outstanding",
+  "@msLoansOutstanding": {},
+  "msLoansEndsOn": "Ends {month}",
+  "@msLoansEndsOn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansNextEmi": "Next EMI · {date}",
+  "@msLoansNextEmi": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansSplit": "EMI split",
+  "@msLoansSplit": {},
+  "msLoansPrincipalL": "Principal",
+  "@msLoansPrincipalL": {},
+  "msLoansInterestL": "Interest",
+  "@msLoansInterestL": {},
+  "msLoansTotalInterest": "Total interest",
+  "@msLoansTotalInterest": {},
+  "msLoansRecordExtra": "Record extra payment",
+  "@msLoansRecordExtra": {},
+  "msLoansChangeRate": "Change interest rate",
+  "@msLoansChangeRate": {},
+  "msLoansCloseLoan": "Close loan",
+  "@msLoansCloseLoan": {},
+  "msLoansOutstandingTab": "Outstanding",
+  "@msLoansOutstandingTab": {},
+  "msLoansSplitTab": "Principal vs interest",
+  "@msLoansSplitTab": {},
+  "msLoansMonth": "Month",
+  "@msLoansMonth": {},
+  "msLoansYear": "Year",
+  "@msLoansYear": {},
+  "msLoansBeforeKuber": "Before Kuber",
+  "@msLoansBeforeKuber": {},
+  "msLoansNext": "Next",
+  "@msLoansNext": {},
+  "msLoansRowSplit": "P {principal} · I {interest}",
+  "@msLoansRowSplit": {
+    "placeholders": {
+      "principal": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRowBal": "Bal {balance}",
+  "@msLoansRowBal": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansInterestOnly": "Interest only",
+  "@msLoansInterestOnly": {},
+  "msLoansEventExtra": "Extra payment {amount} · {date}",
+  "@msLoansEventExtra": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventExtraSubTenure": "Reduce tenure · balance after {balance}",
+  "@msLoansEventExtraSubTenure": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventExtraSubEmi": "Reduce EMI · balance after {balance}",
+  "@msLoansEventExtraSubEmi": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventRate": "Rate {oldRate} → {newRate} · from {date}",
+  "msLoansEventRateSubTenure": "Adjust tenure · EMI stays {emi}",
+  "@msLoansEventRateSubTenure": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventRateSubEmi": "Adjust EMI · new EMI {emi}",
+  "@msLoansEventRateSubEmi": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventCharge": "Charge {amount} · {date}",
+  "@msLoansEventCharge": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventRegular": "Regular EMIs start · {date}",
+  "@msLoansEventRegular": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansYearSub": "{n} EMIs · {paid} paid",
+  "@msLoansYearSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansYearEnd": "balance at year end",
+  "@msLoansYearEnd": {},
+  "msLoansChartNote": "The drop in {year} is your {amount} extra payment.",
+  "@msLoansChartNote": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansIoBanner": "Interest only until {month}: {io} a month. Regular EMIs of {emi} start on {date}.",
+  "@msLoansIoBanner": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "io": {
+        "type": "String"
+      },
+      "emi": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansExtraTitle": "Extra payment",
+  "@msLoansExtraTitle": {},
+  "msLoansExtraQ": "Does this go toward principal?",
+  "@msLoansExtraQ": {},
+  "msLoansExtraYes": "Yes",
+  "@msLoansExtraYes": {},
+  "msLoansExtraNo": "No, it's a fee or charge",
+  "@msLoansExtraNo": {},
+  "msLoansReduceTenure": "Reduce tenure",
+  "@msLoansReduceTenure": {},
+  "msLoansReduceTenureSub": "Same EMI, loan ends sooner",
+  "@msLoansReduceTenureSub": {},
+  "msLoansReduceEmi": "Reduce EMI",
+  "@msLoansReduceEmi": {},
+  "msLoansReduceEmiSub": "Same end date, lower EMI",
+  "@msLoansReduceEmiSub": {},
+  "msLoansSavesMore": "Saves more interest",
+  "@msLoansSavesMore": {},
+  "msLoansExtraPreviewTenure": "Saves {amount} interest · ends {n} months earlier",
+  "@msLoansExtraPreviewTenure": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansExtraPreviewEmi": "Saves {amount} interest · EMI becomes {emi}",
+  "@msLoansExtraPreviewEmi": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "emi": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPrepayCharge": "Prepayment charge · optional",
+  "@msLoansPrepayCharge": {},
+  "msLoansPrepayChargeHint": "Amount or %",
+  "@msLoansPrepayChargeHint": {},
+  "msLoansFeeNotice": "Recorded as an expense in Loan charges. What you owe stays {outstanding}.",
+  "@msLoansFeeNotice": {
+    "placeholders": {
+      "outstanding": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansLoanCharges": "Loan charges",
+  "@msLoansLoanCharges": {},
+  "msLoansNoNumbersPreview": "Add the loan numbers to see what this saves.",
+  "@msLoansNoNumbersPreview": {},
+  "msLoansNewRate": "New rate",
+  "@msLoansNewRate": {},
+  "msLoansEffectiveFrom": "Effective from",
+  "@msLoansEffectiveFrom": {},
+  "msLoansThen": "Then",
+  "@msLoansThen": {},
+  "msLoansAdjustEmi": "Adjust EMI",
+  "@msLoansAdjustEmi": {},
+  "msLoansAdjustTenure": "Adjust tenure",
+  "@msLoansAdjustTenure": {},
+  "msLoansRatePreviewEmi": "New EMI {emi} from {date}",
+  "@msLoansRatePreviewEmi": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRatePreviewEmiSub": "Ends {month} as before · saves {amount} interest",
+  "@msLoansRatePreviewEmiSub": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRatePreviewTenure": "EMI stays {emi} · ends {month}",
+  "@msLoansRatePreviewTenure": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRatePreviewTenureSub": "{n} months earlier · saves {amount} interest",
+  "@msLoansRatePreviewTenureSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRatePreviewTenureSubLater": "{n} months later · costs {amount} more interest",
+  "@msLoansRatePreviewTenureSubLater": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansFloatingHelp": "Floating-rate loans change with the lender's benchmark. Record each change here.",
+  "@msLoansFloatingHelp": {},
+  "msLoansPaidOff": "{name} is fully paid",
+  "@msLoansPaidOff": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansCloseTitle": "Close {name}?",
+  "@msLoansCloseTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansCloseBody": "It moves to Closed. Its EMIs stop and its history stays.",
+  "@msLoansCloseBody": {},
+  "msLoansExtraName": "Extra payment · {name}",
+  "@msLoansExtraName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansChargeName": "Loan charge · {name}",
+  "@msLoansChargeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansSaved": "Loan saved",
+  "@msLoansSaved": {},
+  "msLoansRateSaved": "Rate change saved",
+  "@msLoansRateSaved": {},
+  "msLoansExtraSaved": "Extra payment recorded",
+  "@msLoansExtraSaved": {},
+  "msInvPortfolio": "Portfolio value",
+  "@msInvPortfolio": {},
+  "msInvInvested": "Invested",
+  "@msInvInvested": {},
+  "msInvGain": "Gain",
+  "@msInvGain": {},
+  "msInvXirr": "XIRR",
+  "@msInvXirr": {},
+  "msInvOverall": "{pct} overall",
+  "@msInvOverall": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvUpdateValues": "Update values",
+  "@msInvUpdateValues": {},
+  "msInvGroupMutualFunds": "Mutual funds",
+  "@msInvGroupMutualFunds": {},
+  "msInvGroupStocks": "Stocks",
+  "@msInvGroupStocks": {},
+  "msInvGroupGold": "Gold",
+  "@msInvGroupGold": {},
+  "msInvGroupCrypto": "Crypto",
+  "@msInvGroupCrypto": {},
+  "msInvGroupFixed": "Fixed return",
+  "@msInvGroupFixed": {},
+  "msInvGroupOther": "Property and other",
+  "@msInvGroupOther": {},
+  "msInvStale": "Updated {n} days ago",
+  "@msInvStale": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvUpdatedOn": "Updated {month}",
+  "@msInvUpdatedOn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvEmptyTitle": "No investments yet",
+  "@msInvEmptyTitle": {},
+  "msInvEmptyBody": "Add a fund, stock, FD or anything else you own. Kuber shows what it's worth and how much you've gained.",
+  "@msInvEmptyBody": {},
+  "msInvFab": "Add investment",
+  "@msInvFab": {},
+  "msInvAdd": "Add investment",
+  "@msInvAdd": {},
+  "msInvEdit": "Edit investment",
+  "@msInvEdit": {},
+  "msInvSave": "Save investment",
+  "@msInvSave": {},
+  "msInvPickIntro": "What kind of investment is it? The form adapts to how its value changes.",
+  "@msInvPickIntro": {},
+  "msInvPickMarket": "Value changes with the market",
+  "@msInvPickMarket": {},
+  "msInvPickMarketSub": "You update the value now and then",
+  "@msInvPickMarketSub": {},
+  "msInvPickFixed": "Fixed return",
+  "@msInvPickFixed": {},
+  "msInvPickFixedSub": "Kuber calculates the value for you",
+  "@msInvPickFixedSub": {},
+  "msInvPickOther": "Other",
+  "@msInvPickOther": {},
+  "msInvPickOtherSub": "You update the value rarely",
+  "@msInvPickOtherSub": {},
+  "msInvTypeMutualFund": "Mutual fund",
+  "@msInvTypeMutualFund": {},
+  "msInvTypeStocks": "Stocks",
+  "@msInvTypeStocks": {},
+  "msInvTypeEtf": "ETF",
+  "@msInvTypeEtf": {},
+  "msInvTypeGold": "Gold",
+  "@msInvTypeGold": {},
+  "msInvTypeCrypto": "Crypto",
+  "@msInvTypeCrypto": {},
+  "msInvTypeFd": "Fixed deposit",
+  "@msInvTypeFd": {},
+  "msInvTypeRd": "Recurring deposit",
+  "@msInvTypeRd": {},
+  "msInvTypePpf": "PPF",
+  "@msInvTypePpf": {},
+  "msInvTypeBonds": "Bonds",
+  "@msInvTypeBonds": {},
+  "msInvTypeProperty": "Property",
+  "@msInvTypeProperty": {},
+  "msInvTypeCollectibles": "Collectibles",
+  "@msInvTypeCollectibles": {},
+  "msInvTypeCustom": "Custom",
+  "@msInvTypeCustom": {},
+  "msInvName": "Name",
+  "@msInvName": {},
+  "msInvHow": "How do you invest?",
+  "@msInvHow": {},
+  "msInvOneTime": "One time",
+  "@msInvOneTime": {},
+  "msInvSip": "SIP",
+  "@msInvSip": {},
+  "msInvAmountInvested": "Amount invested",
+  "@msInvAmountInvested": {},
+  "msInvCurrentValue": "Current value",
+  "@msInvCurrentValue": {},
+  "msInvUnits": "Units · optional",
+  "@msInvUnits": {},
+  "msInvUnitsHint": "e.g. 612.4",
+  "@msInvUnitsHint": {},
+  "msInvSipAmount": "SIP amount",
+  "@msInvSipAmount": {},
+  "msInvFromAccount": "From account",
+  "@msInvFromAccount": {},
+  "msInvStepUp": "Yearly step-up",
+  "@msInvStepUp": {},
+  "msInvStepUpSwitch": "Increase every year",
+  "@msInvStepUpSwitch": {},
+  "msInvStepUpField": "Step-up",
+  "@msInvStepUpField": {},
+  "msInvStepUpNotice": "{a} now, {b} from {date1}, {c} from {date2}.",
+  "@msInvStepUpNotice": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "date1": {
+        "type": "String"
+      },
+      "c": {
+        "type": "String"
+      },
+      "date2": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvPrincipal": "Principal",
+  "@msInvPrincipal": {},
+  "msInvInstallment": "Installment",
+  "@msInvInstallment": {},
+  "msInvTerms": "Terms",
+  "@msInvTerms": {},
+  "msInvRate": "Interest rate",
+  "@msInvRate": {},
+  "msInvStartDate": "Start date",
+  "@msInvStartDate": {},
+  "msInvTenure": "Tenure",
+  "@msInvTenure": {},
+  "msInvCompounding": "Compounding",
+  "@msInvCompounding": {},
+  "msInvCompMonthly": "Monthly",
+  "@msInvCompMonthly": {},
+  "msInvCompQuarterly": "Quarterly",
+  "@msInvCompQuarterly": {},
+  "msInvCompHalfYearly": "Half-yearly",
+  "@msInvCompHalfYearly": {},
+  "msInvCompYearly": "Yearly",
+  "@msInvCompYearly": {},
+  "msInvPayout": "Payout type",
+  "@msInvPayout": {},
+  "msInvPayCumulative": "Cumulative",
+  "@msInvPayCumulative": {},
+  "msInvPayMonthly": "Monthly",
+  "@msInvPayMonthly": {},
+  "msInvPayQuarterly": "Quarterly",
+  "@msInvPayQuarterly": {},
+  "msInvPayYearly": "Yearly",
+  "@msInvPayYearly": {},
+  "msInvAtMaturity": "At maturity",
+  "@msInvAtMaturity": {},
+  "msInvMaturityLine": "on {date} · interest {amount}",
+  "@msInvMaturityLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvMaturityLineRd": "on {date} · you deposit {amount}",
+  "@msInvMaturityLineRd": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvAutoValue": "Kuber calculates the value every day. You never need to update it.",
+  "@msInvAutoValue": {},
+  "msInvInvestedSoFar": "Invested so far",
+  "@msInvInvestedSoFar": {},
+  "msInvUnrealized": "Unrealized",
+  "@msInvUnrealized": {},
+  "msInvRealized": "Realized gain",
+  "@msInvRealized": {},
+  "msInvWithdrawn": "Withdrawn",
+  "@msInvWithdrawn": {},
+  "msInvLastUpdated": "Last updated",
+  "@msInvLastUpdated": {},
+  "msInvSipLine": "{amount} on the {ordinal}",
+  "@msInvSipLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "ordinal": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvSipLineStep": "{amount} on the {ordinal} · +{pct} yearly",
+  "@msInvSipLineStep": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "ordinal": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvUpdateValue": "Update value",
+  "@msInvUpdateValue": {},
+  "msInvAddMoney": "Add money",
+  "@msInvAddMoney": {},
+  "msInvWithdraw": "Withdraw",
+  "@msInvWithdraw": {},
+  "msInvValueToday": "Value today",
+  "@msInvValueToday": {},
+  "msInvMatures": "Matures {date}",
+  "@msInvMatures": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvWithdrawEarly": "Withdraw early",
+  "@msInvWithdrawEarly": {},
+  "msInvLegendValue": "Current value",
+  "@msInvLegendValue": {},
+  "msInvLegendInvested": "Amount invested",
+  "@msInvLegendInvested": {},
+  "msInvLegendGain": "Gain",
+  "@msInvLegendGain": {},
+  "msInvActivity": "Activity",
+  "@msInvActivity": {},
+  "msInvActValue": "Value updated",
+  "@msInvActValue": {},
+  "msInvActSip": "SIP installment",
+  "@msInvActSip": {},
+  "msInvActTopUp": "Top-up",
+  "@msInvActTopUp": {},
+  "msInvActWithdrawal": "Withdrawal",
+  "@msInvActWithdrawal": {},
+  "msInvActOpening": "Opening value",
+  "@msInvActOpening": {},
+  "msInvActInterest": "Interest added",
+  "@msInvActInterest": {},
+  "msInvActOpened": "Deposit opened",
+  "@msInvActOpened": {},
+  "msInvTransaction": "Transaction",
+  "@msInvTransaction": {},
+  "msInvAddPast": "Add a value for a past date",
+  "@msInvAddPast": {},
+  "msInvAddPastTitle": "Add a past value",
+  "@msInvAddPastTitle": {},
+  "msInvValueOnDate": "Value on that date",
+  "@msInvValueOnDate": {},
+  "msInvPastHelp": "Past values fill in the chart. They don't change the current value or any balance.",
+  "@msInvPastHelp": {},
+  "msInvInterestLocked": "Interest entries are calculated and can't be edited.",
+  "@msInvInterestLocked": {},
+  "msInvUpdSub": "{n} holdings · about 30 seconds",
+  "@msInvUpdSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvUpdHelp": "Fixed deposits and PPF update themselves, so they aren't listed.",
+  "@msInvUpdHelp": {},
+  "msInvNewValue": "New value",
+  "@msInvNewValue": {},
+  "msInvSaveN": "Save {n} values",
+  "@msInvSaveN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvSaveEmpty": "Save",
+  "@msInvSaveEmpty": {},
+  "msInvSaved": "{n} values updated. Portfolio {amount}.",
+  "@msInvSaved": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvWithdrawAll": "Withdraw everything",
+  "@msInvWithdrawAll": {},
+  "msInvValueLine": "Value {amount}",
+  "@msInvValueLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvRedeemed": "Amount redeemed",
+  "@msInvRedeemed": {},
+  "msInvExitLoad": "Exit load · optional",
+  "@msInvExitLoad": {},
+  "msInvTax": "Tax · optional",
+  "@msInvTax": {},
+  "msInvReceived": "Amount received",
+  "@msInvReceived": {},
+  "msInvToAccount": "To account",
+  "@msInvToAccount": {},
+  "msInvDate": "Date",
+  "@msInvDate": {},
+  "msInvAfter": "After this withdrawal",
+  "@msInvAfter": {},
+  "msInvCloseTitle": "Close {name}?",
+  "@msInvCloseTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvCloseBody": "You received {amount}. Here's how it did.",
+  "@msInvCloseBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvCloseInvested": "Invested",
+  "@msInvCloseInvested": {},
+  "msInvCloseReceived": "Received",
+  "@msInvCloseReceived": {},
+  "msInvCloseReturn": "Final return",
+  "@msInvCloseReturn": {},
+  "msInvCloseXirr": "XIRR",
+  "@msInvCloseXirr": {},
+  "msInvCloseHeld": "Held",
+  "@msInvCloseHeld": {},
+  "msInvHeldValue": "{n} months",
+  "@msInvHeldValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvCloseHelp": "It moves to Closed. You can still open it and see its history.",
+  "@msInvCloseHelp": {},
+  "msInvCloseCta": "Close holding",
+  "@msInvCloseCta": {},
+  "msInvBack": "Back",
+  "@msInvBack": {},
+  "msInvPenalty": "Penalty rate",
+  "@msInvPenalty": {},
+  "msInvPenaltySupport": "Your bank's penalty for withdrawing before maturity",
+  "@msInvPenaltySupport": {},
+  "msInvRateAfterPenalty": "Rate after penalty",
+  "@msInvRateAfterPenalty": {},
+  "msInvInterestEarned": "Interest earned",
+  "@msInvInterestEarned": {},
+  "msInvLessThanToday": "Less than value today",
+  "@msInvLessThanToday": {},
+  "msInvWithdrawClose": "Withdraw and close",
+  "@msInvWithdrawClose": {},
+  "msInvMatured": "Your FD matured: {amount}. Move it to {account}?",
+  "@msInvMatured": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvMaturedSub": "{name} · matured {date}",
+  "@msInvMaturedSub": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvRenew": "Renew",
+  "@msInvRenew": {},
+  "msInvMove": "Move to {account}",
+  "@msInvMove": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvNotifTitle": "Your FD matured: {amount}",
+  "@msInvNotifTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvNotifBody": "Move it to {account}?",
+  "@msInvNotifBody": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvNotifLater": "Not now",
+  "@msInvNotifLater": {},
+  "msInvWithdrawName": "Withdrawal · {name}",
+  "@msInvWithdrawName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvMaturityName": "Maturity · {name}",
+  "@msInvMaturityName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvTopUpName": "Top-up · {name}",
+  "@msInvTopUpName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msInvValuesUpdated": "Value updated",
+  "@msInvValuesUpdated": {},
+  "msInvClosedSnack": "{name} moved to Closed",
+  "@msInvClosedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecEveryMonth": "Every month",
+  "@msRecEveryMonth": {},
+  "msRecOut": "out",
+  "@msRecOut": {},
+  "msRecIn": "in",
+  "@msRecIn": {},
+  "msRecBills": "Bills and subscriptions",
+  "@msRecBills": {},
+  "msRecEmis": "EMIs",
+  "@msRecEmis": {},
+  "msRecSips": "SIPs",
+  "@msRecSips": {},
+  "msRecIncome": "Income",
+  "@msRecIncome": {},
+  "msRecActive": "Active",
+  "@msRecActive": {},
+  "msRecPaused": "Paused",
+  "@msRecPaused": {},
+  "msRecProcessed": "Recently processed",
+  "@msRecProcessed": {},
+  "msRecEnded": "Ended",
+  "@msRecEnded": {},
+  "msRecRowSub": "{interval} · next {date}",
+  "@msRecRowSub": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecNextOnly": "next {date}",
+  "@msRecNextOnly": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecDue": "{interval} · due today · {account}",
+  "@msRecDue": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecPausedSince": "{interval} · paused since {month}",
+  "@msRecPausedSince": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecViewHistory": "View in History",
+  "@msRecViewHistory": {},
+  "msRecEmptyTitle": "Nothing repeats yet",
+  "@msRecEmptyTitle": {},
+  "msRecEmptyBody": "Add rent, bills, subscriptions or income that repeats. Loan EMIs and SIPs show up here on their own.",
+  "@msRecEmptyBody": {},
+  "msRecFab": "Add recurring",
+  "@msRecFab": {},
+  "msRecNew": "New recurring",
+  "@msRecNew": {},
+  "msRecEdit": "Edit recurring",
+  "@msRecEdit": {},
+  "msRecExpense": "Expense",
+  "@msRecExpense": {},
+  "msRecIncomeType": "Income",
+  "@msRecIncomeType": {},
+  "msRecAmount": "Amount",
+  "@msRecAmount": {},
+  "msRecName": "Name",
+  "@msRecName": {},
+  "msRecCategory": "Category",
+  "@msRecCategory": {},
+  "msRecAccount": "Account",
+  "@msRecAccount": {},
+  "msRecSkipNext": "Skip next · {date}",
+  "@msRecSkipNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecSkipNextShort": "Skip next",
+  "@msRecSkipNextShort": {},
+  "msRecPause": "Pause",
+  "@msRecPause": {},
+  "msRecResume": "Resume",
+  "@msRecResume": {},
+  "msRecSave": "Save recurring",
+  "@msRecSave": {},
+  "msRecSaveChanges": "Save changes",
+  "@msRecSaveChanges": {},
+  "msRecFutureTitle": "Apply changes to future occurrences only?",
+  "@msRecFutureTitle": {},
+  "msRecFutureBody": "{name} has run {n} times. Those transactions stay as they are. The new amount and schedule start from the next occurrence.",
+  "@msRecFutureBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecFutureCta": "Apply to future",
+  "@msRecFutureCta": {},
+  "msRecSkipped": "Skipped {date}. Next on {date2}.",
+  "@msRecSkipped": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "date2": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecSkippedEnd": "Skipped {date}.",
+  "@msRecSkippedEnd": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecUsually": "Usually",
+  "@msRecUsually": {},
+  "msRecLast12": "Last 12 months",
+  "@msRecLast12": {},
+  "msRecMonthlyAvg": "Monthly avg",
+  "@msRecMonthlyAvg": {},
+  "msRecProcessedKv": "Processed",
+  "@msRecProcessedKv": {},
+  "msRecProcessedN": "{n} times",
+  "@msRecProcessedN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecMonthlyTotal": "Monthly total",
+  "@msRecMonthlyTotal": {},
+  "msRecAvgCaption": "last 12 months · avg {amount}",
+  "@msRecAvgCaption": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecSkippedRow": "Skipped",
+  "@msRecSkippedRow": {},
+  "msRecRange12": "12 months",
+  "@msRecRange12": {},
+  "msRecRangeAll": "All",
+  "@msRecRangeAll": {},
+  "msRecDeleteTitle": "Delete {name}?",
+  "@msRecDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecDeleteBody": "It stops repeating. Transactions it already added stay in History.",
+  "@msRecDeleteBody": {},
+  "msRecPausedSnack": "{name} paused",
+  "@msRecPausedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecResumedSnack": "{name} resumed. Next on {date}.",
+  "@msRecResumedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecSaved": "Recurring saved",
+  "@msRecSaved": {},
+  "msCalcSave": "Save",
+  "@msCalcSave": {},
+  "msCalcAddLoan": "Add as loan",
+  "@msCalcAddLoan": {},
+  "msCalcStartSip": "Start this SIP",
+  "@msCalcStartSip": {},
+  "msCalcAddFd": "Add this FD",
+  "@msCalcAddFd": {},
+  "msCalcAddRd": "Add this RD",
+  "@msCalcAddRd": {},
+  "msCalcAddInvestments": "Add to investments",
+  "@msCalcAddInvestments": {},
+  "msCalcEmi": "EMI calculator",
+  "@msCalcEmi": {},
+  "msCalcPrepay": "Loan Prepayment",
+  "@msCalcPrepay": {},
+  "msCalcSipAmount": "SIP Amount",
+  "@msCalcSipAmount": {},
+  "msCalcGoal": "Goal Planner",
+  "@msCalcGoal": {},
+  "msCalcReturns": "Investment Returns",
+  "@msCalcReturns": {},
+  "msCalcInflation": "Inflation",
+  "@msCalcInflation": {},
+  "msCalcFdRd": "FD / RD",
+  "@msCalcFdRd": {},
+  "msCalcPpf": "PPF Calculator",
+  "@msCalcPpf": {},
+  "msTxnSourceAuto": "Recorded automatically",
+  "@msTxnSourceAuto": {},
+  "msTxnSourceSip": "SIP installment",
+  "@msTxnSourceSip": {},
+  "msTxnSourceLabel": "Source",
+  "@msTxnSourceLabel": {},
+  "msTxnSplit": "EMI split",
+  "@msTxnSplit": {},
+  "msTxnDeletedLoan": "From a deleted loan",
+  "@msTxnDeletedLoan": {},
+  "msTxnDeletedInvestment": "From a deleted investment",
+  "@msTxnDeletedInvestment": {},
+  "msTxnDeletedRule": "From a deleted recurring rule",
+  "@msTxnDeletedRule": {},
+  "bgStepProcessing": "Adding {n} recurring transactions…",
+  "@bgStepProcessing": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "bgStepProcessingOne": "Adding 1 recurring transaction…",
+  "@bgStepProcessingOne": {},
+  "bgStepMaturity": "Checking deposits…",
+  "@bgStepMaturity": {},
+  "bgStepBackup": "Backing up…",
+  "@bgStepBackup": {},
+  "bgStepStarting": "Catching up…",
+  "@bgStepStarting": {},
+  "bgContinues": "Continues in the background",
+  "@bgContinues": {},
+  "bgResultRecurring": "{n} recurring added",
+  "@bgResultRecurring": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "bgResultRecurringOne": "1 recurring added",
+  "@bgResultRecurringOne": {},
+  "bgResultBackup": "Backup done",
+  "@bgResultBackup": {},
+  "bgResultMatured": "{n} deposits matured",
+  "@bgResultMatured": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "bgFailBackup": "Backup failed",
+  "@bgFailBackup": {},
+  "bgFailRecurring": "Couldn't add {n} recurring transactions",
+  "@bgFailRecurring": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "bgFailRecurringOne": "Couldn't add 1 recurring transaction",
+  "@bgFailRecurringOne": {},
+  "bgRetry": "Retry",
+  "@bgRetry": {},
+  "bgView": "View",
+  "@bgView": {},
+  "bgChannelName": "Background tasks",
+  "@bgChannelName": {},
+  "bgChannelDesc": "Recurring transactions, EMIs, SIPs and backups added in the background",
+  "@bgChannelDesc": {},
+  "bgNotifTitle": "Kuber is catching up",
+  "@bgNotifTitle": {},
+  "bgNotifFailedTitle": "A background task failed",
+  "@bgNotifFailedTitle": {},
+  "numFormatAutomatic": "Automatic",
+  "@numFormatAutomatic": {},
+  "numFormatAutomaticSub": "Lakh for rupees, standard for other currencies",
+  "@numFormatAutomaticSub": {},
+  "showCurrencyCode": "Show currency code instead of symbol",
+  "@showCurrencyCode": {},
+  "showCurrencyCodeSub": "Useful when currencies share a symbol, like C$ and A$",
+  "@showCurrencyCodeSub": {},
+  "currencySuggested": "Suggested",
+  "@currencySuggested": {},
+  "currencyAll": "All currencies",
+  "@currencyAll": {},
+  "currencySearchHint": "Search by name, code or country",
+  "@currencySearchHint": {},
+  "currencyNoMatch": "No currency matches",
+  "@currencyNoMatch": {},
+  "converterUnavailable": "{code} isn't in the converter. Its rates come from the European Central Bank list, which doesn't include it.",
+  "@converterUnavailable": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoReducingTitle": "Reducing balance",
+  "@msInfoReducingTitle": {},
+  "msInfoReducingLine": "Most bank loans. Interest is charged only on what you still owe, so each EMI pays off a little more principal than the last.",
+  "@msInfoReducingLine": {},
+  "msInfoReducingEx": "{p} at {r} for {y} years has an EMI of {emi}.",
+  "@msInfoReducingEx": {
+    "placeholders": {
+      "p": {
+        "type": "String"
+      },
+      "r": {
+        "type": "String"
+      },
+      "y": {
+        "type": "String"
+      },
+      "emi": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoReducingRow1": "Month 1 interest",
+  "@msInfoReducingRow1": {},
+  "msInfoReducingRow2": "Month 1 principal",
+  "@msInfoReducingRow2": {},
+  "msInfoReducingAfter": "By the end, almost all of the EMI is principal.",
+  "@msInfoReducingAfter": {},
+  "msInfoFlatTitle": "Flat rate",
+  "@msInfoFlatTitle": {},
+  "msInfoFlatLine": "Many car, personal and consumer loans. Interest is charged on the original amount for the whole tenure, even as you repay.",
+  "@msInfoFlatLine": {},
+  "msInfoFlatEx": "{p} at {r} flat for {y} years.",
+  "@msInfoFlatEx": {
+    "placeholders": {
+      "p": {
+        "type": "String"
+      },
+      "r": {
+        "type": "String"
+      },
+      "y": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoFlatRow1": "Interest every year",
+  "@msInfoFlatRow1": {},
+  "msInfoFlatRow2": "Total interest",
+  "@msInfoFlatRow2": {},
+  "msInfoFlatRow3": "EMI",
+  "@msInfoFlatRow3": {},
+  "msInfoFlatAfter": "At {r} reducing balance, the same loan would cost {amount} in interest.",
+  "@msInfoFlatAfter": {
+    "placeholders": {
+      "r": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoIoTitle": "With an interest-only period first",
+  "@msInfoIoTitle": {},
+  "msInfoIoLine": "Also called pre-EMI. For the first few months you pay only the interest. Regular EMIs start after that.",
+  "@msInfoIoLine": {},
+  "msInfoIoEx": "{p} at {r} with {n} interest-only months.",
+  "@msInfoIoEx": {
+    "placeholders": {
+      "p": {
+        "type": "String"
+      },
+      "r": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoIoRow1": "Months 1 to {n}",
+  "@msInfoIoRow1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoIoRow2": "Then, for {n} months",
+  "@msInfoIoRow2": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoIoRowValue": "{amount} a month",
+  "@msInfoIoRowValue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoIoAfter": "The interest-only months don't reduce what you owe.",
+  "@msInfoIoAfter": {},
+  "msInfoCalculatedTitle": "Calculated fields",
+  "@msInfoCalculatedTitle": {},
+  "msInfoCalculatedLine": "Fill in any 3 of principal, rate, tenure and EMI. Kuber works out the 4th and marks it Calculated.",
+  "@msInfoCalculatedLine": {},
+  "msInfoCalculatedAfter": "Type over a calculated field to use your own figure. The field you filled in first then becomes the calculated one.",
+  "@msInfoCalculatedAfter": {},
+  "msInfoMismatchTitle": "Why your EMI is different",
+  "@msInfoMismatchTitle": {},
+  "msInfoMismatchLine": "Banks often round the EMI, add loan insurance to it, or charge interest for the days before your first EMI. Kuber always uses the EMI you enter.",
+  "@msInfoMismatchLine": {},
+  "msInfoMismatchRow1": "Calculated EMI",
+  "@msInfoMismatchRow1": {},
+  "msInfoMismatchRow2": "Your EMI",
+  "@msInfoMismatchRow2": {},
+  "msInfoMismatchRow3": "Difference",
+  "@msInfoMismatchRow3": {},
+  "msInfoRun1Title": "I know the original loan details",
+  "@msInfoRun1Title": {},
+  "msInfoRun1Line": "Enter the loan as it was sanctioned. Kuber works out everything you've paid until today.",
+  "@msInfoRun1Line": {},
+  "msInfoRun2Title": "I know what's outstanding today",
+  "@msInfoRun2Title": {},
+  "msInfoRun2Line": "Use the outstanding amount from your latest bank statement. Kuber works out how many EMIs are left.",
+  "@msInfoRun2Line": {},
+  "msInfoRun2After": "Past totals are optional. Add them if you want lifetime interest to be complete.",
+  "@msInfoRun2After": {},
+  "msInfoRun3Title": "Just track the EMI",
+  "@msInfoRun3Title": {},
+  "msInfoRun3Line": "Kuber records each EMI on its day without splitting it into principal and interest. You can add the loan numbers later.",
+  "@msInfoRun3Line": {},
+  "msInfoAdjustmentTitle": "Adjustment",
+  "@msInfoAdjustmentTitle": {},
+  "msInfoAdjustmentLine": "When your figure is different from Kuber's, Kuber keeps yours and records the difference as an opening adjustment on the loan.",
+  "@msInfoAdjustmentLine": {},
+  "msInfoAdjustmentRow1": "Kuber calculated",
+  "@msInfoAdjustmentRow1": {},
+  "msInfoAdjustmentRow2": "You entered",
+  "@msInfoAdjustmentRow2": {},
+  "msInfoAdjustmentAfter": "Adjustments only change the loan. No account balance changes.",
+  "@msInfoAdjustmentAfter": {},
+  "msInfoInterestOnlyTitle": "Count only interest as expense",
+  "@msInfoInterestOnlyTitle": {},
+  "msInfoInterestOnlyLine": "Only the interest part of each EMI counts as spending in Analytics and Budgets. The principal is counted as a transfer to this loan.",
+  "@msInfoInterestOnlyLine": {},
+  "msInfoInterestOnlyRow1": "Interest, counted as expense",
+  "@msInfoInterestOnlyRow1": {},
+  "msInfoInterestOnlyRow2": "Principal, counted as transfer",
+  "@msInfoInterestOnlyRow2": {},
+  "msInfoInterestOnlyAfter": "Your bank balance goes down by the full EMI either way. Changing this applies to future EMIs only.",
+  "@msInfoInterestOnlyAfter": {},
+  "msInfoTenureEmiTitle": "Reduce tenure or reduce EMI",
+  "@msInfoTenureEmiTitle": {},
+  "msInfoTenureEmiLine": "Reduce tenure keeps your EMI the same and ends the loan sooner. Reduce EMI keeps the end date and lowers each EMI. Reducing tenure saves more interest.",
+  "@msInfoTenureEmiLine": {},
+  "msInfoPrepayChargeTitle": "Prepayment charge",
+  "@msInfoPrepayChargeTitle": {},
+  "msInfoPrepayChargeLine": "Some lenders charge a fee when you pay extra. Kuber records it as an expense. It doesn't reduce what you owe. Floating-rate home loans usually have none.",
+  "@msInfoPrepayChargeLine": {},
+  "msInfoPrepayRow1": "Goes to principal",
+  "@msInfoPrepayRow1": {},
+  "msInfoPrepayRow2": "Charge, recorded as expense",
+  "@msInfoPrepayRow2": {},
+  "msInfoPrepayRow3": "Leaves your account",
+  "@msInfoPrepayRow3": {},
+  "msInfoFloatingTitle": "Floating rate",
+  "@msInfoFloatingTitle": {},
+  "msInfoFloatingLine": "A floating rate moves with the lender's benchmark, so it can change during the loan. When your lender changes it, record it here so the schedule stays right.",
+  "@msInfoFloatingLine": {},
+  "msInfoXirrTitle": "XIRR",
+  "@msInfoXirrTitle": {},
+  "msInfoXirrLine": "Your yearly return, taking into account when each amount went in and came out. It lets you compare a SIP with an FD fairly.",
+  "@msInfoXirrLine": {},
+  "msInfoXirrEx": "{amount} every month for 3 years is {invested} invested. It's worth {value} today.",
+  "@msInfoXirrEx": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "invested": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoXirrRow1": "Total gain",
+  "@msInfoXirrRow1": {},
+  "msInfoXirrRow2": "XIRR",
+  "@msInfoXirrRow2": {},
+  "msInfoXirrValue": "{pct} a year",
+  "@msInfoXirrValue": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoRealizedTitle": "Unrealized and realized gain",
+  "@msInfoRealizedTitle": {},
+  "msInfoRealizedLine": "Unrealized gain is on paper: what you would gain if you sold everything today. Realized gain is what you actually made on money you've already withdrawn.",
+  "@msInfoRealizedLine": {},
+  "msInfoProportionalTitle": "How withdrawals are counted",
+  "@msInfoProportionalTitle": {},
+  "msInfoProportionalLine": "When you withdraw part of a holding, the invested amount goes down in the same proportion as the value you took out.",
+  "@msInfoProportionalLine": {},
+  "msInfoProportionalEx": "Value {value} with {invested} invested. You withdraw {amount}, which is 20% of the value.",
+  "@msInfoProportionalEx": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "invested": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoProportionalRow1": "Invested goes down by",
+  "@msInfoProportionalRow1": {},
+  "msInfoProportionalRow2": "Realized gain",
+  "@msInfoProportionalRow2": {},
+  "msInfoProportionalRow3": "Left invested",
+  "@msInfoProportionalRow3": {},
+  "msInfoStepupTitle": "Yearly step-up",
+  "@msInfoStepupTitle": {},
+  "msInfoStepupLine": "Your SIP grows by a fixed percentage or amount once a year, usually in line with your salary.",
+  "@msInfoStepupLine": {},
+  "msInfoStepupEx": "{amount} a month with a 10% step-up.",
+  "@msInfoStepupEx": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoStepupRow": "Year {n}",
+  "@msInfoStepupRow": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoCompoundingTitle": "Compounding",
+  "@msInfoCompoundingTitle": {},
+  "msInfoCompoundingLine": "How often interest is added to your deposit so that it starts earning interest too. More often means a little more.",
+  "@msInfoCompoundingLine": {},
+  "msInfoCompoundingEx": "{amount} at 7% for 5 years.",
+  "@msInfoCompoundingEx": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoPayoutTitle": "Payout type",
+  "@msInfoPayoutTitle": {},
+  "msInfoPayoutLine": "Cumulative adds the interest to the deposit and pays everything at maturity. Payout sends the interest to your bank account every month, quarter or year.",
+  "@msInfoPayoutLine": {},
+  "msInfoPayoutRow1": "Cumulative, at maturity",
+  "@msInfoPayoutRow1": {},
+  "msInfoPayoutRow2": "Quarterly payout",
+  "@msInfoPayoutRow2": {},
+  "msInfoPayoutRow2Value": "{amount} every quarter",
+  "@msInfoPayoutRow2Value": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoPayoutRow3": "Quarterly payout, at maturity",
+  "@msInfoPayoutRow3": {},
+  "msInfoAccruedTitle": "Value today",
+  "@msInfoAccruedTitle": {},
+  "msInfoAccruedLine": "What a fixed deposit is worth today, including interest earned so far that hasn't been paid yet. Kuber works it out every day, so you never update it.",
+  "@msInfoAccruedLine": {},
+  "msInfoUpdatedTitle": "Last updated",
+  "@msInfoUpdatedTitle": {},
+  "msInfoUpdatedLine": "Market prices change every day, but Kuber only knows the value you last entered. Values older than 30 days are marked so you know which ones to update.",
+  "@msInfoUpdatedLine": {},
+  "msInfoMonthlyTitle": "How the monthly amount works",
+  "@msInfoMonthlyTitle": {},
+  "msInfoMonthlyLine": "Anything that isn't monthly is converted to what it costs per month. Each item is counted once, even if it also appears in Loans or Investments.",
+  "@msInfoMonthlyLine": {},
+  "msInfoMonthlyRow1": "{amount} every year",
+  "@msInfoMonthlyRow1": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoMonthlyRow2": "{amount} every 3 months",
+  "@msInfoMonthlyRow2": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoMonthlyRow3": "{amount} every week",
+  "@msInfoMonthlyRow3": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msInfoMonthlyAfter": "Weeks use 52 weeks ÷ 12. Daily items use 30 days a month.",
+  "@msInfoMonthlyAfter": {},
+  "@msLoansEventRate": {
+    "placeholders": {
+      "oldRate": {
+        "type": "String"
+      },
+      "newRate": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msRecUndo": "Undo",
+  "@msRecUndo": {},
+  "msLoansFirstEmiDate": "First EMI date",
+  "@msLoansFirstEmiDate": {},
+  "msLoansNextEmiDate": "Next EMI date",
+  "@msLoansNextEmiDate": {},
+  "appDrawerSection": "App drawer",
+  "@appDrawerSection": {},
+  "appDrawerDescription": "Give Kuber Cards, Notes or Reminders their own icon in your phone's app list.",
+  "@appDrawerDescription": {},
+  "appDrawerAdd": "Add to app drawer",
+  "@appDrawerAdd": {},
+  "appDrawerRemove": "Remove from app drawer",
+  "@appDrawerRemove": {},
+  "appDrawerCards": "Kuber Cards",
+  "@appDrawerCards": {},
+  "appDrawerNotes": "Kuber Notes",
+  "@appDrawerNotes": {},
+  "appDrawerReminders": "Reminders",
+  "@appDrawerReminders": {},
+  "appDrawerAdded": "{name} added to your app drawer. It can take a moment to show up.",
+  "@appDrawerAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "appDrawerRemoved": "{name} removed from your app drawer",
+  "@appDrawerRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "appDrawerFailed": "Could not change the app drawer. Try again.",
+  "@appDrawerFailed": {},
+  "msLoansChangeRateShort": "Change rate",
+  "@msLoansChangeRateShort": {},
+  "msLoansPageOf": "Year {n} of {total}",
+  "@msLoansPageOf": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPrevYear": "Previous year",
+  "@msLoansPrevYear": {},
+  "msLoansNextYear": "Next year",
+  "@msLoansNextYear": {},
+  "msLoansRecordAutoHelpNoAccount": "On the EMI day, Kuber records the EMI from the account you pay from.",
+  "@msLoansRecordAutoHelpNoAccount": {},
+  "betaTag": "Beta",
+  "@betaTag": {},
+  "appDrawerCardsSub": "Add Kuber Cards to your app drawer",
+  "@appDrawerCardsSub": {},
+  "appDrawerNotesSub": "Add Kuber Notes to your app drawer",
+  "@appDrawerNotesSub": {},
+  "appDrawerRemindersSub": "Add Reminders to your app drawer",
+  "@appDrawerRemindersSub": {},
+  "msLoansViewSchedule": "View EMI schedule",
+  "@msLoansViewSchedule": {},
+  "msLoansExtraChoose": "What should change?",
+  "@msLoansExtraChoose": {},
+  "msLoansExtraHelp": "Paying extra lowers what you owe, so you pay less interest from now on. Pick how you want that saving.",
+  "@msLoansExtraHelp": {},
+  "msLoansReduceTenureHow": "Keep paying {emi} a month. The loan ends sooner.",
+  "@msLoansReduceTenureHow": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansReduceEmiHow": "Keep the same end date. Each EMI gets smaller.",
+  "@msLoansReduceEmiHow": {},
+  "msLoansReduceTenureResult": "EMI stays {emi} · ends {month}, {n} months sooner",
+  "@msLoansReduceTenureResult": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansReduceEmiResult": "Ends {month} as now · EMI becomes {emi}",
+  "@msLoansReduceEmiResult": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "emi": {
+        "type": "String"
+      }
+    }
+  }
 }

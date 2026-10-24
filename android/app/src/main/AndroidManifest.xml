@@ -65,6 +65,54 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts"/>
         </activity>
+        <!-- Optional app-drawer entries (off by default; the user adds them from
+             the screen's overflow or Settings). See LauncherEntryActivity. -->
+        <activity
+            android:name=".LauncherEntryActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay"/>
+        <activity-alias
+            android:name=".entry.Cards"
+            android:targetActivity=".LauncherEntryActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/entry_cards"
+            android:icon="@mipmap/ic_entry_cards">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <meta-data android:name="com.grs.kuber.deepLink" android:value="kuber://app/cards"/>
+        </activity-alias>
+        <activity-alias
+            android:name=".entry.Notes"
+            android:targetActivity=".LauncherEntryActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/entry_notes"
+            android:icon="@mipmap/ic_entry_notes">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <meta-data android:name="com.grs.kuber.deepLink" android:value="kuber://app/notes"/>
+        </activity-alias>
+        <activity-alias
+            android:name=".entry.Reminders"
+            android:targetActivity=".LauncherEntryActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/entry_reminders"
+            android:icon="@mipmap/ic_entry_reminders">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <meta-data android:name="com.grs.kuber.deepLink" android:value="kuber://app/reminders"/>
+        </activity-alias>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

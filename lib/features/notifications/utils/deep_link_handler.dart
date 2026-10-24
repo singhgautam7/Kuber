@@ -13,13 +13,13 @@ import '../../budgets/data/budget.dart';
 import '../../budgets/widgets/budget_details_sheet.dart';
 import '../../categories/data/category.dart';
 import '../../investments/data/investment.dart';
-import '../../investments/widgets/investment_detail_sheet.dart';
+import '../../investments/widgets/holding_sheet.dart';
 import '../../ledger/data/ledger.dart';
 import '../../ledger/widgets/ledger_detail_sheet.dart';
 import '../../loans/data/loan.dart';
-import '../../loans/widgets/loan_detail_sheet.dart';
+import '../../loans/widgets/loan_sheet.dart';
 import '../../recurring/data/recurring_rule.dart';
-import '../../recurring/widgets/recurring_detail_sheet.dart';
+import '../../recurring/widgets/rule_sheet.dart';
 import '../../reminders/data/reminder.dart';
 import '../../reminders/widgets/reminder_view_sheet.dart';
 import '../data/app_notification.dart';
@@ -75,11 +75,11 @@ Future<Widget?> notificationItemSheet(Isar isar, NotificationRoute route) async 
     case 'recurring':
       final rule =
           intId == null ? null : await isar.collection<RecurringRule>().get(intId);
-      return rule == null ? null : RecurringDetailSheet(rule: rule);
+      return rule == null ? null : RuleSheet(rule: rule);
     case 'loan':
       final loan =
           await isar.collection<Loan>().filter().uidEqualTo(id).findFirst();
-      return loan == null ? null : LoanDetailSheet(loan: loan);
+      return loan == null ? null : LoanSheet(loan: loan);
     case 'budget':
       final budget =
           intId == null ? null : await isar.collection<Budget>().get(intId);
@@ -98,7 +98,7 @@ Future<Widget?> notificationItemSheet(Isar isar, NotificationRoute route) async 
           .filter()
           .uidEqualTo(id)
           .findFirst();
-      return inv == null ? null : InvestmentDetailSheet(investment: inv);
+      return inv == null ? null : HoldingSheet(investment: inv);
     case 'reminder':
       final reminder =
           intId == null ? null : await isar.collection<Reminder>().get(intId);

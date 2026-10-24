@@ -170,11 +170,35 @@ class KuberNavPill extends StatelessWidget {
     required this.index,
     required this.onSelect,
     this.onLongPress,
+    this.showLabels = true,
   });
 
   final int index;
   final ValueChanged<int> onSelect;
   final VoidCallback? onLongPress;
+
+  /// False on narrow screens / large text where the label wouldn't fit.
+  final bool showLabels;
+
+  /// Width of the pill: border 2, padding 16, items 40 (24 glyph + 8 + 8),
+  /// 2 between items; the selected one adds 11 + 8 + label + 14 - 16.
+  static double widthFor(BuildContext context, {required bool withLabel}) {
+    var w = 2.0 + 16 + kuberNavItems.length * 40 + (kuberNavItems.length - 1) * 2;
+    if (!withLabel) return w;
+    final style = Theme.of(context).textTheme.labelLarge!;
+    var label = 0.0;
+    for (final item in kuberNavItems) {
+      final tp = TextPainter(
+        text: TextSpan(text: localNavLabel(context, item.label), style: style),
+        maxLines: 1,
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      if (tp.width > label) label = tp.width;
+      tp.dispose();
+    }
+    return w + 17 + label;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +221,7 @@ class KuberNavPill extends StatelessWidget {
                 index: i,
                 label: localNavLabel(context, kuberNavItems[i].label),
                 selected: i == index,
+                showLabel: showLabels,
                 onTap: () => onSelect(i),
                 onLongPress: onLongPress,
               ),
@@ -212,6 +237,7 @@ class _PillItem extends StatelessWidget {
     required this.index,
     required this.label,
     required this.selected,
+    required this.showLabel,
     required this.onTap,
     this.onLongPress,
   });
@@ -219,6 +245,7 @@ class _PillItem extends StatelessWidget {
   final int index;
   final String label;
   final bool selected;
+  final bool showLabel;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
@@ -229,8 +256,9 @@ class _PillItem extends StatelessWidget {
     final fg = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
     // Under a large OS text scale the label drops first; the glyph and the
     // indicator still say where you are.
-    final showLabel =
-        selected && MediaQuery.textScalerOf(context).scale(14) <= 20;
+    final showLabel = this.showLabel &&
+        selected &&
+        MediaQuery.textScalerOf(context).scale(14) <= 20;
 
     return Semantics(
       button: true,

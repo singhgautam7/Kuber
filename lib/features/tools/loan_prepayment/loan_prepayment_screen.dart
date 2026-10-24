@@ -15,7 +15,8 @@ import '../widgets/calculator_widgets.dart';
 
 class LoanPrepaymentScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const LoanPrepaymentScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const LoanPrepaymentScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<LoanPrepaymentScreen> createState() =>
@@ -52,6 +53,8 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
   String get toolKey => 'loan-prepayment';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName => 'Loan prepayment';
   @override
@@ -127,6 +130,8 @@ class _LoanPrepaymentScreenState extends ConsumerState<LoanPrepaymentScreen>
       infoConfig: InfoConstants.loanPrepayment,
       overflowConfig: savedOverflowConfig('prepayment'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

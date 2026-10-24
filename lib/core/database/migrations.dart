@@ -11,6 +11,7 @@ import '../../features/stories/data/insight_story.dart';
 import '../../features/transactions/services/suggestion_service.dart';
 import '../../features/widget_editor/data/widget_preference.dart';
 import '../utils/prefs_keys.dart';
+import 'vnext_migration.dart';
 import 'seed_service.dart';
 
 class MigrationService {
@@ -85,6 +86,15 @@ class MigrationService {
     if (!(prefs.getBool(PrefsKeys.migratedRecurringIntervalV1) ?? false)) {
       await migrateRecurringIntervals(isar);
       await prefs.setBool(PrefsKeys.migratedRecurringIntervalV1, true);
+    }
+
+    // Migration 11 (vNext): shared schedules, loan / investment fields,
+    // processed ledger seeding, transaction sub types. Per record and
+    // idempotent; must run after migration 10 (it reads intervalUnit).
+    if (!(prefs.getBool(PrefsKeys.migratedVNextV1) ?? false)) {
+      final report = await VNextMigration.run(isar);
+      await prefs.setString(PrefsKeys.vnextMigrationReport, report.toString());
+      await prefs.setBool(PrefsKeys.migratedVNextV1, true);
     }
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/features/recurring/data/recurring_interval.dart';
-import 'package:kuber/features/recurring/data/recurring_processor.dart';
+import '../../helpers/process_due.dart';
 import 'package:kuber/features/recurring/data/recurring_repository.dart';
 import 'package:kuber/features/recurring/data/recurring_rule.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
@@ -68,7 +68,7 @@ void main() {
   group('catch-up with the new intervals', () {
     test('every 2 weeks, 5 weeks overdue: 3 runs, next in 1 week', () async {
       final r = await insert(rule(2, RecurrenceUnit.week, start: daysAgo(35)));
-      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect(await processDue(isar), 3);
       expect(await txnDays(r), [daysAgo(35), daysAgo(21), daysAgo(7)]);
       expect((await reload(r)).nextDueAt, daysAgo(-7));
     });
@@ -76,7 +76,7 @@ void main() {
     test('quarterly from the 1st, 7 months overdue: 3 runs', () async {
       final start = DateTime(today.year, today.month - 7, 1);
       final r = await insert(rule(3, RecurrenceUnit.month, start: start));
-      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect(await processDue(isar), 3);
       expect(await txnDays(r), [
         start,
         DateTime(today.year, today.month - 4, 1),
@@ -88,7 +88,7 @@ void main() {
 
     test('every 2 years starting today runs once, next in 2 years', () async {
       final r = await insert(rule(2, RecurrenceUnit.year, start: today));
-      expect(await RecurringProcessor(isar).processAll(), 1);
+      expect(await processDue(isar), 1);
       expect((await reload(r)).nextDueAt,
           DateTime(today.year + 2, today.month, today.day));
     });
@@ -98,11 +98,11 @@ void main() {
     test('every 10 days, end after 2: stops at 2 and expires', () async {
       final r = await insert(rule(10, RecurrenceUnit.day,
           start: daysAgo(50), endType: 'occurrences', endAfter: 2));
-      expect(await RecurringProcessor(isar).processAll(), 2);
+      expect(await processDue(isar), 2);
       final after = await reload(r);
       expect(after.executionCount, 2);
       expect(RecurringRepository.isExpired(after), isTrue);
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
 
     test('weekly ending in 30 days: catches up and keeps going', () async {
@@ -110,7 +110,7 @@ void main() {
           start: daysAgo(20),
           endType: 'date',
           endDate: daysAgo(-30)));
-      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect(await processDue(isar), 3);
       expect(RecurringRepository.isExpired(await reload(r)), isFalse);
     });
 
@@ -118,15 +118,15 @@ void main() {
         () async {
       final r = await insert(rule(1, RecurrenceUnit.month,
           start: daysAgo(40), endType: 'date', endDate: daysAgo(1)));
-      expect(await RecurringProcessor(isar).processAll(), 2);
+      expect(await processDue(isar), 2);
       expect(RecurringRepository.isExpired(await reload(r)), isTrue);
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
 
     test('daily catch-up across the end date stops on the end day', () async {
       final r = await insert(rule(1, RecurrenceUnit.day,
           start: daysAgo(10), endType: 'date', endDate: daysAgo(5)));
-      expect(await RecurringProcessor(isar).processAll(), 6);
+      expect(await processDue(isar), 6);
       expect(await txnDays(r), [for (var d = 10; d >= 5; d--) daysAgo(d)]);
       final after = await reload(r);
       expect(after.nextDueAt, daysAgo(4));
@@ -138,7 +138,7 @@ void main() {
           start: DateTime(2025, 10, 31),
           endType: 'date',
           endDate: DateTime(2026, 1, 31)));
-      expect(await RecurringProcessor(isar).processAll(), 4);
+      expect(await processDue(isar), 4);
       expect(await txnDays(r), [
         DateTime(2025, 10, 31),
         DateTime(2025, 11, 30),
@@ -151,20 +151,20 @@ void main() {
     test('occurrence on an end date of today (midnight) runs', () async {
       final r = await insert(rule(1, RecurrenceUnit.week,
           start: daysAgo(14), endType: 'date', endDate: today));
-      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect(await processDue(isar), 3);
       expect((await txnDays(r)).last, today);
       expect(RecurringRepository.isExpired(await reload(r)), isTrue);
     });
 
     test('future start date: nothing runs yet', () async {
       await insert(rule(3, RecurrenceUnit.month, start: daysAgo(-10)));
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
 
     test('paused overdue quarterly rule: nothing runs', () async {
       await insert(rule(3, RecurrenceUnit.month,
           start: daysAgo(200), isPaused: true));
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
   });
 
@@ -194,12 +194,12 @@ void main() {
         () async {
       // Weekly from 14 days ago: runs on -14, -7 and today.
       final r = await insert(rule(1, RecurrenceUnit.week, start: daysAgo(14)));
-      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect(await processDue(isar), 3);
 
       // Every 2 weeks from the same start also lands on today.
       final e = await edit(r, (r) => r.customDays = 2);
       expect(e.nextDueAt, daysAgo(-14));
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
       expect((await txnDays(r)).where((d) => d == today).length, 1);
     });
 
@@ -207,11 +207,11 @@ void main() {
         () async {
       final r = await insert(rule(1, RecurrenceUnit.month,
           start: DateTime.now())); // created today, start keeps the time
-      expect(await RecurringProcessor(isar).processAll(), 1);
+      expect(await processDue(isar), 1);
       // The date picker returns midnight, so the start "changes".
       final e = await edit(r, (r) => r.startDate = today);
       expect(e.nextDueAt.isAfter(today), isTrue);
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
 
     test('switch to a schedule with a past occurrence: no catch-up', () async {
@@ -222,19 +222,19 @@ void main() {
         ..customDays = 10
         ..intervalUnit = 'day');
       expect(e.nextDueAt.isBefore(today), isFalse);
-      expect(await RecurringProcessor(isar).processAll(),
+      expect(await processDue(isar),
           e.nextDueAt == today ? 1 : 0);
     });
 
     test('ending a rule after N it already reached: nothing more runs',
         () async {
       final r = await insert(rule(1, RecurrenceUnit.week, start: daysAgo(14)));
-      expect(await RecurringProcessor(isar).processAll(), 3);
+      expect(await processDue(isar), 3);
       final e = await edit(r, (r) => r
         ..endType = 'occurrences'
         ..endAfter = 3);
       expect(RecurringRepository.isExpired(e), isTrue);
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
 
     test('editing a paused rule keeps it paused and idle', () async {
@@ -242,7 +242,7 @@ void main() {
           start: daysAgo(90), next: daysAgo(-5), isPaused: true));
       await edit(r, (r) => r.customDays = 3);
       expect((await reload(r)).isPaused, isTrue);
-      expect(await RecurringProcessor(isar).processAll(), 0);
+      expect(await processDue(isar), 0);
     });
   });
 }

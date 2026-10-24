@@ -7,6 +7,10 @@ import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'background_main.dart';
+import 'core/background/background_tasks.dart';
+import 'core/utils/locale_font.dart' show AppLocale;
+import 'l10n/app_localizations.dart';
 import 'core/router/app_router.dart' show initialLocationProvider;
 import 'core/utils/frame_budget_monitor.dart';
 import 'core/utils/currency_data.dart';
@@ -25,23 +29,12 @@ import 'features/transactions/data/transaction.dart';
 import 'features/home_v2/providers/home_v2_provider.dart';
 import 'core/theme/theme_families.dart' show resolveVariant;
 import 'features/notifications/providers/notification_provider.dart';
-import 'features/backups/data/backup_config.dart';
-import 'features/recurring/data/recurring_processor.dart';
 import 'features/reminders/data/reminder_action_handler.dart';
 import 'features/stories/services/welcome_story.dart';
 import 'features/pro/paywall/pro_state.dart';
 
 
-final recurringProcessResultProvider = StateProvider<int>((ref) {
-  return 0;
-});
-
-final automaticBackupDueProvider = StateProvider<bool>((ref) {
-  return false;
-});
-
-/// "The app is interactive": the cold-start splash has finished fading and, on
-/// a first-of-day start, the recurring-loader has handed off to Home. KuberApp
+/// "The app is interactive": the cold-start splash has finished fading. KuberApp
 /// runs its on-open maintenance batch (backup, widget sync, ledger/reminder
 /// passes, billing, tab warm-up) only once this is true, and any other
 /// on-app-open work (e.g. the Home SMS background scan) must gate on it too.
@@ -79,6 +72,11 @@ class _RestartWidgetState extends State<RestartWidget> {
     return KeyedSubtree(key: key, child: widget.child);
   }
 }
+
+/// Entry point of the WorkManager worker's headless engine
+/// (BackgroundTasksWorker.kt): runs the launch task queue.
+@pragma('vm:entry-point')
+Future<void> backgroundMain() => runBackgroundWorker();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -131,14 +129,21 @@ Future<void> _bootstrap() async {
   var onboarded = false;
   var bootThemeOptions = const ThemeOptions();
   var bootTextSizeLevel = 3;
-  var bootNumberFormat = ('INR', NumberSystem.indian);
+  var bootNumberFormat = ('INR', NumberSystem.automatic);
+  var bootShowCurrencyCode = false;
   try {
     final prefs = await SharedPreferences.getInstance();
     bootThemeOptions = ThemeOptions(
       amoled: prefs.getBool(PrefsKeys.themeAmoled) ?? false,
       dynamicColor: prefs.getBool(PrefsKeys.themeDynamicColor) ?? false,
     );
-    final modeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
+    // Fresh install: light until onboarding saves a choice (the setup page
+    // preselects Light too). Existing installs without a saved mode keep
+    // System.
+    final modeIndex = prefs.getInt(PrefsKeys.themeMode) ??
+        (prefs.getBool(PrefsKeys.onboarded) ?? false
+            ? ThemeMode.system.index
+            : ThemeMode.light.index);
     final variantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
     bootTheme = (
       ThemeMode.values[modeIndex.clamp(0, ThemeMode.values.length - 1)],
@@ -147,17 +152,20 @@ Future<void> _bootstrap() async {
     );
     bootTextSizeLevel = prefs.getInt(PrefsKeys.textSizeLevel) ?? 3;
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
-    final systemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
+    final systemIndex =
+        prefs.getInt(PrefsKeys.numberSystem) ?? NumberSystem.automatic.index;
     bootNumberFormat = (
       prefs.getString(PrefsKeys.currency) ?? 'INR',
       NumberSystem
           .values[systemIndex.clamp(0, NumberSystem.values.length - 1)],
     );
+    bootShowCurrencyCode = prefs.getBool(PrefsKeys.showCurrencyCode) ?? false;
     // Amounts formatted before the provider tree exists (reminder action
     // notifications below) use the user's currency, not the INR default.
     AppFormatter.current = AppFormatter(
       system: bootNumberFormat.$2,
-      symbol: currencyFromCode(bootNumberFormat.$1).symbol,
+      currency: currencyFromCode(bootNumberFormat.$1),
+      showCode: bootShowCurrencyCode,
     );
   } catch (e) {
     debugPrint('Kuber: boot theme read failed (non-fatal): $e');
@@ -181,8 +189,6 @@ Future<void> _bootstrap() async {
 
   // Best-effort on-open processing. A failure here must not prevent launch.
   String? coldStartPayload;
-  int missedCount = 0;
-  bool backupDue = false;
   try {
     // NotificationService captures a cold-start payload internally; the
     // foreground-tap callback is wired below. Both eventually land in
@@ -196,6 +202,12 @@ Future<void> _bootstrap() async {
       // Reminder notification action buttons (Mark done / Snooze 1 hour)
       // apply directly, matching quick-action semantics.
       onAction: (actionId, payload) {
+        if (actionId == NotificationService.backgroundRetryAction) {
+          BackgroundTasks.start(isar, lookupAppLocalizations(AppLocale.current),
+                  trigger: 'retry', force: true)
+              .ignore();
+          return;
+        }
         handleReminderNotificationAction(isar, actionId, payload)
             .catchError((Object e) {
           debugPrint('Kuber: reminder action failed (non-fatal): $e');
@@ -208,7 +220,13 @@ Future<void> _bootstrap() async {
 
     // If the app was LAUNCHED from a reminder action button, apply it now.
     final coldAction = NotificationService().consumeColdStartAction();
-    if (coldAction != null) {
+    if (coldAction?.actionId == NotificationService.backgroundRetryAction) {
+      // Retry from the failure notification: the on-open batch starts the
+      // queue anyway; force it in case nothing looks due (backup failed).
+      BackgroundTasks.start(isar, lookupAppLocalizations(AppLocale.current),
+              trigger: 'retry', force: true)
+          .ignore();
+    } else if (coldAction != null) {
       await handleReminderNotificationAction(
         isar,
         coldAction.actionId,
@@ -216,10 +234,9 @@ Future<void> _bootstrap() async {
       );
     }
 
-    // Recurring must run before the first frame: its result decides whether
-    // the splash routes to the recurring-loader screen.
-    missedCount = await RecurringProcessor(isar).processAll();
-    backupDue = await _isAutomaticBackupDue(isar);
+    // Recurring, EMIs, SIPs and the automatic backup no longer run here:
+    // the on-open batch starts them in the background (BackgroundTasks), so
+    // the app always opens straight to Home.
     // First-launch Welcome story: a single pre-built Isar write (no aggregation)
     // so a fresh install shows a bubble immediately. All other stories generate
     // post-first-frame. Existing users just get the flag set, no Welcome.
@@ -231,15 +248,8 @@ Future<void> _bootstrap() async {
   }
 
   // Decide the boot destination up front (same logic the router's redirect
-  // would apply for '/'), so the app opens directly on Home / Onboarding /
-  // recurring-loader. The brand splash is a fade-out overlay painted on top
-  // (see KuberApp), so the destination's heavy first build happens hidden
-  // behind it — no route transition to judder.
-  final initialLocation = _resolveInitialLocation(
-    onboarded: onboarded,
-    missedCount: missedCount,
-    backupDue: backupDue,
-  );
+  // would apply for '/'), so the app opens directly on Home / Onboarding.
+  final initialLocation = onboarded ? '/' : '/onboarding';
 
   runApp(
     RestartWidget(
@@ -250,11 +260,10 @@ Future<void> _bootstrap() async {
           bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
           bootTextSizeLevelProvider.overrideWithValue(bootTextSizeLevel),
           bootNumberFormatProvider.overrideWithValue(bootNumberFormat),
+          bootShowCurrencyCodeProvider.overrideWithValue(bootShowCurrencyCode),
           homeV2BootProvider.overrideWithValue(homeV2),
           hasTransactionsBootProvider.overrideWithValue(hasTransactions),
           initialLocationProvider.overrideWithValue(initialLocation),
-          recurringProcessResultProvider.overrideWith((ref) => missedCount),
-          automaticBackupDueProvider.overrideWith((ref) => backupDue),
           if (coldStartPayload != null)
             pendingDeeplinkProvider.overrideWith((ref) => coldStartPayload),
         ],
@@ -262,38 +271,6 @@ Future<void> _bootstrap() async {
       ),
     ),
   );
-}
-
-/// Mirrors the router's '/' redirect: a fresh install opens Onboarding; an
-/// onboarded user with missed recurring rules / a due backup opens the
-/// recurring loader; otherwise Home.
-String _resolveInitialLocation({
-  required bool onboarded,
-  required int missedCount,
-  required bool backupDue,
-}) {
-  if (!onboarded) return '/onboarding';
-  if (missedCount > 0 || backupDue) return '/recurring-loader';
-  return '/';
-}
-
-Future<bool> _isAutomaticBackupDue(Isar isar) async {
-  final config = await isar.collection<BackupConfig>().where().findFirst();
-  if (config == null || !config.enabled || config.folderUri == null) {
-    return false;
-  }
-  final last = config.lastBackupAt;
-  if (last == null) return true;
-  final days = switch (config.frequency) {
-    'daily' => 1,
-    'monthly' => 30,
-    _ => 7,
-  };
-  final lastLocal = last.toLocal();
-  final lastMidnight = DateTime(lastLocal.year, lastLocal.month, lastLocal.day);
-  final now = DateTime.now();
-  final nowMidnight = DateTime(now.year, now.month, now.day);
-  return nowMidnight.difference(lastMidnight).inDays >= days;
 }
 
 /// Shown when the database cannot be opened/migrated. Offers a retry that

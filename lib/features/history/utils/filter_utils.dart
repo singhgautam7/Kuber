@@ -25,7 +25,8 @@ List<Transaction> applyHistoryFilters(
 
   // Recurring filter
   if (filter.isRecurring != null) {
-    filtered = filtered.where((t) => (t.linkedRuleType == 'recurring') == filter.isRecurring).toList();
+    // Rules, EMIs and SIPs (vNext: one Recurring hub).
+    filtered = filtered.where((t) => t.isScheduled == filter.isRecurring).toList();
   }
 
   // Date Range

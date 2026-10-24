@@ -5,6 +5,9 @@ import '../../accounts/data/account.dart';
 import '../../investments/data/investment.dart';
 import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
+import '../../loans/domain/loan_engine.dart';
+import '../../../core/money_math/investment_math.dart';
+import '../../../core/schedule/schedule_engine.dart';
 import '../../recurring/data/recurring_rule.dart';
 import '../../reminders/data/reminder.dart';
 
@@ -47,12 +50,16 @@ class LoanEmiEvent implements UpcomingEvent {
   final Loan loan;
   @override
   final DateTime date;
-  const LoanEmiEvent(this.loan, this.date);
+
+  /// The EMI due then (interest-only months, rate changes and prepayments
+  /// applied); defaults to the loan's EMI.
+  final double? emi;
+  const LoanEmiEvent(this.loan, this.date, {this.emi});
 
   @override
   String get title => loan.name;
   @override
-  double? get amount => -loan.emiAmount;
+  double? get amount => -(emi ?? loan.emiAmount);
   @override
   String get sourceType => 'emi';
   @override
@@ -63,13 +70,18 @@ class InvestmentSipEvent implements UpcomingEvent {
   final Investment investment;
   @override
   final DateTime date;
-  const InvestmentSipEvent(this.investment, this.date);
+
+  /// The installment due then (yearly step-up applied).
+  final double? sip;
+  const InvestmentSipEvent(this.investment, this.date, {this.sip});
 
   @override
   String get title => investment.name;
   @override
-  double? get amount =>
-      investment.sipAmount == null ? null : -investment.sipAmount!;
+  double? get amount {
+    final v = sip ?? investment.sipAmount;
+    return v == null ? null : -v;
+  }
   @override
   String get sourceType => 'sip';
   @override
@@ -78,10 +90,11 @@ class InvestmentSipEvent implements UpcomingEvent {
 
 class RecurringEvent implements UpcomingEvent {
   final RecurringRule rule;
-  const RecurringEvent(this.rule);
+  final DateTime? next;
+  const RecurringEvent(this.rule, [this.next]);
 
   @override
-  DateTime get date => rule.nextDueAt;
+  DateTime get date => next ?? rule.nextDueAt;
   @override
   String get title => rule.name;
   @override
@@ -185,34 +198,78 @@ class UpcomingEventsAggregator {
           .map(ReminderEvent.new));
     }
 
+    // EMIs, SIPs and rules come from the shared schedule (vNext); rows not
+    // migrated yet fall back to the old fields.
+    final today = todayKey(now);
     if (wanted('emi')) {
-      final loans =
-          await isar.loans.filter().isCompletedEqualTo(false).findAll();
+      final loans = await isar.loans
+          .filter()
+          .isCompletedEqualTo(false)
+          .closedAtIsNull()
+          .findAll();
       for (final loan in loans) {
-        final next = nextMonthlyOccurrence(loan.billDate, now);
-        if (inWindow(next)) events.add(LoanEmiEvent(loan, next));
+        final s = loan.schedule;
+        if (s == null) {
+          final next = nextMonthlyOccurrence(loan.billDate, now);
+          if (inWindow(next)) events.add(LoanEmiEvent(loan, next));
+          continue;
+        }
+        if (s.paused) continue;
+        for (final o in upcomingOccurrences(s, fromKey: today, toKey: todayKey(end), limit: 400)) {
+          final d = dayOf(o.day);
+          if (!inWindow(d) || o.skipped) continue;
+          events.add(LoanEmiEvent(loan, d, emi: emiFor(loan, o.day, 2).amount));
+          break;
+        }
       }
     }
 
     if (wanted('sip')) {
-      final investments =
-          await isar.investments.filter().autoDebitEqualTo(true).findAll();
+      final investments = await isar.investments
+          .filter()
+          .statusEqualTo(InvestmentStatus.active)
+          .findAll();
       for (final inv in investments) {
-        final day = inv.sipDate;
-        if (day == null) continue;
-        final next = nextMonthlyOccurrence(day, now);
-        if (inWindow(next)) events.add(InvestmentSipEvent(inv, next));
+        final s = inv.sip;
+        if (s == null) {
+          final day = inv.sipDate;
+          if (!inv.autoDebit || day == null) continue;
+          final next = nextMonthlyOccurrence(day, now);
+          if (inWindow(next)) events.add(InvestmentSipEvent(inv, next));
+          continue;
+        }
+        if (s.paused) continue;
+        for (final o in upcomingOccurrences(s, fromKey: today, toKey: todayKey(end), limit: 400)) {
+          final d = dayOf(o.day);
+          if (!inWindow(d) || o.skipped) continue;
+          events.add(InvestmentSipEvent(inv, d,
+              sip: stepUpAmount(
+                  base: inv.sipAmount ?? inv.installment ?? 0,
+                  start: s.startDate!,
+                  on: d,
+                  percent: inv.stepUpKind == StepUpKind.percent,
+                  value: inv.stepUpValue)));
+          break;
+        }
       }
     }
 
     if (wanted('recurring')) {
-      final rules = await isar.recurringRules
-          .filter()
-          .isPausedEqualTo(false)
-          .findAll();
-      events.addAll(rules
-          .where((r) => inWindow(r.nextDueAt))
-          .map(RecurringEvent.new));
+      final rules = await isar.recurringRules.where().findAll();
+      for (final r in rules) {
+        final s = r.schedule;
+        if (s == null) {
+          if (!r.isPaused && inWindow(r.nextDueAt)) events.add(RecurringEvent(r));
+          continue;
+        }
+        if (s.paused) continue;
+        for (final o in upcomingOccurrences(s, fromKey: today, toKey: todayKey(end), limit: 400)) {
+          final d = dayOf(o.day);
+          if (!inWindow(d) || o.skipped) continue;
+          events.add(RecurringEvent(r, d));
+          break;
+        }
+      }
     }
 
     if (wanted('ledger')) {

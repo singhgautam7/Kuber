@@ -12,14 +12,21 @@ import 'package:integration_test/integration_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/core/database/isar_service.dart';
 import 'package:kuber/core/theme/app_theme.dart';
+import 'package:kuber/core/background/background_task_run.dart';
+import 'package:kuber/core/database/vnext_migration.dart';
+import 'package:kuber/core/schedule/processed_occurrence.dart';
+import 'package:kuber/features/investments/data/investment.dart';
+import 'package:kuber/features/loans/data/loan.dart';
 import 'package:kuber/core/utils/prefs_keys.dart';
+import 'package:kuber/shared/widgets/kuber_chips.dart';
+import 'package:kuber/shared/widgets/when_picker.dart';
 import 'package:kuber/features/accounts/data/account.dart';
 import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/categories/data/category_group.dart';
 import 'package:kuber/features/recurring/data/recurring_interval.dart';
 import 'package:kuber/features/recurring/data/recurring_rule.dart';
 import 'package:kuber/features/recurring/screens/add_recurring_screen.dart';
-import 'package:kuber/features/recurring/widgets/recurring_detail_sheet.dart';
+import 'package:kuber/features/recurring/widgets/rule_sheet.dart';
 import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/features/tags/data/tag.dart';
 import 'package:kuber/features/tags/data/transaction_tag.dart';
@@ -31,7 +38,7 @@ late Isar isar;
 
 RecurringRule _rule(String name, int count, RecurrenceUnit unit) {
   final now = DateTime.now();
-  return RecurringRule()
+  final r = RecurringRule()
     ..name = name
     ..amount = 1250000
     ..type = 'expense'
@@ -45,6 +52,9 @@ RecurringRule _rule(String name, int count, RecurrenceUnit unit) {
     ..endType = 'never'
     ..createdAt = now
     ..updatedAt = now;
+  // vNext screens read the shared schedule.
+  VNextMigration.migrateRule(r, now);
+  return r;
 }
 
 Future<void> _pump(
@@ -87,6 +97,10 @@ void main() {
       RecurringRuleSchema,
       TagSchema,
       TransactionTagSchema,
+      LoanSchema,
+      InvestmentSchema,
+      ProcessedOccurrenceSchema,
+      BackgroundTaskRunSchema,
     ], directory: dir.path, name: 'itest');
     await isar.writeTxn(() async {
       await isar.categorys.put(Category()
@@ -110,35 +124,27 @@ void main() {
 
     await tester.ensureVisible(find.text('Quarterly'));
     await tester.pumpAndSettle();
-    expect(find.text('Every 6 months'), findsOneWidget);
-    expect(find.textContaining('then every 3 months'), findsOneWidget);
-    // Custom inputs stay hidden for a preset.
-    expect(find.byKey(const Key('recurring_custom_count')), findsNothing);
+    final chip = tester.widget<KuberChip>(find.widgetWithText(KuberChip, 'Quarterly'));
+    expect(chip.selected, isTrue);
+    expect(find.textContaining('Every 3 months'), findsWidgets);
   });
 
-  testWidgets('custom interval rejects 0 / empty and describes N units',
-      (tester) async {
+  testWidgets('custom interval rejects 0 and describes N units', (tester) async {
     await _pump(tester, const AddRecurringScreen());
     await tester.ensureVisible(find.text('Custom'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Custom'));
     await tester.pumpAndSettle();
 
-    final field = find.byKey(const Key('recurring_custom_count'));
-    expect(find.text('Enter a whole number of 1 or more'), findsOneWidget);
+    final field = find.descendant(of: find.byType(KuberWhenPicker), matching: find.byType(TextField)).first;
     await tester.enterText(field, '0');
     await tester.pumpAndSettle();
-    expect(find.text('Enter a whole number of 1 or more'), findsOneWidget);
+    expect(find.text('Enter 1 or more.'), findsOneWidget);
 
     await tester.enterText(field, '10');
     await tester.pumpAndSettle();
-    expect(find.text('Enter a whole number of 1 or more'), findsNothing);
-    expect(find.textContaining('then every 10 days'), findsOneWidget);
-
-    await tester.enterText(field, '2');
-    await tester.tap(find.text('weeks').last);
-    await tester.pumpAndSettle();
-    expect(find.textContaining('then every 2 weeks'), findsOneWidget);
+    expect(find.text('Enter 1 or more.'), findsNothing);
+    expect(find.textContaining('Every 10 months'), findsWidgets);
   });
 
   testWidgets('recurring detail sheet follows the currency setting',
@@ -146,15 +152,15 @@ void main() {
     final rule = _rule('Rent', 1, RecurrenceUnit.month);
     await isar.writeTxn(() => isar.recurringRules.put(rule));
 
-    await _pump(tester, Scaffold(body: RecurringDetailSheet(rule: rule)),
+    await _pump(tester, Scaffold(body: RuleSheet(rule: rule)),
         currency: ('USD', NumberSystem.international));
     expect(find.textContaining(r'$1,250,000'), findsWidgets);
     expect(find.textContaining('₹'), findsNothing);
 
-    await _pump(tester, Scaffold(body: RecurringDetailSheet(rule: rule)));
+    await _pump(tester, Scaffold(body: RuleSheet(rule: rule)));
     expect(find.textContaining('₹12,50,000'), findsWidgets);
 
-    await _pump(tester, Scaffold(body: RecurringDetailSheet(rule: rule)),
+    await _pump(tester, Scaffold(body: RuleSheet(rule: rule)),
         currency: ('EUR', NumberSystem.international));
     expect(find.textContaining('€1,250,000'), findsWidgets);
   });

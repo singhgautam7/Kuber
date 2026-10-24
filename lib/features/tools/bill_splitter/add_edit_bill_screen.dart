@@ -1,10 +1,12 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../ledger/data/ledger_prefill.dart';
@@ -55,7 +57,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
     final b = widget.existingBill;
     if (b != null) {
       _nameCtrl.text = b.name;
-      _amountCtrl.text = b.totalAmount.toString();
+      _amountCtrl.text = CurrencyInputFormatter(
+              isIndian: ref.read(formatterProvider).system == NumberSystem.indian)
+          .format(b.totalAmount.toString());
       _participants = b.participants.map((p) => p.personName).toList();
       _paidBy = b.paidByPersonName;
       _splitType = b.splitType;
@@ -86,7 +90,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
     String name,
   ) => map.putIfAbsent(name, TextEditingController.new);
 
-  double? get _total => double.tryParse(_amountCtrl.text);
+  double? get _total => double.tryParse(_amountCtrl.text.replaceAll(',', ''));
 
   Map<String, double>? _resolveShares() {
     final total = _total;
@@ -99,7 +103,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
         final shares = <String, double>{};
         double sum = 0;
         for (final p in _participants) {
-          final v = double.tryParse(_ctrl(_unequalCtrls, p).text);
+          final v = double.tryParse(_ctrl(_unequalCtrls, p).text.replaceAll(',', ''));
           if (v == null) return null;
           shares[p] = v;
           sum += v;
@@ -391,6 +395,10 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      inputFormatters: [
+                        CurrencyInputFormatter(
+                            isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
+                      ],
                       onChanged: (_) => setState(() {}),
                       style: localeFont(
                         fontSize: 36,
@@ -799,6 +807,10 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                 controller: _ctrl(_unequalCtrls, name),
                                 suffix: currency.symbol,
                                 width: 104,
+                                inputFormatters: [
+                                  CurrencyInputFormatter(
+                                      isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
+                                ],
                                 onChanged: () => setState(() {}),
                               ),
 
@@ -1286,12 +1298,14 @@ class _SplitInput extends StatelessWidget {
   final String suffix;
   final double width;
   final VoidCallback onChanged;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _SplitInput({
     required this.controller,
     required this.suffix,
     required this.width,
     required this.onChanged,
+    this.inputFormatters,
   });
 
   @override
@@ -1303,6 +1317,7 @@ class _SplitInput extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: inputFormatters,
         onChanged: (_) => onChanged(),
         textAlign: TextAlign.right,
         style: localeFont(

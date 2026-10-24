@@ -12,7 +12,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../recurring/providers/recurring_provider.dart';
-import '../../recurring/widgets/recurring_detail_sheet.dart';
+import '../../recurring/widgets/rule_sheet.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class HomeRecurringCard extends ConsumerWidget {
@@ -85,7 +85,7 @@ class HomeRecurringCard extends ConsumerWidget {
                         : cs.onSurfaceVariant;
 
                     return GestureDetector(
-                      onTap: () => showRecurringDetailSheet(context, ref, rule),
+                      onTap: () => showRuleSheet(context, ref, rule),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: KuberSpace.sm),
                         padding: const EdgeInsets.all(KuberSpace.md),

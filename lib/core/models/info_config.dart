@@ -6,12 +6,43 @@ class KuberInfoConfig {
   final List<KuberInfoItem> items;
   final Widget? customChild;
 
+  /// Money "i" sheets: an "Example" block with real, computed numbers.
+  final KuberInfoExampleBlock? exampleBlock;
+
+  /// Overrides the pinned button label (money "i" sheets use "Got it",
+  /// tonal).
+  final String? actionLabel;
+
   const KuberInfoConfig({
     required this.title,
     required this.description,
-    required this.items,
+    this.items = const [],
     this.customChild,
+    this.exampleBlock,
+    this.actionLabel,
   });
+}
+
+/// Example block (components/info-sheet.md): an optional sentence, up to 4
+/// label / value rows (one may be highlighted), an optional closing line.
+class KuberInfoExampleBlock {
+  final String label;
+  final String? sentence;
+  final List<KuberInfoExampleRow> rows;
+  final String? after;
+  const KuberInfoExampleBlock({
+    required this.label,
+    this.sentence,
+    this.rows = const [],
+    this.after,
+  });
+}
+
+class KuberInfoExampleRow {
+  final String label;
+  final String value;
+  final bool highlight;
+  const KuberInfoExampleRow(this.label, this.value, {this.highlight = false});
 }
 
 class KuberInfoItem {

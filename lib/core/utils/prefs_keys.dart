@@ -33,6 +33,13 @@ class PrefsKeys {
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
   static const migratedCashGreenV1 = 'kuber_migrated_cash_green_v1';
   static const migratedRecurringIntervalV1 = 'kuber_migrated_recurring_interval_v1';
+  /// vNext money schedules migration (VNextMigration). Also re-run after
+  /// every JSON restore regardless of this flag.
+  /// Settings: show the currency code instead of the symbol.
+  static const showCurrencyCode = 'kuber_show_currency_code';
+  static const migratedVNextV1 = 'kuber_migrated_vnext_v1b';
+  /// Last VNextMigration report line (Dev tools > Background tasks).
+  static const vnextMigrationReport = 'kuber_vnext_migration_report';
   static const migratedSuggestionBackfillV1 =
       'kuber_migrated_suggestion_backfill_v1';
   static const migratedStoriesPositionV2 = 'kuber_migrated_stories_position_v2';

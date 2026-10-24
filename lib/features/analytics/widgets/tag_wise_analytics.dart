@@ -206,7 +206,7 @@ class TagWiseAnalytics extends ConsumerWidget {
         for (final tagId in tagIds) {
           final existing = tagStats[tagId] ?? {'amount': 0.0, 'count': 0.0};
           tagStats[tagId] = {
-            'amount': existing['amount']! + tx.amount,
+            'amount': existing['amount']! + tx.spendAmount,
             'count': existing['count']! + 1,
           };
         }

@@ -3,6 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import '../../home_v2/data/home_v2_state.dart';
 import 'package:flutter/material.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -148,6 +149,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         selectedValue: current,
         choices: [
           SettingsChoice(
+            value: NumberSystem.automatic,
+            label: context.l10n.numFormatAutomatic,
+            subtitle: context.l10n.numFormatAutomaticSub,
+            icon: Icons.auto_awesome_outlined,
+          ),
+          SettingsChoice(
             value: NumberSystem.indian,
             label: context.l10n.numFormatIndian,
             subtitle: '1,23,000.00',
@@ -240,7 +247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentSwipeMode =
         _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
     final currentNumberSystem =
-        _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
+        _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.automatic;
     final currentNavBarStyle =
         _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
     final currentMoreTabLayout =
@@ -261,9 +268,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final moreLayoutStr = currentMoreTabLayout == MoreTabLayout.simple
         ? context.l10n.simpleLabel
         : context.l10n.navModernChoice;
-    final numberStr = currentNumberSystem == NumberSystem.indian
-        ? context.l10n.numFormatIndian
-        : context.l10n.numFormatInternational;
+    final numberStr = switch (currentNumberSystem) {
+      NumberSystem.indian => context.l10n.numFormatIndian,
+      NumberSystem.international => context.l10n.numFormatInternational,
+      NumberSystem.automatic => context.l10n.numFormatAutomatic,
+    };
     final swipeStr = currentSwipeMode == SwipeMode.changeTabs
         ? context.l10n.swipeChangeTabs
         : context.l10n.swipeRowActions;
@@ -402,6 +411,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const _ShortcutsDiscoveryTip(),
                 const SizedBox(height: KuberSpace.xl),
 
+
                 // WIDGETS
                 _SectionLabel(label: context.l10n.widgetsSection),
                 _SectionDescription(context.l10n.widgetsDescription),
@@ -458,6 +468,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onTap: () =>
                           _showNumberFormatSheet(context, currentNumberSystem),
                       trailing: _trailingWidget(context, text: numberStr),
+                    ),
+                    Divider(height: 1, color: cs.outlineVariant),
+                    _SettingsTile(
+                      icon: Icons.abc_rounded,
+                      label: context.l10n.showCurrencyCode,
+                      subtitle: context.l10n.showCurrencyCodeSub,
+                      trailing: Switch(
+                        value: settings?.showCurrencyCode ?? false,
+                        onChanged: (v) => ref
+                            .read(settingsProvider.notifier)
+                            .setShowCurrencyCode(v),
+                        activeTrackColor: cs.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -627,6 +650,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: KuberSpace.xl),
+
+                // APP DRAWER (Android): own launcher icons for three screens.
+                if (AppDrawerEntries.supported) ...[
+                  _SectionLabel(label: context.l10n.appDrawerSection),
+                  _SectionDescription(context.l10n.appDrawerDescription),
+                  _SettingsCard(
+                    children: [
+                      for (final (i, e) in [
+                        (AppDrawerEntry.cards, Icons.wallet_rounded, context.l10n.appDrawerCards, context.l10n.appDrawerCardsSub),
+                        (AppDrawerEntry.notes, Icons.sticky_note_2_outlined, context.l10n.appDrawerNotes, context.l10n.appDrawerNotesSub),
+                        (AppDrawerEntry.reminders, Icons.notifications_none_rounded, context.l10n.appDrawerReminders, context.l10n.appDrawerRemindersSub),
+                      ].indexed) ...[
+                        if (i > 0) Divider(height: 1, color: cs.outlineVariant),
+                        _SettingsTile(
+                          icon: e.$2,
+                          label: e.$3,
+                          subtitle: e.$4,
+                          trailing: Switch(
+                            value: ref.watch(appDrawerEntriesProvider).valueOrNull?.contains(e.$1) ?? false,
+                            onChanged: (v) => toggleAppDrawerEntry(context, ref, e.$1, v),
+                            activeTrackColor: cs.primary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: KuberSpace.xl),
+                ],
 
                 // ABOUT
                 _SectionLabel(label: context.l10n.aboutSection),
@@ -819,7 +870,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       ref: ref,
       currentCode: currentCode,
-      onSelected: (code) => setState(() => _tempCurrencyCode = code),
+      // The number format follows the currency (settings_provider), so drop
+      // the cached choice and show the saved one.
+      onSelected: (code) => setState(() {
+        _tempCurrencyCode = code;
+        _tempNumberSystem = null;
+      }),
     );
   }
 

@@ -15,11 +15,16 @@ class SheetAction {
   /// (Delete).
   final bool destructive;
 
+  /// Always listed in the overflow menu (rare or final actions such as
+  /// Close loan); the row then shows at most two buttons.
+  final bool overflowOnly;
+
   const SheetAction({
     required this.label,
     required this.icon,
     this.onPressed,
     this.destructive = false,
+    this.overflowOnly = false,
   });
 }
 
@@ -62,12 +67,14 @@ class SheetButtonSection extends StatelessWidget {
     // Decide visible vs. overflow actions.
     final List<SheetAction> visible;
     final List<SheetAction> overflow;
-    if (actions.length <= 3) {
-      visible = actions;
+    final forced = actions.where((a) => a.overflowOnly).toList();
+    final regular = actions.where((a) => !a.overflowOnly).toList();
+    if (forced.isEmpty && regular.length <= 3) {
+      visible = regular;
       overflow = const [];
     } else {
-      visible = actions.take(2).toList();
-      overflow = actions.skip(2).toList();
+      visible = regular.take(2).toList();
+      overflow = [...regular.skip(2), ...forced];
     }
 
     return Padding(

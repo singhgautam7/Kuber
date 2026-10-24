@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -252,10 +250,10 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
                       ))
                         [
                           'M${m[0].toInt()}',
-                          money(total * pow(1 + rate / 100, m[0] / 12)),
+                          money(lumpsumValueAtMonth(total, rate, m[0].toInt())),
                           money(m[1]),
                           money(m[2]),
-                          money(total * pow(1 + rate / 100, m[0] / 12) - m[2]),
+                          money(lumpsumValueAtMonth(total, rate, m[0].toInt()) - m[2]),
                         ],
                     ]
                   : [

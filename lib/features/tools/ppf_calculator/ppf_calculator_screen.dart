@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -17,7 +19,8 @@ import '../widgets/tool_accents.dart';
 
 class PpfCalculatorScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const PpfCalculatorScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const PpfCalculatorScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<PpfCalculatorScreen> createState() =>
@@ -48,6 +51,8 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
   String get toolKey => 'ppf-calculator';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName => 'PPF account';
   @override
@@ -109,6 +114,16 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
       infoConfig: InfoConstants.ppfCalculator,
       overflowConfig: savedOverflowConfig('PPF'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
+      trackLabel: context.l10n.msCalcAddInvestments,
+      onTrack: () => context.push(Uri(path: '/investments/add', queryParameters: {
+            'type': 'ppf',
+            'installment': '${parseAmount(_depositCtrl.text).round()}',
+            'rate': _rateCtrl.text,
+            'months': '${_years * 12}',
+            'from': context.l10n.msCalcPpf,
+          }).toString()),
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

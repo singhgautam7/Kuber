@@ -107,7 +107,8 @@ class StoryRing extends StatelessWidget {
           infoConfig: InfoConstants.moneyStories,
         ),
         SizedBox(
-          height: 80,
+          // 56 ring + 8 gap + the label line, which grows with the OS font.
+          height: 64 + MediaQuery.textScalerOf(context).scale(16),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             cacheExtent: 360,

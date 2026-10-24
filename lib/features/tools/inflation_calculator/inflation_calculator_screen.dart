@@ -14,7 +14,8 @@ import '../widgets/tool_accents.dart';
 
 class InflationCalculatorScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const InflationCalculatorScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const InflationCalculatorScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<InflationCalculatorScreen> createState() =>
@@ -46,6 +47,8 @@ class _InflationCalculatorScreenState
   String get toolKey => 'inflation-calculator';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName => 'Inflation impact';
   @override
@@ -103,6 +106,8 @@ class _InflationCalculatorScreenState
       infoConfig: InfoConstants.inflationCalculator,
       overflowConfig: savedOverflowConfig('inflation'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

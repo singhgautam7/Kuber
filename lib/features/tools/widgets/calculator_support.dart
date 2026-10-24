@@ -64,7 +64,28 @@ mixin CalculatorSupport<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   bool get isModified =>
       hasSaved && _loadedJson != null && currentInputsJson() != _loadedJson;
 
+  /// Values passed in from a loan or investment ("Filled from {name}").
+  CalculatorPrefill? get initialPrefill => null;
+
+  /// The item the inputs were filled from, while its chip shows.
+  String? filledFromName;
+  Map<String, dynamic>? _defaults;
+
+  /// Removes the "Filled from" chip and restores the calculator's defaults.
+  void clearPrefill() {
+    final d = _defaults;
+    if (d != null) applyInputs(d);
+    setState(() => filledFromName = null);
+    scheduleRecompute();
+  }
+
   void initCalculatorSupport() {
+    final prefill = initialPrefill;
+    if (prefill != null) {
+      _defaults = collectInputs();
+      applyInputs({..._defaults!, ...prefill.inputs});
+      filledFromName = prefill.name;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(recentCalculatorsProvider.notifier).touch(toolKey);
@@ -134,3 +155,10 @@ double parseAmount(String s) =>
     double.tryParse(s.replaceAll(',', '').trim()) ?? 0;
 
 double parseNum(String s) => double.tryParse(s.trim()) ?? 0;
+
+/// Inputs handed to a calculator from an item's calculator chip.
+class CalculatorPrefill {
+  final String name;
+  final Map<String, dynamic> inputs;
+  const CalculatorPrefill(this.name, this.inputs);
+}

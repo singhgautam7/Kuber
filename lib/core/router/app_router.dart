@@ -41,7 +41,6 @@ import '../../features/categories/data/category.dart';
 import '../../features/more/screens/add_edit_category_screen.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/recurring/screens/add_recurring_screen.dart';
-import '../../features/recurring/screens/recurring_loader_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
@@ -63,6 +62,8 @@ import '../../features/ask_kuber/screen/ask_kuber_screen.dart';
 import '../../features/more/screens/troubleshoot_screen.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/dev/screens/dev_tools_screen.dart';
+import '../../features/dev/screens/schedule_debug_screen.dart';
+import '../../features/dev/screens/background_tasks_screen.dart';
 import '../../features/dev/screens/db_explorer_screen.dart';
 import '../../features/dev/screens/db_collection_screen.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
@@ -70,10 +71,8 @@ import '../../features/budgets/screens/add_edit_budget_screen.dart';
 import '../../features/widget_editor/models/home_widget_config.dart';
 import '../../features/widget_editor/screens/widget_editor_screen.dart';
 import '../../core/utils/prefs_keys.dart';
-import '../../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:async';
 
 import '../../features/notes/screens/note_editor_screen.dart';
 import '../../features/notes/screens/notes_biometric_gate.dart';
@@ -96,6 +95,7 @@ import '../../features/kuber_cards/screens/change_pin_screen.dart';
 import '../../features/tools/tools_hub_screen.dart';
 import '../../features/tools/currency_converter/currency_converter_screen.dart';
 import '../../features/tools/emi_calculator/emi_calculator_screen.dart';
+import '../../features/tools/widgets/calculator_support.dart' show CalculatorPrefill;
 import '../../features/tools/sip_calculator/sip_calculator_screen.dart';
 import '../../features/tools/sip_amount_finder/sip_amount_finder_screen.dart';
 import '../../features/tools/tip_calculator/tip_calculator_screen.dart';
@@ -117,6 +117,9 @@ import '../../features/tools/saved/saved_calculations_screen.dart';
 
 /// Parses the optional `?savedId=` query param used to open a calculator
 /// pre-filled from a SavedCalculation.
+CalculatorPrefill? _prefill(GoRouterState s) =>
+    s.extra is CalculatorPrefill ? s.extra as CalculatorPrefill : null;
+
 int? _savedId(GoRouterState state) =>
     int.tryParse(state.uri.queryParameters['savedId'] ?? '');
 
@@ -132,28 +135,9 @@ final shellNavigatorKeys = [
   _shellMoreKey,
 ];
 
-/// A [Listenable] that notifies when a [Stream] emits a value.
-class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
-    _subscription = stream.asBroadcastStream().listen(
-      (dynamic _) => notifyListeners(),
-    );
-  }
-
-  late final StreamSubscription<dynamic> _subscription;
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-}
-
 /// The location the router boots at. Computed in `main._bootstrap` (from the
 /// onboarded flag + recurring/backup state) and injected via override, so the
-/// app opens directly on its real destination — Home, Onboarding or the
-/// recurring loader. The brand splash is the native launch screen
+/// app opens directly on its real destination: Home or Onboarding. The brand splash is the native launch screen
 /// (flutter_native_splash), dismissed by the engine on the first frame.
 final initialLocationProvider = Provider<String>((ref) => '/');
 
@@ -161,9 +145,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: ref.read(initialLocationProvider),
-    refreshListenable: GoRouterRefreshStream(
-      ref.watch(recurringProcessResultProvider.notifier).stream,
-    ),
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
       final onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
@@ -173,6 +154,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation == '/ask-kuber') return '/more/ask-kuber';
       if (state.matchedLocation == '/tools') return '/more/tools';
       if (state.matchedLocation == '/notes') return '/more/notes';
+      if (state.matchedLocation == '/reminders') return '/more/reminders';
       if (state.matchedLocation == '/advanced-analytics') return null;
       if (state.matchedLocation == '/home') return '/';
       if (state.matchedLocation == '/sms-import') return '/more/sms-import';
@@ -191,15 +173,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If opening for the first time, go to onboarding
       if (!onboarded && !state.matchedLocation.startsWith('/onboarding')) {
         return '/onboarding';
-      }
-
-      // If onboarded and trying to go to root, check for recurring transactions
-      if (onboarded && state.matchedLocation == '/') {
-        final missedCount = ref.read(recurringProcessResultProvider);
-        final backupDue = ref.read(automaticBackupDueProvider);
-        if (missedCount > 0 || backupDue) {
-          return '/recurring-loader';
-        }
       }
 
       return null;
@@ -380,11 +353,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       GoRoute(
-        path: '/recurring-loader',
-        parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const RecurringLoaderScreen(),
-      ),
-      GoRoute(
         name: 'permissions',
         path: '/security',
         parentNavigatorKey: rootNavigatorKey,
@@ -504,7 +472,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'recurring',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const RecurringScreen(),
+                    builder: (_, s) => RecurringScreen(focus: s.extra as String?),
                   ),
                   GoRoute(
                     path: 'budgets',
@@ -609,19 +577,19 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'tools/emi-calculator',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        EmiCalculatorScreen(savedId: _savedId(s)),
+                        EmiCalculatorScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/sip-calculator',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        InvestmentReturnsCalculatorScreen(savedId: _savedId(s)),
+                        InvestmentReturnsCalculatorScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/sip-amount-finder',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        SipAmountFinderScreen(savedId: _savedId(s)),
+                        SipAmountFinderScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/tip-calculator',
@@ -643,13 +611,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'tools/fd-rd-calculator',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        FdRdCalculatorScreen(savedId: _savedId(s)),
+                        FdRdCalculatorScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/ppf-calculator',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        PpfCalculatorScreen(savedId: _savedId(s)),
+                        PpfCalculatorScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/salary-calculator',
@@ -661,13 +629,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'tools/inflation-calculator',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        InflationCalculatorScreen(savedId: _savedId(s)),
+                        InflationCalculatorScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/loan-prepayment',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, s) =>
-                        LoanPrepaymentScreen(savedId: _savedId(s)),
+                        LoanPrepaymentScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/lumpsum-vs-sip',
@@ -677,7 +645,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/goal-planner',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, s) => GoalPlannerScreen(savedId: _savedId(s)),
+                    builder: (_, s) => GoalPlannerScreen(savedId: _savedId(s), prefill: _prefill(s)),
                   ),
                   GoRoute(
                     path: 'tools/retirement-corpus',
@@ -713,6 +681,16 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const DevToolsScreen(),
                     routes: [
+                      GoRoute(
+                        path: 'schedule-debug',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, _) => const ScheduleDebugScreen(),
+                      ),
+                      GoRoute(
+                        path: 'background-tasks',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, _) => const BackgroundTasksScreen(),
+                      ),
                       GoRoute(
                         path: 'db-explorer',
                         parentNavigatorKey: rootNavigatorKey,
@@ -786,12 +764,20 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           lenderPrefill: state.uri.queryParameters['lender'],
           emiPrefill: double.tryParse(state.uri.queryParameters['emi'] ?? ''),
+          ratePrefill: double.tryParse(state.uri.queryParameters['rate'] ?? ''),
+          monthsPrefill: int.tryParse(state.uri.queryParameters['months'] ?? ''),
+          fromCalculator: state.uri.queryParameters['from'],
         ),
       ),
       GoRoute(
         path: '/loans/edit',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => AddLoanScreen(existing: state.extra as Loan?),
+      ),
+      GoRoute(
+        path: '/investments/update-values',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const UpdateValuesScreen(),
       ),
       GoRoute(
         path: '/investments/add',
@@ -802,6 +788,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           namePrefill: state.uri.queryParameters['name'],
           sipPrefill: double.tryParse(state.uri.queryParameters['sip'] ?? ''),
+          query: state.uri.queryParameters,
         ),
       ),
       GoRoute(

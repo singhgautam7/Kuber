@@ -166,9 +166,9 @@ class WidgetSyncService {
     for (final t in txns) {
       if (!_isSpendable(t) || t.createdAt.isBefore(monthStart)) continue;
       if (t.type == 'income') {
-        income += t.amount;
+        income += t.spendAmount;
       } else {
-        expense += t.amount;
+        expense += t.spendAmount;
       }
     }
     final net = income - expense;
@@ -295,7 +295,7 @@ class WidgetSyncService {
       var s = 0.0;
       for (final t in txns) {
         if (t.type == 'expense' && _isSpendable(t) && t.categoryId == categoryId && !t.createdAt.isBefore(monthStart)) {
-          s += t.amount;
+          s += t.spendAmount;
         }
       }
       return s;
@@ -391,9 +391,9 @@ class WidgetSyncService {
       final b = bucketOf(t);
       if (b < 0 || b >= count) continue;
       if (t.type == 'income') {
-        inc[b] += t.amount;
+        inc[b] += t.spendAmount;
       } else {
-        exp[b] += t.amount;
+        exp[b] += t.spendAmount;
       }
     }
     return [for (var i = 0; i < count; i++) (inc[i], exp[i])];
@@ -467,7 +467,7 @@ class WidgetSyncService {
     final byCat = <String, double>{};
     for (final t in txns) {
       if (t.type == 'expense' && !t.createdAt.isBefore(monthStart)) {
-        byCat[t.categoryId] = (byCat[t.categoryId] ?? 0) + t.amount;
+        byCat[t.categoryId] = (byCat[t.categoryId] ?? 0) + t.spendAmount;
       }
     }
     final total = byCat.values.fold(0.0, (s, v) => s + v);

@@ -110,4 +110,8 @@ dependencies {
     // setNavigationBarColor (Android 15 edge-to-edge flag). Pin a current
     // Material that migrated its date picker to the inset-compat APIs.
     implementation("com.google.android.material:material:1.13.0")
+
+    // vNext: launch task queue as expedited background work
+    // (BackgroundTasksWorker.kt).
+    implementation("androidx.work:work-runtime-ktx:2.10.5")
 }
