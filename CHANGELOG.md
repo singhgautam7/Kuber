@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
+  reminder, card due date and money you lent or borrowed on a month grid,
+  with what went out and came in. Tap a day to see its list, long-press a day
+  to add a reminder, and switch between List and Calendar any time. It opens
+  in Calendar.
+- New theme options: Expressive colours tints backgrounds with your theme
+  colour (turn it off for clean white and grey), and Pure black gives a black
+  background in dark mode on every theme. Theme changes now fade in smoothly.
+- Join the Kuber community on Telegram from About or Feedback.
+- A few buttons and chips are easier to read in dark mode.
+- A closed loan can be re-opened from its sheet. Every loan can open the EMI
+  and Loan Prepayment calculators, filled with what it knows.
+- Loan and investment icons now look like the ones in Recurring.
+- Fixed: Close loan did nothing; deleting a loan, investment or recurring
+  payment, and Skip next or Pause, did not always refresh the screen.
+- Fixed: a loan with the bank's rounded EMI showed one extra tiny EMI at the
+  end.
+- Fixed: View EMI schedule crashed for loans from demo data.
+
 - Loans, investments and recurring payments got a big upgrade. Loans show what
   you still owe, the interest in every EMI, and let you record extra payments
   or rate changes. Investments track value, gains and XIRR, and FDs work out

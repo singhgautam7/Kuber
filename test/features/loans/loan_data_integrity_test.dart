@@ -166,6 +166,90 @@ void main() {
     expect((await linked(l)).length, count, reason: 'a closed loan posts nothing');
   });
 
+  test('close, then re-open: nothing posts while closed or back-fills', () async {
+    var l = await create(start: LoanStartingPoint.originalDetails);
+    final service = LoanService(isar);
+    final endBefore = lastDate(l.schedule!);
+    await service.close(l);
+    l = await reload(l);
+    expect(loanStatus(l, const []).closed, isTrue);
+    // Three months pass while closed.
+    final later = today.add(const Duration(days: 92));
+    await processor().run(now: DateTime(later.year, later.month, later.day, 9));
+    expect(await linked(l), isEmpty, reason: 'a closed loan posts nothing');
+    await service.reopen(l, now: later);
+    l = await reload(l);
+    expect(loanStatus(l, const [], now: later).closed, isFalse);
+    expect(l.closedAt, isNull);
+    expect(l.isCompleted, isFalse);
+    expect(lastDate(l.schedule!), endBefore, reason: 'end date does not move');
+    // The next run (same day) posts nothing from the closed months.
+    await processor().run(now: DateTime(later.year, later.month, later.day, 12));
+    final txns = await linked(l);
+    expect(txns.where((t) => t.occurrenceDate! < dayKey(later)), isEmpty);
+    // Next month's EMI posts as usual.
+    final next = nextDate(l.schedule!, fromKey: dayKey(later))!;
+    final nd = dayOf(next);
+    await processor().run(now: DateTime(nd.year, nd.month, nd.day, 9));
+    expect((await linked(l)).where((t) => t.occurrenceDate == next), hasLength(1));
+  });
+
+  test('editing a running loan keeps its history and never double-posts', () async {
+    var l = await create(start: LoanStartingPoint.originalDetails);
+    final later = today.add(const Duration(days: 75));
+    await processor().run(now: DateTime(later.year, later.month, later.day, 9));
+    l = await reload(l);
+    final before = await linked(l);
+    expect(before, isNotEmpty);
+    // Edit: new name and lender, same schedule; then a rate edit that changes the EMI.
+    l
+      ..name = 'Home Loan HDFC'
+      ..lenderName = 'HDFC';
+    await LoanService(isar).save(l, l.schedule!.copy());
+    l = await reload(l);
+    await processor().run(now: DateTime(later.year, later.month, later.day, 18));
+    final after = await linked(l);
+    expect(after.length, before.length, reason: 'editing posts nothing again');
+    expect(after.map((t) => t.amount).toList(), before.map((t) => t.amount).toList(),
+        reason: 'posted EMIs are never rewritten');
+    expectPrincipalAddsUp(l, loanStatus(l, after, now: later), 3000000);
+    // Next due date posts exactly once.
+    final next = nextDate(l.schedule!, fromKey: addDays(dayKey(later), 1))!;
+    final nd = dayOf(next);
+    await processor().run(now: DateTime(nd.year, nd.month, nd.day, 9));
+    await processor().run(now: DateTime(nd.year, nd.month, nd.day, 21));
+    expect((await linked(l)).where((t) => t.occurrenceDate == next), hasLength(1));
+  });
+
+  test('flat rate: every posted EMI is the same and its split adds up', () async {
+    final first = DateTime(today.year, today.month, 5);
+    final flatEmi = (500000 + 500000 * 0.09 * 5) / 60; // 5L at 9% flat, 5 years
+    final l = await LoanService(isar).save(
+        Loan()
+          ..name = 'Bike loan'
+          ..loanType = 'vehicle'
+          ..lenderName = 'Bajaj'
+          ..accountId = '1'
+          ..principalAmount = 500000
+          ..emiAmount = flatEmi
+          ..mode = LoanMode.advanced
+          ..interestType = LoanInterestType.flatRate
+          ..startingPoint = LoanStartingPoint.originalDetails
+          ..annualRate = 9
+          ..tenureMonths = 60,
+        scheduleFrom(start: first, endType: ScheduleEnd.afterCount, endCount: 60)..autoRecord = true,
+        isNew: true);
+    final later = today.add(const Duration(days: 100));
+    await processor().run(now: DateTime(later.year, later.month, later.day, 9));
+    final txns = await linked(l);
+    expect(txns.length, inInclusiveRange(3, 4));
+    for (final t in txns) {
+      expect(t.amount, closeTo(flatEmi, 0.01));
+      expect(t.principalPart! + t.interestPart!, closeTo(t.amount, 0.001));
+      expect(t.interestPart, closeTo(500000 * 0.09 / 12, 0.01), reason: 'flat interest is the same each month');
+    }
+  });
+
   test('"outstanding today" keeps the past totals and counts from the balance', () async {
     final l = await create(
         start: LoanStartingPoint.outstandingToday,

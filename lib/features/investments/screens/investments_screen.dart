@@ -427,7 +427,7 @@ class _UpdateValuesScreenState extends ConsumerState<UpdateValuesScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(children: [
-                  KuberIconTile(icon: investmentIcon(i.investmentType)),
+                  HoldingIcon(i),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

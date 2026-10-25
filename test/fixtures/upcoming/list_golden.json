@@ -1,0 +1,450 @@
+{
+ "start/7/all": [
+  "2026-11-12T10:00:00.000|reminder|2|Mobile recharge|-349.0",
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "start/7/reminder": [
+  "2026-11-12T10:00:00.000|reminder|2|Mobile recharge|-349.0",
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null"
+ ],
+ "start/7/emi": [],
+ "start/7/sip": [],
+ "start/7/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0"
+ ],
+ "start/7/ledger": [],
+ "start/7/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "start/30/all": [
+  "2026-11-12T10:00:00.000|reminder|2|Mobile recharge|-349.0",
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "start/30/reminder": [
+  "2026-11-12T10:00:00.000|reminder|2|Mobile recharge|-349.0",
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null"
+ ],
+ "start/30/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "start/30/sip": [
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "start/30/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0"
+ ],
+ "start/30/ledger": [
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0"
+ ],
+ "start/30/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "start/90/all": [
+  "2026-11-12T10:00:00.000|reminder|2|Mobile recharge|-349.0",
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "start/90/reminder": [
+  "2026-11-12T10:00:00.000|reminder|2|Mobile recharge|-349.0",
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null"
+ ],
+ "start/90/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "start/90/sip": [
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "start/90/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0"
+ ],
+ "start/90/ledger": [
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0"
+ ],
+ "start/90/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "mid/7/all": [
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "mid/7/reminder": [
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null"
+ ],
+ "mid/7/emi": [],
+ "mid/7/sip": [],
+ "mid/7/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0"
+ ],
+ "mid/7/ledger": [],
+ "mid/7/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "mid/30/all": [
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "mid/30/reminder": [
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null"
+ ],
+ "mid/30/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "mid/30/sip": [
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "mid/30/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0"
+ ],
+ "mid/30/ledger": [
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0"
+ ],
+ "mid/30/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "mid/90/all": [
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "mid/90/reminder": [
+  "2026-11-12T18:00:00.000|reminder|3|Water purifier service|null",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null"
+ ],
+ "mid/90/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "mid/90/sip": [
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "mid/90/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0"
+ ],
+ "mid/90/ledger": [
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0"
+ ],
+ "mid/90/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "late/7/all": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "late/7/reminder": [
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null"
+ ],
+ "late/7/emi": [],
+ "late/7/sip": [],
+ "late/7/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0"
+ ],
+ "late/7/ledger": [],
+ "late/7/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "late/30/all": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "late/30/reminder": [
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null"
+ ],
+ "late/30/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "late/30/sip": [
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "late/30/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0"
+ ],
+ "late/30/ledger": [
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0"
+ ],
+ "late/30/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "late/90/all": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "late/90/reminder": [
+  "2026-11-14T09:00:00.000|reminder|6|Check credit score|null",
+  "2026-11-28T11:00:00.000|reminder|4|Renew car insurance|null"
+ ],
+ "late/90/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "late/90/sip": [
+  "2026-11-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0"
+ ],
+ "late/90/recurring": [
+  "2026-11-14T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-11-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-11-26T00:00:00.000|recurring|8|Society maintenance|-3500.0",
+  "2026-11-30T00:00:00.000|recurring|6|Salary|120000.0",
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0"
+ ],
+ "late/90/ledger": [
+  "2026-11-20T00:00:00.000|ledger|1|Rahul owes you|1500.0"
+ ],
+ "late/90/creditCard": [
+  "2026-11-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "monthEnd/7/all": [
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "monthEnd/7/reminder": [],
+ "monthEnd/7/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "monthEnd/7/sip": [],
+ "monthEnd/7/recurring": [
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|recurring|4|Maid|-750.0"
+ ],
+ "monthEnd/7/ledger": [],
+ "monthEnd/7/creditCard": [
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null"
+ ],
+ "monthEnd/30/all": [
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0",
+  "2026-12-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-12-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-30T00:00:00.000|recurring|6|Salary|120000.0"
+ ],
+ "monthEnd/30/reminder": [],
+ "monthEnd/30/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "monthEnd/30/sip": [
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0",
+  "2026-12-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0"
+ ],
+ "monthEnd/30/recurring": [
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-12-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-12-30T00:00:00.000|recurring|6|Salary|120000.0"
+ ],
+ "monthEnd/30/ledger": [],
+ "monthEnd/30/creditCard": [
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ],
+ "monthEnd/90/all": [
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0",
+  "2026-12-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-12-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null",
+  "2026-12-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0",
+  "2026-12-30T00:00:00.000|recurring|6|Salary|120000.0"
+ ],
+ "monthEnd/90/reminder": [],
+ "monthEnd/90/emi": [
+  "2026-12-05T00:00:00.000|emi|1|Home loan EMI|-21696.0",
+  "2026-12-05T00:00:00.000|emi|2|Maruti Brezza EMI|-11200.0"
+ ],
+ "monthEnd/90/sip": [
+  "2026-12-10T00:00:00.000|sip|1|Nifty 50 Index Fund|-5500.0",
+  "2026-12-28T00:00:00.000|sip|2|Parag Parikh Flexi Cap|-3000.0"
+ ],
+ "monthEnd/90/recurring": [
+  "2026-12-01T00:00:00.000|recurring|1|Rent|-18000.0",
+  "2026-12-05T00:00:00.000|recurring|2|Spotify|-119.0",
+  "2026-12-05T00:00:00.000|recurring|3|Broadband|-799.0",
+  "2026-12-05T00:00:00.000|recurring|4|Maid|-750.0",
+  "2026-12-15T00:00:00.000|recurring|5|Netflix|-649.0",
+  "2026-12-30T00:00:00.000|recurring|6|Salary|120000.0"
+ ],
+ "monthEnd/90/ledger": [],
+ "monthEnd/90/creditCard": [
+  "2026-12-05T00:00:00.000|creditCard|2:due|Payment due · HDFC Regalia|null",
+  "2026-12-16T00:00:00.000|creditCard|2:bill|Bill generated · HDFC Regalia|null"
+ ]
+}

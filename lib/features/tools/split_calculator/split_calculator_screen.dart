@@ -463,7 +463,7 @@ class _SplitTypeChips extends StatelessWidget {
               style: localeFont(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : cs.onSurface,
+                color: isSelected ? cs.onPrimary : cs.onSurface,
               ),
             ),
           ),

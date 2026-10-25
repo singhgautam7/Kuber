@@ -1,6 +1,8 @@
 // Holding sheet -> full screen (design I.3) and its actions: update value,
 // add money, past value, withdraw / close (I.5), FD early withdrawal.
 
+import '../../categories/providers/category_provider.dart';
+import '../../../shared/widgets/category_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,6 +65,24 @@ String investmentTypeLabel(BuildContext context, String t) {
   };
 }
 
+/// A holding's icon, drawn like a category (tinted square, filled glyph) in
+/// its category's colour, the same as recurring rows.
+class HoldingIcon extends ConsumerWidget {
+  final Investment investment;
+  final double size;
+  const HoldingIcon(this.investment, {super.key, this.size = 40});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cat = ref.watch(categoryMapProvider).valueOrNull?[int.tryParse(investment.categoryId)];
+    return CategoryIcon.square(
+      icon: investmentIcon(investment.investmentType),
+      rawColor: Color(cat?.colorValue ?? 0xFF26A69A),
+      size: size,
+    );
+  }
+}
+
 IconData investmentIcon(String t) => switch (t) {
       'mutual_fund' || 'sip' || 'etf' => Icons.pie_chart_rounded,
       'stocks' => Icons.show_chart_rounded,
@@ -84,6 +104,9 @@ String compoundingLabel(BuildContext context, CompoundingFrequency f) {
 }
 
 Future<bool> confirmDeleteInvestment(BuildContext context, WidgetRef ref, Investment i) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
@@ -100,7 +123,7 @@ Future<bool> confirmDeleteInvestment(BuildContext context, WidgetRef ref, Invest
     ),
   );
   if (ok != true) return false;
-  await ref.read(investmentListProvider.notifier).deleteInvestment(i);
+  await container.read(investmentListProvider.notifier).deleteInvestment(i);
   return true;
 }
 
@@ -250,7 +273,7 @@ class HoldingSheet extends ConsumerWidget {
     return MoneySummarySheet(
       contextLabel: investmentTypeLabel(context, i.investmentType),
       title: i.name,
-      leading: KuberIconTile(icon: investmentIcon(i.investmentType), tone: KuberTone.primary, size: 48),
+      leading: HoldingIcon(i, size: 48),
       body: body,
       primary: closed
           ? null
@@ -482,7 +505,7 @@ class _HoldingFullScreenState extends ConsumerState<HoldingFullScreen> {
             child: Text(l.deleteLabel, style: TextStyle(color: cs.error))),
       ],
       identity: MoneyIdentity(
-        tile: KuberIconTile(icon: investmentIcon(i.investmentType), tone: KuberTone.primary, size: 48),
+        tile: HoldingIcon(i, size: 48),
         contextLabel: investmentTypeLabel(context, i.investmentType),
         headline: m(value),
         caption: fixed

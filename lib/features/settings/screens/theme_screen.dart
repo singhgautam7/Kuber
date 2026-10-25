@@ -46,6 +46,7 @@ class ThemeScreen extends ConsumerWidget {
     final previewBrightness = darkInEffect ? Brightness.dark : Brightness.light;
     final seed = ref.watch(wallpaperSeedProvider).valueOrNull;
     final dynamicOn = options.dynamicColor && hasPro;
+    final l = context.l10n;
 
     Widget optionRow({
       required Widget leading,
@@ -54,6 +55,7 @@ class ThemeScreen extends ConsumerWidget {
       required bool value,
       required ValueChanged<bool>? onChanged,
       bool highlighted = false,
+      bool enabled = true,
     }) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -64,31 +66,35 @@ class ThemeScreen extends ConsumerWidget {
           width: highlighted ? 2 : 1,
         ),
       ),
-      child: Row(
-        spacing: KuberSpace.md,
-        children: [
-          leading,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium!.copyWith(
-                    color: cs.onSurface,
+      child: AnimatedOpacity(
+        opacity: enabled ? 1 : 0.38,
+        duration: KuberMotion.of(context, KuberMotion.fast),
+        child: Row(
+          spacing: KuberSpace.md,
+          children: [
+            leading,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      color: cs.onSurface,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall!.copyWith(
-                    color: cs.onSurfaceVariant,
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall!.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Switch(value: value, onChanged: onChanged),
-        ],
+            Switch(value: value, onChanged: enabled ? onChanged : null),
+          ],
+        ),
       ),
     );
 
@@ -115,10 +121,43 @@ class ThemeScreen extends ConsumerWidget {
                 settings.setThemeMode(m);
               },
             ),
-            if (darkInEffect &&
-                (dynamicOn || themeFamilyHasAmoled(variant))) ...[
-              const SizedBox(height: KuberSpace.md),
-              optionRow(
+            // Expressive colours and Pure black (theme-surfaces-v1): always
+            // shown, free on every family. Pure black only acts in dark.
+            const SizedBox(height: KuberSpace.md),
+            optionRow(
+              leading: Container(
+                width: 30,
+                height: 30,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(9),
+                  border: Border.all(color: cs.outlineVariant),
+                ),
+                child: Row(children: [
+                  for (final on in [true, false])
+                    Expanded(
+                      child: ColoredBox(
+                        color: AppTheme.schemeOf(variant, previewBrightness,
+                                expressive: on, seed: dynamicOn ? seed : null)
+                            .surfaceContainerHigh,
+                      ),
+                    ),
+                ]),
+              ),
+              title: l.themeExpressiveTitle,
+              subtitle: l.themeExpressiveSubtitle,
+              value: options.expressive,
+              onChanged: (v) {
+                HapticFeedback.selectionClick();
+                optionsCtl.setExpressive(v);
+              },
+            ),
+            const SizedBox(height: KuberSpace.md),
+            Semantics(
+              label: mode == ThemeMode.light ? l.themePureBlackDisabledA11y : null,
+              excludeSemantics: mode == ThemeMode.light,
+              child: optionRow(
+                enabled: mode != ThemeMode.light,
                 leading: Container(
                   width: 30,
                   height: 30,
@@ -128,29 +167,46 @@ class ThemeScreen extends ConsumerWidget {
                     border: Border.all(color: cs.outlineVariant),
                   ),
                 ),
-                title: 'True black (AMOLED)',
-                subtitle: 'Appears only while dark is active',
-                value: options.amoled || variant == ThemeVariant.signature,
-                // Signature's dark page is already true black.
-                onChanged: variant == ThemeVariant.signature && !dynamicOn
-                    ? null
-                    : (v) => optionsCtl.setAmoled(v),
+                title: l.themePureBlackTitle,
+                subtitle: l.themePureBlackSubtitle,
+                value: options.pureBlack && mode != ThemeMode.light,
+                onChanged: (v) {
+                  HapticFeedback.selectionClick();
+                  optionsCtl.setPureBlack(v);
+                },
               ),
-            ],
+            ),
+            // System only: when Pure black applies. (Light shows no helper,
+            // the dimmed row says it; user review.)
+            if (mode == ThemeMode.system)
+              Padding(
+                padding: const EdgeInsets.only(left: KuberSpace.lg, top: KuberSpace.sm),
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Icon(Icons.info_outline_rounded, size: 14, color: cs.onSurfaceVariant),
+                    Expanded(
+                      child: Text(
+                        l.themePureBlackHelperSystem,
+                        style: theme.textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: KuberSpace.lg),
             _TwoColumnGrid(
               children: [
                 for (final v in kSelectableVariants)
                   _FamilyCard(
                     name: themeFamilyName(v),
-                    blurb:
-                        themeFamilyHasAmoled(v) && v != ThemeVariant.signature
-                        ? '${themeFamilyBlurb(v)} · true black'
-                        : themeFamilyBlurb(v),
+                    blurb: themeFamilyBlurb(v),
+                    // Each card previews its theme under the current switches.
                     scheme: AppTheme.schemeOf(
                       v,
                       previewBrightness,
-                      amoled: options.amoled,
+                      expressive: options.expressive,
+                      pureBlack: options.pureBlack,
                     ),
                     selected: !dynamicOn && v == variant,
                     locked: !hasPro && v != ThemeVariant.signature,

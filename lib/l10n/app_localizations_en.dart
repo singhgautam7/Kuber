@@ -5237,7 +5237,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeV33TourCardHideA11y => 'Hide this card';
 
   @override
-  String get homeV33TourCardHidden => 'You can find Why Kuber? in More.';
+  String get homeV33TourCardHidden => 'You can find `Why Kuber` in More.';
 
   @override
   String get homeV33TourNext => 'Next';
@@ -7740,4 +7740,294 @@ class AppLocalizationsEn extends AppLocalizations {
   String msLoansReduceEmiResult(String month, String emi) {
     return 'Ends $month as now · EMI becomes $emi';
   }
+
+  @override
+  String get communityTelegramTitle => 'Join the Kuber community';
+
+  @override
+  String get communityTelegramSubtitle =>
+      'Official Telegram channel for news, tips and help';
+
+  @override
+  String get ueTitle => 'Upcoming events';
+
+  @override
+  String get ueViewList => 'List';
+
+  @override
+  String get ueViewCalendar => 'Calendar';
+
+  @override
+  String get ueFilter => 'Filter';
+
+  @override
+  String get ueFilterHint => 'Applies to List and Calendar.';
+
+  @override
+  String get ueFilterShow => 'Show';
+
+  @override
+  String get ueFilterType => 'Type';
+
+  @override
+  String get ueFilterReset => 'Reset';
+
+  @override
+  String ueA11yFilter(int count) {
+    return 'Filter, $count applied';
+  }
+
+  @override
+  String get ueRange7 => 'Next 7 days';
+
+  @override
+  String get ueRange30 => 'Next 30 days';
+
+  @override
+  String get ueRange90 => 'Next 90 days';
+
+  @override
+  String get ueTypeAll => 'All';
+
+  @override
+  String get ueTypeReminders => 'Reminders';
+
+  @override
+  String get ueTypeEmis => 'EMIs';
+
+  @override
+  String get ueTypeSips => 'SIPs';
+
+  @override
+  String get ueTypeRecurring => 'Recurring';
+
+  @override
+  String get ueTypeLedger => 'Ledger';
+
+  @override
+  String get uePillReminder => 'Reminder';
+
+  @override
+  String get uePillEmi => 'EMI';
+
+  @override
+  String get uePillSip => 'SIP';
+
+  @override
+  String get uePillFd => 'FD';
+
+  @override
+  String get uePillRecurring => 'Recurring';
+
+  @override
+  String get uePillLedger => 'Ledger';
+
+  @override
+  String get uePillCard => 'Credit card';
+
+  @override
+  String ueEmptyList(int days) {
+    return 'No upcoming events in the next $days days';
+  }
+
+  @override
+  String get ueEmptyListHint =>
+      'Reminders, EMIs, SIPs, recurring and ledger dates show up here.';
+
+  @override
+  String ueOutAmount(String amount) {
+    return '$amount out';
+  }
+
+  @override
+  String ueInAmount(String amount) {
+    return '$amount in';
+  }
+
+  @override
+  String ueCardBills(String amount) {
+    return 'Card bills $amount';
+  }
+
+  @override
+  String ueDayToday(String date) {
+    return 'Today, $date';
+  }
+
+  @override
+  String get ueCardNote =>
+      'Card bills are not in the total. That spending was recorded when you used the card.';
+
+  @override
+  String get ueEmptyDay => 'Nothing scheduled for this day';
+
+  @override
+  String get ueEmptyMonth => 'Nothing scheduled this month';
+
+  @override
+  String get ueStatusUpcoming => 'Upcoming';
+
+  @override
+  String get ueStatusConfirm => 'Needs confirmation';
+
+  @override
+  String get ueStatusDone => 'Done';
+
+  @override
+  String get ueStatusSkipped => 'Skipped';
+
+  @override
+  String get ueStatusOverdue => 'Overdue';
+
+  @override
+  String get ueLegendTitle => 'About the calendar';
+
+  @override
+  String get ueLegendIntro =>
+      'Each dot is one event. Up to 3 dots show, then a count.';
+
+  @override
+  String get ueLegendReminders => 'Reminders';
+
+  @override
+  String get ueLegendEmis => 'EMIs';
+
+  @override
+  String get ueLegendSips => 'SIPs and FDs';
+
+  @override
+  String get ueLegendRecurring => 'Recurring';
+
+  @override
+  String get ueLegendLedger => 'Lent and borrowed';
+
+  @override
+  String get ueLegendCards => 'Credit cards';
+
+  @override
+  String get ueLegendDays => 'Days';
+
+  @override
+  String get ueLegendToday => 'Today';
+
+  @override
+  String get ueLegendSelected => 'Selected';
+
+  @override
+  String get ueLegendOverdue => 'Overdue';
+
+  @override
+  String get ueLegendSkipped => 'Skipped';
+
+  @override
+  String get ueLegendOtherMonth => 'Other month';
+
+  @override
+  String get ueLegendTotals =>
+      'Out and in add up the month, without skipped items and reminders that have no amount. Card bills are shown on their own, because that spending was recorded when you used the card.';
+
+  @override
+  String ueA11yToday(String date) {
+    return 'Today, $date';
+  }
+
+  @override
+  String get ueA11ySelected => 'selected';
+
+  @override
+  String ueA11yEvents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count events',
+      one: '1 event',
+      zero: 'no events',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ueA11yDue(String amount) {
+    return '$amount due';
+  }
+
+  @override
+  String ueA11yCardBill(String amount) {
+    return 'card bill $amount';
+  }
+
+  @override
+  String ueA11yOverdue(int count) {
+    return '$count overdue';
+  }
+
+  @override
+  String ueA11yConfirm(int count) {
+    return '$count needs confirmation';
+  }
+
+  @override
+  String get ueA11yHidden => 'amounts hidden';
+
+  @override
+  String ueA11yOtherMonthNext(String date) {
+    return '$date, next month';
+  }
+
+  @override
+  String ueA11yOtherMonthPrev(String date) {
+    return '$date, previous month';
+  }
+
+  @override
+  String ueA11yPrevMonth(String month) {
+    return 'Previous month, $month';
+  }
+
+  @override
+  String ueA11yNextMonth(String month) {
+    return 'Next month, $month';
+  }
+
+  @override
+  String ueA11yWeekCollapsed(String date) {
+    return 'Week of $date, collapsed. Double tap to show the month.';
+  }
+
+  @override
+  String get ueA11yHandle => 'Show the whole month';
+
+  @override
+  String get themeExpressiveTitle => 'Expressive colours';
+
+  @override
+  String get themeExpressiveSubtitle =>
+      'Tint backgrounds with your theme colour';
+
+  @override
+  String get themePureBlackTitle => 'Pure black';
+
+  @override
+  String get themePureBlackSubtitle =>
+      'Black background in dark mode. Saves battery on OLED screens.';
+
+  @override
+  String get themePureBlackHelperSystem =>
+      'Applies when your phone is in dark mode';
+
+  @override
+  String get themePureBlackDisabledA11y =>
+      'Pure black. Off. Works in dark mode.';
+
+  @override
+  String get msLoansReopen => 'Re-open loan';
+
+  @override
+  String msLoansReopenTitle(String name) {
+    return 'Re-open $name?';
+  }
+
+  @override
+  String get msLoansReopenBody =>
+      'Its EMIs start again from the next due date. Nothing is added for the time it was closed.';
 }

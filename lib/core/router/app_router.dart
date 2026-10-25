@@ -823,7 +823,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reminders/add',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const AddEditReminderScreen(),
+        builder: (_, state) => AddEditReminderScreen(
+          initialDate: DateTime.tryParse(state.uri.queryParameters['date'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/reminders/edit',

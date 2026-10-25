@@ -23,7 +23,10 @@ import '../providers/reminders_provider.dart';
 class AddEditReminderScreen extends ConsumerStatefulWidget {
   final Reminder? existing;
 
-  const AddEditReminderScreen({super.key, this.existing});
+  /// New reminder on this day at 10:00 (long-press a calendar day).
+  final DateTime? initialDate;
+
+  const AddEditReminderScreen({super.key, this.existing, this.initialDate});
 
   @override
   ConsumerState<AddEditReminderScreen> createState() =>
@@ -60,6 +63,9 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
       _transactionType = e.transactionType ?? 'expense';
       _categoryId = int.tryParse(e.categoryId ?? '');
       _repeat = e.repeat;
+    } else if (widget.initialDate != null) {
+      _dueDate = widget.initialDate!;
+      _dueTime = const TimeOfDay(hour: 10, minute: 0);
     } else {
       final now = DateTime.now().add(const Duration(hours: 1));
       _dueDate = now;

@@ -87,24 +87,29 @@ class OnboardingNavBar extends StatelessWidget {
                           ),
                           child: compactBack
                               ? const Icon(Icons.arrow_back_rounded, size: 24)
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.arrow_back_rounded,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: KuberSpace.sm),
-                                    Text(
-                                      'Back',
-                                      style: localeFont(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.1,
+                              // Natural width while the slot animates open;
+                              // the ClipRect above hides the rest.
+                              : OverflowBox(
+                                  maxWidth: double.infinity,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.arrow_back_rounded,
+                                        size: 20,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: KuberSpace.sm),
+                                      Text(
+                                        'Back',
+                                        style: localeFont(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                         ),
                       ),

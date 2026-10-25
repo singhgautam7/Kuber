@@ -240,7 +240,7 @@ class _MethodRow extends StatelessWidget {
                   : Border.all(color: cs.outlineVariant, width: 1.5),
             ),
             child: isWinner
-                ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
+                ? Icon(Icons.check_rounded, size: 13, color: context.kuberMoney.onIncome)
                 : null,
           ),
           const SizedBox(width: 9),

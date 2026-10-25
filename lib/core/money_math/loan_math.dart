@@ -413,7 +413,12 @@ Amortization amortize({
   final io = kind == RateKind.interestOnlyFirst ? ioMonths : 0;
   var bal = principal;
   var r = rate;
-  var pay = emi ?? regularEmi(kind, principal, rate, months, ioMonths: io);
+  final planEmi = regularEmi(kind, principal, rate, months, ioMonths: io);
+  var pay = emi ?? planEmi;
+  // The user's EMI is the plan's EMI rounded to the rupee (as banks quote
+  // it): the last planned EMI takes the residue, so the tenure stays. Any
+  // prepayment, adjustment or rate change ends this.
+  var bankRounded = emi != null && (emi - planEmi).abs() <= 1;
   // Flat: interest stays on the original principal; principal part fixed.
   final base = flatBase ?? principal;
   var flatPrincipalPart = months > 0 ? principal / months : principal;
@@ -435,8 +440,10 @@ Amortization amortize({
         case AmortEventKind.charge:
           break;
         case AmortEventKind.adjustment:
+          bankRounded = false;
           bal = max(0, bal + e.amount);
         case AmortEventKind.prepayment:
+          bankRounded = false;
           // "Adjust EMI" keeps the current end date: the EMIs left at the
           // current payment (an earlier reduce-tenure prepayment moved it).
           final left = keepEnd(i, remaining);
@@ -450,6 +457,7 @@ Amortization amortize({
             }
           }
         case AmortEventKind.rateChange:
+          bankRounded = false;
           final left = keepEnd(i, remaining);
           r = e.newRate ?? r;
           if (kind == RateKind.flat) {
@@ -470,8 +478,13 @@ Amortization amortize({
       princ = isIo ? 0 : pay - interest;
     }
     if (princ < 0) princ = 0;
-    // Final EMI: whatever is left (no dust row).
-    if (princ > bal || bal - princ < 0.005) princ = bal;
+    // Final EMI: whatever is left. A residue under 1% of the EMI also goes
+    // into this payment, instead of a tiny extra one.
+    if (princ > bal ||
+        bal - princ < max(0.005, pay * 0.01) ||
+        (bankRounded && i == months - 1)) {
+      princ = bal;
+    }
     bal -= princ;
     rows.add(AmortRow(
       index: i + 1,

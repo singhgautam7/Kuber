@@ -9443,7 +9443,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeV33TourCardHidden.
   ///
   /// In en, this message translates to:
-  /// **'You can find Why Kuber? in More.'**
+  /// **'You can find `Why Kuber` in More.'**
   String get homeV33TourCardHidden;
 
   /// No description provided for @homeV33TourNext.
@@ -13680,6 +13680,480 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ends {month} as now · EMI becomes {emi}'**
   String msLoansReduceEmiResult(String month, String emi);
+
+  /// Row that opens the official Kuber Telegram channel (About and Feedback).
+  ///
+  /// In en, this message translates to:
+  /// **'Join the Kuber community'**
+  String get communityTelegramTitle;
+
+  /// Subtitle under the Telegram community row.
+  ///
+  /// In en, this message translates to:
+  /// **'Official Telegram channel for news, tips and help'**
+  String get communityTelegramSubtitle;
+
+  /// No description provided for @ueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming events'**
+  String get ueTitle;
+
+  /// No description provided for @ueViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get ueViewList;
+
+  /// No description provided for @ueViewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get ueViewCalendar;
+
+  /// No description provided for @ueFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get ueFilter;
+
+  /// No description provided for @ueFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to List and Calendar.'**
+  String get ueFilterHint;
+
+  /// No description provided for @ueFilterShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get ueFilterShow;
+
+  /// No description provided for @ueFilterType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get ueFilterType;
+
+  /// No description provided for @ueFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get ueFilterReset;
+
+  /// No description provided for @ueA11yFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter, {count} applied'**
+  String ueA11yFilter(int count);
+
+  /// No description provided for @ueRange7.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 7 days'**
+  String get ueRange7;
+
+  /// No description provided for @ueRange30.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 30 days'**
+  String get ueRange30;
+
+  /// No description provided for @ueRange90.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 90 days'**
+  String get ueRange90;
+
+  /// No description provided for @ueTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get ueTypeAll;
+
+  /// No description provided for @ueTypeReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get ueTypeReminders;
+
+  /// No description provided for @ueTypeEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs'**
+  String get ueTypeEmis;
+
+  /// No description provided for @ueTypeSips.
+  ///
+  /// In en, this message translates to:
+  /// **'SIPs'**
+  String get ueTypeSips;
+
+  /// No description provided for @ueTypeRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get ueTypeRecurring;
+
+  /// No description provided for @ueTypeLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get ueTypeLedger;
+
+  /// No description provided for @uePillReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get uePillReminder;
+
+  /// No description provided for @uePillEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI'**
+  String get uePillEmi;
+
+  /// No description provided for @uePillSip.
+  ///
+  /// In en, this message translates to:
+  /// **'SIP'**
+  String get uePillSip;
+
+  /// No description provided for @uePillFd.
+  ///
+  /// In en, this message translates to:
+  /// **'FD'**
+  String get uePillFd;
+
+  /// No description provided for @uePillRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get uePillRecurring;
+
+  /// No description provided for @uePillLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get uePillLedger;
+
+  /// No description provided for @uePillCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card'**
+  String get uePillCard;
+
+  /// No description provided for @ueEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming events in the next {days} days'**
+  String ueEmptyList(int days);
+
+  /// No description provided for @ueEmptyListHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders, EMIs, SIPs, recurring and ledger dates show up here.'**
+  String get ueEmptyListHint;
+
+  /// No description provided for @ueOutAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} out'**
+  String ueOutAmount(String amount);
+
+  /// No description provided for @ueInAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} in'**
+  String ueInAmount(String amount);
+
+  /// No description provided for @ueCardBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Card bills {amount}'**
+  String ueCardBills(String amount);
+
+  /// No description provided for @ueDayToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, {date}'**
+  String ueDayToday(String date);
+
+  /// No description provided for @ueCardNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Card bills are not in the total. That spending was recorded when you used the card.'**
+  String get ueCardNote;
+
+  /// No description provided for @ueEmptyDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing scheduled for this day'**
+  String get ueEmptyDay;
+
+  /// No description provided for @ueEmptyMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing scheduled this month'**
+  String get ueEmptyMonth;
+
+  /// No description provided for @ueStatusUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get ueStatusUpcoming;
+
+  /// No description provided for @ueStatusConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs confirmation'**
+  String get ueStatusConfirm;
+
+  /// No description provided for @ueStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get ueStatusDone;
+
+  /// No description provided for @ueStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get ueStatusSkipped;
+
+  /// No description provided for @ueStatusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get ueStatusOverdue;
+
+  /// No description provided for @ueLegendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About the calendar'**
+  String get ueLegendTitle;
+
+  /// No description provided for @ueLegendIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Each dot is one event. Up to 3 dots show, then a count.'**
+  String get ueLegendIntro;
+
+  /// No description provided for @ueLegendReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get ueLegendReminders;
+
+  /// No description provided for @ueLegendEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs'**
+  String get ueLegendEmis;
+
+  /// No description provided for @ueLegendSips.
+  ///
+  /// In en, this message translates to:
+  /// **'SIPs and FDs'**
+  String get ueLegendSips;
+
+  /// No description provided for @ueLegendRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get ueLegendRecurring;
+
+  /// No description provided for @ueLegendLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Lent and borrowed'**
+  String get ueLegendLedger;
+
+  /// No description provided for @ueLegendCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit cards'**
+  String get ueLegendCards;
+
+  /// No description provided for @ueLegendDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get ueLegendDays;
+
+  /// No description provided for @ueLegendToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get ueLegendToday;
+
+  /// No description provided for @ueLegendSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get ueLegendSelected;
+
+  /// No description provided for @ueLegendOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get ueLegendOverdue;
+
+  /// No description provided for @ueLegendSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get ueLegendSkipped;
+
+  /// No description provided for @ueLegendOtherMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Other month'**
+  String get ueLegendOtherMonth;
+
+  /// No description provided for @ueLegendTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'Out and in add up the month, without skipped items and reminders that have no amount. Card bills are shown on their own, because that spending was recorded when you used the card.'**
+  String get ueLegendTotals;
+
+  /// No description provided for @ueA11yToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, {date}'**
+  String ueA11yToday(String date);
+
+  /// No description provided for @ueA11ySelected.
+  ///
+  /// In en, this message translates to:
+  /// **'selected'**
+  String get ueA11ySelected;
+
+  /// No description provided for @ueA11yEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no events} =1{1 event} other{{count} events}}'**
+  String ueA11yEvents(int count);
+
+  /// No description provided for @ueA11yDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} due'**
+  String ueA11yDue(String amount);
+
+  /// No description provided for @ueA11yCardBill.
+  ///
+  /// In en, this message translates to:
+  /// **'card bill {amount}'**
+  String ueA11yCardBill(String amount);
+
+  /// No description provided for @ueA11yOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} overdue'**
+  String ueA11yOverdue(int count);
+
+  /// No description provided for @ueA11yConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} needs confirmation'**
+  String ueA11yConfirm(int count);
+
+  /// No description provided for @ueA11yHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'amounts hidden'**
+  String get ueA11yHidden;
+
+  /// No description provided for @ueA11yOtherMonthNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, next month'**
+  String ueA11yOtherMonthNext(String date);
+
+  /// No description provided for @ueA11yOtherMonthPrev.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, previous month'**
+  String ueA11yOtherMonthPrev(String date);
+
+  /// No description provided for @ueA11yPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month, {month}'**
+  String ueA11yPrevMonth(String month);
+
+  /// No description provided for @ueA11yNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month, {month}'**
+  String ueA11yNextMonth(String month);
+
+  /// No description provided for @ueA11yWeekCollapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}, collapsed. Double tap to show the month.'**
+  String ueA11yWeekCollapsed(String date);
+
+  /// No description provided for @ueA11yHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the whole month'**
+  String get ueA11yHandle;
+
+  /// Switch title. UK spelling, matches "Dynamic colour".
+  ///
+  /// In en, this message translates to:
+  /// **'Expressive colours'**
+  String get themeExpressiveTitle;
+
+  /// Switch subtitle. Always shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Tint backgrounds with your theme colour'**
+  String get themeExpressiveSubtitle;
+
+  /// Switch title. Replaces "True black (AMOLED)".
+  ///
+  /// In en, this message translates to:
+  /// **'Pure black'**
+  String get themePureBlackTitle;
+
+  /// Switch subtitle. Always shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Black background in dark mode. Saves battery on OLED screens.'**
+  String get themePureBlackSubtitle;
+
+  /// Helper under the row in System mode. The switch is enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies when your phone is in dark mode'**
+  String get themePureBlackHelperSystem;
+
+  /// TalkBack label for the disabled switch in Light mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure black. Off. Works in dark mode.'**
+  String get themePureBlackDisabledA11y;
+
+  /// No description provided for @msLoansReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-open loan'**
+  String get msLoansReopen;
+
+  /// No description provided for @msLoansReopenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-open {name}?'**
+  String msLoansReopenTitle(String name);
+
+  /// No description provided for @msLoansReopenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its EMIs start again from the next due date. Nothing is added for the time it was closed.'**
+  String get msLoansReopenBody;
 }
 
 class _AppLocalizationsDelegate

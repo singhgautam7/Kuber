@@ -55,6 +55,11 @@ void _dismissCurrent({bool restoreProgress = true}) {
 void _restoreProgress() {
   final p = _progress;
   if (p == null || _currentEntry != null) return;
+  // The app was rebuilt meanwhile (restore, clear data): its overlay is gone.
+  if (!p.overlay.mounted) {
+    _progress = null;
+    return;
+  }
   _insert(
     p.overlay,
     (controller) => _KuberSnackBarWidget(

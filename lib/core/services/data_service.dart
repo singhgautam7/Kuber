@@ -442,6 +442,9 @@ class DataService {
   /// Generates mock data.
   Future<void> generateMockData() async {
     await MockDataService.generate(isar);
+    // Demo loans, SIPs and rules are written in the old shape; give them
+    // schedules the same way a restore does.
+    await VNextMigration.run(isar);
     // Upsert suggestions for all generated transactions
     await _rebuildSuggestions();
   }

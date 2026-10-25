@@ -118,13 +118,15 @@ class _HomeV2TopSlotState extends ConsumerState<HomeV2TopSlot> {
 
     // Collapse 230 ms / expand 240 ms easeOutCubic with a 150 ms fade;
     // reduced motion: 90 ms cross-fade (suggestion-rules.md §4).
-    // While Home is not showing, swap with no transition.
+    // While Home is not showing, swap with no visible transition. 1 ms, not
+    // 0: a zero-length AnimatedSize completes inside its own layout, which
+    // asserts when Home relayouts behind another screen (language change).
     final instant = !active;
     final reduced = MediaQuery.disableAnimationsOf(context);
     return AnimatedSize(
-      duration: Duration(milliseconds: instant ? 0 : (reduced ? 90 : 240)),
+      duration: Duration(milliseconds: instant ? 1 : (reduced ? 90 : 240)),
       reverseDuration: Duration(
-        milliseconds: instant ? 0 : (reduced ? 90 : 230),
+        milliseconds: instant ? 1 : (reduced ? 90 : 230),
       ),
       curve: Curves.easeOutCubic,
       alignment: Alignment.topCenter,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../accounts/widgets/account_detail_sheet.dart';
 import '../../ledger/widgets/ledger_detail_sheet.dart';
@@ -11,22 +12,29 @@ import '../../recurring/widgets/rule_sheet.dart';
 import '../../reminders/widgets/reminder_view_sheet.dart';
 import '../engine/event_aggregator.dart';
 
-/// Pill label + accent color for a source type, consistent across the home
-/// widget and the full screen (3a/3d).
-({String label, Color color}) eventSourceStyle(
+/// Type label, colour and icon (upcoming-calendar-v1 §2, decision 7). The
+/// colours are fixed categorical tokens (same in every theme family), shared
+/// by the List pills, the calendar dots and the type tiles. [fd] picks the FD
+/// label for an FD maturity under the SIPs type.
+({String label, Color color, IconData icon}) eventSourceStyle(
   BuildContext context,
-  String sourceType,
-) {
-  final cs = Theme.of(context).colorScheme;
+  String sourceType, {
+  bool fd = false,
+}) {
+  final c = context.kuberChart.categorical;
+  final l = context.l10n;
   return switch (sourceType) {
-    'reminder' => (label: 'REMINDER', color: cs.primary),
-    'emi' => (label: 'EMI', color: context.kuberChart.eventEmi),
-    'sip' => (label: 'SIP', color: context.kuberMoney.income),
-    'recurring' => (label: 'RECURRING', color: context.kuberMoney.warning),
-    'creditCard' => (label: 'CREDIT CARD', color: cs.primary),
-    _ => (label: 'LEDGER', color: context.kuberChart.eventLedger),
+    'reminder' => (label: l.uePillReminder, color: c[0], icon: Icons.notifications_outlined),
+    'emi' => (label: l.uePillEmi, color: c[6], icon: Icons.account_balance_outlined),
+    'sip' => (label: fd ? l.uePillFd : l.uePillSip, color: c[4], icon: Icons.savings_outlined),
+    'recurring' => (label: l.uePillRecurring, color: c[2], icon: Icons.repeat_rounded),
+    'creditCard' => (label: l.uePillCard, color: c[3], icon: Icons.credit_card_outlined),
+    _ => (label: l.uePillLedger, color: c[1], icon: Icons.handshake_outlined),
   };
 }
+
+/// The six filter / legend types, in day-list order.
+const kUpcomingTypes = ['reminder', 'emi', 'sip', 'recurring', 'ledger', 'creditCard'];
 
 /// Opens the tapped event's source detail. Read-only navigation — never
 /// mutates the source records.
@@ -41,6 +49,8 @@ void openUpcomingEventSource(
     case LoanEmiEvent(:final loan):
       showLoanSheet(context, ref, loan);
     case InvestmentSipEvent(:final investment):
+      showHoldingSheet(context, ref, investment);
+    case InvestmentMaturityEvent(:final investment):
       showHoldingSheet(context, ref, investment);
     case RecurringEvent(:final rule):
       showRuleSheet(context, ref, rule);
@@ -68,12 +78,13 @@ void openUpcomingEventSource(
 /// Small tinted source-type pill.
 class EventSourcePill extends StatelessWidget {
   final String sourceType;
+  final bool fd;
 
-  const EventSourcePill({super.key, required this.sourceType});
+  const EventSourcePill({super.key, required this.sourceType, this.fd = false});
 
   @override
   Widget build(BuildContext context) {
-    final style = eventSourceStyle(context, sourceType);
+    final style = eventSourceStyle(context, sourceType, fd: fd);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
@@ -88,6 +99,28 @@ class EventSourcePill extends StatelessWidget {
           color: style.color,
         ),
       ),
+    );
+  }
+}
+
+/// 40 dp type tile: the type colour as a light container with its icon
+/// (calendar day list leading slot, filter and legend rows).
+class EventTypeTile extends StatelessWidget {
+  final String sourceType;
+  final double size;
+  const EventTypeTile({super.key, required this.sourceType, this.size = 40});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = eventSourceStyle(context, sourceType);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: style.color.withValues(alpha: 0.16),
+        borderRadius: KuberShape.mediumR,
+      ),
+      child: Icon(style.icon, size: size * 0.5, color: style.color),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/constants/about_l10n.dart' show kKuberTelegramUrl;
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
@@ -252,6 +253,19 @@ Currency    : ${currency.name} (${currency.code})
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: KuberSpace.sectionGap - 4),
+                  KuberGroup(
+                    children: [
+                      KuberListRow(
+                        leading: const KuberIconTile(icon: Icons.forum_outlined),
+                        title: context.l10n.communityTelegramTitle,
+                        subtitle: context.l10n.communityTelegramSubtitle,
+                        trailing: const KuberChevron(),
+                        onTap: () => launchUrl(Uri.parse(kKuberTelegramUrl),
+                            mode: LaunchMode.externalApplication),
+                      ),
+                    ],
                   ),
                 ],
               ),

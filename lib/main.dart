@@ -133,8 +133,12 @@ Future<void> _bootstrap() async {
   var bootShowCurrencyCode = false;
   try {
     final prefs = await SharedPreferences.getInstance();
+    // Once, before the first frame: Expressive colours / Pure black defaults
+    // for existing users (theme-surfaces-v1, open-decisions.md 1).
+    await migrateThemeSurfaces(prefs);
     bootThemeOptions = ThemeOptions(
-      amoled: prefs.getBool(PrefsKeys.themeAmoled) ?? false,
+      expressive: prefs.getBool(PrefsKeys.themeExpressive) ?? true,
+      pureBlack: prefs.getBool(PrefsKeys.themeAmoled) ?? false,
       dynamicColor: prefs.getBool(PrefsKeys.themeDynamicColor) ?? false,
     );
     // Fresh install: light until onboarding saves a choice (the setup page

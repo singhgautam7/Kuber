@@ -233,19 +233,32 @@ class _MonthlySummary extends ConsumerWidget {
             KuberInfoGlyph(onTap: () => showMoneyInfo(context, ref, MoneyInfo.monthly)),
           ]),
           const SizedBox(height: 4),
-          Wrap(crossAxisAlignment: WrapCrossAlignment.end, spacing: 6, runSpacing: 4, children: [
-            Text(fmt.formatCurrency(total.round()), style: tt.headlineMedium),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(l.msRecOut, style: tt.bodyLarge!.copyWith(color: cs.onSurfaceVariant)),
-            ),
-            const SizedBox(width: 12),
-            Text(fmt.formatCurrency(hub.income.round()),
-                style: tt.headlineSmall!.copyWith(color: money.income)),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 3),
-              child: Text(l.msRecIn, style: tt.bodyLarge!.copyWith(color: cs.onSurfaceVariant)),
-            ),
+          // Out on the left, In on the right, same size (like the Loans hero).
+          Row(children: [
+            for (final (amount, label, color, end) in [
+              (total, l.msRecOut, cs.onSurface, false),
+              (hub.income, l.msRecIn, money.income, true),
+            ]) ...[
+              if (end) const SizedBox(width: 16),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(fmt.formatCurrency(amount.round()),
+                          style: tt.headlineMedium!.copyWith(
+                              color: color, fontFeatures: const [FontFeature.tabularFigures()])),
+                      const SizedBox(width: 6),
+                      Text(label, style: tt.bodyLarge!.copyWith(color: cs.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ]),
           if (total > 0) ...[
             const SizedBox(height: 12),

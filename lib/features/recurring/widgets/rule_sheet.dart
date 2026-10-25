@@ -35,6 +35,9 @@ void showRuleSheet(BuildContext context, WidgetRef ref, RecurringRule rule) =>
     showMoneySheet<void>(context, RuleSheet(rule: rule));
 
 Future<void> confirmDeleteRule(BuildContext context, WidgetRef ref, RecurringRule rule) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
@@ -52,42 +55,52 @@ Future<void> confirmDeleteRule(BuildContext context, WidgetRef ref, RecurringRul
     ),
   );
   if (ok != true) return;
-  await RecurringService(ref.read(isarProvider)).delete(rule);
-  ref.invalidate(recurringListProvider);
+  await RecurringService(container.read(isarProvider)).delete(rule);
+  container.invalidate(recurringListProvider);
 }
 
 /// Skip next with the "Skipped 1 Jan. Next on 1 Apr." + Undo snackbar.
 Future<void> skipNextOccurrence(BuildContext context, WidgetRef ref, RecurringRule rule) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
+  // The snackbar goes on the app, not the closed sheet.
+  final host = Navigator.of(context, rootNavigator: true).context;
   if (blockIfProcessing(context, ref, 'recurring:${rule.id}')) return;
   final l = context.l10n;
-  final service = RecurringService(ref.read(isarProvider));
+  final service = RecurringService(container.read(isarProvider));
   final day = await service.skip(rule);
-  ref.invalidate(recurringListProvider);
-  if (day == null || !context.mounted) return;
+  container.invalidate(recurringListProvider);
+  if (day == null || !host.mounted) return;
   final next = nextDate(rule.schedule!, fromKey: addDays(day, 1));
   showKuberSnackBar(
-    context,
+    host,
     next == null
         ? l.msRecSkippedEnd(fmtDayShort(dayOf(day)))
         : l.msRecSkipped(fmtDayShort(dayOf(day)), fmtDayShort(dayOf(next))),
     actionLabel: l.msRecUndo,
     onAction: () async {
       await service.undoSkip(rule, day);
-      ref.invalidate(recurringListProvider);
+      container.invalidate(recurringListProvider);
     },
   );
 }
 
 Future<void> togglePauseRule(BuildContext context, WidgetRef ref, RecurringRule rule) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
+  // The snackbar goes on the app, not the closed sheet.
+  final host = Navigator.of(context, rootNavigator: true).context;
   if (blockIfProcessing(context, ref, 'recurring:${rule.id}')) return;
   final l = context.l10n;
   final pausing = !rule.schedule!.paused;
-  await RecurringService(ref.read(isarProvider)).setPaused(rule, pausing);
-  ref.invalidate(recurringListProvider);
-  if (!context.mounted) return;
+  await RecurringService(container.read(isarProvider)).setPaused(rule, pausing);
+  container.invalidate(recurringListProvider);
+  if (!host.mounted) return;
   final next = nextDate(rule.schedule!);
   showKuberSnackBar(
-      context,
+      host,
       pausing
           ? l.msRecPausedSnack(rule.name)
           : l.msRecResumedSnack(rule.name, next == null ? '' : fmtDayShort(dayOf(next))));

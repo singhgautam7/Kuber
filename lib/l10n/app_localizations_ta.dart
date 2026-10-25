@@ -7836,4 +7836,293 @@ class AppLocalizationsTa extends AppLocalizations {
   String msLoansReduceEmiResult(String month, String emi) {
     return 'இப்போது போல் $month இல் முடியும் · EMI $emi ஆகும்';
   }
+
+  @override
+  String get communityTelegramTitle => 'Kuber சமூகத்தில் சேருங்கள்';
+
+  @override
+  String get communityTelegramSubtitle =>
+      'செய்திகள், குறிப்புகள் மற்றும் உதவிக்கான அதிகாரப்பூர்வ Telegram சேனல்';
+
+  @override
+  String get ueTitle => 'வரவிருக்கும் நிகழ்வுகள்';
+
+  @override
+  String get ueViewList => 'பட்டியல்';
+
+  @override
+  String get ueViewCalendar => 'நாட்காட்டி';
+
+  @override
+  String get ueFilter => 'வடிகட்டி';
+
+  @override
+  String get ueFilterHint => 'பட்டியல், நாட்காட்டி இரண்டுக்கும் பொருந்தும்.';
+
+  @override
+  String get ueFilterShow => 'காட்டு';
+
+  @override
+  String get ueFilterType => 'வகை';
+
+  @override
+  String get ueFilterReset => 'மீட்டமை';
+
+  @override
+  String ueA11yFilter(int count) {
+    return 'வடிகட்டி, $count பயன்படுத்தப்பட்டது';
+  }
+
+  @override
+  String get ueRange7 => 'அடுத்த 7 நாட்கள்';
+
+  @override
+  String get ueRange30 => 'அடுத்த 30 நாட்கள்';
+
+  @override
+  String get ueRange90 => 'அடுத்த 90 நாட்கள்';
+
+  @override
+  String get ueTypeAll => 'அனைத்தும்';
+
+  @override
+  String get ueTypeReminders => 'நினைவூட்டல்கள்';
+
+  @override
+  String get ueTypeEmis => 'EMIகள்';
+
+  @override
+  String get ueTypeSips => 'SIPகள்';
+
+  @override
+  String get ueTypeRecurring => 'தொடர்ச்சியானவை';
+
+  @override
+  String get ueTypeLedger => 'லெட்ஜர்';
+
+  @override
+  String get uePillReminder => 'நினைவூட்டல்';
+
+  @override
+  String get uePillEmi => 'EMI';
+
+  @override
+  String get uePillSip => 'SIP';
+
+  @override
+  String get uePillFd => 'FD';
+
+  @override
+  String get uePillRecurring => 'தொடர்ச்சி';
+
+  @override
+  String get uePillLedger => 'லெட்ஜர்';
+
+  @override
+  String get uePillCard => 'கிரெடிட் கார்டு';
+
+  @override
+  String ueEmptyList(int days) {
+    return 'அடுத்த $days நாட்களில் நிகழ்வுகள் இல்லை';
+  }
+
+  @override
+  String get ueEmptyListHint =>
+      'நினைவூட்டல்கள், EMI, SIP, தொடர்ச்சியானவை, லெட்ஜர் தேதிகள் இங்கே தெரியும்.';
+
+  @override
+  String ueOutAmount(String amount) {
+    return '$amount செலவு';
+  }
+
+  @override
+  String ueInAmount(String amount) {
+    return '$amount வரவு';
+  }
+
+  @override
+  String ueCardBills(String amount) {
+    return 'கார்டு பில்கள் $amount';
+  }
+
+  @override
+  String ueDayToday(String date) {
+    return 'இன்று, $date';
+  }
+
+  @override
+  String get ueCardNote =>
+      'கார்டு பில்கள் மொத்தத்தில் இல்லை. கார்டைப் பயன்படுத்தியபோதே அந்தச் செலவு பதிவானது.';
+
+  @override
+  String get ueEmptyDay => 'இந்த நாளுக்கு எதுவும் திட்டமிடப்படவில்லை';
+
+  @override
+  String get ueEmptyMonth => 'இந்த மாதம் எதுவும் திட்டமிடப்படவில்லை';
+
+  @override
+  String get ueStatusUpcoming => 'வரவிருக்கிறது';
+
+  @override
+  String get ueStatusConfirm => 'உறுதிப்படுத்த வேண்டும்';
+
+  @override
+  String get ueStatusDone => 'முடிந்தது';
+
+  @override
+  String get ueStatusSkipped => 'தவிர்க்கப்பட்டது';
+
+  @override
+  String get ueStatusOverdue => 'நிலுவையில்';
+
+  @override
+  String get ueLegendTitle => 'நாட்காட்டி பற்றி';
+
+  @override
+  String get ueLegendIntro =>
+      'ஒவ்வொரு புள்ளியும் ஒரு நிகழ்வு. 3 புள்ளிகள் வரை, பிறகு எண்ணிக்கை.';
+
+  @override
+  String get ueLegendReminders => 'நினைவூட்டல்கள்';
+
+  @override
+  String get ueLegendEmis => 'EMIகள்';
+
+  @override
+  String get ueLegendSips => 'SIP, FD';
+
+  @override
+  String get ueLegendRecurring => 'தொடர்ச்சியானவை';
+
+  @override
+  String get ueLegendLedger => 'கொடுத்தது, வாங்கியது';
+
+  @override
+  String get ueLegendCards => 'கிரெடிட் கார்டுகள்';
+
+  @override
+  String get ueLegendDays => 'நாட்கள்';
+
+  @override
+  String get ueLegendToday => 'இன்று';
+
+  @override
+  String get ueLegendSelected => 'தேர்ந்தெடுத்தது';
+
+  @override
+  String get ueLegendOverdue => 'நிலுவை';
+
+  @override
+  String get ueLegendSkipped => 'தவிர்த்தது';
+
+  @override
+  String get ueLegendOtherMonth => 'வேறு மாதம்';
+
+  @override
+  String get ueLegendTotals =>
+      'செலவும் வரவும் மாதத்தின் மொத்தம், தவிர்த்தவையும் தொகை இல்லாத நினைவூட்டல்களும் இன்றி. கார்டு பில்கள் தனியே காட்டப்படும், ஏனெனில் கார்டைப் பயன்படுத்தியபோதே அந்தச் செலவு பதிவானது.';
+
+  @override
+  String ueA11yToday(String date) {
+    return 'இன்று, $date';
+  }
+
+  @override
+  String get ueA11ySelected => 'தேர்ந்தெடுக்கப்பட்டது';
+
+  @override
+  String ueA11yEvents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count நிகழ்வுகள்',
+      one: '1 நிகழ்வு',
+      zero: 'நிகழ்வுகள் இல்லை',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ueA11yDue(String amount) {
+    return '$amount செலுத்த வேண்டும்';
+  }
+
+  @override
+  String ueA11yCardBill(String amount) {
+    return 'கார்டு பில் $amount';
+  }
+
+  @override
+  String ueA11yOverdue(int count) {
+    return '$count நிலுவை';
+  }
+
+  @override
+  String ueA11yConfirm(int count) {
+    return '$count உறுதிப்படுத்த வேண்டும்';
+  }
+
+  @override
+  String get ueA11yHidden => 'தொகைகள் மறைக்கப்பட்டன';
+
+  @override
+  String ueA11yOtherMonthNext(String date) {
+    return '$date, அடுத்த மாதம்';
+  }
+
+  @override
+  String ueA11yOtherMonthPrev(String date) {
+    return '$date, முந்தைய மாதம்';
+  }
+
+  @override
+  String ueA11yPrevMonth(String month) {
+    return 'முந்தைய மாதம், $month';
+  }
+
+  @override
+  String ueA11yNextMonth(String month) {
+    return 'அடுத்த மாதம், $month';
+  }
+
+  @override
+  String ueA11yWeekCollapsed(String date) {
+    return '$date வாரம், சுருக்கப்பட்டது. மாதத்தைக் காண இருமுறை தட்டவும்.';
+  }
+
+  @override
+  String get ueA11yHandle => 'முழு மாதத்தையும் காட்டு';
+
+  @override
+  String get themeExpressiveTitle => 'வண்ணமயமான பின்னணி';
+
+  @override
+  String get themeExpressiveSubtitle => 'பின்னணிக்கு தீம் நிறச் சாயல்';
+
+  @override
+  String get themePureBlackTitle => 'முழு கருப்பு';
+
+  @override
+  String get themePureBlackSubtitle =>
+      'இருண்ட பயன்முறையில் கருப்பு பின்னணி. OLED திரைகளில் பேட்டரியைச் சேமிக்கும்.';
+
+  @override
+  String get themePureBlackHelperSystem =>
+      'உங்கள் போன் இருண்ட பயன்முறையில் இருக்கும்போது பொருந்தும்';
+
+  @override
+  String get themePureBlackDisabledA11y =>
+      'முழு கருப்பு. அணைக்கப்பட்டது. இருண்ட பயன்முறையில் வேலை செய்யும்.';
+
+  @override
+  String get msLoansReopen => 'கடனை மீண்டும் திற';
+
+  @override
+  String msLoansReopenTitle(String name) {
+    return '$name மீண்டும் திறக்கவா?';
+  }
+
+  @override
+  String get msLoansReopenBody =>
+      'இதன் EMI அடுத்த தேதியிலிருந்து மீண்டும் தொடங்கும். மூடியிருந்த காலத்துக்கு எதுவும் சேர்க்கப்படாது.';
 }

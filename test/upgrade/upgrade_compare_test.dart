@@ -1,12 +1,19 @@
-// Emulator upgrade check (specs/vnext/test-report.md): compares the database
-// pulled from the base build (pre) with the one pulled after installing this
-// build over it (post). Skipped unless both are given:
+// Upgrade check (specs/vnext/test-report.md): compares the database from the
+// base build 6ce4f0e (pre) with the same database after this build's upgrade
+// (post). By default it upgrades in process: the committed fixture
+// (test/fixtures/upgrade, pulled from the emulator after the base build ran
+// on the full schedule set + 6k ledger) is opened with this build's schemas
+// and the first background run (migration + processing) runs on it.
+// Emulator mode compares two pulled databases instead:
 //   KUBER_PRE_DB=<dir with pre.isar> KUBER_POST_DB=<dir with post.isar> \
 //   KUBER_TODAY=2026-10-21 flutter test test/upgrade/upgrade_compare_test.dart
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
+import 'package:kuber/core/background/task_runner.dart';
+import 'package:kuber/features/backups/services/scheduled_backup.dart';
+import 'package:kuber/l10n/app_localizations_en.dart';
 import 'package:kuber/core/schedule/legacy_schedules.dart';
 import 'package:kuber/core/schedule/schedule_engine.dart';
 import 'package:kuber/features/investments/data/investment.dart';
@@ -20,24 +27,47 @@ import '../helpers/isar_test_helper.dart';
 void main() {
   final preDir = Platform.environment['KUBER_PRE_DB'];
   final postDir = Platform.environment['KUBER_POST_DB'];
-  final skip = preDir == null || postDir == null
-      ? 'needs KUBER_PRE_DB and KUBER_POST_DB'
-      : null;
   late Isar pre, post;
   late DateTime today;
 
   setUpAll(() async {
-    if (skip != null) return;
     await initialiseIsarForTests();
-    pre = await openTestIsar(directory: preDir, name: 'pre');
-    post = await openTestIsar(directory: postDir, name: 'post');
-    today = DateTime.parse(Platform.environment['KUBER_TODAY']!);
+    if (preDir != null && postDir != null) {
+      pre = await openTestIsar(directory: preDir, name: 'pre');
+      post = await openTestIsar(directory: postDir, name: 'post');
+      today = DateTime.parse(Platform.environment['KUBER_TODAY']!);
+      return;
+    }
+    final bytes = gzip.decode(
+        File('test/fixtures/upgrade/pre_6ce4f0e.isar.gz').readAsBytesSync());
+    Directory dir(String name) {
+      final d = Directory.systemTemp.createTempSync('upgrade_');
+      File('${d.path}/$name.isar').writeAsBytesSync(bytes);
+      return d;
+    }
+
+    pre = await openTestIsar(directory: dir('pre').path, name: 'pre');
+    post = await openTestIsar(directory: dir('post').path, name: 'post');
+    final now = DateTime.now();
+    today = DateTime(now.year, now.month, now.day);
+    final run = await TaskRunner(
+      isar: post,
+      decimals: 2,
+      l10n: AppLocalizationsEn(),
+      backup: () async => (BackupOutcome.notDue, null),
+    ).run(trigger: 'coldStart', now: now);
+    expect(run!.status, 'done');
+  });
+
+  tearDownAll(() async {
+    await pre.close();
+    await post.close();
   });
 
   int day(DateTime d) => dayKey(d);
   int todayK() => dayKey(today);
 
-  group('upgrade', skip: skip, () {
+  group('upgrade', () {
     test(
       'recurring: next dates match the old rule, nothing posted twice',
       () async {

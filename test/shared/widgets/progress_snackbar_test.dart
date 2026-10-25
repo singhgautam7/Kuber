@@ -127,4 +127,20 @@ void main() {
     expect(find.text('Starting'), findsNothing);
     await cleanUp(tester);
   });
+
+  // Regression (specs/vcal/regressions.md R2): a snackbar shown over the
+  // progress snackbar put the progress back into the old overlay after the app
+  // was rebuilt (RestartWidget after a restore), which threw.
+  testWidgets('progress is not restored into a disposed overlay', (tester) async {
+    await pump(tester);
+    KuberProgressSnackBar.show(overlay(), const KuberProgressState('Backing up'));
+    await tester.pump(const Duration(milliseconds: 300));
+    showKuberSnackBar(ctx(), 'Restored');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpWidget(const SizedBox()); // the app is rebuilt
+    await tester.pump(const Duration(seconds: 8));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+    expect(KuberProgressSnackBar.isActive, isFalse);
+  });
 }

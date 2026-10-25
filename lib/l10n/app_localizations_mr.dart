@@ -7756,4 +7756,293 @@ class AppLocalizationsMr extends AppLocalizations {
   String msLoansReduceEmiResult(String month, String emi) {
     return 'आताप्रमाणे $month मध्ये संपेल · EMI $emi होईल';
   }
+
+  @override
+  String get communityTelegramTitle => 'Kuber समुदायात सामील व्हा';
+
+  @override
+  String get communityTelegramSubtitle =>
+      'बातम्या, टिप्स आणि मदतीसाठी अधिकृत Telegram चॅनेल';
+
+  @override
+  String get ueTitle => 'येणारे इव्हेंट';
+
+  @override
+  String get ueViewList => 'यादी';
+
+  @override
+  String get ueViewCalendar => 'कॅलेंडर';
+
+  @override
+  String get ueFilter => 'फिल्टर';
+
+  @override
+  String get ueFilterHint => 'यादी आणि कॅलेंडर दोन्हीला लागू.';
+
+  @override
+  String get ueFilterShow => 'दाखवा';
+
+  @override
+  String get ueFilterType => 'प्रकार';
+
+  @override
+  String get ueFilterReset => 'रीसेट';
+
+  @override
+  String ueA11yFilter(int count) {
+    return 'फिल्टर, $count लागू';
+  }
+
+  @override
+  String get ueRange7 => 'पुढील 7 दिवस';
+
+  @override
+  String get ueRange30 => 'पुढील 30 दिवस';
+
+  @override
+  String get ueRange90 => 'पुढील 90 दिवस';
+
+  @override
+  String get ueTypeAll => 'सर्व';
+
+  @override
+  String get ueTypeReminders => 'रिमाइंडर';
+
+  @override
+  String get ueTypeEmis => 'EMI';
+
+  @override
+  String get ueTypeSips => 'SIP';
+
+  @override
+  String get ueTypeRecurring => 'आवर्ती';
+
+  @override
+  String get ueTypeLedger => 'लेजर';
+
+  @override
+  String get uePillReminder => 'रिमाइंडर';
+
+  @override
+  String get uePillEmi => 'EMI';
+
+  @override
+  String get uePillSip => 'SIP';
+
+  @override
+  String get uePillFd => 'FD';
+
+  @override
+  String get uePillRecurring => 'आवर्ती';
+
+  @override
+  String get uePillLedger => 'लेजर';
+
+  @override
+  String get uePillCard => 'क्रेडिट कार्ड';
+
+  @override
+  String ueEmptyList(int days) {
+    return 'पुढील $days दिवसांत काहीही नाही';
+  }
+
+  @override
+  String get ueEmptyListHint =>
+      'रिमाइंडर, EMI, SIP, आवर्ती आणि लेजरच्या तारखा इथे दिसतात.';
+
+  @override
+  String ueOutAmount(String amount) {
+    return '$amount खर्च';
+  }
+
+  @override
+  String ueInAmount(String amount) {
+    return '$amount उत्पन्न';
+  }
+
+  @override
+  String ueCardBills(String amount) {
+    return 'कार्ड बिले $amount';
+  }
+
+  @override
+  String ueDayToday(String date) {
+    return 'आज, $date';
+  }
+
+  @override
+  String get ueCardNote =>
+      'कार्ड बिले एकूण रकमेत नाहीत. कार्ड वापरतानाच तो खर्च नोंदवला गेला.';
+
+  @override
+  String get ueEmptyDay => 'या दिवशी काहीही ठरलेले नाही';
+
+  @override
+  String get ueEmptyMonth => 'या महिन्यात काहीही ठरलेले नाही';
+
+  @override
+  String get ueStatusUpcoming => 'येणारे';
+
+  @override
+  String get ueStatusConfirm => 'पुष्टी हवी';
+
+  @override
+  String get ueStatusDone => 'पूर्ण';
+
+  @override
+  String get ueStatusSkipped => 'वगळले';
+
+  @override
+  String get ueStatusOverdue => 'थकीत';
+
+  @override
+  String get ueLegendTitle => 'कॅलेंडरबद्दल';
+
+  @override
+  String get ueLegendIntro =>
+      'प्रत्येक ठिपका एक इव्हेंट आहे. 3 ठिपक्यांपर्यंत दिसतात, मग संख्या.';
+
+  @override
+  String get ueLegendReminders => 'रिमाइंडर';
+
+  @override
+  String get ueLegendEmis => 'EMI';
+
+  @override
+  String get ueLegendSips => 'SIP आणि FD';
+
+  @override
+  String get ueLegendRecurring => 'आवर्ती';
+
+  @override
+  String get ueLegendLedger => 'उधार दिले आणि घेतले';
+
+  @override
+  String get ueLegendCards => 'क्रेडिट कार्ड';
+
+  @override
+  String get ueLegendDays => 'दिवस';
+
+  @override
+  String get ueLegendToday => 'आज';
+
+  @override
+  String get ueLegendSelected => 'निवडलेले';
+
+  @override
+  String get ueLegendOverdue => 'थकीत';
+
+  @override
+  String get ueLegendSkipped => 'वगळले';
+
+  @override
+  String get ueLegendOtherMonth => 'दुसरा महिना';
+
+  @override
+  String get ueLegendTotals =>
+      'खर्च आणि उत्पन्न म्हणजे महिन्याची बेरीज, वगळलेले आयटम आणि रक्कम नसलेले रिमाइंडर सोडून. कार्ड बिले वेगळी दिसतात, कारण कार्ड वापरतानाच तो खर्च नोंदवला गेला.';
+
+  @override
+  String ueA11yToday(String date) {
+    return 'आज, $date';
+  }
+
+  @override
+  String get ueA11ySelected => 'निवडलेले';
+
+  @override
+  String ueA11yEvents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count इव्हेंट',
+      one: '1 इव्हेंट',
+      zero: 'इव्हेंट नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ueA11yDue(String amount) {
+    return '$amount देय';
+  }
+
+  @override
+  String ueA11yCardBill(String amount) {
+    return 'कार्ड बिल $amount';
+  }
+
+  @override
+  String ueA11yOverdue(int count) {
+    return '$count थकीत';
+  }
+
+  @override
+  String ueA11yConfirm(int count) {
+    return '$count ची पुष्टी हवी';
+  }
+
+  @override
+  String get ueA11yHidden => 'रक्कम लपवलेली';
+
+  @override
+  String ueA11yOtherMonthNext(String date) {
+    return '$date, पुढचा महिना';
+  }
+
+  @override
+  String ueA11yOtherMonthPrev(String date) {
+    return '$date, मागचा महिना';
+  }
+
+  @override
+  String ueA11yPrevMonth(String month) {
+    return 'मागचा महिना, $month';
+  }
+
+  @override
+  String ueA11yNextMonth(String month) {
+    return 'पुढचा महिना, $month';
+  }
+
+  @override
+  String ueA11yWeekCollapsed(String date) {
+    return '$date चा आठवडा, लहान केला. महिना पाहण्यासाठी दोनदा टॅप करा.';
+  }
+
+  @override
+  String get ueA11yHandle => 'पूर्ण महिना दाखवा';
+
+  @override
+  String get themeExpressiveTitle => 'रंगीत पार्श्वभूमी';
+
+  @override
+  String get themeExpressiveSubtitle => 'पार्श्वभूमीला थीमच्या रंगाची छटा';
+
+  @override
+  String get themePureBlackTitle => 'गडद काळा';
+
+  @override
+  String get themePureBlackSubtitle =>
+      'डार्क मोडमध्ये काळी पार्श्वभूमी. OLED स्क्रीनवर बॅटरी वाचते.';
+
+  @override
+  String get themePureBlackHelperSystem =>
+      'फोन डार्क मोडमध्ये असताना लागू होते';
+
+  @override
+  String get themePureBlackDisabledA11y =>
+      'गडद काळा. बंद. डार्क मोडमध्ये चालते.';
+
+  @override
+  String get msLoansReopen => 'कर्ज पुन्हा सुरू करा';
+
+  @override
+  String msLoansReopenTitle(String name) {
+    return '$name पुन्हा सुरू करायचे?';
+  }
+
+  @override
+  String get msLoansReopenBody =>
+      'याचे EMI पुढील देय तारखेपासून पुन्हा सुरू होतील. बंद असलेल्या काळासाठी काहीही जोडले जाणार नाही.';
 }

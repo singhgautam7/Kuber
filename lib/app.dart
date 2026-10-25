@@ -57,7 +57,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // specs/plans/theme-personalization-cache-audit.md).
   Locale? _cachedLocale;
   ThemeVariant? _cachedVariant;
-  bool? _cachedAmoled;
+  bool? _cachedExpressive;
+  bool? _cachedPureBlack;
   Color? _cachedSeed;
   ThemeData? _lightTheme;
   ThemeData? _darkTheme;
@@ -520,17 +521,19 @@ class _KuberAppState extends ConsumerState<KuberApp>
 
     if (_cachedLocale != locale ||
         _cachedVariant != themeVariant ||
-        _cachedAmoled != themeOptions.amoled ||
+        _cachedExpressive != themeOptions.expressive ||
+        _cachedPureBlack != themeOptions.pureBlack ||
         _cachedSeed != seed ||
         _lightTheme == null ||
         _darkTheme == null) {
       _cachedLocale = locale;
       _cachedVariant = themeVariant;
-      _cachedAmoled = themeOptions.amoled;
+      _cachedExpressive = themeOptions.expressive;
+      _cachedPureBlack = themeOptions.pureBlack;
       _cachedSeed = seed;
-      _lightTheme = AppTheme.light(locale, themeVariant, seed);
-      _darkTheme =
-          AppTheme.dark(locale, themeVariant, themeOptions.amoled, seed);
+      _lightTheme = AppTheme.light(locale, themeVariant, seed, themeOptions.expressive);
+      _darkTheme = AppTheme.dark(
+          locale, themeVariant, themeOptions.pureBlack, seed, themeOptions.expressive);
     }
 
     // PRO-GATE: when Pro access drops mid-session (trial end, debug Force-Free),
@@ -560,6 +563,16 @@ class _KuberAppState extends ConsumerState<KuberApp>
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: themeMode,
+      // Recolour in place (theme-surfaces-v1 motion.md): every role tweens,
+      // nothing moves. Reduced motion: 90 ms linear.
+      themeAnimationDuration: WidgetsBinding
+              .instance.platformDispatcher.accessibilityFeatures.disableAnimations
+          ? KuberMotion.instant
+          : const Duration(milliseconds: 240),
+      themeAnimationCurve: WidgetsBinding
+              .instance.platformDispatcher.accessibilityFeatures.disableAnimations
+          ? Curves.linear
+          : Curves.easeOutCubic,
       routerConfig: router,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,

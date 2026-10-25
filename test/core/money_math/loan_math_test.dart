@@ -230,6 +230,26 @@ void main() {
     });
   });
 
+  // Regression (specs/vcal/regressions.md R3): a bank EMI rounded down by a
+  // few paise made a tiny extra EMI (61 of 60, ending a month late).
+  test('a rounded EMI keeps the tenure; the last EMI takes the residue', () {
+    List<int> days(int n) => [for (var i = 0; i < n + 6; i++) 20250000 + (i ~/ 12 + 0) * 10000 + (i % 12 + 1) * 100 + 12];
+    for (final (p, rate, months) in [(900000.0, 9.2, 60), (2500000.0, 8.5, 240), (45000.0, 14.0, 12), (3000000.0, 9.0, 360)]) {
+      final exact = calculateEmi(p, rate, months);
+      for (final emi in [exact.floorToDouble(), exact.roundToDouble(), exact.ceilToDouble()]) {
+        final a = amortize(principal: p, rate: rate, months: months, emiDays: days(months), emi: emi);
+        expect(a.rows.length, months, reason: '$p $rate $months EMI $emi');
+        expect(a.rows.last.balance, 0);
+        expect(a.rows.last.payment, closeTo(emi, emi * 0.1));
+        final paid = a.rows.fold(0.0, (s, r) => s + r.principal);
+        expect(paid, closeTo(p, 0.01));
+      }
+    }
+    // An EMI clearly too low still needs more payments.
+    final low = amortize(principal: 900000, rate: 9.2, months: 60, emiDays: days(60), emi: 18000);
+    expect(low.rows.length, greaterThan(60));
+  });
+
   test('rounded split always adds up to the payment', () {
     final rnd = Random(9);
     for (var i = 0; i < 1000; i++) {

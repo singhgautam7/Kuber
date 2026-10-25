@@ -7785,4 +7785,293 @@ class AppLocalizationsTe extends AppLocalizations {
   String msLoansReduceEmiResult(String month, String emi) {
     return 'ఇప్పటిలాగే $month లో ముగుస్తుంది · EMI $emi అవుతుంది';
   }
+
+  @override
+  String get communityTelegramTitle => 'Kuber కమ్యూనిటీలో చేరండి';
+
+  @override
+  String get communityTelegramSubtitle =>
+      'వార్తలు, చిట్కాలు మరియు సహాయం కోసం అధికారిక Telegram ఛానల్';
+
+  @override
+  String get ueTitle => 'రాబోయే ఈవెంట్‌లు';
+
+  @override
+  String get ueViewList => 'జాబితా';
+
+  @override
+  String get ueViewCalendar => 'క్యాలెండర్';
+
+  @override
+  String get ueFilter => 'ఫిల్టర్';
+
+  @override
+  String get ueFilterHint => 'జాబితా మరియు క్యాలెండర్ రెండింటికీ వర్తిస్తుంది.';
+
+  @override
+  String get ueFilterShow => 'చూపించు';
+
+  @override
+  String get ueFilterType => 'రకం';
+
+  @override
+  String get ueFilterReset => 'రీసెట్';
+
+  @override
+  String ueA11yFilter(int count) {
+    return 'ఫిల్టర్, $count వర్తించింది';
+  }
+
+  @override
+  String get ueRange7 => 'తదుపరి 7 రోజులు';
+
+  @override
+  String get ueRange30 => 'తదుపరి 30 రోజులు';
+
+  @override
+  String get ueRange90 => 'తదుపరి 90 రోజులు';
+
+  @override
+  String get ueTypeAll => 'అన్నీ';
+
+  @override
+  String get ueTypeReminders => 'రిమైండర్‌లు';
+
+  @override
+  String get ueTypeEmis => 'EMIలు';
+
+  @override
+  String get ueTypeSips => 'SIPలు';
+
+  @override
+  String get ueTypeRecurring => 'పునరావృతం';
+
+  @override
+  String get ueTypeLedger => 'లెడ్జర్';
+
+  @override
+  String get uePillReminder => 'రిమైండర్';
+
+  @override
+  String get uePillEmi => 'EMI';
+
+  @override
+  String get uePillSip => 'SIP';
+
+  @override
+  String get uePillFd => 'FD';
+
+  @override
+  String get uePillRecurring => 'పునరావృతం';
+
+  @override
+  String get uePillLedger => 'లెడ్జర్';
+
+  @override
+  String get uePillCard => 'క్రెడిట్ కార్డ్';
+
+  @override
+  String ueEmptyList(int days) {
+    return 'తదుపరి $days రోజుల్లో ఈవెంట్‌లు లేవు';
+  }
+
+  @override
+  String get ueEmptyListHint =>
+      'రిమైండర్‌లు, EMI, SIP, పునరావృత మరియు లెడ్జర్ తేదీలు ఇక్కడ కనిపిస్తాయి.';
+
+  @override
+  String ueOutAmount(String amount) {
+    return '$amount ఖర్చు';
+  }
+
+  @override
+  String ueInAmount(String amount) {
+    return '$amount ఆదాయం';
+  }
+
+  @override
+  String ueCardBills(String amount) {
+    return 'కార్డ్ బిల్లులు $amount';
+  }
+
+  @override
+  String ueDayToday(String date) {
+    return 'ఈరోజు, $date';
+  }
+
+  @override
+  String get ueCardNote =>
+      'కార్డ్ బిల్లులు మొత్తంలో లేవు. కార్డ్ వాడినప్పుడే ఆ ఖర్చు నమోదైంది.';
+
+  @override
+  String get ueEmptyDay => 'ఈ రోజుకు ఏదీ షెడ్యూల్ కాలేదు';
+
+  @override
+  String get ueEmptyMonth => 'ఈ నెల ఏదీ షెడ్యూల్ కాలేదు';
+
+  @override
+  String get ueStatusUpcoming => 'రాబోయేది';
+
+  @override
+  String get ueStatusConfirm => 'నిర్ధారణ అవసరం';
+
+  @override
+  String get ueStatusDone => 'పూర్తయింది';
+
+  @override
+  String get ueStatusSkipped => 'దాటవేశారు';
+
+  @override
+  String get ueStatusOverdue => 'గడువు దాటింది';
+
+  @override
+  String get ueLegendTitle => 'క్యాలెండర్ గురించి';
+
+  @override
+  String get ueLegendIntro =>
+      'ప్రతి చుక్క ఒక ఈవెంట్. 3 చుక్కల వరకు చూపిస్తుంది, తర్వాత సంఖ్య.';
+
+  @override
+  String get ueLegendReminders => 'రిమైండర్‌లు';
+
+  @override
+  String get ueLegendEmis => 'EMIలు';
+
+  @override
+  String get ueLegendSips => 'SIP మరియు FD';
+
+  @override
+  String get ueLegendRecurring => 'పునరావృతం';
+
+  @override
+  String get ueLegendLedger => 'ఇచ్చిన మరియు తీసుకున్న అప్పు';
+
+  @override
+  String get ueLegendCards => 'క్రెడిట్ కార్డ్‌లు';
+
+  @override
+  String get ueLegendDays => 'రోజులు';
+
+  @override
+  String get ueLegendToday => 'ఈరోజు';
+
+  @override
+  String get ueLegendSelected => 'ఎంచుకున్నది';
+
+  @override
+  String get ueLegendOverdue => 'గడువు దాటింది';
+
+  @override
+  String get ueLegendSkipped => 'దాటవేసింది';
+
+  @override
+  String get ueLegendOtherMonth => 'వేరే నెల';
+
+  @override
+  String get ueLegendTotals =>
+      'ఖర్చు మరియు ఆదాయం నెల మొత్తం, దాటవేసినవి మరియు మొత్తం లేని రిమైండర్‌లు మినహా. కార్డ్ బిల్లులు విడిగా చూపిస్తాయి, ఎందుకంటే కార్డ్ వాడినప్పుడే ఆ ఖర్చు నమోదైంది.';
+
+  @override
+  String ueA11yToday(String date) {
+    return 'ఈరోజు, $date';
+  }
+
+  @override
+  String get ueA11ySelected => 'ఎంచుకున్నారు';
+
+  @override
+  String ueA11yEvents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ఈవెంట్‌లు',
+      one: '1 ఈవెంట్',
+      zero: 'ఈవెంట్‌లు లేవు',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ueA11yDue(String amount) {
+    return '$amount చెల్లించాలి';
+  }
+
+  @override
+  String ueA11yCardBill(String amount) {
+    return 'కార్డ్ బిల్ $amount';
+  }
+
+  @override
+  String ueA11yOverdue(int count) {
+    return '$count గడువు దాటింది';
+  }
+
+  @override
+  String ueA11yConfirm(int count) {
+    return '$count నిర్ధారణ అవసరం';
+  }
+
+  @override
+  String get ueA11yHidden => 'మొత్తాలు దాచబడ్డాయి';
+
+  @override
+  String ueA11yOtherMonthNext(String date) {
+    return '$date, వచ్చే నెల';
+  }
+
+  @override
+  String ueA11yOtherMonthPrev(String date) {
+    return '$date, గత నెల';
+  }
+
+  @override
+  String ueA11yPrevMonth(String month) {
+    return 'గత నెల, $month';
+  }
+
+  @override
+  String ueA11yNextMonth(String month) {
+    return 'వచ్చే నెల, $month';
+  }
+
+  @override
+  String ueA11yWeekCollapsed(String date) {
+    return '$date వారం, కుదించబడింది. నెల చూడటానికి రెండుసార్లు నొక్కండి.';
+  }
+
+  @override
+  String get ueA11yHandle => 'మొత్తం నెల చూపించు';
+
+  @override
+  String get themeExpressiveTitle => 'రంగుల నేపథ్యం';
+
+  @override
+  String get themeExpressiveSubtitle => 'నేపథ్యానికి థీమ్ రంగు ఛాయ';
+
+  @override
+  String get themePureBlackTitle => 'పూర్తి నలుపు';
+
+  @override
+  String get themePureBlackSubtitle =>
+      'డార్క్ మోడ్‌లో నల్లని నేపథ్యం. OLED స్క్రీన్‌లలో బ్యాటరీ ఆదా అవుతుంది.';
+
+  @override
+  String get themePureBlackHelperSystem =>
+      'మీ ఫోన్ డార్క్ మోడ్‌లో ఉన్నప్పుడు వర్తిస్తుంది';
+
+  @override
+  String get themePureBlackDisabledA11y =>
+      'పూర్తి నలుపు. ఆఫ్. డార్క్ మోడ్‌లో పనిచేస్తుంది.';
+
+  @override
+  String get msLoansReopen => 'లోన్‌ను మళ్లీ తెరవండి';
+
+  @override
+  String msLoansReopenTitle(String name) {
+    return '$nameను మళ్లీ తెరవాలా?';
+  }
+
+  @override
+  String get msLoansReopenBody =>
+      'దీని EMIలు తదుపరి తేదీ నుండి మళ్లీ మొదలవుతాయి. మూసి ఉన్న కాలానికి ఏదీ జోడించబడదు.';
 }

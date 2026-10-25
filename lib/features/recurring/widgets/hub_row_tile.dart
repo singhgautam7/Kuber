@@ -60,10 +60,15 @@ class HubRowTile extends ConsumerWidget {
           ? const KuberIconTile(icon: Icons.repeat_rounded)
           : CategoryIcon.square(icon: IconMapper.fromString(cat.icon), rawColor: Color(cat.colorValue));
     } else {
-      leading = KuberIconTile(
-        icon: row.kind == HubKind.loan ? Icons.account_balance_rounded : Icons.savings_rounded,
-        tone: KuberTone.primary,
-      );
+      // Same look as the Loans and Investments screens.
+      leading = row.loan != null
+          ? LoanIcon(row.loan!)
+          : row.investment != null
+              ? HoldingIcon(row.investment!)
+              : KuberIconTile(
+                  icon: row.kind == HubKind.loan ? Icons.account_balance_rounded : Icons.savings_rounded,
+                  tone: KuberTone.primary,
+                );
     }
 
     final amountText = '${row.income ? '+' : '-'}${fmt.formatCurrency(row.amount)}';

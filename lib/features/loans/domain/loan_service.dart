@@ -170,6 +170,27 @@ class LoanService {
     await isar.writeTxn(() => isar.loans.put(l));
   }
 
+  /// Re-open a closed loan. EMIs that fell while it was closed are passed,
+  /// not posted (like resuming a paused schedule): its next EMI is the next
+  /// date from today and its end date does not move.
+  Future<void> reopen(Loan l, {DateTime? now}) async {
+    final s = l.schedule;
+    if (s != null) {
+      final yesterday = addDays(todayKey(now), -1);
+      if (s.processedThrough < yesterday) {
+        final missed = upcomingOccurrences(s, toKey: yesterday, limit: 100000);
+        s
+          ..postedCount += missed.length
+          ..processedThrough = yesterday;
+      }
+    }
+    l
+      ..isCompleted = false
+      ..closedAt = null
+      ..updatedAt = DateTime.now();
+    await isar.writeTxn(() => isar.loans.put(l));
+  }
+
   /// What an extra payment saves (preview), or null without loan numbers.
   static ({double saved, int monthsSooner, double newEmi, int endDay})? extraPaymentPreview(
       Loan l, double amount, LoanAdjust reduce, DateTime date) {

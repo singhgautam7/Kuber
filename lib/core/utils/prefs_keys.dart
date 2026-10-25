@@ -163,4 +163,9 @@ class PrefsKeys {
   // What do you want to track? (Welcome, Edit widgets › What you track).
   static const trackingChoices = 'home_v3_tracking_choices';
   static const trackingAnswer = 'home_v3_tracking_answer';
+  // Upcoming events: 'list' | 'calendar' (upcoming-calendar-v1).
+  static const upcomingEventsView = 'upcoming_events_view';
+  // Theme surfaces (theme-surfaces-v1). Pure black keeps `themeAmoled`.
+  static const themeExpressive = 'theme_expressive';
+  static const themeSurfacesMigrated = 'theme_surfaces_migrated_v1';
 }

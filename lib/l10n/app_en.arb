@@ -3040,7 +3040,7 @@
   "homeV33TourCardBody": "How tracking every expense helps, and what Kuber can do.",
   "homeV33TourCardAct": "Show me",
   "homeV33TourCardHideA11y": "Hide this card",
-  "homeV33TourCardHidden": "You can find Why Kuber? in More.",
+  "homeV33TourCardHidden": "You can find `Why Kuber` in More.",
   "homeV33TourNext": "Next",
   "homeV33TourDone": "Done",
   "homeV33TourPageA11y": "Page {page} of {total}",
@@ -5486,5 +5486,234 @@
         "type": "String"
       }
     }
-  }
+  },
+  "communityTelegramTitle": "Join the Kuber community",
+  "communityTelegramSubtitle": "Official Telegram channel for news, tips and help",
+  "@communityTelegramTitle": {
+    "description": "Row that opens the official Kuber Telegram channel (About and Feedback)."
+  },
+  "@communityTelegramSubtitle": {
+    "description": "Subtitle under the Telegram community row."
+  },
+  "ueTitle": "Upcoming events",
+  "ueViewList": "List",
+  "ueViewCalendar": "Calendar",
+  "ueFilter": "Filter",
+  "ueFilterHint": "Applies to List and Calendar.",
+  "ueFilterShow": "Show",
+  "ueFilterType": "Type",
+  "ueFilterReset": "Reset",
+  "ueA11yFilter": "Filter, {count} applied",
+  "@ueA11yFilter": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ueRange7": "Next 7 days",
+  "ueRange30": "Next 30 days",
+  "ueRange90": "Next 90 days",
+  "ueTypeAll": "All",
+  "ueTypeReminders": "Reminders",
+  "ueTypeEmis": "EMIs",
+  "ueTypeSips": "SIPs",
+  "ueTypeRecurring": "Recurring",
+  "ueTypeLedger": "Ledger",
+  "uePillReminder": "Reminder",
+  "uePillEmi": "EMI",
+  "uePillSip": "SIP",
+  "uePillFd": "FD",
+  "uePillRecurring": "Recurring",
+  "uePillLedger": "Ledger",
+  "uePillCard": "Credit card",
+  "ueEmptyList": "No upcoming events in the next {days} days",
+  "@ueEmptyList": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ueEmptyListHint": "Reminders, EMIs, SIPs, recurring and ledger dates show up here.",
+  "ueOutAmount": "{amount} out",
+  "@ueOutAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ueInAmount": "{amount} in",
+  "@ueInAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ueCardBills": "Card bills {amount}",
+  "@ueCardBills": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ueDayToday": "Today, {date}",
+  "@ueDayToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ueCardNote": "Card bills are not in the total. That spending was recorded when you used the card.",
+  "ueEmptyDay": "Nothing scheduled for this day",
+  "ueEmptyMonth": "Nothing scheduled this month",
+  "ueStatusUpcoming": "Upcoming",
+  "ueStatusConfirm": "Needs confirmation",
+  "ueStatusDone": "Done",
+  "ueStatusSkipped": "Skipped",
+  "ueStatusOverdue": "Overdue",
+  "ueLegendTitle": "About the calendar",
+  "ueLegendIntro": "Each dot is one event. Up to 3 dots show, then a count.",
+  "ueLegendReminders": "Reminders",
+  "ueLegendEmis": "EMIs",
+  "ueLegendSips": "SIPs and FDs",
+  "ueLegendRecurring": "Recurring",
+  "ueLegendLedger": "Lent and borrowed",
+  "ueLegendCards": "Credit cards",
+  "ueLegendDays": "Days",
+  "ueLegendToday": "Today",
+  "ueLegendSelected": "Selected",
+  "ueLegendOverdue": "Overdue",
+  "ueLegendSkipped": "Skipped",
+  "ueLegendOtherMonth": "Other month",
+  "ueLegendTotals": "Out and in add up the month, without skipped items and reminders that have no amount. Card bills are shown on their own, because that spending was recorded when you used the card.",
+  "ueA11yToday": "Today, {date}",
+  "@ueA11yToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11ySelected": "selected",
+  "ueA11yEvents": "{count, plural, =0{no events} =1{1 event} other{{count} events}}",
+  "@ueA11yEvents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ueA11yDue": "{amount} due",
+  "@ueA11yDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yCardBill": "card bill {amount}",
+  "@ueA11yCardBill": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yOverdue": "{count} overdue",
+  "@ueA11yOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ueA11yConfirm": "{count} needs confirmation",
+  "@ueA11yConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ueA11yHidden": "amounts hidden",
+  "ueA11yOtherMonthNext": "{date}, next month",
+  "@ueA11yOtherMonthNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yOtherMonthPrev": "{date}, previous month",
+  "@ueA11yOtherMonthPrev": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yPrevMonth": "Previous month, {month}",
+  "@ueA11yPrevMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yNextMonth": "Next month, {month}",
+  "@ueA11yNextMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yWeekCollapsed": "Week of {date}, collapsed. Double tap to show the month.",
+  "@ueA11yWeekCollapsed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ueA11yHandle": "Show the whole month",
+  "themeExpressiveTitle": "Expressive colours",
+  "@themeExpressiveTitle": {
+    "description": "Switch title. UK spelling, matches \"Dynamic colour\"."
+  },
+  "themeExpressiveSubtitle": "Tint backgrounds with your theme colour",
+  "@themeExpressiveSubtitle": {
+    "description": "Switch subtitle. Always shown."
+  },
+  "themePureBlackTitle": "Pure black",
+  "@themePureBlackTitle": {
+    "description": "Switch title. Replaces \"True black (AMOLED)\"."
+  },
+  "themePureBlackSubtitle": "Black background in dark mode. Saves battery on OLED screens.",
+  "@themePureBlackSubtitle": {
+    "description": "Switch subtitle. Always shown."
+  },
+  "themePureBlackHelperSystem": "Applies when your phone is in dark mode",
+  "@themePureBlackHelperSystem": {
+    "description": "Helper under the row in System mode. The switch is enabled."
+  },
+  "themePureBlackDisabledA11y": "Pure black. Off. Works in dark mode.",
+  "@themePureBlackDisabledA11y": {
+    "description": "TalkBack label for the disabled switch in Light mode."
+  },
+  "msLoansReopen": "Re-open loan",
+  "msLoansReopenTitle": "Re-open {name}?",
+  "@msLoansReopenTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansReopenBody": "Its EMIs start again from the next due date. Nothing is added for the time it was closed."
 }

@@ -17,6 +17,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_list.dart';
@@ -27,6 +28,7 @@ import '../../../shared/widgets/money_widgets.dart';
 import '../../../shared/widgets/sheet_button_section.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
+import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tools/widgets/calculator_line_chart.dart';
 import '../../tools/widgets/calculator_support.dart' show CalculatorPrefill;
@@ -42,6 +44,9 @@ void showLoanSheet(BuildContext context, WidgetRef ref, Loan loan) =>
     showMoneySheet<void>(context, LoanSheet(loan: loan));
 
 Future<bool> confirmDeleteLoan(BuildContext context, WidgetRef ref, Loan loan) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
@@ -58,11 +63,14 @@ Future<bool> confirmDeleteLoan(BuildContext context, WidgetRef ref, Loan loan) a
     ),
   );
   if (ok != true) return false;
-  await ref.read(loanListProvider.notifier).deleteLoan(loan);
+  await container.read(loanListProvider.notifier).deleteLoan(loan);
   return true;
 }
 
 Future<void> _closeLoan(BuildContext context, WidgetRef ref, Loan loan) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
   final l = context.l10n;
   final ok = await showDialog<bool>(
     context: context,
@@ -76,52 +84,95 @@ Future<void> _closeLoan(BuildContext context, WidgetRef ref, Loan loan) async {
     ),
   );
   if (ok != true) return;
-  await LoanService(ref.read(isarProvider)).close(loan);
-  ref.invalidate(loanListProvider);
+  await LoanService(container.read(isarProvider)).close(loan);
+  container.invalidate(loanListProvider);
 }
 
+/// Calculator links for every loan. A loan without its numbers fills what
+/// it has (principal and rate entered before vNext, the EMI count from its
+/// schedule) and leaves the rest for the user.
 List<CalculatorLink> loanCalculatorLinks(BuildContext context, Loan loan, LoanStatus st) {
   final l = context.l10n;
-  if (!hasLoanNumbers(loan)) return const [];
-  final months = loan.tenureMonths ?? 0;
-  final left = (st.totalEmis ?? months) - st.emisPaid;
-  final rate = (loanAmortization(loan)?.rows.where((r) => r.day > todayKey()).firstOrNull?.rate ??
-          loan.annualRate ??
-          0)
-      .toString();
+  final numbers = hasLoanNumbers(loan);
+  final principal = loan.principalAmount > 0 ? loan.principalAmount : null;
+  final baseRate = loan.annualRate ?? loan.interestRate;
+  final rateNow = numbers
+      ? loanAmortization(loan)?.rows.where((r) => r.day > todayKey()).firstOrNull?.rate
+      : null;
+  final rate = rateNow ?? (baseRate != null && baseRate > 0 ? baseRate : null);
+  final months = loan.tenureMonths ?? st.totalEmis;
+  final left = st.totalEmis == null ? null : st.totalEmis! - st.emisPaid;
+  final outstanding = st.outstanding ?? principal;
+  String text(num? v) => v == null ? '' : '$v';
   return [
     CalculatorLink(l.msCalcEmi, () {
       Navigator.of(context, rootNavigator: true).maybePop();
       context.push('/more/tools/emi-calculator',
           extra: CalculatorPrefill(loan.name, {
-            'principal': '${loan.principalAmount.round()}',
-            'rate': '${loan.annualRate ?? 0}',
-            'tenure': months % 12 == 0 ? '${months ~/ 12}' : '$months',
-            'tenureUnit': months % 12 == 0 ? 0 : 1,
+            'principal': text(principal?.round()),
+            'rate': text(baseRate != null && baseRate > 0 ? baseRate : null),
+            'tenure': months == null ? '' : (months % 12 == 0 ? '${months ~/ 12}' : '$months'),
+            'tenureUnit': months == null || months % 12 == 0 ? 0 : 1,
           }));
     }),
     CalculatorLink(l.msCalcPrepay, () {
       Navigator.of(context, rootNavigator: true).maybePop();
       context.push('/more/tools/loan-prepayment',
           extra: CalculatorPrefill(loan.name, {
-            'amount': '${(st.outstanding ?? loan.principalAmount).round()}',
-            'rate': rate,
-            'tenure': '${(left / 12).ceil()}',
+            'amount': text(outstanding?.round()),
+            'rate': text(rate),
+            'tenure': left == null ? '' : '${(left / 12).ceil()}',
             'prepay': '0',
           }));
     }),
   ];
 }
 
+Future<void> _reopenLoan(BuildContext context, WidgetRef ref, Loan loan) async {
+  // Sheets close before their actions finish: take the container now,
+  // not the sheet's ref (disposed after the first await).
+  final container = ProviderScope.containerOf(context, listen: false);
+  final l = context.l10n;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l.msLoansReopenTitle(loan.name), style: localeFont(fontWeight: FontWeight.w600)),
+      content: Text(l.msLoansReopenBody, style: localeFont()),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancelLabel)),
+        TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.msLoansReopen)),
+      ],
+    ),
+  );
+  if (ok != true) return;
+  await LoanService(container.read(isarProvider)).reopen(loan);
+  container.invalidate(loanListProvider);
+}
+
 /// The loan type's icon (same set as the type chips in the loan form).
 IconData loanTypeIcon(String t) => switch (t) {
-      'home' => Icons.home_outlined,
-      'vehicle' => Icons.directions_car_outlined,
-      'personal' => Icons.person_outline_rounded,
-      'education' => Icons.school_outlined,
-      'credit_card' => Icons.credit_card_outlined,
+      'home' => Icons.home_rounded,
+      'vehicle' => Icons.directions_car_rounded,
+      'personal' => Icons.person_rounded,
+      'education' => Icons.school_rounded,
+      'credit_card' => Icons.credit_card_rounded,
       _ => Icons.account_balance_rounded,
     };
+
+/// A loan's icon, drawn like a category (tinted square, filled glyph) in its
+/// category's colour, the same as recurring rows.
+class LoanIcon extends ConsumerWidget {
+  final Loan loan;
+  final double size;
+  const LoanIcon(this.loan, {super.key, this.size = 40});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cat = ref.watch(categoryMapProvider).valueOrNull?[int.tryParse(loan.categoryId)];
+    return CategoryIcon.square(
+        icon: loanTypeIcon(loan.loanType), rawColor: Color(cat?.colorValue ?? 0xFF5C6BC0), size: size);
+  }
+}
 
 String _loanTypeLabel(BuildContext context, String t) {
   final l = context.l10n;
@@ -152,7 +203,7 @@ class LoanSheet extends ConsumerWidget {
       contextLabel: [_loanTypeLabel(context, loan.loanType), if (loan.lenderName.isNotEmpty) loan.lenderName]
           .join(' · '),
       title: loan.name,
-      leading: KuberIconTile(icon: loanTypeIcon(loan.loanType), tone: KuberTone.primary, size: 48),
+      leading: LoanIcon(loan, size: 48),
       body: [
         if (st.outstanding != null)
           MoneyHeadline(label: l.msLoansOutstanding, value: m(st.outstanding!))
@@ -194,8 +245,9 @@ class LoanSheet extends ConsumerWidget {
         if (loanCalculatorLinks(context, loan, st).isNotEmpty)
           CalculatorLinkChips(links: loanCalculatorLinks(context, loan, st)),
       ],
-      // Primary: the EMI schedule. Row: Record extra payment + overflow
-      // (Edit, Change interest rate, Close loan, Delete).
+      // Primary: the EMI schedule. Row: Record extra payment (Re-open loan
+      // once closed) + overflow (Edit, Change interest rate, Close loan,
+      // Delete; closed: Edit, Delete).
       actions: [
         if (!st.closed)
           SheetAction(
@@ -204,6 +256,14 @@ class LoanSheet extends ConsumerWidget {
               onPressed: () {
                 nav.pop();
                 showExtraPaymentSheet(context, ref, loan);
+              })
+        else
+          SheetAction(
+              label: l.msLoansReopen,
+              icon: Icons.replay_rounded,
+              onPressed: () {
+                nav.pop();
+                _reopenLoan(context, ref, loan);
               }),
         SheetAction(
             label: l.editLabel,
@@ -309,10 +369,12 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
     }
 
     // Schedule rows: amortization when the loan has numbers, else the dates.
+    final sched = loan.schedule;
     final rows = a?.rows ??
         [
+          if (sched != null)
           for (final o in upcomingOccurrences(
-              loan.schedule!.copy()
+              sched.copy()
                 ..processedThrough = 0
                 ..postedCount = 0,
               limit: 600))
@@ -603,7 +665,7 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
             child: Text(l.deleteLabel, style: TextStyle(color: cs.error))),
       ],
       identity: MoneyIdentity(
-        tile: KuberIconTile(icon: loanTypeIcon(loan.loanType), tone: KuberTone.primary, size: 48),
+        tile: LoanIcon(loan, size: 48),
         contextLabel: _loanTypeLabel(context, loan.loanType),
         headline: st.outstanding != null ? m(st.outstanding!) : m(loan.emiAmount),
         caption: st.totalEmis == null ? null : l.msLoansProgress('${st.emisPaid}', '${st.totalEmis}'),

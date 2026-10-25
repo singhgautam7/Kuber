@@ -217,9 +217,7 @@ class _LoanRow extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
-            KuberIconTile(
-                icon: loanTypeIcon(loan.loanType),
-                tone: st.closed ? KuberTone.neutral : KuberTone.primary),
+            Opacity(opacity: st.closed ? 0.6 : 1, child: LoanIcon(loan)),
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

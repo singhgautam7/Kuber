@@ -317,7 +317,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     if (!numbers || (_running && _start == LoanStartingPoint.trackEmiOnly)) {
       l
         ..startingPoint = LoanStartingPoint.trackEmiOnly
-        ..principalAmount = numbers ? s.principal : (l.principalAmount)
+        // A new loan has no principal yet (late field): 0 = not tracked.
+        ..principalAmount = numbers ? s.principal : (_existing?.principalAmount ?? 0)
         ..annualRate = numbers ? s.rate : null
         ..tenureMonths = _when.endType == ScheduleEnd.afterCount ? _when.endCount : null;
     } else if (_running && _start == LoanStartingPoint.outstandingToday) {
