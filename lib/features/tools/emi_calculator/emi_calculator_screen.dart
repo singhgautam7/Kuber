@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -16,7 +18,8 @@ import '../widgets/calculator_widgets.dart';
 
 class EmiCalculatorScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const EmiCalculatorScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const EmiCalculatorScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<EmiCalculatorScreen> createState() =>
@@ -49,6 +52,8 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
   String get toolKey => 'emi-calculator';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName => 'Home loan';
   @override
@@ -113,6 +118,15 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
       infoConfig: InfoConstants.emiCalculator,
       overflowConfig: savedOverflowConfig('EMI'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
+      trackLabel: context.l10n.msCalcAddLoan,
+      onTrack: () => context.push(Uri(path: '/loans/add', queryParameters: {
+            'amount': '${parseAmount(_principalCtrl.text).round()}',
+            'rate': _rateCtrl.text,
+            'months': '$_tenureMonths',
+            'from': context.l10n.msCalcEmi,
+          }).toString()),
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

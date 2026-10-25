@@ -5,7 +5,12 @@ import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/notifications/data/app_notification.dart';
 import 'package:kuber/features/notifications/utils/deep_link_handler.dart';
 import 'package:kuber/features/notifications/utils/notification_routes.dart';
+import 'package:kuber/core/background/occurrence_processor.dart';
+import 'package:kuber/core/schedule/schedule_engine.dart';
+import 'package:kuber/features/investments/data/investment.dart';
+import 'package:kuber/features/loans/data/loan.dart';
 import 'package:kuber/features/recurring/data/recurring_rule.dart';
+import 'package:kuber/l10n/app_localizations_en.dart';
 
 import '../../helpers/isar_test_helper.dart';
 import '../../helpers/test_factories.dart';
@@ -28,6 +33,9 @@ void main() {
         'backup:diskFull': NotificationRoute('/more/data/automatic-backups'),
         '/storage/emulated/0/Download/kuber.csv':
             NotificationRoute('/more/data'),
+        // Background tasks notification (failure + Retry).
+        'background:backup': NotificationRoute('/more/data/automatic-backups'),
+        'background:recurring': NotificationRoute('/more/recurring'),
       };
       cases.forEach((payload, expected) {
         expect(resolveNotificationRoute(payload), expected, reason: payload);
@@ -97,6 +105,52 @@ void main() {
           'account:9', 'recurring:not-a-number']) {
         expect(await notificationItemSheet(isar, resolveNotificationRoute(p)),
             isNull, reason: p);
+      }
+    });
+
+    test('every payload the background run writes opens its item sheet', () async {
+      final start = DateTime(2026, 10, 1);
+      await isar.writeTxn(() async {
+        await isar.recurringRules.put(makeRecurringRule()
+          ..schedule = scheduleFrom(start: start)
+          ..dataVersion = 1);
+        await isar.loans.put(Loan()
+          ..uid = 'L1'
+          ..name = 'Car'
+          ..loanType = 'car'
+          ..lenderName = 'SBI'
+          ..principalAmount = 0
+          ..emiAmount = 11200
+          ..billDate = 1
+          ..autoAddTransaction = true
+          ..startDate = start
+          ..accountId = '1'
+          ..categoryId = '1'
+          ..createdAt = start
+          ..updatedAt = start
+          ..dataVersion = 1
+          ..schedule = (scheduleFrom(start: start)..autoRecord = true));
+        await isar.investments.put(Investment()
+          ..uid = 'I1'
+          ..name = 'Index'
+          ..investmentType = 'mutual_fund'
+          ..sipAmount = 5000
+          ..accountId = '1'
+          ..categoryId = '1'
+          ..createdAt = start
+          ..updatedAt = start
+          ..dataVersion = 1
+          ..sip = scheduleFrom(start: start));
+      });
+      final s = await OccurrenceProcessor(isar, decimals: 2, l10n: AppLocalizationsEn())
+          .run(now: DateTime(2026, 10, 1, 9));
+      expect(s.posted, 3);
+      final rows = await isar.appNotifications.where().findAll();
+      expect(rows.length, 3);
+      for (final n in rows) {
+        final route = resolveNotificationRoute(n.payload, type: n.type);
+        expect(route.hasItem, isTrue, reason: n.payload);
+        expect(await notificationItemSheet(isar, route), isNotNull, reason: n.payload);
       }
     });
   });

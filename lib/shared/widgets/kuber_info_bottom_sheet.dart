@@ -24,8 +24,10 @@ class KuberInfoBottomSheet extends StatelessWidget {
     return KuberBottomSheet(
       title: displayTitle,
       actions: AppButton(
-        label: context.l10n.doneLabel,
-        type: AppButtonType.primary,
+        label: config.actionLabel ?? context.l10n.doneLabel,
+        type: config.actionLabel != null
+            ? AppButtonType.normal
+            : AppButtonType.primary,
         fullWidth: true,
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
       ),
@@ -100,6 +102,10 @@ class KuberInfoBottomSheet extends StatelessWidget {
               ),
             );
           }),
+          if (config.exampleBlock != null) ...[
+            _ExampleBlock(block: config.exampleBlock!),
+            const SizedBox(height: 8),
+          ],
           if (config.customChild != null) ...[
             config.customChild!,
             const SizedBox(height: 16),
@@ -180,6 +186,59 @@ class _ExampleBox extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+/// Money "i" sheet example: surfaceContainerHigh r16 pad 16 gap 12, caps
+/// label, sentence, label / value rows (highlight in primary), closing line.
+class _ExampleBlock extends StatelessWidget {
+  final KuberInfoExampleBlock block;
+  const _ExampleBlock({required this.block});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final gap = <Widget>[];
+    void add(Widget w) {
+      if (gap.isNotEmpty) gap.add(const SizedBox(height: 12));
+      gap.add(w);
+    }
+
+    add(Text(block.label.toUpperCase(),
+        style: tt.labelMedium!.copyWith(color: cs.onSurfaceVariant, letterSpacing: 0.8)));
+    if (block.sentence != null) {
+      add(Text(block.sentence!, style: tt.bodyMedium!.copyWith(color: cs.onSurface)));
+    }
+    for (final r in block.rows) {
+      final labelText = Text(r.label, style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant));
+      final valueStyle = tt.titleSmall!.copyWith(
+          color: r.highlight ? cs.primary : cs.onSurface,
+          fontFeatures: const [FontFeature.tabularFigures()]);
+      // Short values (an amount) sit on the right; sentence-like values
+      // ("Saves ₹1,74,682 interest · ends 17 months earlier") go under the
+      // label so neither gets squeezed.
+      add(r.value.length > 18
+          ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              labelText,
+              const SizedBox(height: 2),
+              Text(r.value, style: valueStyle),
+            ])
+          : Row(children: [
+              Expanded(child: labelText),
+              const SizedBox(width: 12),
+              Flexible(child: Text(r.value, textAlign: TextAlign.end, style: valueStyle)),
+            ]));
+    }
+    if (block.after != null) {
+      add(Text(block.after!, style: tt.bodyMedium!.copyWith(color: cs.onSurface)));
+    }
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh, borderRadius: KuberShape.largeR),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: gap),
     );
   }
 }

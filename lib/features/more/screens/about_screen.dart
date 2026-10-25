@@ -674,6 +674,20 @@ class _FeedbackCard extends StatelessWidget {
             endIndent: 16,
           ),
           _FeedbackTile(
+            icon: Icons.forum_outlined,
+            label: context.l10n.communityTelegramTitle,
+            subtitle: context.l10n.communityTelegramSubtitle,
+            onTap: () => launchUrl(Uri.parse(kKuberTelegramUrl),
+                mode: LaunchMode.externalApplication),
+          ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: cs.outlineVariant,
+            indent: 16,
+            endIndent: 16,
+          ),
+          _FeedbackTile(
             icon: Icons.star_outline_rounded,
             label: abL10n("Rate Kuber", lang),
             subtitle: abL10n("Help others discover the app", lang),

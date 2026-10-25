@@ -1,13 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../engine/fd_rd_engine.dart';
+import '../engine/monthly_schedules.dart';
 import '../widgets/calculator_donut_breakdown.dart';
 import '../widgets/calculator_hero_result.dart';
 import '../widgets/calculator_line_chart.dart';
@@ -19,7 +20,8 @@ import '../widgets/tool_accents.dart';
 
 class FdRdCalculatorScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const FdRdCalculatorScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const FdRdCalculatorScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<FdRdCalculatorScreen> createState() =>
@@ -60,6 +62,8 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
   String get toolKey => 'fd-rd-calculator';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName =>
       _type == 0 ? 'Fixed deposit' : 'Recurring deposit';
@@ -114,27 +118,9 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
   List<List<double>> _monthlyRows() {
     final amount = parseAmount(_amountCtrl.text);
     final rate = parseNum(_rateCtrl.text);
-    final months = _years * 12;
-    final rows = <List<double>>[];
-    if (_isFd) {
-      final f = _freqs[_freq].perYear;
-      final pr = rate / 100 / f;
-      double prev = amount;
-      for (var m = 1; m <= months; m++) {
-        final bal = amount * pow(1 + pr, f * m / 12);
-        rows.add([m.toDouble(), prev, bal - prev, bal]);
-        prev = bal.toDouble();
-      }
-    } else {
-      final r = rate / 100 / 12;
-      double bal = 0;
-      for (var m = 1; m <= months; m++) {
-        final opening = bal;
-        bal = (bal + amount) * (1 + r);
-        rows.add([m.toDouble(), opening, bal - opening - amount, bal]);
-      }
-    }
-    return rows;
+    return _isFd
+        ? fdMonthlyRows(amount, rate, _years, _freqs[_freq])
+        : rdMonthlyRows(amount, rate, _years);
   }
 
   @override
@@ -153,6 +139,18 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
       infoConfig: InfoConstants.fdRdCalculator,
       overflowConfig: savedOverflowConfig('FD/RD'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
+      trackLabel: _isFd ? context.l10n.msCalcAddFd : context.l10n.msCalcAddRd,
+      onTrack: () => context.push(Uri(path: '/investments/add', queryParameters: {
+            'type': _isFd ? 'fd' : 'rd',
+            if (_isFd) 'principal': '${parseAmount(_amountCtrl.text).round()}'
+            else 'installment': '${parseAmount(_amountCtrl.text).round()}',
+            'rate': _rateCtrl.text,
+            'months': '${_years * 12}',
+            'freq': _freqs[_freq].name,
+            'from': context.l10n.msCalcFdRd,
+          }).toString()),
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

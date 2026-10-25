@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -16,7 +18,8 @@ import '../widgets/calculator_widgets.dart';
 
 class InvestmentReturnsCalculatorScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const InvestmentReturnsCalculatorScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const InvestmentReturnsCalculatorScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<InvestmentReturnsCalculatorScreen> createState() =>
@@ -50,6 +53,8 @@ class _InvestmentReturnsCalculatorScreenState
   String get toolKey => 'sip-calculator';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName => _type == 1 ? 'Monthly SIP' : 'Lumpsum invest';
   @override
@@ -114,6 +119,14 @@ class _InvestmentReturnsCalculatorScreenState
       infoConfig: InfoConstants.investmentReturnsCalculator,
       overflowConfig: savedOverflowConfig('investment'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
+      trackLabel: _isSip ? context.l10n.msCalcStartSip : null,
+      onTrack: () => context.push(Uri(path: '/investments/add', queryParameters: {
+            'type': 'sip',
+            'sip': '${parseAmount(_amountCtrl.text).round()}',
+            'from': context.l10n.msCalcReturns,
+          }).toString()),
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

@@ -7,6 +7,8 @@ import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../../core/utils/formatters.dart';
+import '../widgets/calculator_support.dart' show parseAmount;
 import '../widgets/calculator_widgets.dart';
 
 enum _SplitType { equal, unequal, percentage, fraction }
@@ -93,7 +95,7 @@ class _SplitCalculatorScreenState extends ConsumerState<SplitCalculatorScreen> {
 
       case _SplitType.fraction:
         final numerators = _people
-            .map((p) => double.tryParse(p.inputCtrl.text) ?? 0)
+            .map((p) => parseAmount(p.inputCtrl.text))
             .toList();
         final denominator = numerators.fold(0.0, (a, b) => a + b);
         if (denominator <= 0) return List.filled(n, 0);
@@ -114,7 +116,7 @@ class _SplitCalculatorScreenState extends ConsumerState<SplitCalculatorScreen> {
       case _SplitType.percentage:
         final sum = _people.fold(
           0.0,
-          (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0),
+          (a, p) => a + parseAmount(p.inputCtrl.text),
         );
         return (sum - 100).abs() < 0.01;
     }
@@ -140,7 +142,7 @@ class _SplitCalculatorScreenState extends ConsumerState<SplitCalculatorScreen> {
       case _SplitType.percentage:
         final sum = _people.fold(
           0.0,
-          (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0),
+          (a, p) => a + parseAmount(p.inputCtrl.text),
         );
         if ((sum - 100).abs() < 0.01) return null;
         return 'Total: ${sum.toStringAsFixed(1)}% / 100%';
@@ -461,7 +463,7 @@ class _SplitTypeChips extends StatelessWidget {
               style: localeFont(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : cs.onSurface,
+                color: isSelected ? cs.onPrimary : cs.onSurface,
               ),
             ),
           ),
@@ -570,6 +572,10 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
+              inputFormatters: prefix == null
+                  ? null
+                  : [CurrencyInputFormatter(
+                          isIndian: ref.watch(formatterProvider).system == NumberSystem.indian)],
               style: localeFont(fontSize: 14, color: cs.onSurface),
               decoration: InputDecoration(
                 prefixText: prefix != null ? '$prefix ' : null,
@@ -670,7 +676,7 @@ class _PercentageIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final total = people.fold(
       0.0,
-      (a, p) => a + (double.tryParse(p.inputCtrl.text) ?? 0),
+      (a, p) => a + parseAmount(p.inputCtrl.text),
     );
     final ok = (total - 100).abs() < 0.01;
     return Text(

@@ -133,6 +133,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
               child: KuberAppBar(
                 title: 'Kuber Cards',
                 showBack: true,
+                appDrawerEntry: AppDrawerEntry.cards,
                 pinShortcut: const PinShortcutSpec(
                   shortcutId: 'kuber_cards',
                   shortLabel: 'Cards',

@@ -62,6 +62,13 @@ NotificationRoute resolveNotificationRoute(
   if (payload == null || payload.isEmpty) return fallback;
   // Export notifications carry the saved file's path.
   if (payload.startsWith('/')) return const NotificationRoute('/more/data');
+  // Background tasks notification: the queue's page (no item sheet).
+  if (payload == 'background:backup') {
+    return const NotificationRoute('/more/data/automatic-backups');
+  }
+  if (payload.startsWith('background:')) {
+    return const NotificationRoute('/more/recurring');
+  }
 
   final sep = payload.indexOf(':');
   if (sep <= 0) return fallback;

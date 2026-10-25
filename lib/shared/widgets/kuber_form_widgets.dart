@@ -19,6 +19,7 @@ import 'app_button.dart';
 import 'app_icon_button.dart';
 import '../../core/utils/color_harmonizer.dart';
 import 'package:flutter/services.dart';
+import '../../core/utils/formatters.dart' show CurrencyInputFormatter;
 
 import '../../core/theme/app_theme.dart';
 
@@ -377,6 +378,10 @@ class KuberSwitchRow extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final bool enabled;
 
+  /// Shows an "i" after the name (an explainer sheet); stays tappable when
+  /// the switch is disabled, since it explains why.
+  final VoidCallback? onInfo;
+
   const KuberSwitchRow({
     super.key,
     required this.icon,
@@ -385,6 +390,7 @@ class KuberSwitchRow extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.enabled = true,
+    this.onInfo,
   });
 
   @override
@@ -407,8 +413,16 @@ class KuberSwitchRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(name,
-                    style: tt.titleMedium!.copyWith(color: cs.onSurface)),
+                Row(children: [
+                  Flexible(
+                    child: Text(name,
+                        style: tt.titleMedium!.copyWith(color: cs.onSurface)),
+                  ),
+                  if (onInfo != null) ...[
+                    const SizedBox(width: 4),
+                    KuberInfoGlyph(onTap: onInfo!),
+                  ],
+                ]),
                 Text(sub,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -424,13 +438,10 @@ class KuberSwitchRow extends StatelessWidget {
 
     return Opacity(
       opacity: enabled ? 1.0 : 0.38,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: InkWell(
-          onTap: () => onChanged(!value),
-          borderRadius: KuberShape.cardR,
-          child: rowBody,
-        ),
+      child: InkWell(
+        onTap: enabled ? () => onChanged(!value) : null,
+        borderRadius: KuberShape.cardR,
+        child: rowBody,
       ),
     );
   }
@@ -902,35 +913,428 @@ class KuberLeadingSwatch extends StatelessWidget {
   }
 }
 
-/// Warning callout (amber). Used by Ledger's duplicate-person warning.
+enum KuberCalloutTone { info, warning, error, ok }
+
+/// Notice block (design "notice"): info = secondaryContainer, warning =
+/// warningContainer (default; Ledger's duplicate-person warning), error =
+/// errorContainer, ok = incomeContainer. Optional trailing "i".
 class KuberCallout extends StatelessWidget {
   final Widget child;
-  const KuberCallout({super.key, required this.child});
+  final KuberCalloutTone tone;
+  final IconData? icon;
+  final VoidCallback? onInfo;
+  const KuberCallout({
+    super.key,
+    required this.child,
+    this.tone = KuberCalloutTone.warning,
+    this.icon,
+    this.onInfo,
+  });
+
+  /// Plain text notice.
+  factory KuberCallout.text(String text,
+          {Key? key,
+          KuberCalloutTone tone = KuberCalloutTone.info,
+          IconData? icon,
+          VoidCallback? onInfo}) =>
+      KuberCallout(
+          key: key, tone: tone, icon: icon, onInfo: onInfo, child: Text(text));
 
   @override
   Widget build(BuildContext context) {
     final m = context.kuberMoney;
+    final cs = Theme.of(context).colorScheme;
+    final (Color bg, Color fg, IconData glyph) = switch (tone) {
+      KuberCalloutTone.info => (cs.secondaryContainer, cs.onSecondaryContainer, Icons.info_rounded),
+      KuberCalloutTone.warning => (m.warningContainer, m.onWarningContainer, Icons.error_outline_rounded),
+      KuberCalloutTone.error => (cs.errorContainer, cs.onErrorContainer, Icons.block_rounded),
+      KuberCalloutTone.ok => (m.incomeContainer, m.onIncomeContainer, Icons.check_circle_rounded),
+    };
+    final tt = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: m.warningContainer,
-        borderRadius: KuberShape.largeR,
-      ),
+      padding: EdgeInsets.fromLTRB(16, 12, onInfo != null ? 4 : 16, 12),
+      decoration: BoxDecoration(color: bg, borderRadius: KuberShape.largeR),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 1, right: 10),
-            child: Icon(Icons.error_outline_rounded,
-                size: 20, color: m.onWarningContainer),
+            padding: const EdgeInsets.only(top: 1, right: 12),
+            child: Icon(icon ?? glyph, size: 20, color: fg),
           ),
           Expanded(
             child: DefaultTextStyle.merge(
-              style: TextStyle(color: m.onWarningContainer),
+              style: tt.bodyMedium!.copyWith(color: fg),
               child: child,
             ),
           ),
+          if (onInfo != null) KuberInfoGlyph(onTap: onInfo!, color: fg),
         ],
+      ),
+    );
+  }
+}
+
+/// The "i" after a label: info (outlined) 18 in a 24 box, 48 touch target.
+class KuberInfoGlyph extends StatelessWidget {
+  final VoidCallback onTap;
+  final Color? color;
+  const KuberInfoGlyph({super.key, required this.onTap, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 32,
+      height: 24,
+      child: OverflowBox(
+        maxWidth: 48,
+        maxHeight: 48,
+        child: IconButton(
+          onPressed: onTap,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          iconSize: 18,
+          tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+          icon: Icon(Icons.info_outline_rounded,
+              color: color ?? Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Calculated" pill after a field label (11/16 600, secondaryContainer).
+class KuberCalculatedPill extends StatelessWidget {
+  final String label;
+  const KuberCalculatedPill(this.label, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(left: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+          color: cs.secondaryContainer, borderRadius: KuberShape.fullR),
+      child: Text(label,
+          style: localeFont(
+              fontSize: 11,
+              height: 16 / 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+              color: cs.onSecondaryContainer)),
+    );
+  }
+}
+
+/// A labelled text field in the app's filled style (theme decoration): label
+/// row above with an optional "i" and Calculated pill, then the field.
+/// A field that becomes calculated flashes once (motion "swap").
+class KuberTextField extends StatefulWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? hint;
+  final String? prefixText;
+  final String? suffixText;
+  final Widget? suffix;
+  final String? errorText;
+  final String? helperText;
+  final bool optional;
+  final VoidCallback? onInfo;
+  final String? calculatedLabel;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
+  final TextCapitalization textCapitalization;
+  final TextInputAction? textInputAction;
+  final bool enabled;
+  final bool showLabel;
+
+  const KuberTextField({
+    super.key,
+    required this.label,
+    required this.controller,
+    this.hint,
+    this.prefixText,
+    this.suffixText,
+    this.suffix,
+    this.errorText,
+    this.helperText,
+    this.optional = false,
+    this.onInfo,
+    this.calculatedLabel,
+    this.keyboardType,
+    this.inputFormatters,
+    this.onChanged,
+    this.focusNode,
+    this.textCapitalization = TextCapitalization.none,
+    this.textInputAction,
+    this.enabled = true,
+    this.showLabel = true,
+  });
+
+  /// Numeric field (rate, tenure, months, count).
+  factory KuberTextField.number({
+    Key? key,
+    required String label,
+    required TextEditingController controller,
+    String? hint,
+    String? suffixText,
+    String? errorText,
+    String? helperText,
+    VoidCallback? onInfo,
+    String? calculatedLabel,
+    ValueChanged<String>? onChanged,
+    bool decimal = true,
+    bool optional = false,
+    bool showLabel = true,
+  }) =>
+      KuberTextField(
+        key: key,
+        showLabel: showLabel,
+        label: label,
+        controller: controller,
+        hint: hint,
+        suffixText: suffixText,
+        errorText: errorText,
+        helperText: helperText,
+        onInfo: onInfo,
+        calculatedLabel: calculatedLabel,
+        onChanged: onChanged,
+        optional: optional,
+        keyboardType: TextInputType.numberWithOptions(decimal: decimal),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(decimal ? r'[0-9.]' : r'[0-9]')),
+        ],
+      );
+
+  @override
+  State<KuberTextField> createState() => _KuberTextFieldState();
+}
+
+class _KuberTextFieldState extends State<KuberTextField>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _flash = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 600));
+
+  @override
+  void didUpdateWidget(KuberTextField old) {
+    super.didUpdateWidget(old);
+    final became = old.calculatedLabel == null && widget.calculatedLabel != null;
+    if (became && !(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
+      _flash.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _flash.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final field = AnimatedBuilder(
+      animation: _flash,
+      builder: (context, child) {
+        final t = _flash.value;
+        final pulse = t < 0.5 ? t * 2 : (1 - t) * 2;
+        return TextField(
+          controller: widget.controller,
+          focusNode: widget.focusNode,
+          enabled: widget.enabled,
+          keyboardType: widget.keyboardType,
+          inputFormatters: widget.inputFormatters,
+          textCapitalization: widget.textCapitalization,
+          textInputAction: widget.textInputAction,
+          onChanged: widget.onChanged,
+          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+          style: localeFont(color: cs.onSurface, fontSize: 16),
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            prefixText: widget.prefixText,
+            prefixStyle: localeFont(color: cs.onSurfaceVariant, fontSize: 16),
+            suffixText: widget.suffixText,
+            suffixIcon: widget.suffix,
+            errorText: widget.errorText,
+            errorMaxLines: 3,
+            helperText: widget.helperText,
+            helperMaxLines: 3,
+            fillColor: pulse > 0
+                ? Color.lerp(cs.surfaceContainerHigh, cs.secondaryContainer, pulse)
+                : null,
+          ),
+        );
+      },
+    );
+    if (!widget.showLabel) return field;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Flexible(child: KuberFieldLabel(widget.label, optional: widget.optional)),
+            if (widget.onInfo != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: KuberInfoGlyph(onTap: widget.onInfo!),
+              ),
+            if (widget.calculatedLabel != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: KuberCalculatedPill(widget.calculatedLabel!),
+              ),
+          ],
+        ),
+        field,
+      ],
+    );
+  }
+}
+
+/// Amount field: currency symbol, grouping and the currency's decimals
+/// (CurrencyInputFormatter), optional calculator button. The standard way to
+/// type an amount outside the big hero input.
+class KuberAmountField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String symbol;
+  final bool indianGrouping;
+  final VoidCallback? onCalculator;
+  final String? errorText;
+  final String? helperText;
+  final bool optional;
+  final VoidCallback? onInfo;
+  final String? calculatedLabel;
+  final ValueChanged<String>? onChanged;
+  final String? hint;
+  final bool showLabel;
+
+  const KuberAmountField({
+    super.key,
+    required this.label,
+    required this.controller,
+    required this.symbol,
+    required this.indianGrouping,
+    this.onCalculator,
+    this.errorText,
+    this.helperText,
+    this.optional = false,
+    this.onInfo,
+    this.calculatedLabel,
+    this.onChanged,
+    this.hint,
+    this.showLabel = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return KuberTextField(
+      label: label,
+      controller: controller,
+      hint: hint ?? '0',
+      prefixText: '$symbol ',
+      errorText: errorText,
+      helperText: helperText,
+      optional: optional,
+      onInfo: onInfo,
+      calculatedLabel: calculatedLabel,
+      onChanged: onChanged,
+      showLabel: showLabel,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [CurrencyInputFormatter(isIndian: indianGrouping)],
+      suffix: onCalculator == null
+          ? null
+          : IconButton(
+              icon: Icon(Icons.calculate_outlined,
+                  size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              onPressed: onCalculator,
+            ),
+    );
+  }
+
+  /// The typed value (grouping stripped), or 0.
+  static double valueOf(TextEditingController c) =>
+      double.tryParse(c.text.replaceAll(',', '').trim()) ?? 0;
+}
+
+/// Selectable card (radio + title + one line + optional "i", optional pill).
+/// Used for "Already running?" starting points, interest types, Reduce tenure
+/// / Reduce EMI and Adjust EMI / tenure. Selected = secondaryContainer with a
+/// 2dp primary border.
+class KuberSelectCard extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback? onInfo;
+  final String? pill;
+
+  const KuberSelectCard({
+    super.key,
+    required this.title,
+    this.subtitle,
+    required this.selected,
+    required this.onTap,
+    this.onInfo,
+    this.pill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final fg = selected ? cs.onSecondaryContainer : cs.onSurface;
+    return Material(
+      color: selected ? cs.secondaryContainer : cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.largeR,
+        side: BorderSide(
+            color: selected ? cs.primary : cs.outlineVariant,
+            width: selected ? 2 : 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  size: 20,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(title, style: tt.titleSmall!.copyWith(color: fg)),
+                        if (pill != null) KuberCalculatedPill(pill!),
+                      ],
+                    ),
+                    if (subtitle != null)
+                      Text(subtitle!,
+                          style: tt.bodySmall!.copyWith(
+                              color: selected ? fg : cs.onSurfaceVariant)),
+                  ],
+                ),
+              ),
+              if (onInfo != null) KuberInfoGlyph(onTap: onInfo!, color: fg),
+            ],
+          ),
+        ),
       ),
     );
   }

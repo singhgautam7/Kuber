@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 
-import '../../../core/utils/monthly_recurrence.dart';
+import 'occurrences.dart';
+
 import '../../accounts/data/account.dart';
 import '../../investments/data/investment.dart';
 import '../../ledger/data/ledger.dart';
@@ -47,12 +48,16 @@ class LoanEmiEvent implements UpcomingEvent {
   final Loan loan;
   @override
   final DateTime date;
-  const LoanEmiEvent(this.loan, this.date);
+
+  /// The EMI due then (interest-only months, rate changes and prepayments
+  /// applied); defaults to the loan's EMI.
+  final double? emi;
+  const LoanEmiEvent(this.loan, this.date, {this.emi});
 
   @override
   String get title => loan.name;
   @override
-  double? get amount => -loan.emiAmount;
+  double? get amount => -(emi ?? loan.emiAmount);
   @override
   String get sourceType => 'emi';
   @override
@@ -63,13 +68,18 @@ class InvestmentSipEvent implements UpcomingEvent {
   final Investment investment;
   @override
   final DateTime date;
-  const InvestmentSipEvent(this.investment, this.date);
+
+  /// The installment due then (yearly step-up applied).
+  final double? sip;
+  const InvestmentSipEvent(this.investment, this.date, {this.sip});
 
   @override
   String get title => investment.name;
   @override
-  double? get amount =>
-      investment.sipAmount == null ? null : -investment.sipAmount!;
+  double? get amount {
+    final v = sip ?? investment.sipAmount;
+    return v == null ? null : -v;
+  }
   @override
   String get sourceType => 'sip';
   @override
@@ -78,10 +88,11 @@ class InvestmentSipEvent implements UpcomingEvent {
 
 class RecurringEvent implements UpcomingEvent {
   final RecurringRule rule;
-  const RecurringEvent(this.rule);
+  final DateTime? next;
+  const RecurringEvent(this.rule, [this.next]);
 
   @override
-  DateTime get date => rule.nextDueAt;
+  DateTime get date => next ?? rule.nextDueAt;
   @override
   String get title => rule.name;
   @override
@@ -152,8 +163,28 @@ class CreditCardEvent implements UpcomingEvent {
   }
 }
 
-/// Queries all 6 sources and returns a chronologically merged, typed list
-/// capped to `[now, now + window]`.
+/// FD maturity (decision 3): under the SIPs filter and dot, counted as In.
+class InvestmentMaturityEvent implements UpcomingEvent {
+  final Investment investment;
+  @override
+  final DateTime date;
+  final double? value;
+  const InvestmentMaturityEvent(this.investment, this.date, this.value);
+
+  @override
+  String get title => investment.name;
+  @override
+  double? get amount => value;
+  @override
+  String get sourceType => 'sip';
+  @override
+  String get sourceId => '${investment.id}:maturity';
+}
+
+/// The List view and the home widgets: the next event per source within
+/// `[now, now + window]` (the rule from before the calendar), built on
+/// [OccurrenceEngine] so both views read one engine. FD maturity is new
+/// (upcoming-calendar-v1) and is merged in after the old ordering.
 class UpcomingEventsAggregator {
   final Isar isar;
 
@@ -165,91 +196,61 @@ class UpcomingEventsAggregator {
     // Pre-loaded accounts, to avoid a duplicate read when the caller (e.g.
     // widget sync) already has them. Null = load here.
     List<Account>? accounts,
+    // Tests pin the clock; the app passes nothing.
+    DateTime? at,
   }) async {
-    final now = DateTime.now();
+    final now = at ?? DateTime.now();
     final end = now.add(window);
-    bool wanted(String type) =>
-        sourceFilters == null || sourceFilters.contains(type);
     bool inWindow(DateTime d) => !d.isBefore(now) && !d.isAfter(end);
 
+    final all = await OccurrenceEngine(isar).between(
+      DateTime(now.year, now.month, now.day),
+      end,
+      at: now,
+      sources: sourceFilters,
+      accounts: accounts,
+    );
     final events = <UpcomingEvent>[];
-
-    if (wanted('reminder')) {
-      final reminders = await isar.reminders
-          .filter()
-          .not()
-          .statusEqualTo(ReminderStatus.completed)
-          .findAll();
-      events.addAll(reminders
-          .where((r) => inWindow(r.dueAt))
-          .map(ReminderEvent.new));
-    }
-
-    if (wanted('emi')) {
-      final loans =
-          await isar.loans.filter().isCompletedEqualTo(false).findAll();
-      for (final loan in loans) {
-        final next = nextMonthlyOccurrence(loan.billDate, now);
-        if (inWindow(next)) events.add(LoanEmiEvent(loan, next));
-      }
-    }
-
-    if (wanted('sip')) {
-      final investments =
-          await isar.investments.filter().autoDebitEqualTo(true).findAll();
-      for (final inv in investments) {
-        final day = inv.sipDate;
-        if (day == null) continue;
-        final next = nextMonthlyOccurrence(day, now);
-        if (inWindow(next)) events.add(InvestmentSipEvent(inv, next));
-      }
-    }
-
-    if (wanted('recurring')) {
-      final rules = await isar.recurringRules
-          .filter()
-          .isPausedEqualTo(false)
-          .findAll();
-      events.addAll(rules
-          .where((r) => inWindow(r.nextDueAt))
-          .map(RecurringEvent.new));
-    }
-
-    if (wanted('ledger')) {
-      final ledgers = await isar.ledgers
-          .filter()
-          .isSettledEqualTo(false)
-          .expectedDateIsNotNull()
-          .findAll();
-      events.addAll(ledgers
-          .where((l) => inWindow(l.expectedDate!))
-          .map(LedgerEvent.new));
-    }
-
-    if (wanted('creditCard')) {
-      // Small table (a handful of rows): reuse the caller's list if given,
-      // else load once and filter in memory.
-      final creditAccounts = accounts ?? await isar.accounts.where().findAll();
-      for (final a in creditAccounts) {
-        if (!a.isCreditCard || a.isDisabled) continue;
-        final billDay = a.billGenerationDay;
-        if (billDay != null) {
-          final next = nextMonthlyOccurrence(billDay, now);
-          if (inWindow(next)) {
-            events.add(CreditCardEvent(a, next, isPaymentDue: false));
+    final maturities = <UpcomingEvent>[];
+    final taken = <String>{}; // sources that already have their next event
+    for (final o in all) {
+      if (o.ordinal < 0) continue; // before today
+      final e = o.event;
+      final key = '${e.runtimeType}:${e.sourceId}';
+      switch (e) {
+        case InvestmentMaturityEvent():
+          if (o.status != OccurrenceStatus.done && inWindow(e.date)) maturities.add(e);
+        case ReminderEvent(:final reminder):
+          // The reminder's own due date only, never its later repeats.
+          if (e.date == reminder.dueAt &&
+              o.status != OccurrenceStatus.done &&
+              inWindow(e.date)) {
+            events.add(e);
           }
-        }
-        final dueDay = a.paymentDueDay;
-        if (dueDay != null) {
-          final next = nextMonthlyOccurrence(dueDay, now);
-          if (inWindow(next)) {
-            events.add(CreditCardEvent(a, next, isPaymentDue: true));
+        case LedgerEvent():
+          if (o.status != OccurrenceStatus.done && inWindow(e.date)) events.add(e);
+        case CreditCardEvent():
+        case LoanEmiEvent():
+        case InvestmentSipEvent():
+        case RecurringEvent():
+          if (taken.contains(key) || o.status == OccurrenceStatus.skipped) continue;
+          // Old rows and cards: only their next date counts. Schedules: the
+          // first one inside the window.
+          if (o.legacy || e is CreditCardEvent) taken.add(key);
+          if (inWindow(e.date)) {
+            events.add(e);
+            taken.add(key);
           }
-        }
       }
     }
-
     events.sort((a, b) => a.date.compareTo(b.date));
+    for (final m in maturities) {
+      var at = events.length;
+      while (at > 0 && events[at - 1].date.isAfter(m.date)) {
+        at--;
+      }
+      events.insert(at, m);
+    }
     return events;
   }
 }

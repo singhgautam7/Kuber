@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -86,6 +87,7 @@ class _RemindersLandingScreenState
         header: KuberAppBar(
           title: 'Reminders',
           showBack: true,
+          appDrawerEntry: AppDrawerEntry.reminders,
           infoConfig: kAboutRemindersInfoConfig,
           search: KuberHeaderSearch(
             controller: _searchController,

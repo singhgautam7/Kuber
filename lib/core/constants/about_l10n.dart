@@ -1,3 +1,6 @@
+/// Official Kuber community channel (About and Feedback).
+const kKuberTelegramUrl = 'https://t.me/KuberHQ';
+
 final Map<String, Map<String, String>> aboutL10n = {
   // Eyebrows / Headings
   'WHY KUBER?': {

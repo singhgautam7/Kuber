@@ -30,6 +30,8 @@ import '../../features/reminders/data/reminder.dart';
 import '../../features/pro/data/user_entitlement.dart';
 import '../../features/kuber_cards/data/stored_card.dart';
 import '../../features/kuber_cards/data/card_vault_meta.dart';
+import '../schedule/processed_occurrence.dart';
+import '../background/background_task_run.dart';
 // Deprecated collection, kept registered so older databases still open.
 import '../../features/search/data/recent_search.dart';
 
@@ -76,6 +78,8 @@ class IsarService {
       StoredCardSchema,
       CardVaultMetaSchema,
       RecentSearchSchema,
+      ProcessedOccurrenceSchema,
+      BackgroundTaskRunSchema,
     ], directory: dir.path);
   }
 }

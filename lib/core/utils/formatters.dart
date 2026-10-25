@@ -1,15 +1,41 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../features/settings/providers/settings_provider.dart';
+import 'currency_data.dart';
 
 class AppFormatter {
-  final NumberSystem system;
+  /// The selected currency (ISO entry). Every amount in the app is formatted
+  /// with it unless a caller passes a different explicit `symbol:` (currency
+  /// converter).
+  final KuberCurrency currency;
 
-  /// The selected currency's symbol. Every amount in the app is formatted
-  /// with it unless a caller passes an explicit `symbol:` (currency converter).
-  final String symbol;
+  /// Settings > "Show currency code instead of symbol".
+  final bool showCode;
 
-  AppFormatter({this.system = NumberSystem.indian, this.symbol = '₹'});
+  final NumberSystem _system;
+
+  AppFormatter({
+    NumberSystem system = NumberSystem.indian,
+    String? symbol,
+    KuberCurrency? currency,
+    this.showCode = false,
+  })  : currency = currency ?? _currencyForSymbol(symbol),
+        _system = system;
+
+  static KuberCurrency _currencyForSymbol(String? symbol) {
+    if (symbol == null) return kCurrencies.first;
+    return kCurrencies.where((c) => c.symbol == symbol).firstOrNull ??
+        KuberCurrency(code: symbol, name: symbol, symbol: symbol);
+  }
+
+  /// Effective grouping: Automatic resolves to Indian for INR, else
+  /// international.
+  NumberSystem get system => _system == NumberSystem.automatic
+      ? (currency.indianGrouping ? NumberSystem.indian : NumberSystem.international)
+      : _system;
+
+  /// The symbol (or code) amounts are shown with.
+  String get symbol => showCode ? currency.code : currency.symbol;
 
   /// The formatter for the current settings, for code that has no `ref`
   /// (notification bodies, stories isolate input). Seeded from prefs in
@@ -32,39 +58,42 @@ class AppFormatter {
 
   static final Map<String, NumberFormat> _cache = {};
 
-  NumberFormat _getFormatter({
-    required String locale,
-    String? symbol,
-    int? decimalDigits,
-  }) {
-    final key = '$locale-$symbol-$decimalDigits';
-    if (!_cache.containsKey(key)) {
-      _cache[key] = NumberFormat.currency(
-        locale: locale,
-        symbol: symbol ?? '',
-        decimalDigits: decimalDigits,
-      );
-    }
-    return _cache[key]!;
+  NumberFormat _number(int decimalDigits) {
+    final locale = system == NumberSystem.indian ? 'en_IN' : 'en_US';
+    final key = '$locale-$decimalDigits';
+    return _cache[key] ??= NumberFormat.currency(
+      locale: locale,
+      symbol: '',
+      decimalDigits: decimalDigits,
+    );
   }
 
-  String formatCurrency(num amount, {String? symbol}) {
-    symbol ??= this.symbol;
-    final locale = system == NumberSystem.indian ? 'en_IN' : 'en_US';
-    final formatter = _getFormatter(
-      locale: locale,
-      symbol: symbol,
-      decimalDigits: amount % 1 == 0 ? 0 : 2,
-    );
+  /// Places [sym] before or after [number] per the currency (codes always
+  /// lead with a space: "USD 1,200").
+  String _place(String sym, String number) {
+    if (showCode) return '$sym $number';
+    if (currency.after) return '$number $sym';
+    return currency.spaced ? '$sym $number' : '$sym$number';
+  }
 
+  /// A whole amount shows no decimals; otherwise the currency's ISO minor
+  /// units (INR 2, JPY 0, KWD 3). Stored values are never rounded here.
+  String formatCurrency(num amount, {String? symbol}) {
+    final legacy =
+        symbol != null && symbol != currency.symbol && symbol != currency.code;
+    final d = legacy ? 2 : currency.decimals;
+    final formatted =
+        _number(amount % 1 == 0 || d == 0 ? 0 : d).format(amount.abs());
     // Handle negative values: -₹1,200 instead of ₹-1,200
-    final formatted = formatter.format(amount.abs());
-    return amount < 0 ? '-$formatted' : formatted;
+    final body = legacy ? '$symbol$formatted' : _place(this.symbol, formatted);
+    return amount < 0 ? '-$body' : body;
   }
 
   String formatCompactCurrency(num amount, {String? symbol}) {
-    symbol ??= this.symbol;
-    if (amount == 0) return '${symbol}0';
+    final legacy =
+        symbol != null && symbol != currency.symbol && symbol != currency.code;
+    String place(String n) => legacy ? '$symbol$n' : _place(this.symbol, n);
+    if (amount == 0) return place('0');
     final isNegative = amount < 0;
     final absAmount = amount.abs();
 
@@ -91,7 +120,26 @@ class AppFormatter {
       }
     }
 
-    return '${isNegative ? '-' : ''}$symbol$result';
+    return '${isNegative ? '-' : ''}${place(result)}';
+  }
+
+  /// Parses a formatted or typed amount back to a number (grouping, symbol
+  /// and code stripped). Used by the round-trip tests and amount fields.
+  double? parseAmount(String text) {
+    var t = text.trim();
+    final neg = t.startsWith('-');
+    // Longest first, so "MOP$" or "ZAR" go before "$" or "R".
+    final marks = {currency.symbol, currency.code, currency.narrow}.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final m in marks) {
+      t = t.replaceAll(m, '');
+    }
+    t = t
+        .replaceAll(',', '')
+        .replaceAll(' ', '')
+        .replaceAll('-', '');
+    final v = double.tryParse(t);
+    return v == null ? null : (neg ? -v : v);
   }
 
   String formatPercentage(num value) {
@@ -116,7 +164,22 @@ class AppFormatter {
 class CurrencyInputFormatter extends TextInputFormatter {
   final bool isIndian;
 
-  CurrencyInputFormatter({this.isIndian = true});
+  /// Most fraction digits accepted: the selected currency's minor units
+  /// (JPY 0 = no decimal point, KWD 3).
+  final int decimals;
+
+  CurrencyInputFormatter({this.isIndian = true, int? decimals})
+      : decimals = decimals ?? AppFormatter.current.currency.decimals;
+
+  /// Groups a value set in code ("2500000" -> "25,00,000"); returns [raw]
+  /// unchanged when it isn't a plain number or doesn't fit the decimals.
+  String format(String raw) {
+    final v = double.tryParse(raw.replaceAll(',', ''));
+    if (v == null) return raw;
+    final plain = v == v.roundToDouble() ? v.round().toString() : '$v';
+    final f = formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: plain)).text;
+    return f.isEmpty ? raw : f;
+  }
 
   @override
   TextEditingValue formatEditUpdate(
@@ -140,6 +203,11 @@ class CurrencyInputFormatter extends TextInputFormatter {
       );
     }
     
+    if (text.contains('.') && decimals == 0) return oldValue;
+    if (text.contains('.') && text.split('.').last.length > decimals) {
+      return oldValue;
+    }
+
     // Allow partial decimals like "." or "0."
     if (text == '.') {
       final result = '${isNegative ? '-' : ''}0.';

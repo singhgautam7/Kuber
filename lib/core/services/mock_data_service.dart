@@ -18,7 +18,11 @@ import '../../features/tools/bill_splitter/data/bill.dart';
 import '../../features/tools/bill_splitter/data/person.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
 import '../../features/kuber_cards/data/card_vault_service.dart';
+import '../../features/loans/domain/loan_service.dart';
+import '../money_math/loan_math.dart' show calculateEmi;
 import '../database/seed_service.dart';
+import '../schedule/schedule.dart';
+import '../schedule/schedule_engine.dart';
 import '../utils/formatters.dart';
 
 class MockDataService {
@@ -603,6 +607,31 @@ class MockDataService {
           ..readAt = now.subtract(const Duration(days: 7)),
       ]);
     });
+
+    // 15b. One loan with full details (Advanced options): a car loan running
+    // for 14 months before Kuber, interest counted as spending. Outside the
+    // transaction above: LoanService.save runs its own write.
+    final payFrom = await isar.accounts.filter().nameEqualTo('HDFC Savings').findFirst();
+    if (payFrom != null) {
+      final first = DateTime(now.year, now.month - 14, 12);
+      final car = Loan()
+        ..name = 'Creta Car Loan'
+        ..loanType = 'vehicle'
+        ..lenderName = 'ICICI Bank'
+        ..accountId = '${payFrom.id}'
+        ..principalAmount = 900000
+        ..annualRate = 9.2
+        ..tenureMonths = 60
+        ..emiAmount = calculateEmi(900000, 9.2, 60).roundToDouble()
+        ..mode = LoanMode.advanced
+        ..alreadyRunning = true
+        ..startingPoint = LoanStartingPoint.originalDetails
+        ..countOnlyInterest = true
+        ..countOnlyInterestFrom = DateTime(now.year, now.month, now.day);
+      final schedule = scheduleFrom(start: first, endType: ScheduleEnd.afterCount, endCount: 60)
+        ..autoRecord = true;
+      await LoanService(isar).save(car, schedule, isNew: true);
+    }
 
     // 16. Kuber Cards: a vault with PIN 0000 (4 digits, named in the confirm
     // sheet) and a few cards. Outside the transaction above: the vault

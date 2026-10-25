@@ -217,9 +217,9 @@ class InsightEngine {
     final amountsByDay = <int, List<double>>{};
     for (final t in recent) {
       final wd = t.createdAt.weekday;
-      totals[wd] = (totals[wd] ?? 0) + t.amount;
+      totals[wd] = (totals[wd] ?? 0) + t.spendAmount;
       counts[wd] = (counts[wd] ?? 0) + 1;
-      (amountsByDay[wd] ??= []).add(t.amount);
+      (amountsByDay[wd] ??= []).add(t.spendAmount);
     }
 
     final avgPerDay = <int, double>{};
@@ -296,7 +296,7 @@ class InsightEngine {
 
     final catTotals = <String, double>{};
     for (final t in recent) {
-      catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
+      catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.spendAmount;
     }
     if (catTotals.isEmpty) return [];
 
@@ -468,9 +468,9 @@ class InsightEngine {
 
     for (final t in recent) {
       if (t.createdAt.weekday >= 6) {
-        weekendTotal += t.amount;
+        weekendTotal += t.spendAmount;
       } else {
-        weekdayTotal += t.amount;
+        weekdayTotal += t.spendAmount;
       }
     }
 
@@ -486,9 +486,9 @@ class InsightEngine {
     final weekdayAmounts = <double>[];
     for (final t in recent) {
       if (t.createdAt.weekday >= 6) {
-        weekendAmounts.add(t.amount);
+        weekendAmounts.add(t.spendAmount);
       } else {
-        weekdayAmounts.add(t.amount);
+        weekdayAmounts.add(t.spendAmount);
       }
     }
     final weekendMedian = median(weekendAmounts);
@@ -642,9 +642,9 @@ class InsightEngine {
     double recurringTotal = 0;
     double total = 0;
     for (final t in recent) {
-      total += t.amount;
+      total += t.spendAmount;
       if (t.linkedRuleType == 'recurring') {
-        recurringTotal += t.amount;
+        recurringTotal += t.spendAmount;
       }
     }
 
@@ -879,7 +879,7 @@ class InsightEngine {
 
     final catTotals = <String, double>{};
     for (final t in recent) {
-      catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
+      catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.spendAmount;
     }
     if (catTotals.length < 3) return [];
 
@@ -994,7 +994,7 @@ class InsightEngine {
           .where(
             (t) => t.linkedRuleType == 'loan' && t.linkedRuleId == loan.uid,
           )
-          .fold<double>(0, (sum, t) => sum + t.amount);
+          .fold<double>(0, (sum, t) => sum + t.spendAmount);
       if (paid > loan.principalAmount) {
         estimatedInterest += paid - loan.principalAmount;
       }
@@ -1204,7 +1204,7 @@ class InsightEngine {
       ];
     }
 
-    final total = recent.fold<double>(0, (sum, t) => sum + t.amount);
+    final total = recent.fold<double>(0, (sum, t) => sum + t.spendAmount);
 
     final (icon, color, label) = _iconForType(InsightType.fallbackTotal, false);
 
@@ -1245,7 +1245,7 @@ class InsightEngine {
   Map<String, double> _groupByCategory(List<Transaction> txns) {
     final map = <String, double>{};
     for (final t in txns) {
-      map[t.categoryId] = (map[t.categoryId] ?? 0) + t.amount;
+      map[t.categoryId] = (map[t.categoryId] ?? 0) + t.spendAmount;
     }
     return map;
   }

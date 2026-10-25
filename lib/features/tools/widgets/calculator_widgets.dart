@@ -1,7 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_menu.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -72,7 +72,7 @@ class ToolInputLabel extends StatelessWidget {
   }
 }
 
-class ToolTextField extends ConsumerWidget {
+class ToolTextField extends ConsumerStatefulWidget {
   final TextEditingController controller;
   final String? label;
   final String? prefix;
@@ -91,11 +91,71 @@ class ToolTextField extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ToolTextField> createState() => _ToolTextFieldState();
+}
+
+class _ToolTextFieldState extends ConsumerState<ToolTextField> {
+  bool? _isIndian; // null until the first build groups any preset text
+
+  TextEditingController get controller => widget.controller;
+  String? get label => widget.label;
+  String? get prefix => widget.prefix;
+  String? get suffix => widget.suffix;
+  ValueChanged<String>? get onChanged => widget.onChanged;
+  bool get formatAsAmount => widget.formatAsAmount;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_regroup);
+  }
+
+  @override
+  void didUpdateWidget(ToolTextField old) {
+    super.didUpdateWidget(old);
+    if (old.controller != controller) {
+      old.controller.removeListener(_regroup);
+      controller.addListener(_regroup);
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_regroup);
+    super.dispose();
+  }
+
+  /// Typing goes through [CurrencyInputFormatter]; text set in code
+  /// (defaults, "Filled from", saved calculations, the slider) is grouped
+  /// here, as is existing text when the number format setting changes.
+  void _regroup() {
+    if (!formatAsAmount) return;
+    final text = controller.text;
+    final v = double.tryParse(text.replaceAll(',', ''));
+    if (v == null) return;
+    // Mid-typing states ("12.", "0.50") are the formatter's business.
+    final midTyping = text.endsWith('.') || (text.contains('.') && text.endsWith('0'));
+    if (midTyping) return;
+    final f = CurrencyInputFormatter(isIndian: _isIndian ?? true).format(text);
+    if (f == text) return;
+    controller.value = TextEditingValue(
+      text: f,
+      selection: TextSelection.collapsed(offset: f.length),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isIndian = formatAsAmount
         ? ref.watch(formatterProvider).system == NumberSystem.indian
         : false;
+    if (formatAsAmount && isIndian != _isIndian) {
+      _isIndian = isIndian;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _regroup();
+      });
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -115,38 +175,43 @@ class ToolTextField extends ConsumerWidget {
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
-          decoration: InputDecoration(
-            prefixText: prefix != null ? '$prefix ' : null,
-            prefixStyle: localeFont(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurfaceVariant,
-            ),
-            suffixText: suffix,
-            suffixStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-            filled: true,
-            fillColor: cs.surfaceContainerHigh,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: KuberSpace.md,
-              vertical: KuberSpace.md,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberShape.large),
-              borderSide: BorderSide(color: cs.outlineVariant),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberShape.large),
-              borderSide: BorderSide(color: cs.outlineVariant),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberShape.large),
-              borderSide: BorderSide(color: cs.primary),
-            ),
-          ),
+          decoration: toolFieldDecoration(cs, prefix: prefix, suffix: suffix),
         ),
       ],
     );
   }
+}
+
+/// The calculator input box (filled, outlineVariant border, large radius);
+/// shared by [ToolTextField] and [ToolUnitDropdown] so they line up.
+InputDecoration toolFieldDecoration(
+  ColorScheme cs, {
+  String? prefix,
+  String? suffix,
+}) {
+  OutlineInputBorder border(Color c) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(KuberShape.large),
+    borderSide: BorderSide(color: c),
+  );
+  return InputDecoration(
+    prefixText: prefix != null ? '$prefix ' : null,
+    prefixStyle: localeFont(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: cs.onSurfaceVariant,
+    ),
+    suffixText: suffix,
+    suffixStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+    filled: true,
+    fillColor: cs.surfaceContainerHigh,
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: KuberSpace.md,
+      vertical: KuberSpace.md,
+    ),
+    border: border(cs.outlineVariant),
+    enabledBorder: border(cs.outlineVariant),
+    focusedBorder: border(cs.primary),
+  );
 }
 
 class ToolSegmentedControl extends StatelessWidget {
@@ -189,15 +254,49 @@ class ToolUnitDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
+  // Same box as the number field beside it (height, fill, border, radius);
+  // opens the app's anchored menu like KuberDropdownChip.
   @override
   Widget build(BuildContext context) {
-    return KuberDropdownChip<int>(
-      value: selectedIndex,
-      options: [
-        for (var i = 0; i < labels.length; i++)
-          KuberDropdownOption(i, labels[i]),
-      ],
-      onChanged: onChanged,
+    final cs = Theme.of(context).colorScheme;
+    return Builder(
+      builder: (anchor) => InkWell(
+        borderRadius: BorderRadius.circular(KuberShape.large),
+        onTap: () async {
+          final picked = await showKuberMenu<int>(
+            context: anchor,
+            minWidth: 160,
+            entries: [
+              for (var i = 0; i < labels.length; i++)
+                KuberMenuEntry<int>(
+                  value: i,
+                  label: labels[i],
+                  selected: i == selectedIndex,
+                ),
+            ],
+          );
+          if (picked != null && picked != selectedIndex) onChanged(picked);
+        },
+        child: IntrinsicWidth(
+          child: InputDecorator(
+            decoration: toolFieldDecoration(cs).copyWith(
+              suffixIcon: Icon(
+                Icons.arrow_drop_down_rounded,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            child: Text(
+              labels[selectedIndex],
+              maxLines: 1,
+              style: localeFont(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

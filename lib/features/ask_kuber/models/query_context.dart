@@ -164,7 +164,7 @@ class QueryContext {
           t.type == 'expense' &&
           !t.createdAt.isBefore(from) &&
           t.createdAt.isBefore(to))
-      .fold(0.0, (s, t) => s + t.amount);
+      .fold(0.0, (s, t) => s + t.spendAmount);
 
   /// Sum of income amounts in `[from, to)`, same baseline as [sumExpenses].
   double sumIncome(DateTime from, DateTime to) => txns.validForCalculations
@@ -172,7 +172,7 @@ class QueryContext {
           t.type == 'income' &&
           !t.createdAt.isBefore(from) &&
           t.createdAt.isBefore(to))
-      .fold(0.0, (s, t) => s + t.amount);
+      .fold(0.0, (s, t) => s + t.spendAmount);
 
   /// Whole-number currency in the user's symbol. Ask Kuber never shows paise.
   String money(num amount) =>

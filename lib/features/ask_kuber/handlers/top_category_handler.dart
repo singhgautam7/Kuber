@@ -43,7 +43,7 @@ class TopCategoryHandler extends QueryHandler {
           continue;
         }
       }
-      byCat[t.categoryId] = (byCat[t.categoryId] ?? 0) + t.amount;
+      byCat[t.categoryId] = (byCat[t.categoryId] ?? 0) + t.spendAmount;
     }
 
     final String periodLabel;

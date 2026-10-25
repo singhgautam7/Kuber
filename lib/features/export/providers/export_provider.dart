@@ -15,6 +15,12 @@ import '../../accounts/providers/account_provider.dart';
 import '../../analytics/providers/analytics_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
+import '../../investments/data/investment.dart';
+import '../../investments/providers/investment_provider.dart';
+import '../../loans/data/loan.dart';
+import '../../loans/providers/loan_provider.dart';
+import '../../recurring/data/recurring_rule.dart';
+import '../../recurring/providers/recurring_provider.dart';
 import '../../history/utils/filter_utils.dart';
 import '../../insights/providers/insight_provider.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -76,6 +82,27 @@ TransactionExportData buildTransactionExportData(
     if (t.isTransfer && t.transferId != null) {
       transferLegsMap.putIfAbsent(t.transferId!, () => []).add(t);
     }
+  }
+
+  // vNext source link: "Recurring: Rent", "Loan: Home loan", "Investment: Nifty SIP".
+  final ruleNames = {
+    for (final r in ref.read(recurringListProvider).valueOrNull ?? const <RecurringRule>[]) '${r.id}': r.name
+  };
+  final loanNames = {
+    for (final l in ref.read(loanListProvider).valueOrNull ?? const <Loan>[]) l.uid: l.name
+  };
+  final invNames = {
+    for (final i in ref.read(investmentListProvider).valueOrNull ?? const <Investment>[]) i.uid: i.name
+  };
+  String? sourceOf(Transaction t) {
+    final id = t.sourceId;
+    if (id == null) return null;
+    return switch (t.sourceType) {
+      'recurring' => 'Recurring: ${ruleNames[id] ?? 'deleted'}',
+      'loan' => 'Loan: ${loanNames[id] ?? 'deleted'}',
+      'investment' => 'Investment: ${invNames[id] ?? 'deleted'}',
+      _ => null,
+    };
   }
 
   // Build rows — include both legs of transfers
@@ -145,6 +172,10 @@ TransactionExportData buildTransactionExportData(
       categoryName: catName,
       accountName: accountNames[tx.accountId] ?? 'Unknown',
       notes: tx.notes,
+      subType: tx.subType?.value,
+      source: sourceOf(tx),
+      principalPart: tx.principalPart,
+      interestPart: tx.interestPart,
     ));
   }
 

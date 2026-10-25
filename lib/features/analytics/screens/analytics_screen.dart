@@ -146,9 +146,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         idx = 4;
       }
       if (t.type == 'income') {
-        buckets[idx].income += t.amount;
+        buckets[idx].income += t.spendAmount;
       } else {
-        buckets[idx].expense += t.amount;
+        buckets[idx].expense += t.spendAmount;
       }
     }
     return _toKuber(buckets);
@@ -179,9 +179,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       final diff = txDay.difference(fromDay).inDays;
       if (diff < 0 || diff >= daysCount) continue;
       if (t.type == 'income') {
-        buckets[diff].income += t.amount;
+        buckets[diff].income += t.spendAmount;
       } else {
-        buckets[diff].expense += t.amount;
+        buckets[diff].expense += t.spendAmount;
       }
     }
     return _toKuber(buckets);
@@ -210,9 +210,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       final dayDiff = t.createdAt.difference(fromDay).inDays;
       final idx = (dayDiff / 7).floor().clamp(0, weeks - 1);
       if (t.type == 'income') {
-        buckets[idx].income += t.amount;
+        buckets[idx].income += t.spendAmount;
       } else {
-        buckets[idx].expense += t.amount;
+        buckets[idx].expense += t.spendAmount;
       }
     }
     return _toKuber(buckets);
@@ -240,9 +240,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           (t.createdAt.year - from.year) * 12 + t.createdAt.month - from.month;
       if (idx < 0 || idx >= count) continue;
       if (t.type == 'income') {
-        buckets[idx].income += t.amount;
+        buckets[idx].income += t.spendAmount;
       } else {
-        buckets[idx].expense += t.amount;
+        buckets[idx].expense += t.spendAmount;
       }
     }
     return _toKuber(buckets);
@@ -276,9 +276,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       final mDiff = (tQ.year - fromQ.year) * 12 + tQ.month - fromQ.month;
       final idx = (mDiff ~/ 3).clamp(0, count - 1);
       if (t.type == 'income') {
-        buckets[idx].income += t.amount;
+        buckets[idx].income += t.spendAmount;
       } else {
-        buckets[idx].expense += t.amount;
+        buckets[idx].expense += t.spendAmount;
       }
     }
     return _toKuber(buckets);
@@ -303,9 +303,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     for (final t in txns) {
       final idx = (t.createdAt.year - from.year).clamp(0, years - 1);
       if (t.type == 'income') {
-        buckets[idx].income += t.amount;
+        buckets[idx].income += t.spendAmount;
       } else {
-        buckets[idx].expense += t.amount;
+        buckets[idx].expense += t.spendAmount;
       }
     }
     return _toKuber(buckets);

@@ -17,7 +17,8 @@ import '../widgets/tool_accents.dart';
 
 class GoalPlannerScreen extends ConsumerStatefulWidget {
   final int? savedId;
-  const GoalPlannerScreen({super.key, this.savedId});
+  final CalculatorPrefill? prefill;
+  const GoalPlannerScreen({super.key, this.savedId, this.prefill});
 
   @override
   ConsumerState<GoalPlannerScreen> createState() => _GoalPlannerScreenState();
@@ -52,6 +53,8 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
   String get toolKey => 'goal-planner';
   @override
   int? get initialSavedId => widget.savedId;
+  @override
+  CalculatorPrefill? get initialPrefill => widget.prefill;
   @override
   String get defaultSaveName =>
       _nameCtrl.text.trim().isEmpty ? 'Financial goal' : _nameCtrl.text.trim();
@@ -121,6 +124,8 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
       infoConfig: InfoConstants.goalPlanner,
       overflowConfig: savedOverflowConfig('goal'),
       banner: buildSavedBanner(),
+      filledFrom: filledFromName,
+      onClearFilled: clearPrefill,
       onSave: openSaveSheet,
       canSave: result != null,
       isSavedView: hasSaved,

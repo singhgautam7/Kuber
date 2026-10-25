@@ -97,7 +97,7 @@ class SpendingHandler extends QueryHandler {
                 t.categoryId == matchedCat.id.toString() &&
                 !t.createdAt.isBefore(from) &&
                 t.createdAt.isBefore(to))
-            .fold(0.0, (sum, t) => sum + t.amount);
+            .fold(0.0, (sum, t) => sum + t.spendAmount);
 
         final verb = (dateLabel == 'today' ||
                 dateLabel == 'this week' ||

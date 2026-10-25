@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/info_config.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/models/overflow_config.dart';
 import '../../core/services/shortcut_pin_service.dart';
 import '../../core/theme/app_theme.dart';
@@ -54,6 +55,10 @@ class KuberAppBar extends ConsumerStatefulWidget
   /// existing app bars are unchanged.
   final PinShortcutSpec? pinShortcut;
 
+  /// When set (Android), adds "Add to app drawer" / "Remove from app drawer"
+  /// for this screen's own launcher icon.
+  final AppDrawerEntry? appDrawerEntry;
+
   /// Fill behind the header (the multi-select contextual header uses
   /// surfaceContainer). Transparent by default.
   final Color? background;
@@ -72,6 +77,7 @@ class KuberAppBar extends ConsumerStatefulWidget
     this.onBack,
     this.showBrand = true,
     this.pinShortcut,
+    this.appDrawerEntry,
     this.background,
     this.search,
   });
@@ -101,6 +107,16 @@ class KuberAppBar extends ConsumerStatefulWidget
 }
 
 class _KuberAppBarState extends ConsumerState<KuberAppBar> {
+  KuberOverflowItem _appDrawerItem(AppDrawerEntry entry) {
+    final l = AppLocalizations.of(context)!;
+    final added = ref.watch(appDrawerEntriesProvider).valueOrNull?.contains(entry) ?? false;
+    return KuberOverflowItem(
+      icon: added ? Icons.playlist_remove_rounded : Icons.apps_rounded,
+      label: added ? l.appDrawerRemove : l.appDrawerAdd,
+      onTap: () => toggleAppDrawerEntry(context, ref, entry, !added),
+    );
+  }
+
   // Starts open when the screen comes back with a query still applied.
   late bool _searching = widget.search?.controller.text.isNotEmpty ?? false;
 
@@ -146,6 +162,8 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
           label: 'Add to home screen',
           onTap: () => requestPinShortcut(context, pinShortcut),
         ),
+      if (w.appDrawerEntry != null && AppDrawerEntries.supported)
+        _appDrawerItem(w.appDrawerEntry!),
       ...configItems.where((i) => !i.isDestructive),
       ...configItems.where((i) => i.isDestructive),
     ];

@@ -13,6 +13,7 @@ import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
 import 'json_backup_service.dart';
+import '../database/vnext_migration.dart';
 import 'mock_data_service.dart';
 import '../utils/color_palette.dart';
 
@@ -164,6 +165,9 @@ class DataService {
   }) async {
     final result = await JsonBackupService()
         .importJson(isar, jsonContent, onProgress: onProgress);
+    // Older backups (version 1) restore through the same vNext migration;
+    // version 2 rows are already migrated (dataVersion 1) and are skipped.
+    if (result.error == null) await VNextMigration.run(isar);
     // Rebuild suggestions from the restored transactions
     onProgress?.call('suggestions', 0, 0);
     await _rebuildSuggestions();
@@ -438,6 +442,9 @@ class DataService {
   /// Generates mock data.
   Future<void> generateMockData() async {
     await MockDataService.generate(isar);
+    // Demo loans, SIPs and rules are written in the old shape; give them
+    // schedules the same way a restore does.
+    await VNextMigration.run(isar);
     // Upsert suggestions for all generated transactions
     await _rebuildSuggestions();
   }

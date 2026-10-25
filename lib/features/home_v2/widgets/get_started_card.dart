@@ -31,12 +31,13 @@ class _GetStartedCardState extends ConsumerState<GetStartedCard> {
   void initState() {
     super.initState();
     // First time the card is on screen (for the 14-day timeout).
-    final s = ref.read(homeV2Provider);
-    if (s.gsFirstShownAt == null) {
+    // After the frame: a provider must not change while the tree builds.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || ref.read(homeV2Provider).gsFirstShownAt != null) return;
       ref
           .read(homeV2Provider.notifier)
           .update((s) => s.copyWith(gsFirstShownAt: DateTime.now()));
-    }
+    });
     // Graduation is a side effect of fresh data, never of a rebuild.
     ref.listenManual<AsyncValue<GsData?>>(getStartedProvider, (_, next) {
       final d = next.valueOrNull;

@@ -4,7 +4,7 @@ import '../utils/locale_font.dart';
 import 'theme_families.dart';
 
 export 'kuber_tokens.dart' show ThemeVariant, KuberTokens;
-export 'theme_families.dart' show themeFamilyName, themeFamilyBlurb, themeFamilyHasAmoled;
+export 'theme_families.dart' show themeFamilyName, themeFamilyBlurb;
 
 /// Kuber M3 spacing (specs/design/kuber-m3-round-1-design-system tokens.md §1).
 /// 4/8 scale plus the layout metrics that are defined once.
@@ -256,33 +256,39 @@ extension KuberThemeX on BuildContext {
 }
 
 class AppTheme {
-  /// [amoled] = true-black dark surfaces (families that support it);
-  /// [seed] = Android wallpaper colour ("From your wallpaper").
+  /// [pureBlack] = the page is #000000 in dark; [seed] = Android wallpaper
+  /// colour ("From your wallpaper"); [expressive] = tinted backgrounds (off:
+  /// neutral greys). One surface rule for every family (theme-surfaces-v1).
   static ThemeData dark(
     Locale locale, [
     ThemeVariant variant = ThemeVariant.signature,
-    bool amoled = false,
+    bool pureBlack = false,
     Color? seed,
+    bool expressive = true,
   ]) =>
       _build(
-          kuberPalette(variant, Brightness.dark, amoled: amoled, seed: seed),
-          kuberPalette(variant, Brightness.light, seed: seed),
+          kuberPalette(variant, Brightness.dark,
+              expressive: expressive, pureBlack: pureBlack, seed: seed),
+          kuberPalette(variant, Brightness.light, expressive: expressive, seed: seed),
           locale);
 
   static ThemeData light(
     Locale locale, [
     ThemeVariant variant = ThemeVariant.signature,
     Color? seed,
+    bool expressive = true,
+    bool pureBlack = false,
   ]) =>
       _build(
-          kuberPalette(variant, Brightness.light, seed: seed),
-          kuberPalette(variant, Brightness.dark, seed: seed),
+          kuberPalette(variant, Brightness.light, expressive: expressive, seed: seed),
+          kuberPalette(variant, Brightness.dark,
+              expressive: expressive, pureBlack: pureBlack, seed: seed),
           locale);
 
   /// A family's scheme without building a ThemeData (theme previews).
   static ColorScheme schemeOf(ThemeVariant variant, Brightness b,
-          {bool amoled = false, Color? seed}) =>
-      kuberPalette(variant, b, amoled: amoled, seed: seed).scheme;
+          {bool expressive = true, bool pureBlack = false, Color? seed}) =>
+      kuberPalette(variant, b, expressive: expressive, pureBlack: pureBlack, seed: seed).scheme;
 
   static KuberChartTheme _chart(KuberPalette p) {
     final dark = p.scheme.brightness == Brightness.dark;

@@ -412,7 +412,7 @@ class _TransactionReviewSheetState
     final picked = await showDatePicker(
       context: context,
       initialDate: _date.isAfter(now) ? now : _date,
-      firstDate: DateTime(2020),
+      firstDate: DateTime(1900),
       lastDate: now,
     );
     if (picked == null || !mounted) return;

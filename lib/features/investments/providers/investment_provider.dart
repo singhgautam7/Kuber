@@ -10,7 +10,7 @@ import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/investment.dart';
 import '../data/investment_repository.dart';
-import '../utils/investment_calculations.dart' as calc;
+import '../domain/investment_engine.dart';
 
 final investmentRepositoryProvider = Provider<InvestmentRepository>((ref) {
   return InvestmentRepository(ref.watch(isarProvider));
@@ -200,10 +200,14 @@ final investmentSummaryProvider =
       })
     >((ref) async {
       final investments = await ref.watch(investmentListProvider.future);
+      final active =
+          investments.where((i) => i.status == InvestmentStatus.active).toList();
+      final invested = active.fold(0.0, (s, i) => s + investedOf(i));
+      final value = active.fold(0.0, (s, i) => s + currentValue(i));
       return (
-        totalInvested: calc.totalInvestedAll(investments),
-        currentValue: calc.totalCurrentValueAll(investments),
-        gainLoss: calc.totalGainLossAll(investments),
-        assetCount: calc.totalAssetCount(investments),
+        totalInvested: invested,
+        currentValue: value,
+        gainLoss: value - invested,
+        assetCount: active.length,
       );
     });

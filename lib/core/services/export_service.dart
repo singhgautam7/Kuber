@@ -37,7 +37,7 @@ class ExportService {
     // RFC 4180 requires \r\n line endings. StringBuffer.writeln() only gives \n,
     // which some Android CSV viewers don't split on correctly, causing rows to appear
     // merged or missing. Using explicit \r\n throughout.
-    buffer.write('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes\r\n');
+    buffer.write('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes,Sub type,Source,Principal,Interest\r\n');
 
     String escape(String value) {
       if (value.contains(',') || value.contains('"') || value.contains('\r') || value.contains('\n')) {
@@ -74,6 +74,10 @@ class ExportService {
         escape(row.accountName),
         signedAmount.toStringAsFixed(2),
         escape(row.notes ?? ''),
+        row.subType ?? '',
+        escape(row.source ?? ''),
+        row.principalPart?.toStringAsFixed(2) ?? '',
+        row.interestPart?.toStringAsFixed(2) ?? '',
       ].join(','));
       buffer.write('\r\n');
     }
@@ -160,7 +164,7 @@ class ExportService {
             ),
             children: [
               _pdfCell(DateFormat('dd MMM').format(row.date), bodyFont, textColor),
-              _pdfCell(row.name, bodyFont, textColor, flex: true),
+              _pdfCell(_pdfName(row), bodyFont, textColor, flex: true),
               _pdfCell(typeLabel, bodyFont, textColor),
               _pdfCell(isTransfer ? 'Transfer' : row.categoryName, bodyFont, textColor),
               _pdfCell(row.accountName, bodyFont, textColor),
@@ -190,6 +194,16 @@ class ExportService {
 
   return doc.save();
 }
+
+  /// Name plus the vNext source line and EMI split, when there is one.
+  static String _pdfName(TransactionRow row) {
+    final extra = [
+      if (row.source != null) row.source!,
+      if (row.principalPart != null && row.interestPart != null)
+        'Principal ${row.principalPart!.toStringAsFixed(2)}, Interest ${row.interestPart!.toStringAsFixed(2)}',
+    ];
+    return extra.isEmpty ? row.name : '${row.name}\n${extra.join(' | ')}';
+  }
 
   static pw.Widget _pdfCell(String text, pw.Font font, PdfColor color,
       {bool flex = false, pw.TextAlign align = pw.TextAlign.left}) {

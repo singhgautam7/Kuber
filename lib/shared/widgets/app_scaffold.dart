@@ -182,8 +182,11 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     // Only watch the two fields this scaffold actually renders with —
     // watching the whole settings state would rebuild the app shell on any
     // settings change (theme, currency, etc.).
-    final swipeMode = ref.watch(settingsProvider
-        .select((s) => s.valueOrNull?.swipeMode ?? SwipeMode.changeTabs));
+    final swipeMode = ref.watch(
+      settingsProvider.select(
+        (s) => s.valueOrNull?.swipeMode ?? SwipeMode.changeTabs,
+      ),
+    );
     final navBarStyle = ref.watch(navBarStyleProvider);
 
     final animatedContent = swipeMode == SwipeMode.changeTabs
@@ -345,23 +348,41 @@ class _ModernNavBarState extends State<_ModernNavBar> {
               ),
             ),
             Positioned(
-              left: 0,
-              right: 0,
+              left: KuberSpace.lg,
+              right: KuberSpace.lg,
               bottom: bottom,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 10,
-                children: [
-                  KuberNavPill(
-                    index: widget.currentIndex,
-                    onSelect: widget.onTap,
-                    onLongPress: widget.onTabLongPress,
-                  ),
-                  KuberNavFab(
-                    onTap: widget.onAddTapped,
-                    onLongPress: widget.onAddLongPress,
-                  ),
-                ],
+              // Default look whenever it fits; on a narrow screen or with a
+              // large OS font the label goes first, and if even that is too
+              // wide the row scales down instead of running off the screen.
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  const fabAndGap = 56.0 + 10;
+                  final labels =
+                      KuberNavPill.widthFor(context, withLabel: true) +
+                          fabAndGap <=
+                      c.maxWidth;
+                  return Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 10,
+                        children: [
+                          KuberNavPill(
+                            index: widget.currentIndex,
+                            onSelect: widget.onTap,
+                            onLongPress: widget.onTabLongPress,
+                            showLabels: labels,
+                          ),
+                          KuberNavFab(
+                            onTap: widget.onAddTapped,
+                            onLongPress: widget.onAddLongPress,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -495,8 +516,11 @@ class _NavBarItemState extends State<_NavBarItem>
         builder: (context, _) {
           final t = _controller.value;
           final cs = widget.cs;
-          final iconColor =
-              Color.lerp(cs.onSurfaceVariant, cs.onSecondaryContainer, t)!;
+          final iconColor = Color.lerp(
+            cs.onSurfaceVariant,
+            cs.onSecondaryContainer,
+            t,
+          )!;
           final index = kuberNavItems.indexOf(widget.item);
           final labelStr = localNavLabel(context, widget.item.label);
 
@@ -515,10 +539,7 @@ class _NavBarItemState extends State<_NavBarItem>
                     borderRadius: KuberShape.fullR,
                   ),
                   alignment: Alignment.center,
-                  child: KuberNavGlyph(
-                    index: index,
-                    color: iconColor,
-                  ),
+                  child: KuberNavGlyph(index: index, color: iconColor),
                 ),
               ),
               const SizedBox(height: 4),
@@ -527,7 +548,11 @@ class _NavBarItemState extends State<_NavBarItem>
                 style: widget.tt.labelMedium!.copyWith(
                   color: widget.isSelected ? cs.onSurface : cs.onSurfaceVariant,
                 ),
-                child: Text(labelStr),
+                child: Text(
+                  labelStr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           );

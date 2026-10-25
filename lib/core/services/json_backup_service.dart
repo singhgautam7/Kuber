@@ -33,6 +33,9 @@ import '../../features/tools/saved/data/calculator_recent_use.dart';
 import '../../features/kuber_cards/data/stored_card.dart';
 import '../../features/kuber_cards/data/card_vault_meta.dart';
 import 'data_service.dart';
+import '../schedule/processed_occurrence.dart';
+import '../schedule/schedule.dart';
+import '../../features/tools/engine/fd_rd_engine.dart' show CompoundingFrequency;
 
 /// Top-level so it can run on a background isolate via [compute].
 String _encodeBackupData(Map<String, dynamic> data) => jsonEncode(data);
@@ -42,7 +45,9 @@ typedef ImportProgressCallback = void Function(
     String label, int current, int total);
 
 class JsonBackupService {
-  static const _version = 1;
+  /// 2 = vNext (schedules, loan / investment fields, sub types, processed
+  /// ledger). Version 1 backups restore through the same migration.
+  static const version = 2;
 
   Future<String> writeScheduledBackup({
     required Isar isar,
@@ -79,7 +84,20 @@ class JsonBackupService {
         '${two(at.hour)}${two(at.minute)}.json';
   }
 
+  /// The whole database as backup JSON. All reads happen inside one read
+  /// transaction, so the backup is a consistent snapshot even while a
+  /// background run is posting.
   Future<String> exportJson(Isar isar) async {
+    final data = await isar.txn(() => _collect(isar));
+    // Encoding the whole database into one string is the heaviest part of a
+    // backup. Run it on a background isolate so a multi-MB export never stalls
+    // the UI thread (the data map is plain primitives, so it copies cleanly).
+    // On web, where there are no isolates, compute runs inline and this is a
+    // no-op — still correct, just not offloaded.
+    return compute(_encodeBackupData, data);
+  }
+
+  Future<Map<String, dynamic>> _collect(Isar isar) async {
     final transactions = await isar.transactions.where().findAll();
     final categories = await isar.categorys.where().findAll();
     final categoryGroups = await isar.categoryGroups.where().findAll();
@@ -109,9 +127,10 @@ class JsonBackupService {
     // carries salt + KDF params so the payload decrypts with the same PIN.
     final storedCards = await isar.storedCards.where().findAll();
     final cardVaultMeta = await isar.cardVaultMetas.get(0);
+    final processed = await isar.processedOccurrences.where().findAll();
 
-    final data = {
-      'version': _version,
+    return {
+      'version': version,
       'exportedAt': DateTime.now().toIso8601String(),
       'transactions': transactions.map(_txToMap).toList(),
       'categories': categories.map(_catToMap).toList(),
@@ -140,14 +159,8 @@ class JsonBackupService {
       'reminders': reminders.map((r) => r.toMap()).toList(),
       'storedCards': storedCards.map((c) => c.toMap()).toList(),
       'cardVaultMeta': cardVaultMeta?.toMap(),
+      'processedOccurrences': processed.map((p) => p.toMap()).toList(),
     };
-
-    // Encoding the whole database into one string is the heaviest part of a
-    // backup. Run it on a background isolate so a multi-MB export never stalls
-    // the UI thread (the data map is plain primitives, so it copies cleanly).
-    // On web, where there are no isolates, compute runs inline and this is a
-    // no-op — still correct, just not offloaded.
-    return compute(_encodeBackupData, data);
   }
 
   Future<ImportResult> importJson(
@@ -217,6 +230,9 @@ class JsonBackupService {
           _mapToSmsTransaction);
       await restore('kuberNotes', 'notes', isar.kuberNotes, _mapToKuberNote);
       await restore('reminders', 'reminders', isar.reminders, _mapToReminder);
+      // vNext processed ledger (absent in v1 backups; the migration seeds it).
+      await restore('processedOccurrences', 'schedule history',
+          isar.processedOccurrences, ProcessedOccurrence.fromMap);
 
       // Kuber Cards: the encrypted card rows persist as-is. The vault metadata
       // is restored with biometric + lockout reset for THIS device, and flagged
@@ -293,6 +309,15 @@ class JsonBackupService {
     'nameLower': t.nameLower,
     'attachmentPaths': t.attachmentPaths,
     'sourceNoteId': t.sourceNoteId,
+    'importSource': t.importSource,
+    'importedFromSms': t.importedFromSms,
+    'subType': t.subType?.value,
+    'sourceType': t.sourceType,
+    'sourceId': t.sourceId,
+    'principalPart': t.principalPart,
+    'interestPart': t.interestPart,
+    'spendInterestOnly': t.spendInterestOnly,
+    'occurrenceDate': t.occurrenceDate,
   };
 
   Map<String, dynamic> _catToMap(Category c) => {
@@ -340,27 +365,7 @@ class JsonBackupService {
     'tagId': tt.tagId,
   };
 
-  Map<String, dynamic> _recurringToMap(RecurringRule r) => {
-    'id': r.id,
-    'name': r.name,
-    'amount': r.amount,
-    'type': r.type,
-    'categoryId': r.categoryId,
-    'accountId': r.accountId,
-    'notes': r.notes,
-    'frequency': r.frequency,
-    'customDays': r.customDays,
-    'intervalUnit': r.intervalUnit,
-    'startDate': r.startDate.toIso8601String(),
-    'nextDueAt': r.nextDueAt.toIso8601String(),
-    'executionCount': r.executionCount,
-    'endType': r.endType,
-    'endAfter': r.endAfter,
-    'endDate': r.endDate?.toIso8601String(),
-    'isPaused': r.isPaused,
-    'createdAt': r.createdAt.toIso8601String(),
-    'updatedAt': r.updatedAt.toIso8601String(),
-  };
+  Map<String, dynamic> _recurringToMap(RecurringRule r) => r.toMap();
 
   Map<String, dynamic> _budgetToMap(Budget b) => {
     'id': b.id,
@@ -405,46 +410,10 @@ class JsonBackupService {
     'updatedAt': l.updatedAt.toIso8601String(),
   };
 
-  Map<String, dynamic> _loanToMap(Loan l) => {
-    'id': l.id,
-    'uid': l.uid,
-    'name': l.name,
-    'loanType': l.loanType,
-    'lenderName': l.lenderName,
-    'referenceNumber': l.referenceNumber,
-    'principalAmount': l.principalAmount,
-    'emiAmount': l.emiAmount,
-    'rateType': l.rateType,
-    'interestRate': l.interestRate,
-    'loanStartDate': l.loanStartDate?.toIso8601String(),
-    'billDate': l.billDate,
-    'startDate': l.startDate.toIso8601String(),
-    'endDate': l.endDate?.toIso8601String(),
-    'autoAddTransaction': l.autoAddTransaction,
-    'accountId': l.accountId,
-    'categoryId': l.categoryId,
-    'notes': l.notes,
-    'isCompleted': l.isCompleted,
-    'createdAt': l.createdAt.toIso8601String(),
-    'updatedAt': l.updatedAt.toIso8601String(),
-  };
+  Map<String, dynamic> _loanToMap(Loan l) => l.toMap();
 
-  Map<String, dynamic> _investmentToMap(Investment i) => {
-    'id': i.id,
-    'uid': i.uid,
-    'name': i.name,
-    'investmentType': i.investmentType,
-    'currentValue': i.currentValue,
-    'investedAmount': i.investedAmount,
-    'autoDebit': i.autoDebit,
-    'sipAmount': i.sipAmount,
-    'sipDate': i.sipDate,
-    'accountId': i.accountId,
-    'categoryId': i.categoryId,
-    'notes': i.notes,
-    'createdAt': i.createdAt.toIso8601String(),
-    'updatedAt': i.updatedAt.toIso8601String(),
-  };
+  // Model toMap: includes deductedFromAccount (was dropped before vNext).
+  Map<String, dynamic> _investmentToMap(Investment i) => i.toMap();
 
   // ---------------------------------------------------------------------------
   // Deserializers
@@ -468,7 +437,16 @@ class JsonBackupService {
     ..updatedAt = DateTime.parse(m['updatedAt'] as String)
     ..nameLower = m['nameLower'] as String
     ..attachmentPaths = (m['attachmentPaths'] as List?)?.cast<String>() ?? []
-    ..sourceNoteId = m['sourceNoteId'] as String?;
+    ..sourceNoteId = m['sourceNoteId'] as String?
+    ..importSource = m['importSource'] as String?
+    ..importedFromSms = m['importedFromSms'] as String?
+    ..subType = TxnSubType.fromValue(m['subType'])
+    ..sourceType = m['sourceType'] as String?
+    ..sourceId = m['sourceId'] as String?
+    ..principalPart = (m['principalPart'] as num?)?.toDouble()
+    ..interestPart = (m['interestPart'] as num?)?.toDouble()
+    ..spendInterestOnly = (m['spendInterestOnly'] as bool?) ?? false
+    ..occurrenceDate = m['occurrenceDate'] as int?;
 
   KuberNote _mapToKuberNote(Map<String, dynamic> m) => KuberNote()
     ..id = m['id'] as int
@@ -561,7 +539,15 @@ class JsonBackupService {
         : null
     ..isPaused = (m['isPaused'] as bool?) ?? false
     ..createdAt = DateTime.parse(m['createdAt'] as String)
-    ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+    ..updatedAt = DateTime.parse(m['updatedAt'] as String)
+    // vNext (absent in v1 backups -> dataVersion 0 -> migrated after import).
+    ..schedule = Schedule.fromMap(m['schedule'])
+    ..versions = [
+      for (final v in (m['versions'] as List? ?? const []))
+        RuleVersion.fromMap((v as Map).cast<String, dynamic>())
+    ]
+    ..endedAt = _date(m['endedAt'])
+    ..dataVersion = (m['dataVersion'] as int?) ?? 0;
 
   Budget _mapToBudget(Map<String, dynamic> m) {
     final b = Budget()
@@ -647,7 +633,30 @@ class JsonBackupService {
     ..notes = m['notes'] as String?
     ..isCompleted = (m['isCompleted'] as bool?) ?? false
     ..createdAt = DateTime.parse(m['createdAt'] as String)
-    ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+    ..updatedAt = DateTime.parse(m['updatedAt'] as String)
+    ..mode = _enum(LoanMode.values, m['mode'], LoanMode.simple)
+    ..interestType = _enum(LoanInterestType.values, m['interestType'],
+        LoanInterestType.reducingBalance)
+    ..interestOnlyMonths = (m['interestOnlyMonths'] as int?) ?? 0
+    ..tenureMonths = m['tenureMonths'] as int?
+    ..annualRate = (m['annualRate'] as num?)?.toDouble()
+    ..schedule = Schedule.fromMap(m['schedule'])
+    ..alreadyRunning = (m['alreadyRunning'] as bool?) ?? false
+    ..startingPoint = _enum(LoanStartingPoint.values, m['startingPoint'],
+        LoanStartingPoint.originalDetails)
+    ..principalPaidBefore = (m['principalPaidBefore'] as num?)?.toDouble() ?? 0
+    ..interestPaidBefore = (m['interestPaidBefore'] as num?)?.toDouble() ?? 0
+    ..emisPaidBefore = (m['emisPaidBefore'] as int?) ?? 0
+    ..outstandingAtStart = (m['outstandingAtStart'] as num?)?.toDouble()
+    ..adjustment = (m['adjustment'] as num?)?.toDouble() ?? 0
+    ..countOnlyInterest = (m['countOnlyInterest'] as bool?) ?? false
+    ..countOnlyInterestFrom = _date(m['countOnlyInterestFrom'])
+    ..events = [
+      for (final e in (m['events'] as List? ?? const []))
+        LoanEvent.fromMap((e as Map).cast<String, dynamic>())
+    ]
+    ..closedAt = _date(m['closedAt'])
+    ..dataVersion = (m['dataVersion'] as int?) ?? 0;
 
   Investment _mapToInvestment(Map<String, dynamic> m) => Investment()
     ..id = m['id'] as int
@@ -662,8 +671,45 @@ class JsonBackupService {
     ..accountId = m['accountId'] as String?
     ..categoryId = m['categoryId'] as String
     ..notes = m['notes'] as String?
+    ..deductedFromAccount = (m['deductedFromAccount'] as bool?) ?? true
     ..createdAt = DateTime.parse(m['createdAt'] as String)
-    ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+    ..updatedAt = DateTime.parse(m['updatedAt'] as String)
+    ..behaviour = _enum(InvestmentBehaviour.values, m['behaviour'],
+        InvestmentBehaviour.market)
+    ..sip = Schedule.fromMap(m['sip'])
+    ..stepUpKind = _enum(StepUpKind.values, m['stepUpKind'], StepUpKind.percent)
+    ..stepUpValue = (m['stepUpValue'] as num?)?.toDouble() ?? 0
+    ..units = (m['units'] as num?)?.toDouble()
+    ..snapshots = [
+      for (final v in (m['snapshots'] as List? ?? const []))
+        ValueSnapshot.fromMap((v as Map).cast<String, dynamic>())
+    ]
+    ..withdrawals = [
+      for (final w in (m['withdrawals'] as List? ?? const []))
+        Withdrawal.fromMap((w as Map).cast<String, dynamic>())
+    ]
+    ..fixedPrincipal = (m['fixedPrincipal'] as num?)?.toDouble()
+    ..installment = (m['installment'] as num?)?.toDouble()
+    ..fixedRate = (m['fixedRate'] as num?)?.toDouble()
+    ..compounding = _enum(CompoundingFrequency.values, m['compounding'],
+        CompoundingFrequency.quarterly)
+    ..payout = _enum(PayoutType.values, m['payout'], PayoutType.cumulative)
+    ..fixedStart = _date(m['fixedStart'])
+    ..fixedTenureMonths = m['fixedTenureMonths'] as int?
+    ..maturityDate = _date(m['maturityDate'])
+    ..maturityHandled = (m['maturityHandled'] as bool?) ?? false
+    ..status = _enum(InvestmentStatus.values, m['status'], InvestmentStatus.active)
+    ..closedAt = _date(m['closedAt'])
+    ..alreadyRunning = (m['alreadyRunning'] as bool?) ?? false
+    ..openingInvested = (m['openingInvested'] as num?)?.toDouble() ?? 0
+    ..openingValue = (m['openingValue'] as num?)?.toDouble()
+    ..openingDate = _date(m['openingDate'])
+    ..dataVersion = (m['dataVersion'] as int?) ?? 0;
+
+  static DateTime? _date(Object? v) => v == null ? null : DateTime.parse(v as String);
+
+  static T _enum<T extends Enum>(List<T> values, Object? name, T fallback) =>
+      values.where((e) => e.name == name).firstOrNull ?? fallback;
 
   SavedCalculation _mapToSavedCalculation(Map<String, dynamic> m) =>
       SavedCalculation()

@@ -201,9 +201,9 @@ final analyticsComputedProvider = Provider<AnalyticsComputed?>((ref) {
 
   for (final t in txns) {
     if (t.type == 'income') {
-      totalIncome += t.amount;
+      totalIncome += t.spendAmount;
     } else {
-      totalExpense += t.amount;
+      totalExpense += t.spendAmount;
       // Size distribution (expense only)
       if (t.amount < 500) {
         smallCount++;
@@ -213,7 +213,7 @@ final analyticsComputedProvider = Provider<AnalyticsComputed?>((ref) {
         largeCount++;
       }
       // Daily averages by weekday (expense only)
-      dayAmounts[t.createdAt.toLocal().weekday]!.add(t.amount);
+      dayAmounts[t.createdAt.toLocal().weekday]!.add(t.spendAmount);
     }
   }
 

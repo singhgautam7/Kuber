@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'oklch.dart';
@@ -54,34 +56,122 @@ class KuberPalette {
   const KuberPalette(this.scheme, this.money, this.ramp);
 }
 
-/// Resolves the palette for [variant]. [seed] (Android wallpaper colour)
-/// overrides the family; [amoled] drops dark surfaces to true black for
-/// families that support it.
+/// Theme settings that shape the surfaces (theme-surfaces-v1). Both are
+/// global, not per family.
+///
+/// [expressive]: background roles take a light tint of the theme; off = one
+/// neutral grey ramp for every theme. [pureBlack]: in dark only, the page
+/// (surface, surfaceDim, surfaceContainerLowest) becomes #000000; containers
+/// keep their value.
 KuberPalette kuberPalette(
   ThemeVariant variant,
   Brightness brightness, {
-  bool amoled = false,
+  bool expressive = true,
+  bool pureBlack = false,
   Color? seed,
 }) {
   final dark = brightness == Brightness.dark;
+  final KuberPalette base;
   if (seed != null) {
-    return MullFamily.fromSeed(seed).palette(dark: dark, amoled: amoled);
+    base = MullFamily.fromSeed(seed).palette(dark: dark);
+  } else {
+    variant = resolveVariant(variant);
+    base = variant == ThemeVariant.signature
+        ? _signature(dark)
+        : MullFamily.of(variant).palette(dark: dark);
   }
-  variant = resolveVariant(variant);
-  if (variant == ThemeVariant.signature) return _signature(dark);
-  return MullFamily.of(variant).palette(dark: dark, amoled: amoled);
+  return applySurfaceRule(base, dark: dark, expressive: expressive, pureBlack: pureBlack);
 }
 
-// ── Kuber Signature: M3 seed scheme matching the app icon ────────────────────
+/// The one background rule (theme-surfaces.md §3): build the family scheme,
+/// then replace the surface family with the neutral ramp when not
+/// expressive, then black out the page when dark and pure black. Accent,
+/// money, chart and error roles never change.
+KuberPalette applySurfaceRule(
+  KuberPalette p, {
+  required bool dark,
+  required bool expressive,
+  required bool pureBlack,
+}) {
+  var cs = p.scheme;
+  if (!expressive) {
+    final n = dark ? kNeutralDark : kNeutralLight;
+    cs = cs.copyWith(
+      surface: n.surface,
+      surfaceContainerLowest: n.lowest,
+      surfaceContainerLow: n.low,
+      surfaceContainer: n.container,
+      surfaceContainerHigh: n.high,
+      surfaceContainerHighest: n.highest,
+      outlineVariant: n.outlineVariant,
+      outline: n.outline,
+      onSurfaceVariant: n.onSurfaceVariant,
+      onSurface: n.onSurface,
+      inverseSurface: n.inverseSurface,
+      onInverseSurface: n.inverseOnSurface,
+      surfaceDim: dark ? n.surface : n.high,
+      surfaceBright: dark ? n.high : n.surface,
+    );
+  }
+  if (dark && pureBlack) {
+    const black = Color(0xFF000000);
+    cs = cs.copyWith(surface: black, surfaceDim: black, surfaceContainerLowest: black);
+  }
+  return KuberPalette(cs, p.money, p.ramp);
+}
+
+/// A neutral grey ramp (Expressive colours off): OKLCh chroma 0, shared by
+/// every theme and the wallpaper colour (theme-surfaces.md §4).
+class NeutralRamp {
+  final Color surface, lowest, low, container, high, highest, outlineVariant, outline,
+      onSurfaceVariant, onSurface, inverseSurface, inverseOnSurface;
+  NeutralRamp._(List<double> l)
+      : surface = _grey(l[0]),
+        lowest = _grey(l[1]),
+        low = _grey(l[2]),
+        container = _grey(l[3]),
+        high = _grey(l[4]),
+        highest = _grey(l[5]),
+        outlineVariant = _grey(l[6]),
+        outline = _grey(l[7]),
+        onSurfaceVariant = _grey(l[8]),
+        onSurface = _grey(l[9]),
+        inverseSurface = _grey(l[10]),
+        inverseOnSurface = _grey(l[11]);
+  static Color _grey(double l) => _q(Oklch(l, 0, 0));
+}
+
+final kNeutralLight = NeutralRamp._([1, 1, .982, .965, .935, .91, .885, .60, .48, .20, .22, .97]);
+final kNeutralDark = NeutralRamp._([.205, .17, .23, .255, .30, .33, .36, .60, .74, .96, .93, .20]);
+
+/// 8-bit colour (the values the design tables list).
+Color _q(Oklch o) => Color(o.toColor().toARGB32());
+
+/// Per-channel 8-bit mix, rounded like the design's reference (surfaces.js).
+Color _mix(Color a, Color b, double t) {
+  int c8(double v) => (v * 255).round();
+  final ar = c8(a.r), ag = c8(a.g), ab = c8(a.b);
+  final br = c8(b.r), bg = c8(b.g), bb = c8(b.b);
+  return Color.fromARGB(255, (ar + (br - ar) * t).round(), (ag + (bg - ag) * t).round(),
+      (ab + (bb - ab) * t).round());
+}
+
+/// WCAG contrast ratio.
+double contrastRatio(Color a, Color b) {
+  final x = a.computeLuminance(), y = b.computeLuminance();
+  return (math.max(x, y) + 0.05) / (math.min(x, y) + 0.05);
+}
+
+// ── Kuber Signature v2: surfaces from the app icon ────────────────────────────
 //
-// Seed #3B82F6 with the fidelity variant (tonalSpot washes this blue out to a
-// dull #445E91). Dark mode drops surface / surfaceContainerLowest to true
-// black; every other role is generated. Reference values, money colours and
-// the heat ramp come from
-// specs/design/kuber-m3-round-1-design-system/project/tokens/palettes.json
-// (signature_light / signature_dark).
+// The app icon: background #D8E2FF, strokes #003D88 / #2573E6, dark splash
+// #001A42; OKLCh hue 265 (theme-surfaces.md §3b). Secondary, tertiary and error
+// still come from the M3 fidelity scheme seeded with #3B82F6, money colours
+// and the heat ramp from tokens/palettes.json, as before.
 
 const _signatureSeed = Color(0xFF3B82F6);
+const _sigHue = 265.0;
+Color _sq(double l, double c) => _q(Oklch(l, c, _sigHue));
 
 /// palettes.json `money`: income c/on/cont/onCont, expense x4, warning x4.
 const _signatureMoneyLight = [
@@ -106,15 +196,61 @@ const _signatureHeatDark = [
 ];
 
 KuberPalette _signature(bool dark) {
-  var scheme = ColorScheme.fromSeed(
+  final seeded = ColorScheme.fromSeed(
     seedColor: _signatureSeed,
     brightness: dark ? Brightness.dark : Brightness.light,
     dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
   );
-  if (dark) {
-    scheme = scheme.copyWith(
-      surface: const Color(0xFF000000),
-      surfaceContainerLowest: const Color(0xFF000000),
+  final ColorScheme scheme;
+  if (!dark) {
+    final surface = _sq(.975, .016), container = _sq(.945, .03), high = _sq(.925, .036),
+        border = _sq(.865, .045);
+    scheme = seeded.copyWith(
+      primary: const Color(0xFF0058BE),
+      onPrimary: const Color(0xFFFFFFFF),
+      primaryContainer: const Color(0xFF1F6CDF),
+      onPrimaryContainer: const Color(0xFFFFFFFF),
+      secondaryContainer: _sq(.86, .07),
+      onSecondaryContainer: const Color(0xFF003D88),
+      surface: surface,
+      surfaceDim: high,
+      surfaceBright: surface,
+      surfaceContainerLowest: const Color(0xFFFFFFFF),
+      surfaceContainerLow: _mix(surface, container, .5),
+      surfaceContainer: container,
+      surfaceContainerHigh: high,
+      surfaceContainerHighest: _mix(high, border, .5),
+      outlineVariant: border,
+      outline: _sq(.58, .05),
+      onSurface: _sq(.22, .04),
+      onSurfaceVariant: _sq(.45, .05),
+      inverseSurface: _sq(.25, .04),
+      onInverseSurface: _sq(.96, .012),
+    );
+  } else {
+    final surface = _sq(.19, .042), container = _sq(.245, .048), high = _sq(.29, .05),
+        border = _sq(.37, .05);
+    scheme = seeded.copyWith(
+      primary: const Color(0xFFADC6FF),
+      onPrimary: const Color(0xFF002E6A),
+      primaryContainer: const Color(0xFF4D8EFF),
+      onPrimaryContainer: const Color(0xFF001A42),
+      secondaryContainer: _sq(.36, .08),
+      onSecondaryContainer: const Color(0xFFD8E2FF),
+      surface: surface,
+      surfaceDim: surface,
+      surfaceBright: high,
+      surfaceContainerLowest: _sq(.155, .035),
+      surfaceContainerLow: _mix(surface, container, .5),
+      surfaceContainer: container,
+      surfaceContainerHigh: high,
+      surfaceContainerHighest: _mix(high, border, .5),
+      outlineVariant: border,
+      outline: _sq(.64, .04),
+      onSurface: _sq(.95, .012),
+      onSurfaceVariant: _sq(.80, .03),
+      inverseSurface: _sq(.92, .015),
+      onInverseSurface: _sq(.22, .04),
     );
   }
   return KuberPalette(
@@ -126,9 +262,9 @@ KuberPalette _signature(bool dark) {
 
 // ── Mull families ────────────────────────────────────────────────────────────
 
-/// One accent family, copied from Mull `core/theme/palette.dart`
-/// (`ThemeFamily`): the same OKLCh construction for light, dark and true
-/// black. [palette] maps Mull's roles onto Kuber's M3 scheme.
+/// One accent family, from Mull `core/theme/palette.dart` (`ThemeFamily`),
+/// with the theme-surfaces-v1 light ladder. [palette] maps the roles onto
+/// Kuber's M3 scheme; the surface rule is applied on top by [kuberPalette].
 @immutable
 class MullFamily {
   const MullFamily({
@@ -141,8 +277,6 @@ class MullFamily {
     required this.primaryLightness,
     required this.primaryChroma,
     required this.primaryContainerChroma,
-    required this.hasAmoled,
-    this.lightSurfaceSink = 0,
     double? darkNeutralChroma,
   }) : darkNeutralChroma = darkNeutralChroma ?? neutralChroma;
 
@@ -155,26 +289,25 @@ class MullFamily {
   final double primaryLightness;
   final double primaryChroma;
   final double primaryContainerChroma;
-  final bool hasAmoled;
-  final double lightSurfaceSink;
   final double darkNeutralChroma;
 
-  static const mull = MullFamily(id: 'mull', name: 'Mull', blurb: 'default', neutralHue: 215, neutralChroma: 1, primaryHue: 215, primaryLightness: 0.52, primaryChroma: 0.11, primaryContainerChroma: 0.04, hasAmoled: true);
-  static const vellum = MullFamily(id: 'vellum', name: 'Vellum', blurb: 'warm', neutralHue: 80, neutralChroma: 1.3, primaryHue: 70, primaryLightness: 0.58, primaryChroma: 0.10, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const foxglove = MullFamily(id: 'foxglove', name: 'Foxglove', blurb: 'soft', neutralHue: 330, neutralChroma: 1.05, primaryHue: 325, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const slate = MullFamily(id: 'slate', name: 'Slate', blurb: 'mono', neutralHue: 215, neutralChroma: 0.4, primaryHue: 215, primaryLightness: 0.42, primaryChroma: 0.012, primaryContainerChroma: 0.006, hasAmoled: true);
-  static const clay = MullFamily(id: 'clay', name: 'Clay', blurb: 'greige', neutralHue: 75, neutralChroma: 2.2, primaryHue: 45, primaryLightness: 0.50, primaryChroma: 0.055, primaryContainerChroma: 0.02, hasAmoled: false, lightSurfaceSink: 0.025, darkNeutralChroma: 1.2);
-  static const perch = MullFamily(id: 'perch', name: 'Perch', blurb: 'violet', neutralHue: 265, neutralChroma: 1, primaryHue: 265, primaryLightness: 0.52, primaryChroma: 0.11, primaryContainerChroma: 0.04, hasAmoled: true);
-  static const ember = MullFamily(id: 'ember', name: 'Ember', blurb: 'amber', neutralHue: 55, neutralChroma: 1.35, primaryHue: 45, primaryLightness: 0.58, primaryChroma: 0.11, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const fern = MullFamily(id: 'fern', name: 'Fern', blurb: 'cool green', neutralHue: 160, neutralChroma: 1.15, primaryHue: 162, primaryLightness: 0.54, primaryChroma: 0.10, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const azure = MullFamily(id: 'azure', name: 'Azure', blurb: 'blue', neutralHue: 259, neutralChroma: 1, primaryHue: 259, primaryLightness: 0.52, primaryChroma: 0.12, primaryContainerChroma: 0.04, hasAmoled: true);
-  static const tide = MullFamily(id: 'tide', name: 'Tide', blurb: 'teal', neutralHue: 189, neutralChroma: 1, primaryHue: 189, primaryLightness: 0.50, primaryChroma: 0.09, primaryContainerChroma: 0.04, hasAmoled: true);
-  static const meadow = MullFamily(id: 'meadow', name: 'Meadow', blurb: 'green', neutralHue: 145, neutralChroma: 1.1, primaryHue: 145, primaryLightness: 0.52, primaryChroma: 0.10, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const blush = MullFamily(id: 'blush', name: 'Blush', blurb: 'rose', neutralHue: 359, neutralChroma: 1.05, primaryHue: 359, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const iris = MullFamily(id: 'iris', name: 'Iris', blurb: 'purple', neutralHue: 290, neutralChroma: 1, primaryHue: 290, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04, hasAmoled: true);
-  static const coral = MullFamily(id: 'coral', name: 'Coral', blurb: 'red orange', neutralHue: 30, neutralChroma: 1.2, primaryHue: 30, primaryLightness: 0.56, primaryChroma: 0.12, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const citron = MullFamily(id: 'citron', name: 'Citron', blurb: 'yellow green', neutralHue: 113, neutralChroma: 1.2, primaryHue: 113, primaryLightness: 0.55, primaryChroma: 0.10, primaryContainerChroma: 0.04, hasAmoled: false);
-  static const neon = MullFamily(id: 'neon', name: 'Neon', blurb: 'vivid green', neutralHue: 147, neutralChroma: 0.8, primaryHue: 147, primaryLightness: 0.60, primaryChroma: 0.14, primaryContainerChroma: 0.05, hasAmoled: true);
+  static const mull = MullFamily(id: 'mull', name: 'Mull', blurb: 'default', neutralHue: 215, neutralChroma: 1, primaryHue: 215, primaryLightness: 0.52, primaryChroma: 0.11, primaryContainerChroma: 0.04);
+  static const vellum = MullFamily(id: 'vellum', name: 'Vellum', blurb: 'warm', neutralHue: 80, neutralChroma: 1.3, primaryHue: 70, primaryLightness: 0.58, primaryChroma: 0.10, primaryContainerChroma: 0.04);
+  static const foxglove = MullFamily(id: 'foxglove', name: 'Foxglove', blurb: 'soft', neutralHue: 330, neutralChroma: 1.05, primaryHue: 325, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04);
+  static const slate = MullFamily(id: 'slate', name: 'Slate', blurb: 'mono', neutralHue: 215, neutralChroma: 0.4, primaryHue: 215, primaryLightness: 0.42, primaryChroma: 0.012, primaryContainerChroma: 0.006);
+  static const clay = MullFamily(id: 'clay', name: 'Clay', blurb: 'greige', neutralHue: 75, neutralChroma: 2.2, primaryHue: 45, primaryLightness: 0.50, primaryChroma: 0.055, primaryContainerChroma: 0.02, darkNeutralChroma: 1.2);
+  static const perch = MullFamily(id: 'perch', name: 'Perch', blurb: 'violet', neutralHue: 265, neutralChroma: 1, primaryHue: 265, primaryLightness: 0.52, primaryChroma: 0.11, primaryContainerChroma: 0.04);
+  static const ember = MullFamily(id: 'ember', name: 'Ember', blurb: 'amber', neutralHue: 55, neutralChroma: 1.35, primaryHue: 45, primaryLightness: 0.58, primaryChroma: 0.11, primaryContainerChroma: 0.04);
+  static const fern = MullFamily(id: 'fern', name: 'Fern', blurb: 'cool green', neutralHue: 160, neutralChroma: 1.15, primaryHue: 162, primaryLightness: 0.54, primaryChroma: 0.10, primaryContainerChroma: 0.04);
+  static const azure = MullFamily(id: 'azure', name: 'Azure', blurb: 'blue', neutralHue: 259, neutralChroma: 1, primaryHue: 259, primaryLightness: 0.52, primaryChroma: 0.12, primaryContainerChroma: 0.04);
+  static const tide = MullFamily(id: 'tide', name: 'Tide', blurb: 'teal', neutralHue: 189, neutralChroma: 1, primaryHue: 189, primaryLightness: 0.50, primaryChroma: 0.09, primaryContainerChroma: 0.04);
+  static const meadow = MullFamily(id: 'meadow', name: 'Meadow', blurb: 'green', neutralHue: 145, neutralChroma: 1.1, primaryHue: 145, primaryLightness: 0.52, primaryChroma: 0.10, primaryContainerChroma: 0.04);
+  static const blush = MullFamily(id: 'blush', name: 'Blush', blurb: 'rose', neutralHue: 359, neutralChroma: 1.05, primaryHue: 359, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04);
+  static const iris = MullFamily(id: 'iris', name: 'Iris', blurb: 'purple', neutralHue: 290, neutralChroma: 1, primaryHue: 290, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04);
+  static const coral = MullFamily(id: 'coral', name: 'Coral', blurb: 'red orange', neutralHue: 30, neutralChroma: 1.2, primaryHue: 30, primaryLightness: 0.56, primaryChroma: 0.12, primaryContainerChroma: 0.04);
+  static const citron = MullFamily(id: 'citron', name: 'Citron', blurb: 'yellow green', neutralHue: 113, neutralChroma: 1.2, primaryHue: 113, primaryLightness: 0.55, primaryChroma: 0.10, primaryContainerChroma: 0.04);
+  static const neon = MullFamily(id: 'neon', name: 'Neon', blurb: 'vivid green', neutralHue: 147, neutralChroma: 0.8, primaryHue: 147, primaryLightness: 0.60, primaryChroma: 0.14, primaryContainerChroma: 0.05);
+
 
   static MullFamily of(ThemeVariant v) => switch (v) {
         ThemeVariant.signature || ThemeVariant.mull => mull,
@@ -209,29 +342,42 @@ class MullFamily {
       primaryLightness: 0.52,
       primaryChroma: 0.11,
       primaryContainerChroma: 0.04,
-      hasAmoled: true,
     );
   }
 
-  Oklch _n(double l, double c, {bool dark = false}) =>
-      Oklch(l, c * (dark ? darkNeutralChroma : neutralChroma), neutralHue);
-  Oklch _nd(double l, double c) => _n(l, c, dark: true);
+  Color _n(double l, double c) => _q(Oklch(l, c * neutralChroma, neutralHue));
+  Color _nd(double l, double c) => _q(Oklch(l, c * darkNeutralChroma, neutralHue));
   Oklch _p(double l, double c) => Oklch(l, c, primaryHue);
 
-  KuberPalette palette({required bool dark, bool amoled = false}) {
+  /// Contrast guard (theme-surfaces.md §3c): the light primary steps down in
+  /// 0.005 lightness until it reads at 4.5:1 as text on the deepest card fill
+  /// (expressive and neutral) and under white labels.
+  double get guardedLightness {
+    final worst = [_n(.955, .014), _q(const Oklch(.965, 0, 0))];
+    var l = primaryLightness;
+    bool fails(double l) {
+      final p = _q(_p(l, primaryChroma));
+      return contrastRatio(const Color(0xFFFFFFFF), p) < 4.5 ||
+          worst.any((w) => contrastRatio(p, w) < 4.5);
+    }
+
+    while (l > .3 && fails(l)) {
+      l = ((l - .005) * 1000).round() / 1000;
+    }
+    return l;
+  }
+
+  KuberPalette palette({required bool dark}) {
     final pc = primaryChroma;
     if (!dark) {
-      final sink = lightSurfaceSink;
-      final surface = _n(0.99 - sink, 0.004).toColor();
-      final container = _n(0.965 - 1.6 * sink, 0.008).toColor();
-      final high = _n(0.935 - 2.2 * sink, 0.011).toColor();
-      final border = _n(0.885 - 2.2 * sink, 0.012).toColor();
+      final surface = _n(.985, .008), container = _n(.955, .014), high = _n(.93, .017),
+          border = _n(.875, .02);
       final primaryContainer = _p(0.92, primaryContainerChroma).toColor();
       final onPrimaryContainer = _p(0.38, pc).toColor();
       return KuberPalette(
         ColorScheme(
           brightness: Brightness.light,
-          primary: _p(primaryLightness, pc).toColor(),
+          primary: _q(_p(guardedLightness, pc)),
           onPrimary: Colors.white,
           primaryContainer: primaryContainer,
           onPrimaryContainer: onPrimaryContainer,
@@ -251,17 +397,17 @@ class MullFamily {
           surface: surface,
           surfaceDim: high,
           surfaceBright: surface,
-          surfaceContainerLowest: _n(1.0, 0).toColor(),
-          surfaceContainerLow: Color.lerp(surface, container, 0.5)!,
+          surfaceContainerLowest: const Color(0xFFFFFFFF),
+          surfaceContainerLow: _mix(surface, container, 0.5),
           surfaceContainer: container,
           surfaceContainerHigh: high,
-          surfaceContainerHighest: Color.lerp(high, border, 0.5)!,
-          onSurface: _n(0.20, 0.02).toColor(),
-          onSurfaceVariant: _n(0.52, 0.02).toColor(),
-          outline: _n(0.62, 0.02).toColor(),
+          surfaceContainerHighest: _mix(high, border, 0.5),
+          onSurface: _n(0.20, 0.02),
+          onSurfaceVariant: _n(0.50, 0.02),
+          outline: _n(0.62, 0.02),
           outlineVariant: border,
-          inverseSurface: _n(0.22, 0.02).toColor(),
-          onInverseSurface: _n(0.97, 0.004).toColor(),
+          inverseSurface: _n(0.22, 0.02),
+          onInverseSurface: _n(0.97, 0.004),
           shadow: Colors.black,
           scrim: Colors.black,
           surfaceTint: Colors.transparent,
@@ -270,50 +416,45 @@ class MullFamily {
         [for (final l in [0.95, 0.86, 0.73, 0.57, 0.44]) _p(l, pc).toColor()],
       );
     }
-    final black = amoled && hasAmoled;
     final pcd = pc * 0.81;
-    final surface =
-        black ? const Color(0xFF000000) : _nd(0.205, 0.012).toColor();
-    final container =
-        _nd(black ? 0.13 : 0.255, black ? 0.012 : 0.014).toColor();
-    final high = _nd(black ? 0.15 : 0.30, black ? 0.012 : 0.016).toColor();
-    final border = _nd(black ? 0.30 : 0.36, black ? 0.014 : 0.016).toColor();
+    final surface = _nd(0.205, 0.012), container = _nd(0.255, 0.014), high = _nd(0.30, 0.016),
+        border = _nd(0.36, 0.016);
     final primaryContainer = _p(0.28, pcd * 0.46).toColor();
     final onPrimaryContainer = _p(0.90, pcd * 0.46).toColor();
     return KuberPalette(
       ColorScheme(
         brightness: Brightness.dark,
         primary: _p(0.74, pcd).toColor(),
-        onPrimary: _nd(0.14, 0.01).toColor(),
+        onPrimary: _nd(0.14, 0.01),
         primaryContainer: primaryContainer,
         onPrimaryContainer: onPrimaryContainer,
         inversePrimary: _p(primaryLightness, pc).toColor(),
         secondary: _p(0.85, pcd * 0.69).toColor(),
-        onSecondary: _nd(0.14, 0.01).toColor(),
+        onSecondary: _nd(0.14, 0.01),
         secondaryContainer: primaryContainer,
         onSecondaryContainer: onPrimaryContainer,
         tertiary: _p(0.85, pcd * 0.69).toColor(),
-        onTertiary: _nd(0.14, 0.01).toColor(),
+        onTertiary: _nd(0.14, 0.01),
         tertiaryContainer: primaryContainer,
         onTertiaryContainer: onPrimaryContainer,
         error: const Oklch(0.72, 0.14, 25).toColor(),
-        onError: _nd(0.14, 0.01).toColor(),
-        errorContainer: Oklch(black ? 0.20 : 0.26, 0.05, 25).toColor(),
+        onError: _nd(0.14, 0.01),
+        errorContainer: const Oklch(0.26, 0.05, 25).toColor(),
         onErrorContainer: const Oklch(0.82, 0.11, 25).toColor(),
         surface: surface,
         surfaceDim: surface,
         surfaceBright: high,
-        surfaceContainerLowest: black ? const Color(0xFF000000) : _nd(0.17, 0.01).toColor(),
-        surfaceContainerLow: Color.lerp(surface, container, 0.5)!,
+        surfaceContainerLowest: _nd(0.17, 0.01),
+        surfaceContainerLow: _mix(surface, container, 0.5),
         surfaceContainer: container,
         surfaceContainerHigh: high,
-        surfaceContainerHighest: Color.lerp(high, border, 0.5)!,
-        onSurface: _nd(0.96, 0.005).toColor(),
-        onSurfaceVariant: _nd(0.72, 0.012).toColor(),
-        outline: _nd(0.60, 0.012).toColor(),
+        surfaceContainerHighest: _mix(high, border, 0.5),
+        onSurface: _nd(0.96, 0.005),
+        onSurfaceVariant: _nd(0.72, 0.012),
+        outline: _nd(0.60, 0.012),
         outlineVariant: border,
-        inverseSurface: _nd(0.93, 0.008).toColor(),
-        onInverseSurface: _nd(0.20, 0.02).toColor(),
+        inverseSurface: _nd(0.93, 0.008),
+        onInverseSurface: _nd(0.20, 0.02),
         shadow: Colors.black,
         scrim: Colors.black,
         surfaceTint: Colors.transparent,
@@ -348,6 +489,3 @@ String themeFamilyName(ThemeVariant v) =>
 
 String themeFamilyBlurb(ThemeVariant v) =>
     v == ThemeVariant.signature ? 'classic blue' : MullFamily.of(v).blurb;
-
-bool themeFamilyHasAmoled(ThemeVariant v) =>
-    v == ThemeVariant.signature || MullFamily.of(v).hasAmoled;

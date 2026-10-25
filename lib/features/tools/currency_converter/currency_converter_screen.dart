@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../core/utils/l10n_ext.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -26,6 +29,23 @@ class _CurrencyConverterScreenState
   String _fromCurrency = 'USD';
   String _toCurrency = 'INR';
   bool _refreshRequested = false;
+
+  /// The app currency when the rate list (Frankfurter / ECB) lacks it.
+  String? _unsupported;
+
+  @override
+  void initState() {
+    super.initState();
+    final app = AppFormatter.current.currency.code;
+    if (kFrankfurterCurrencies.contains(app)) {
+      _toCurrency = app;
+      if (app == 'USD') _fromCurrency = 'EUR';
+    } else {
+      _unsupported = app;
+      _fromCurrency = 'INR';
+      _toCurrency = 'USD';
+    }
+  }
 
   @override
   void dispose() {
@@ -163,6 +183,10 @@ class _CurrencyConverterScreenState
                     ),
                   ),
                 ),
+                if (_unsupported != null) ...[
+                  KuberCallout.text(context.l10n.converterUnavailable(_unsupported!)),
+                  const SizedBox(height: KuberSpace.md),
+                ],
                 ToolInputCard(
                   children: [
                     ToolTextField(

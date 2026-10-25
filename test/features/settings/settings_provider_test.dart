@@ -121,6 +121,8 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   @override
   Future<void> setNumberSystem(NumberSystem system) async {}
   @override
+  Future<void> setShowCurrencyCode(bool value) async {}
+  @override
   Future<void> setSwipeMode(SwipeMode mode) async {}
   @override
   Future<void> setThemeMode(themeMode) async {}

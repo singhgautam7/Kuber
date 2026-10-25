@@ -202,6 +202,7 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
               header: KuberAppBar(
                 title: 'Kuber Notes',
                 showBack: true,
+                appDrawerEntry: AppDrawerEntry.notes,
                 pinShortcut: const PinShortcutSpec(
                   shortcutId: 'kuber_notes',
                   shortLabel: 'Notes',

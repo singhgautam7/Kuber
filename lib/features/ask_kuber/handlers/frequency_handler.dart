@@ -62,7 +62,7 @@ class FrequencyHandler extends QueryHandler {
     }).toList();
 
     final count = matched.length;
-    final total = matched.fold<double>(0, (sum, t) => sum + t.amount);
+    final total = matched.fold<double>(0, (sum, t) => sum + t.spendAmount);
 
     if (count == 0) {
       return HandlerResult(

@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+- Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
+  reminder, card due date and money you lent or borrowed on a month grid,
+  with what went out and came in. Tap a day to see its list, long-press a day
+  to add a reminder, and switch between List and Calendar any time. It opens
+  in Calendar.
+- New theme options: Expressive colours tints backgrounds with your theme
+  colour (turn it off for clean white and grey), and Pure black gives a black
+  background in dark mode on every theme. Theme changes now fade in smoothly.
+- Join the Kuber community on Telegram from About or Feedback.
+- A few buttons and chips are easier to read in dark mode.
+- A closed loan can be re-opened from its sheet. Every loan can open the EMI
+  and Loan Prepayment calculators, filled with what it knows.
+- Loan and investment icons now look like the ones in Recurring.
+- Fixed: Close loan did nothing; deleting a loan, investment or recurring
+  payment, and Skip next or Pause, did not always refresh the screen.
+- Fixed: a loan with the bank's rounded EMI showed one extra tiny EMI at the
+  end.
+- Fixed: View EMI schedule crashed for loans from demo data.
+
+- Loans, investments and recurring payments got a big upgrade. Loans show what
+  you still owe, the interest in every EMI, and let you record extra payments
+  or rate changes. Investments track value, gains and XIRR, and FDs work out
+  their own value every day. Recurring shows everything that repeats, including
+  EMIs and SIPs, with a monthly total.
+- One simple schedule picker everywhere: daily, weekly, monthly, quarterly,
+  yearly or custom, with a clear preview of the next dates.
+- The app opens straight to Home. Recurring transactions, EMIs, SIPs and
+  backups now run in the background, even if you close the app.
+- Every world currency is supported, with search and an option to show the
+  currency code instead of the symbol. Number format follows the currency and
+  can still be changed in Settings.
+- Calculators can fill in from your loans and investments, and you can add a
+  loan or an investment straight from a result. All amounts use commas.
+- Kuber Cards, Notes and Reminders can have their own icon in your app drawer.
+- Fixes: the bottom bar fits on small screens with large text, and first-time
+  setup screens start in light mode.
+
 - Your chosen currency now shows everywhere. Accounts, budgets, charts,
   notifications, widgets and every other screen use the same symbol and
   number format you picked in Settings.

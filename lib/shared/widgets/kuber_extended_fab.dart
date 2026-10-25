@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Bottom offset shared with the main nav bar (`app_scaffold.dart`): the
 /// system inset, but never less than 22.
 double _navBottom(BuildContext context) {
@@ -26,8 +25,7 @@ class KuberFabScrollWatcher extends StatelessWidget {
         // Driven by the real scroll delta (drag and fling), not the
         // UserScrollNotification direction, which flips to "forward" at
         // the end of many upward drags.
-        if (n is ScrollUpdateNotification &&
-            n.metrics.axis == Axis.vertical) {
+        if (n is ScrollUpdateNotification && n.metrics.axis == Axis.vertical) {
           final delta = n.scrollDelta ?? 0;
           if (n.metrics.extentBefore <= 0 || delta < -2) {
             kuberFabVisible.value = true;
@@ -88,24 +86,33 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
-          // The nav bar's scrim: content fades out under the button.
+          // The nav bar's scrim: content fades out under the button. It
+          // hides and shows with the button.
           Positioned(
             left: 0,
             right: 0,
             bottom: -bottom,
             height: bottom + 56 + 32,
             child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      cs.surface.withValues(alpha: 0),
-                      cs.surface.withValues(alpha: 0.92),
-                      cs.surface,
-                    ],
-                    stops: const [0.0, 0.55, 1.0],
+              child: ValueListenableBuilder<bool>(
+                valueListenable: kuberFabVisible,
+                builder: (context, visible, child) => AnimatedOpacity(
+                  opacity: visible ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: child,
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        cs.surface.withValues(alpha: 0),
+                        cs.surface.withValues(alpha: 0.92),
+                        cs.surface,
+                      ],
+                      stops: const [0.0, 0.55, 1.0],
+                    ),
                   ),
                 ),
               ),
@@ -139,8 +146,9 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
                       const SizedBox(width: 10),
                       Text(
                         widget.label,
-                        style: theme.textTheme.labelLarge!
-                            .copyWith(color: cs.onPrimaryContainer),
+                        style: theme.textTheme.labelLarge!.copyWith(
+                          color: cs.onPrimaryContainer,
+                        ),
                       ),
                     ],
                   ),

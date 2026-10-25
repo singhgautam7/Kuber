@@ -20,7 +20,7 @@ class AverageExpenseHandler extends QueryHandler {
     final monthlyTotals = <String, double>{};
     for (final t in ctx.txns.validForCalculations.where((t) => t.type == 'expense')) {
       final key = '${t.createdAt.year}-${t.createdAt.month}';
-      monthlyTotals[key] = (monthlyTotals[key] ?? 0) + t.amount;
+      monthlyTotals[key] = (monthlyTotals[key] ?? 0) + t.spendAmount;
     }
 
     if (monthlyTotals.isEmpty) {

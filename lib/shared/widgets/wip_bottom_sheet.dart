@@ -144,7 +144,7 @@ class WIPBottomSheet extends StatelessWidget {
                 style: localeFont(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: cs.onPrimary,
                 ),
               ),
             ),

@@ -20,9 +20,15 @@ import '../../core/utils/icon_mapper.dart';
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/transactions/data/transaction.dart';
-import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
 import '../../features/transactions/providers/transaction_provider.dart';
 import '../../features/recurring/providers/recurring_provider.dart';
+import '../../features/recurring/widgets/rule_sheet.dart';
+import '../../features/loans/providers/loan_provider.dart';
+import '../../features/loans/widgets/loan_sheet.dart';
+import '../../features/investments/providers/investment_provider.dart';
+import '../../features/investments/widgets/holding_sheet.dart';
+import 'money_widgets.dart';
+import '../../features/settings/providers/settings_provider.dart';
 import '../../features/notes/providers/notes_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
@@ -156,6 +162,15 @@ class _TransactionDetailSheetState
       }
     }
 
+    // vNext: posted by a schedule (rule, EMI, SIP).
+    if (t.occurrenceDate != null) {
+      return (
+        label: t.sourceType == 'investment'
+            ? context.l10n.msTxnSourceSip
+            : context.l10n.msTxnSourceAuto,
+        icon: Icons.event_repeat_rounded,
+      );
+    }
     switch (type) {
       case 'recurring':
         return (label: context.l10n.sourceRecurring, icon: Icons.repeat_rounded);
@@ -168,6 +183,47 @@ class _TransactionDetailSheetState
         return (label: context.l10n.sourceLentBorrowed, icon: Icons.swap_horiz_rounded);
     }
     return (label: context.l10n.sourceManual, icon: Icons.edit_outlined);
+  }
+
+  /// "From Home loan ›" under the amount (components/source-chip.md). A
+  /// deleted source hides the chip; the Source row then says so.
+  List<Widget> _sourceChip(BuildContext context) {
+    final t = transaction;
+    final l = context.l10n;
+    final type = t.sourceType ?? t.linkedRuleType;
+    final id = t.sourceId ?? t.linkedRuleId;
+    if (id == null) return const [];
+    Widget chip(String label, VoidCallback onTap) => Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: SourceChip(label: label, onTap: onTap),
+        );
+    Widget gone(String kind) => Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(kind,
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        );
+    switch (type) {
+      case 'recurring':
+        final rule = (ref.watch(recurringListProvider).valueOrNull ?? const [])
+            .where((r) => '${r.id}' == id)
+            .firstOrNull;
+        if (rule == null) return [gone(l.msTxnDeletedRule)];
+        return [chip(l.msSourceRule(rule.name), () => showRuleSheet(context, ref, rule))];
+      case 'loan':
+        final loan = (ref.watch(loanListProvider).valueOrNull ?? const [])
+            .where((x) => x.uid == id)
+            .firstOrNull;
+        if (loan == null) return [gone(l.msTxnDeletedLoan)];
+        return [chip(l.msSource(loan.name), () => showLoanSheet(context, ref, loan))];
+      case 'investment':
+        final inv = (ref.watch(investmentListProvider).valueOrNull ?? const [])
+            .where((x) => x.uid == id)
+            .firstOrNull;
+        if (inv == null) return [gone(l.msTxnDeletedInvestment)];
+        return [chip(l.msSource(inv.name), () => showHoldingSheet(context, ref, inv))];
+    }
+    return const [];
   }
 
   /// Opens the source note in the editor, or falls back to a snackbar when
@@ -358,8 +414,25 @@ class _TransactionDetailSheetState
             amount: amountText,
             amountColor: amountColor,
           ),
+          ..._sourceChip(context),
           const SizedBox(height: KuberSpace.xl - 4),
           InfoTable(rows: rows),
+          if (transaction.principalPart != null && transaction.interestPart != null) ...[
+            const SizedBox(height: KuberSpace.xl - 4),
+            Text(context.l10n.msTxnSplit.toUpperCase(),
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                    color: cs.onSurfaceVariant, letterSpacing: 0.8)),
+            const SizedBox(height: 8),
+            KuberCard(
+              padding: const EdgeInsets.all(16),
+              child: EmiSplitBar(
+                principal: transaction.principalPart!,
+                interest: transaction.interestPart!,
+                principalText: ref.watch(formatterProvider).formatCurrency(transaction.principalPart!),
+                interestText: ref.watch(formatterProvider).formatCurrency(transaction.interestPart!),
+              ),
+            ),
+          ],
 
           // ── "View note" (Kuber Notes provenance, per 1m) ─────────────────
           if (transaction.sourceNoteId != null) ...[

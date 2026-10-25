@@ -315,8 +315,6 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                   onChanged: (v) => setState(() => _enableNotification = v),
                   activeThumbColor: cs.primary,
                   activeTrackColor: cs.primary.withValues(alpha: 0.3),
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
                 ),
               ],
             ),

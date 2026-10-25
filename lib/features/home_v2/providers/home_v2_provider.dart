@@ -37,29 +37,25 @@ class HomeV2Notifier extends Notifier<HomeV2Snapshot> {
   }
 
   /// Get started › Set up accounts: Accounts opened, or a balance set.
-  Future<void> markBalanceSet() async {
-    if (state.isV2 && !state.balanceSet) {
-      await update((s) => s.copyWith(balanceSet: true));
-    }
+  // Discovery flags. Set after the current frame: callers include initState
+  // (Ask Kuber), where changing a provider is not allowed.
+  Future<void> _mark(bool Function(HomeV2Snapshot s) done,
+      HomeV2Snapshot Function(HomeV2Snapshot s) f) async {
+    await Future<void>.microtask(() {});
+    if (state.isV2 && !done(state)) await update(f);
   }
 
-  Future<void> markSmsRequested() async {
-    if (state.isV2 && !state.smsRequested) {
-      await update((s) => s.copyWith(smsRequested: true));
-    }
-  }
+  Future<void> markBalanceSet() =>
+      _mark((s) => s.balanceSet, (s) => s.copyWith(balanceSet: true));
 
-  Future<void> markAskOpened() async {
-    if (state.isV2 && !state.askOpened) {
-      await update((s) => s.copyWith(askOpened: true));
-    }
-  }
+  Future<void> markSmsRequested() =>
+      _mark((s) => s.smsRequested, (s) => s.copyWith(smsRequested: true));
 
-  Future<void> markVoiceUsed() async {
-    if (state.isV2 && !state.voiceUsed) {
-      await update((s) => s.copyWith(voiceUsed: true));
-    }
-  }
+  Future<void> markAskOpened() =>
+      _mark((s) => s.askOpened, (s) => s.copyWith(askOpened: true));
+
+  Future<void> markVoiceUsed() =>
+      _mark((s) => s.voiceUsed, (s) => s.copyWith(voiceUsed: true));
 }
 
 final homeV2Provider = NotifierProvider<HomeV2Notifier, HomeV2Snapshot>(
