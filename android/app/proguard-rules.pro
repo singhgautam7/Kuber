@@ -21,3 +21,9 @@
 # AppWidgetManager binder and every widget sync silently fails.
 -keep class com.grs.kuber.widgets.** { *; }
 -keep class * extends android.appwidget.AppWidgetProvider { *; }
+
+# WorkManager (background task queue) creates its Room database by reflection
+# (WorkDatabase_Impl no-arg constructor). R8 stripped it and every release
+# build crashed on launch in androidx.startup.InitializationProvider.
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
