@@ -1,17 +1,17 @@
 // Follows a background run (BackgroundTaskRun rows, written by the worker
 // isolate or in-process) and drives the one progress snackbar:
+// reports through the one BackgroundReporter (loan accuracy D3):
 //   - nothing for the first 400 ms; a run that finishes by then goes straight
 //     to its result,
-//   - progress (step text, no timer, no swipe; during backup a swipe is
-//     allowed after 5 s with "Continues in the background"),
-//   - result / failure as the normal snackbar, or nothing when nothing
-//     needed doing.
+//   - progress (step text and percentage; during backup a swipe is allowed
+//     after 5 s with "Continues in the background"),
+//   - result / failure as the normal snackbar (View opens History filtered
+//     to what the run added), or nothing when nothing needed doing.
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
 
 import '../../features/budgets/providers/budget_provider.dart';
@@ -23,22 +23,24 @@ import '../../features/transactions/providers/transaction_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/timed_snackbar.dart';
 import '../database/isar_service.dart';
-import '../router/app_router.dart';
 import '../utils/locale_font.dart' show AppLocale;
+import '../schedule/processed_occurrence.dart';
+import 'background_reporter.dart';
 import 'background_task_run.dart';
 import 'background_tasks.dart';
 
 class BackgroundRunWatch extends Notifier<BackgroundTaskRun?> {
-  static const showDelay = Duration(milliseconds: 400);
   static const swipeAfter = Duration(seconds: 5);
   static const giveUp = Duration(minutes: 2);
 
   DateTime? _since;
   StreamSubscription<void>? _sub;
-  Timer? _poll, _delay, _swipe, _deadline;
-  bool _progressShown = false;
+  Timer? _poll, _swipe, _deadline;
   bool _finished = false;
   DateTime? _backupStartedAt;
+  int? _job;
+
+  BackgroundReporter get _reporter => BackgroundReporter.instance;
 
   @override
   BackgroundTaskRun? build() {
@@ -49,23 +51,26 @@ class BackgroundRunWatch extends Notifier<BackgroundTaskRun?> {
   Isar get _isar => ref.read(isarProvider);
   AppLocalizations get _l10n => lookupAppLocalizations(AppLocale.current);
 
-  /// Starts following the run that begins at or after [since].
+  /// Starts following the run that begins at or after [since]. Its progress
+  /// and result go through the one background reporter.
   void watchFrom(DateTime since) {
     _stop();
+    if (_job != null) _reporter.finish(_job!, BgOutcome.none);
     _since = since.subtract(const Duration(seconds: 2));
-    _progressShown = false;
     _finished = false;
     _backupStartedAt = null;
     state = null;
+    _job = _reporter.begin(_l10n.bgStepStarting, onSwiped: () async {
+      final r = state;
+      if (r == null) return;
+      r.snackbarDismissed = true;
+      await _isar.writeTxn(() => _isar.backgroundTaskRuns.put(r));
+    });
     _sub = _isar.backgroundTaskRuns.watchLazy().listen((_) => _refresh());
     // Cross-isolate safety net while a run is active (cheap single query).
     _poll = Timer.periodic(const Duration(seconds: 1), (_) => _refresh());
-    _delay = Timer(showDelay, _showProgressIfRunning);
     _deadline = Timer(giveUp, () {
-      if (!_finished) {
-        KuberProgressSnackBar.hide();
-        _stop();
-      }
+      if (!_finished) _end(BgOutcome.none);
     });
     _refresh();
   }
@@ -84,44 +89,30 @@ class BackgroundRunWatch extends Notifier<BackgroundTaskRun?> {
     if (run.status == 'running') {
       if (run.step == 'backup') {
         _backupStartedAt ??= DateTime.now();
-        _swipe ??= Timer(swipeAfter, _allowSwipe);
+        _swipe ??= Timer(swipeAfter, () => _progress(state));
       }
-      if (_progressShown) KuberProgressSnackBar.update(_progressState(run));
+      _progress(run);
     } else {
       _finish(run);
     }
   }
 
-  KuberProgressState _progressState(BackgroundTaskRun? run) {
-    final text = run == null ? _l10n.bgStepStarting : BackgroundTasks.stepText(run, _l10n);
+  void _progress(BackgroundTaskRun? run) {
+    final job = _job;
+    if (job == null || _finished) return;
     final swipeable = run?.step == 'backup' &&
         _backupStartedAt != null &&
         DateTime.now().difference(_backupStartedAt!) >= swipeAfter;
-    return KuberProgressState(text,
-        detail: swipeable ? _l10n.bgContinues : null, dismissible: swipeable);
-  }
-
-  void _showProgressIfRunning() {
-    if (_finished) return;
-    final overlay = rootNavigatorKey.currentState?.overlay;
-    if (overlay == null) return;
-    _progressShown = true;
-    KuberProgressSnackBar.show(overlay, _progressState(state), onSwiped: () async {
-      final r = state;
-      if (r == null) return;
-      r.snackbarDismissed = true;
-      await _isar.writeTxn(() => _isar.backgroundTaskRuns.put(r));
-    });
-  }
-
-  void _allowSwipe() {
-    if (_finished || !_progressShown) return;
-    KuberProgressSnackBar.update(_progressState(state));
+    _reporter.progress(job,
+        text: run == null ? _l10n.bgStepStarting : BackgroundTasks.stepText(run, _l10n),
+        // Backup has no count; the occurrence step does.
+        done: run?.step == 'processing' ? run!.stepDone : 0,
+        total: run?.step == 'processing' ? run!.stepTotal : 0,
+        detail: swipeable ? _l10n.bgContinues : null,
+        dismissible: swipeable);
   }
 
   void _finish(BackgroundTaskRun run) {
-    _finished = true;
-    _stop();
     // The worker isolate wrote these; the lists only reload on their own writes.
     if (run.postedRecurring + run.postedEmis + run.postedSips + run.maturedCount > 0) {
       for (final ProviderOrFamily p in [
@@ -135,54 +126,53 @@ class BackgroundRunWatch extends Notifier<BackgroundTaskRun?> {
         ref.invalidate(p);
       }
     }
-    final context = rootNavigatorKey.currentContext;
-    if (context == null || run.resultShown) {
-      KuberProgressSnackBar.hide();
+    if (run.resultShown) {
+      _end(BgOutcome.none);
       return;
     }
     final l = _l10n;
     final text = BackgroundTasks.resultText(run, l);
     final backupFailed = run.backupStatus == 'failed';
-    final failed = backupFailed || run.failedOccurrences > 0;
+    final ids = [
+      for (final p in _isar.processedOccurrences.filter().runIdEqualTo(run.runId).findAllSync())
+        if (p.transactionId != null && p.status == 'posted') p.transactionId!,
+    ];
     final posted = run.postedRecurring + run.postedEmis + run.postedSips;
-    if (text.isEmpty) {
-      KuberProgressSnackBar.hide();
-      return;
-    }
-    KuberProgressSnackBar.finish(
-      context,
-      text,
-      isError: failed,
-      actionLabel: backupFailed && run.failedOccurrences == 0 ? l.bgRetry : l.bgView,
-      onAction: () {
-        if (backupFailed && run.failedOccurrences == 0) {
-          BackgroundTasks.start(_isar, l, trigger: 'retry', force: true)
-              .then((started) {
-            if (started) watchFrom(DateTime.now());
-          });
-          return;
-        }
-        final ctx = rootNavigatorKey.currentContext;
-        if (ctx == null) return;
-        if (posted == 0 && run.failedOccurrences == 0 && run.backupStatus == 'done') {
-          GoRouter.of(ctx).go('/more/data/automatic-backups');
-        } else {
-          GoRouter.of(ctx).go('/more/recurring', extra: 'processed');
-        }
-      },
-    );
+    _end(text.isEmpty
+        ? BgOutcome.none
+        : BgOutcome(
+            text,
+            error: backupFailed || run.failedOccurrences > 0,
+            transactionIds: ids,
+            details: run.failedOccurrences > 0 ? run.log.where((e) => e.startsWith('Failed')).join('\n') : null,
+            retry: backupFailed && run.failedOccurrences == 0
+                ? () => BackgroundTasks.start(_isar, l, trigger: 'retry', force: true).then((started) {
+                      if (started) watchFrom(DateTime.now());
+                    })
+                : null,
+            route: posted == 0 && run.backupStatus == 'done'
+                ? '/more/data/automatic-backups'
+                : (ids.isEmpty ? '/more/recurring' : null),
+          ));
     run.resultShown = true;
     _isar.writeTxn(() => _isar.backgroundTaskRuns.put(run));
+  }
+
+  void _end(BgOutcome outcome) {
+    _finished = true;
+    _stop();
+    final job = _job;
+    _job = null;
+    if (job != null) _reporter.finish(job, outcome);
   }
 
   void _stop() {
     _sub?.cancel();
     _poll?.cancel();
-    _delay?.cancel();
     _swipe?.cancel();
     _deadline?.cancel();
     _sub = null;
-    _poll = _delay = _swipe = _deadline = null;
+    _poll = _swipe = _deadline = null;
   }
 }
 

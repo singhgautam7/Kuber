@@ -46,8 +46,10 @@ typedef ImportProgressCallback = void Function(
 
 class JsonBackupService {
   /// 2 = vNext (schedules, loan / investment fields, sub types, processed
-  /// ledger). Version 1 backups restore through the same migration.
-  static const version = 2;
+  /// ledger). 3 = loan accuracy (edited EMI splits, past EMIs, outstanding
+  /// adjustments, Overdraft accounts). Older backups still restore:
+  /// version 1 through the vNext migration, the new fields default.
+  static const version = 3;
 
   Future<String> writeScheduledBackup({
     required Isar isar,
@@ -318,6 +320,8 @@ class JsonBackupService {
     'interestPart': t.interestPart,
     'spendInterestOnly': t.spendInterestOnly,
     'occurrenceDate': t.occurrenceDate,
+    'splitEdited': t.splitEdited,
+    'addedAsPastEmi': t.addedAsPastEmi,
   };
 
   Map<String, dynamic> _catToMap(Category c) => {
@@ -446,7 +450,9 @@ class JsonBackupService {
     ..principalPart = (m['principalPart'] as num?)?.toDouble()
     ..interestPart = (m['interestPart'] as num?)?.toDouble()
     ..spendInterestOnly = (m['spendInterestOnly'] as bool?) ?? false
-    ..occurrenceDate = m['occurrenceDate'] as int?;
+    ..occurrenceDate = m['occurrenceDate'] as int?
+    ..splitEdited = (m['splitEdited'] as bool?) ?? false
+    ..addedAsPastEmi = (m['addedAsPastEmi'] as bool?) ?? false;
 
   KuberNote _mapToKuberNote(Map<String, dynamic> m) => KuberNote()
     ..id = m['id'] as int
@@ -655,6 +661,8 @@ class JsonBackupService {
       for (final e in (m['events'] as List? ?? const []))
         LoanEvent.fromMap((e as Map).cast<String, dynamic>())
     ]
+    ..addPastEmis = (m['addPastEmis'] as bool?) ?? false
+    ..pastEmisAddedAt = _date(m['pastEmisAddedAt'])
     ..closedAt = _date(m['closedAt'])
     ..dataVersion = (m['dataVersion'] as int?) ?? 0;
 

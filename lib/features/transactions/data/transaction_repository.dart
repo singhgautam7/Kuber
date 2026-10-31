@@ -1,4 +1,9 @@
+import 'dart:isolate';
+
+import 'package:flutter/foundation.dart';
 import 'package:isar_community/isar.dart';
+
+import '../../../core/database/isar_service.dart' show kIsarSchemas;
 
 import '../../../core/database/base_repository.dart';
 import 'transaction.dart';
@@ -6,9 +11,33 @@ import 'transaction.dart';
 class TransactionRepository extends BaseRepository<Transaction> {
   TransactionRepository(super.isar);
 
+  /// Every transaction, newest first. On the app's database the query and
+  /// its deserialisation run on a helper isolate: the whole table is ~20-30
+  /// ms of decoding on a 6k ledger, which landed on the UI thread during
+  /// Home's first frames (loan accuracy D2, specs/loan-accuracy/performance.md).
+  /// Isolate.run hands the list back without copying.
   Future<List<Transaction>> getAll() async {
+    final dir = isar.directory;
+    if (!kIsWeb && isar.name == Isar.defaultName && dir != null && offloadGetAll) {
+      try {
+        return await Isolate.run(() async {
+          final helper = await Isar.open(kIsarSchemas, directory: dir, inspector: false);
+          try {
+            return await helper.transactions.where().sortByCreatedAtDesc().findAll();
+          } finally {
+            await helper.close();
+          }
+        });
+      } catch (e) {
+        debugPrint('Kuber: transaction load on a helper isolate failed, loading here: $e');
+      }
+    }
     return isar.transactions.where().sortByCreatedAtDesc().findAll();
   }
+
+  /// Tests open their own temporary databases in this isolate.
+  @visibleForTesting
+  static bool offloadGetAll = true;
 
   Future<Transaction?> getById(Id id) async {
     return isar.transactions.get(id);

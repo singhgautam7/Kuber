@@ -38,6 +38,16 @@ class Account {
   /// Fire a reminder on the payment-due day.
   bool paymentDueReminderEnabled = false;
 
+  /// Overdraft account: money owed (type 'overdraft'). Works like a credit
+  /// card without the billing cycle: the balance can be negative (owed) and
+  /// [creditLimit] is an optional limit.
+  @ignore
+  bool get isOverdraft => type == 'overdraft';
+
+  /// Credit card or Overdraft: the balance reads as an amount owed.
+  @ignore
+  bool get isLiability => isCreditCard || isOverdraft;
+
   Map<String, dynamic> toMap() => {
     'id': id,
     'name': name,

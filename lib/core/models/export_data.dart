@@ -25,6 +25,10 @@ class TransactionRow {
   final double? principalPart;
   final double? interestPart;
 
+  /// Loan accuracy: the EMI split was edited / the EMI was added as a past EMI.
+  final bool splitEdited;
+  final bool addedAsPastEmi;
+
   const TransactionRow({
     required this.date,
     required this.name,
@@ -40,6 +44,8 @@ class TransactionRow {
     this.source,
     this.principalPart,
     this.interestPart,
+    this.splitEdited = false,
+    this.addedAsPastEmi = false,
   });
 }
 

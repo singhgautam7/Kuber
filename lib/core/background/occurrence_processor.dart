@@ -12,6 +12,7 @@ import 'package:isar_community/isar.dart';
 import '../../features/investments/data/investment.dart';
 import '../../features/loans/data/loan.dart';
 import '../../features/loans/domain/loan_engine.dart';
+import '../../features/loans/domain/loan_service.dart';
 import '../../features/notifications/data/app_notification.dart';
 import '../../features/notifications/data/notification_repository.dart';
 import '../../features/recurring/data/recurring_rule.dart';
@@ -292,7 +293,9 @@ class OccurrenceProcessor {
           ..notes = r.notes;
       case 'loan':
         final l = (await isar.loans.filter().uidEqualTo(id).findFirst())!;
-        final emi = emiFor(l, day, decimals);
+        // Split from the outstanding after what was actually paid.
+        final rec = await LoanService.records(isar, id);
+        final emi = emiFor(l, day, decimals, linked: rec.linked, deletedDays: rec.deleted);
         final from = l.countOnlyInterestFrom;
         return base('EMI - ${l.name}')
           ..amount = emi.amount

@@ -11,7 +11,10 @@ enum LoanInterestType { reducingBalance, flatRate, interestOnlyFirst }
 /// "Already running?" starting point.
 enum LoanStartingPoint { originalDetails, outstandingToday, trackEmiOnly }
 
-enum LoanEventKind { rateChange, prepayment, charge }
+enum LoanEventKind { rateChange, prepayment, charge, adjustment }
+
+/// Why the outstanding was updated (adjustment events).
+enum LoanAdjustReason { matchBank, interestAdded }
 
 /// What a prepayment or rate change adjusts.
 enum LoanAdjust { tenure, emi }
@@ -30,8 +33,13 @@ class LoanEvent {
   @Enumerated(EnumType.name)
   LoanAdjust adjust = LoanAdjust.tenure;
 
-  /// Prepayment: principal part. Charge: the charge amount.
+  /// Prepayment: principal part. Charge: the charge amount. Adjustment: the
+  /// signed difference to Kuber's outstanding on [date].
   double amount = 0;
+
+  /// Adjustment: why (stored by name).
+  @Enumerated(EnumType.name)
+  LoanAdjustReason reason = LoanAdjustReason.matchBank;
 
   /// Prepayment charge (expense, never reduces the outstanding amount).
   double charge = 0;
@@ -50,6 +58,7 @@ class LoanEvent {
     'charge': charge,
     'transactionId': transactionId,
     'chargeTransactionId': chargeTransactionId,
+    'reason': reason.name,
   };
 
   static LoanEvent fromMap(Map<String, dynamic> m) => LoanEvent()
@@ -62,7 +71,9 @@ class LoanEvent {
     ..amount = (m['amount'] as num?)?.toDouble() ?? 0
     ..charge = (m['charge'] as num?)?.toDouble() ?? 0
     ..transactionId = m['transactionId'] as int?
-    ..chargeTransactionId = m['chargeTransactionId'] as int?;
+    ..chargeTransactionId = m['chargeTransactionId'] as int?
+    ..reason = LoanAdjustReason.values.firstWhere((r) => r.name == m['reason'],
+        orElse: () => LoanAdjustReason.matchBank);
 }
 
 @collection
@@ -147,6 +158,12 @@ class Loan {
 
   List<LoanEvent> events = [];
 
+  /// "Add past EMIs as transactions" (original details, already running):
+  /// every EMI from the first EMI date is a transaction, so nothing is
+  /// "paid before Kuber". [pastEmisAddedAt]: when they were last added.
+  bool addPastEmis = false;
+  DateTime? pastEmisAddedAt;
+
   DateTime? closedAt;
 
   /// 0 = not migrated to vNext yet.
@@ -191,6 +208,8 @@ class Loan {
     ..countOnlyInterest = countOnlyInterest
     ..countOnlyInterestFrom = countOnlyInterestFrom
     ..events = [...events]
+    ..addPastEmis = addPastEmis
+    ..pastEmisAddedAt = pastEmisAddedAt
     ..closedAt = closedAt
     ..dataVersion = dataVersion;
 
@@ -232,6 +251,8 @@ class Loan {
     'countOnlyInterest': countOnlyInterest,
     'countOnlyInterestFrom': countOnlyInterestFrom?.toIso8601String(),
     'events': events.map((e) => e.toMap()).toList(),
+    'addPastEmis': addPastEmis,
+    'pastEmisAddedAt': pastEmisAddedAt?.toIso8601String(),
     'closedAt': closedAt?.toIso8601String(),
     'dataVersion': dataVersion,
   };

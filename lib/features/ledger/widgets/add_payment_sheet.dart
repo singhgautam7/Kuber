@@ -241,9 +241,12 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
         initialValue: _amount,
         onConfirm: (result) {
           setState(() {
-            _amountController.text = result == result.truncateToDouble()
+            _amountController.text = CurrencyInputFormatter(
+              isIndian:
+                  ref.read(formatterProvider).system == NumberSystem.indian,
+            ).format(result == result.truncateToDouble()
                 ? result.toInt().toString()
-                : result.toStringAsFixed(2);
+                : result.toStringAsFixed(2));
           });
         },
       ),

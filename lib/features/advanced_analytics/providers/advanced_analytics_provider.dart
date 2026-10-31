@@ -299,6 +299,7 @@ Map<String, Object?> _accountMap(Account a) => {
   'name': a.name,
   'type': a.type,
   'isCreditCard': a.isCreditCard,
+  'isOverdraft': a.isOverdraft,
 };
 
 Map<String, Object?> _loanMap(Loan l) => {

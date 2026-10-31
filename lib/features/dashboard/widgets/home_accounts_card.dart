@@ -121,11 +121,13 @@ class _HomeAccountTile extends ConsumerWidget {
     final masked = ref.watch(privacyModeProvider);
 
     final isCC = account.isCreditCard;
+    // Overdraft in debt reads like the detail sheet: "Owed" + the amount.
+    final odOwed = account.isOverdraft && balance < 0;
     final accentColor = resolveAccountColor(account);
 
     // For CC, `balance` is OUTSTANDING (negative). We render the absolute
     // outstanding under an "OUTSTANDING" label that carries the colour.
-    final amountText = isCC
+    final amountText = isCC || odOwed
         ? maskAmount(fmt.formatCurrency(balance.abs()), masked)
         : maskAmount(
             '${balance < 0 ? '−' : ''}${fmt.formatCurrency(balance.abs())}',
@@ -134,7 +136,9 @@ class _HomeAccountTile extends ConsumerWidget {
 
     final theme = Theme.of(context);
     final tones = categoryTones(context, accentColor);
-    final hasUtil = isCC && account.creditLimit != null;
+    // Overdraft: signed like other accounts (it can be positive),
+    // with the limit bar like a card.
+    final hasUtil = account.isLiability && account.creditLimit != null;
     final utilPct = hasUtil && account.creditLimit! > 0
         ? balance.abs() / account.creditLimit!
         : 0.0;
@@ -222,6 +226,8 @@ class _HomeAccountTile extends ConsumerWidget {
                     sentenceCase(
                       isCC
                           ? context.l10n.outstandingLabel
+                          : odOwed
+                          ? context.l10n.accountOwedLabel
                           : context.l10n.availableLabel,
                     ),
                     maxLines: 1,
@@ -256,6 +262,7 @@ class _HomeAccountTile extends ConsumerWidget {
 
   String _typeLabel(BuildContext context, Account a) {
     if (a.isCreditCard) return context.l10n.creditCardLabel;
+    if (a.isOverdraft) return context.l10n.accountTypeOverdraft;
     return switch (a.type.toLowerCase()) {
       'bank' => context.l10n.bankLabel,
       'wallet' => context.l10n.walletLabel,

@@ -211,6 +211,8 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
                             name: acc.name,
                             type: (acc.isCreditCard
                                 ? context.l10n.creditCardLabel
+                                : acc.isOverdraft
+                                ? context.l10n.accountTypeOverdraft
                                 : switch (acc.type.toLowerCase()) {
                                     'bank' => context.l10n.bankLabel,
                                     'wallet' => context.l10n.walletLabel,
@@ -221,7 +223,8 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
                             color: color,
                             selected: selected,
                             balance: ref.watch(accountBalanceProvider(acc.id)),
-                            isCreditCard: acc.isCreditCard,
+                            // Balance / limit for cards and loan accounts.
+                            isCreditCard: acc.isLiability,
                             creditLimit: acc.creditLimit,
                             currencySymbol: ref.watch(currencyProvider).symbol,
                             onTap: () => widget.onSelected(acc.id),

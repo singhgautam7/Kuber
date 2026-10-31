@@ -62,6 +62,10 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
   final _keep = <int, ProviderSubscription<AsyncValue<List<CalendarOccurrence>>>>{};
   final _summaryKey = GlobalKey();
   bool _collapsed = false;
+  // Built day cells, reused while their inputs are unchanged: a tap rebuilds
+  // only the two cells whose selection changed, and collapsing the grid
+  // (a rebuild per scroll frame) rebuilds none.
+  final _cellCache = <String, Widget>{};
 
   int get _monthIndex => (_pages?.hasClients ?? false) ? (_pages!.page ?? 0).round() : _indexOf(monthKeyOf(_selected));
   int _keyAt(int index) {
@@ -233,6 +237,7 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
                   weekStart: weekStart,
                   today: _today,
                   selected: _selected,
+                  cellCache: _cellCache,
                   onPage: _onPage,
                   onTap: _select,
                   onLongPress: _quickAdd,
@@ -458,6 +463,7 @@ class _GridArea extends ConsumerWidget {
   final String filter;
   final int weekStart;
   final DateTime today, selected;
+  final Map<String, Widget> cellCache;
   final ValueChanged<int> onPage;
   final ValueChanged<DateTime> onTap, onLongPress;
   final ValueChanged<int> onWeek;
@@ -474,6 +480,7 @@ class _GridArea extends ConsumerWidget {
     required this.weekStart,
     required this.today,
     required this.selected,
+    required this.cellCache,
     required this.onPage,
     required this.onTap,
     required this.onLongPress,
@@ -497,22 +504,29 @@ class _GridArea extends ConsumerWidget {
       for (var i = 0; i < 7; i++) DateTime(2026, 11, 1 + (weekStart + i) % 7), // 1 Nov 2026 is a Sunday
     ];
     final style = theme.textTheme.labelSmall!.copyWith(color: cs.onSurfaceVariant);
-    var fmt = DateFormat.E(locale);
-    if (names.any((d) => (TextPainter(
-              text: TextSpan(text: fmt.format(d), style: style),
-              textDirection: Directionality.of(context),
-              textScaler: MediaQuery.textScalerOf(context),
-            )..layout())
-                .width >
-            cellW - 8)) {
-      fmt = DateFormat('EEEEE', locale);
-    }
+    final scaler = MediaQuery.textScalerOf(context);
+    // This build runs on every frame while the grid collapses: measure the
+    // weekday names once per locale, width and text size.
+    final fmt = _weekdayFormats.putIfAbsent('$locale|$cellW|${scaler.scale(100)}|${style.fontSize}', () {
+      final short = DateFormat.E(locale);
+      final tooWide = names.any((d) {
+        final p = TextPainter(
+          text: TextSpan(text: short.format(d), style: style),
+          textDirection: Directionality.of(context),
+          textScaler: scaler,
+        )..layout();
+        final w = p.width;
+        p.dispose();
+        return w > cellW - 8;
+      });
+      return tooWide ? DateFormat('EEEEE', locale) : short;
+    });
 
-    // Spoken-label helpers, once per build (never a DateFormat per cell).
+    // Spoken-label helpers, once per locale (never a DateFormat per cell).
     final labels = _LabelKit(
       l: l,
-      dayMonth: DateFormat('d MMMM', locale),
-      fullDate: DateFormat('EEEE d MMMM', locale),
+      dayMonth: _dateFormats.putIfAbsent('d MMMM|$locale', () => DateFormat('d MMMM', locale)),
+      fullDate: _dateFormats.putIfAbsent('EEEE d MMMM|$locale', () => DateFormat('EEEE d MMMM', locale)),
       money: ref.watch(formatterProvider).formatCurrency,
       private: ref.watch(privacyModeProvider),
     );
@@ -544,7 +558,7 @@ class _GridArea extends ConsumerWidget {
                     child: Row(
                       children: [
                         for (final d in days.sublist(r * 7, r * 7 + 7))
-                          _cell(labels, d, key, byDay[dayKey(d)] ?? const [], cellW),
+                          _cell(labels, d, key, items, byDay[dayKey(d)] ?? const [], cellW),
                       ],
                     ),
                   ),
@@ -625,10 +639,21 @@ class _GridArea extends ConsumerWidget {
     );
   }
 
-  Widget _cell(_LabelKit labels, DateTime d, int monthKey, List<CalendarOccurrence> items, double w) {
+  Widget _cell(_LabelKit labels, DateTime d, int monthKey, List<CalendarOccurrence>? monthItems,
+      List<CalendarOccurrence> items, double w) {
     final other = monthKeyOf(d) != monthKey;
     final isToday = dayKey(d) == dayKey(today);
     final isSelected = !other && dayKey(d) == dayKey(selected);
+    // Everything the cell and its spoken label depend on. The month's list
+    // is a new object whenever its data changes.
+    final cacheKey = '${dayKey(d)}|$monthKey|$isSelected|${dayKey(today)}|${other && d.isAfter(selected)}|'
+        '${identityHashCode(monthItems)}|$filter|$w|${labels.private}|${labels.l.localeName}';
+    if (cellCache.length > 600) cellCache.clear();
+    return cellCache[cacheKey] ??= _buildCell(labels, d, other, isToday, isSelected, items, w);
+  }
+
+  Widget _buildCell(_LabelKit labels, DateTime d, bool other, bool isToday, bool isSelected,
+      List<CalendarOccurrence> items, double w) {
     final state = DayCellState(
       day: d.day,
       today: isToday && !other,
@@ -667,6 +692,9 @@ class _GridArea extends ConsumerWidget {
     );
   }
 }
+
+final _weekdayFormats = <String, DateFormat>{};
+final _dateFormats = <String, DateFormat>{};
 
 /// What a cell's spoken label needs, built once per grid build.
 class _LabelKit {

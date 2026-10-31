@@ -15,6 +15,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
+import '../../settings/providers/settings_provider.dart' show formatterProvider, NumberSystem;
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_chips.dart';
@@ -43,12 +45,14 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
     _searchCtrl = TextEditingController(text: _localFilter.searchQuery ?? '');
     _minAmountCtrl = TextEditingController(
       text: _localFilter.minAmount != null
-          ? _localFilter.minAmount!.toStringAsFixed(0)
+          ? CurrencyInputFormatter(isIndian: _isIndian)
+                .format(_localFilter.minAmount!.toStringAsFixed(0))
           : '',
     );
     _maxAmountCtrl = TextEditingController(
       text: _localFilter.maxAmount != null
-          ? _localFilter.maxAmount!.toStringAsFixed(0)
+          ? CurrencyInputFormatter(isIndian: _isIndian)
+                .format(_localFilter.maxAmount!.toStringAsFixed(0))
           : '',
     );
   }
@@ -60,6 +64,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
     _maxAmountCtrl.dispose();
     super.dispose();
   }
+
+  bool get _isIndian =>
+      ref.read(formatterProvider).system == NumberSystem.indian;
 
   void _reset() {
     _searchCtrl.clear();
@@ -74,8 +81,8 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
     final searchQuery = _searchCtrl.text.trim();
     final minText = _minAmountCtrl.text.trim();
     final maxText = _maxAmountCtrl.text.trim();
-    final minAmount = minText.isNotEmpty ? double.tryParse(minText) : null;
-    final maxAmount = maxText.isNotEmpty ? double.tryParse(maxText) : null;
+    final minAmount = minText.isNotEmpty ? double.tryParse(minText.replaceAll(',', '')) : null;
+    final maxAmount = maxText.isNotEmpty ? double.tryParse(maxText.replaceAll(',', '')) : null;
 
     final notifier = ref.read(historyFilterProvider.notifier);
     notifier.setFilters(
@@ -241,6 +248,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: [
+                          CurrencyInputFormatter(isIndian: _isIndian),
+                        ],
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
@@ -259,6 +269,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: [
+                          CurrencyInputFormatter(isIndian: _isIndian),
+                        ],
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
@@ -283,6 +296,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                       ..sort((a, b) {
                         int typePriority(account) {
                           if (account.isCreditCard) return 2;
+                          if (account.isOverdraft) return 3;
                           if (account.type == 'cash') return 0;
                           return 1;
                         }
@@ -494,6 +508,8 @@ class _AccountPill extends StatelessWidget {
     final iconColor = resolveAccountColor(account);
     final typeLabel = (account.isCreditCard
         ? context.l10n.creditShort
+        : account.isOverdraft
+        ? context.l10n.accountTypeOverdraft
         : switch (account.type.toLowerCase()) {
             'bank' => context.l10n.bankLabel,
             'wallet' => context.l10n.walletLabel,

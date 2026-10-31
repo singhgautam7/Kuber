@@ -52,6 +52,7 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
     });
     final loans = ref.watch(loanListProvider).valueOrNull;
     final txns = ref.watch(transactionListProvider).valueOrNull ?? const <Transaction>[];
+    final deleted = ref.watch(loanDeletedDaysProvider).valueOrNull ?? const <String, Set<int>>{};
     final byLoan = <String, List<Transaction>>{};
     for (final t in txns) {
       if (t.linkedRuleType == 'loan' && t.linkedRuleId != null) {
@@ -60,7 +61,8 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
     }
     final items = [
       for (final loan in loans ?? const <Loan>[])
-        (loan, loanStatus(loan, byLoan[loan.uid] ?? const [])),
+        (loan, loanStatus(loan, byLoan[loan.uid] ?? const [],
+            deletedDays: deleted[loan.uid] ?? const {})),
     ];
     final active = items.where((e) => !e.$2.closed).toList()
       ..sort((a, b) => (a.$2.nextDay ?? 99999999).compareTo(b.$2.nextDay ?? 99999999));

@@ -37,7 +37,7 @@ class ExportService {
     // RFC 4180 requires \r\n line endings. StringBuffer.writeln() only gives \n,
     // which some Android CSV viewers don't split on correctly, causing rows to appear
     // merged or missing. Using explicit \r\n throughout.
-    buffer.write('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes,Sub type,Source,Principal,Interest\r\n');
+    buffer.write('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes,Sub type,Source,Principal,Interest,Split edited,Past EMI\r\n');
 
     String escape(String value) {
       if (value.contains(',') || value.contains('"') || value.contains('\r') || value.contains('\n')) {
@@ -78,6 +78,8 @@ class ExportService {
         escape(row.source ?? ''),
         row.principalPart?.toStringAsFixed(2) ?? '',
         row.interestPart?.toStringAsFixed(2) ?? '',
+        row.splitEdited ? 'Yes' : '',
+        row.addedAsPastEmi ? 'Yes' : '',
       ].join(','));
       buffer.write('\r\n');
     }

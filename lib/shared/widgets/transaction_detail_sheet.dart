@@ -28,6 +28,8 @@ import '../../features/loans/widgets/loan_sheet.dart';
 import '../../features/investments/providers/investment_provider.dart';
 import '../../features/investments/widgets/holding_sheet.dart';
 import 'money_widgets.dart';
+import 'money_info_sheets.dart';
+import 'kuber_form_widgets.dart' show KuberInfoGlyph;
 import '../../features/settings/providers/settings_provider.dart';
 import '../../features/notes/providers/notes_provider.dart';
 import 'category_icon.dart';
@@ -419,10 +421,21 @@ class _TransactionDetailSheetState
           InfoTable(rows: rows),
           if (transaction.principalPart != null && transaction.interestPart != null) ...[
             const SizedBox(height: KuberSpace.xl - 4),
-            Text(context.l10n.msTxnSplit.toUpperCase(),
-                style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                    color: cs.onSurfaceVariant, letterSpacing: 0.8)),
-            const SizedBox(height: 8),
+            Row(children: [
+              Flexible(
+                child: Text(context.l10n.msTxnSplit.toUpperCase(),
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                        color: cs.onSurfaceVariant, letterSpacing: 0.8)),
+              ),
+              // Changed by the user to match the bank (A2).
+              if (transaction.splitEdited) ...[
+                const SizedBox(width: 8),
+                KuberPill(label: context.l10n.msTxnEdited, tone: KuberTone.neutral),
+                KuberInfoGlyph(
+                    onTap: () => showMoneyInfo(context, ref, MoneyInfo.splitEdited)),
+              ],
+            ]),
+            SizedBox(height: transaction.splitEdited ? 0 : 8),
             KuberCard(
               padding: const EdgeInsets.all(16),
               child: EmiSplitBar(

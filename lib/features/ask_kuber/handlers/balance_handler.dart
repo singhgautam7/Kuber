@@ -25,8 +25,12 @@ class BalanceHandler extends QueryHandler {
       if (lower.contains(a.name.toLowerCase()) &&
           (lower.contains('balance') || lower.contains('how much'))) {
         final balance = await ctx.read(accountBalanceProvider(a.id).future);
+        // Overdraft accounts: a negative balance is money owed.
+        final owed = a.isOverdraft && balance < 0;
         return HandlerResult(
-          text: '${a.name} balance: ${ctx.money(balance)}.',
+          text: owed
+              ? 'You owe ${ctx.money(-balance)} on ${a.name}.'
+              : '${a.name} balance: ${ctx.money(balance)}.',
           thinking: ThinkingInfo(
             dateFilter: 'Current balance',
             scanned: const ['Accounts'],

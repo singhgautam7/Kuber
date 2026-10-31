@@ -106,7 +106,10 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
 
   void _onTabTapped(int index) {
     if (widget.navigationShell == null) return;
-    if (index == widget.navigationShell!.currentIndex) return;
+    if (index == widget.navigationShell!.currentIndex) {
+      _scrollTabToTop(index);
+      return;
+    }
 
     ref.read(transactionSelectionProvider.notifier).clear();
     ref.read(currentShellTabIndexProvider.notifier).state = index;
@@ -142,6 +145,50 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
         );
       }
     }
+  }
+
+  /// Re-tapping the active tab scrolls it back to the top: the outermost
+  /// vertical scroll view of the branch's topmost route, whichever controller
+  /// it uses (History has its own for paging). Runs only on the tap, and the
+  /// walk stops at the first vertical scroll view near the top of the page.
+  void _scrollTabToTop(int index) {
+    final nav = widget.navigationShell!.route.branches[index].navigatorKey.currentContext;
+    if (nav == null) return;
+    // Each route wraps its page in a PrimaryScrollController; the last one
+    // found is the route on top.
+    Element? route;
+    void findRoute(Element e) {
+      if (e.widget is PrimaryScrollController) {
+        route = e;
+        return;
+      }
+      e.visitChildren(findRoute);
+    }
+
+    nav.visitChildElements(findRoute);
+    ScrollPosition? pos;
+    void findScrollable(Element e) {
+      if (pos != null) return;
+      if (e is StatefulElement && e.state is ScrollableState) {
+        final s = e.state as ScrollableState;
+        if (axisDirectionToAxis(s.axisDirection) == Axis.vertical) {
+          pos = s.position;
+          return;
+        }
+      }
+      e.visitChildren(findScrollable);
+    }
+
+    route?.visitChildren(findScrollable);
+    final p = pos;
+    if (p == null || p.pixels <= p.minScrollExtent) return;
+    // Going back up lays out every row on the way (a list of varying row
+    // heights can't skip them), so never jump: a jump does it all in one
+    // frame. Longer trips get more frames and an even-speed curve keeps the
+    // rows per frame small.
+    final screens = (p.pixels - p.minScrollExtent) / p.viewportDimension;
+    final ms = (250 + screens * 40).clamp(250, 800).round();
+    p.animateTo(p.minScrollExtent, duration: Duration(milliseconds: ms), curve: Curves.easeInOutSine);
   }
 
   void _onPageChanged(int index) {

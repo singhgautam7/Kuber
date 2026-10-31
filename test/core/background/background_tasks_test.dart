@@ -59,7 +59,7 @@ void main() {
 
   test('result text: posted, failed, matured, backup', () {
     expect(BackgroundTasks.resultText(run(), l), '');
-    expect(BackgroundTasks.resultText(run()..postedRecurring = 1, l), l.bgResultRecurringOne);
+    expect(BackgroundTasks.resultText(run()..postedRecurring = 1, l), l.bgAddedOne);
     expect(
         BackgroundTasks.resultText(
             run()
@@ -68,7 +68,7 @@ void main() {
               ..postedSips = 1
               ..backupStatus = 'done',
             l),
-        '${l.bgResultRecurring('4')} · ${l.bgResultBackup}');
+        '${l.bgAdded(4)} · ${l.bgBackupSaved}');
     expect(
         BackgroundTasks.resultText(
             run()

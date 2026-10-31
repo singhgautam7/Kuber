@@ -4700,7 +4700,7 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get makeDefaultAccountSub =>
-      'ഇടപാടുകൾ ചേർക്കുമ്പോൾ മുൻകൂട്ടി തിരഞ്ഞെടുത്തത്.';
+      'ക്വിക്ക് ആഡ്, വോയ്സ് ആഡ് അല്ലെങ്കിൽ Ask Kuber വഴി ഇടപാടുകൾ ചേർക്കുമ്പോൾ മുൻകൂട്ടി തിരഞ്ഞെടുത്തത്.';
 
   @override
   String get currentBalanceLabel => 'നിലവിലെ ബാലൻസ്';
@@ -8104,4 +8104,277 @@ class AppLocalizationsMl extends AppLocalizations {
   @override
   String get msLoansReopenBody =>
       'ഇതിന്റെ EMI അടുത്ത തീയതി മുതൽ വീണ്ടും തുടങ്ങും. അടച്ചിരുന്ന സമയത്തേക്ക് ഒന്നും ചേർക്കില്ല.';
+
+  @override
+  String get msLoansUpdateOutstanding => 'ബാക്കി പുതുക്കുക';
+
+  @override
+  String get msLoansOutstandingPrincipal => 'ബാക്കി മുതൽ';
+
+  @override
+  String get msLoansAsOn => 'ഈ തീയതിയിൽ';
+
+  @override
+  String get msLoansAdjReason => 'കാരണം';
+
+  @override
+  String get msLoansAdjMatchBank => 'ബാങ്ക് സ്റ്റേറ്റ്മെന്റുമായി ഒത്തുനോക്കുക';
+
+  @override
+  String get msLoansAdjMatchBankSub =>
+      'നിങ്ങളുടെ ബാങ്ക് മറ്റൊരു ബാക്കി കാണിക്കുന്നു.';
+
+  @override
+  String get msLoansAdjInterestAdded => 'അടയ്ക്കാത്ത പലിശ വായ്പയിൽ ചേർത്തു';
+
+  @override
+  String get msLoansAdjInterestAddedSub =>
+      'നിങ്ങളുടെ ബാങ്ക് പലിശ ബാക്കിയിൽ ചേർത്തു, മൊറട്ടോറിയം സമയത്തെപ്പോലെ.';
+
+  @override
+  String msLoansKuberOutstandingOn(String date) {
+    return '$date-ന് Kuber-ന്റെ ബാക്കി';
+  }
+
+  @override
+  String get msLoansAdjDifference => 'വ്യത്യാസം';
+
+  @override
+  String get msLoansKeepEmiChangeEnd => 'EMI അതേപടി, അവസാന തീയതി മാറും';
+
+  @override
+  String get msLoansKeepEndChangeEmi => 'അവസാന തീയതി അതേപടി, EMI മാറും';
+
+  @override
+  String msLoansKeepEmiResult(String emi, String month) {
+    return 'EMI $emi തുടരും · $month-ൽ അവസാനിക്കും';
+  }
+
+  @override
+  String msLoansKeepEndResult(String month, String emi) {
+    return '$month-ൽ അവസാനിക്കും · EMI $emi ആകും';
+  }
+
+  @override
+  String get msLoansRemainingInterest => 'ബാക്കി പലിശ';
+
+  @override
+  String get msLoansAdjErrNegative => 'ബാക്കി 0-ൽ കുറയാൻ പാടില്ല.';
+
+  @override
+  String get msLoansAdjZeroTitle => 'അടയ്ക്കാൻ ഒന്നും ബാക്കിയില്ലേ?';
+
+  @override
+  String get msLoansAdjZeroBody =>
+      '0 ബാക്കി എന്നാൽ വായ്പ തീർന്നു. അടച്ചതായി അടയാളപ്പെടുത്തണോ?';
+
+  @override
+  String get msLoansAdjSaveOnly => 'സേവ് മാത്രം';
+
+  @override
+  String get msLoansAdjSaved => 'ബാക്കി പുതുക്കി';
+
+  @override
+  String msLoansEventAdjusted(String amount, String date) {
+    return 'ബാക്കി പുതുക്കി $amount · $date';
+  }
+
+  @override
+  String msLoansEventInterestAdded(String amount, String date) {
+    return 'വായ്പയിൽ പലിശ ചേർത്തു $amount · $date';
+  }
+
+  @override
+  String get msLoansEventAdjSubTenure => 'EMI മാറ്റമില്ല, അവസാന തീയതി മാറി';
+
+  @override
+  String get msLoansEventAdjSubEmi => 'അവസാന തീയതി മാറ്റമില്ല, EMI മാറി';
+
+  @override
+  String get msLoansEventDeleted => 'ഇല്ലാതാക്കി';
+
+  @override
+  String get msLoansInterestAdded => 'വായ്പയിൽ ചേർത്ത പലിശ';
+
+  @override
+  String msLoansRecalcTitle(int count) {
+    return 'നിങ്ങൾ മാറ്റാത്ത പിന്നീടുള്ള $count EMI-കളുടെ വിഭജനം വീണ്ടും കണക്കാക്കണോ?';
+  }
+
+  @override
+  String msLoansRecalcBody(String before, String after) {
+    return 'ആ EMI-കളിലെ പലിശ ഇപ്പോൾ $before, വീണ്ടും കണക്കാക്കിയാൽ $after. നിങ്ങൾ മാറ്റിയ EMI-കൾ അതേപടി തുടരും.';
+  }
+
+  @override
+  String get msLoansRecalc => 'വീണ്ടും കണക്കാക്കുക';
+
+  @override
+  String get msLoansKeepAsIs => 'അതേപടി നിലനിർത്തുക';
+
+  @override
+  String msLoansRecalcDone(int count) {
+    return '$count EMI-കൾ പുതുക്കി';
+  }
+
+  @override
+  String get msLoansDeleteExtraTitle => 'ഈ അധിക പേയ്മെന്റ് ഇല്ലാതാക്കണോ?';
+
+  @override
+  String get msLoansDeleteExtraBody =>
+      'ഇതിന്റെ ഇടപാടുകളും ഇല്ലാതാകും, ബാക്കി വീണ്ടും കൂടും.';
+
+  @override
+  String get msLoansDeleteAdjTitle => 'ഈ അപ്ഡേറ്റ് ഇല്ലാതാക്കണോ?';
+
+  @override
+  String get msLoansDeleteAdjBody =>
+      'ബാക്കി വീണ്ടും Kuber-ന്റെ കണക്കിലേക്ക് മാറും.';
+
+  @override
+  String get msTxnEdited => 'മാറ്റിയത്';
+
+  @override
+  String get msTxnSplitHelper =>
+      'നിങ്ങളുടെ ബാങ്കുമായി ഒത്തുനോക്കാൻ ഇവ മാറ്റുക. ഇവ എപ്പോഴും EMI-ക്ക് തുല്യമാകും.';
+
+  @override
+  String get msTxnSplitErr => 'മുതലും പലിശയും 0-ൽ കുറയാൻ പാടില്ല.';
+
+  @override
+  String get msInfoSplitEditedTitle => 'മാറ്റിയ വിഭജനം';
+
+  @override
+  String get msInfoSplitEditedLine =>
+      'നിങ്ങളുടെ ബാങ്കുമായി ഒത്തുപോകാൻ നിങ്ങൾ ഈ വിഭജനം മാറ്റി. Kuber ബാക്കിക്കായി നിങ്ങളുടെ കണക്കുകൾ ഉപയോഗിക്കുകയും അവിടെ നിന്ന് ഭാവി EMI-കൾ കണക്കാക്കുകയും ചെയ്യുന്നു.';
+
+  @override
+  String get msInfoAdjustBankLine =>
+      'ബാങ്ക് സ്റ്റേറ്റ്മെന്റിലെ ബാക്കി Kuber-ൽ നിന്ന് വ്യത്യസ്തമാകുമ്പോൾ ഇത് ഉപയോഗിക്കുക. Kuber ആ തീയതി മുതൽ നിങ്ങളുടെ കണക്കിൽ നിന്ന് തുടങ്ങും.';
+
+  @override
+  String get msInfoAdjustInterestLine =>
+      'ചില ബാങ്കുകൾ അടയ്ക്കാത്ത പലിശ, മൊറട്ടോറിയത്തിലോ EMI തുടങ്ങും മുമ്പോ പോലെ, ബാക്കിയിൽ ചേർക്കും. ഇത് വായ്പയുടെ ആകെ പലിശയിൽ ഉൾപ്പെടും. നിങ്ങളുടെ അക്കൗണ്ടിൽ നിന്ന് പണം പോകാത്തതിനാൽ ഇത് ചെലവല്ല.';
+
+  @override
+  String get msInfoRemainingLine =>
+      'ബാക്കി പലിശ നിങ്ങളുടെ ബാക്കി, നിരക്ക്, EMI എന്നിവയെ ആശ്രയിക്കുന്നു, അതിനാൽ Kuber ഇത് കണക്കാക്കുന്നു. പകരം ബാക്കിയോ നിരക്കോ പുതുക്കുക.';
+
+  @override
+  String get msLoansPastEmis => 'മുൻ EMI-കൾ ഇടപാടുകളായി ചേർക്കുക';
+
+  @override
+  String get msInfoPastEmisLine =>
+      'വായ്പ ഇതിനകം ഓടിയ ഓരോ മാസത്തിനും Kuber ഒരു EMI ഇടപാട് മുതലും പലിശയും സഹിതം ചേർക്കും. ഏതൊരു പേയ്മെന്റും പോലെ അക്കൗണ്ട് ബാലൻസ് ആകെ തുകയോളം കുറയും. മുൻ ഇടപാടുകളില്ലാതെ ഇന്ന് മുതൽ തുടങ്ങാൻ ഇത് ഓഫ് ആക്കുക.';
+
+  @override
+  String get msLoansPastEmisHelp =>
+      'ആദ്യ EMI തീയതി മുതൽ ഇന്നുവരെയുള്ള ഓരോ EMI-യും ഇടപാടായി സൃഷ്ടിക്കുന്നു.';
+
+  @override
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  ) {
+    return '$from മുതൽ $to വരെ $count EMI-കൾ ചേർത്ത് $account ബാലൻസ് $amount കുറയ്ക്കും.';
+  }
+
+  @override
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  ) {
+    return '$from മുതൽ $to വരെ $count EMI-കൾ ചേർക്കും, ആകെ $amount.';
+  }
+
+  @override
+  String msLoansPastEmisRemoveTitle(int count) {
+    return 'ഈ സ്വിച്ച് ചേർത്ത $count മുൻ EMI-കൾ നീക്കണോ?';
+  }
+
+  @override
+  String get msLoansPastEmisRemoveBody =>
+      'നിങ്ങൾ മാറ്റിയ EMI-കൾ നിലനിൽക്കും. നീക്കിയവയുടെ തുകയോളം അക്കൗണ്ട് ബാലൻസ് വീണ്ടും കൂടും.';
+
+  @override
+  String get msLoansKeep => 'നിലനിർത്തുക';
+
+  @override
+  String get msLoansRemove => 'നീക്കുക';
+
+  @override
+  String msLoansPastEmisRemoved(int removed, int kept) {
+    return '$removed മുൻ EMI-കൾ നീക്കി. നിങ്ങൾ മാറ്റിയ $kept എണ്ണം നിലനിർത്തി.';
+  }
+
+  @override
+  String get bgStepPastEmis => 'മുൻ EMI-കൾ ചേർക്കുന്നു…';
+
+  @override
+  String bgJobPercent(String text, int percent) {
+    return '$text $percent%';
+  }
+
+  @override
+  String bgJobsRunning(String text, int count) {
+    return '$text ($count ജോലികൾ)';
+  }
+
+  @override
+  String get bgJobFailed => 'എന്തോ പിശക് സംഭവിച്ചു';
+
+  @override
+  String get bgDetails => 'വിശദാംശങ്ങൾ';
+
+  @override
+  String get bgDetailsTitle => 'എന്താണ് പിശക്';
+
+  @override
+  String get bgAddedOne => '1 ഇടപാട് ചേർത്തു';
+
+  @override
+  String bgAdded(int count) {
+    return '$count ഇടപാടുകൾ ചേർത്തു';
+  }
+
+  @override
+  String get bgBackupSaved => 'ബാക്കപ്പ് സേവ് ചെയ്തു';
+
+  @override
+  String get accountTypeOverdraft => 'ഓവർഡ്രാഫ്റ്റ്';
+
+  @override
+  String get accountOverdraftHint => 'ഉദാ. HDFC ഓവർഡ്രാഫ്റ്റ്';
+
+  @override
+  String get accountOverdraftSub =>
+      'നിങ്ങൾ കൊടുക്കാനുള്ള പണത്തിന്, ഓവർഡ്രാഫ്റ്റ് പോലെ.';
+
+  @override
+  String get accountOverdraftInfoLine =>
+      'നിങ്ങൾ കൊടുക്കാനുള്ള പണത്തിന് ഇത് ഉപയോഗിക്കുക, ഓവർഡ്രാഫ്റ്റോ ക്രെഡിറ്റ് ലൈനോ പോലെ. Loans-ൽ ട്രാക്ക് ചെയ്യുന്ന EMI-കൾ ഇപ്പോഴും അവിടെ തിരഞ്ഞെടുത്ത അക്കൗണ്ടിൽ നിന്നാണ്.';
+
+  @override
+  String get accountAmountOwed => 'കൊടുക്കാനുള്ള തുക';
+
+  @override
+  String get accountLimitOptional => 'പരിധി (ഐച്ഛികം)';
+
+  @override
+  String accountAvailable(String amount) {
+    return 'ലഭ്യം $amount';
+  }
+
+  @override
+  String get accountOwedLabel => 'കൊടുക്കാനുള്ളത്';
+
+  @override
+  String accountOverLimit(String amount) {
+    return 'ഇത് പരിധി $amount കവിയുന്നു.';
+  }
 }

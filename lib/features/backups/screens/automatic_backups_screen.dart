@@ -1,6 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../core/background/background_reporter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -9,7 +10,6 @@ import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/constants/info_constants.dart';
-import '../../../shared/widgets/timed_snackbar.dart';
 import '../../pro/feature_gates/gate_sheet_backups.dart';
 import '../../pro/feature_gates/pro_gate.dart';
 import '../providers/backup_provider.dart';
@@ -89,16 +89,22 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                         s.enabled &&
                             s.folderPath != null &&
                             !s.backupJustCompleted
-                        ? () async {
-                            final (success, message) = await ref
-                                .read(backupSettingsProvider.notifier)
-                                .backupNow();
-                            if (!context.mounted) return;
-                            showKuberSnackBar(
-                              context,
-                              message,
-                              isError: !success,
-                            );
+                        ? () {
+                            // Progress and result through the one
+                            // background reporter (D3).
+                            final l = context.l10n;
+                            BackgroundReporter.instance
+                                .run<(bool, String)>(
+                                  l.bgStepBackup,
+                                  (_) => ref
+                                      .read(backupSettingsProvider.notifier)
+                                      .backupNow(),
+                                  outcome: (r) => r.$1
+                                      ? BgOutcome(l.bgBackupSaved)
+                                      : BgOutcome(l.bgFailBackup,
+                                          error: true, details: r.$2),
+                                )
+                                .ignore();
                           }
                         : null,
                   ),

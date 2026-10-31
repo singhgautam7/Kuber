@@ -94,6 +94,13 @@ class Transaction {
   /// yyyymmdd of the schedule occurrence that created it.
   int? occurrenceDate;
 
+  /// Loan EMI: the user changed principal / interest (to match the bank).
+  /// Kuber never recalculates an edited split.
+  bool splitEdited = false;
+
+  /// Loan EMI created by "Add past EMIs as transactions".
+  bool addedAsPastEmi = false;
+
   @ignore
   String? tempTags; // temporary storage for import
 
@@ -141,5 +148,7 @@ class Transaction {
     'interestPart': interestPart,
     'spendInterestOnly': spendInterestOnly,
     'occurrenceDate': occurrenceDate,
+    'splitEdited': splitEdited,
+    'addedAsPastEmi': addedAsPastEmi,
   };
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart' show TextEditingController;
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../features/settings/providers/settings_provider.dart';
@@ -179,6 +180,20 @@ class CurrencyInputFormatter extends TextInputFormatter {
     final plain = v == v.roundToDouble() ? v.round().toString() : '$v';
     final f = formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: plain)).text;
     return f.isEmpty ? raw : f;
+  }
+
+  /// Regroups text set in code (prefill, results) in [c]; typing goes through
+  /// [formatEditUpdate]. Skips mid-typing states ("12.", "0.50").
+  static void regroup(TextEditingController c, {required bool isIndian}) {
+    final text = c.text;
+    if (double.tryParse(text.replaceAll(',', '')) == null) return;
+    if (text.endsWith('.') || (text.contains('.') && text.endsWith('0'))) return;
+    final f = CurrencyInputFormatter(isIndian: isIndian).format(text);
+    if (f == text) return;
+    c.value = TextEditingValue(
+      text: f,
+      selection: TextSelection.collapsed(offset: f.length),
+    );
   }
 
   @override

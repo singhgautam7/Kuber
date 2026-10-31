@@ -22,113 +22,123 @@ const TransactionSchema = CollectionSchema(
       name: r'accountId',
       type: IsarType.string,
     ),
-    r'amount': PropertySchema(id: 1, name: r'amount', type: IsarType.double),
+    r'addedAsPastEmi': PropertySchema(
+      id: 1,
+      name: r'addedAsPastEmi',
+      type: IsarType.bool,
+    ),
+    r'amount': PropertySchema(id: 2, name: r'amount', type: IsarType.double),
     r'attachmentPaths': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'attachmentPaths',
       type: IsarType.stringList,
     ),
     r'categoryId': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'categoryId',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'importSource': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'importSource',
       type: IsarType.string,
     ),
     r'importedFromSms': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'importedFromSms',
       type: IsarType.string,
     ),
     r'interestPart': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'interestPart',
       type: IsarType.double,
     ),
     r'isBalanceAdjustment': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'isBalanceAdjustment',
       type: IsarType.bool,
     ),
     r'isTransfer': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'isTransfer',
       type: IsarType.bool,
     ),
     r'linkedRuleId': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'linkedRuleId',
       type: IsarType.string,
     ),
     r'linkedRuleType': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'linkedRuleType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 12, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 13, name: r'name', type: IsarType.string),
     r'nameLower': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'nameLower',
       type: IsarType.string,
     ),
-    r'notes': PropertySchema(id: 14, name: r'notes', type: IsarType.string),
+    r'notes': PropertySchema(id: 15, name: r'notes', type: IsarType.string),
     r'occurrenceDate': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'occurrenceDate',
       type: IsarType.long,
     ),
     r'principalPart': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'principalPart',
       type: IsarType.double,
     ),
     r'quickAddNote': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'quickAddNote',
       type: IsarType.string,
     ),
     r'sourceId': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'sourceId',
       type: IsarType.string,
     ),
     r'sourceNoteId': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'sourceNoteId',
       type: IsarType.string,
     ),
     r'sourceType': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'sourceType',
       type: IsarType.string,
     ),
     r'spendInterestOnly': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'spendInterestOnly',
       type: IsarType.bool,
     ),
+    r'splitEdited': PropertySchema(
+      id: 23,
+      name: r'splitEdited',
+      type: IsarType.bool,
+    ),
     r'subType': PropertySchema(
-      id: 22,
+      id: 24,
       name: r'subType',
       type: IsarType.string,
       enumMap: _TransactionsubTypeEnumValueMap,
     ),
     r'transferId': PropertySchema(
-      id: 23,
+      id: 25,
       name: r'transferId',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 24, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 26, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 25,
+      id: 27,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -337,31 +347,33 @@ void _transactionSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.accountId);
-  writer.writeDouble(offsets[1], object.amount);
-  writer.writeStringList(offsets[2], object.attachmentPaths);
-  writer.writeString(offsets[3], object.categoryId);
-  writer.writeDateTime(offsets[4], object.createdAt);
-  writer.writeString(offsets[5], object.importSource);
-  writer.writeString(offsets[6], object.importedFromSms);
-  writer.writeDouble(offsets[7], object.interestPart);
-  writer.writeBool(offsets[8], object.isBalanceAdjustment);
-  writer.writeBool(offsets[9], object.isTransfer);
-  writer.writeString(offsets[10], object.linkedRuleId);
-  writer.writeString(offsets[11], object.linkedRuleType);
-  writer.writeString(offsets[12], object.name);
-  writer.writeString(offsets[13], object.nameLower);
-  writer.writeString(offsets[14], object.notes);
-  writer.writeLong(offsets[15], object.occurrenceDate);
-  writer.writeDouble(offsets[16], object.principalPart);
-  writer.writeString(offsets[17], object.quickAddNote);
-  writer.writeString(offsets[18], object.sourceId);
-  writer.writeString(offsets[19], object.sourceNoteId);
-  writer.writeString(offsets[20], object.sourceType);
-  writer.writeBool(offsets[21], object.spendInterestOnly);
-  writer.writeString(offsets[22], object.subType?.value);
-  writer.writeString(offsets[23], object.transferId);
-  writer.writeString(offsets[24], object.type);
-  writer.writeDateTime(offsets[25], object.updatedAt);
+  writer.writeBool(offsets[1], object.addedAsPastEmi);
+  writer.writeDouble(offsets[2], object.amount);
+  writer.writeStringList(offsets[3], object.attachmentPaths);
+  writer.writeString(offsets[4], object.categoryId);
+  writer.writeDateTime(offsets[5], object.createdAt);
+  writer.writeString(offsets[6], object.importSource);
+  writer.writeString(offsets[7], object.importedFromSms);
+  writer.writeDouble(offsets[8], object.interestPart);
+  writer.writeBool(offsets[9], object.isBalanceAdjustment);
+  writer.writeBool(offsets[10], object.isTransfer);
+  writer.writeString(offsets[11], object.linkedRuleId);
+  writer.writeString(offsets[12], object.linkedRuleType);
+  writer.writeString(offsets[13], object.name);
+  writer.writeString(offsets[14], object.nameLower);
+  writer.writeString(offsets[15], object.notes);
+  writer.writeLong(offsets[16], object.occurrenceDate);
+  writer.writeDouble(offsets[17], object.principalPart);
+  writer.writeString(offsets[18], object.quickAddNote);
+  writer.writeString(offsets[19], object.sourceId);
+  writer.writeString(offsets[20], object.sourceNoteId);
+  writer.writeString(offsets[21], object.sourceType);
+  writer.writeBool(offsets[22], object.spendInterestOnly);
+  writer.writeBool(offsets[23], object.splitEdited);
+  writer.writeString(offsets[24], object.subType?.value);
+  writer.writeString(offsets[25], object.transferId);
+  writer.writeString(offsets[26], object.type);
+  writer.writeDateTime(offsets[27], object.updatedAt);
 }
 
 Transaction _transactionDeserialize(
@@ -372,33 +384,35 @@ Transaction _transactionDeserialize(
 ) {
   final object = Transaction();
   object.accountId = reader.readString(offsets[0]);
-  object.amount = reader.readDouble(offsets[1]);
-  object.attachmentPaths = reader.readStringList(offsets[2]) ?? [];
-  object.categoryId = reader.readString(offsets[3]);
-  object.createdAt = reader.readDateTime(offsets[4]);
+  object.addedAsPastEmi = reader.readBool(offsets[1]);
+  object.amount = reader.readDouble(offsets[2]);
+  object.attachmentPaths = reader.readStringList(offsets[3]) ?? [];
+  object.categoryId = reader.readString(offsets[4]);
+  object.createdAt = reader.readDateTime(offsets[5]);
   object.id = id;
-  object.importSource = reader.readStringOrNull(offsets[5]);
-  object.importedFromSms = reader.readStringOrNull(offsets[6]);
-  object.interestPart = reader.readDoubleOrNull(offsets[7]);
-  object.isBalanceAdjustment = reader.readBool(offsets[8]);
-  object.isTransfer = reader.readBool(offsets[9]);
-  object.linkedRuleId = reader.readStringOrNull(offsets[10]);
-  object.linkedRuleType = reader.readStringOrNull(offsets[11]);
-  object.name = reader.readString(offsets[12]);
-  object.nameLower = reader.readString(offsets[13]);
-  object.notes = reader.readStringOrNull(offsets[14]);
-  object.occurrenceDate = reader.readLongOrNull(offsets[15]);
-  object.principalPart = reader.readDoubleOrNull(offsets[16]);
-  object.quickAddNote = reader.readStringOrNull(offsets[17]);
-  object.sourceId = reader.readStringOrNull(offsets[18]);
-  object.sourceNoteId = reader.readStringOrNull(offsets[19]);
-  object.sourceType = reader.readStringOrNull(offsets[20]);
-  object.spendInterestOnly = reader.readBool(offsets[21]);
+  object.importSource = reader.readStringOrNull(offsets[6]);
+  object.importedFromSms = reader.readStringOrNull(offsets[7]);
+  object.interestPart = reader.readDoubleOrNull(offsets[8]);
+  object.isBalanceAdjustment = reader.readBool(offsets[9]);
+  object.isTransfer = reader.readBool(offsets[10]);
+  object.linkedRuleId = reader.readStringOrNull(offsets[11]);
+  object.linkedRuleType = reader.readStringOrNull(offsets[12]);
+  object.name = reader.readString(offsets[13]);
+  object.nameLower = reader.readString(offsets[14]);
+  object.notes = reader.readStringOrNull(offsets[15]);
+  object.occurrenceDate = reader.readLongOrNull(offsets[16]);
+  object.principalPart = reader.readDoubleOrNull(offsets[17]);
+  object.quickAddNote = reader.readStringOrNull(offsets[18]);
+  object.sourceId = reader.readStringOrNull(offsets[19]);
+  object.sourceNoteId = reader.readStringOrNull(offsets[20]);
+  object.sourceType = reader.readStringOrNull(offsets[21]);
+  object.spendInterestOnly = reader.readBool(offsets[22]);
+  object.splitEdited = reader.readBool(offsets[23]);
   object.subType =
-      _TransactionsubTypeValueEnumMap[reader.readStringOrNull(offsets[22])];
-  object.transferId = reader.readStringOrNull(offsets[23]);
-  object.type = reader.readString(offsets[24]);
-  object.updatedAt = reader.readDateTime(offsets[25]);
+      _TransactionsubTypeValueEnumMap[reader.readStringOrNull(offsets[24])];
+  object.transferId = reader.readStringOrNull(offsets[25]);
+  object.type = reader.readString(offsets[26]);
+  object.updatedAt = reader.readDateTime(offsets[27]);
   return object;
 }
 
@@ -412,39 +426,39 @@ P _transactionDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readDouble(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 4:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 9:
       return (reader.readBool(offset)) as P;
     case 10:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 11:
       return (reader.readStringOrNull(offset)) as P;
     case 12:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 13:
       return (reader.readString(offset)) as P;
     case 14:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readLongOrNull(offset)) as P;
-    case 16:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 17:
       return (reader.readStringOrNull(offset)) as P;
+    case 16:
+      return (reader.readLongOrNull(offset)) as P;
+    case 17:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 18:
       return (reader.readStringOrNull(offset)) as P;
     case 19:
@@ -452,15 +466,19 @@ P _transactionDeserializeProp<P>(
     case 20:
       return (reader.readStringOrNull(offset)) as P;
     case 21:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 22:
+      return (reader.readBool(offset)) as P;
+    case 23:
+      return (reader.readBool(offset)) as P;
+    case 24:
       return (_TransactionsubTypeValueEnumMap[reader.readStringOrNull(offset)])
           as P;
-    case 23:
-      return (reader.readStringOrNull(offset)) as P;
-    case 24:
-      return (reader.readString(offset)) as P;
     case 25:
+      return (reader.readStringOrNull(offset)) as P;
+    case 26:
+      return (reader.readString(offset)) as P;
+    case 27:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1462,6 +1480,15 @@ extension TransactionQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'accountId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  addedAsPastEmiEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'addedAsPastEmi', value: value),
       );
     });
   }
@@ -4011,6 +4038,15 @@ extension TransactionQueryFilter
   }
 
   QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  splitEditedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'splitEdited', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
   subTypeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -4557,6 +4593,19 @@ extension TransactionQuerySortBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByAddedAsPastEmi() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'addedAsPastEmi', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  sortByAddedAsPastEmiDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'addedAsPastEmi', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'amount', Sort.asc);
@@ -4810,6 +4859,18 @@ extension TransactionQuerySortBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortBySplitEdited() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'splitEdited', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortBySplitEditedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'splitEdited', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> sortBySubType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'subType', Sort.asc);
@@ -4870,6 +4931,19 @@ extension TransactionQuerySortThenBy
   QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByAccountIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'accountId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByAddedAsPastEmi() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'addedAsPastEmi', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  thenByAddedAsPastEmiDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'addedAsPastEmi', Sort.desc);
     });
   }
 
@@ -5138,6 +5212,18 @@ extension TransactionQuerySortThenBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenBySplitEdited() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'splitEdited', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenBySplitEditedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'splitEdited', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> thenBySubType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'subType', Sort.asc);
@@ -5194,6 +5280,12 @@ extension TransactionQueryWhereDistinct
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'accountId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QDistinct> distinctByAddedAsPastEmi() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'addedAsPastEmi');
     });
   }
 
@@ -5356,6 +5448,12 @@ extension TransactionQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QDistinct> distinctBySplitEdited() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'splitEdited');
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QDistinct> distinctBySubType({
     bool caseSensitive = true,
   }) {
@@ -5398,6 +5496,12 @@ extension TransactionQueryProperty
   QueryBuilder<Transaction, String, QQueryOperations> accountIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'accountId');
+    });
+  }
+
+  QueryBuilder<Transaction, bool, QQueryOperations> addedAsPastEmiProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'addedAsPastEmi');
     });
   }
 
@@ -5529,6 +5633,12 @@ extension TransactionQueryProperty
   spendInterestOnlyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'spendInterestOnly');
+    });
+  }
+
+  QueryBuilder<Transaction, bool, QQueryOperations> splitEditedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'splitEdited');
     });
   }
 

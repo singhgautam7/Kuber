@@ -4686,7 +4686,7 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get makeDefaultAccountSub =>
-      'ವಹಿವಾಟುಗಳನ್ನು ಸೇರಿಸುವಾಗ ಮೊದಲೇ ಆಯ್ಕೆಯಾಗಿರುತ್ತದೆ.';
+      'ತ್ವರಿತ ಸೇರ್ಪಡೆ, ಧ್ವನಿ ಸೇರ್ಪಡೆ ಅಥವಾ Ask Kuber ಮೂಲಕ ವಹಿವಾಟು ಸೇರಿಸುವಾಗ ಮೊದಲೇ ಆಯ್ಕೆಯಾಗಿರುತ್ತದೆ.';
 
   @override
   String get currentBalanceLabel => 'ಪ್ರಸ್ತುತ ಬ್ಯಾಲೆನ್ಸ್';
@@ -8080,4 +8080,276 @@ class AppLocalizationsKn extends AppLocalizations {
   @override
   String get msLoansReopenBody =>
       'ಇದರ EMI ಮುಂದಿನ ಬಾಕಿ ದಿನಾಂಕದಿಂದ ಮತ್ತೆ ಶುರುವಾಗುತ್ತವೆ. ಮುಚ್ಚಿದ್ದ ಅವಧಿಗೆ ಏನೂ ಸೇರುವುದಿಲ್ಲ.';
+
+  @override
+  String get msLoansUpdateOutstanding => 'ಬಾಕಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ';
+
+  @override
+  String get msLoansOutstandingPrincipal => 'ಬಾಕಿ ಅಸಲು';
+
+  @override
+  String get msLoansAsOn => 'ಈ ದಿನಾಂಕದಂದು';
+
+  @override
+  String get msLoansAdjReason => 'ಕಾರಣ';
+
+  @override
+  String get msLoansAdjMatchBank => 'ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್‌ಗೆ ಹೊಂದಿಸಿ';
+
+  @override
+  String get msLoansAdjMatchBankSub => 'ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ಬೇರೆ ಬಾಕಿ ತೋರಿಸುತ್ತದೆ.';
+
+  @override
+  String get msLoansAdjInterestAdded => 'ಪಾವತಿಸದ ಬಡ್ಡಿ ಸಾಲಕ್ಕೆ ಸೇರಿದೆ';
+
+  @override
+  String get msLoansAdjInterestAddedSub =>
+      'ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ಬಡ್ಡಿಯನ್ನು ಬಾಕಿಗೆ ಸೇರಿಸಿದೆ, ಉದಾ. ಮೊರಟೋರಿಯಂ ಸಮಯದಲ್ಲಿ.';
+
+  @override
+  String msLoansKuberOutstandingOn(String date) {
+    return '$date ರಂದು Kuber ಬಾಕಿ';
+  }
+
+  @override
+  String get msLoansAdjDifference => 'ವ್ಯತ್ಯಾಸ';
+
+  @override
+  String get msLoansKeepEmiChangeEnd => 'EMI ಅದೇ, ಅಂತಿಮ ದಿನಾಂಕ ಬದಲು';
+
+  @override
+  String get msLoansKeepEndChangeEmi => 'ಅಂತಿಮ ದಿನಾಂಕ ಅದೇ, EMI ಬದಲು';
+
+  @override
+  String msLoansKeepEmiResult(String emi, String month) {
+    return 'EMI $emi ಇರುತ್ತದೆ · $month ರಲ್ಲಿ ಮುಗಿಯುತ್ತದೆ';
+  }
+
+  @override
+  String msLoansKeepEndResult(String month, String emi) {
+    return '$month ರಲ್ಲಿ ಮುಗಿಯುತ್ತದೆ · EMI $emi ಆಗುತ್ತದೆ';
+  }
+
+  @override
+  String get msLoansRemainingInterest => 'ಉಳಿದ ಬಡ್ಡಿ';
+
+  @override
+  String get msLoansAdjErrNegative => 'ಬಾಕಿ 0 ಕ್ಕಿಂತ ಕಡಿಮೆ ಇರಲು ಸಾಧ್ಯವಿಲ್ಲ.';
+
+  @override
+  String get msLoansAdjZeroTitle => 'ಪಾವತಿಸಲು ಏನೂ ಉಳಿದಿಲ್ಲವೇ?';
+
+  @override
+  String get msLoansAdjZeroBody =>
+      '0 ಬಾಕಿ ಎಂದರೆ ಸಾಲ ತೀರಿದೆ. ಮುಚ್ಚಿದೆ ಎಂದು ಗುರುತಿಸಬೇಕೇ?';
+
+  @override
+  String get msLoansAdjSaveOnly => 'ಉಳಿಸಿ ಮಾತ್ರ';
+
+  @override
+  String get msLoansAdjSaved => 'ಬಾಕಿ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ';
+
+  @override
+  String msLoansEventAdjusted(String amount, String date) {
+    return 'ಬಾಕಿ ಅಪ್‌ಡೇಟ್ $amount · $date';
+  }
+
+  @override
+  String msLoansEventInterestAdded(String amount, String date) {
+    return 'ಸಾಲಕ್ಕೆ ಬಡ್ಡಿ ಸೇರಿದೆ $amount · $date';
+  }
+
+  @override
+  String get msLoansEventAdjSubTenure => 'EMI ಅದೇ, ಅಂತಿಮ ದಿನಾಂಕ ಬದಲಾಗಿದೆ';
+
+  @override
+  String get msLoansEventAdjSubEmi => 'ಅಂತಿಮ ದಿನಾಂಕ ಅದೇ, EMI ಬದಲಾಗಿದೆ';
+
+  @override
+  String get msLoansEventDeleted => 'ಅಳಿಸಲಾಗಿದೆ';
+
+  @override
+  String get msLoansInterestAdded => 'ಸಾಲಕ್ಕೆ ಸೇರಿದ ಬಡ್ಡಿ';
+
+  @override
+  String msLoansRecalcTitle(int count) {
+    return 'ನೀವು ಬದಲಿಸದ ನಂತರದ $count EMI ಗಳ ವಿಭಜನೆಯನ್ನು ಮತ್ತೆ ಲೆಕ್ಕಹಾಕಬೇಕೇ?';
+  }
+
+  @override
+  String msLoansRecalcBody(String before, String after) {
+    return 'ಆ EMI ಗಳ ಬಡ್ಡಿ ಈಗ $before, ಮತ್ತೆ ಲೆಕ್ಕಹಾಕಿದರೆ $after. ನೀವು ಬದಲಿಸಿದ EMI ಗಳು ಹಾಗೆಯೇ ಇರುತ್ತವೆ.';
+  }
+
+  @override
+  String get msLoansRecalc => 'ಮತ್ತೆ ಲೆಕ್ಕಹಾಕಿ';
+
+  @override
+  String get msLoansKeepAsIs => 'ಹಾಗೆಯೇ ಇರಲಿ';
+
+  @override
+  String msLoansRecalcDone(int count) {
+    return '$count EMI ಗಳು ಅಪ್‌ಡೇಟ್ ಆಗಿವೆ';
+  }
+
+  @override
+  String get msLoansDeleteExtraTitle => 'ಈ ಹೆಚ್ಚುವರಿ ಪಾವತಿಯನ್ನು ಅಳಿಸಬೇಕೇ?';
+
+  @override
+  String get msLoansDeleteExtraBody =>
+      'ಇದರ ವಹಿವಾಟುಗಳೂ ಅಳಿಸುತ್ತವೆ, ಬಾಕಿ ಮತ್ತೆ ಹೆಚ್ಚುತ್ತದೆ.';
+
+  @override
+  String get msLoansDeleteAdjTitle => 'ಈ ಅಪ್‌ಡೇಟ್ ಅಳಿಸಬೇಕೇ?';
+
+  @override
+  String get msLoansDeleteAdjBody => 'ಬಾಕಿ ಮತ್ತೆ Kuber ಲೆಕ್ಕಕ್ಕೆ ಮರಳುತ್ತದೆ.';
+
+  @override
+  String get msTxnEdited => 'ಬದಲಿಸಲಾಗಿದೆ';
+
+  @override
+  String get msTxnSplitHelper =>
+      'ನಿಮ್ಮ ಬ್ಯಾಂಕ್‌ಗೆ ಹೊಂದಿಸಲು ಇವುಗಳನ್ನು ಬದಲಿಸಿ. ಇವು ಯಾವಾಗಲೂ EMI ಗೆ ಸಮ.';
+
+  @override
+  String get msTxnSplitErr =>
+      'ಅಸಲು ಮತ್ತು ಬಡ್ಡಿ 0 ಕ್ಕಿಂತ ಕಡಿಮೆ ಇರಲು ಸಾಧ್ಯವಿಲ್ಲ.';
+
+  @override
+  String get msInfoSplitEditedTitle => 'ಬದಲಿಸಿದ ವಿಭಜನೆ';
+
+  @override
+  String get msInfoSplitEditedLine =>
+      'ನಿಮ್ಮ ಬ್ಯಾಂಕ್‌ಗೆ ಹೊಂದಿಸಲು ನೀವು ಈ ವಿಭಜನೆಯನ್ನು ಬದಲಿಸಿದ್ದೀರಿ. Kuber ಬಾಕಿಗೆ ನಿಮ್ಮ ಅಂಕಿಗಳನ್ನು ಬಳಸುತ್ತದೆ ಮತ್ತು ಅಲ್ಲಿಂದ ಮುಂದಿನ EMI ಗಳನ್ನು ಅಂದಾಜಿಸುತ್ತದೆ.';
+
+  @override
+  String get msInfoAdjustBankLine =>
+      'ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್‌ನಲ್ಲಿ ಬಾಕಿ Kuber ಗಿಂತ ಬೇರೆ ಇದ್ದಾಗ ಇದನ್ನು ಬಳಸಿ. Kuber ಆ ದಿನಾಂಕದಿಂದ ನಿಮ್ಮ ಅಂಕಿಯಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ.';
+
+  @override
+  String get msInfoAdjustInterestLine =>
+      'ಕೆಲವು ಬ್ಯಾಂಕ್‌ಗಳು ಪಾವತಿಸದ ಬಡ್ಡಿಯನ್ನು, ಉದಾ. ಮೊರಟೋರಿಯಂ ಅಥವಾ EMI ಆರಂಭಕ್ಕೂ ಮೊದಲು, ಬಾಕಿಗೆ ಸೇರಿಸುತ್ತವೆ. ಇದು ಸಾಲದ ಒಟ್ಟು ಬಡ್ಡಿಯಲ್ಲಿ ಎಣಿಕೆಯಾಗುತ್ತದೆ. ನಿಮ್ಮ ಖಾತೆಯಿಂದ ಹಣ ಹೋಗದ ಕಾರಣ ಇದು ಖರ್ಚಲ್ಲ.';
+
+  @override
+  String get msInfoRemainingLine =>
+      'ಉಳಿದ ಬಡ್ಡಿ ನಿಮ್ಮ ಬಾಕಿ, ದರ ಮತ್ತು EMI ಮೇಲೆ ಅವಲಂಬಿತ, ಆದ್ದರಿಂದ Kuber ಇದನ್ನು ಲೆಕ್ಕಹಾಕುತ್ತದೆ. ಬದಲಿಗೆ ಬಾಕಿ ಅಥವಾ ದರವನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.';
+
+  @override
+  String get msLoansPastEmis => 'ಹಿಂದಿನ EMI ಗಳನ್ನು ವಹಿವಾಟುಗಳಾಗಿ ಸೇರಿಸಿ';
+
+  @override
+  String get msInfoPastEmisLine =>
+      'Kuber ಸಾಲ ಈಗಾಗಲೇ ನಡೆದ ಪ್ರತಿ ತಿಂಗಳಿಗೆ ಒಂದು EMI ವಹಿವಾಟನ್ನು ಅಸಲು ಮತ್ತು ಬಡ್ಡಿಯೊಂದಿಗೆ ಸೇರಿಸುತ್ತದೆ. ಯಾವುದೇ ಪಾವತಿಯಂತೆ ನಿಮ್ಮ ಖಾತೆಯ ಬ್ಯಾಲೆನ್ಸ್ ಒಟ್ಟು ಮೊತ್ತದಷ್ಟು ಕಡಿಮೆಯಾಗುತ್ತದೆ. ಹಿಂದಿನ ವಹಿವಾಟುಗಳಿಲ್ಲದೆ ಇಂದಿನಿಂದ ಆರಂಭಿಸಲು ಇದನ್ನು ಆಫ್ ಇಡಿ.';
+
+  @override
+  String get msLoansPastEmisHelp =>
+      'ಮೊದಲ EMI ದಿನಾಂಕದಿಂದ ಇಂದಿನವರೆಗಿನ ಪ್ರತಿ EMI ಅನ್ನು ವಹಿವಾಟಾಗಿ ರಚಿಸುತ್ತದೆ.';
+
+  @override
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  ) {
+    return '$from ರಿಂದ $to ವರೆಗೆ $count EMI ಗಳನ್ನು ಸೇರಿಸಿ $account ಬ್ಯಾಲೆನ್ಸ್ ಅನ್ನು $amount ಕಡಿಮೆ ಮಾಡುತ್ತದೆ.';
+  }
+
+  @override
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  ) {
+    return '$from ರಿಂದ $to ವರೆಗೆ $count EMI ಗಳನ್ನು ಸೇರಿಸುತ್ತದೆ, ಒಟ್ಟು $amount.';
+  }
+
+  @override
+  String msLoansPastEmisRemoveTitle(int count) {
+    return 'ಈ ಸ್ವಿಚ್ ಸೇರಿಸಿದ $count ಹಿಂದಿನ EMI ಗಳನ್ನು ತೆಗೆಯಬೇಕೇ?';
+  }
+
+  @override
+  String get msLoansPastEmisRemoveBody =>
+      'ನೀವು ಬದಲಿಸಿದ EMI ಗಳು ಉಳಿಯುತ್ತವೆ. ತೆಗೆದವುಗಳಷ್ಟು ಖಾತೆ ಬ್ಯಾಲೆನ್ಸ್ ಮತ್ತೆ ಹೆಚ್ಚುತ್ತದೆ.';
+
+  @override
+  String get msLoansKeep => 'ಇರಿಸಿ';
+
+  @override
+  String get msLoansRemove => 'ತೆಗೆಯಿರಿ';
+
+  @override
+  String msLoansPastEmisRemoved(int removed, int kept) {
+    return '$removed ಹಿಂದಿನ EMI ಗಳನ್ನು ತೆಗೆಯಲಾಗಿದೆ. ನೀವು ಬದಲಿಸಿದ $kept ಉಳಿಸಲಾಗಿದೆ.';
+  }
+
+  @override
+  String get bgStepPastEmis => 'ಹಿಂದಿನ EMI ಗಳನ್ನು ಸೇರಿಸಲಾಗುತ್ತಿದೆ…';
+
+  @override
+  String bgJobPercent(String text, int percent) {
+    return '$text $percent%';
+  }
+
+  @override
+  String bgJobsRunning(String text, int count) {
+    return '$text ($count ಕೆಲಸಗಳು)';
+  }
+
+  @override
+  String get bgJobFailed => 'ಏನೋ ತಪ್ಪಾಗಿದೆ';
+
+  @override
+  String get bgDetails => 'ವಿವರಗಳು';
+
+  @override
+  String get bgDetailsTitle => 'ಏನು ತಪ್ಪಾಯಿತು';
+
+  @override
+  String get bgAddedOne => '1 ವಹಿವಾಟು ಸೇರಿಸಲಾಗಿದೆ';
+
+  @override
+  String bgAdded(int count) {
+    return '$count ವಹಿವಾಟುಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String get bgBackupSaved => 'ಬ್ಯಾಕಪ್ ಉಳಿಸಲಾಗಿದೆ';
+
+  @override
+  String get accountTypeOverdraft => 'ಓವರ್‌ಡ್ರಾಫ್ಟ್';
+
+  @override
+  String get accountOverdraftHint => 'ಉದಾ. HDFC ಓವರ್‌ಡ್ರಾಫ್ಟ್';
+
+  @override
+  String get accountOverdraftSub =>
+      'ನೀವು ಬಾಕಿ ಇರುವ ಹಣಕ್ಕೆ, ಉದಾ. ಓವರ್‌ಡ್ರಾಫ್ಟ್.';
+
+  @override
+  String get accountOverdraftInfoLine =>
+      'ನೀವು ಬಾಕಿ ಇರುವ ಹಣಕ್ಕೆ ಇದನ್ನು ಬಳಸಿ, ಉದಾ. ಓವರ್‌ಡ್ರಾಫ್ಟ್ ಅಥವಾ ಕ್ರೆಡಿಟ್ ಲೈನ್. Loans ನಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಿದ EMI ಗಳು ಅಲ್ಲಿ ಆಯ್ಕೆ ಮಾಡಿದ ಖಾತೆಯಿಂದಲೇ ಹೋಗುತ್ತವೆ.';
+
+  @override
+  String get accountAmountOwed => 'ಬಾಕಿ ಮೊತ್ತ';
+
+  @override
+  String get accountLimitOptional => 'ಮಿತಿ (ಐಚ್ಛಿಕ)';
+
+  @override
+  String accountAvailable(String amount) {
+    return 'ಲಭ್ಯ $amount';
+  }
+
+  @override
+  String get accountOwedLabel => 'ಬಾಕಿ';
+
+  @override
+  String accountOverLimit(String amount) {
+    return 'ಇದು ಮಿತಿಯನ್ನು $amount ಮೀರುತ್ತದೆ.';
+  }
 }

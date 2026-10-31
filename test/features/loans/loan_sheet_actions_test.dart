@@ -90,6 +90,7 @@ void main() {
     await settle(t);
     await t.tap(find.text(l.msLoansCloseLoan).last); // dialog confirm
     await settle(t);
+    await drainIsarWrites(t, isar);
     Loan? saved = await t.runAsync<Loan?>(() => isar.loans.filter().uidEqualTo(loan.uid).findFirst());
     expect(saved!.closedAt, isNotNull, reason: 'Close loan must close it');
     expect(t.takeException(), isNull);
@@ -112,11 +113,13 @@ void main() {
     await settle(t);
     await t.tap(find.text(l.msLoansReopen).last); // dialog confirm
     await settle(t);
+    await drainIsarWrites(t, isar);
     saved = await t.runAsync<Loan?>(() => isar.loans.filter().uidEqualTo(loan.uid).findFirst());
     expect(saved!.closedAt, isNull);
     expect(saved.isCompleted, isFalse);
     expect(t.takeException(), isNull);
     await t.pumpWidget(const SizedBox());
     await t.pump(const Duration(seconds: 5));
+    await drainIsarWrites(t, isar);
   });
 }

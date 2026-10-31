@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -169,6 +170,8 @@ class _AccountWidgetConfigScreenState
                 child: Icon(
                   a.isCreditCard
                       ? Icons.credit_card
+                      : a.isOverdraft
+                      ? Icons.request_quote_rounded
                       : Icons.account_balance_outlined,
                   size: 20,
                   color: cs.onSurfaceVariant,
@@ -191,7 +194,11 @@ class _AccountWidgetConfigScreenState
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      a.isCreditCard ? 'Credit card' : 'Account',
+                      a.isCreditCard
+                          ? context.l10n.creditCardLabel
+                          : a.isOverdraft
+                          ? context.l10n.accountTypeOverdraft
+                          : context.l10n.accountLabel,
                       style: TextStyle(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
