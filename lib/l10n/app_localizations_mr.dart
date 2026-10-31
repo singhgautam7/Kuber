@@ -8317,4 +8317,113 @@ class AppLocalizationsMr extends AppLocalizations {
   String accountOverLimit(String amount) {
     return 'हे मर्यादेपेक्षा $amount जास्त आहे.';
   }
+
+  @override
+  String get smsTodayLabel => 'आज नोंद न झालेले';
+
+  @override
+  String get smsTodaySpentLabel => 'खर्च';
+
+  @override
+  String get smsTodayReceivedLabel => 'मिळाले';
+
+  @override
+  String smsTodayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count SMS अजून जोडले नाहीत',
+      one: '1 SMS अजून जोडला नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String smsTodayCountNoAmount(int count, int missing) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count SMS अजून जोडले नाहीत',
+      one: '1 SMS अजून जोडला नाही',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      missing,
+      locale: localeName,
+      other: '$missing रकमेशिवाय',
+      one: '1 रकमेशिवाय',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String get smsTodayCaughtTitle => 'आजचे सगळे पूर्ण झाले';
+
+  @override
+  String get smsTodayCaughtBody => 'आजचे सर्व SMS हाताळले गेले.';
+
+  @override
+  String get smsTodayNoneBody => 'आज अजून एकही बँक SMS नाही.';
+
+  @override
+  String get smsRowNoAmount => 'रक्कम नाही';
+
+  @override
+  String smsWidgetSpentUntracked(String amount) {
+    return 'SMS मधील $amount खर्च नोंद झालेला नाही';
+  }
+
+  @override
+  String smsWidgetCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'आजचे $count SMS अजून जोडले नाहीत',
+      one: 'आजचा 1 SMS अजून जोडला नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smsMenuDismissAll => 'सर्व काढा';
+
+  @override
+  String smsDismissAllTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'सर्व $count मेसेज काढायचे?',
+      one: '1 मेसेज काढायचा?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smsDismissAllBody =>
+      'ते Dismissed टॅबमध्ये जातील. तिथून तुम्ही ते अजूनही जोडू शकता.';
+
+  @override
+  String get smsDismissAllBodyOne =>
+      'तो Dismissed टॅबमध्ये जाईल. तिथून तुम्ही तो अजूनही जोडू शकता.';
+
+  @override
+  String smsDismissAllConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'सर्व काढा',
+      one: 'काढा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String smsDismissedSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count मेसेज काढले',
+      one: '1 मेसेज काढला',
+    );
+    return '$_temp0';
+  }
 }

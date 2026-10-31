@@ -4,10 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../main.dart' show onOpenBatchReadyProvider;
+import '../../settings/providers/settings_provider.dart';
 import '../providers/sms_import_provider.dart';
+import '../providers/sms_today_summary.dart';
 
 /// Home dashboard widget for SMS import. Deliberately lightweight: it reads
 /// only the last-scan time (shared prefs) + permission flag via
@@ -73,7 +77,7 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
       loading: () => const SizedBox(key: ValueKey('loading'), height: 84),
       error: (_, __) => const SizedBox(key: ValueKey('err'), height: 0),
       data: (info) => info.hasPermission
-          ? _LastCheckedCard(
+          ? _TodayOrLastChecked(
               key: const ValueKey('checked'),
               lastScannedAt: info.lastScannedAt,
             )
@@ -106,12 +110,80 @@ void _openImport(BuildContext context, WidgetRef ref, SmsImportTabArg tab) {
 /// screen here.
 enum SmsImportTabArg { unreviewed, imported, dismissed }
 
+/// Today's numbers (board 3.9f) once a scan has run in this app session, else
+/// the "last checked" row. Reads the same [smsTodaySummaryProvider] as the
+/// Unreviewed card, so the numbers always match (Home shows only the spent
+/// amount and the count). Before the session's first scan
+/// it watches only a bool: Home never loads SMS rows and never asks for a scan
+/// here. Rebuilds only this row when the summary changes. Static on Home.
+class _TodayOrLastChecked extends ConsumerWidget {
+  final DateTime? lastScannedAt;
+  const _TodayOrLastChecked({super.key, required this.lastScannedAt});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scanned = ref.watch(smsScannedThisSessionProvider);
+    final summary = scanned ? ref.watch(smsTodaySummaryProvider) : null;
+    final now = DateTime.now();
+    if (summary == null ||
+        summary.day != DateTime(now.year, now.month, now.day)) {
+      return _LastCheckedCard(lastScannedAt: lastScannedAt);
+    }
+
+    final l10n = context.l10n;
+    void open() => _openImport(context, ref, SmsImportTabArg.unreviewed);
+
+    if (summary.state != SmsTodayState.untracked) {
+      return KuberGroup(
+        children: [
+          KuberListRow(
+            leading: const KuberIconTile(
+              icon: Icons.check_rounded,
+              circle: true,
+            ),
+            title: l10n.smsTodayCaughtTitle,
+            subtitle: summary.state == SmsTodayState.none
+                ? l10n.smsTodayNoneBody
+                : l10n.smsTodayCaughtBody,
+            trailing: const KuberChevron(),
+            onTap: open,
+          ),
+        ],
+      );
+    }
+
+    final formatter = ref.watch(formatterProvider);
+    final symbol = ref.watch(currencyProvider.select((c) => c.symbol));
+    final private = ref.watch(privacyModeProvider);
+    String money(double v) =>
+        maskAmount(formatter.formatCurrency(v, symbol: symbol), private);
+
+    // Debits only on Home: the received amount was too much in one row (user
+    // review). Credits-only days keep the plain title.
+    return KuberGroup(
+      children: [
+        KuberListRow(
+          leading: const KuberIconTile(icon: Icons.sms_outlined),
+          title: summary.spent > 0
+              ? l10n.smsWidgetSpentUntracked(money(summary.spent))
+              : 'Import from SMS',
+          // Lakh amounts plus the longer copy wrap instead of truncating.
+          titleLines: 2,
+          subtitle: l10n.smsWidgetCount(summary.count),
+          trailing: const KuberChevron(),
+          onTap: open,
+        ),
+      ],
+    );
+  }
+}
+
 /// Muted "last checked" summary — the home surface shows when the inbox was
 /// last scanned rather than a live unreviewed counter (which would require
 /// loading every staged row).
 class _LastCheckedCard extends ConsumerWidget {
   final DateTime? lastScannedAt;
-  const _LastCheckedCard({super.key, required this.lastScannedAt});
+  const _LastCheckedCard({required this.lastScannedAt});
 
   String _label() {
     final at = lastScannedAt;

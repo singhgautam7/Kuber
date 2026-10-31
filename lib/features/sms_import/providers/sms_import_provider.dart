@@ -114,10 +114,22 @@ final smsImportProvider =
       SmsImportNotifier.new,
     );
 
+/// True once any inbox scan has finished in this app session. Home shows the
+/// "today" summary only after this, because only then is [smsImportProvider]
+/// already loaded (Home never loads SMS rows itself).
+final smsScannedThisSessionProvider = StateProvider<bool>((ref) => false);
+
+/// Whether the page's once-per-session automatic refresh has started. Plain
+/// mutable holder (not reactive): nothing rebuilds on it.
+final _smsAutoRefreshSessionProvider = Provider<List<bool>>((ref) => [false]);
+
 class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
   SmsScanController? _controller;
   DateTime? _lastScannedAt;
-  bool _scanInProgress = false;
+
+  /// The scan in flight, if any. A second request (auto refresh, pull, Home)
+  /// joins it instead of starting another one.
+  Future<void>? _inFlight;
 
   @override
   FutureOr<SmsImportState> build() async {
@@ -154,7 +166,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
   // ── Scan orchestration ────────────────────────────────────────────────────
 
-  bool get isScanning => _scanInProgress;
+  bool get isScanning => _inFlight != null;
 
   /// Whether a fresh first-load scan is warranted: granted, supported, the
   /// staging collection is empty and no scan has ever run.
@@ -174,13 +186,25 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
     return DateTime.now().difference(_lastScannedAt!) > minInterval;
   }
 
-  /// Full-screen first-load scan (Scenario A).
-  Future<void> startFirstLoadScan() => _runScan(ScanTrigger.firstLoad);
+  /// Full-screen first-load scan (Scenario A). It also counts as this
+  /// session's automatic refresh, so the list does not scan again right after.
+  Future<void> startFirstLoadScan() {
+    ref.read(_smsAutoRefreshSessionProvider)[0] = true;
+    return _runScan(ScanTrigger.firstLoad);
+  }
 
-  /// Non-blocking background refresh (Scenario B).
-  Future<void> startBackgroundScan() {
-    if (isScanning) return Future.value();
-    return _runScan(ScanTrigger.backgroundRefresh);
+  /// Non-blocking background refresh (Scenario B, pull to refresh). Joins the
+  /// scan already running, if there is one.
+  Future<void> startBackgroundScan() =>
+      _runScan(ScanTrigger.backgroundRefresh);
+
+  /// The page's automatic refresh: runs once per app session, on the first
+  /// open with permission. Later calls (and re-opens) do nothing.
+  Future<void> autoRefreshOnce() {
+    final done = ref.read(_smsAutoRefreshSessionProvider);
+    if (done[0]) return Future.value();
+    done[0] = true;
+    return startBackgroundScan();
   }
 
   /// Cancels an in-flight scan, discarding partial work.
@@ -193,10 +217,10 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
     if (s != null) state = AsyncData(s.copyWith(scanProgress: null));
   }
 
-  Future<void> _runScan(ScanTrigger trigger) async {
-    if (_scanInProgress) return;
-    _scanInProgress = true;
+  Future<void> _runScan(ScanTrigger trigger) =>
+      _inFlight ??= _scan(trigger).whenComplete(() => _inFlight = null);
 
+  Future<void> _scan(ScanTrigger trigger) async {
     try {
       final service = ref.read(smsInboxServiceProvider);
       if (!service.isSupported || !await service.checkPermission()) {
@@ -259,6 +283,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
       _lastScannedAt = DateTime.now();
       await _writeLastScannedAt(_lastScannedAt!);
+      ref.read(smsScannedThisSessionProvider.notifier).state = true;
 
       // Final state: bankMessagesFound carries the count of *new* rows added.
       final done = ScanProgress(
@@ -286,8 +311,8 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
           }
         });
       }
-    } finally {
-      _scanInProgress = false;
+    } catch (_) {
+      // A failed scan leaves the staged rows as they were.
     }
   }
 
@@ -592,7 +617,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
   Future<void> resetSmsImports({bool runBackgroundScan = true}) async {
     _controller?.cancel();
     _controller = null;
-    _scanInProgress = false;
+    await _inFlight;
 
     await ref.read(smsImportRepositoryProvider).clearAll();
 

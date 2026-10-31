@@ -14591,6 +14591,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This goes over the limit by {amount}.'**
   String accountOverLimit(String amount);
+
+  /// No description provided for @smsTodayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Untracked today'**
+  String get smsTodayLabel;
+
+  /// No description provided for @smsTodaySpentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get smsTodaySpentLabel;
+
+  /// No description provided for @smsTodayReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get smsTodayReceivedLabel;
+
+  /// No description provided for @smsTodayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 SMS not added yet} other{{count} SMS not added yet}}'**
+  String smsTodayCount(int count);
+
+  /// No description provided for @smsTodayCountNoAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 SMS not added yet} other{{count} SMS not added yet}}, {missing, plural, =1{1 without an amount} other{{missing} without an amount}}'**
+  String smsTodayCountNoAmount(int count, int missing);
+
+  /// No description provided for @smsTodayCaughtTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up for today'**
+  String get smsTodayCaughtTitle;
+
+  /// No description provided for @smsTodayCaughtBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every SMS today is sorted.'**
+  String get smsTodayCaughtBody;
+
+  /// No description provided for @smsTodayNoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No bank SMS today so far.'**
+  String get smsTodayNoneBody;
+
+  /// No description provided for @smsRowNoAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'No amount'**
+  String get smsRowNoAmount;
+
+  /// No description provided for @smsWidgetSpentUntracked.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} spends untracked from SMS'**
+  String smsWidgetSpentUntracked(String amount);
+
+  /// No description provided for @smsWidgetCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 SMS from today not yet added} other{{count} SMS from today not yet added}}'**
+  String smsWidgetCount(int count);
+
+  /// No description provided for @smsMenuDismissAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss all'**
+  String get smsMenuDismissAll;
+
+  /// No description provided for @smsDismissAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Dismiss 1 message?} other{Dismiss all {count} messages?}}'**
+  String smsDismissAllTitle(int count);
+
+  /// No description provided for @smsDismissAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They will move to the Dismissed tab. You can still add them from there.'**
+  String get smsDismissAllBody;
+
+  /// No description provided for @smsDismissAllBodyOne.
+  ///
+  /// In en, this message translates to:
+  /// **'It will move to the Dismissed tab. You can still add it from there.'**
+  String get smsDismissAllBodyOne;
+
+  /// No description provided for @smsDismissAllConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Dismiss} other{Dismiss all}}'**
+  String smsDismissAllConfirm(int count);
+
+  /// No description provided for @smsDismissedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 message dismissed} other{{count} messages dismissed}}'**
+  String smsDismissedSnack(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -2408,5 +2408,22 @@
   "accountLimitOptional": "வரம்பு (விருப்பம்)",
   "accountAvailable": "கிடைப்பது {amount}",
   "accountOwedLabel": "நிலுவை",
-  "accountOverLimit": "இது வரம்பை {amount} மீறுகிறது."
+  "accountOverLimit": "இது வரம்பை {amount} மீறுகிறது.",
+  "smsTodayLabel": "இன்று பதிவாகாதவை",
+  "smsTodaySpentLabel": "செலவு",
+  "smsTodayReceivedLabel": "வரவு",
+  "smsTodayCount": "{count, plural, =1{1 SMS இன்னும் சேர்க்கப்படவில்லை} other{{count} SMS இன்னும் சேர்க்கப்படவில்லை}}",
+  "smsTodayCountNoAmount": "{count, plural, =1{1 SMS இன்னும் சேர்க்கப்படவில்லை} other{{count} SMS இன்னும் சேர்க்கப்படவில்லை}}, {missing, plural, =1{1 தொகை இல்லாமல்} other{{missing} தொகை இல்லாமல்}}",
+  "smsTodayCaughtTitle": "இன்றைக்கு எல்லாம் முடிந்தது",
+  "smsTodayCaughtBody": "இன்றைய எல்லா SMS-ம் சரிசெய்யப்பட்டன.",
+  "smsTodayNoneBody": "இன்று இதுவரை வங்கி SMS இல்லை.",
+  "smsRowNoAmount": "தொகை இல்லை",
+  "smsWidgetSpentUntracked": "SMS-இலிருந்து {amount} செலவு பதிவாகவில்லை",
+  "smsWidgetCount": "{count, plural, =1{இன்றைய 1 SMS இன்னும் சேர்க்கப்படவில்லை} other{இன்றைய {count} SMS இன்னும் சேர்க்கப்படவில்லை}}",
+  "smsMenuDismissAll": "அனைத்தையும் நிராகரி",
+  "smsDismissAllTitle": "{count, plural, =1{1 செய்தியை நிராகரிக்கவா?} other{அனைத்து {count} செய்திகளையும் நிராகரிக்கவா?}}",
+  "smsDismissAllBody": "இவை Dismissed தாவலுக்குச் செல்லும். அங்கிருந்து இன்னும் சேர்க்கலாம்.",
+  "smsDismissAllBodyOne": "இது Dismissed தாவலுக்குச் செல்லும். அங்கிருந்து இன்னும் சேர்க்கலாம்.",
+  "smsDismissAllConfirm": "{count, plural, =1{நிராகரி} other{அனைத்தையும் நிராகரி}}",
+  "smsDismissedSnack": "{count, plural, =1{1 செய்தி நிராகரிக்கப்பட்டது} other{{count} செய்திகள் நிராகரிக்கப்பட்டன}}"
 }

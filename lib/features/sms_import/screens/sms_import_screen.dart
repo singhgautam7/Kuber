@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
@@ -8,18 +10,24 @@ import '../../../shared/widgets/date_separator.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/overflow_config.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_skeleton.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../data/sms_transaction.dart';
+import '../engine/scan_progress.dart';
 import '../providers/sms_import_provider.dart';
+import '../providers/sms_today_summary.dart';
 import '../widgets/batch_summary_sheet.dart';
 import '../widgets/paste_sms_sheet.dart';
-import '../widgets/scan_progress_strip.dart';
+import '../widgets/sms_today_card.dart';
 import '../widgets/transaction_review_sheet.dart';
 import 'sms_first_load_screen.dart';
 import 'sms_import_widgets.dart';
@@ -38,14 +46,18 @@ class SmsImportScreen extends ConsumerStatefulWidget {
 
 class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     with SingleTickerProviderStateMixin {
-  late SmsImportTab _tab = widget.initialTab;
-
-  /// Fades the list in after a tab change (tap or swipe).
-  late final AnimationController _tabFade = AnimationController(
+  /// Tap or swipe between tabs with the M3 horizontal slide; the indicator
+  /// follows the drag. Each tab is its own lazily built scroll view.
+  late final TabController _tabs = TabController(
+    length: SmsImportTab.values.length,
     vsync: this,
-    duration: const Duration(milliseconds: 220),
-    value: 1,
+    initialIndex: widget.initialTab.index,
   );
+
+  /// Mirrors [_tabs.index] for the app bar only (its overflow depends on the
+  /// tab), so a tab change does not rebuild the whole screen.
+  late final ValueNotifier<int> _tabIndex = ValueNotifier(_tabs.index);
+
   SmsPermissionMode? _permMode; // null = permission granted, show list
   bool _resolvingPermission = true;
 
@@ -56,51 +68,56 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   String _query = '';
 
   // Pagination: render rows in pages and grow as the user scrolls (the inbox
-  // can hold hundreds of messages, so we never build them all at once).
+  // can hold hundreds of messages, so we never build them all at once). One
+  // count per tab, so switching back keeps both the rows and the offset
+  // (PageStorageKey per tab).
   static const _pageSize = 30;
-  int _displayedCount = _pageSize;
-  final _scrollController = ScrollController();
+  final _displayed = List<int>.filled(SmsImportTab.values.length, _pageSize);
+
+  /// True while pull to refresh runs: the top indicator stays hidden then, so
+  /// only one loader shows.
+  final _pulling = ValueNotifier(false);
+
+  /// Rows a refresh just added; they slide in with a fading tint once.
+  Set<int> _freshIds = const {};
+  Timer? _freshTimer;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initPermission());
+    _tabs.addListener(() => _tabIndex.value = _tabs.index);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // A summary computed before midnight must not show as "today".
+      ref.invalidate(smsTodaySummaryProvider);
+      _initPermission();
+    });
   }
 
   @override
   void dispose() {
-    _tabFade.dispose();
-    _scrollController.dispose();
+    _freshTimer?.cancel();
+    _tabs.dispose();
+    _tabIndex.dispose();
+    _pulling.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_scrollController.position.extentAfter < 400) {
-      setState(() => _displayedCount += _pageSize);
+  bool _onScroll(SmsImportTab tab, int rowCount, ScrollNotification n) {
+    final i = tab.index;
+    if (n.depth == 0 &&
+        n.metrics.axis == Axis.vertical &&
+        n.metrics.extentAfter < 400 &&
+        _displayed[i] < rowCount) {
+      setState(() => _displayed[i] += _pageSize);
     }
+    return false;
   }
 
-  void _switchTab(SmsImportTab tab) {
-    if (tab == _tab) return;
-    setState(() {
-      _tab = tab;
-      _displayedCount = _pageSize; // reset pagination per tab
-    });
-    _tabFade.forward(from: 0);
-  }
-
-  /// Horizontal swipe moves between Unreviewed / Imported / Dismissed (not
-  /// while multi-selecting).
-  void _onSwipe(DragEndDetails d) {
-    if (_selectionMode) return;
-    final v = d.primaryVelocity ?? 0;
-    if (v.abs() < 300) return;
-    final i = _tab.index + (v < 0 ? 1 : -1);
-    if (i < 0 || i >= SmsImportTab.values.length) return;
-    _switchTab(SmsImportTab.values[i]);
-  }
+  void _setQuery(String v) => setState(() {
+    _query = v;
+    _displayed.fillRange(0, _displayed.length, _pageSize);
+  });
 
   Future<void> _initPermission() async {
     final supported = ref.read(smsInboxServiceProvider).isSupported;
@@ -171,6 +188,64 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
       _permMode = null;
       _resolvingPermission = false;
     });
+    _autoRefreshAfterTransition();
+  }
+
+  /// The once-per-session automatic refresh (board 3.9c). Permission is
+  /// granted here. Waits for the route's open transition to finish so the
+  /// platform read and isolate spawn never land in it.
+  void _autoRefreshAfterTransition() {
+    final notifier = ref.read(smsImportProvider.notifier);
+    final anim = ModalRoute.of(context)?.animation;
+    if (anim == null || anim.isCompleted) {
+      notifier.autoRefreshOnce();
+      return;
+    }
+    late final AnimationStatusListener listener;
+    listener = (status) {
+      if (status != AnimationStatus.completed) return;
+      anim.removeStatusListener(listener);
+      if (mounted) notifier.autoRefreshOnce();
+    };
+    anim.addStatusListener(listener);
+  }
+
+  Future<void> _pullRefresh() async {
+    _pulling.value = true;
+    try {
+      await ref.read(smsImportProvider.notifier).startBackgroundScan();
+    } finally {
+      if (mounted) _pulling.value = false;
+    }
+  }
+
+  /// Marks the rows a completed refresh added, so they animate in once.
+  void _onSmsState(
+    AsyncValue<SmsImportState>? prev,
+    AsyncValue<SmsImportState> next,
+  ) {
+    final p = prev?.valueOrNull, n = next.valueOrNull;
+    if (p == null || n == null || identical(p.unreviewed, n.unreviewed)) return;
+    final done = n.scanProgress;
+    if (done == null ||
+        !done.isComplete ||
+        done.trigger != ScanTrigger.backgroundRefresh ||
+        done.bankMessagesFound == 0) {
+      return;
+    }
+    final before = {for (final s in p.unreviewed) s.id};
+    final fresh = {
+      for (final s in n.unreviewed)
+        if (!before.contains(s.id)) s.id,
+    };
+    if (fresh.isEmpty) return;
+    setState(() => _freshIds = fresh);
+    // Later rebuilds must not replay it (rows already animating keep going).
+    _freshTimer?.cancel();
+    _freshTimer = Timer(
+      const Duration(milliseconds: 1500),
+      () => _freshIds = const {},
+    );
   }
 
   void _exitSelection() {
@@ -191,8 +266,22 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     });
   }
 
+  List<SmsTransaction> _filter(List<SmsTransaction> rows) {
+    if (_query.isEmpty) return rows;
+    final q = _query.toLowerCase();
+    return rows
+        .where(
+          (sms) =>
+              (sms.parsedMerchant?.toLowerCase().contains(q) ?? false) ||
+              sms.senderId.toLowerCase().contains(q) ||
+              sms.rawSms.toLowerCase().contains(q),
+        )
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(smsImportProvider, _onSmsState);
     final cs = Theme.of(context).colorScheme;
     final canPop =
         !_selectionMode && _query.isEmpty;
@@ -208,10 +297,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
         }
         if (_query.isNotEmpty) {
           _searchController.clear();
-          setState(() {
-            _query = '';
-            _displayedCount = _pageSize;
-          });
+          _setQuery('');
           return;
         }
       },
@@ -240,7 +326,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
                   ),
                 ],
               )
-            : _buildListScrollView(cs),
+            : _buildListView(cs),
         // Paste is the screen's create action: a centred extended FAB, like
         // Accounts (user review round 2), hidden while selecting.
         floatingActionButton:
@@ -300,168 +386,170 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     }
   }
 
-  /// App bar. Not sticky in the list view (it scrolls with the content). In
-  /// selection mode the back arrow clears the selection.
-  KuberAppBar _topAppBar(ColorScheme cs) {
-    return KuberAppBar(
-      showBack: true,
-      title: 'SMS',
-      pinShortcut: const PinShortcutSpec(
-        shortcutId: 'sms_import',
-        shortLabel: 'SMS Import',
-        longLabel: 'Import from SMS',
-        iconDrawable: 'ic_shortcut_sms',
-        deepLink: 'kuber://app/sms-import',
-      ),
-      infoConfig: InfoConstants.smsImport,
-      onBack: _selectionMode ? _exitSelection : null,
-      search: _selectionMode || _permMode != null || _resolvingPermission
-          ? null
-          : KuberHeaderSearch(
-              controller: _searchController,
-              hint: 'Search merchant, sender, or message',
-              onChanged: (v) => setState(() {
-                _query = v;
-                _displayedCount = _pageSize;
-              }),
+  /// Dismiss all (board 3.9g): every Unreviewed message, search or not, so the
+  /// count in the sheet is exactly what moves. One write transaction; Undo
+  /// restores exactly these ids in one more.
+  Future<void> _confirmDismissAll() async {
+    final notifier = ref.read(smsImportProvider.notifier);
+    final ids = [
+      for (final s
+          in ref.read(smsImportProvider).valueOrNull?.unreviewed ??
+              const <SmsTransaction>[])
+        s.id,
+    ];
+    if (ids.isEmpty) return;
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final n = ids.length;
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => KuberBottomSheet(
+        title: l10n.smsDismissAllTitle(n),
+        showClose: false,
+        actions: SheetButtonSection(
+          padding: EdgeInsets.zero,
+          actions: [
+            SheetAction(
+              label: l10n.cancelLabel,
+              icon: Icons.close_rounded,
+              onPressed: () => Navigator.pop(ctx, false),
             ),
-      overflowConfig: _selectionMode
-          ? null
-          : KuberOverflowConfig(
-              items: [
-                KuberOverflowItem(
-                  icon: Icons.delete_outline_rounded,
-                  label: 'Reset SMS Imports',
-                  isDestructive: true,
-                  onTap: _confirmReset,
-                ),
-              ],
+            SheetAction(
+              label: l10n.smsDismissAllConfirm(n),
+              icon: Icons.do_not_disturb_on_outlined,
+              destructive: true,
+              onPressed: () => Navigator.pop(ctx, true),
             ),
-    );
-  }
-
-  /// The list view. App bar + page header scroll away; only the tab strip is
-  /// pinned. Row lists are read via `select` so scan-progress emissions never
-  /// rebuild the list.
-  Widget _buildListScrollView(ColorScheme cs) {
-    final unreviewed =
-        ref.watch(smsImportProvider.select((s) => s.valueOrNull?.unreviewed)) ??
-        const <SmsTransaction>[];
-    final imported =
-        ref.watch(smsImportProvider.select((s) => s.valueOrNull?.imported)) ??
-        const <SmsTransaction>[];
-    final dismissed =
-        ref.watch(smsImportProvider.select((s) => s.valueOrNull?.dismissed)) ??
-        const <SmsTransaction>[];
-
-    final List<SmsTransaction> visibleItems;
-    final List<SmsTransaction> sourceList;
-    switch (_tab) {
-      case SmsImportTab.unreviewed:
-        sourceList = unreviewed;
-        break;
-      case SmsImportTab.imported:
-        sourceList = imported;
-        break;
-      case SmsImportTab.dismissed:
-        sourceList = dismissed;
-        break;
-    }
-
-    visibleItems = sourceList.where((sms) {
-      if (_query.isEmpty) return true;
-      final q = _query.toLowerCase();
-      return (sms.parsedMerchant?.toLowerCase().contains(q) ?? false) ||
-          sms.senderId.toLowerCase().contains(q) ||
-          sms.rawSms.toLowerCase().contains(q);
-    }).toList();
-
-    final total = unreviewed.length + imported.length + dismissed.length;
-
-    return SafeArea(
-      top: true,
-      bottom: false,
-      child: RefreshIndicator(
-        onRefresh: () =>
-            ref.read(smsImportProvider.notifier).startBackgroundScan(),
-        color: cs.primary,
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          onHorizontalDragEnd: _onSwipe,
-          behavior: HitTestBehavior.opaque,
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            slivers: [
-              // App bar + header scroll away. removeTop avoids double safe-area
-              // padding (the outer SafeArea already handles the status bar).
-              SliverToBoxAdapter(
-                child: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: _topAppBar(cs),
-                ),
-              ),
-              // Pinned: tabs, or the selection bar during multi-select.
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _PinnedHeaderDelegate(
-                  height: _selectionMode ? 64 : 52,
-                  background: cs.surface,
-                  child: _selectionMode
-                      ? _selectionHeaderRow(cs, visibleItems)
-                      : _tabsRow(cs, unreviewed.length),
-                ),
-              ),
-              const SliverToBoxAdapter(child: ScanProgressStrip()),
-              SliverToBoxAdapter(child: _footer(cs, total)),
-              for (final sliver in _contentSlivers(
-                cs,
-                visibleItems,
-                sourceList.isNotEmpty,
-                imported.isNotEmpty || dismissed.isNotEmpty,
-              ))
-                SliverFadeTransition(opacity: _tabFade, sliver: sliver),
-              const SliverToBoxAdapter(
-                child: SizedBox(height: KuberExtendedFab.clearance),
-              ),
-            ],
+          ],
+        ),
+        child: Text(
+          n == 1 ? l10n.smsDismissAllBodyOne : l10n.smsDismissAllBody,
+          style: theme.textTheme.bodyLarge!.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ),
     );
+    if (ok != true || !mounted) return;
+    await notifier.dismissBatch(ids);
+    if (!mounted) return;
+    showKuberSnackBar(
+      context,
+      l10n.smsDismissedSnack(n),
+      actionLabel: l10n.msRecUndo,
+      duration: const Duration(seconds: 7),
+      onAction: () => notifier.undoDismissBatch(ids),
+    );
   }
 
-  /// M3 primary tabs (board 3.9a): underline indicator, count badge on
-  /// Unreviewed, a full-width divider under the strip.
-  Widget _tabsRow(ColorScheme cs, int unreviewedCount) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: cs.outlineVariant)),
+  /// App bar, fixed above the tabs. In selection mode the back arrow clears
+  /// the selection. Dismiss all shows only on a non-empty Unreviewed tab.
+  Widget _topAppBar(ColorScheme cs) {
+    return ValueListenableBuilder<int>(
+      valueListenable: _tabIndex,
+      builder: (context, tabIndex, _) => Consumer(
+        builder: (context, ref, _) {
+          final canDismissAll =
+              !_resolvingPermission &&
+              _permMode == null &&
+              tabIndex == SmsImportTab.unreviewed.index &&
+              ref.watch(smsUnreviewedCountProvider) > 0;
+          return KuberAppBar(
+            showBack: true,
+            title: 'SMS',
+            pinShortcut: const PinShortcutSpec(
+              shortcutId: 'sms_import',
+              shortLabel: 'SMS Import',
+              longLabel: 'Import from SMS',
+              iconDrawable: 'ic_shortcut_sms',
+              deepLink: 'kuber://app/sms-import',
+            ),
+            infoConfig: InfoConstants.smsImport,
+            onBack: _selectionMode ? _exitSelection : null,
+            search: _selectionMode || _permMode != null || _resolvingPermission
+                ? null
+                : KuberHeaderSearch(
+                    controller: _searchController,
+                    hint: 'Search merchant, sender, or message',
+                    onChanged: _setQuery,
+                  ),
+            overflowConfig: _selectionMode
+                ? null
+                : KuberOverflowConfig(
+                    items: [
+                      if (canDismissAll)
+                        KuberOverflowItem(
+                          icon: Icons.do_not_disturb_on_outlined,
+                          label: context.l10n.smsMenuDismissAll,
+                          isDestructive: true,
+                          onTap: _confirmDismissAll,
+                        ),
+                      KuberOverflowItem(
+                        icon: Icons.delete_outline_rounded,
+                        label: 'Reset SMS Imports',
+                        isDestructive: true,
+                        onTap: _confirmReset,
+                      ),
+                    ],
+                  ),
+          );
+        },
       ),
-      child: Row(
+    );
+  }
+
+  /// The list view: fixed app bar and tabs (or the selection bar), then one
+  /// scroll view per tab in a [TabBarView]. Only the visible tab (and its
+  /// neighbour mid-swipe) is built; each tab watches only its own list.
+  Widget _buildListView(ColorScheme cs) {
+    return SafeArea(
+      top: true,
+      bottom: false,
+      child: Column(
         children: [
-          Expanded(
-            child: _TabPill(
-              label: 'Unreviewed',
-              count: unreviewedCount,
-              selected: _tab == SmsImportTab.unreviewed,
-              onTap: () => _switchTab(SmsImportTab.unreviewed),
+          // removeTop avoids double safe-area padding (the outer SafeArea
+          // already handles the status bar).
+          MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: _topAppBar(cs),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpace.screenMargin,
             ),
+            child: _selectionMode
+                ? SizedBox(height: 64, child: _selectionHeaderRow(cs))
+                : _tabBar(cs),
           ),
           Expanded(
-            child: _TabPill(
-              label: 'Imported',
-              selected: _tab == SmsImportTab.imported,
-              onTap: () => _switchTab(SmsImportTab.imported),
-            ),
-          ),
-          Expanded(
-            child: _TabPill(
-              label: 'Dismissed',
-              selected: _tab == SmsImportTab.dismissed,
-              onTap: () => _switchTab(SmsImportTab.dismissed),
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              behavior: HitTestBehavior.opaque,
+              child: Stack(
+                children: [
+                  TabBarView(
+                    controller: _tabs,
+                    // Selection only lives on Unreviewed: no tab swipe then.
+                    physics: _selectionMode
+                        ? const NeverScrollableScrollPhysics()
+                        : null,
+                    children: [
+                      for (final tab in SmsImportTab.values) _page(tab),
+                    ],
+                  ),
+                  Positioned(
+                    left: KuberSpace.screenMargin,
+                    right: KuberSpace.screenMargin,
+                    top: 0,
+                    child: _AutoRefreshBar(pulling: _pulling),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -469,51 +557,212 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     );
   }
 
-  Widget _selectionHeaderRow(
-    ColorScheme cs,
-    List<SmsTransaction> visibleItems,
-  ) {
-    final visibleIds = visibleItems.map((e) => e.id).toSet();
-    final selectedVisibleCount = _selectedIds.intersection(visibleIds).length;
-
-    bool? checkboxValue;
-    if (selectedVisibleCount == 0) {
-      checkboxValue = false;
-    } else if (selectedVisibleCount == visibleIds.length) {
-      checkboxValue = true;
-    } else {
-      checkboxValue = null; // Indeterminate
-    }
-
-    final allSelected = checkboxValue == true;
-    return Row(
-      children: [
-        AppIconButton(
-          icon: Icons.close_rounded,
-          semanticLabel: 'Cancel selection',
-          onPressed: _exitSelection,
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            '${_selectedIds.length} selected',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge!.copyWith(color: cs.onSurface),
+  /// M3 primary tabs (board 3.9a): label-width indicator, count badge on
+  /// Unreviewed, a full-width divider under the strip.
+  Widget _tabBar(ColorScheme cs) {
+    final theme = Theme.of(context);
+    final label = theme.textTheme.titleSmall;
+    return TabBar(
+      controller: _tabs,
+      labelColor: cs.primary,
+      unselectedLabelColor: cs.onSurfaceVariant,
+      labelStyle: label,
+      unselectedLabelStyle: label,
+      indicatorColor: cs.primary,
+      indicatorSize: TabBarIndicatorSize.label,
+      dividerColor: cs.outlineVariant,
+      // Three equal tabs in a phone width: any side padding leaves
+      // "Unreviewed" + a 3-digit badge short (the old tab row had none). The
+      // label ellipsizes at large font scales instead of overflowing.
+      labelPadding: EdgeInsets.zero,
+      tabs: [
+        Tab(
+          height: 48,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Flexible(
+                child: Text(
+                  'Unreviewed',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  final count = ref.watch(smsUnreviewedCountProvider);
+                  if (count == 0) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(left: 6),
+                    constraints: const BoxConstraints(minWidth: 18),
+                    height: 18,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: cs.primary,
+                      borderRadius: KuberShape.fullR,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$count',
+                      style: theme.textTheme.labelSmall!.copyWith(
+                        color: cs.onPrimary,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
-        TextButton(
-          onPressed: () => setState(() {
-            if (allSelected) {
-              _selectedIds.removeAll(visibleIds);
-              if (_selectedIds.isEmpty) _selectionMode = false;
-            } else {
-              _selectedIds.addAll(visibleIds);
-            }
-          }),
-          child: Text(allSelected ? 'Deselect all' : 'Select all'),
-        ),
+        const Tab(height: 48, text: 'Imported'),
+        const Tab(height: 48, text: 'Dismissed'),
       ],
+    );
+  }
+
+  /// One tab: its own scroll view (offset kept by [PageStorageKey]) and pull
+  /// to refresh. Rows are read with `select`, so scan-progress emissions and
+  /// the other tabs' lists never rebuild it.
+  Widget _page(SmsImportTab tab) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final cs = Theme.of(context).colorScheme;
+        final rows =
+            ref.watch(
+              smsImportProvider.select(
+                (s) => switch (tab) {
+                  SmsImportTab.unreviewed => s.valueOrNull?.unreviewed,
+                  SmsImportTab.imported => s.valueOrNull?.imported,
+                  SmsImportTab.dismissed => s.valueOrNull?.dismissed,
+                },
+              ),
+            ) ??
+            const <SmsTransaction>[];
+        final total = ref.watch(
+          smsImportProvider.select((s) {
+            final v = s.valueOrNull;
+            return v == null
+                ? 0
+                : v.unreviewed.length + v.imported.length + v.dismissed.length;
+          }),
+        );
+        final hasReviewed = ref.watch(
+          smsImportProvider.select(
+            (s) =>
+                (s.valueOrNull?.imported.isNotEmpty ?? false) ||
+                (s.valueOrNull?.dismissed.isNotEmpty ?? false),
+          ),
+        );
+        final unreviewed = tab == SmsImportTab.unreviewed;
+        // Board 3.9c: an automatic refresh with nothing to show yet gets the
+        // card + row skeleton instead of an empty state.
+        final skeleton =
+            unreviewed &&
+            rows.isEmpty &&
+            _query.isEmpty &&
+            ref.watch(
+              smsImportProvider.select((s) {
+                final p = s.valueOrNull?.scanProgress;
+                return p != null &&
+                    !p.isComplete &&
+                    p.trigger == ScanTrigger.backgroundRefresh;
+              }),
+            );
+        final visible = _filter(rows);
+
+        return RefreshIndicator(
+          onRefresh: _pullRefresh,
+          color: cs.primary,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (n) => _onScroll(tab, visible.length, n),
+            child: CustomScrollView(
+              key: PageStorageKey<String>('sms-tab-${tab.name}'),
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: [
+                // Untracked today (board 3.9d): Unreviewed only, hidden while
+                // searching.
+                if (unreviewed && _query.isEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      KuberSpace.screenMargin,
+                      KuberSpace.lg,
+                      KuberSpace.screenMargin,
+                      0,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: skeleton
+                          ? const _SkeletonCard()
+                          : const SmsTodayCard(),
+                    ),
+                  ),
+                SliverToBoxAdapter(child: _footer(cs, total)),
+                if (skeleton)
+                  const SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: KuberSpace.screenMargin,
+                    ),
+                    sliver: SliverToBoxAdapter(child: _SkeletonList()),
+                  )
+                else
+                  _contentSliver(tab, visible, hasReviewed),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: KuberExtendedFab.clearance),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _selectionHeaderRow(ColorScheme cs) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final unreviewed =
+            ref.watch(
+              smsImportProvider.select((s) => s.valueOrNull?.unreviewed),
+            ) ??
+            const <SmsTransaction>[];
+        final visibleIds = _filter(unreviewed).map((e) => e.id).toSet();
+        final selectedVisibleCount = _selectedIds
+            .intersection(visibleIds)
+            .length;
+        final allSelected =
+            selectedVisibleCount > 0 &&
+            selectedVisibleCount == visibleIds.length;
+        return Row(
+          children: [
+            AppIconButton(
+              icon: Icons.close_rounded,
+              semanticLabel: 'Cancel selection',
+              onPressed: _exitSelection,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                '${_selectedIds.length} selected',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge!.copyWith(color: cs.onSurface),
+              ),
+            ),
+            TextButton(
+              onPressed: () => setState(() {
+                if (allSelected) {
+                  _selectedIds.removeAll(visibleIds);
+                  if (_selectedIds.isEmpty) _selectionMode = false;
+                } else {
+                  _selectedIds.addAll(visibleIds);
+                }
+              }),
+              child: Text(allSelected ? 'Deselect all' : 'Select all'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -535,120 +784,71 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     );
   }
 
-  List<Widget> _contentSlivers(
-    ColorScheme cs,
+  Widget _contentSliver(
+    SmsImportTab tab,
     List<SmsTransaction> visibleItems,
-    bool hasAnyItems,
     bool hasReviewedItems,
   ) {
-    switch (_tab) {
-      case SmsImportTab.unreviewed:
-        if (visibleItems.isEmpty) {
-          if (_query.isNotEmpty) {
-            return [
-              _emptySliver(
-                _SearchEmptyState(
-                  query: _query,
-                  onClear: () {
-                    _searchController.clear();
-                    setState(() {
-                      _query = '';
-                      _displayedCount = _pageSize;
-                    });
-                  },
-                ),
-              ),
-            ];
-          }
-          return [
-            _emptySliver(
-              hasReviewedItems
-                  ? const _EmptyState(
-                      icon: Icons.check_circle_outline_rounded,
-                      title: 'All caught up',
-                      body: 'Every detected transaction has been reviewed.',
-                    )
-                  : const _EmptyState(
-                      icon: Icons.inbox_outlined,
-                      title: 'No bank SMS found',
-                      body:
-                          'Kuber did not find any bank transaction messages in '
-                          'the last 90 days.',
-                    ),
-            ),
-          ];
-        }
-        return [_cardsSliver(visibleItems, selectable: true)];
-      case SmsImportTab.imported:
-        if (visibleItems.isEmpty) {
-          if (_query.isNotEmpty) {
-            return [
-              _emptySliver(
-                _SearchEmptyState(
-                  query: _query,
-                  onClear: () {
-                    _searchController.clear();
-                    setState(() {
-                      _query = '';
-                      _displayedCount = _pageSize;
-                    });
-                  },
-                ),
-              ),
-            ];
-          }
-          return [
-            _emptySliver(
-              const _EmptyState(
-                icon: Icons.inbox_outlined,
-                title: 'Nothing imported yet',
-                body: 'Imported transactions will appear here.',
-              ),
-            ),
-          ];
-        }
-        return [_cardsSliver(visibleItems, selectable: false)];
-      case SmsImportTab.dismissed:
-        if (visibleItems.isEmpty) {
-          if (_query.isNotEmpty) {
-            return [
-              _emptySliver(
-                _SearchEmptyState(
-                  query: _query,
-                  onClear: () {
-                    _searchController.clear();
-                    setState(() {
-                      _query = '';
-                      _displayedCount = _pageSize;
-                    });
-                  },
-                ),
-              ),
-            ];
-          }
-          return [
-            _emptySliver(
-              const _EmptyState(
-                icon: Icons.do_not_disturb_on_outlined,
-                title: 'Nothing dismissed',
-                body:
-                    'Messages you dismiss appear here. You can still add them '
-                    'later.',
-              ),
-            ),
-          ];
-        }
-        return [_cardsSliver(visibleItems, selectable: false)];
+    if (visibleItems.isNotEmpty) {
+      return _cardsSliver(
+        tab,
+        visibleItems,
+        selectable: tab == SmsImportTab.unreviewed,
+      );
     }
+    if (_query.isNotEmpty) {
+      return _emptySliver(
+        _SearchEmptyState(
+          query: _query,
+          onClear: () {
+            _searchController.clear();
+            _setQuery('');
+          },
+        ),
+      );
+    }
+    return _emptySliver(switch (tab) {
+      SmsImportTab.unreviewed =>
+        hasReviewedItems
+            ? const _EmptyState(
+                icon: Icons.check_circle_outline_rounded,
+                title: 'All caught up',
+                body: 'Every detected transaction has been reviewed.',
+              )
+            : const _EmptyState(
+                icon: Icons.inbox_outlined,
+                title: 'No bank SMS found',
+                body:
+                    'Kuber did not find any bank transaction messages in '
+                    'the last 90 days.',
+              ),
+      SmsImportTab.imported => const _EmptyState(
+        icon: Icons.inbox_outlined,
+        title: 'Nothing imported yet',
+        body: 'Imported transactions will appear here.',
+      ),
+      SmsImportTab.dismissed => const _EmptyState(
+        icon: Icons.do_not_disturb_on_outlined,
+        title: 'Nothing dismissed',
+        body:
+            'Messages you dismiss appear here. You can still add them '
+            'later.',
+      ),
+    });
   }
 
   Widget _emptySliver(Widget child) =>
       SliverFillRemaining(hasScrollBody: false, child: child);
 
-  /// Paginated card list for a single status. Renders at most [_displayedCount]
-  /// rows; [_onScroll] grows that as the user reaches the bottom.
-  Widget _cardsSliver(List<SmsTransaction> rows, {required bool selectable}) {
-    final count = rows.length < _displayedCount ? rows.length : _displayedCount;
+  /// Paginated card list for a single status. Renders at most the tab's
+  /// displayed count; [_onScroll] grows it as the user reaches the bottom.
+  Widget _cardsSliver(
+    SmsImportTab tab,
+    List<SmsTransaction> rows, {
+    required bool selectable,
+  }) {
+    final limit = _displayed[tab.index];
+    final count = rows.length < limit ? rows.length : limit;
 
     // Day groups (board 3.9a): caps section label, then one grouped card.
     final children = <Widget>[];
@@ -677,7 +877,12 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
         );
         lastDay = day;
       }
-      dayRows.add(_card(sms, selectable: selectable));
+      final card = _card(sms, selectable: selectable);
+      dayRows.add(
+        selectable && _freshIds.contains(sms.id)
+            ? _FreshRow(key: ValueKey(('fresh', sms.id)), child: card)
+            : card,
+      );
     }
     flush();
 
@@ -800,77 +1005,213 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   }
 }
 
-class _TabPill extends StatelessWidget {
-  final String label;
-  final int? count;
-  final bool selected;
-  final VoidCallback onTap;
+/// Indeterminate M3 linear progress pinned under the tabs while the automatic
+/// refresh runs (board 3.9c). It overlays the content, so the list never
+/// shifts, and hides during pull to refresh (its spinner is the loader then).
+/// Its ticker is muted while hidden, so it costs no frames at rest.
+class _AutoRefreshBar extends ConsumerWidget {
+  final ValueNotifier<bool> pulling;
+  const _AutoRefreshBar({required this.pulling});
 
-  const _TabPill({
-    required this.label,
-    this.count,
-    required this.selected,
-    required this.onTap,
-  });
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scanning = ref.watch(
+      smsImportProvider.select((s) {
+        final p = s.valueOrNull?.scanProgress;
+        return p != null &&
+            !p.isComplete &&
+            p.trigger == ScanTrigger.backgroundRefresh;
+      }),
+    );
+    return ValueListenableBuilder<bool>(
+      valueListenable: pulling,
+      builder: (context, pull, _) {
+        final show = scanning && !pull;
+        // Only the indicator's ticker is muted: the fade keeps its own.
+        return IgnorePointer(
+          child: AnimatedOpacity(
+            opacity: show ? 1 : 0,
+            duration: KuberMotion.fast,
+            curve: KuberMotion.decelerate,
+            child: TickerMode(
+              enabled: show,
+              child: const RepaintBoundary(
+                child: LinearProgressIndicator(
+                  minHeight: 4,
+                  borderRadius: KuberShape.fullR,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A row a refresh just added: grows in (230 ms) and fades in (150 ms), then a
+/// primary 8% tint fades out over 1.2 s. Plays once, when the row is created.
+class _FreshRow extends StatefulWidget {
+  final Widget child;
+  const _FreshRow({super.key, required this.child});
+
+  @override
+  State<_FreshRow> createState() => _FreshRowState();
+}
+
+class _FreshRowState extends State<_FreshRow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1430),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _c.forward();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final fg = selected ? cs.primary : cs.onSurfaceVariant;
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        height: 48,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.titleSmall!.copyWith(color: fg),
-                ),
-                if (count != null && count! > 0) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    constraints: const BoxConstraints(minWidth: 18),
-                    height: 18,
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      borderRadius: KuberShape.fullR,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$count',
-                      style: theme.textTheme.labelSmall!.copyWith(
-                        color: cs.onPrimary,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            if (selected)
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: 64,
-                  height: 3,
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(3),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+    if (KuberMotion.reduced(context)) return widget.child;
+    final tint = Theme.of(context).colorScheme.primary;
+    const enter = 230 / 1430;
+    return RepaintBoundary(
+      child: SizeTransition(
+        alignment: Alignment.topCenter,
+        sizeFactor: CurvedAnimation(
+          parent: _c,
+          curve: const Interval(0, enter, curve: KuberMotion.decelerate),
+        ),
+        child: FadeTransition(
+          opacity: CurvedAnimation(
+            parent: _c,
+            curve: const Interval(0, 150 / 1430, curve: KuberMotion.decelerate),
+          ),
+          child: AnimatedBuilder(
+            animation: _c,
+            builder: (context, child) {
+              final t = ((_c.value - enter) / (1 - enter)).clamp(0.0, 1.0);
+              return ColoredBox(
+                color: tint.withValues(alpha: 0.08 * (1 - t)),
+                child: child,
+              );
+            },
+            child: widget.child,
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Untracked today placeholder while an automatic refresh fills an empty tab.
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    Widget kpi(double label, double value) => Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          KuberSkeleton(width: label, height: 14),
+          const SizedBox(height: 10),
+          KuberSkeleton(width: value, height: 28),
+        ],
+      ),
+    );
+    return KuberCard(
+      hero: true,
+      color: cs.secondaryContainer,
+      borderColor: cs.secondaryContainer,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const KuberSkeleton(width: 96, height: 10),
+          const SizedBox(height: KuberSpace.lg),
+          Row(
+            children: [
+              kpi(64, 100),
+              const SizedBox(width: KuberSpace.lg),
+              kpi(72, 110),
+            ],
+          ),
+          const SizedBox(height: KuberSpace.lg),
+          const KuberSkeleton(width: 140, height: 14),
+        ],
+      ),
+    );
+  }
+}
+
+/// Four skeleton message rows under a skeleton day label.
+class _SkeletonList extends StatelessWidget {
+  const _SkeletonList();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget row(double title, double meta) => Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const KuberSkeleton(
+            width: 40,
+            height: 40,
+            borderRadius: KuberShape.full,
+          ),
+          const SizedBox(width: KuberSpace.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    KuberSkeleton(width: title, height: 14),
+                    const Spacer(),
+                    const KuberSkeleton(width: 56, height: 14),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Row(
+                  children: [
+                    KuberSkeleton(width: 92, height: 20),
+                    SizedBox(width: 6),
+                    KuberSkeleton(width: 72, height: 20),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                KuberSkeleton(width: meta, height: 10),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: KuberSpace.md),
+        const KuberSkeleton(width: 48, height: 10),
+        const SizedBox(height: KuberSpace.md),
+        KuberGroup(
+          children: [
+            row(120, 88),
+            row(96, 104),
+            row(132, 80),
+            row(104, 96),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -888,46 +1229,6 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       KuberEmptyState(icon: icon, title: title, description: body);
-}
-
-/// Pinned sticky-header delegate with a fixed height, used for the tab strip
-/// (or the selection bar) so it stays put while the list scrolls.
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double height;
-  final Color background;
-  final Widget child;
-
-  _PinnedHeaderDelegate({
-    required this.height,
-    required this.background,
-    required this.child,
-  });
-
-  @override
-  double get minExtent => height;
-  @override
-  double get maxExtent => height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: background,
-      height: height,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
-      child: child,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_PinnedHeaderDelegate old) =>
-      old.height != height ||
-      old.background != background ||
-      old.child != child;
 }
 
 class _SearchEmptyState extends StatelessWidget {

@@ -12,6 +12,7 @@ import '../../features/settings/providers/settings_provider.dart';
 import 'app_icon_button.dart';
 import 'kuber_info_bottom_sheet.dart';
 import 'kuber_menu.dart';
+import 'kuber_search_pill.dart';
 
 /// The one header (components/header.md, board 2b).
 ///
@@ -116,6 +117,9 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
       onTap: () => toggleAppDrawerEntry(context, ref, entry, !added),
     );
   }
+
+  /// Key of the pill's transition, so the switcher can keep it on top.
+  static const _pillTransition = ValueKey<String>('search-pill');
 
   // Starts open when the screen comes back with a query still applied.
   late bool _searching = widget.search?.controller.text.isNotEmpty ?? false;
@@ -228,6 +232,7 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
         horizontalPadding ??
         (trailing.isNotEmpty ? KuberSpace.lg : KuberSpace.screenMargin);
 
+    final reduced = KuberMotion.reduced(context);
     final searchOpen = _searching && w.search != null;
     return ColoredBox(
       color: w.background ?? Colors.transparent,
@@ -247,21 +252,57 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
               SizedBox(
                 height: 48,
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, a) => FadeTransition(
-                    opacity: a,
-                    child: ScaleTransition(
-                      scale: Tween(begin: 0.96, end: 1.0).animate(a),
-                      child: child,
-                    ),
-                  ),
+                  duration: reduced
+                      ? KuberMotion.reducedFade
+                      : const Duration(milliseconds: 250),
+                  // Same curve both ways: closing plays the opening backwards.
+                  switchInCurve: reduced ? Curves.linear : Curves.easeOutCubic,
+                  switchOutCurve: reduced ? Curves.linear : Curves.easeOutCubic,
+                  // The pill grows out of the trailing edge (the search icon)
+                  // and collapses back into it. It always paints above the
+                  // title row, so closing uncovers the row instead of the row
+                  // fading in over the pill (which read as no animation).
+                  layoutBuilder: (current, previous) {
+                    final all = [...previous, ?current];
+                    bool pill(Widget w) =>
+                        w.key == const ValueKey<Object>(_pillTransition);
+                    return Stack(
+                      alignment: AlignmentDirectional.centerEnd,
+                      children: [
+                        ...all.where((w) => !pill(w)),
+                        ...all.where(pill),
+                      ],
+                    );
+                  },
+                  transitionBuilder: (child, a) {
+                    final fade = FadeTransition(opacity: a, child: child);
+                    if (reduced || child.key != const ValueKey('search')) {
+                      return fade;
+                    }
+                    // Opaque for most of the move (fades only in the last
+                    // 30%), so the title row never shows through it.
+                    return SizeTransition(
+                      key: _pillTransition,
+                      sizeFactor: a,
+                      axis: Axis.horizontal,
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: a,
+                          curve: const Interval(0, 0.3),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
                   child: searchOpen
-                      ? _SearchPill(
+                      ? KuberSearchPill(
                           key: const ValueKey('search'),
-                          search: w.search!,
+                          controller: w.search!.controller,
+                          hint: w.search!.hint,
+                          onChanged: w.search!.onChanged,
                           onClose: _closeSearch,
+                          autofocus: w.search!.controller.text.isEmpty,
                         )
                       : Row(
                           key: const ValueKey('bar'),
@@ -310,84 +351,6 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
                 ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The open header search: a pill with back (closes search and clears the
-/// query), the field, and a clear button while there is text.
-class _SearchPill extends StatelessWidget {
-  final KuberHeaderSearch search;
-  final VoidCallback onClose;
-  const _SearchPill({super.key, required this.search, required this.onClose});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) onClose();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: KuberShape.fullR,
-          border: Border.all(color: cs.primary, width: 2),
-        ),
-        child: Row(
-          children: [
-            AppIconButton(
-              icon: Icons.arrow_back_rounded,
-              kind: AppIconButtonKind.plain,
-              semanticLabel: 'Close search',
-              onPressed: onClose,
-            ),
-            Expanded(
-              child: TextField(
-                controller: search.controller,
-                autofocus: search.controller.text.isEmpty,
-                textAlignVertical: TextAlignVertical.center,
-                textInputAction: TextInputAction.search,
-                onChanged: search.onChanged,
-                style: theme.textTheme.bodyLarge!.copyWith(color: cs.onSurface),
-                decoration: InputDecoration(
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  filled: false,
-                  hintText: search.hint,
-                  hintStyle: theme.textTheme.bodyLarge!.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-            ValueListenableBuilder<TextEditingValue>(
-              valueListenable: search.controller,
-              builder: (_, v, __) => AnimatedSwitcher(
-                duration: const Duration(milliseconds: 150),
-                transitionBuilder: (c, a) =>
-                    ScaleTransition(scale: a, child: c),
-                child: v.text.isEmpty
-                    ? const SizedBox(width: 8, key: ValueKey('none'))
-                    : AppIconButton(
-                        key: const ValueKey('clear'),
-                        icon: Icons.close_rounded,
-                        kind: AppIconButtonKind.plain,
-                        semanticLabel: 'Clear',
-                        onPressed: () {
-                          search.controller.clear();
-                          search.onChanged('');
-                        },
-                      ),
-              ),
-            ),
-          ],
         ),
       ),
     );

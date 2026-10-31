@@ -5950,5 +5950,84 @@
         "type": "String"
       }
     }
+  },
+  "smsTodayLabel": "Untracked today",
+  "@smsTodayLabel": {},
+  "smsTodaySpentLabel": "Spent",
+  "@smsTodaySpentLabel": {},
+  "smsTodayReceivedLabel": "Received",
+  "@smsTodayReceivedLabel": {},
+  "smsTodayCount": "{count, plural, =1{1 SMS not added yet} other{{count} SMS not added yet}}",
+  "@smsTodayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smsTodayCountNoAmount": "{count, plural, =1{1 SMS not added yet} other{{count} SMS not added yet}}, {missing, plural, =1{1 without an amount} other{{missing} without an amount}}",
+  "@smsTodayCountNoAmount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "smsTodayCaughtTitle": "All caught up for today",
+  "@smsTodayCaughtTitle": {},
+  "smsTodayCaughtBody": "Every SMS today is sorted.",
+  "@smsTodayCaughtBody": {},
+  "smsTodayNoneBody": "No bank SMS today so far.",
+  "@smsTodayNoneBody": {},
+  "smsRowNoAmount": "No amount",
+  "@smsRowNoAmount": {},
+  "smsWidgetSpentUntracked": "{amount} spends untracked from SMS",
+  "@smsWidgetSpentUntracked": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "smsWidgetCount": "{count, plural, =1{1 SMS from today not yet added} other{{count} SMS from today not yet added}}",
+  "@smsWidgetCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smsMenuDismissAll": "Dismiss all",
+  "@smsMenuDismissAll": {},
+  "smsDismissAllTitle": "{count, plural, =1{Dismiss 1 message?} other{Dismiss all {count} messages?}}",
+  "@smsDismissAllTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smsDismissAllBody": "They will move to the Dismissed tab. You can still add them from there.",
+  "@smsDismissAllBody": {},
+  "smsDismissAllBodyOne": "It will move to the Dismissed tab. You can still add it from there.",
+  "@smsDismissAllBodyOne": {},
+  "smsDismissAllConfirm": "{count, plural, =1{Dismiss} other{Dismiss all}}",
+  "@smsDismissAllConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smsDismissedSnack": "{count, plural, =1{1 message dismissed} other{{count} messages dismissed}}",
+  "@smsDismissedSnack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -2408,5 +2408,22 @@
   "accountLimitOptional": "सीमा (वैकल्पिक)",
   "accountAvailable": "उपलब्ध {amount}",
   "accountOwedLabel": "बकाया",
-  "accountOverLimit": "यह सीमा से {amount} ज़्यादा है।"
+  "accountOverLimit": "यह सीमा से {amount} ज़्यादा है।",
+  "smsTodayLabel": "आज ट्रैक नहीं हुए",
+  "smsTodaySpentLabel": "खर्च",
+  "smsTodayReceivedLabel": "मिले",
+  "smsTodayCount": "{count, plural, =1{1 SMS अभी जोड़ा नहीं गया} other{{count} SMS अभी जोड़े नहीं गए}}",
+  "smsTodayCountNoAmount": "{count, plural, =1{1 SMS अभी जोड़ा नहीं गया} other{{count} SMS अभी जोड़े नहीं गए}}, {missing, plural, =1{1 बिना राशि} other{{missing} बिना राशि}}",
+  "smsTodayCaughtTitle": "आज का सब हिसाब हो गया",
+  "smsTodayCaughtBody": "आज के सभी SMS निपट गए।",
+  "smsTodayNoneBody": "आज अभी तक कोई बैंक SMS नहीं।",
+  "smsRowNoAmount": "राशि नहीं",
+  "smsWidgetSpentUntracked": "SMS से {amount} के खर्च ट्रैक नहीं हुए",
+  "smsWidgetCount": "{count, plural, =1{आज का 1 SMS अभी जोड़ा नहीं गया} other{आज के {count} SMS अभी जोड़े नहीं गए}}",
+  "smsMenuDismissAll": "सभी हटाएँ",
+  "smsDismissAllTitle": "{count, plural, =1{1 मैसेज हटाएँ?} other{सभी {count} मैसेज हटाएँ?}}",
+  "smsDismissAllBody": "ये Dismissed टैब में चले जाएँगे। आप उन्हें वहाँ से अब भी जोड़ सकते हैं।",
+  "smsDismissAllBodyOne": "यह Dismissed टैब में चला जाएगा। आप इसे वहाँ से अब भी जोड़ सकते हैं।",
+  "smsDismissAllConfirm": "{count, plural, =1{हटाएँ} other{सभी हटाएँ}}",
+  "smsDismissedSnack": "{count, plural, =1{1 मैसेज हटाया गया} other{{count} मैसेज हटाए गए}}"
 }

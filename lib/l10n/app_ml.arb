@@ -2408,5 +2408,22 @@
   "accountLimitOptional": "പരിധി (ഐച്ഛികം)",
   "accountAvailable": "ലഭ്യം {amount}",
   "accountOwedLabel": "കൊടുക്കാനുള്ളത്",
-  "accountOverLimit": "ഇത് പരിധി {amount} കവിയുന്നു."
+  "accountOverLimit": "ഇത് പരിധി {amount} കവിയുന്നു.",
+  "smsTodayLabel": "ഇന്ന് രേഖപ്പെടുത്താത്തവ",
+  "smsTodaySpentLabel": "ചെലവ്",
+  "smsTodayReceivedLabel": "ലഭിച്ചത്",
+  "smsTodayCount": "{count, plural, =1{1 SMS ഇനിയും ചേർത്തിട്ടില്ല} other{{count} SMS ഇനിയും ചേർത്തിട്ടില്ല}}",
+  "smsTodayCountNoAmount": "{count, plural, =1{1 SMS ഇനിയും ചേർത്തിട്ടില്ല} other{{count} SMS ഇനിയും ചേർത്തിട്ടില്ല}}, {missing, plural, =1{1 എണ്ണത്തിൽ തുകയില്ല} other{{missing} എണ്ണത്തിൽ തുകയില്ല}}",
+  "smsTodayCaughtTitle": "ഇന്നത്തേത് എല്ലാം കഴിഞ്ഞു",
+  "smsTodayCaughtBody": "ഇന്നത്തെ എല്ലാ SMS-ഉം ക്രമീകരിച്ചു.",
+  "smsTodayNoneBody": "ഇന്ന് ഇതുവരെ ബാങ്ക് SMS ഒന്നുമില്ല.",
+  "smsRowNoAmount": "തുകയില്ല",
+  "smsWidgetSpentUntracked": "SMS-ൽ നിന്നുള്ള {amount} ചെലവ് രേഖപ്പെടുത്തിയിട്ടില്ല",
+  "smsWidgetCount": "{count, plural, =1{ഇന്നത്തെ 1 SMS ഇനിയും ചേർത്തിട്ടില്ല} other{ഇന്നത്തെ {count} SMS ഇനിയും ചേർത്തിട്ടില്ല}}",
+  "smsMenuDismissAll": "എല്ലാം ഒഴിവാക്കുക",
+  "smsDismissAllTitle": "{count, plural, =1{1 സന്ദേശം ഒഴിവാക്കണോ?} other{{count} സന്ദേശങ്ങളും ഒഴിവാക്കണോ?}}",
+  "smsDismissAllBody": "ഇവ Dismissed ടാബിലേക്ക് മാറും. അവിടെ നിന്ന് ഇനിയും ചേർക്കാം.",
+  "smsDismissAllBodyOne": "ഇത് Dismissed ടാബിലേക്ക് മാറും. അവിടെ നിന്ന് ഇനിയും ചേർക്കാം.",
+  "smsDismissAllConfirm": "{count, plural, =1{ഒഴിവാക്കുക} other{എല്ലാം ഒഴിവാക്കുക}}",
+  "smsDismissedSnack": "{count, plural, =1{1 സന്ദേശം ഒഴിവാക്കി} other{{count} സന്ദേശങ്ങൾ ഒഴിവാക്കി}}"
 }

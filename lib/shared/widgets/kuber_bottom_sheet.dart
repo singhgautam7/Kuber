@@ -31,6 +31,10 @@ class KuberBottomSheet extends StatefulWidget {
   /// Optional actions widget pinned at the bottom.
   final Widget? actions;
 
+  /// Shows the header close button (default). Confirmation sheets whose
+  /// actions include Cancel turn it off.
+  final bool showClose;
+
   const KuberBottomSheet({
     super.key,
     required this.title,
@@ -39,6 +43,7 @@ class KuberBottomSheet extends StatefulWidget {
     this.leadingIcon,
     required this.child,
     this.actions,
+    this.showClose = true,
   });
 
   @override
@@ -129,12 +134,14 @@ class _KuberBottomSheetState extends State<KuberBottomSheet> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: KuberSpace.sm),
-                  AppIconButton(
-                    icon: Icons.close_rounded,
-                    semanticLabel: 'Close',
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+                  if (widget.showClose) ...[
+                    const SizedBox(width: KuberSpace.sm),
+                    AppIconButton(
+                      icon: Icons.close_rounded,
+                      semanticLabel: 'Close',
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
                 ],
               ),
             ),

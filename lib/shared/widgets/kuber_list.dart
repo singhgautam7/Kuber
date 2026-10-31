@@ -210,6 +210,7 @@ class KuberListRow extends StatelessWidget {
   final bool dense;
   final bool destructive;
   final double? minHeight;
+  final int titleLines;
   final int subtitleLines;
 
   /// e.g. line-through for completed items.
@@ -229,6 +230,7 @@ class KuberListRow extends StatelessWidget {
     this.dense = false,
     this.destructive = false,
     this.minHeight,
+    this.titleLines = 1,
     this.subtitleLines = 1,
     this.titleDecoration,
   });
@@ -270,7 +272,7 @@ class KuberListRow extends StatelessWidget {
                     Flexible(
                       child: Text(
                         title,
-                        maxLines: 1,
+                        maxLines: titleLines,
                         overflow: TextOverflow.ellipsis,
                         style:
                             (dense

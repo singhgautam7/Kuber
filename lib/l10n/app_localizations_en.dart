@@ -8303,4 +8303,113 @@ class AppLocalizationsEn extends AppLocalizations {
   String accountOverLimit(String amount) {
     return 'This goes over the limit by $amount.';
   }
+
+  @override
+  String get smsTodayLabel => 'Untracked today';
+
+  @override
+  String get smsTodaySpentLabel => 'Spent';
+
+  @override
+  String get smsTodayReceivedLabel => 'Received';
+
+  @override
+  String smsTodayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count SMS not added yet',
+      one: '1 SMS not added yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String smsTodayCountNoAmount(int count, int missing) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count SMS not added yet',
+      one: '1 SMS not added yet',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      missing,
+      locale: localeName,
+      other: '$missing without an amount',
+      one: '1 without an amount',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String get smsTodayCaughtTitle => 'All caught up for today';
+
+  @override
+  String get smsTodayCaughtBody => 'Every SMS today is sorted.';
+
+  @override
+  String get smsTodayNoneBody => 'No bank SMS today so far.';
+
+  @override
+  String get smsRowNoAmount => 'No amount';
+
+  @override
+  String smsWidgetSpentUntracked(String amount) {
+    return '$amount spends untracked from SMS';
+  }
+
+  @override
+  String smsWidgetCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count SMS from today not yet added',
+      one: '1 SMS from today not yet added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smsMenuDismissAll => 'Dismiss all';
+
+  @override
+  String smsDismissAllTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dismiss all $count messages?',
+      one: 'Dismiss 1 message?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smsDismissAllBody =>
+      'They will move to the Dismissed tab. You can still add them from there.';
+
+  @override
+  String get smsDismissAllBodyOne =>
+      'It will move to the Dismissed tab. You can still add it from there.';
+
+  @override
+  String smsDismissAllConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dismiss all',
+      one: 'Dismiss',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String smsDismissedSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages dismissed',
+      one: '1 message dismissed',
+    );
+    return '$_temp0';
+  }
 }
