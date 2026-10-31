@@ -85,6 +85,9 @@ class UpcomingDayCell extends StatelessWidget {
             onTap: onTap,
             onLongPress: onLongPress,
             borderRadius: BorderRadius.circular(KuberShape.medium),
+            // The theme's InkSparkle runs ~600 ms on a shader; a quick ripple
+            // suits a grid tapped day after day and keeps raster cheap.
+            splashFactory: InkRipple.splashFactory,
             overlayColor: WidgetStatePropertyAll(cs.onSurface.withValues(alpha: 0.10)),
             child: Stack(
               clipBehavior: Clip.none,

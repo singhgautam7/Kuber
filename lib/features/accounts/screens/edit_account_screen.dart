@@ -34,6 +34,7 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/color_palette.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
@@ -44,7 +45,7 @@ import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider, settingsProvider;
+    show currencyProvider, formatterProvider, settingsProvider, NumberSystem;
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
 import '../providers/account_provider.dart';
@@ -84,7 +85,12 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   bool _seeded = false;
 
   Account get _a => widget.account;
-  bool get _isCredit => _a.isCreditCard;
+  bool get _isCreditCard => _a.isCreditCard;
+  bool get _isOverdraft => _a.isOverdraft;
+
+  /// Credit card or Overdraft: the hero is what is owed (stored
+  /// negative) and there is a limit.
+  bool get _isCredit => _a.isLiability;
   bool get _isCash => _a.type == 'cash' && !_a.isCreditCard;
   bool get _showIdentifier => !_isCash;
 
@@ -121,8 +127,11 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     super.dispose();
   }
 
+  /// Grouped seed text ("1,00,000"); the limit is a plain TextField, so the
+  /// shared fields' regroup of code-set text doesn't reach it.
   String _fmtSeed(double v) =>
-      v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+      CurrencyInputFormatter(isIndian: ref.read(formatterProvider).system == NumberSystem.indian)
+          .format(v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(2));
 
   /// Rounds to paise (2 decimals). The computed balance can carry sub-paise
   /// floating-point residue from summing transactions; comparing that against
@@ -144,7 +153,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   /// Signed new hero value, mirroring EditBalanceSheet (_newValue):
   /// credit stores limit-spent as a negative number.
   double? get _typedSigned {
-    final raw = double.tryParse(_valueController.text.trim());
+    final raw = double.tryParse(_valueController.text.replaceAll(',', '').trim());
     if (raw == null) return null;
     return _isCredit ? -raw : raw;
   }
@@ -187,8 +196,8 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
       final confirmed = await showAdjustmentConfirmation(
         context,
-        valueNoun: _isCredit ? l10n.valueNounLimitSpent : l10n.valueNounBalance,
-        valueNounCap: _isCredit
+        valueNoun: _isCreditCard ? l10n.valueNounLimitSpent : l10n.valueNounBalance,
+        valueNounCap: _isCreditCard
             ? l10n.valueNounLimitSpentCap
             : l10n.valueNounBalanceCap,
         fromText: _formatCurrency(fromMag),
@@ -228,7 +237,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
           : null;
     // Total Limit is a plain field write (no adjustment).
     if (_isCredit) {
-      account.creditLimit = double.tryParse(_limitController.text.trim());
+      account.creditLimit = double.tryParse(_limitController.text.replaceAll(',', '').trim());
       // Billing cycle. Reminder flags follow their day + toggle.
       account
         ..billGenerationDay = _billGenerationDay
@@ -548,6 +557,11 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     final cs = theme.colorScheme;
     final l10n = context.l10n;
     final symbol = ref.watch(currencyProvider).symbol;
+    final amountFormatters = [
+      CurrencyInputFormatter(
+        isIndian: ref.watch(formatterProvider).system == NumberSystem.indian,
+      ),
+    ];
     final iconKey = _selectedIcon ?? IconMapper.kAccountIconKeys.first;
     final colorValue = _selectedColor ?? AppColorPalette.kVibrant.first;
     final field = theme.textTheme.bodyLarge!.copyWith(color: cs.onSurface);
@@ -644,6 +658,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                         ('bank', l10n.accountTypeBank),
                         ('cash', l10n.accountTypeCash),
                         ('credit', l10n.accountTypeCreditCard),
+                        ('overdraft', l10n.accountTypeOverdraft),
                       ])
                         Opacity(
                           opacity: _isTypeKey(key) ? 1 : 0.38,
@@ -686,16 +701,16 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
           label: l10n.balanceLabel,
           children: [
             KuberHeroAmountInput(
-              label: _isCredit
+              label: _isOverdraft
+                  ? l10n.accountAmountOwed
+                  : _isCredit
                   ? l10n.limitSpentLabel
                   : l10n.currentBalanceLabel,
               currencySymbol: symbol,
               controller: _valueController,
               large: false,
               tone: _isCredit ? HeroAmountTone.expense : HeroAmountTone.neutral,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-              ],
+              inputFormatters: amountFormatters,
             ),
             _AdjustmentIndicator(
               hasChange: _hasAdjustment,
@@ -711,31 +726,28 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                           ))
                   : '',
             ),
+            // Same filled field as the balance above (and the add form).
             if (_isCredit)
-              TextField(
+              KuberHeroAmountInput(
+                label: _isOverdraft ? l10n.accountLimitOptional : l10n.totalLimitField,
+                currencySymbol: symbol,
                 controller: _limitController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onTapOutside: (_) =>
-                    FocusManager.instance.primaryFocus?.unfocus(),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                ],
-                style: field,
-                decoration: InputDecoration(
-                  labelText: l10n.totalLimitLabel,
-                  prefixText: '$symbol ',
-                  hintText: '0',
-                  helperText: l10n.totalLimitHelper,
-                  helperMaxLines: 2,
+                large: false,
+                inputFormatters: amountFormatters,
+              ),
+            if (_isCreditCard)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Text(
+                  l10n.totalLimitHelper,
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
           ],
         ),
 
         // ── Billing cycle (credit only) ──────────────────────────────────
-        if (_isCredit) ...[
+        if (_isCreditCard) ...[
           const SizedBox(height: KuberSpace.xl),
           CreditBillingCycleSection(
             billDay: _billGenerationDay,
@@ -799,12 +811,14 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   }
 
   bool _isTypeKey(String key) => switch (key) {
-    'credit' => _isCredit,
+    'credit' => _isCreditCard,
+    'overdraft' => _isOverdraft,
     'cash' => _isCash,
     _ => !_isCredit && !_isCash,
   };
 
   String _typeName(AppLocalizations l10n) {
+    if (_isOverdraft) return l10n.accountTypeOverdraft;
     if (_isCredit) return l10n.accountTypeCreditCard;
     if (_isCash) return l10n.accountTypeCash;
     return l10n.accountTypeBank;

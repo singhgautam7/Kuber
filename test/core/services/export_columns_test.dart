@@ -32,8 +32,8 @@ void main() {
       totalCount: 2,
     ));
     final lines = csv.split('\r\n');
-    expect(lines[0], 'Date,Name,Type,Category,Account,Amount (KES),Notes,Sub type,Source,Principal,Interest');
-    expect(lines[1], '2026-05-05,EMI - Home,Expense,Loan EMI,HDFC,-10000.00,,loan_repayment,Loan: Home,8000.00,2000.00');
-    expect(lines[2], '2026-05-06,Tea,Expense,Food,Cash,-20.00,,,,,');
+    expect(lines[0], 'Date,Name,Type,Category,Account,Amount (KES),Notes,Sub type,Source,Principal,Interest,Split edited,Past EMI');
+    expect(lines[1], '2026-05-05,EMI - Home,Expense,Loan EMI,HDFC,-10000.00,,loan_repayment,Loan: Home,8000.00,2000.00,,');
+    expect(lines[2], '2026-05-06,Tea,Expense,Food,Cash,-20.00,,,,,,,');
   });
 }

@@ -4682,7 +4682,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get makeDefaultAccountSub =>
-      'లావాదేవీలను జోడించేటప్పుడు ముందుగా ఎంపిక చేయబడుతుంది.';
+      'క్విక్ యాడ్, వాయిస్ యాడ్ లేదా Ask Kuber ద్వారా లావాదేవీలను జోడించేటప్పుడు ముందుగా ఎంపిక చేయబడుతుంది.';
 
   @override
   String get currentBalanceLabel => 'ప్రస్తుత బ్యాలెన్స్';
@@ -8074,4 +8074,275 @@ class AppLocalizationsTe extends AppLocalizations {
   @override
   String get msLoansReopenBody =>
       'దీని EMIలు తదుపరి తేదీ నుండి మళ్లీ మొదలవుతాయి. మూసి ఉన్న కాలానికి ఏదీ జోడించబడదు.';
+
+  @override
+  String get msLoansUpdateOutstanding => 'బకాయిని అప్‌డేట్ చేయండి';
+
+  @override
+  String get msLoansOutstandingPrincipal => 'బకాయి అసలు';
+
+  @override
+  String get msLoansAsOn => 'ఈ తేదీ నాటికి';
+
+  @override
+  String get msLoansAdjReason => 'కారణం';
+
+  @override
+  String get msLoansAdjMatchBank => 'బ్యాంక్ స్టేట్‌మెంట్‌తో సరిపోల్చండి';
+
+  @override
+  String get msLoansAdjMatchBankSub => 'మీ బ్యాంక్ వేరే బకాయిని చూపుతోంది.';
+
+  @override
+  String get msLoansAdjInterestAdded => 'చెల్లించని వడ్డీ రుణంలో కలిపారు';
+
+  @override
+  String get msLoansAdjInterestAddedSub =>
+      'మీ బ్యాంక్ వడ్డీని బకాయికి కలిపింది, మారటోరియం సమయంలో లాగా.';
+
+  @override
+  String msLoansKuberOutstandingOn(String date) {
+    return '$date నాటికి Kuber బకాయి';
+  }
+
+  @override
+  String get msLoansAdjDifference => 'తేడా';
+
+  @override
+  String get msLoansKeepEmiChangeEnd => 'EMI అదే, ముగింపు తేదీ మారుతుంది';
+
+  @override
+  String get msLoansKeepEndChangeEmi => 'ముగింపు తేదీ అదే, EMI మారుతుంది';
+
+  @override
+  String msLoansKeepEmiResult(String emi, String month) {
+    return 'EMI $emi ఉంటుంది · $monthలో ముగుస్తుంది';
+  }
+
+  @override
+  String msLoansKeepEndResult(String month, String emi) {
+    return '$monthలో ముగుస్తుంది · EMI $emi అవుతుంది';
+  }
+
+  @override
+  String get msLoansRemainingInterest => 'మిగిలిన వడ్డీ';
+
+  @override
+  String get msLoansAdjErrNegative => 'బకాయి 0 కంటే తక్కువ ఉండకూడదు.';
+
+  @override
+  String get msLoansAdjZeroTitle => 'చెల్లించడానికి ఏమీ లేదా?';
+
+  @override
+  String get msLoansAdjZeroBody =>
+      '0 బకాయి అంటే రుణం తీరింది. మూసివేసినట్లు గుర్తించాలా?';
+
+  @override
+  String get msLoansAdjSaveOnly => 'సేవ్ మాత్రమే';
+
+  @override
+  String get msLoansAdjSaved => 'బకాయి అప్‌డేట్ అయింది';
+
+  @override
+  String msLoansEventAdjusted(String amount, String date) {
+    return 'బకాయి అప్‌డేట్ $amount · $date';
+  }
+
+  @override
+  String msLoansEventInterestAdded(String amount, String date) {
+    return 'రుణంలో వడ్డీ కలిపారు $amount · $date';
+  }
+
+  @override
+  String get msLoansEventAdjSubTenure => 'EMI మారలేదు, ముగింపు తేదీ మారింది';
+
+  @override
+  String get msLoansEventAdjSubEmi => 'ముగింపు తేదీ అదే, EMI మారింది';
+
+  @override
+  String get msLoansEventDeleted => 'తొలగించబడింది';
+
+  @override
+  String get msLoansInterestAdded => 'రుణంలో కలిపిన వడ్డీ';
+
+  @override
+  String msLoansRecalcTitle(int count) {
+    return 'మీరు మార్చని తర్వాతి $count EMIల విభజనను మళ్లీ లెక్కించాలా?';
+  }
+
+  @override
+  String msLoansRecalcBody(String before, String after) {
+    return 'ఆ EMIలలో వడ్డీ ఇప్పుడు $before, మళ్లీ లెక్కిస్తే $after. మీరు మార్చిన EMIలు అలాగే ఉంటాయి.';
+  }
+
+  @override
+  String get msLoansRecalc => 'మళ్లీ లెక్కించండి';
+
+  @override
+  String get msLoansKeepAsIs => 'అలాగే ఉంచండి';
+
+  @override
+  String msLoansRecalcDone(int count) {
+    return '$count EMIలు అప్‌డేట్ అయ్యాయి';
+  }
+
+  @override
+  String get msLoansDeleteExtraTitle => 'ఈ అదనపు చెల్లింపును తొలగించాలా?';
+
+  @override
+  String get msLoansDeleteExtraBody =>
+      'దీని లావాదేవీలు కూడా తొలగిపోతాయి, బకాయి మళ్లీ పెరుగుతుంది.';
+
+  @override
+  String get msLoansDeleteAdjTitle => 'ఈ అప్‌డేట్‌ను తొలగించాలా?';
+
+  @override
+  String get msLoansDeleteAdjBody => 'బకాయి మళ్లీ Kuber లెక్కకు వస్తుంది.';
+
+  @override
+  String get msTxnEdited => 'మార్చబడింది';
+
+  @override
+  String get msTxnSplitHelper =>
+      'మీ బ్యాంక్‌తో సరిపోల్చడానికి వీటిని మార్చండి. ఇవి ఎప్పుడూ EMIకి సమానం.';
+
+  @override
+  String get msTxnSplitErr => 'అసలు, వడ్డీ 0 కంటే తక్కువ ఉండకూడదు.';
+
+  @override
+  String get msInfoSplitEditedTitle => 'మార్చిన విభజన';
+
+  @override
+  String get msInfoSplitEditedLine =>
+      'మీ బ్యాంక్‌తో సరిపోయేలా మీరు ఈ విభజనను మార్చారు. Kuber బకాయికి మీ అంకెలను వాడుతుంది, అక్కడి నుంచి రాబోయే EMIలను అంచనా వేస్తుంది.';
+
+  @override
+  String get msInfoAdjustBankLine =>
+      'బ్యాంక్ స్టేట్‌మెంట్‌లో బకాయి Kuber కంటే వేరుగా ఉన్నప్పుడు దీన్ని వాడండి. Kuber ఆ తేదీ నుంచి మీ అంకె నుంచి కొనసాగుతుంది.';
+
+  @override
+  String get msInfoAdjustInterestLine =>
+      'కొన్ని బ్యాంకులు చెల్లించని వడ్డీని, మారటోరియంలో లేదా EMIలు మొదలయ్యే ముందు లాగా, బకాయికి కలుపుతాయి. ఇది రుణం మొత్తం వడ్డీలో లెక్కకు వస్తుంది. మీ ఖాతా నుంచి డబ్బు వెళ్లలేదు కాబట్టి ఇది ఖర్చు కాదు.';
+
+  @override
+  String get msInfoRemainingLine =>
+      'మిగిలిన వడ్డీ మీ బకాయి, రేటు, EMI మీద ఆధారపడుతుంది, కాబట్టి Kuber దాన్ని లెక్కిస్తుంది. బదులుగా బకాయి లేదా రేటును అప్‌డేట్ చేయండి.';
+
+  @override
+  String get msLoansPastEmis => 'గత EMIలను లావాదేవీలుగా జోడించండి';
+
+  @override
+  String get msInfoPastEmisLine =>
+      'రుణం ఇప్పటికే నడిచిన ప్రతి నెలకు Kuber అసలు, వడ్డీతో ఒక EMI లావాదేవీని జోడిస్తుంది. ఏ చెల్లింపులాగానే మీ ఖాతా నిల్వ మొత్తం మేరకు తగ్గుతుంది. గత లావాదేవీలు లేకుండా ఈరోజు నుంచి మొదలుపెట్టాలంటే దీన్ని ఆఫ్‌లో ఉంచండి.';
+
+  @override
+  String get msLoansPastEmisHelp =>
+      'మొదటి EMI తేదీ నుంచి ఈరోజు వరకు ప్రతి EMIని లావాదేవీగా సృష్టిస్తుంది.';
+
+  @override
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  ) {
+    return '$from నుంచి $to వరకు $count EMIలను జోడించి $account నిల్వను $amount తగ్గిస్తుంది.';
+  }
+
+  @override
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  ) {
+    return '$from నుంచి $to వరకు $count EMIలను జోడిస్తుంది, మొత్తం $amount.';
+  }
+
+  @override
+  String msLoansPastEmisRemoveTitle(int count) {
+    return 'ఈ స్విచ్ జోడించిన $count గత EMIలను తీసివేయాలా?';
+  }
+
+  @override
+  String get msLoansPastEmisRemoveBody =>
+      'మీరు మార్చిన EMIలు ఉంటాయి. తీసివేసిన వాటి మేరకు ఖాతా నిల్వ మళ్లీ పెరుగుతుంది.';
+
+  @override
+  String get msLoansKeep => 'ఉంచండి';
+
+  @override
+  String get msLoansRemove => 'తీసివేయండి';
+
+  @override
+  String msLoansPastEmisRemoved(int removed, int kept) {
+    return '$removed గత EMIలు తీసివేశాం. మీరు మార్చిన $kept ఉంచాం.';
+  }
+
+  @override
+  String get bgStepPastEmis => 'గత EMIలను జోడిస్తున్నాం…';
+
+  @override
+  String bgJobPercent(String text, int percent) {
+    return '$text $percent%';
+  }
+
+  @override
+  String bgJobsRunning(String text, int count) {
+    return '$text ($count పనులు)';
+  }
+
+  @override
+  String get bgJobFailed => 'ఏదో పొరపాటు జరిగింది';
+
+  @override
+  String get bgDetails => 'వివరాలు';
+
+  @override
+  String get bgDetailsTitle => 'ఏం తప్పు జరిగింది';
+
+  @override
+  String get bgAddedOne => '1 లావాదేవీ జోడించాం';
+
+  @override
+  String bgAdded(int count) {
+    return '$count లావాదేవీలు జోడించాం';
+  }
+
+  @override
+  String get bgBackupSaved => 'బ్యాకప్ సేవ్ అయింది';
+
+  @override
+  String get accountTypeOverdraft => 'ఓవర్‌డ్రాఫ్ట్';
+
+  @override
+  String get accountOverdraftHint => 'ఉదా. HDFC ఓవర్‌డ్రాఫ్ట్';
+
+  @override
+  String get accountOverdraftSub =>
+      'మీరు చెల్లించాల్సిన డబ్బు కోసం, ఓవర్‌డ్రాఫ్ట్ లాగా.';
+
+  @override
+  String get accountOverdraftInfoLine =>
+      'మీరు చెల్లించాల్సిన డబ్బు కోసం దీన్ని వాడండి, ఓవర్‌డ్రాఫ్ట్ లేదా క్రెడిట్ లైన్ లాగా. Loansలో ట్రాక్ చేసే EMIలు ఇప్పటికీ అక్కడ ఎంచుకున్న ఖాతా నుంచే వెళ్తాయి.';
+
+  @override
+  String get accountAmountOwed => 'బకాయి మొత్తం';
+
+  @override
+  String get accountLimitOptional => 'పరిమితి (ఐచ్ఛికం)';
+
+  @override
+  String accountAvailable(String amount) {
+    return 'అందుబాటులో $amount';
+  }
+
+  @override
+  String get accountOwedLabel => 'బకాయి';
+
+  @override
+  String accountOverLimit(String amount) {
+    return 'ఇది పరిమితిని $amount మించుతుంది.';
+  }
 }

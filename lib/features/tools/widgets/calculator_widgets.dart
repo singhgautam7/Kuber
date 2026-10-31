@@ -130,18 +130,7 @@ class _ToolTextFieldState extends ConsumerState<ToolTextField> {
   /// here, as is existing text when the number format setting changes.
   void _regroup() {
     if (!formatAsAmount) return;
-    final text = controller.text;
-    final v = double.tryParse(text.replaceAll(',', ''));
-    if (v == null) return;
-    // Mid-typing states ("12.", "0.50") are the formatter's business.
-    final midTyping = text.endsWith('.') || (text.contains('.') && text.endsWith('0'));
-    if (midTyping) return;
-    final f = CurrencyInputFormatter(isIndian: _isIndian ?? true).format(text);
-    if (f == text) return;
-    controller.value = TextEditingValue(
-      text: f,
-      selection: TextSelection.collapsed(offset: f.length),
-    );
+    CurrencyInputFormatter.regroup(controller, isIndian: _isIndian ?? true);
   }
 
   @override

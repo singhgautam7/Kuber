@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:kuber/l10n/app_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart'
     show FlutterQuillLocalizations;
@@ -11,8 +12,11 @@ import 'main.dart' show onOpenBatchReadyProvider;
 import 'features/settings/providers/theme_options_provider.dart';
 import 'features/kuber_cards/providers/kuber_cards_provider.dart';
 import 'core/database/isar_service.dart';
+import 'package:go_router/go_router.dart';
+import 'core/background/background_reporter.dart';
 import 'core/background/background_run_controller.dart';
 import 'core/background/background_tasks.dart';
+import 'core/utils/ui_idle.dart';
 import 'core/utils/locale_font.dart' show AppLocale;
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
@@ -22,6 +26,7 @@ import 'core/theme/app_theme.dart';
 import 'features/analytics/providers/analytics_provider.dart';
 import 'features/auth/screens/lock_screen.dart';
 import 'features/budgets/services/budget_service.dart';
+import 'features/history/providers/history_filter_provider.dart';
 import 'features/history/providers/history_view_provider.dart';
 import 'features/history/providers/selection_provider.dart';
 import 'features/transactions/providers/transaction_provider.dart';
@@ -80,6 +85,15 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // as the in-app sheet.
     _notificationTapSub = notificationTaps.stream
         .listen((payload) => handleNotificationTap(ref, payload: payload));
+    // One reporter for background work (D3): any started run is followed,
+    // and View opens History filtered to what a job added.
+    BackgroundTasks.onStarted =
+        (since) => ref.read(backgroundRunWatchProvider.notifier).watchFrom(since);
+    BackgroundReporter.instance.openAdded = (ids) {
+      ref.read(historyFilterProvider.notifier).showOnly(ids.toSet());
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx != null) GoRouter.of(ctx).go('/history');
+    };
     // On-open processing deferred to after the first frame so it never delays
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
@@ -286,11 +300,15 @@ class _KuberAppState extends ConsumerState<KuberApp>
     final now = DateTime.now();
     _lastBackgroundCheckDay = DateTime(now.year, now.month, now.day);
     try {
+      // The worker's engine starts on the main thread (~35 ms): not while
+      // Home is still animating.
+      await whenUiIdle();
+      if (!mounted) return;
       final started = await BackgroundTasks.start(
           ref.read(isarProvider), lookupAppLocalizations(AppLocale.current),
           trigger: trigger);
+      // A started run is followed through BackgroundTasks.onStarted.
       debugPrint('Kuber: background tasks ($trigger): ${started ? 'started' : 'nothing due'}');
-      if (started) ref.read(backgroundRunWatchProvider.notifier).watchFrom(now);
     } catch (e, stack) {
       debugPrint('Kuber: background tasks failed to start (non-fatal): $e\n$stack');
     }
@@ -577,6 +595,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
+        // Before the stock Material delegate so English picks it up.
+        _IndianEnglishMaterialLocalizations(),
         ...AppLocalizations.localizationsDelegates,
         // Required by the flutter_quill editor used in Kuber Notes.
         FlutterQuillLocalizations.delegate,
@@ -648,4 +668,22 @@ class _AppTextScale extends ConsumerWidget {
       child: child,
     );
   }
+}
+
+/// English Material strings from en_IN instead of en_US: the same words, but
+/// date pickers read and type dates as DD/MM/YYYY. Only Material widgets see
+/// this; the app's locale stays `en`.
+class _IndianEnglishMaterialLocalizations
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _IndianEnglishMaterialLocalizations();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'en';
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) =>
+      GlobalMaterialLocalizations.delegate.load(const Locale('en', 'IN'));
+
+  @override
+  bool shouldReload(_IndianEnglishMaterialLocalizations old) => false;
 }

@@ -2643,7 +2643,7 @@
   "accountIdentifierHint": "Last 4 digits or full number",
   "accountIdentifierHelper": "Last 4 digits or full number. Used to match SMS imports.",
   "makeDefaultAccount": "Make this the default account",
-  "makeDefaultAccountSub": "Pre-selected when adding transactions.",
+  "makeDefaultAccountSub": "Pre-selected when adding transactions via Quick Add, Voice Add or Ask Kuber.",
   "currentBalanceLabel": "Current Balance",
   "limitSpentLabel": "Limit Spent",
   "totalLimitLabel": "Total Limit",
@@ -5715,5 +5715,240 @@
       }
     }
   },
-  "msLoansReopenBody": "Its EMIs start again from the next due date. Nothing is added for the time it was closed."
+  "msLoansReopenBody": "Its EMIs start again from the next due date. Nothing is added for the time it was closed.",
+  "msLoansUpdateOutstanding": "Update outstanding",
+  "msLoansOutstandingPrincipal": "Outstanding principal",
+  "msLoansAsOn": "As on",
+  "msLoansAdjReason": "Reason",
+  "msLoansAdjMatchBank": "Match bank statement",
+  "msLoansAdjMatchBankSub": "Your bank shows a different amount owed.",
+  "msLoansAdjInterestAdded": "Unpaid interest added to loan",
+  "msLoansAdjInterestAddedSub": "Your bank added interest to what you owe, like during a moratorium.",
+  "msLoansKuberOutstandingOn": "Kuber's outstanding on {date}",
+  "@msLoansKuberOutstandingOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansAdjDifference": "Difference",
+  "msLoansKeepEmiChangeEnd": "Keep EMI, change end date",
+  "msLoansKeepEndChangeEmi": "Keep end date, change EMI",
+  "msLoansKeepEmiResult": "EMI stays {emi} · ends {month}",
+  "@msLoansKeepEmiResult": {
+    "placeholders": {
+      "emi": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansKeepEndResult": "Ends {month} · EMI becomes {emi}",
+  "@msLoansKeepEndResult": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "emi": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRemainingInterest": "Remaining interest",
+  "msLoansAdjErrNegative": "Outstanding can't be less than 0.",
+  "msLoansAdjZeroTitle": "Nothing left to pay?",
+  "msLoansAdjZeroBody": "An outstanding of 0 means this loan is paid off. Mark it as closed?",
+  "msLoansAdjSaveOnly": "Just save",
+  "msLoansAdjSaved": "Outstanding updated",
+  "msLoansEventAdjusted": "Outstanding updated {amount} · {date}",
+  "@msLoansEventAdjusted": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventInterestAdded": "Interest added to loan {amount} · {date}",
+  "@msLoansEventInterestAdded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventAdjSubTenure": "EMI unchanged, end date moves",
+  "msLoansEventAdjSubEmi": "End date unchanged, EMI changes",
+  "msLoansEventDeleted": "Deleted",
+  "msLoansInterestAdded": "Interest added to loan",
+  "msLoansRecalcTitle": "Recalculate the split of {count} later EMIs you haven't edited?",
+  "@msLoansRecalcTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msLoansRecalcBody": "Interest in those EMIs is {before} now and {after} after recalculating. EMIs you edited stay as they are.",
+  "@msLoansRecalcBody": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansRecalc": "Recalculate",
+  "msLoansKeepAsIs": "Keep as is",
+  "msLoansRecalcDone": "Updated {count} EMIs",
+  "@msLoansRecalcDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msLoansDeleteExtraTitle": "Delete this extra payment?",
+  "msLoansDeleteExtraBody": "Its transactions are deleted too, and the outstanding goes back up.",
+  "msLoansDeleteAdjTitle": "Delete this update?",
+  "msLoansDeleteAdjBody": "The outstanding goes back to Kuber's figure.",
+  "msTxnEdited": "Edited",
+  "msTxnSplitHelper": "Change these to match your bank. They always add up to the EMI.",
+  "msTxnSplitErr": "Principal and interest can't be less than 0.",
+  "msInfoSplitEditedTitle": "Edited split",
+  "msInfoSplitEditedLine": "You changed this split to match your bank. Kuber uses your figures for the outstanding amount and projects future EMIs from there.",
+  "msInfoAdjustBankLine": "Use this when your bank statement shows a different amount owed than Kuber. Kuber starts from your figure on that date.",
+  "msInfoAdjustInterestLine": "Some banks add interest you didn't pay, like during a moratorium or before EMIs start, to what you owe. It counts toward the loan's total interest. It is not spending, because no money left your account.",
+  "msInfoRemainingLine": "Remaining interest depends on what you owe, the rate and your EMI, so Kuber calculates it. Update the outstanding amount or the rate instead.",
+  "msLoansPastEmis": "Add past EMIs as transactions",
+  "msInfoPastEmisLine": "Kuber adds one EMI transaction for every month the loan has already run, with its principal and interest. Your account balance goes down by the total, like any payment. Leave it off to start from today without past transactions.",
+  "msLoansPastEmisHelp": "Creates every EMI from the first EMI date until today as a transaction.",
+  "msLoansPastEmisPreview": "Adds {count} EMIs from {from} to {to} and lowers {account}'s balance by {amount}.",
+  "@msLoansPastEmisPreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPastEmisPreviewNoAccount": "Adds {count} EMIs from {from} to {to}, {amount} in all.",
+  "@msLoansPastEmisPreviewNoAccount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPastEmisRemoveTitle": "Remove the {count} past EMIs added by this switch?",
+  "@msLoansPastEmisRemoveTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msLoansPastEmisRemoveBody": "EMIs you edited are kept. The account balance goes back up by the ones removed.",
+  "msLoansKeep": "Keep",
+  "msLoansRemove": "Remove",
+  "msLoansPastEmisRemoved": "Removed {removed} past EMIs. Kept {kept} you edited.",
+  "@msLoansPastEmisRemoved": {
+    "placeholders": {
+      "removed": {
+        "type": "int"
+      },
+      "kept": {
+        "type": "int"
+      }
+    }
+  },
+  "bgStepPastEmis": "Adding past EMIs…",
+  "bgJobPercent": "{text} {percent}%",
+  "@bgJobPercent": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "bgJobsRunning": "{text} ({count} tasks)",
+  "@bgJobsRunning": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bgJobFailed": "Something went wrong",
+  "bgDetails": "Details",
+  "bgDetailsTitle": "What went wrong",
+  "bgAddedOne": "Added 1 transaction",
+  "bgAdded": "Added {count} transactions",
+  "@bgAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bgBackupSaved": "Backup saved",
+  "accountTypeOverdraft": "Overdraft",
+  "accountOverdraftHint": "e.g. HDFC overdraft",
+  "accountOverdraftSub": "For money you owe, like an overdraft.",
+  "accountOverdraftInfoLine": "Use this for money you owe, like an overdraft or a credit line. EMIs you track in Loans still come from the account you pick there.",
+  "accountAmountOwed": "Amount owed",
+  "accountLimitOptional": "Limit (optional)",
+  "accountAvailable": "Available {amount}",
+  "@accountAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwedLabel": "Owed",
+  "accountOverLimit": "This goes over the limit by {amount}.",
+  "@accountOverLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../settings/providers/settings_provider.dart'
     show
+        NumberSystem,
         currencyProvider,
+        formatterProvider,
         settingsProvider,
         thresholdCeilingProvider,
         thresholdFloorProvider;
@@ -31,11 +34,15 @@ class _ThresholdSettingsSheetState
     super.initState();
     final floor = ref.read(thresholdFloorProvider);
     final ceiling = ref.read(thresholdCeilingProvider);
-    _floorController = TextEditingController(text: floor.toInt().toString());
-    _ceilingController = TextEditingController(
-      text: ceiling.toInt().toString(),
-    );
+    _floorController = TextEditingController(text: _group(floor.toInt()));
+    _ceilingController = TextEditingController(text: _group(ceiling.toInt()));
   }
+
+  bool get _isIndian =>
+      ref.read(formatterProvider).system == NumberSystem.indian;
+
+  String _group(int v) =>
+      CurrencyInputFormatter(isIndian: _isIndian).format(v.toString());
 
   @override
   void dispose() {
@@ -45,11 +52,11 @@ class _ThresholdSettingsSheetState
   }
 
   double get _previewFloor =>
-      double.tryParse(_floorController.text.trim()) ??
+      double.tryParse(_floorController.text.replaceAll(',', '').trim()) ??
       ref.read(thresholdFloorProvider);
 
   double get _previewCeiling =>
-      double.tryParse(_ceilingController.text.trim()) ??
+      double.tryParse(_ceilingController.text.replaceAll(',', '').trim()) ??
       ref.read(thresholdCeilingProvider);
 
   @override
@@ -73,8 +80,8 @@ class _ThresholdSettingsSheetState
                     type: AppButtonType.normal,
                     onPressed: () {
                       setState(() {
-                        _floorController.text = '500';
-                        _ceilingController.text = '2000';
+                        _floorController.text = _group(500);
+                        _ceilingController.text = _group(2000);
                       });
                     },
                   ),
@@ -100,6 +107,7 @@ class _ThresholdSettingsSheetState
               description: context.l10n.thresholdSmallDesc,
               controller: _floorController,
               symbol: symbol,
+              isIndian: ref.watch(formatterProvider).system == NumberSystem.indian,
               cs: cs,
               onChanged: () => setState(() {}),
             ),
@@ -109,6 +117,7 @@ class _ThresholdSettingsSheetState
               description: context.l10n.thresholdLargeDesc,
               controller: _ceilingController,
               symbol: symbol,
+              isIndian: ref.watch(formatterProvider).system == NumberSystem.indian,
               cs: cs,
               onChanged: () => setState(() {}),
             ),
@@ -126,8 +135,8 @@ class _ThresholdSettingsSheetState
   }
 
   void _save() {
-    final floor = double.tryParse(_floorController.text.trim()) ?? 500;
-    final ceiling = double.tryParse(_ceilingController.text.trim()) ?? 2000;
+    final floor = double.tryParse(_floorController.text.replaceAll(',', '').trim()) ?? 500;
+    final ceiling = double.tryParse(_ceilingController.text.replaceAll(',', '').trim()) ?? 2000;
     ref.read(settingsProvider.notifier).setThresholds(floor, ceiling);
     Navigator.of(context, rootNavigator: true).pop();
   }
@@ -138,6 +147,7 @@ class _ThresholdField extends StatelessWidget {
   final String description;
   final TextEditingController controller;
   final String symbol;
+  final bool isIndian;
   final ColorScheme cs;
   final VoidCallback onChanged;
 
@@ -146,6 +156,7 @@ class _ThresholdField extends StatelessWidget {
     required this.description,
     required this.controller,
     required this.symbol,
+    required this.isIndian,
     required this.cs,
     required this.onChanged,
   });
@@ -172,6 +183,7 @@ class _ThresholdField extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: TextInputType.number,
+          inputFormatters: [CurrencyInputFormatter(isIndian: isIndian, decimals: 0)],
           style: localeFont(fontSize: 16, color: cs.onSurface),
           onChanged: (_) => onChanged(),
           decoration: InputDecoration(

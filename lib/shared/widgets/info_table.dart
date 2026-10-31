@@ -1,3 +1,5 @@
+import 'dart:math' show max, min;
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -165,17 +167,51 @@ class _RowWidget extends StatelessWidget {
     };
   }
 
+  /// Large font sizes: a label that fits in half the row keeps its width
+  /// (the value wraps, as before); a longer one wraps between words, never
+  /// inside one, leaving the value up to half the row so an amount stays on
+  /// one line. [trailing] is space after the value (chevron).
+  Widget _label(BuildContext context, ColorScheme cs, InfoTableDataRow r,
+      double rowWidth, {double trailing = 0}) {
+    final dir = Directionality.of(context);
+    final scaler = MediaQuery.textScalerOf(context);
+    double width(String text, TextStyle style) {
+      final p = TextPainter(
+          text: TextSpan(text: text, style: style), textDirection: dir, textScaler: scaler, maxLines: 1)
+        ..layout();
+      final w = p.width;
+      p.dispose();
+      return w;
+    }
+
+    final labelStyle = _labelStyle(cs);
+    final half = rowWidth * 0.5;
+    var maxWidth = width(r.label, labelStyle).ceilToDouble();
+    if (maxWidth > half) {
+      final longestWord =
+          r.label.split(' ').map((w) => width(w, labelStyle)).fold(0.0, max);
+      final value = width(r.value, _valueStyle(cs)) + (r.valueLeadingIcon != null ? 26 : 0);
+      maxWidth = max(longestWord, rowWidth - 16 - trailing - min(value, half));
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: Text(r.label, style: labelStyle),
+    );
+  }
+
   Widget _standard(ColorScheme cs, InfoTableDataRow r) {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: _minRowHeight),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 8),
-        child: Row(
-          children: [
-            Text(r.label, style: _labelStyle(cs)),
-            const SizedBox(width: 16),
-            Expanded(child: _valueContent(cs, r, alignEnd: true)),
-          ],
+        child: LayoutBuilder(
+          builder: (context, c) => Row(
+            children: [
+              _label(context, cs, r, c.maxWidth),
+              const SizedBox(width: 16),
+              Expanded(child: _valueContent(cs, r, alignEnd: true)),
+            ],
+          ),
         ),
       ),
     );
@@ -204,23 +240,25 @@ class _RowWidget extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: _minRowHeight),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 8),
-            child: Row(
-              children: [
-                if (r.label.isNotEmpty) ...[
-                  Text(r.label, style: _labelStyle(cs)),
-                  const SizedBox(width: 16),
-                ],
-                Expanded(
-                  child: _valueContent(
-                    cs,
-                    r,
-                    alignEnd: r.label.isNotEmpty,
-                    forceColor: accent,
+            child: LayoutBuilder(
+              builder: (context, c) => Row(
+                children: [
+                  if (r.label.isNotEmpty) ...[
+                    _label(context, cs, r, c.maxWidth, trailing: 26),
+                    const SizedBox(width: 16),
+                  ],
+                  Expanded(
+                    child: _valueContent(
+                      cs,
+                      r,
+                      alignEnd: r.label.isNotEmpty,
+                      forceColor: accent,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Icon(Icons.chevron_right_rounded, size: 18, color: accent),
-              ],
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right_rounded, size: 18, color: accent),
+                ],
+              ),
             ),
           ),
         ),

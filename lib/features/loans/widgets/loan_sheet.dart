@@ -14,6 +14,7 @@ import '../../../core/money_math/loan_math.dart';
 import '../../../core/schedule/schedule_engine.dart';
 import '../../../core/schedule/schedule_text.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -39,6 +40,7 @@ import '../data/loan.dart';
 import '../domain/loan_engine.dart';
 import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
+import 'loan_adjust_sheet.dart';
 
 void showLoanSheet(BuildContext context, WidgetRef ref, Loan loan) =>
     showMoneySheet<void>(context, LoanSheet(loan: loan));
@@ -194,8 +196,9 @@ class LoanSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final fmt = ref.watch(formatterProvider);
-    final txns = ref.watch(loanTransactionsProvider(loan.uid)).valueOrNull ?? const [];
-    final st = loanStatus(loan, txns);
+    final rec = ref.watch(loanRecordsProvider(loan.uid));
+    final txns = rec.linked;
+    final st = loanStatus(loan, txns, deletedDays: rec.deleted);
     String m(num v) => fmt.formatCurrency(v.round());
     final nav = Navigator.of(context);
     final row = st.nextRow;
@@ -241,6 +244,7 @@ class LoanSheet extends ConsumerWidget {
             KvItem(l.msLoansTotalInterest, m(st.totalInterest!)),
             KvItem(l.msLoansInterestPaid, m(st.interestPaid ?? 0)),
             KvItem(l.msLoansPrincipalPaid, m(st.principalPaid ?? 0)),
+            if (st.addedInterest > 0) KvItem(l.msLoansInterestAdded, m(st.addedInterest)),
           ]),
         if (loanCalculatorLinks(context, loan, st).isNotEmpty)
           CalculatorLinkChips(links: loanCalculatorLinks(context, loan, st)),
@@ -274,6 +278,15 @@ class LoanSheet extends ConsumerWidget {
               if (blockIfProcessing(context, ref, 'loan:${loan.uid}')) return;
               context.push('/loans/edit', extra: loan);
             }),
+        if (!st.closed && hasLoanNumbers(loan))
+          SheetAction(
+              label: l.msLoansUpdateOutstanding,
+              icon: Icons.edit_note_rounded,
+              overflowOnly: true,
+              onPressed: () {
+                nav.pop();
+                showUpdateOutstandingSheet(context, loan);
+              }),
         if (!st.closed && hasLoanNumbers(loan))
           SheetAction(
               label: l.msLoansChangeRate,
@@ -342,10 +355,17 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final fmt = ref.watch(formatterProvider);
-    final loan = widget.loan;
-    final txns = ref.watch(loanTransactionsProvider(loan.uid)).valueOrNull ?? const [];
-    final st = loanStatus(loan, txns);
-    final a = loanAmortization(loan);
+    // The stored loan (an update from this page adds events to it).
+    final loan = ref
+            .watch(loanListProvider)
+            .valueOrNull
+            ?.where((x) => x.uid == widget.loan.uid)
+            .firstOrNull ??
+        widget.loan;
+    final rec = ref.watch(loanRecordsProvider(loan.uid));
+    final txns = rec.linked;
+    final st = loanStatus(loan, txns, deletedDays: rec.deleted);
+    final a = loanAmortization(loan, linked: txns, deletedDays: rec.deleted);
     final today = todayKey();
     final tracking = trackingDay(loan);
     String m(num v) => fmt.formatCurrency(v.round());
@@ -435,6 +455,10 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
                         const SizedBox(width: 6),
                         KuberPill(label: l.msLoansNext, tone: KuberTone.primary),
                       ],
+                      if (r.edited) ...[
+                        const SizedBox(width: 6),
+                        KuberPill(label: l.msTxnEdited, tone: KuberTone.neutral),
+                      ],
                     ]),
                     if (a != null)
                       Text(
@@ -461,20 +485,28 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
       );
     }
 
-    Widget eventRow(IconData icon, String title, String sub) => Container(
+    // Adjustments and extra payments open their edit / delete from here.
+    Widget eventRow(IconData icon, String title, String sub, {VoidCallback? onTap}) => Material(
           color: cs.surfaceContainerHigh,
-          constraints: const BoxConstraints(minHeight: 56),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(children: [
-            Icon(icon, size: 20, color: cs.secondary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(title, style: tt.titleSmall),
-                if (sub.isNotEmpty) Text(sub, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 56),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(children: [
+                Icon(icon, size: 20, color: cs.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(title, style: tt.titleSmall),
+                    if (sub.isNotEmpty)
+                      Text(sub, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+                  ]),
+                ),
+                if (onTap != null) Icon(Icons.chevron_right_rounded, size: 20, color: cs.onSurfaceVariant),
               ]),
             ),
-          ]),
+          ),
         );
 
     final events = [...loan.events]..sort((x, y) => x.date!.compareTo(y.date!));
@@ -482,33 +514,54 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
     final monthByYear = <int, List<Widget>>{};
     var ev = 0;
     double rateBefore = loan.annualRate ?? 0;
+    void addEvent(LoanEvent e, AmortRow r, List<Widget> monthChildren) {
+      final d = fmtDayShort(e.date!);
+      switch (e.kind) {
+        case LoanEventKind.prepayment:
+          monthChildren.add(eventRow(
+              Icons.payments_rounded,
+              l.msLoansEventExtra(m(e.amount), d),
+              a == null
+                  ? ''
+                  : (e.adjust == LoanAdjust.tenure
+                      ? l.msLoansEventExtraSubTenure(m(a.balanceOn(dayKey(e.date!))))
+                      : l.msLoansEventExtraSubEmi(m(a.balanceOn(dayKey(e.date!))))),
+              onTap: st.closed ? null : () => deleteExtraPayment(context, loan, e)));
+        case LoanEventKind.rateChange:
+          final newRate = e.newRate ?? rateBefore;
+          monthChildren.add(eventRow(
+              Icons.percent_rounded,
+              l.msLoansEventRate(fmt.formatPercentage(rateBefore), fmt.formatPercentage(newRate), d),
+              e.adjust == LoanAdjust.tenure
+                  ? l.msLoansEventRateSubTenure(m(r.payment))
+                  : l.msLoansEventRateSubEmi(m(r.payment))));
+          rateBefore = newRate;
+        case LoanEventKind.charge:
+          monthChildren.add(eventRow(Icons.receipt_long_rounded, l.msLoansEventCharge(m(e.amount), d), ''));
+        case LoanEventKind.adjustment:
+          final signed = '${e.amount >= 0 ? '+' : '-'}${m(e.amount.abs())}';
+          monthChildren.add(eventRow(
+              e.reason == LoanAdjustReason.interestAdded
+                  ? Icons.add_card_rounded
+                  : Icons.edit_note_rounded,
+              e.reason == LoanAdjustReason.interestAdded
+                  ? l.msLoansEventInterestAdded(m(e.amount), d)
+                  : l.msLoansEventAdjusted(signed, d),
+              e.adjust == LoanAdjust.tenure ? l.msLoansEventAdjSubTenure : l.msLoansEventAdjSubEmi,
+              onTap: st.closed ? null : () => showUpdateOutstandingSheet(context, loan, existing: e)));
+      }
+    }
+
     for (final r in rows) {
       final monthChildren = monthByYear.putIfAbsent(r.day ~/ 10000, () => []);
-      while (ev < events.length && dayKey(events[ev].date!) <= r.day) {
-        final e = events[ev++];
-        final d = fmtDayShort(e.date!);
-        switch (e.kind) {
-          case LoanEventKind.prepayment:
-            monthChildren.add(eventRow(
-                Icons.payments_rounded,
-                l.msLoansEventExtra(m(e.amount), d),
-                a == null
-                    ? ''
-                    : (e.adjust == LoanAdjust.tenure
-                        ? l.msLoansEventExtraSubTenure(m(a.balanceOn(dayKey(e.date!))))
-                        : l.msLoansEventExtraSubEmi(m(a.balanceOn(dayKey(e.date!)))))));
-          case LoanEventKind.rateChange:
-            final newRate = e.newRate ?? rateBefore;
-            monthChildren.add(eventRow(
-                Icons.percent_rounded,
-                l.msLoansEventRate(fmt.formatPercentage(rateBefore), fmt.formatPercentage(newRate), d),
-                e.adjust == LoanAdjust.tenure
-                    ? l.msLoansEventRateSubTenure(m(r.payment))
-                    : l.msLoansEventRateSubEmi(m(r.payment))));
-            rateBefore = newRate;
-          case LoanEventKind.charge:
-            monthChildren.add(eventRow(Icons.receipt_long_rounded, l.msLoansEventCharge(m(e.amount), d), ''));
-        }
+      // Adjustments apply after that day's EMI (loan_engine afterEmi), so
+      // their marker goes below the row; other events go above it.
+      bool sameDayAdjustment(LoanEvent e) =>
+          dayKey(e.date!) == r.day && e.kind == LoanEventKind.adjustment;
+      while (ev < events.length &&
+          dayKey(events[ev].date!) <= r.day &&
+          !sameDayAdjustment(events[ev])) {
+        addEvent(events[ev++], r, monthChildren);
       }
       if (loan.interestType == LoanInterestType.interestOnlyFirst &&
           a != null &&
@@ -517,6 +570,9 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
             l.msLoansEventRegular(fmtDayShort(dayOf(r.day))), ''));
       }
       monthChildren.add(monthRow(r));
+      while (ev < events.length && dayKey(events[ev].date!) == r.day) {
+        addEvent(events[ev++], r, monthChildren);
+      }
     }
 
     // Year rows.
@@ -677,6 +733,7 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
               KvItem(l.msLoansTotalInterest, m(st.totalInterest!)),
               KvItem(l.msLoansInterestPaid, m(st.interestPaid ?? 0)),
               KvItem(l.msLoansPrincipalPaid, m(st.principalPaid ?? 0)),
+              if (st.addedInterest > 0) KvItem(l.msLoansInterestAdded, m(st.addedInterest)),
             ]),
           ],
         ]),
@@ -748,10 +805,13 @@ class _ExtraPaymentSheetState extends ConsumerState<_ExtraPaymentSheet> {
     final indian = fmt.system == NumberSystem.indian;
     String m(num v) => fmt.formatCurrency(v.round());
     final loan = widget.loan;
-    final tenurePreview = LoanService.extraPaymentPreview(loan, _amountValue, LoanAdjust.tenure, _date);
-    final emiPreview = LoanService.extraPaymentPreview(loan, _amountValue, LoanAdjust.emi, _date);
+    final rec = ref.watch(loanRecordsProvider(loan.uid));
+    final tenurePreview =
+        LoanService.extraPaymentPreview(loan, _amountValue, LoanAdjust.tenure, _date, records: rec);
+    final emiPreview =
+        LoanService.extraPaymentPreview(loan, _amountValue, LoanAdjust.emi, _date, records: rec);
     final preview = !_principal ? null : (_reduce == LoanAdjust.tenure ? tenurePreview : emiPreview);
-    final st = loanStatus(loan, ref.watch(loanTransactionsProvider(loan.uid)).valueOrNull ?? const []);
+    final st = loanStatus(loan, rec.linked, deletedDays: rec.deleted);
     final emiNow = st.nextAmount ?? loan.emiAmount;
     final motion = KuberMotion.reduced(context) ? Duration.zero : const Duration(milliseconds: 250);
     return KuberBottomSheet(
@@ -858,6 +918,9 @@ class _ExtraPaymentSheetState extends ConsumerState<_ExtraPaymentSheet> {
                           child: KuberTextField.number(
                             label: l.msLoansPrepayCharge,
                             controller: _charge,
+                            inputFormatters: _chargePct
+                                ? null
+                                : [CurrencyInputFormatter(isIndian: indian)],
                             hint: l.msLoansPrepayChargeHint,
                             onInfo: () => showMoneyInfo(context, ref, MoneyInfo.prepayCharge),
                             onChanged: (_) => setState(() {}),
@@ -868,7 +931,10 @@ class _ExtraPaymentSheetState extends ConsumerState<_ExtraPaymentSheet> {
                           width: 120,
                           child: KuberSegmented<bool>(
                             groupValue: _chargePct,
-                            onChanged: (v) => setState(() => _chargePct = v),
+                            onChanged: (v) => setState(() {
+                              _chargePct = v;
+                              if (v) _charge.text = _charge.text.replaceAll(',', '');
+                            }),
                             segments: [
                               KuberSegment(value: false, label: fmt.currency.narrow),
                               const KuberSegment(value: true, label: '%'),
@@ -932,7 +998,10 @@ class _RateChangeSheetState extends ConsumerState<_RateChangeSheet> {
     final fmt = ref.watch(formatterProvider);
     String m(num v) => fmt.formatCurrency(v.round());
     final rate = double.tryParse(_rate.text.trim());
-    final p = rate == null ? null : LoanService.ratePreview(widget.loan, rate, _from, _adjust);
+    final p = rate == null
+        ? null
+        : LoanService.ratePreview(widget.loan, rate, _from, _adjust,
+            records: ref.watch(loanRecordsProvider(widget.loan.uid)));
     String? preview, sub;
     if (p != null) {
       final end = p.endDay == null ? '' : fmtMonthYear(dayOf(p.endDay!));

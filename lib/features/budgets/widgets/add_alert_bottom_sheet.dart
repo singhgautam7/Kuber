@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../data/budget.dart';
 
 class AddAlertBottomSheet extends ConsumerStatefulWidget {
@@ -28,6 +29,21 @@ class AddAlertBottomSheet extends ConsumerStatefulWidget {
 class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
   BudgetAlertType _type = BudgetAlertType.percentage;
   late final TextEditingController _controller;
+
+  /// Amount alerts group their digits; parse without the commas.
+  String get _raw => _controller.text.replaceAll(',', '');
+
+  bool get _isIndian =>
+      ref.read(formatterProvider).system == NumberSystem.indian;
+
+  /// Percent has no grouping; amount does. Re-render the typed value for
+  /// the new type.
+  void _setType(BudgetAlertType t) {
+    final raw = _raw;
+    _controller.text =
+        t == BudgetAlertType.amount ? CurrencyInputFormatter(isIndian: _isIndian).format(raw) : raw;
+    setState(() => _type = t);
+  }
   bool _enableNotification = true;
 
   @override
@@ -48,7 +64,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
   }
 
   String get _description {
-    final value = double.tryParse(_controller.text) ?? 0;
+    final value = double.tryParse(_raw) ?? 0;
     if (_type == BudgetAlertType.percentage) {
       return context.l10n.alertDesc(
         ref.watch(formatterProvider).formatPercentage(value),
@@ -62,7 +78,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
 
   String? get _errorText {
     if (_controller.text.isEmpty) return context.l10n.enterValidValue;
-    final value = double.tryParse(_controller.text);
+    final value = double.tryParse(_raw);
     if (value == null || value <= 0) return context.l10n.enterValidValue;
 
     if (_type == BudgetAlertType.percentage) {
@@ -87,7 +103,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
 
     final alert = BudgetAlert()
       ..type = _type
-      ..value = double.parse(_controller.text)
+      ..value = double.parse(_raw)
       ..enableNotification = _enableNotification;
 
     widget.onAdd(alert);
@@ -184,14 +200,14 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                 _buildToggleButton(
                   context.l10n.percentageType,
                   _type == BudgetAlertType.percentage,
-                  () => setState(() => _type = BudgetAlertType.percentage),
+                  () => _setType(BudgetAlertType.percentage),
                 ),
                 _buildToggleButton(
                   context.l10n.alertAmountType(
                     ref.watch(currencyProvider).symbol,
                   ),
                   _type == BudgetAlertType.amount,
-                  () => setState(() => _type = BudgetAlertType.amount),
+                  () => _setType(BudgetAlertType.amount),
                 ),
               ],
             ),
@@ -219,9 +235,12 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                         decimal: true,
                       ),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d*'),
-                        ),
+                        if (_type == BudgetAlertType.amount)
+                          CurrencyInputFormatter(isIndian: _isIndian)
+                        else
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*'),
+                          ),
                       ],
                       decoration: InputDecoration(
                         border: InputBorder.none,

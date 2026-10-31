@@ -19,6 +19,9 @@ import '../../settings/providers/settings_provider.dart'
     show formatterProvider, NumberSystem;
 import '../../../core/utils/formatters.dart';
 import '../data/transaction.dart';
+import '../../loans/domain/loan_engine.dart' show isEditableEmi;
+import '../../loans/domain/loan_service.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart' show KuberAmountField, KuberCallout, KuberCalloutTone;
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../services/suggestion_service.dart';
@@ -121,13 +124,57 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   bool get _isEditing => widget.transaction != null;
 
+  // A2: a loan EMI's split. EMI amount (the amount field), Principal and
+  // Interest are linked: banks fix the month's interest first, so a new EMI
+  // amount moves Principal; editing one part fills the other.
+  final _principalController = TextEditingController();
+  final _interestController = TextEditingController();
+  bool _syncingSplit = false;
+  bool get _isEmi => _isEditing && isEditableEmi(widget.transaction!);
+
+  double _num(TextEditingController c) => KuberAmountField.valueOf(c);
+
+  String _fmtPart(double v) {
+    final f = ref.read(formatterProvider);
+    final d = f.currency.decimals;
+    return CurrencyInputFormatter(isIndian: f.system == NumberSystem.indian, decimals: d)
+        .format(v.toStringAsFixed(d));
+  }
+
+  void _setPart(TextEditingController c, double v) {
+    _syncingSplit = true;
+    c.text = _fmtPart(v);
+    _syncingSplit = false;
+  }
+
+  void _onEmiAmountChanged() {
+    if (_syncingSplit || !_isEmi) return;
+    _setPart(_principalController, _num(_amountController) - _num(_interestController));
+    setState(() {});
+  }
+
+  void _onPrincipalChanged(String _) {
+    if (_syncingSplit) return;
+    _setPart(_interestController, _num(_amountController) - _num(_principalController));
+    setState(() {});
+  }
+
+  void _onInterestChanged(String _) {
+    if (_syncingSplit) return;
+    _setPart(_principalController, _num(_amountController) - _num(_interestController));
+    setState(() {});
+  }
+
+  bool get _splitInvalid =>
+      _isEmi && (_num(_principalController) < 0 || _num(_interestController) < 0);
+
   @override
   void initState() {
     super.initState();
     if (_isEditing) {
       final t = widget.transaction!;
       _nameController.text = t.name;
-      _amountController.text = t.amount.toString();
+      _amountController.text = _fmtPart(t.amount);
       _notesController.text = t.notes ?? '';
       _type = t.isTransfer ? 'transfer' : t.type;
       _selectedCategoryId = int.tryParse(t.categoryId);
@@ -139,6 +186,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
       _attachmentPaths = List.from(t.attachmentPaths);
       _loadTags();
+      if (_isEmi) {
+        _principalController.text = _fmtPart(t.principalPart!);
+        _interestController.text = _fmtPart(t.interestPart!);
+        _amountController.addListener(_onEmiAmountChanged);
+      }
     } else {
       _type = widget.initialType ?? 'expense';
       _selectedAccountId = widget.initialAccountId;
@@ -148,9 +200,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
       final amount = widget.initialAmount;
       if (amount != null && amount > 0) {
-        _amountController.text = amount == amount.truncateToDouble()
-            ? amount.toInt().toString()
-            : amount.toStringAsFixed(2);
+        _amountController.text = _fmtPart(amount);
         // A prefilled entry already has its amount; a suggestion overlay
         // popping over it would fight the prefill.
         _suppressSuggestions = true;
@@ -183,7 +233,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _amountController.removeListener(_onEmiAmountChanged);
     _amountController.dispose();
+    _principalController.dispose();
+    _interestController.dispose();
     _notesController.dispose();
     _nameFocusNode.dispose();
     _amountFocusNode.dispose();
@@ -312,9 +365,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         amountColor: _typeColor,
                       ),
                       const SizedBox(height: KuberSpace.lg),
+                      if (_isEmi) ...[
+                        _buildEmiSplitFields(),
+                        const SizedBox(height: KuberSpace.lg),
+                      ],
 
                       // Category + Account selector tiles
                       _buildCategoryAccountRow(cs, categoryMap, accounts),
+                      if (_type == 'expense')
+                        _overLimitWarning(accounts.valueOrNull ?? const [], _selectedAccountId),
                       if (_selectedCategoryId != null) ...[
                         const SizedBox(height: KuberSpace.md),
                         BudgetProgressIndicator(
@@ -356,6 +415,74 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
       ),
     );
+  }
+
+  /// Overdraft: spending past the limit is allowed, with a warning.
+  Widget _overLimitWarning(List<Account> accounts, int? accountId) {
+    final a = accounts.where((x) => x.id == accountId).firstOrNull;
+    final limit = a?.creditLimit;
+    if (a == null || !a.isOverdraft || limit == null || limit <= 0) {
+      return const SizedBox.shrink();
+    }
+    final balance = ref.watch(accountBalanceProvider(a.id)).valueOrNull;
+    if (balance == null) return const SizedBox.shrink();
+    final fmt = ref.watch(formatterProvider);
+    // Editing: this transaction is already in the balance.
+    final old = widget.transaction;
+    final already = old != null && old.accountId == '${a.id}' && old.type == 'expense' ? old.amount : 0;
+    // Only the warning rebuilds as the amount is typed.
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _amountController,
+      builder: (context, v, _) {
+        final amount = double.tryParse(v.text.trim().replaceAll(',', '')) ?? 0;
+        final over = -(balance + already - amount) - limit;
+        if (over <= 0.005) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: KuberSpace.sm),
+          child: KuberCallout.text(
+            context.l10n.accountOverLimit(fmt.formatCurrency(over)),
+            tone: KuberCalloutTone.warning,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmiSplitFields() {
+    final l = context.l10n;
+    final fmt = ref.watch(formatterProvider);
+    final indian = fmt.system == NumberSystem.indian;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(
+          child: KuberAmountField(
+            label: l.msLoansPrincipalL,
+            controller: _principalController,
+            symbol: fmt.symbol,
+            indianGrouping: indian,
+            onChanged: _onPrincipalChanged,
+          ),
+        ),
+        const SizedBox(width: KuberSpace.md),
+        Expanded(
+          child: KuberAmountField(
+            label: l.msLoansInterestL,
+            controller: _interestController,
+            symbol: fmt.symbol,
+            indianGrouping: indian,
+            onChanged: _onInterestChanged,
+          ),
+        ),
+      ]),
+      const SizedBox(height: KuberSpace.xs),
+      Text(
+        _splitInvalid ? l.msTxnSplitErr : l.msTxnSplitHelper,
+        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+            color: _splitInvalid
+                ? Theme.of(context).colorScheme.error
+                : Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+    ]);
   }
 
   /// Shared form fields: Date, Tags, Notes, Attachments.
@@ -950,8 +1077,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       return;
     }
 
+    if (_splitInvalid) {
+      showKuberSnackBar(context, l10n.msTxnSplitErr, isError: true);
+      return;
+    }
     final t = _isEditing ? widget.transaction! : Transaction();
     t.name = name;
+    if (_isEmi) {
+      // The two parts always add up to the EMI amount.
+      final d = ref.read(formatterProvider).currency.decimals;
+      final interest = double.parse(_num(_interestController).toStringAsFixed(d));
+      LoanService.applyEditedSplit(t,
+          amount: amount,
+          principal: double.parse((amount - interest).toStringAsFixed(d)),
+          interest: interest);
+    }
     t.amount = amount;
     t.type = _type;
     t.categoryId = _selectedCategoryId.toString();

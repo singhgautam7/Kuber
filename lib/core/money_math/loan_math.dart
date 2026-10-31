@@ -324,12 +324,48 @@ class AmortEvent {
   final double amount; // prepayment principal / charge / signed adjustment
   final double? newRate;
 
-  /// Prepayment and rate change: true = keep the end date, change the EMI;
-  /// false = keep the EMI, change the tenure.
+  /// Prepayment, rate change and adjustment: true = keep the end date,
+  /// change the EMI; false = keep the EMI, change the tenure.
   final bool adjustEmi;
 
+  /// Adjustment: unpaid interest the bank added to the loan. It raises the
+  /// outstanding and counts toward total interest.
+  final bool interestAdded;
+
+  /// Applies after an EMI on the same day ("outstanding on this date" is the
+  /// balance after that day's EMI). Update outstanding uses this; every other
+  /// event applies before the EMI on its day, as before.
+  final bool afterEmi;
+
   const AmortEvent(this.day, this.kind,
-      {this.amount = 0, this.newRate, this.adjustEmi = false});
+      {this.amount = 0,
+      this.newRate,
+      this.adjustEmi = false,
+      this.interestAdded = false,
+      this.afterEmi = false});
+}
+
+/// How a recorded EMI transaction takes part in the amortization.
+enum RecordedUse {
+  /// Its split is used when the user edited it or it differs from the
+  /// calculation; equal to the rounded calculation it is the calculation.
+  auto,
+
+  /// Its amount is kept; the month's interest is calculated again from the
+  /// outstanding and principal takes the rest (recalculate past splits).
+  recalculate,
+}
+
+/// An EMI the user actually paid (a linked transaction), by schedule day.
+class RecordedEmi {
+  final double payment;
+  final double principal;
+  final double interest;
+  final bool edited;
+  final RecordedUse use;
+
+  const RecordedEmi(this.payment, this.principal, this.interest,
+      {this.edited = false, this.use = RecordedUse.auto});
 }
 
 class AmortRow {
@@ -342,6 +378,12 @@ class AmortRow {
   final double rate;
   final bool interestOnly;
 
+  /// Taken from a recorded transaction (its own split, not calculated).
+  final bool recorded;
+
+  /// The user changed this EMI's split.
+  final bool edited;
+
   const AmortRow({
     required this.index,
     required this.day,
@@ -351,6 +393,8 @@ class AmortRow {
     required this.balance,
     required this.rate,
     required this.interestOnly,
+    this.recorded = false,
+    this.edited = false,
   });
 }
 
@@ -362,6 +406,11 @@ class Amortization {
   const Amortization(this.rows, this.events, this.openingBalance);
 
   double get totalInterest => rows.fold(0.0, (s, r) => s + r.interest);
+
+  /// Unpaid interest the bank added to the loan (adjustments).
+  double get addedInterest => events
+      .where((e) => e.kind == AmortEventKind.adjustment && e.interestAdded)
+      .fold(0.0, (s, e) => s + e.amount);
   double get totalPaid => rows.fold(0.0, (s, r) => s + r.payment);
 
   /// Balance after every EMI and event on or before [day]. [eventsThrough]
@@ -377,7 +426,7 @@ class Amortization {
     final lastEmiDay = rows.where((r) => r.day <= day).lastOrNull?.day ?? 0;
     final upTo = eventsThrough ?? day;
     for (final e in events) {
-      if (e.day > lastEmiDay && e.day <= upTo) {
+      if ((e.day > lastEmiDay || (e.afterEmi && e.day == lastEmiDay)) && e.day <= upTo) {
         if (e.kind == AmortEventKind.prepayment) bal = max(0, bal - e.amount);
         if (e.kind == AmortEventKind.adjustment) bal = max(0, bal + e.amount);
       }
@@ -393,10 +442,16 @@ class Amortization {
 /// apply in date order before the first EMI on or after their date:
 /// a prepayment reduces the balance (then tenure or EMI), a rate change sets
 /// the rate (then EMI or tenure), a charge changes nothing, an adjustment
-/// shifts the balance (opening override).
+/// shifts the balance (opening override, Update outstanding).
 ///
 /// [emi] is the payment the user makes in the regular phase (their EMI is
 /// the truth when it differs from the rate's); null = the rate's EMI.
+///
+/// [recorded]: EMIs actually paid, by day. Their split is the truth (see
+/// [RecordedUse]); only the future is projected, from the outstanding after
+/// them. [unpaid]: recorded EMIs the user deleted; nothing is paid that
+/// month, so their principal stays owed. [decimals]: the currency's minor
+/// units, to tell a recorded split from the rounded calculation.
 Amortization amortize({
   required double principal,
   required double rate,
@@ -407,9 +462,16 @@ Amortization amortize({
   double? emi,
   List<AmortEvent> events = const [],
   double? flatBase,
+  Map<int, RecordedEmi> recorded = const {},
+  Set<int> unpaid = const {},
+  int decimals = 2,
 }) {
   final rows = <AmortRow>[];
-  final sorted = [...events]..sort((a, b) => a.day.compareTo(b.day));
+  // By day; on the same day, after-EMI events last.
+  final sorted = [...events]
+    ..sort((a, b) => a.day != b.day
+        ? a.day.compareTo(b.day)
+        : (a.afterEmi ? 1 : 0).compareTo(b.afterEmi ? 1 : 0));
   final io = kind == RateKind.interestOnlyFirst ? ioMonths : 0;
   var bal = principal;
   var r = rate;
@@ -431,43 +493,64 @@ Amortization amortize({
     return emisLeftFor(bal, r, pay) ?? planned;
   }
 
+  void apply(AmortEvent e, int i, int remaining) {
+    switch (e.kind) {
+      case AmortEventKind.charge:
+        break;
+      case AmortEventKind.adjustment:
+        bankRounded = false;
+        final left = keepEnd(i, remaining);
+        bal = max(0, bal + e.amount);
+        if (e.adjustEmi && bal > 0) {
+          if (kind == RateKind.flat) {
+            flatPrincipalPart = bal / remaining;
+            pay = flatPrincipalPart + monthlyInterest(base, r);
+          } else {
+            pay = calculateEmi(bal, r, left);
+          }
+        }
+      case AmortEventKind.prepayment:
+        bankRounded = false;
+        // "Adjust EMI" keeps the current end date: the EMIs left at the
+        // current payment (an earlier reduce-tenure prepayment moved it).
+        final left = keepEnd(i, remaining);
+        bal = max(0, bal - e.amount);
+        if (e.adjustEmi && bal > 0) {
+          if (kind == RateKind.flat) {
+            flatPrincipalPart = bal / remaining;
+            pay = flatPrincipalPart + monthlyInterest(base, r);
+          } else {
+            pay = calculateEmi(bal, r, left);
+          }
+        }
+      case AmortEventKind.rateChange:
+        bankRounded = false;
+        final left = keepEnd(i, remaining);
+        r = e.newRate ?? r;
+        if (kind == RateKind.flat) {
+          pay = flatPrincipalPart + monthlyInterest(base, r);
+        } else if (e.adjustEmi && bal > 0) {
+          pay = calculateEmi(bal, r, left);
+        }
+    }
+  }
+
   for (var i = 0; i < emiDays.length && bal > 1e-6; i++) {
     final day = emiDays[i];
     final remaining = max(1, months - i);
-    while (ev < sorted.length && sorted[ev].day <= day) {
-      final e = sorted[ev++];
-      switch (e.kind) {
-        case AmortEventKind.charge:
-          break;
-        case AmortEventKind.adjustment:
-          bankRounded = false;
-          bal = max(0, bal + e.amount);
-        case AmortEventKind.prepayment:
-          bankRounded = false;
-          // "Adjust EMI" keeps the current end date: the EMIs left at the
-          // current payment (an earlier reduce-tenure prepayment moved it).
-          final left = keepEnd(i, remaining);
-          bal = max(0, bal - e.amount);
-          if (e.adjustEmi && bal > 0) {
-            if (kind == RateKind.flat) {
-              flatPrincipalPart = bal / remaining;
-              pay = flatPrincipalPart + monthlyInterest(base, r);
-            } else {
-              pay = calculateEmi(bal, r, left);
-            }
-          }
-        case AmortEventKind.rateChange:
-          bankRounded = false;
-          final left = keepEnd(i, remaining);
-          r = e.newRate ?? r;
-          if (kind == RateKind.flat) {
-            pay = flatPrincipalPart + monthlyInterest(base, r);
-          } else if (e.adjustEmi && bal > 0) {
-            pay = calculateEmi(bal, r, left);
-          }
-      }
+    while (ev < sorted.length &&
+        (sorted[ev].day < day || (sorted[ev].day == day && !sorted[ev].afterEmi))) {
+      apply(sorted[ev++], i, remaining);
     }
     if (bal <= 1e-6) break;
+    if (unpaid.contains(day)) {
+      // Deleted by the user: no payment this month.
+      bankRounded = false;
+      while (ev < sorted.length && sorted[ev].day <= day) {
+        apply(sorted[ev++], i + 1, max(1, months - i - 1));
+      }
+      continue;
+    }
     final isIo = i < io;
     double interest, princ;
     if (kind == RateKind.flat) {
@@ -485,17 +568,48 @@ Amortization amortize({
         (bankRounded && i == months - 1)) {
       princ = bal;
     }
+    var payment = princ + interest;
+    var fromRecord = false, edited = false;
+    final rec = recorded[day];
+    if (rec != null) {
+      edited = rec.edited;
+      if (rec.use == RecordedUse.recalculate && !rec.edited) {
+        // The amount paid stays; this month's interest on what is owed now.
+        interest = min(rec.payment, interest);
+        princ = min(bal, rec.payment - interest);
+        payment = rec.payment;
+        fromRecord = true;
+      } else {
+        final calc = roundedSplit(payment, interest, decimals);
+        final same = !rec.edited &&
+            (calc.principal - rec.principal).abs() < 1e-9 &&
+            (calc.interest - rec.interest).abs() < 1e-9;
+        if (!same) {
+          princ = min(bal, rec.principal);
+          interest = rec.interest;
+          payment = rec.payment;
+          fromRecord = true;
+        }
+      }
+      if (fromRecord) bankRounded = false;
+    }
     bal -= princ;
     rows.add(AmortRow(
       index: i + 1,
       day: day,
-      payment: princ + interest,
+      payment: payment,
       principal: princ,
       interest: interest,
       balance: bal,
       rate: r,
       interestOnly: isIo,
+      recorded: fromRecord,
+      edited: edited,
     ));
+    // After-EMI events on this day (Update outstanding).
+    while (ev < sorted.length && sorted[ev].day <= day) {
+      apply(sorted[ev++], i + 1, max(1, months - i - 1));
+    }
     // A loan that can't amortize (EMI <= interest) stops at the date list.
   }
   return Amortization(rows, sorted, principal);

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
-import 'package:flutter/services.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_chips.dart';
@@ -13,7 +13,7 @@ import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/reminder.dart';
 import '../providers/reminders_provider.dart';
@@ -54,9 +54,13 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
       _titleController.text = e.title;
       _notesController.text = e.notes ?? '';
       if (e.amount != null) {
-        _amountController.text = e.amount == e.amount!.truncateToDouble()
-            ? e.amount!.toInt().toString()
-            : e.amount!.toStringAsFixed(2);
+        _amountController.text = CurrencyInputFormatter(
+          isIndian: ref.read(formatterProvider).system == NumberSystem.indian,
+        ).format(
+          e.amount == e.amount!.truncateToDouble()
+              ? e.amount!.toInt().toString()
+              : e.amount!.toStringAsFixed(2),
+        );
       }
       _dueDate = e.dueAt;
       _dueTime = TimeOfDay.fromDateTime(e.dueAt);
@@ -270,7 +274,10 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
                     decimal: true,
                   ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                    CurrencyInputFormatter(
+                      isIndian: ref.watch(formatterProvider).system ==
+                          NumberSystem.indian,
+                    ),
                   ],
                   onTapOutside: (_) =>
                       FocusManager.instance.primaryFocus?.unfocus(),

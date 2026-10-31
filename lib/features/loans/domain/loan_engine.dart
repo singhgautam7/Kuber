@@ -5,6 +5,7 @@
 import '../../../core/money_math/loan_math.dart';
 import '../../../core/schedule/schedule.dart';
 import '../../../core/schedule/schedule_engine.dart';
+import '../../../core/schedule/processed_occurrence.dart';
 import '../../transactions/data/transaction.dart';
 import '../data/loan.dart';
 
@@ -24,7 +25,11 @@ bool hasLoanNumbers(Loan l) =>
         : l.principalAmount > 0);
 
 /// The day Kuber started tracking the loan (opening values are before it).
-int trackingDay(Loan l) => dayKey(l.createdAt);
+/// With "Add past EMIs as transactions" the whole loan is tracked.
+int trackingDay(Loan l) {
+  final first = l.schedule?.startDate;
+  return l.addPastEmis && first != null ? dayKey(first) : dayKey(l.createdAt);
+}
 
 /// Every EMI date of the loan's rule (ignoring what's posted), long enough to
 /// let a rate rise extend the tenure.
@@ -50,17 +55,34 @@ List<AmortEvent> amortEventsOf(Loan l) => [
               LoanEventKind.rateChange => AmortEventKind.rateChange,
               LoanEventKind.prepayment => AmortEventKind.prepayment,
               LoanEventKind.charge => AmortEventKind.charge,
+              LoanEventKind.adjustment => AmortEventKind.adjustment,
             },
             amount: e.amount,
             newRate: e.newRate,
             adjustEmi: e.adjust == LoanAdjust.emi,
+            interestAdded: e.kind == LoanEventKind.adjustment &&
+                e.reason == LoanAdjustReason.interestAdded,
+            // Update outstanding: the balance after that day's EMI.
+            afterEmi: e.kind == LoanEventKind.adjustment,
           ),
+      // The outstanding entered in the form, on the day it was entered.
       if (l.adjustment != 0)
-        AmortEvent(trackingDay(l), AmortEventKind.adjustment, amount: l.adjustment),
+        AmortEvent(dayKey(l.createdAt), AmortEventKind.adjustment, amount: l.adjustment),
     ];
 
 /// The loan's amortization, or null for "Just track the EMI".
-Amortization? loanAmortization(Loan l) {
+///
+/// [linked]: the loan's transactions; recorded EMIs keep their own split
+/// (an edited or out-of-date split is the truth, see [RecordedEmi]) and the
+/// future is projected from the outstanding after them. [deletedDays]: EMIs
+/// that were recorded and then deleted (no payment those months).
+/// [recalculateFrom]: unedited recorded EMIs on or after this day are split
+/// again from the outstanding (A4 "Recalculate").
+Amortization? loanAmortization(Loan l,
+    {List<Transaction> linked = const [],
+    Set<int> deletedDays = const {},
+    int? recalculateFrom,
+    int decimals = 2}) {
   if (!hasLoanNumbers(l)) return null;
   final running = l.startingPoint == LoanStartingPoint.outstandingToday;
   return amortize(
@@ -72,13 +94,65 @@ Amortization? loanAmortization(Loan l) {
     ioMonths: l.interestOnlyMonths,
     emi: l.emiAmount > 0 ? l.emiAmount : null,
     events: amortEventsOf(l),
+    recorded: recordedEmis(linked, recalculateFrom: recalculateFrom),
+    unpaid: deletedDays,
+    decimals: decimals,
   );
 }
+
+/// Recorded EMIs with a split, by schedule day.
+Map<int, RecordedEmi> recordedEmis(List<Transaction> linked, {int? recalculateFrom}) => {
+      for (final t in linked)
+        if (t.occurrenceDate != null && t.principalPart != null && t.interestPart != null)
+          t.occurrenceDate!: RecordedEmi(t.amount, t.principalPart!, t.interestPart!,
+              edited: t.splitEdited,
+              use: recalculateFrom != null && t.occurrenceDate! >= recalculateFrom
+                  ? RecordedUse.recalculate
+                  : RecordedUse.auto),
+    };
+
+/// A loan's transactions and deleted EMI days, for [loanStatus] /
+/// [loanAmortization].
+typedef LoanRecords = ({List<Transaction> linked, Set<int> deleted});
+
+const LoanRecords noLoanRecords = (linked: <Transaction>[], deleted: <int>{});
+
+/// [loanAmortization] with the loan's records.
+Amortization? loanAmortizationWith(Loan l, LoanRecords r, {int? recalculateFrom}) =>
+    loanAmortization(l,
+        linked: r.linked, deletedDays: r.deleted, recalculateFrom: recalculateFrom);
+
+/// EMIs recorded and then deleted: ledger rows marked posted whose
+/// transaction no longer exists (the ledger keeps them from being posted
+/// again; their principal goes back to the outstanding).
+Set<int> deletedEmiDays(Iterable<ProcessedOccurrence> ledger, Set<int> existingIds) => {
+      for (final p in ledger)
+        if (p.sourceType == 'loan' &&
+            p.status == 'posted' &&
+            p.transactionId != null &&
+            !existingIds.contains(p.transactionId))
+          p.occurrenceDate,
+    };
+
+/// Update outstanding (A3): 0 offers to close the loan, below 0 is refused.
+enum OutstandingCheck { ok, closes, negative }
+
+OutstandingCheck outstandingError(double v) => v < 0
+    ? OutstandingCheck.negative
+    : (v < 0.005 ? OutstandingCheck.closes : OutstandingCheck.ok);
 
 /// True for transactions that are a regular EMI (not an extra payment,
 /// charge or closure).
 bool isEmiTransaction(Transaction t) =>
     t.occurrenceDate != null || t.name.startsWith('EMI - ');
+
+/// A loan EMI whose split the user can edit (A2).
+bool isEditableEmi(Transaction t) =>
+    t.subType == TxnSubType.loanRepayment &&
+    t.sourceType == 'loan' &&
+    isEmiTransaction(t) &&
+    t.principalPart != null &&
+    t.interestPart != null;
 
 class LoanStatus {
   final double? outstanding;
@@ -90,6 +164,9 @@ class LoanStatus {
   final double? interestPaid;
   final double? principalPaid;
   final double? totalInterest;
+
+  /// Unpaid interest the bank added to the loan (part of [totalInterest]).
+  final double addedInterest;
   final int? endDay;
   final bool closed;
 
@@ -103,6 +180,7 @@ class LoanStatus {
     this.interestPaid,
     this.principalPaid,
     this.totalInterest,
+    this.addedInterest = 0,
     this.endDay,
     this.closed = false,
   });
@@ -111,13 +189,15 @@ class LoanStatus {
       totalEmis == null || totalEmis == 0 ? 0 : (emisPaid / totalEmis!).clamp(0, 1);
 }
 
-/// Where the loan stands on [now]. [linked] = the loan's transactions.
-LoanStatus loanStatus(Loan l, List<Transaction> linked, {DateTime? now}) {
+/// Where the loan stands on [now]. [linked] = the loan's transactions,
+/// [deletedDays] = its recorded EMIs that were deleted.
+LoanStatus loanStatus(Loan l, List<Transaction> linked,
+    {DateTime? now, Set<int> deletedDays = const {}}) {
   final today = todayKey(now);
   final closed = l.isCompleted || l.closedAt != null;
   final s = l.schedule;
   final next = closed || s == null ? null : nextDate(s, fromKey: today);
-  final a = loanAmortization(l);
+  final a = loanAmortization(l, linked: linked, deletedDays: deletedDays);
   if (a == null) {
     final posted = linked.where(isEmiTransaction).length;
     return LoanStatus(
@@ -156,7 +236,9 @@ LoanStatus loanStatus(Loan l, List<Transaction> linked, {DateTime? now}) {
     nextRow: row,
     interestPaid: interest + (running ? l.interestPaidBefore : 0),
     principalPaid: principal + (running ? l.principalPaidBefore : 0),
-    totalInterest: a.totalInterest + (running ? l.interestPaidBefore : 0),
+    totalInterest:
+        a.totalInterest + a.addedInterest + (running ? l.interestPaidBefore : 0),
+    addedInterest: a.addedInterest,
     endDay: a.rows.isEmpty ? null : a.rows.last.day,
     closed: closed,
   );
@@ -171,8 +253,10 @@ int? _totalEmis(Loan l, Schedule s) {
 /// The EMI to post on [day]: amount and split (null split for loans without
 /// numbers). [decimals] = the currency's minor units.
 ({double amount, double? principal, double? interest}) emiFor(
-    Loan l, int day, int decimals) {
-  final a = loanAmortization(l);
+    Loan l, int day, int decimals,
+    {List<Transaction> linked = const [], Set<int> deletedDays = const {}}) {
+  final a = loanAmortization(l,
+      linked: linked, deletedDays: deletedDays, decimals: decimals);
   final row = a?.rowOn(day);
   if (row == null) {
     return (amount: l.emiAmount, principal: null, interest: null);

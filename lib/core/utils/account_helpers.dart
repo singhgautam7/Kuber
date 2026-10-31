@@ -7,6 +7,7 @@ IconData accountIcon(String type) {
   return switch (type) {
     'bank' => Icons.account_balance,
     'card' => Icons.credit_card,
+    'overdraft' => Icons.request_quote_rounded,
     _ => Icons.savings,
   };
 }

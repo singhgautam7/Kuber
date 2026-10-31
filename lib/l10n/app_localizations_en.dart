@@ -4636,7 +4636,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get makeDefaultAccount => 'Make this the default account';
 
   @override
-  String get makeDefaultAccountSub => 'Pre-selected when adding transactions.';
+  String get makeDefaultAccountSub =>
+      'Pre-selected when adding transactions via Quick Add, Voice Add or Ask Kuber.';
 
   @override
   String get currentBalanceLabel => 'Current Balance';
@@ -8030,4 +8031,276 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get msLoansReopenBody =>
       'Its EMIs start again from the next due date. Nothing is added for the time it was closed.';
+
+  @override
+  String get msLoansUpdateOutstanding => 'Update outstanding';
+
+  @override
+  String get msLoansOutstandingPrincipal => 'Outstanding principal';
+
+  @override
+  String get msLoansAsOn => 'As on';
+
+  @override
+  String get msLoansAdjReason => 'Reason';
+
+  @override
+  String get msLoansAdjMatchBank => 'Match bank statement';
+
+  @override
+  String get msLoansAdjMatchBankSub =>
+      'Your bank shows a different amount owed.';
+
+  @override
+  String get msLoansAdjInterestAdded => 'Unpaid interest added to loan';
+
+  @override
+  String get msLoansAdjInterestAddedSub =>
+      'Your bank added interest to what you owe, like during a moratorium.';
+
+  @override
+  String msLoansKuberOutstandingOn(String date) {
+    return 'Kuber\'s outstanding on $date';
+  }
+
+  @override
+  String get msLoansAdjDifference => 'Difference';
+
+  @override
+  String get msLoansKeepEmiChangeEnd => 'Keep EMI, change end date';
+
+  @override
+  String get msLoansKeepEndChangeEmi => 'Keep end date, change EMI';
+
+  @override
+  String msLoansKeepEmiResult(String emi, String month) {
+    return 'EMI stays $emi · ends $month';
+  }
+
+  @override
+  String msLoansKeepEndResult(String month, String emi) {
+    return 'Ends $month · EMI becomes $emi';
+  }
+
+  @override
+  String get msLoansRemainingInterest => 'Remaining interest';
+
+  @override
+  String get msLoansAdjErrNegative => 'Outstanding can\'t be less than 0.';
+
+  @override
+  String get msLoansAdjZeroTitle => 'Nothing left to pay?';
+
+  @override
+  String get msLoansAdjZeroBody =>
+      'An outstanding of 0 means this loan is paid off. Mark it as closed?';
+
+  @override
+  String get msLoansAdjSaveOnly => 'Just save';
+
+  @override
+  String get msLoansAdjSaved => 'Outstanding updated';
+
+  @override
+  String msLoansEventAdjusted(String amount, String date) {
+    return 'Outstanding updated $amount · $date';
+  }
+
+  @override
+  String msLoansEventInterestAdded(String amount, String date) {
+    return 'Interest added to loan $amount · $date';
+  }
+
+  @override
+  String get msLoansEventAdjSubTenure => 'EMI unchanged, end date moves';
+
+  @override
+  String get msLoansEventAdjSubEmi => 'End date unchanged, EMI changes';
+
+  @override
+  String get msLoansEventDeleted => 'Deleted';
+
+  @override
+  String get msLoansInterestAdded => 'Interest added to loan';
+
+  @override
+  String msLoansRecalcTitle(int count) {
+    return 'Recalculate the split of $count later EMIs you haven\'t edited?';
+  }
+
+  @override
+  String msLoansRecalcBody(String before, String after) {
+    return 'Interest in those EMIs is $before now and $after after recalculating. EMIs you edited stay as they are.';
+  }
+
+  @override
+  String get msLoansRecalc => 'Recalculate';
+
+  @override
+  String get msLoansKeepAsIs => 'Keep as is';
+
+  @override
+  String msLoansRecalcDone(int count) {
+    return 'Updated $count EMIs';
+  }
+
+  @override
+  String get msLoansDeleteExtraTitle => 'Delete this extra payment?';
+
+  @override
+  String get msLoansDeleteExtraBody =>
+      'Its transactions are deleted too, and the outstanding goes back up.';
+
+  @override
+  String get msLoansDeleteAdjTitle => 'Delete this update?';
+
+  @override
+  String get msLoansDeleteAdjBody =>
+      'The outstanding goes back to Kuber\'s figure.';
+
+  @override
+  String get msTxnEdited => 'Edited';
+
+  @override
+  String get msTxnSplitHelper =>
+      'Change these to match your bank. They always add up to the EMI.';
+
+  @override
+  String get msTxnSplitErr => 'Principal and interest can\'t be less than 0.';
+
+  @override
+  String get msInfoSplitEditedTitle => 'Edited split';
+
+  @override
+  String get msInfoSplitEditedLine =>
+      'You changed this split to match your bank. Kuber uses your figures for the outstanding amount and projects future EMIs from there.';
+
+  @override
+  String get msInfoAdjustBankLine =>
+      'Use this when your bank statement shows a different amount owed than Kuber. Kuber starts from your figure on that date.';
+
+  @override
+  String get msInfoAdjustInterestLine =>
+      'Some banks add interest you didn\'t pay, like during a moratorium or before EMIs start, to what you owe. It counts toward the loan\'s total interest. It is not spending, because no money left your account.';
+
+  @override
+  String get msInfoRemainingLine =>
+      'Remaining interest depends on what you owe, the rate and your EMI, so Kuber calculates it. Update the outstanding amount or the rate instead.';
+
+  @override
+  String get msLoansPastEmis => 'Add past EMIs as transactions';
+
+  @override
+  String get msInfoPastEmisLine =>
+      'Kuber adds one EMI transaction for every month the loan has already run, with its principal and interest. Your account balance goes down by the total, like any payment. Leave it off to start from today without past transactions.';
+
+  @override
+  String get msLoansPastEmisHelp =>
+      'Creates every EMI from the first EMI date until today as a transaction.';
+
+  @override
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  ) {
+    return 'Adds $count EMIs from $from to $to and lowers $account\'s balance by $amount.';
+  }
+
+  @override
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  ) {
+    return 'Adds $count EMIs from $from to $to, $amount in all.';
+  }
+
+  @override
+  String msLoansPastEmisRemoveTitle(int count) {
+    return 'Remove the $count past EMIs added by this switch?';
+  }
+
+  @override
+  String get msLoansPastEmisRemoveBody =>
+      'EMIs you edited are kept. The account balance goes back up by the ones removed.';
+
+  @override
+  String get msLoansKeep => 'Keep';
+
+  @override
+  String get msLoansRemove => 'Remove';
+
+  @override
+  String msLoansPastEmisRemoved(int removed, int kept) {
+    return 'Removed $removed past EMIs. Kept $kept you edited.';
+  }
+
+  @override
+  String get bgStepPastEmis => 'Adding past EMIs…';
+
+  @override
+  String bgJobPercent(String text, int percent) {
+    return '$text $percent%';
+  }
+
+  @override
+  String bgJobsRunning(String text, int count) {
+    return '$text ($count tasks)';
+  }
+
+  @override
+  String get bgJobFailed => 'Something went wrong';
+
+  @override
+  String get bgDetails => 'Details';
+
+  @override
+  String get bgDetailsTitle => 'What went wrong';
+
+  @override
+  String get bgAddedOne => 'Added 1 transaction';
+
+  @override
+  String bgAdded(int count) {
+    return 'Added $count transactions';
+  }
+
+  @override
+  String get bgBackupSaved => 'Backup saved';
+
+  @override
+  String get accountTypeOverdraft => 'Overdraft';
+
+  @override
+  String get accountOverdraftHint => 'e.g. HDFC overdraft';
+
+  @override
+  String get accountOverdraftSub => 'For money you owe, like an overdraft.';
+
+  @override
+  String get accountOverdraftInfoLine =>
+      'Use this for money you owe, like an overdraft or a credit line. EMIs you track in Loans still come from the account you pick there.';
+
+  @override
+  String get accountAmountOwed => 'Amount owed';
+
+  @override
+  String get accountLimitOptional => 'Limit (optional)';
+
+  @override
+  String accountAvailable(String amount) {
+    return 'Available $amount';
+  }
+
+  @override
+  String get accountOwedLabel => 'Owed';
+
+  @override
+  String accountOverLimit(String amount) {
+    return 'This goes over the limit by $amount.';
+  }
 }

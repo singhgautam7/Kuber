@@ -787,6 +787,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           subtitle: Text(
                             a.isCreditCard
                                 ? context.l10n.creditCardLabel
+                                : a.isOverdraft
+                                ? context.l10n.accountTypeOverdraft
                                 : context.l10n.bankCashLabel,
                             style: localeFont(
                               fontSize: 12,

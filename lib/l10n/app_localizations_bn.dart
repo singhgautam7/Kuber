@@ -4661,7 +4661,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get makeDefaultAccountSub =>
-      'লেনদেন যোগ করার সময় আগে থেকে নির্বাচিত।';
+      'কুইক অ্যাড, ভয়েস অ্যাড বা Ask Kuber দিয়ে লেনদেন যোগ করার সময় আগে থেকে নির্বাচিত।';
 
   @override
   String get currentBalanceLabel => 'বর্তমান ব্যালেন্স';
@@ -8045,4 +8045,274 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get msLoansReopenBody =>
       'এর EMI পরের নির্ধারিত তারিখ থেকে আবার শুরু হবে। বন্ধ থাকার সময়ের কিছু যোগ হবে না।';
+
+  @override
+  String get msLoansUpdateOutstanding => 'বকেয়া আপডেট করুন';
+
+  @override
+  String get msLoansOutstandingPrincipal => 'বকেয়া মূলধন';
+
+  @override
+  String get msLoansAsOn => 'এই তারিখে';
+
+  @override
+  String get msLoansAdjReason => 'কারণ';
+
+  @override
+  String get msLoansAdjMatchBank => 'ব্যাংক স্টেটমেন্টের সাথে মেলান';
+
+  @override
+  String get msLoansAdjMatchBankSub => 'আপনার ব্যাংক অন্য বকেয়া দেখাচ্ছে।';
+
+  @override
+  String get msLoansAdjInterestAdded => 'অপরিশোধিত সুদ ঋণে যোগ হয়েছে';
+
+  @override
+  String get msLoansAdjInterestAddedSub =>
+      'আপনার ব্যাংক সুদকে বকেয়ায় যোগ করেছে, যেমন মোরেটোরিয়ামের সময়।';
+
+  @override
+  String msLoansKuberOutstandingOn(String date) {
+    return '$date-এ Kuber-এর বকেয়া';
+  }
+
+  @override
+  String get msLoansAdjDifference => 'পার্থক্য';
+
+  @override
+  String get msLoansKeepEmiChangeEnd => 'EMI একই, শেষ তারিখ বদলাবে';
+
+  @override
+  String get msLoansKeepEndChangeEmi => 'শেষ তারিখ একই, EMI বদলাবে';
+
+  @override
+  String msLoansKeepEmiResult(String emi, String month) {
+    return 'EMI $emi থাকবে · $month-এ শেষ';
+  }
+
+  @override
+  String msLoansKeepEndResult(String month, String emi) {
+    return '$month-এ শেষ · EMI হবে $emi';
+  }
+
+  @override
+  String get msLoansRemainingInterest => 'বাকি সুদ';
+
+  @override
+  String get msLoansAdjErrNegative => 'বকেয়া 0-এর কম হতে পারে না।';
+
+  @override
+  String get msLoansAdjZeroTitle => 'শোধ করার কিছু বাকি নেই?';
+
+  @override
+  String get msLoansAdjZeroBody =>
+      '0 বকেয়া মানে ঋণ শোধ হয়েছে। বন্ধ হিসেবে চিহ্নিত করবেন?';
+
+  @override
+  String get msLoansAdjSaveOnly => 'শুধু সেভ করুন';
+
+  @override
+  String get msLoansAdjSaved => 'বকেয়া আপডেট হয়েছে';
+
+  @override
+  String msLoansEventAdjusted(String amount, String date) {
+    return 'বকেয়া আপডেট $amount · $date';
+  }
+
+  @override
+  String msLoansEventInterestAdded(String amount, String date) {
+    return 'ঋণে সুদ যোগ $amount · $date';
+  }
+
+  @override
+  String get msLoansEventAdjSubTenure => 'EMI একই, শেষ তারিখ সরেছে';
+
+  @override
+  String get msLoansEventAdjSubEmi => 'শেষ তারিখ একই, EMI বদলেছে';
+
+  @override
+  String get msLoansEventDeleted => 'মুছে ফেলা হয়েছে';
+
+  @override
+  String get msLoansInterestAdded => 'ঋণে যোগ হওয়া সুদ';
+
+  @override
+  String msLoansRecalcTitle(int count) {
+    return 'আপনি বদলাননি এমন পরের $countটি EMI-র ভাগ আবার হিসাব করবেন?';
+  }
+
+  @override
+  String msLoansRecalcBody(String before, String after) {
+    return 'ওই EMI-গুলোর সুদ এখন $before, আবার হিসাব করলে $after। আপনার বদলানো EMI যেমন আছে তেমনই থাকবে।';
+  }
+
+  @override
+  String get msLoansRecalc => 'আবার হিসাব করুন';
+
+  @override
+  String get msLoansKeepAsIs => 'যেমন আছে রাখুন';
+
+  @override
+  String msLoansRecalcDone(int count) {
+    return '$countটি EMI আপডেট হয়েছে';
+  }
+
+  @override
+  String get msLoansDeleteExtraTitle => 'এই অতিরিক্ত পেমেন্ট মুছবেন?';
+
+  @override
+  String get msLoansDeleteExtraBody =>
+      'এর লেনদেনও মুছে যাবে এবং বকেয়া আবার বাড়বে।';
+
+  @override
+  String get msLoansDeleteAdjTitle => 'এই আপডেট মুছবেন?';
+
+  @override
+  String get msLoansDeleteAdjBody => 'বকেয়া আবার Kuber-এর হিসাবে ফিরবে।';
+
+  @override
+  String get msTxnEdited => 'বদলানো';
+
+  @override
+  String get msTxnSplitHelper =>
+      'আপনার ব্যাংকের সাথে মেলাতে এগুলো বদলান। এগুলো সবসময় EMI-র সমান হয়।';
+
+  @override
+  String get msTxnSplitErr => 'মূলধন ও সুদ 0-এর কম হতে পারে না।';
+
+  @override
+  String get msInfoSplitEditedTitle => 'বদলানো ভাগ';
+
+  @override
+  String get msInfoSplitEditedLine =>
+      'আপনার ব্যাংকের সাথে মেলাতে আপনি এই ভাগ বদলেছেন। Kuber বকেয়ার জন্য আপনার হিসাব নেয় এবং সেখান থেকে ভবিষ্যতের EMI হিসাব করে।';
+
+  @override
+  String get msInfoAdjustBankLine =>
+      'যখন ব্যাংক স্টেটমেন্টে বকেয়া Kuber-এর থেকে আলাদা দেখায়, তখন এটি ব্যবহার করুন। Kuber সেই তারিখ থেকে আপনার হিসাব ধরে চলে।';
+
+  @override
+  String get msInfoAdjustInterestLine =>
+      'কিছু ব্যাংক না দেওয়া সুদ, যেমন মোরেটোরিয়ামে বা EMI শুরুর আগে, বকেয়ায় যোগ করে। এটি ঋণের মোট সুদে ধরা হয়। এটি খরচ নয়, কারণ আপনার অ্যাকাউন্ট থেকে টাকা যায়নি।';
+
+  @override
+  String get msInfoRemainingLine =>
+      'বাকি সুদ আপনার বকেয়া, হার ও EMI-র উপর নির্ভর করে, তাই Kuber এটি হিসাব করে। এর বদলে বকেয়া বা হার আপডেট করুন।';
+
+  @override
+  String get msLoansPastEmis => 'আগের EMI লেনদেন হিসেবে যোগ করুন';
+
+  @override
+  String get msInfoPastEmisLine =>
+      'Kuber ঋণের প্রতিটি পেরোনো মাসের জন্য একটি EMI লেনদেন যোগ করে, মূলধন ও সুদসহ। যেকোনো পেমেন্টের মতো আপনার অ্যাকাউন্টের ব্যালেন্স মোট পরিমাণে কমবে। আগের লেনদেন ছাড়া আজ থেকে শুরু করতে এটি বন্ধ রাখুন।';
+
+  @override
+  String get msLoansPastEmisHelp =>
+      'প্রথম EMI-র তারিখ থেকে আজ পর্যন্ত প্রতিটি EMI লেনদেন হিসেবে তৈরি করে।';
+
+  @override
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  ) {
+    return '$from থেকে $to পর্যন্ত $countটি EMI যোগ করবে এবং $account-এর ব্যালেন্স $amount কমাবে।';
+  }
+
+  @override
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  ) {
+    return '$from থেকে $to পর্যন্ত $countটি EMI যোগ করবে, মোট $amount।';
+  }
+
+  @override
+  String msLoansPastEmisRemoveTitle(int count) {
+    return 'এই সুইচে যোগ হওয়া $countটি আগের EMI সরাবেন?';
+  }
+
+  @override
+  String get msLoansPastEmisRemoveBody =>
+      'আপনার বদলানো EMI থাকবে। সরানো EMI-র সমান অ্যাকাউন্টের ব্যালেন্স আবার বাড়বে।';
+
+  @override
+  String get msLoansKeep => 'রাখুন';
+
+  @override
+  String get msLoansRemove => 'সরান';
+
+  @override
+  String msLoansPastEmisRemoved(int removed, int kept) {
+    return '$removedটি আগের EMI সরানো হয়েছে। আপনার বদলানো $keptটি রাখা হয়েছে।';
+  }
+
+  @override
+  String get bgStepPastEmis => 'আগের EMI যোগ হচ্ছে…';
+
+  @override
+  String bgJobPercent(String text, int percent) {
+    return '$text $percent%';
+  }
+
+  @override
+  String bgJobsRunning(String text, int count) {
+    return '$text ($countটি কাজ)';
+  }
+
+  @override
+  String get bgJobFailed => 'কিছু ভুল হয়েছে';
+
+  @override
+  String get bgDetails => 'বিস্তারিত';
+
+  @override
+  String get bgDetailsTitle => 'কী ভুল হয়েছে';
+
+  @override
+  String get bgAddedOne => '1টি লেনদেন যোগ হয়েছে';
+
+  @override
+  String bgAdded(int count) {
+    return '$countটি লেনদেন যোগ হয়েছে';
+  }
+
+  @override
+  String get bgBackupSaved => 'ব্যাকআপ সেভ হয়েছে';
+
+  @override
+  String get accountTypeOverdraft => 'ওভারড্রাফট';
+
+  @override
+  String get accountOverdraftHint => 'যেমন HDFC ওভারড্রাফট';
+
+  @override
+  String get accountOverdraftSub => 'যে টাকা আপনি ধার করেছেন, যেমন ওভারড্রাফট।';
+
+  @override
+  String get accountOverdraftInfoLine =>
+      'যে টাকা আপনি ধার করেছেন, যেমন ওভারড্রাফট বা ক্রেডিট লাইন, তার জন্য এটি ব্যবহার করুন। Loans-এ ট্র্যাক করা EMI এখনও সেখানে বাছাই করা অ্যাকাউন্ট থেকেই যায়।';
+
+  @override
+  String get accountAmountOwed => 'বকেয়া পরিমাণ';
+
+  @override
+  String get accountLimitOptional => 'সীমা (ঐচ্ছিক)';
+
+  @override
+  String accountAvailable(String amount) {
+    return 'উপলব্ধ $amount';
+  }
+
+  @override
+  String get accountOwedLabel => 'বকেয়া';
+
+  @override
+  String accountOverLimit(String amount) {
+    return 'এটি সীমা $amount ছাড়িয়ে যায়।';
+  }
 }

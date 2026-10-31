@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/schedule/processed_occurrence.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -191,11 +192,38 @@ final loanTransactionsProvider =
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     });
 
+/// Deleted EMI days per loan uid (see [deletedEmiDays]). Refreshes with the
+/// transaction list (a delete or a background run changes both).
+final loanDeletedDaysProvider = FutureProvider<Map<String, Set<int>>>((ref) async {
+  final txns = await ref.watch(transactionListProvider.future);
+  final ledger = await ref
+      .watch(isarProvider)
+      .processedOccurrences
+      .filter()
+      .sourceTypeEqualTo('loan')
+      .statusEqualTo('posted')
+      .findAll();
+  final ids = txns.map((t) => t.id).toSet();
+  final out = <String, Set<int>>{};
+  for (final p in ledger) {
+    final d = deletedEmiDays([p], ids);
+    if (d.isNotEmpty) (out[p.sourceId] ??= {}).addAll(d);
+  }
+  return out;
+});
+
+final loanRecordsProvider = Provider.family<LoanRecords, String>((ref, uid) {
+  final linked = ref.watch(loanTransactionsProvider(uid)).valueOrNull ?? const <Transaction>[];
+  final deleted = ref.watch(loanDeletedDaysProvider).valueOrNull?[uid] ?? const <int>{};
+  return (linked: linked, deleted: deleted);
+});
+
 /// Summary: total outstanding and total paid.
 final loanSummaryProvider =
     FutureProvider<({double outstanding, double totalPaid})>((ref) async {
       final loans = await ref.watch(loanListProvider.future);
       final txns = await ref.watch(transactionListProvider.future);
+      final deleted = await ref.watch(loanDeletedDaysProvider.future);
       // vNext (approved fix L3): outstanding from each loan's schedule;
       // loans tracked by EMI only have no outstanding.
       var outstanding = 0.0, paid = 0.0;
@@ -204,7 +232,7 @@ final loanSummaryProvider =
             .where((t) => t.linkedRuleType == 'loan' && t.linkedRuleId == l.uid)
             .toList();
         paid += linked.fold(0.0, (s, t) => s + t.amount);
-        final st = loanStatus(l, linked);
+        final st = loanStatus(l, linked, deletedDays: deleted[l.uid] ?? const {});
         if (!st.closed) outstanding += st.outstanding ?? 0;
       }
       return (outstanding: outstanding, totalPaid: paid);

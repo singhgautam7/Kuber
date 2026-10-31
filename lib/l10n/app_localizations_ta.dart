@@ -4718,7 +4718,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get makeDefaultAccountSub =>
-      'பரிவர்த்தனைகளைச் சேர்க்கும்போது முன்கூட்டியே தேர்ந்தெடுக்கப்பட்டது.';
+      'விரைவாகச் சேர், குரல் மூலம் சேர் அல்லது Ask Kuber மூலம் பரிவர்த்தனைகளைச் சேர்க்கும்போது முன்கூட்டியே தேர்ந்தெடுக்கப்பட்டது.';
 
   @override
   String get currentBalanceLabel => 'தற்போதைய இருப்பு';
@@ -8125,4 +8125,280 @@ class AppLocalizationsTa extends AppLocalizations {
   @override
   String get msLoansReopenBody =>
       'இதன் EMI அடுத்த தேதியிலிருந்து மீண்டும் தொடங்கும். மூடியிருந்த காலத்துக்கு எதுவும் சேர்க்கப்படாது.';
+
+  @override
+  String get msLoansUpdateOutstanding => 'நிலுவையைப் புதுப்பி';
+
+  @override
+  String get msLoansOutstandingPrincipal => 'நிலுவை அசல்';
+
+  @override
+  String get msLoansAsOn => 'இந்தத் தேதியில்';
+
+  @override
+  String get msLoansAdjReason => 'காரணம்';
+
+  @override
+  String get msLoansAdjMatchBank => 'வங்கி அறிக்கையுடன் பொருத்து';
+
+  @override
+  String get msLoansAdjMatchBankSub =>
+      'உங்கள் வங்கி வேறு நிலுவையைக் காட்டுகிறது.';
+
+  @override
+  String get msLoansAdjInterestAdded =>
+      'செலுத்தாத வட்டி கடனில் சேர்க்கப்பட்டது';
+
+  @override
+  String get msLoansAdjInterestAddedSub =>
+      'உங்கள் வங்கி வட்டியை நிலுவையில் சேர்த்தது, மொராட்டோரியம் காலம் போல.';
+
+  @override
+  String msLoansKuberOutstandingOn(String date) {
+    return '$date அன்று Kuber நிலுவை';
+  }
+
+  @override
+  String get msLoansAdjDifference => 'வேறுபாடு';
+
+  @override
+  String get msLoansKeepEmiChangeEnd => 'EMI அதே, முடிவுத் தேதி மாறும்';
+
+  @override
+  String get msLoansKeepEndChangeEmi => 'முடிவுத் தேதி அதே, EMI மாறும்';
+
+  @override
+  String msLoansKeepEmiResult(String emi, String month) {
+    return 'EMI $emi இருக்கும் · $month-ல் முடியும்';
+  }
+
+  @override
+  String msLoansKeepEndResult(String month, String emi) {
+    return '$month-ல் முடியும் · EMI $emi ஆகும்';
+  }
+
+  @override
+  String get msLoansRemainingInterest => 'மீதமுள்ள வட்டி';
+
+  @override
+  String get msLoansAdjErrNegative =>
+      'நிலுவை 0-க்குக் குறைவாக இருக்க முடியாது.';
+
+  @override
+  String get msLoansAdjZeroTitle => 'செலுத்த எதுவும் இல்லையா?';
+
+  @override
+  String get msLoansAdjZeroBody =>
+      '0 நிலுவை என்றால் கடன் முடிந்தது. மூடியதாகக் குறிக்கவா?';
+
+  @override
+  String get msLoansAdjSaveOnly => 'சேமி மட்டும்';
+
+  @override
+  String get msLoansAdjSaved => 'நிலுவை புதுப்பிக்கப்பட்டது';
+
+  @override
+  String msLoansEventAdjusted(String amount, String date) {
+    return 'நிலுவை புதுப்பிப்பு $amount · $date';
+  }
+
+  @override
+  String msLoansEventInterestAdded(String amount, String date) {
+    return 'கடனில் வட்டி சேர்ப்பு $amount · $date';
+  }
+
+  @override
+  String get msLoansEventAdjSubTenure => 'EMI மாறவில்லை, முடிவுத் தேதி மாறியது';
+
+  @override
+  String get msLoansEventAdjSubEmi => 'முடிவுத் தேதி அதே, EMI மாறியது';
+
+  @override
+  String get msLoansEventDeleted => 'நீக்கப்பட்டது';
+
+  @override
+  String get msLoansInterestAdded => 'கடனில் சேர்ந்த வட்டி';
+
+  @override
+  String msLoansRecalcTitle(int count) {
+    return 'நீங்கள் மாற்றாத அடுத்த $count EMI-களின் பிரிப்பை மீண்டும் கணக்கிடவா?';
+  }
+
+  @override
+  String msLoansRecalcBody(String before, String after) {
+    return 'அந்த EMI-களின் வட்டி இப்போது $before, மீண்டும் கணக்கிட்டால் $after. நீங்கள் மாற்றிய EMI-கள் அப்படியே இருக்கும்.';
+  }
+
+  @override
+  String get msLoansRecalc => 'மீண்டும் கணக்கிடு';
+
+  @override
+  String get msLoansKeepAsIs => 'அப்படியே வை';
+
+  @override
+  String msLoansRecalcDone(int count) {
+    return '$count EMI-கள் புதுப்பிக்கப்பட்டன';
+  }
+
+  @override
+  String get msLoansDeleteExtraTitle => 'இந்தக் கூடுதல் கட்டணத்தை நீக்கவா?';
+
+  @override
+  String get msLoansDeleteExtraBody =>
+      'இதன் பரிவர்த்தனைகளும் நீக்கப்படும், நிலுவை மீண்டும் உயரும்.';
+
+  @override
+  String get msLoansDeleteAdjTitle => 'இந்தப் புதுப்பிப்பை நீக்கவா?';
+
+  @override
+  String get msLoansDeleteAdjBody =>
+      'நிலுவை மீண்டும் Kuber கணக்குக்குத் திரும்பும்.';
+
+  @override
+  String get msTxnEdited => 'மாற்றப்பட்டது';
+
+  @override
+  String get msTxnSplitHelper =>
+      'உங்கள் வங்கியுடன் பொருத்த இவற்றை மாற்றுங்கள். இவை எப்போதும் EMI-க்குச் சமம்.';
+
+  @override
+  String get msTxnSplitErr =>
+      'அசலும் வட்டியும் 0-க்குக் குறைவாக இருக்க முடியாது.';
+
+  @override
+  String get msInfoSplitEditedTitle => 'மாற்றிய பிரிப்பு';
+
+  @override
+  String get msInfoSplitEditedLine =>
+      'உங்கள் வங்கியுடன் பொருந்த இந்தப் பிரிப்பை மாற்றினீர்கள். Kuber நிலுவைக்கு உங்கள் எண்களைப் பயன்படுத்தி அங்கிருந்து வரும் EMI-களைக் கணிக்கிறது.';
+
+  @override
+  String get msInfoAdjustBankLine =>
+      'வங்கி அறிக்கையில் நிலுவை Kuber-இலிருந்து வேறுபடும்போது இதைப் பயன்படுத்துங்கள். Kuber அந்தத் தேதியிலிருந்து உங்கள் எண்ணிலிருந்து தொடரும்.';
+
+  @override
+  String get msInfoAdjustInterestLine =>
+      'சில வங்கிகள் செலுத்தாத வட்டியை, மொராட்டோரியம் அல்லது EMI தொடங்கும் முன் போல, நிலுவையில் சேர்க்கும். இது கடனின் மொத்த வட்டியில் சேரும். உங்கள் கணக்கிலிருந்து பணம் செல்லாததால் இது செலவு அல்ல.';
+
+  @override
+  String get msInfoRemainingLine =>
+      'மீதமுள்ள வட்டி உங்கள் நிலுவை, விகிதம், EMI ஆகியவற்றைப் பொறுத்தது, எனவே Kuber இதைக் கணக்கிடுகிறது. பதிலாக நிலுவை அல்லது விகிதத்தைப் புதுப்பியுங்கள்.';
+
+  @override
+  String get msLoansPastEmis => 'முந்தைய EMI-களைப் பரிவர்த்தனைகளாகச் சேர்';
+
+  @override
+  String get msInfoPastEmisLine =>
+      'கடன் ஏற்கனவே ஓடிய ஒவ்வொரு மாதத்துக்கும் Kuber ஒரு EMI பரிவர்த்தனையை அசல், வட்டியுடன் சேர்க்கும். எந்தக் கட்டணம் போலவும் உங்கள் கணக்கு இருப்பு மொத்தத் தொகையால் குறையும். முந்தைய பரிவர்த்தனைகள் இல்லாமல் இன்றிலிருந்து தொடங்க இதை அணைத்து வையுங்கள்.';
+
+  @override
+  String get msLoansPastEmisHelp =>
+      'முதல் EMI தேதியிலிருந்து இன்று வரை ஒவ்வொரு EMI-யையும் பரிவர்த்தனையாக உருவாக்கும்.';
+
+  @override
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  ) {
+    return '$from முதல் $to வரை $count EMI-களைச் சேர்த்து $account இருப்பை $amount குறைக்கும்.';
+  }
+
+  @override
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  ) {
+    return '$from முதல் $to வரை $count EMI-களைச் சேர்க்கும், மொத்தம் $amount.';
+  }
+
+  @override
+  String msLoansPastEmisRemoveTitle(int count) {
+    return 'இந்த ஸ்விட்ச் சேர்த்த $count முந்தைய EMI-களை நீக்கவா?';
+  }
+
+  @override
+  String get msLoansPastEmisRemoveBody =>
+      'நீங்கள் மாற்றிய EMI-கள் இருக்கும். நீக்கியவற்றின் அளவு கணக்கு இருப்பு மீண்டும் உயரும்.';
+
+  @override
+  String get msLoansKeep => 'வை';
+
+  @override
+  String get msLoansRemove => 'நீக்கு';
+
+  @override
+  String msLoansPastEmisRemoved(int removed, int kept) {
+    return '$removed முந்தைய EMI-கள் நீக்கப்பட்டன. நீங்கள் மாற்றிய $kept வைக்கப்பட்டன.';
+  }
+
+  @override
+  String get bgStepPastEmis => 'முந்தைய EMI-கள் சேர்க்கப்படுகின்றன…';
+
+  @override
+  String bgJobPercent(String text, int percent) {
+    return '$text $percent%';
+  }
+
+  @override
+  String bgJobsRunning(String text, int count) {
+    return '$text ($count பணிகள்)';
+  }
+
+  @override
+  String get bgJobFailed => 'ஏதோ தவறு நடந்தது';
+
+  @override
+  String get bgDetails => 'விவரங்கள்';
+
+  @override
+  String get bgDetailsTitle => 'என்ன தவறு';
+
+  @override
+  String get bgAddedOne => '1 பரிவர்த்தனை சேர்க்கப்பட்டது';
+
+  @override
+  String bgAdded(int count) {
+    return '$count பரிவர்த்தனைகள் சேர்க்கப்பட்டன';
+  }
+
+  @override
+  String get bgBackupSaved => 'காப்புப் பிரதி சேமிக்கப்பட்டது';
+
+  @override
+  String get accountTypeOverdraft => 'ஓவர்டிராஃப்ட்';
+
+  @override
+  String get accountOverdraftHint => 'எ.கா. HDFC ஓவர்டிராஃப்ட்';
+
+  @override
+  String get accountOverdraftSub =>
+      'நீங்கள் செலுத்த வேண்டிய பணத்துக்கு, ஓவர்டிராஃப்ட் போல.';
+
+  @override
+  String get accountOverdraftInfoLine =>
+      'நீங்கள் செலுத்த வேண்டிய பணத்துக்கு இதைப் பயன்படுத்துங்கள், ஓவர்டிராஃப்ட் அல்லது கிரெடிட் லைன் போல. Loans-இல் கண்காணிக்கும் EMI-கள் இன்னும் அங்கு தேர்ந்தெடுத்த கணக்கிலிருந்தே செல்லும்.';
+
+  @override
+  String get accountAmountOwed => 'நிலுவைத் தொகை';
+
+  @override
+  String get accountLimitOptional => 'வரம்பு (விருப்பம்)';
+
+  @override
+  String accountAvailable(String amount) {
+    return 'கிடைப்பது $amount';
+  }
+
+  @override
+  String get accountOwedLabel => 'நிலுவை';
+
+  @override
+  String accountOverLimit(String amount) {
+    return 'இது வரம்பை $amount மீறுகிறது.';
+  }
 }

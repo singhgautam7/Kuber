@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
+import 'package:kuber/features/transactions/data/transaction_repository.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/categories/data/category_group.dart';
@@ -69,6 +71,8 @@ const _allSchemas = [
 bool _isarInitialized = false;
 
 Future<void> initialiseIsarForTests() async {
+  // Test databases live in this isolate (helper isolates have no Isar core).
+  TransactionRepository.offloadGetAll = false;
   if (_isarInitialized) return;
   await Isar.initializeIsarCore(download: true);
   _isarInitialized = true;
@@ -96,3 +100,21 @@ Future<void> closeAndCleanIsar(Isar isar) async {
     } catch (_) {}
   }
 }
+
+/// Widget tests: waits until every Isar write started inside the widget's
+/// fake-async zone has finished. Such a write only advances while the test
+/// pumps, so one left unfinished when the test ends makes `isar.close()` in
+/// tearDown wait forever (seen under full-suite disk load). An empty write
+/// from the real zone gets the write lock only after those finish.
+Future<void> drainIsarWrites(WidgetTester t, Isar isar) async {
+  var done = false;
+  await t.runAsync(() async {
+    isar.writeTxn(() async {}).then((_) => done = true);
+  });
+  for (var i = 0; i < 500 && !done; i++) {
+    await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await t.pump();
+  }
+  expect(done, isTrue, reason: 'an Isar write started in the test never finished');
+}
+

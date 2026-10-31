@@ -49,6 +49,8 @@ class AccountDetailSheet extends ConsumerWidget {
         label: context.l10n.accountTypeLabel,
         value: account.isCreditCard
             ? context.l10n.creditCardLabel
+            : account.isOverdraft
+            ? context.l10n.accountTypeOverdraft
             : context.l10n.savingsAccount,
       ),
       if (account.last4Digits != null && account.last4Digits!.isNotEmpty)
@@ -94,6 +96,8 @@ class AccountDetailSheet extends ConsumerWidget {
       title: account.name,
       subtitle: account.isCreditCard
           ? context.l10n.creditCardLabel
+          : account.isOverdraft
+          ? context.l10n.accountTypeOverdraft
           : context.l10n.savingsAccount,
       leadingIcon: CategoryIcon.square(
         icon: account.icon != null
@@ -173,6 +177,29 @@ class AccountDetailSheet extends ConsumerWidget {
             data: (balance) {
               if (account.isCreditCard) {
                 return _buildCreditCardSection(context, ref, balance);
+              }
+              if (account.isOverdraft) {
+                // Owed (negative) or a balance (positive), and Available
+                // when there is a limit.
+                final fmt = ref.watch(formatterProvider);
+                final limit = account.creditLimit;
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  SheetAmountHero(
+                    caption: balance < 0
+                        ? context.l10n.accountOwedLabel
+                        : context.l10n.currentAvailableBalance,
+                    amount: fmt.formatCurrency(balance.abs()),
+                    amountColor: balance < 0
+                        ? context.kuberMoney.expense
+                        : (balance > 0 ? context.kuberMoney.income : cs.onSurface),
+                  ),
+                  if (limit != null && limit > 0)
+                    Text(
+                      context.l10n.accountAvailable(fmt.formatCurrency(limit + balance)),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: limit + balance < 0 ? context.kuberMoney.warning : cs.onSurfaceVariant),
+                    ),
+                ]);
               }
               return SheetAmountHero(
                 caption: context.l10n.currentAvailableBalance,

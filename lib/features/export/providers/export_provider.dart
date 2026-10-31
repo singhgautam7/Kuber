@@ -176,6 +176,8 @@ TransactionExportData buildTransactionExportData(
       source: sourceOf(tx),
       principalPart: tx.principalPart,
       interestPart: tx.interestPart,
+      splitEdited: tx.splitEdited,
+      addedAsPastEmi: tx.addedAsPastEmi,
     ));
   }
 

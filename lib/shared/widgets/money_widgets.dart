@@ -48,19 +48,27 @@ class EmiSplitBar extends StatelessWidget {
     final total = principal + interest;
     final pFlex = total <= 0 ? 0 : (principal / total * 1000).round();
     final iFlex = total <= 0 ? 1 : 1000 - pFlex;
-    Widget dot(Color c, String label, String value) => Expanded(
-          child: Row(children: [
+    // Each legend item keeps its natural width and the pair wraps onto two
+    // lines when it can't fit (large text): a label never breaks mid-word.
+    Widget dot(Color c, String label, String value) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Container(
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
             const SizedBox(width: 6),
-            Flexible(
-                child: Text(label,
-                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant))),
+            Text(label,
+                softWrap: false,
+                style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
             const SizedBox(width: 6),
-            Text(value, style: tt.titleSmall!.copyWith(fontFeatures: _tabular)),
-          ]),
+            Flexible(
+              child: Text(value,
+                  softWrap: false,
+                  overflow: TextOverflow.fade,
+                  style: tt.titleSmall!.copyWith(fontFeatures: _tabular)),
+            ),
+          ],
         );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,11 +98,19 @@ class EmiSplitBar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Row(children: [
-          dot(cs.primary, l.msLoansPrincipalL, principalText),
-          const SizedBox(width: 12),
-          dot(interestColor(context), l.msLoansInterestL, interestText),
-        ]),
+        LayoutBuilder(
+          builder: (context, box) => Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              // Side by side: half the width each, like before.
+              ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: (box.maxWidth - 12) / 2),
+                  child: dot(cs.primary, l.msLoansPrincipalL, principalText)),
+              dot(interestColor(context), l.msLoansInterestL, interestText),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -225,10 +241,17 @@ class KvGrid extends StatelessWidget {
                             ),
                         ]),
                         const SizedBox(height: 2),
-                        Text(items[j].value,
-                            style: tt.titleSmall!.copyWith(
-                                color: items[j].valueColor ?? cs.onSurface,
-                                fontFeatures: _tabular)),
+                        // Amounts never break mid-number; they shrink at
+                        // large font sizes instead.
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(items[j].value,
+                              maxLines: 1,
+                              style: tt.titleSmall!.copyWith(
+                                  color: items[j].valueColor ?? cs.onSurface,
+                                  fontFeatures: _tabular)),
+                        ),
                       ],
                     ),
             ),
@@ -579,8 +602,13 @@ class MoneyIdentity extends StatelessWidget {
               children: [
                 Text(contextLabel.toUpperCase(),
                     style: tt.labelMedium!.copyWith(color: cs.onSurfaceVariant, letterSpacing: 0.8)),
-                Text(headline,
-                    style: tt.headlineMedium!.copyWith(fontFeatures: _tabular)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(headline,
+                      maxLines: 1,
+                      style: tt.headlineMedium!.copyWith(fontFeatures: _tabular)),
+                ),
                 if (caption != null)
                   Text(caption!, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
               ],

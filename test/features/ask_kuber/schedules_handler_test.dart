@@ -70,6 +70,8 @@ void main() {
   Future<String?> ask(String q, {RecurringHub h = hub}) async {
     final c = ProviderContainer(overrides: [
       loanListProvider.overrideWith(() => _Loans([home, car])),
+      // No EMI was recorded and then deleted.
+      loanDeletedDaysProvider.overrideWith((ref) async => const <String, Set<int>>{}),
       recurringHubProvider.overrideWith((ref) async => h),
     ]);
     addTearDown(c.dispose);
@@ -84,6 +86,12 @@ void main() {
     final text = await ask('How much interest have I paid on my home loan?');
     expect(text, contains('Home loan'));
     expect(text, contains(AppFormatter().formatCurrency(paid.round())));
+  });
+
+  test('"How much interest have I paid?" without the word loan', () async {
+    final text = await ask('How much interest have I paid?');
+    expect(text, isNotNull);
+    expect(text, contains('interest'));
   });
 
   test('loan without numbers says how to get the split', () async {

@@ -39,7 +39,8 @@ class AccountCard extends ConsumerWidget {
     final cs = theme.colorScheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
-    final isCC = account.isCreditCard;
+    // Credit cards and Overdraft accounts show their limit use.
+    final isCC = account.isLiability;
     final tones = categoryTones(context, resolveAccountColor(account));
 
     // Credit cards show the outstanding as a negative amount in the expense
@@ -143,6 +144,7 @@ class AccountCard extends ConsumerWidget {
 
   String _typeFor(BuildContext context, Account a) {
     if (a.isCreditCard) return context.l10n.creditCardLabel;
+    if (a.isOverdraft) return context.l10n.accountTypeOverdraft;
     switch (a.type.toLowerCase()) {
       case 'bank':
         return context.l10n.bankLabel;

@@ -51,21 +51,32 @@ class BackgroundTasks {
     return ScheduledBackup.isDueNow(isar);
   }
 
+  /// Set by the app: follows a run that was just started or queued, so its
+  /// progress and result reach the in-app reporter whoever started it (app
+  /// open, resume, Retry from the failure notification, the dev screen).
+  static void Function(DateTime since)? onStarted;
+
   /// Starts a run when something is due (or [force], for Retry). Returns
   /// true when a run was started or queued.
   static Future<bool> start(Isar isar, AppLocalizations l10n,
       {required String trigger, bool force = false}) async {
+    final since = DateTime.now();
     if (!force && !await anythingDue(isar)) return false;
-    if (await TaskRunner.activeRun(isar) != null) return true;
+    if (await TaskRunner.activeRun(isar) != null) {
+      onStarted?.call(since);
+      return true;
+    }
     if (_useWorker) {
       try {
         await _channel.invokeMethod('enqueue', {'trigger': trigger});
+        onStarted?.call(since);
         return true;
       } catch (e) {
         debugPrint('Kuber: WorkManager enqueue failed, running in-process: $e');
       }
     }
     unawaited(runQueue(isar, l10n, trigger: trigger));
+    onStarted?.call(since);
     return true;
   }
 
@@ -135,17 +146,17 @@ class BackgroundTasks {
     return l10n.bgStepStarting;
   }
 
-  /// "2 recurring added · Backup done", "Backup failed", or '' when nothing
-  /// happened.
+  /// "Added 3 transactions · Backup saved", "Backup failed", or '' when
+  /// nothing happened.
   static String resultText(BackgroundTaskRun r, AppLocalizations l10n) {
     final parts = <String>[];
     final posted = _posted(r);
-    if (posted == 1) parts.add(l10n.bgResultRecurringOne);
-    if (posted > 1) parts.add(l10n.bgResultRecurring('$posted'));
+    if (posted == 1) parts.add(l10n.bgAddedOne);
+    if (posted > 1) parts.add(l10n.bgAdded(posted));
     if (r.failedOccurrences == 1) parts.add(l10n.bgFailRecurringOne);
     if (r.failedOccurrences > 1) parts.add(l10n.bgFailRecurring('${r.failedOccurrences}'));
     if (r.maturedCount > 0) parts.add(l10n.bgResultMatured('${r.maturedCount}'));
-    if (r.backupStatus == 'done') parts.add(l10n.bgResultBackup);
+    if (r.backupStatus == 'done') parts.add(l10n.bgBackupSaved);
     if (r.backupStatus == 'failed') parts.add(l10n.bgFailBackup);
     return parts.join(' · ');
   }

@@ -101,10 +101,14 @@ class KuberProgressState {
   final String message;
   final String? detail;
   final bool dismissible;
+
+  /// 0 to 1 when the share done is known (the ring fills), else spinning.
+  final double? value;
   const KuberProgressState(
     this.message, {
     this.detail,
     this.dismissible = false,
+    this.value,
   });
 }
 
@@ -443,6 +447,7 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
+                        value: p.value,
                         strokeWidth: 2.5,
                         color: accent,
                         backgroundColor: fg.withValues(alpha: 0.16),

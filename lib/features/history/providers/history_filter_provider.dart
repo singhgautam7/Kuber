@@ -76,4 +76,9 @@ class HistoryFilterNotifier extends StateNotifier<HistoryFilter> {
   void clearAll() {
     state = const HistoryFilter();
   }
+
+  /// Only these transactions (clears every other filter).
+  void showOnly(Set<int> ids) {
+    state = HistoryFilter(ids: ids);
+  }
 }

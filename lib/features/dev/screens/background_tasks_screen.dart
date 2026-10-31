@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/background/background_run_controller.dart';
 import '../../../core/background/background_task_run.dart';
 import '../../../core/background/background_tasks.dart';
 import '../../../core/database/isar_service.dart';
@@ -55,11 +54,8 @@ class BackgroundTasksScreen extends ConsumerWidget {
             type: AppButtonType.primary,
             fullWidth: true,
             onPressed: () async {
-              final started = await BackgroundTasks.start(isar, context.l10n,
-                  trigger: 'manual', force: true);
-              if (started) {
-                ref.read(backgroundRunWatchProvider.notifier).watchFrom(DateTime.now());
-              }
+              // Followed by the reporter through BackgroundTasks.onStarted.
+              await BackgroundTasks.start(isar, context.l10n, trigger: 'manual', force: true);
             },
           ),
           const SizedBox(height: KuberSpace.md),

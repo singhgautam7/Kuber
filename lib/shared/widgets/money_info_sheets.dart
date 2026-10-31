@@ -40,6 +40,12 @@ enum MoneyInfo {
   accrued,
   updated,
   monthly,
+  // Loan accuracy.
+  splitEdited,
+  adjustBank,
+  adjustInterest,
+  remainingInterest,
+  pastEmis,
 }
 
 void showMoneyInfo(BuildContext context, WidgetRef ref, MoneyInfo kind) {
@@ -272,5 +278,15 @@ KuberInfoConfig moneyInfoConfig(AppLocalizations l, AppFormatter f, MoneyInfo ki
             row(l.msInfoMonthlyRow2(m(6000)), l.msInfoIoRowValue(m(6000 * monthlyFactor(3, ScheduleUnit.month)))),
             row(l.msInfoMonthlyRow3(m(750)), l.msInfoIoRowValue(m(750 * monthlyFactor(1, ScheduleUnit.week)))),
           ], after: l.msInfoMonthlyAfter));
+    case MoneyInfo.splitEdited:
+      return cfg(l.msInfoSplitEditedTitle, l.msInfoSplitEditedLine);
+    case MoneyInfo.adjustBank:
+      return cfg(l.msLoansAdjMatchBank, l.msInfoAdjustBankLine);
+    case MoneyInfo.adjustInterest:
+      return cfg(l.msLoansAdjInterestAdded, l.msInfoAdjustInterestLine);
+    case MoneyInfo.remainingInterest:
+      return cfg(l.msLoansRemainingInterest, l.msInfoRemainingLine);
+    case MoneyInfo.pastEmis:
+      return cfg(l.msLoansPastEmis, l.msInfoPastEmisLine);
   }
 }

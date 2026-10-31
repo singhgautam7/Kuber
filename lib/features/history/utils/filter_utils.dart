@@ -9,6 +9,10 @@ List<Transaction> applyHistoryFilters(
 }) {
   var filtered = transactions;
 
+  if (filter.ids.isNotEmpty) {
+    filtered = filtered.where((t) => filter.ids.contains(t.id)).toList();
+  }
+
   // Search filter
   if (filter.searchQuery != null && filter.searchQuery!.isNotEmpty) {
     final query = filter.searchQuery!.toLowerCase();

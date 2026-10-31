@@ -16,7 +16,10 @@ class SchedulesHandler extends QueryHandler {
   @override
   Future<HandlerResult?> tryHandle(QueryContext ctx) async {
     final lower = ctx.lower;
-    if (lower.contains('interest') && (lower.contains('loan') || lower.contains('emi'))) {
+    // "How much interest have I paid?" is a loan question too: interest is
+    // only ever paid on loans (investments earn it).
+    if (lower.contains('interest') &&
+        (lower.contains('loan') || lower.contains('emi') || lower.contains('paid') || lower.contains(' pay'))) {
       return _interest(ctx);
     }
     if ((lower.contains('recurring') || lower.contains('subscription')) &&
@@ -36,12 +39,17 @@ class SchedulesHandler extends QueryHandler {
       return words.any(ctx.lower.contains);
     }).toList();
     final picked = named.isNotEmpty ? named : loans;
+    final deleted = await ctx.read(loanDeletedDaysProvider.future);
     final lines = <String>[];
-    var total = 0.0, unknown = 0;
+    var total = 0.0, added = 0.0, unknown = 0;
     String? lastName;
     for (final l in picked) {
       final linked = ctx.txns.where((t) => t.linkedRuleType == 'loan' && t.linkedRuleId == l.uid).toList();
-      final paid = loanStatus(l, linked, now: ctx.now).interestPaid;
+      // Recorded EMI splits (edits included); interest the bank added to the
+      // loan is reported on its own line, it was not paid.
+      final st = loanStatus(l, linked, now: ctx.now, deletedDays: deleted[l.uid] ?? const {});
+      final paid = st.interestPaid;
+      added += st.addedInterest;
       if (paid == null) {
         unknown++;
         continue;
@@ -72,8 +80,11 @@ class SchedulesHandler extends QueryHandler {
     final head = lines.length == 1
         ? 'You have paid ${ctx.money(total)} in interest on $lastName so far.'
         : 'You have paid ${ctx.money(total)} in interest so far:\n${lines.join('\n')}';
+    final withAdded = added > 0
+        ? '$head\nInterest added to the loan by the bank: ${ctx.money(added)}. It is owed, not paid yet.'
+        : head;
     return HandlerResult(
-      text: unknown > 0 ? '$head\n($unknown loan${unknown == 1 ? '' : 's'} without loan details not counted.)' : head,
+      text: unknown > 0 ? '$withAdded\n($unknown loan${unknown == 1 ? '' : 's'} without loan details not counted.)' : head,
       thinking: thinking,
     );
   }

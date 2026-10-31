@@ -2,6 +2,7 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
@@ -49,9 +50,11 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
   void initState() {
     super.initState();
     if (widget.existingBudget != null) {
-      _amountController.text = widget.existingBudget!.amount % 1 == 0
-          ? widget.existingBudget!.amount.toStringAsFixed(0)
-          : widget.existingBudget!.amount.toStringAsFixed(2);
+      _amountController.text = _groupAmount(
+        widget.existingBudget!.amount % 1 == 0
+            ? widget.existingBudget!.amount.toStringAsFixed(0)
+            : widget.existingBudget!.amount.toStringAsFixed(2),
+      );
       _isEveryMonth = widget.existingBudget!.isRecurring;
       _alerts = List<BudgetAlert>.from(widget.existingBudget?.alerts ?? []);
 
@@ -71,15 +74,24 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
       _selectedCategory = widget.preselectedCategory;
       final amount = widget.amountPrefill;
       if (amount != null && amount > 0) {
-        _amountController.text = amount.toStringAsFixed(0);
+        _amountController.text = _groupAmount(amount.toStringAsFixed(0));
       }
     }
   }
 
+  bool get _isIndian =>
+      ref.read(formatterProvider).system == NumberSystem.indian;
+
+  String _groupAmount(String raw) =>
+      CurrencyInputFormatter(isIndian: _isIndian).format(raw);
+
+  double get _amount =>
+      double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0.0;
+
   void _save() async {
     if (_selectedCategory == null || _amountController.text.isEmpty) return;
 
-    final amount = double.tryParse(_amountController.text) ?? 0.0;
+    final amount = _amount;
     if (amount <= 0) return;
 
     final budget = widget.existingBudget ?? Budget();
@@ -160,7 +172,13 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             // Board 3.18: a large filled amount field.
             TextField(
               controller: _amountController,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                CurrencyInputFormatter(
+                  isIndian:
+                      ref.watch(formatterProvider).system == NumberSystem.indian,
+                ),
+              ],
               onChanged: (_) => setState(() {}),
               style: Theme.of(
                 context,
@@ -290,7 +308,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
       return;
     }
 
-    final amount = double.tryParse(_amountController.text) ?? 0.0;
+    final amount = _amount;
     if (amount <= 0 && _alerts.isEmpty) {
       // Just a precaution if someone tries to add alert before amount
     }

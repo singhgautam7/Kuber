@@ -12,6 +12,7 @@ import '../../../core/money_math/investment_math.dart';
 import '../../../core/schedule/schedule.dart';
 import '../../../core/schedule/schedule_text.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_chips.dart';
@@ -208,7 +209,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         if (_sip) {
           i
             ..sipAmount = _v(_sipAmount)
-            ..stepUpValue = _stepUpOn ? (double.tryParse(_stepUp.text) ?? 0) : 0
+            ..stepUpValue = _stepUpOn ? _v(_stepUp) : 0
             ..stepUpKind = _stepUpPct ? StepUpKind.percent : StepUpKind.amount;
           if (base == null) {
             i
@@ -548,7 +549,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       }
       if (_sip) {
         final preview = _stepUpOn
-            ? stepUpSeries(_v(_sipAmount), _stepUpPct, double.tryParse(_stepUp.text) ?? 0, 3)
+            ? stepUpSeries(_v(_sipAmount), _stepUpPct, _v(_stepUp), 3)
             : const <double>[];
         final s0 = _when.firstOccurrence;
         children.addAll([
@@ -575,6 +576,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                 child: KuberTextField.number(
                   label: l.msInvStepUpField,
                   controller: _stepUp,
+                  inputFormatters: _stepUpPct ? null : [CurrencyInputFormatter(isIndian: indian)],
                   onInfo: () => showMoneyInfo(context, ref, MoneyInfo.stepup),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -584,7 +586,10 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                 width: 120,
                 child: KuberSegmented<bool>(
                   groupValue: _stepUpPct,
-                  onChanged: (v) => setState(() => _stepUpPct = v),
+                  onChanged: (v) => setState(() {
+                    _stepUpPct = v;
+                    if (v) _stepUp.text = _stepUp.text.replaceAll(',', '');
+                  }),
                   segments: [
                     const KuberSegment(value: true, label: '%'),
                     KuberSegment(value: false, label: fmt.currency.narrow),

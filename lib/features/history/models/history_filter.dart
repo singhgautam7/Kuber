@@ -11,6 +11,9 @@ class HistoryFilter {
   final double? minAmount;
   final double? maxAmount;
 
+  /// Only these transactions ("View" on a background job's snackbar).
+  final Set<int> ids;
+
   const HistoryFilter({
     this.types = const {},
     this.isRecurring,
@@ -22,6 +25,7 @@ class HistoryFilter {
     this.tagIds = const {},
     this.minAmount,
     this.maxAmount,
+    this.ids = const {},
   });
 
   bool get isEmpty =>
@@ -34,7 +38,8 @@ class HistoryFilter {
       categoryIds.isEmpty &&
       tagIds.isEmpty &&
       minAmount == null &&
-      maxAmount == null;
+      maxAmount == null &&
+      ids.isEmpty;
 
   bool get isAdvanced =>
       from != null ||
@@ -56,6 +61,7 @@ class HistoryFilter {
     if (isRecurring != null) count++;
     if (searchQuery != null && searchQuery!.isNotEmpty) count++;
     if (minAmount != null || maxAmount != null) count++;
+    if (ids.isNotEmpty) count++;
     return count;
   }
 
@@ -70,6 +76,7 @@ class HistoryFilter {
     Set<int>? tagIds,
     double? minAmount,
     double? maxAmount,
+    Set<int>? ids,
     bool clearTypes = false,
     bool clearRecurring = false,
     bool clearSearchQuery = false,
@@ -89,6 +96,7 @@ class HistoryFilter {
       tagIds: tagIds ?? this.tagIds,
       minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
       maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
+      ids: ids ?? this.ids,
     );
   }
 
@@ -106,7 +114,8 @@ class HistoryFilter {
           categoryIds == other.categoryIds &&
           tagIds == other.tagIds &&
           minAmount == other.minAmount &&
-          maxAmount == other.maxAmount;
+          maxAmount == other.maxAmount &&
+          ids == other.ids;
 
   @override
   int get hashCode =>
@@ -119,5 +128,6 @@ class HistoryFilter {
       categoryIds.hashCode ^
       tagIds.hashCode ^
       minAmount.hashCode ^
-      maxAmount.hashCode;
+      maxAmount.hashCode ^
+      ids.hashCode;
 }

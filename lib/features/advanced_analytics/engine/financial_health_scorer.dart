@@ -143,8 +143,10 @@ FinancialHealthScore computeFinancialHealth(AnalyticsInput input) {
   }
 
   // 4. Emergency fund (last 6 months) — savings balances vs average expense.
+  // Money owed accounts (cards, Overdraft) are not savings.
   final savingsBalance = input.accounts
-      .where((a) => !(a['isCreditCard'] as bool? ?? false))
+      .where((a) =>
+          !(a['isCreditCard'] as bool? ?? false) && !(a['isOverdraft'] as bool? ?? false))
       .fold<double>(
         0,
         (sum, a) =>

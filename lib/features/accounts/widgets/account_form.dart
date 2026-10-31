@@ -34,10 +34,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/color_palette.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 
@@ -47,6 +48,7 @@ import '../../../shared/widgets/icon_color_picker_sheet.dart';
 import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import 'credit_billing_cycle_section.dart';
+import 'overdraft_account_info.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
   final Account? account;
@@ -85,6 +87,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   bool get _isEditing => widget.account != null;
   bool get _isCreditCard => _selectedType == 'credit';
   bool get _isCash => _selectedType == 'cash';
+  bool get _isOverdraft => _selectedType == 'overdraft';
+
+  /// Credit card or Overdraft: the opening amount is what is owed
+  /// (stored negative) and there is a limit.
+  bool get _isOwed => _isCreditCard || _isOverdraft;
 
   @override
   void initState() {
@@ -141,11 +148,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ..colorValue = _selectedColor
       ..initialBalance = _isEditing
           ? account.initialBalance
-          : _isCreditCard
-          ? -(double.tryParse(_balanceController.text) ?? 0.0).abs()
-          : (double.tryParse(_balanceController.text) ?? 0.0)
-      ..creditLimit = _isCreditCard
-          ? double.tryParse(_limitController.text)
+          : _isOwed
+          ? -(double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0).abs()
+          : (double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0)
+      ..creditLimit = _isOwed
+          ? double.tryParse(_limitController.text.replaceAll(',', ''))
           : null
       ..last4Digits = _last4Controller.text.isNotEmpty
           ? _last4Controller.text
@@ -178,12 +185,19 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
+    final amountFormatters = [
+      CurrencyInputFormatter(
+        isIndian: ref.watch(formatterProvider).system == NumberSystem.indian,
+      ),
+    ];
     final iconKey = _selectedIcon ?? IconMapper.kAccountIconKeys.first;
     final colorValue = _selectedColor ?? AppColorPalette.kVibrant.first;
     final typeLabel = _isCreditCard
         ? context.l10n.creditCardLabel
         : _isCash
         ? context.l10n.cashLabel
+        : _isOverdraft
+        ? context.l10n.accountTypeOverdraft
         : context.l10n.bankLabel;
 
     // Board 3.15 add / edit: live preview, Identity, Balance, Appearance.
@@ -255,6 +269,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     ? context.l10n.creditCardName
                     : _isCash
                     ? context.l10n.cashName
+                    : _isOverdraft
+                    ? context.l10n.accountOverdraftHint
                     : context.l10n.bankName,
               ),
             ),
@@ -267,6 +283,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   ('bank', context.l10n.bankLabel),
                   ('cash', context.l10n.cashLabel),
                   ('credit', context.l10n.creditCardLabel),
+                  ('overdraft', context.l10n.accountTypeOverdraft),
                 ])
                   Opacity(
                     opacity: _isEditing && _selectedType != value ? 0.38 : 1,
@@ -280,6 +297,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   ),
               ],
             ),
+            if (_isOverdraft)
+              Row(children: [
+                Expanded(
+                  child: Text(context.l10n.accountOverdraftSub,
+                      style: theme.textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+                ),
+                KuberInfoGlyph(onTap: () => showOverdraftInfo(context)),
+              ]),
             // Last 4: hidden for cash (existing rule).
             AnimatedSize(
               duration: const Duration(milliseconds: 180),
@@ -308,39 +333,47 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ),
 
         // ── BALANCE ──────────────────────────────────────────────────
-        if (!_isEditing || _isCreditCard)
+        if (!_isEditing || _isOwed)
           KuberFormSection(
             label: context.l10n.balanceLabel,
             children: [
-              // Initial balance: only when (!editing && !credit)
-              if (!_isEditing && !_isCreditCard)
+              // Initial balance: only when (!editing && !credit / loan)
+              if (!_isEditing && !_isOwed)
                 KuberHeroAmountInput(
                   label: context.l10n.initialBalance,
                   currencySymbol: symbol,
                   controller: _balanceController,
                   large: false,
+                  inputFormatters: amountFormatters,
                 ),
-              // Credit card: limit spent (add only) + total limit, side by side.
-              if (_isCreditCard)
+              // Credit card / Loan: what is owed (add only) + the limit, side
+              // by side. A loan's limit is optional.
+              if (_isOwed)
                 Row(
                   children: [
                     if (!_isEditing) ...[
                       Expanded(
                         child: KuberHeroAmountInput(
-                          label: context.l10n.limitSpentField,
+                          label: _isOverdraft
+                              ? context.l10n.accountAmountOwed
+                              : context.l10n.limitSpentField,
                           currencySymbol: symbol,
                           controller: _balanceController,
                           large: false,
+                          inputFormatters: amountFormatters,
                         ),
                       ),
                       const SizedBox(width: KuberSpace.md),
                     ],
                     Expanded(
                       child: KuberHeroAmountInput(
-                        label: context.l10n.totalLimitField,
+                        label: _isOverdraft
+                            ? context.l10n.accountLimitOptional
+                            : context.l10n.totalLimitField,
                         currencySymbol: symbol,
                         controller: _limitController,
                         large: false,
+                        inputFormatters: amountFormatters,
                       ),
                     ),
                   ],

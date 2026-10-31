@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/background/background_reporter.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/money_math/loan_math.dart';
 import '../../../core/schedule/schedule.dart';
@@ -26,6 +27,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../shared/widgets/when_picker.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/entity_picker_rows.dart';
 import '../data/loan.dart';
 import '../domain/loan_engine.dart';
@@ -82,6 +84,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   bool _tenureYears = true;
   bool _running = false;
   LoanStartingPoint _start = LoanStartingPoint.originalDetails;
+
+  /// "Add past EMIs as transactions" (Part B), and the EMI days the stored
+  /// loan already has (a ledger row or a transaction), for the preview.
+  bool _pastEmis = false;
+  Set<int> _handled = const {};
+
+  bool get _pastEmisApplies =>
+      _running && _start == LoanStartingPoint.originalDetails && (_solution?.ok ?? false);
   bool _onlyInterest = false;
   bool _saving = false;
   String? _fromCalc;
@@ -115,6 +125,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       _interest = l.interestType;
       _running = l.alreadyRunning;
       _start = l.startingPoint;
+      _pastEmis = l.addPastEmis;
+      LoanService(ref.read(isarProvider)).handledDays(l).then((d) {
+        if (mounted) setState(() => _handled = d);
+      });
       _onlyInterest = l.countOnlyInterest;
       if (l.interestOnlyMonths > 0) _ioMonths.text = '${l.interestOnlyMonths}';
       final hasNumbers = hasLoanNumbers(l);
@@ -396,14 +410,66 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   void _leave() => context.canPop() ? context.pop() : context.go('/more/loans');
 
   Future<void> _save() async {
+    final l10n = context.l10n;
+    final wasOn = _existing?.addPastEmis ?? false;
+    final wantOn = _pastEmis && _pastEmisApplies;
+    // Turning "Add past EMIs" off: remove the ones it added?
+    bool? remove;
+    if (wasOn && !wantOn) {
+      final r = await LoanService(ref.read(isarProvider)).pastEmisToRemove(_existing!);
+      if (!mounted) return;
+      if (r.removable.isNotEmpty) {
+        remove = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.msLoansPastEmisRemoveTitle(r.removable.length),
+                style: localeFont(fontWeight: FontWeight.w600)),
+            content: Text(l10n.msLoansPastEmisRemoveBody, style: localeFont()),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.msLoansKeep)),
+              TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.msLoansRemove)),
+            ],
+          ),
+        );
+        if (remove == null) return;
+      }
+    }
+    if (!mounted) return;
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _saving = true);
     try {
       final draft = _draft();
       final service = LoanService(ref.read(isarProvider));
-      await service.save(draft, draft.schedule!, isNew: _existing == null);
+      final saved = await service.save(draft, draft.schedule!, isNew: _existing == null);
       ref.invalidate(loanListProvider);
+      if (wasOn && !wantOn) {
+        final (removed, kept) = await service.removePastEmis(saved, remove: remove ?? false);
+        container.invalidate(transactionListProvider);
+        if (mounted && (removed > 0 || kept > 0)) {
+          showKuberSnackBar(context, l10n.msLoansPastEmisRemoved(removed, kept));
+        }
+      }
+      if (wantOn && !wasOn) {
+        // In the background through the reporter; the form doesn't wait.
+        // Lists refresh once at the end, not per transaction.
+        final decimals = ref.read(formatterProvider).currency.decimals;
+        BackgroundReporter.instance
+            .run<List<int>>(
+              l10n.bgStepPastEmis,
+              (progress) => service.addPastEmis(saved, decimals: decimals, onProgress: progress),
+              outcome: (ids) => ids.isEmpty
+                  ? BgOutcome.none
+                  : BgOutcome(l10n.bgAdded(ids.length), transactionIds: ids),
+            )
+            .then((_) {
+              container
+                ..invalidate(transactionListProvider)
+                ..invalidate(loanListProvider);
+            })
+            .ignore();
+      }
       if (mounted) {
-        showKuberSnackBar(context, context.l10n.msLoansSaved);
+        if (!(wasOn && !wantOn)) showKuberSnackBar(context, l10n.msLoansSaved);
         _leave();
       }
     } finally {
@@ -867,6 +933,39 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                 onInfo: () => showMoneyInfo(context, ref, MoneyInfo.adjustment),
               ));
           }
+          out
+            ..add(const SizedBox(height: 12))
+            ..add(KuberSwitchRow(
+              icon: Icons.playlist_add_rounded,
+              name: l.msLoansPastEmis,
+              sub: l.msLoansPastEmisHelp,
+              value: _pastEmis,
+              onChanged: (v) => setState(() => _pastEmis = v),
+              onInfo: () => showMoneyInfo(context, ref, MoneyInfo.pastEmis),
+            ));
+          if (_pastEmis) {
+            final p = LoanService.pastEmisPreview(draft!, _handled,
+                decimals: fmt.currency.decimals);
+            final account = ref
+                    .watch(accountListProvider)
+                    .valueOrNull
+                    ?.where((a) => a.id == _accountId)
+                    .firstOrNull
+                    ?.name ??
+                '';
+            if (p.count > 0) {
+              out
+                ..add(const SizedBox(height: 8))
+                ..add(KuberCallout.text(
+                  account.isEmpty
+                      ? l.msLoansPastEmisPreviewNoAccount(p.count, fmtMonthYear(dayOf(p.from!)),
+                          fmtMonthYear(dayOf(p.to!)), m(p.total))
+                      : l.msLoansPastEmisPreview(p.count, fmtMonthYear(dayOf(p.from!)),
+                          fmtMonthYear(dayOf(p.to!)), account, m(p.total)),
+                  tone: KuberCalloutTone.info,
+                ));
+            }
+          }
         }
       case LoanStartingPoint.outstandingToday:
         out.add(KuberAmountField(
@@ -922,10 +1021,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           tone: KuberCalloutTone.info,
         ));
     }
-    out
-      ..add(const SizedBox(height: 12))
-      ..add(Text(l.msOpeningNote,
-          style: localeFont(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)));
+    // With "Add past EMIs" on, the past EMIs do change the balance.
+    if (!(_pastEmis && _start == LoanStartingPoint.originalDetails)) {
+      out
+        ..add(const SizedBox(height: 12))
+        ..add(Text(l.msOpeningNote,
+            style: localeFont(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)));
+    }
     return out;
   }
 }

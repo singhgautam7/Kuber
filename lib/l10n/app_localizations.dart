@@ -8465,7 +8465,7 @@ abstract class AppLocalizations {
   /// No description provided for @makeDefaultAccountSub.
   ///
   /// In en, this message translates to:
-  /// **'Pre-selected when adding transactions.'**
+  /// **'Pre-selected when adding transactions via Quick Add, Voice Add or Ask Kuber.'**
   String get makeDefaultAccountSub;
 
   /// No description provided for @currentBalanceLabel.
@@ -14154,6 +14154,443 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Its EMIs start again from the next due date. Nothing is added for the time it was closed.'**
   String get msLoansReopenBody;
+
+  /// No description provided for @msLoansUpdateOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Update outstanding'**
+  String get msLoansUpdateOutstanding;
+
+  /// No description provided for @msLoansOutstandingPrincipal.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding principal'**
+  String get msLoansOutstandingPrincipal;
+
+  /// No description provided for @msLoansAsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'As on'**
+  String get msLoansAsOn;
+
+  /// No description provided for @msLoansAdjReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get msLoansAdjReason;
+
+  /// No description provided for @msLoansAdjMatchBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Match bank statement'**
+  String get msLoansAdjMatchBank;
+
+  /// No description provided for @msLoansAdjMatchBankSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank shows a different amount owed.'**
+  String get msLoansAdjMatchBankSub;
+
+  /// No description provided for @msLoansAdjInterestAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid interest added to loan'**
+  String get msLoansAdjInterestAdded;
+
+  /// No description provided for @msLoansAdjInterestAddedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank added interest to what you owe, like during a moratorium.'**
+  String get msLoansAdjInterestAddedSub;
+
+  /// No description provided for @msLoansKuberOutstandingOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber\'s outstanding on {date}'**
+  String msLoansKuberOutstandingOn(String date);
+
+  /// No description provided for @msLoansAdjDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get msLoansAdjDifference;
+
+  /// No description provided for @msLoansKeepEmiChangeEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep EMI, change end date'**
+  String get msLoansKeepEmiChangeEnd;
+
+  /// No description provided for @msLoansKeepEndChangeEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep end date, change EMI'**
+  String get msLoansKeepEndChangeEmi;
+
+  /// No description provided for @msLoansKeepEmiResult.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI stays {emi} · ends {month}'**
+  String msLoansKeepEmiResult(String emi, String month);
+
+  /// No description provided for @msLoansKeepEndResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {month} · EMI becomes {emi}'**
+  String msLoansKeepEndResult(String month, String emi);
+
+  /// No description provided for @msLoansRemainingInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining interest'**
+  String get msLoansRemainingInterest;
+
+  /// No description provided for @msLoansAdjErrNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding can\'t be less than 0.'**
+  String get msLoansAdjErrNegative;
+
+  /// No description provided for @msLoansAdjZeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to pay?'**
+  String get msLoansAdjZeroTitle;
+
+  /// No description provided for @msLoansAdjZeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An outstanding of 0 means this loan is paid off. Mark it as closed?'**
+  String get msLoansAdjZeroBody;
+
+  /// No description provided for @msLoansAdjSaveOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Just save'**
+  String get msLoansAdjSaveOnly;
+
+  /// No description provided for @msLoansAdjSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding updated'**
+  String get msLoansAdjSaved;
+
+  /// No description provided for @msLoansEventAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding updated {amount} · {date}'**
+  String msLoansEventAdjusted(String amount, String date);
+
+  /// No description provided for @msLoansEventInterestAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest added to loan {amount} · {date}'**
+  String msLoansEventInterestAdded(String amount, String date);
+
+  /// No description provided for @msLoansEventAdjSubTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI unchanged, end date moves'**
+  String get msLoansEventAdjSubTenure;
+
+  /// No description provided for @msLoansEventAdjSubEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'End date unchanged, EMI changes'**
+  String get msLoansEventAdjSubEmi;
+
+  /// No description provided for @msLoansEventDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get msLoansEventDeleted;
+
+  /// No description provided for @msLoansInterestAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest added to loan'**
+  String get msLoansInterestAdded;
+
+  /// No description provided for @msLoansRecalcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate the split of {count} later EMIs you haven\'t edited?'**
+  String msLoansRecalcTitle(int count);
+
+  /// No description provided for @msLoansRecalcBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest in those EMIs is {before} now and {after} after recalculating. EMIs you edited stay as they are.'**
+  String msLoansRecalcBody(String before, String after);
+
+  /// No description provided for @msLoansRecalc.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate'**
+  String get msLoansRecalc;
+
+  /// No description provided for @msLoansKeepAsIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep as is'**
+  String get msLoansKeepAsIs;
+
+  /// No description provided for @msLoansRecalcDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} EMIs'**
+  String msLoansRecalcDone(int count);
+
+  /// No description provided for @msLoansDeleteExtraTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this extra payment?'**
+  String get msLoansDeleteExtraTitle;
+
+  /// No description provided for @msLoansDeleteExtraBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its transactions are deleted too, and the outstanding goes back up.'**
+  String get msLoansDeleteExtraBody;
+
+  /// No description provided for @msLoansDeleteAdjTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this update?'**
+  String get msLoansDeleteAdjTitle;
+
+  /// No description provided for @msLoansDeleteAdjBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The outstanding goes back to Kuber\'s figure.'**
+  String get msLoansDeleteAdjBody;
+
+  /// No description provided for @msTxnEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get msTxnEdited;
+
+  /// No description provided for @msTxnSplitHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Change these to match your bank. They always add up to the EMI.'**
+  String get msTxnSplitHelper;
+
+  /// No description provided for @msTxnSplitErr.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal and interest can\'t be less than 0.'**
+  String get msTxnSplitErr;
+
+  /// No description provided for @msInfoSplitEditedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited split'**
+  String get msInfoSplitEditedTitle;
+
+  /// No description provided for @msInfoSplitEditedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed this split to match your bank. Kuber uses your figures for the outstanding amount and projects future EMIs from there.'**
+  String get msInfoSplitEditedLine;
+
+  /// No description provided for @msInfoAdjustBankLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this when your bank statement shows a different amount owed than Kuber. Kuber starts from your figure on that date.'**
+  String get msInfoAdjustBankLine;
+
+  /// No description provided for @msInfoAdjustInterestLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Some banks add interest you didn\'t pay, like during a moratorium or before EMIs start, to what you owe. It counts toward the loan\'s total interest. It is not spending, because no money left your account.'**
+  String get msInfoAdjustInterestLine;
+
+  /// No description provided for @msInfoRemainingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining interest depends on what you owe, the rate and your EMI, so Kuber calculates it. Update the outstanding amount or the rate instead.'**
+  String get msInfoRemainingLine;
+
+  /// No description provided for @msLoansPastEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'Add past EMIs as transactions'**
+  String get msLoansPastEmis;
+
+  /// No description provided for @msInfoPastEmisLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber adds one EMI transaction for every month the loan has already run, with its principal and interest. Your account balance goes down by the total, like any payment. Leave it off to start from today without past transactions.'**
+  String get msInfoPastEmisLine;
+
+  /// No description provided for @msLoansPastEmisHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates every EMI from the first EMI date until today as a transaction.'**
+  String get msLoansPastEmisHelp;
+
+  /// No description provided for @msLoansPastEmisPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {count} EMIs from {from} to {to} and lowers {account}\'s balance by {amount}.'**
+  String msLoansPastEmisPreview(
+    int count,
+    String from,
+    String to,
+    String account,
+    String amount,
+  );
+
+  /// No description provided for @msLoansPastEmisPreviewNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {count} EMIs from {from} to {to}, {amount} in all.'**
+  String msLoansPastEmisPreviewNoAccount(
+    int count,
+    String from,
+    String to,
+    String amount,
+  );
+
+  /// No description provided for @msLoansPastEmisRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the {count} past EMIs added by this switch?'**
+  String msLoansPastEmisRemoveTitle(int count);
+
+  /// No description provided for @msLoansPastEmisRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs you edited are kept. The account balance goes back up by the ones removed.'**
+  String get msLoansPastEmisRemoveBody;
+
+  /// No description provided for @msLoansKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get msLoansKeep;
+
+  /// No description provided for @msLoansRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get msLoansRemove;
+
+  /// No description provided for @msLoansPastEmisRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {removed} past EMIs. Kept {kept} you edited.'**
+  String msLoansPastEmisRemoved(int removed, int kept);
+
+  /// No description provided for @bgStepPastEmis.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding past EMIs…'**
+  String get bgStepPastEmis;
+
+  /// No description provided for @bgJobPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} {percent}%'**
+  String bgJobPercent(String text, int percent);
+
+  /// No description provided for @bgJobsRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} ({count} tasks)'**
+  String bgJobsRunning(String text, int count);
+
+  /// No description provided for @bgJobFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get bgJobFailed;
+
+  /// No description provided for @bgDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get bgDetails;
+
+  /// No description provided for @bgDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong'**
+  String get bgDetailsTitle;
+
+  /// No description provided for @bgAddedOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Added 1 transaction'**
+  String get bgAddedOne;
+
+  /// No description provided for @bgAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} transactions'**
+  String bgAdded(int count);
+
+  /// No description provided for @bgBackupSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get bgBackupSaved;
+
+  /// No description provided for @accountTypeOverdraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdraft'**
+  String get accountTypeOverdraft;
+
+  /// No description provided for @accountOverdraftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. HDFC overdraft'**
+  String get accountOverdraftHint;
+
+  /// No description provided for @accountOverdraftSub.
+  ///
+  /// In en, this message translates to:
+  /// **'For money you owe, like an overdraft.'**
+  String get accountOverdraftSub;
+
+  /// No description provided for @accountOverdraftInfoLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this for money you owe, like an overdraft or a credit line. EMIs you track in Loans still come from the account you pick there.'**
+  String get accountOverdraftInfoLine;
+
+  /// No description provided for @accountAmountOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount owed'**
+  String get accountAmountOwed;
+
+  /// No description provided for @accountLimitOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit (optional)'**
+  String get accountLimitOptional;
+
+  /// No description provided for @accountAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {amount}'**
+  String accountAvailable(String amount);
+
+  /// No description provided for @accountOwedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed'**
+  String get accountOwedLabel;
+
+  /// No description provided for @accountOverLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'This goes over the limit by {amount}.'**
+  String accountOverLimit(String amount);
 }
 
 class _AppLocalizationsDelegate

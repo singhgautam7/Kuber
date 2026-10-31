@@ -149,6 +149,46 @@ class KuberFieldLabel extends StatelessWidget {
   }
 }
 
+/// Groups text set in code (edit-screen prefill, calculator results) for a
+/// field whose formatters include a [CurrencyInputFormatter]; typing is
+/// already grouped by the formatter. Also regroups when the number-system
+/// setting flips.
+mixin _CurrencyRegroup<T extends StatefulWidget> on State<T> {
+  TextEditingController get regroupController;
+  List<TextInputFormatter>? get regroupFormatters;
+
+  CurrencyInputFormatter? get _currency =>
+      regroupFormatters?.whereType<CurrencyInputFormatter>().firstOrNull;
+
+  void _regroup() {
+    final f = _currency;
+    if (f != null) {
+      CurrencyInputFormatter.regroup(regroupController, isIndian: f.isIndian);
+    }
+  }
+
+  void _regroupLater() => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _regroup();
+      });
+
+  void initRegroup() {
+    regroupController.addListener(_regroup);
+    _regroupLater();
+  }
+
+  void updateRegroup(TextEditingController oldC, bool? oldIndian) {
+    if (oldC != regroupController) {
+      oldC.removeListener(_regroup);
+      regroupController.addListener(_regroup);
+      _regroupLater();
+    } else if (oldIndian != _currency?.isIndian) {
+      _regroupLater();
+    }
+  }
+
+  void disposeRegroup() => regroupController.removeListener(_regroup);
+}
+
 /// Hero-sized currency input. Used everywhere a screen has a single
 /// dominant numeric field (Account balance, Recurring amount, Loan
 /// principal/EMI, Investment current value, Ledger amount).
@@ -157,7 +197,7 @@ class KuberFieldLabel extends StatelessWidget {
 ///   • HeroAmountTone.neutral — onSurface (default)
 ///   • HeroAmountTone.income  — context.kuberMoney.income (green)
 ///   • HeroAmountTone.expense — context.kuberMoney.expense (red)
-class KuberHeroAmountInput extends StatelessWidget {
+class KuberHeroAmountInput extends StatefulWidget {
   final String label;
   final String currencySymbol;
   final TextEditingController controller;
@@ -186,23 +226,54 @@ class KuberHeroAmountInput extends StatelessWidget {
   });
 
   @override
+  State<KuberHeroAmountInput> createState() => _KuberHeroAmountInputState();
+}
+
+class _KuberHeroAmountInputState extends State<KuberHeroAmountInput>
+    with _CurrencyRegroup {
+  @override
+  TextEditingController get regroupController => widget.controller;
+  @override
+  List<TextInputFormatter>? get regroupFormatters => widget.inputFormatters;
+
+  @override
+  void initState() {
+    super.initState();
+    initRegroup();
+  }
+
+  @override
+  void didUpdateWidget(KuberHeroAmountInput old) {
+    super.didUpdateWidget(old);
+    updateRegroup(
+        old.controller,
+        old.inputFormatters?.whereType<CurrencyInputFormatter>().firstOrNull?.isIndian);
+  }
+
+  @override
+  void dispose() {
+    disposeRegroup();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final valueColor = switch (tone) {
+    final valueColor = switch (widget.tone) {
       HeroAmountTone.income => context.kuberMoney.income,
       HeroAmountTone.expense => context.kuberMoney.expense,
       HeroAmountTone.neutral => cs.onSurface,
     };
 
     final tt = Theme.of(context).textTheme;
-    final valueStyle = large ? tt.headlineMedium! : tt.titleMedium!;
-    final symbolStyle = large ? tt.titleLarge! : tt.titleMedium!;
+    final valueStyle = widget.large ? tt.headlineMedium! : tt.titleMedium!;
+    final symbolStyle = widget.large ? tt.titleLarge! : tt.titleMedium!;
     // A filled field (surfaceContainerHigh, r16), label inside at the top,
     // optional calculator on the right.
     return Container(
       constraints: const BoxConstraints(minHeight: 56),
       padding: EdgeInsets.fromLTRB(
-          16, large ? 14 : 8, onCalculatorTap != null ? 4 : 16, large ? 14 : 8),
+          16, widget.large ? 14 : 8, widget.onCalculatorTap != null ? 4 : 16, widget.large ? 14 : 8),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
         borderRadius: KuberShape.largeR,
@@ -214,23 +285,23 @@ class KuberHeroAmountInput extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label,
+                Text(widget.label,
                     style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Text(currencySymbol,
+                    Text(widget.currencySymbol,
                         style: symbolStyle.copyWith(
-                            color: large ? cs.onSurfaceVariant : valueColor)),
-                    SizedBox(width: large ? 6 : 2),
+                            color: widget.large ? cs.onSurfaceVariant : valueColor)),
+                    SizedBox(width: widget.large ? 6 : 2),
                     Expanded(
                       child: TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        onChanged: onChanged,
+                        controller: widget.controller,
+                        focusNode: widget.focusNode,
+                        onChanged: widget.onChanged,
                         onTapOutside: (_) =>
                             FocusManager.instance.primaryFocus?.unfocus(),
-                        inputFormatters: inputFormatters,
+                        inputFormatters: widget.inputFormatters,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -256,12 +327,12 @@ class KuberHeroAmountInput extends StatelessWidget {
               ],
             ),
           ),
-          if (onCalculatorTap != null)
+          if (widget.onCalculatorTap != null)
             AppIconButton(
               icon: Icons.calculate_outlined,
               kind: AppIconButtonKind.plain,
               semanticLabel: 'Calculator',
-              onPressed: onCalculatorTap,
+              onPressed: widget.onCalculatorTap,
             ),
         ],
       ),
@@ -423,9 +494,9 @@ class KuberSwitchRow extends StatelessWidget {
                     KuberInfoGlyph(onTap: onInfo!),
                   ],
                 ]),
+                // Not capped: at large font sizes the helper wraps instead
+                // of losing what the switch does.
                 Text(sub,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                     style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
@@ -1088,6 +1159,9 @@ class KuberTextField extends StatefulWidget {
     bool decimal = true,
     bool optional = false,
     bool showLabel = true,
+    // Replaces the digits-only filter, e.g. a CurrencyInputFormatter when a
+    // %/amount toggle is on amount.
+    List<TextInputFormatter>? inputFormatters,
   }) =>
       KuberTextField(
         key: key,
@@ -1103,9 +1177,8 @@ class KuberTextField extends StatefulWidget {
         onChanged: onChanged,
         optional: optional,
         keyboardType: TextInputType.numberWithOptions(decimal: decimal),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(decimal ? r'[0-9.]' : r'[0-9]')),
-        ],
+        inputFormatters: inputFormatters ??
+            [FilteringTextInputFormatter.allow(RegExp(decimal ? r'[0-9.]' : r'[0-9]'))],
       );
 
   @override
@@ -1113,13 +1186,27 @@ class KuberTextField extends StatefulWidget {
 }
 
 class _KuberTextFieldState extends State<KuberTextField>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, _CurrencyRegroup {
   late final AnimationController _flash = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 600));
 
   @override
+  TextEditingController get regroupController => widget.controller;
+  @override
+  List<TextInputFormatter>? get regroupFormatters => widget.inputFormatters;
+
+  @override
+  void initState() {
+    super.initState();
+    initRegroup();
+  }
+
+  @override
   void didUpdateWidget(KuberTextField old) {
     super.didUpdateWidget(old);
+    updateRegroup(
+        old.controller,
+        old.inputFormatters?.whereType<CurrencyInputFormatter>().firstOrNull?.isIndian);
     final became = old.calculatedLabel == null && widget.calculatedLabel != null;
     if (became && !(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _flash.forward(from: 0);
@@ -1128,6 +1215,7 @@ class _KuberTextFieldState extends State<KuberTextField>
 
   @override
   void dispose() {
+    disposeRegroup();
     _flash.dispose();
     super.dispose();
   }

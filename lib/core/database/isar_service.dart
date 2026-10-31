@@ -39,6 +39,42 @@ final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
 });
 
+/// Every collection of the app's database (also opened by helper isolates,
+/// see TransactionRepository.getAll).
+const kIsarSchemas = [
+  TransactionSchema,
+  CategorySchema,
+  CategoryGroupSchema,
+  AccountSchema,
+  RecurringRuleSchema,
+  TagSchema,
+  TransactionTagSchema,
+  BudgetSchema,
+  LedgerSchema,
+  LoanSchema,
+  InvestmentSchema,
+  TransactionSuggestionSchema,
+  PersonSchema,
+  BillSchema,
+  AppNotificationSchema,
+  WidgetPreferenceSchema,
+  InsightStorySchema,
+  BackupConfigSchema,
+  AskKuberMessageSchema,
+  SmsTransactionSchema,
+  SmsAccountMappingSchema,
+  SavedCalculationSchema,
+  CalculatorRecentUseSchema,
+  KuberNoteSchema,
+  ReminderSchema,
+  UserEntitlementSchema,
+  StoredCardSchema,
+  CardVaultMetaSchema,
+  RecentSearchSchema,
+  ProcessedOccurrenceSchema,
+  BackgroundTaskRunSchema,
+];
+
 class IsarService {
   static Future<Isar> open() async {
     // Reuse the process-global instance if it's already open. The widget
@@ -48,38 +84,6 @@ class IsarService {
     final existing = Isar.getInstance();
     if (existing != null && existing.isOpen) return existing;
     final dir = await getApplicationDocumentsDirectory();
-    return Isar.open([
-      TransactionSchema,
-      CategorySchema,
-      CategoryGroupSchema,
-      AccountSchema,
-      RecurringRuleSchema,
-      TagSchema,
-      TransactionTagSchema,
-      BudgetSchema,
-      LedgerSchema,
-      LoanSchema,
-      InvestmentSchema,
-      TransactionSuggestionSchema,
-      PersonSchema,
-      BillSchema,
-      AppNotificationSchema,
-      WidgetPreferenceSchema,
-      InsightStorySchema,
-      BackupConfigSchema,
-      AskKuberMessageSchema,
-      SmsTransactionSchema,
-      SmsAccountMappingSchema,
-      SavedCalculationSchema,
-      CalculatorRecentUseSchema,
-      KuberNoteSchema,
-      ReminderSchema,
-      UserEntitlementSchema,
-      StoredCardSchema,
-      CardVaultMetaSchema,
-      RecentSearchSchema,
-      ProcessedOccurrenceSchema,
-      BackgroundTaskRunSchema,
-    ], directory: dir.path);
+    return Isar.open(kIsarSchemas, directory: dir.path);
   }
 }
