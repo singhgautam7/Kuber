@@ -2408,5 +2408,22 @@
   "accountLimitOptional": "সীমা (ঐচ্ছিক)",
   "accountAvailable": "উপলব্ধ {amount}",
   "accountOwedLabel": "বকেয়া",
-  "accountOverLimit": "এটি সীমা {amount} ছাড়িয়ে যায়।"
+  "accountOverLimit": "এটি সীমা {amount} ছাড়িয়ে যায়।",
+  "smsTodayLabel": "আজ ট্র্যাক হয়নি",
+  "smsTodaySpentLabel": "খরচ",
+  "smsTodayReceivedLabel": "পেয়েছেন",
+  "smsTodayCount": "{count, plural, =1{1টি SMS এখনও যোগ হয়নি} other{{count}টি SMS এখনও যোগ হয়নি}}",
+  "smsTodayCountNoAmount": "{count, plural, =1{1টি SMS এখনও যোগ হয়নি} other{{count}টি SMS এখনও যোগ হয়নি}}, {missing, plural, =1{1টিতে অঙ্ক নেই} other{{missing}টিতে অঙ্ক নেই}}",
+  "smsTodayCaughtTitle": "আজকের সব হিসাব হয়ে গেছে",
+  "smsTodayCaughtBody": "আজকের সব SMS গোছানো হয়েছে।",
+  "smsTodayNoneBody": "আজ এখনও কোনো ব্যাংক SMS আসেনি।",
+  "smsRowNoAmount": "অঙ্ক নেই",
+  "smsWidgetSpentUntracked": "SMS থেকে {amount} খরচ ট্র্যাক হয়নি",
+  "smsWidgetCount": "{count, plural, =1{আজকের 1টি SMS এখনও যোগ হয়নি} other{আজকের {count}টি SMS এখনও যোগ হয়নি}}",
+  "smsMenuDismissAll": "সব সরান",
+  "smsDismissAllTitle": "{count, plural, =1{1টি মেসেজ সরাবেন?} other{সব {count}টি মেসেজ সরাবেন?}}",
+  "smsDismissAllBody": "এগুলো Dismissed ট্যাবে চলে যাবে। সেখান থেকে এখনও যোগ করতে পারবেন।",
+  "smsDismissAllBodyOne": "এটি Dismissed ট্যাবে চলে যাবে। সেখান থেকে এখনও যোগ করতে পারবেন।",
+  "smsDismissAllConfirm": "{count, plural, =1{সরান} other{সব সরান}}",
+  "smsDismissedSnack": "{count, plural, =1{1টি মেসেজ সরানো হয়েছে} other{{count}টি মেসেজ সরানো হয়েছে}}"
 }

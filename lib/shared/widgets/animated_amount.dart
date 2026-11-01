@@ -23,6 +23,10 @@ class AnimatedAmount extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
 
+  /// Count up from 0 on first appearance (default). False starts at [value]
+  /// and only tweens when it changes later.
+  final bool animateIn;
+
   const AnimatedAmount({
     super.key,
     required this.value,
@@ -34,6 +38,7 @@ class AnimatedAmount extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.animateIn = true,
   });
 
   @override
@@ -50,7 +55,7 @@ class AnimatedAmount extends StatelessWidget {
 
     return RepaintBoundary(
       child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: value),
+        tween: Tween<double>(begin: animateIn ? 0 : value, end: value),
         duration: duration,
         curve: curve,
         builder: (context, animatedValue, _) {

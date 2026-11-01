@@ -2408,5 +2408,22 @@
   "accountLimitOptional": "పరిమితి (ఐచ్ఛికం)",
   "accountAvailable": "అందుబాటులో {amount}",
   "accountOwedLabel": "బకాయి",
-  "accountOverLimit": "ఇది పరిమితిని {amount} మించుతుంది."
+  "accountOverLimit": "ఇది పరిమితిని {amount} మించుతుంది.",
+  "smsTodayLabel": "ఈరోజు నమోదు కానివి",
+  "smsTodaySpentLabel": "ఖర్చు",
+  "smsTodayReceivedLabel": "వచ్చినవి",
+  "smsTodayCount": "{count, plural, =1{1 SMS ఇంకా జోడించలేదు} other{{count} SMSలు ఇంకా జోడించలేదు}}",
+  "smsTodayCountNoAmount": "{count, plural, =1{1 SMS ఇంకా జోడించలేదు} other{{count} SMSలు ఇంకా జోడించలేదు}}, {missing, plural, =1{1 మొత్తం లేకుండా} other{{missing} మొత్తం లేకుండా}}",
+  "smsTodayCaughtTitle": "ఈరోజుకి అన్నీ పూర్తయ్యాయి",
+  "smsTodayCaughtBody": "ఈరోజు SMSలన్నీ సర్దుబాటయ్యాయి.",
+  "smsTodayNoneBody": "ఈరోజు ఇంకా బ్యాంక్ SMS ఏదీ లేదు.",
+  "smsRowNoAmount": "మొత్తం లేదు",
+  "smsWidgetSpentUntracked": "SMS నుండి {amount} ఖర్చు నమోదు కాలేదు",
+  "smsWidgetCount": "{count, plural, =1{ఈరోజు 1 SMS ఇంకా జోడించలేదు} other{ఈరోజు {count} SMSలు ఇంకా జోడించలేదు}}",
+  "smsMenuDismissAll": "అన్నీ తీసివేయి",
+  "smsDismissAllTitle": "{count, plural, =1{1 మెసేజ్ తీసివేయాలా?} other{మొత్తం {count} మెసేజ్‌లు తీసివేయాలా?}}",
+  "smsDismissAllBody": "ఇవి Dismissed ట్యాబ్‌కి వెళ్తాయి. అక్కడి నుంచి ఇంకా జోడించవచ్చు.",
+  "smsDismissAllBodyOne": "ఇది Dismissed ట్యాబ్‌కి వెళ్తుంది. అక్కడి నుంచి ఇంకా జోడించవచ్చు.",
+  "smsDismissAllConfirm": "{count, plural, =1{తీసివేయి} other{అన్నీ తీసివేయి}}",
+  "smsDismissedSnack": "{count, plural, =1{1 మెసేజ్ తీసివేయబడింది} other{{count} మెసేజ్‌లు తీసివేయబడ్డాయి}}"
 }

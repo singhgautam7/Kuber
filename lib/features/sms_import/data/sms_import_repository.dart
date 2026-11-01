@@ -144,27 +144,22 @@ class SmsImportRepository extends BaseRepository<SmsTransaction> {
     });
   }
 
-  Future<void> markDismissedBatch(List<int> ids) async {
-    if (ids.isEmpty) return;
-    await isar.writeTxn(() async {
-      for (final id in ids) {
-        final row = await isar.smsTransactions.get(id);
-        if (row == null) continue;
-        row.reviewStatus = SmsReviewStatus.dismissed;
-        await isar.smsTransactions.put(row);
-      }
-    });
-  }
+  Future<void> markDismissedBatch(List<int> ids) =>
+      _setStatusBatch(ids, SmsReviewStatus.dismissed);
 
-  Future<void> markUnreviewedBatch(List<int> ids) async {
+  Future<void> markUnreviewedBatch(List<int> ids) =>
+      _setStatusBatch(ids, SmsReviewStatus.unreviewed);
+
+  /// One read and one write for the whole batch, inside a single transaction
+  /// (Dismiss all can move hundreds of rows).
+  Future<void> _setStatusBatch(List<int> ids, String status) async {
     if (ids.isEmpty) return;
     await isar.writeTxn(() async {
-      for (final id in ids) {
-        final row = await isar.smsTransactions.get(id);
-        if (row == null) continue;
-        row.reviewStatus = SmsReviewStatus.unreviewed;
-        await isar.smsTransactions.put(row);
+      final rows = (await isar.smsTransactions.getAll(ids)).nonNulls.toList();
+      for (final r in rows) {
+        r.reviewStatus = status;
       }
+      await isar.smsTransactions.putAll(rows);
     });
   }
 

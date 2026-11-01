@@ -2408,5 +2408,22 @@
   "accountLimitOptional": "ಮಿತಿ (ಐಚ್ಛಿಕ)",
   "accountAvailable": "ಲಭ್ಯ {amount}",
   "accountOwedLabel": "ಬಾಕಿ",
-  "accountOverLimit": "ಇದು ಮಿತಿಯನ್ನು {amount} ಮೀರುತ್ತದೆ."
+  "accountOverLimit": "ಇದು ಮಿತಿಯನ್ನು {amount} ಮೀರುತ್ತದೆ.",
+  "smsTodayLabel": "ಇಂದು ದಾಖಲಾಗದವು",
+  "smsTodaySpentLabel": "ಖರ್ಚು",
+  "smsTodayReceivedLabel": "ಬಂದದ್ದು",
+  "smsTodayCount": "{count, plural, =1{1 SMS ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ} other{{count} SMS ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ}}",
+  "smsTodayCountNoAmount": "{count, plural, =1{1 SMS ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ} other{{count} SMS ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ}}, {missing, plural, =1{1 ಮೊತ್ತವಿಲ್ಲದೆ} other{{missing} ಮೊತ್ತವಿಲ್ಲದೆ}}",
+  "smsTodayCaughtTitle": "ಇಂದಿನದೆಲ್ಲ ಮುಗಿದಿದೆ",
+  "smsTodayCaughtBody": "ಇಂದಿನ ಎಲ್ಲ SMS ಗಳನ್ನು ವಿಂಗಡಿಸಲಾಗಿದೆ.",
+  "smsTodayNoneBody": "ಇಂದು ಇನ್ನೂ ಯಾವುದೇ ಬ್ಯಾಂಕ್ SMS ಇಲ್ಲ.",
+  "smsRowNoAmount": "ಮೊತ್ತವಿಲ್ಲ",
+  "smsWidgetSpentUntracked": "SMS ನಿಂದ {amount} ಖರ್ಚು ದಾಖಲಾಗಿಲ್ಲ",
+  "smsWidgetCount": "{count, plural, =1{ಇಂದಿನ 1 SMS ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ} other{ಇಂದಿನ {count} SMS ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ}}",
+  "smsMenuDismissAll": "ಎಲ್ಲವನ್ನೂ ತೆಗೆದುಹಾಕಿ",
+  "smsDismissAllTitle": "{count, plural, =1{1 ಸಂದೇಶ ತೆಗೆದುಹಾಕಬೇಕೆ?} other{ಎಲ್ಲ {count} ಸಂದೇಶಗಳನ್ನು ತೆಗೆದುಹಾಕಬೇಕೆ?}}",
+  "smsDismissAllBody": "ಇವು Dismissed ಟ್ಯಾಬ್‌ಗೆ ಹೋಗುತ್ತವೆ. ಅಲ್ಲಿಂದ ಇನ್ನೂ ಸೇರಿಸಬಹುದು.",
+  "smsDismissAllBodyOne": "ಇದು Dismissed ಟ್ಯಾಬ್‌ಗೆ ಹೋಗುತ್ತದೆ. ಅಲ್ಲಿಂದ ಇನ್ನೂ ಸೇರಿಸಬಹುದು.",
+  "smsDismissAllConfirm": "{count, plural, =1{ತೆಗೆದುಹಾಕಿ} other{ಎಲ್ಲವನ್ನೂ ತೆಗೆದುಹಾಕಿ}}",
+  "smsDismissedSnack": "{count, plural, =1{1 ಸಂದೇಶ ತೆಗೆದುಹಾಕಲಾಗಿದೆ} other{{count} ಸಂದೇಶಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ}}"
 }

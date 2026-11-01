@@ -11,6 +11,7 @@ import '../data/sms_transaction.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/l10n_ext.dart';
 
 /// Signed, currency-formatted amount string (e.g. "-₹648.50", "+₹65,000").
 String signedAmount(WidgetRef ref, double amount, String type) {
@@ -235,12 +236,24 @@ class SmsImportCard extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          signedAmount(ref, sms.parsedAmount, sms.parsedType),
-                          style: theme.textTheme.titleMedium!.copyWith(
-                            color: isIncome ? m.income : m.expense,
+                        if (sms.parsedAmount > 0)
+                          Text(
+                            signedAmount(
+                              ref,
+                              sms.parsedAmount,
+                              sms.parsedType,
+                            ),
+                            style: theme.textTheme.titleMedium!.copyWith(
+                              color: isIncome ? m.income : m.expense,
+                            ),
+                          )
+                        else
+                          Text(
+                            context.l10n.smsRowNoAmount,
+                            style: theme.textTheme.bodyMedium!.copyWith(
+                              color: subColor,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
