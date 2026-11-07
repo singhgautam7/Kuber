@@ -574,7 +574,12 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
         if (mounted) showKuberSnackBar(context, l.biometricNotAvailable, isError: true);
         return;
       }
-      if (!await _biometric.authenticate()) return;
+      if (!await _biometric.authenticate()) {
+        if (!await _biometric.hasEnrolled() && mounted) {
+          showKuberSnackBar(context, l.biometricNotAvailable, isError: true);
+        }
+        return;
+      }
       await notifier.setBiometricsEnabled(true);
       if (mounted) showKuberSnackBar(context, l.biometricEnabledMsg);
     } else {

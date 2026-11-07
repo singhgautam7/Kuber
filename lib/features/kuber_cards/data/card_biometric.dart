@@ -38,13 +38,19 @@ Future<CardBiometricResult> setCardBiometric(
     final key = ref.read(cardSessionProvider).key;
     if (key == null) return CardBiometricResult.needsUnlock;
     if (!await bio.canAuthenticate()) return CardBiometricResult.unavailable;
-    if (!await bio.authenticate()) return CardBiometricResult.cancelled;
+    if (!await bio.authenticate()) {
+      return await bio.hasEnrolled()
+          ? CardBiometricResult.cancelled
+          : CardBiometricResult.unavailable;
+    }
     if (!await CardKeystore.storeKey(key)) return CardBiometricResult.failed;
     await service.setBiometricEnabled(true);
     ref.invalidate(cardVaultMetaProvider);
     return CardBiometricResult.enabled;
   }
-  if (await bio.canAuthenticate() && !await bio.authenticate()) {
+  // With nothing enrolled there is nothing to check against, and the switch
+  // must still turn off: the PIN keeps protecting the cards.
+  if (!await bio.authenticate() && await bio.hasEnrolled()) {
     return CardBiometricResult.cancelled;
   }
   await CardKeystore.clear();

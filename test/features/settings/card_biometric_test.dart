@@ -18,10 +18,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/isar_test_helper.dart';
 
 class FakeBiometric extends BiometricService {
-  final bool available, passes;
-  FakeBiometric({this.available = true, this.passes = true});
+  final bool available, passes, enrolled;
+  FakeBiometric({this.available = true, this.passes = true, this.enrolled = true});
   @override
   Future<bool> canAuthenticate() async => available;
+  @override
+  Future<bool> hasEnrolled() async => enrolled;
   @override
   Future<bool> authenticate() async => passes;
 }
@@ -91,6 +93,25 @@ void main() {
       expect(r, CardBiometricResult.unavailable);
       expect(await cardsOn(), isFalse);
     });
+  });
+
+  testWidgets('a phone that claims support but has nothing enrolled says so', (t) async {
+    await run(t, (ref) async {
+      final r = await setCardBiometric(ref, true,
+          biometric: FakeBiometric(passes: false, enrolled: false));
+      expect(r, CardBiometricResult.unavailable);
+      expect(await cardsOn(), isFalse);
+    });
+  });
+
+  testWidgets('with nothing enrolled left, the switch can still turn off', (t) async {
+    await run(t, (ref) async {
+      await ref.read(cardVaultServiceProvider).setBiometricEnabled(true);
+      final r = await setCardBiometric(ref, false,
+          biometric: FakeBiometric(passes: false, enrolled: false));
+      expect(r, CardBiometricResult.disabled);
+      expect(await cardsOn(), isFalse);
+    }, unlocked: false);
   });
 
   testWidgets('a locked vault has no key yet: asks to unlock with the PIN first', (t) async {
