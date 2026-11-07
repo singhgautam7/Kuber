@@ -301,8 +301,9 @@ class _KuberPathTreeState extends State<KuberPathTree> with SingleTickerProvider
     return LayoutBuilder(
       builder: (context, box) {
         final last = n - 1;
-        final room = box.maxWidth - _treeBase - size.tile - KuberSpace.md - _titleRoom;
-        final step = last == 0 ? 0.0 : math.min(size.step, math.max(8.0, room / last));
+        final titles = MediaQuery.textScalerOf(context).scale(_titleRoom);
+        final room = box.maxWidth - _treeBase - size.tile - KuberSpace.md - titles;
+        final step = last == 0 ? 0.0 : math.min(size.step, math.max(4.0, room / last));
         final tree = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -424,7 +425,7 @@ class _TreeRow extends StatelessWidget {
           )
         : Text(
             entry.title,
-            maxLines: 1,
+            maxLines: MediaQuery.textScalerOf(context).scale(16) > 20 ? 2 : 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
           );

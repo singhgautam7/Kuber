@@ -96,7 +96,8 @@ class KuberSearchResultRow extends StatelessWidget {
                   KuberMatchText(
                     text: title,
                     query: query,
-                    maxLines: 1,
+                    // One line, unless the font is too large for that to read.
+                    maxLines: MediaQuery.textScalerOf(context).scale(16) > 20 ? 3 : 1,
                     style: theme.textTheme.titleMedium!.copyWith(color: cs.onSurface),
                   ),
                   Text(subtitle, style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),

@@ -22,6 +22,8 @@ class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
   static int _scrolledFor = 0;
+  static MoreTabLayout? _firstLayout;
+  static bool _layoutChanged = false;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,14 +53,19 @@ class MoreScreen extends ConsumerWidget {
         }
       });
     }
-    // Classic <-> Modern cross-fades when the view changes (review round 3).
-    return AnimatedSwitcher(
+    // Classic <-> Modern fades in when the view changes (review round 3). One
+    // at a time: both carry the tutorial's global keys, so they can't overlap.
+    _firstLayout ??= layout;
+    if (layout != _firstLayout) _layoutChanged = true;
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(layout),
+      tween: Tween(begin: _layoutChanged ? 0 : 1, end: 1),
       duration: const Duration(milliseconds: 250),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
+      curve: Curves.easeOut,
+      builder: (_, t, c) => Opacity(opacity: t, child: c),
       child: switch (layout) {
-        MoreTabLayout.simple => const MoreScreenSimple(key: ValueKey('simple')),
-        MoreTabLayout.modern => const MoreScreenModern(key: ValueKey('modern')),
+        MoreTabLayout.simple => const MoreScreenSimple(),
+        MoreTabLayout.modern => const MoreScreenModern(),
       },
     );
   }

@@ -7,13 +7,19 @@
 - Interest before EMIs: pay it every month or let the bank add it to the loan.
   Kuber works it out day by day, the way banks do.
 - Add to loan: record more money released, charges or unpaid interest.
-- Settings is a short list of pages, and More keeps only what you use most.
-  Search in More finds any setting and takes you right to it.
-- A new first page: pick your language, restore a backup or import a CSV.
-- Tap a page title, or long-press back, to jump to any earlier page.
+- Settings is a short list of groups that show your current values, and More
+  keeps only what you use most. Notifications now has its own page, with
+  switches for EMI, budget and backup alerts.
+- Search in More now finds settings, accounts, categories, tags, money plans,
+  people, card names, note titles and tools. Recent searches stay on your phone.
+- A new first page: pick your language, restore a backup or import a CSV, and
+  watch the progress as it runs.
+- Tap a page title, or long-press back, to see how you got here as a tree and
+  jump to any earlier page.
 - Answers to common questions on the Kuber Pro page.
 - New themes: Saffron, Sky and Ruby. Meadow and Coral are gone.
 - The app lock and the Kuber Cards biometric are now separate settings.
+- Fixed a crash when Horizontal swipe was set to row actions.
 
 - Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
   reminder, card due date and money you lent or borrowed on a month grid,

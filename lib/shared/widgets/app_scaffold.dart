@@ -242,7 +242,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
             onPageChanged: _onPageChanged,
             children: widget.children,
           )
-        : widget.navigationShell!;
+        // The branches themselves: this scaffold already sits inside the shell.
+        : IndexedStack(index: currentIndex, children: widget.children);
 
     Widget content;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;

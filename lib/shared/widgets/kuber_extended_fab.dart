@@ -71,8 +71,9 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
   @override
   void initState() {
     super.initState();
-    // A newly opened screen always starts with its FAB showing.
-    kuberFabVisible.value = true;
+    // A newly opened screen always starts with its FAB showing. After the
+    // frame: this can mount in the middle of a build, and the bar listens.
+    WidgetsBinding.instance.addPostFrameCallback((_) => kuberFabVisible.value = true);
   }
 
   @override

@@ -42,12 +42,16 @@ class SettingsLanguageRow extends ConsumerWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            lang.nativeName,
-            style: localeFont(
-              locale: lang.locale,
-              fontSize: 14,
-              color: cs.onSurfaceVariant,
+          Flexible(
+            child: Text(
+              lang.nativeName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: localeFont(
+                locale: lang.locale,
+                fontSize: 14,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(width: KuberSpace.lg),

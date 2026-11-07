@@ -158,7 +158,11 @@ class SettingsTile extends StatelessWidget {
             ),
             if (trailing case final Widget t) ...[
               const SizedBox(width: KuberSpace.lg),
-              t,
+              // A long value never squeezes the title to a column of letters.
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.4),
+                child: t,
+              ),
             ],
           ],
         ),

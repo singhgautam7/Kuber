@@ -125,7 +125,13 @@ class KuberOptionCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(title, style: theme.textTheme.titleMedium!.copyWith(color: titleColor)),
-                                Text(subtitle, style: theme.textTheme.bodyMedium!.copyWith(color: subColor)),
+                                Text(
+                                  subtitle,
+                                  // Busy shows a file name: one line.
+                                  maxLines: busy ? 1 : null,
+                                  overflow: busy ? TextOverflow.ellipsis : null,
+                                  style: theme.textTheme.bodyMedium!.copyWith(color: subColor),
+                                ),
                               ],
                             ),
                           ),

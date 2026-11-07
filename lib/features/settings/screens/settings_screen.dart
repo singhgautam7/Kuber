@@ -68,13 +68,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .nativeName;
     final currency = ref.watch(currencyProvider);
     final number = ref.watch(settingsProvider.select((s) => s.valueOrNull?.numberSystem ?? NumberSystem.automatic));
-    final appLock = ref.watch(settingsProvider.select((s) => s.valueOrNull?.biometricsEnabled ?? false));
-    final hasPin = ref.watch(hasVaultProvider);
-    final drawer = ref.watch(appDrawerEntriesProvider).valueOrNull ?? const <AppDrawerEntry>{};
-    final backup = ref.watch(backupSettingsProvider.select((s) => s.valueOrNull?.lastBackupAt));
-    final notifOff = ref.watch(notificationsAllowedProvider).valueOrNull == false;
-    final version = ref.watch(appVersionProvider).valueOrNull;
 
+    // The rows fed by async values are Consumers: as each value lands only its
+    // row rebuilds, not the page.
     Widget group(IconData icon, String title, String subtitle, SettingsArea area, {bool warn = false}) => KuberGroupRow(
           icon: icon,
           title: title,
@@ -84,7 +80,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => context.push(area.route),
         );
 
-    return SettingsPageFrame(
+    return SettingsOnResume(
+      onResume: () => ref.invalidate(notificationsAllowedProvider),
+      child: SettingsPageFrame(
       title: l.settingsTitle,
       highlight: widget.highlight,
       children: [
@@ -99,9 +97,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    _userNameController.text.isEmpty ? l.setYourName : _userNameController.text,
-                    style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                  Flexible(
+                    child: Text(
+                      _userNameController.text.isEmpty ? l.setYourName : _userNameController.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                    ),
                   ),
                   const SizedBox(width: KuberSpace.lg),
                   const KuberChevron(),
@@ -119,33 +121,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 l.setPrefsSub(language, '${currency.symbol} ${currency.code}', numberSystemName(l, number)),
                 SettingsArea.prefs),
             if (AppDrawerEntries.supported)
-              group(
-                Icons.apps_rounded,
-                l.appDrawerSection,
-                drawer.isEmpty
-                    ? l.setDrawerNone
-                    : [
-                        if (drawer.contains(AppDrawerEntry.cards)) l.appDrawerCards,
-                        if (drawer.contains(AppDrawerEntry.notes)) l.appDrawerNotes,
-                        if (drawer.contains(AppDrawerEntry.reminders)) l.appDrawerReminders,
-                      ].join(', '),
-                SettingsArea.drawer,
+              Consumer(
+                builder: (_, ref, _) {
+                  final drawer = ref.watch(appDrawerEntriesProvider).valueOrNull ?? const <AppDrawerEntry>{};
+                  return group(
+                    Icons.apps_rounded,
+                    l.appDrawerSection,
+                    drawer.isEmpty
+                        ? l.setDrawerNone
+                        : [
+                            if (drawer.contains(AppDrawerEntry.cards)) l.appDrawerCards,
+                            if (drawer.contains(AppDrawerEntry.notes)) l.appDrawerNotes,
+                            if (drawer.contains(AppDrawerEntry.reminders)) l.appDrawerReminders,
+                          ].join(', '),
+                    SettingsArea.drawer,
+                  );
+                },
               ),
           ],
         ),
         SettingsBlock(
           title: l.setSecSafe,
           children: [
-            group(
-              Icons.shield_outlined,
-              l.setGroupPrivacy,
-              [appLock ? l.setPrivacyLockOn : l.setPrivacyLockOff, if (hasPin) l.setPrivacyPinOn].join(' · '),
-              SettingsArea.privacy,
+            Consumer(
+              builder: (_, ref, _) {
+                final appLock = ref.watch(settingsProvider.select((s) => s.valueOrNull?.biometricsEnabled ?? false));
+                final hasPin = ref.watch(hasVaultProvider);
+                return group(
+                  Icons.shield_outlined,
+                  l.setGroupPrivacy,
+                  [appLock ? l.setPrivacyLockOn : l.setPrivacyLockOff, if (hasPin) l.setPrivacyPinOn].join(' · '),
+                  SettingsArea.privacy,
+                );
+              },
             ),
-            group(Icons.cloud_sync_rounded, l.setGroupData,
-                backup == null ? l.setNoBackupYet : l.setLastBackupAgo(backupAgo(l, backup)), SettingsArea.data),
-            group(Icons.notifications_outlined, l.menuNotifications, notifOff ? l.setOff : l.setOn,
-                SettingsArea.notifications, warn: notifOff),
+            Consumer(
+              builder: (_, ref, _) {
+                final backup = ref.watch(backupSettingsProvider.select((s) => s.valueOrNull?.lastBackupAt));
+                return group(Icons.cloud_sync_rounded, l.setGroupData,
+                    backup == null ? l.setNoBackupYet : l.setLastBackupAgo(backupAgo(l, backup)), SettingsArea.data);
+              },
+            ),
+            Consumer(
+              builder: (_, ref, _) {
+                final off = ref.watch(notificationsAllowedProvider).valueOrNull == false;
+                return group(Icons.notifications_outlined, l.menuNotifications, off ? l.setOff : l.setOn,
+                    SettingsArea.notifications, warn: off);
+              },
+            ),
           ],
         ),
         SettingsBlock(
@@ -157,16 +180,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         SettingsBlock(
           children: [
-            SettingsAnchor('about', child: SettingsTile(
-              icon: Icons.info_outline_rounded,
-              label: l.aboutKuberLabel,
-              subtitle: version == null ? null : l.setVersion(version),
-              onTap: () => context.push('/more/about'),
-              trailing: const KuberChevron(),
+            SettingsAnchor('about', child: Consumer(
+              builder: (_, ref, _) {
+                final version = ref.watch(appVersionProvider).valueOrNull;
+                return SettingsTile(
+                  icon: Icons.info_outline_rounded,
+                  label: l.aboutKuberLabel,
+                  subtitle: version == null ? null : l.setVersion(version),
+                  onTap: () => context.push('/more/about'),
+                  trailing: const KuberChevron(),
+                );
+              },
             )),
           ],
         ),
       ],
+      ),
     );
   }
 

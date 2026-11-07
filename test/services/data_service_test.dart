@@ -121,4 +121,25 @@ void main() {
     expect(all.length, 1);
     expect(all.single.name, 'Keep');
   });
+
+  test('a cancelled CSV import keeps nothing and reports progress', () async {
+    final before = await isar.transactions.count();
+    final rows = [
+      'date,name,amount,type,category,account',
+      for (var i = 0; i < 60; i++) '2026-01-01,Row $i,100,expense,Food,Cash',
+    ].join('\n');
+    final seen = <int>[];
+    var calls = 0;
+    final r = await DataService(isar).importData(
+      rows,
+      onProgress: (done, total) {
+        seen.add(done);
+        expect(total, 60);
+      },
+      cancelled: () => ++calls > 40,
+    );
+    expect(r.error, ImportCancelled.message);
+    expect(seen, isNotEmpty);
+    expect(await isar.transactions.count(), before);
+  });
 }

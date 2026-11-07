@@ -47,11 +47,15 @@ Widget _trailing(BuildContext context, {String? text}) {
     mainAxisSize: MainAxisSize.min,
     children: [
       if (text != null && text.isNotEmpty) ...[
-        Text(
-          text,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+          ),
         ),
         const SizedBox(width: KuberSpace.lg),
       ],
@@ -321,16 +325,16 @@ void _showDefaultAccountPicker(
 
 
 /// Runs [onResume] when the user comes back to the app (from phone settings).
-class _OnResume extends StatefulWidget {
+class SettingsOnResume extends StatefulWidget {
   final VoidCallback onResume;
   final Widget child;
-  const _OnResume({required this.onResume, required this.child});
+  const SettingsOnResume({required this.onResume, required this.child});
 
   @override
-  State<_OnResume> createState() => _OnResumeState();
+  State<SettingsOnResume> createState() => _SettingsOnResumeState();
 }
 
-class _OnResumeState extends State<_OnResume> {
+class _SettingsOnResumeState extends State<SettingsOnResume> {
   late final _listener = AppLifecycleListener(onResume: () => widget.onResume());
 
   @override
@@ -663,7 +667,7 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
     // With nothing enrolled a switch that is on must still turn off.
     final lockOff = noBiometric && !appLock;
     final cardsOff = noBiometric && !(meta?.biometricEnabled ?? false);
-    return _OnResume(
+    return SettingsOnResume(
       onResume: () => ref.invalidate(biometricEnrolledProvider),
       child: SettingsPageFrame(
         title: l.setGroupPrivacy,
@@ -881,8 +885,8 @@ class AppDrawerScreen extends ConsumerWidget {
 
 /// Whether the system lets Kuber post notifications. Read on opening the page
 /// and when the user comes back from system settings.
-final notificationsAllowedProvider = FutureProvider.autoDispose<bool>(
-    (ref) async => (await Permission.notification.status).isGranted);
+final notificationsAllowedProvider =
+    FutureProvider<bool>((ref) async => (await Permission.notification.status).isGranted);
 
 /// Asks the system, or opens system settings once it has been refused.
 Future<bool> requestNotifications() async {
@@ -902,7 +906,7 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final allowed = ref.watch(notificationsAllowedProvider).valueOrNull ?? true;
     final kinds = ref.watch(notificationKindsProvider);
-    return _OnResume(
+    return SettingsOnResume(
       onResume: () => ref.invalidate(notificationsAllowedProvider),
       child: SettingsPageFrame(
         title: l.menuNotifications,

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/supported_locales.dart';
-import '../../../shared/widgets/brand_icon.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_option_card.dart';
 import '../../settings/providers/data_provider.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -98,7 +98,13 @@ class OnboardingStartPage extends ConsumerWidget {
                           beginOffset: Offset.zero,
                           scale: 0.8,
                           curve: Easing.emphasizedDecelerate,
-                          child: BrandIcon(size: 96, radius: 28),
+                          child: KuberIconTile(
+                            icon: Icons.currency_rupee_rounded,
+                            size: 96,
+                            glyph: 54,
+                            radius: 28,
+                            tone: KuberTone.primary,
+                          ),
                         ),
                         const SizedBox(height: KuberSpace.md),
                         Text('Kuber', style: theme.textTheme.displaySmall!.copyWith(color: cs.onSurface)),

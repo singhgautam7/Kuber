@@ -14,13 +14,24 @@ import 'package:kuber/core/schedule/schedule_engine.dart';
 import 'package:kuber/core/theme/theme_families.dart';
 import 'package:kuber/features/accounts/data/account.dart';
 import 'package:kuber/features/accounts/providers/account_provider.dart';
+import 'package:kuber/features/kuber_cards/data/stored_card.dart';
+import 'package:kuber/features/kuber_cards/providers/kuber_cards_provider.dart';
+import 'package:kuber/features/ledger/data/ledger.dart';
+import 'package:kuber/features/ledger/providers/ledger_provider.dart';
 import 'package:kuber/features/loans/data/loan.dart';
 import 'package:kuber/features/loans/domain/loan_engine.dart';
 import 'package:kuber/features/loans/domain/loan_service.dart';
 import 'package:kuber/features/loans/providers/loan_provider.dart';
 import 'package:kuber/features/loans/widgets/loan_add_sheet.dart';
 import 'package:kuber/features/loans/widgets/loan_sheet.dart';
+import 'package:kuber/core/services/notification_service.dart' show notificationKindsProvider;
+import 'package:kuber/features/notes/data/kuber_note.dart';
+import 'package:kuber/features/notes/providers/notes_provider.dart';
 import 'package:kuber/features/notifications/utils/notification_routes.dart';
+import 'package:kuber/features/reminders/data/reminder.dart';
+import 'package:kuber/features/reminders/providers/reminders_provider.dart';
+import 'package:kuber/features/tags/data/tag.dart';
+import 'package:kuber/features/tags/providers/tag_providers.dart';
 import 'package:kuber/features/pro/paywall/pro_faq_section.dart';
 import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/features/settings/settings_index.dart';
@@ -94,6 +105,8 @@ void main() {
     await shot(t, 'welcome/01-first-page');
     // Language switches at once.
     await tapText(t, 'English');
+    await settle(t);
+    await shot(t, 'welcome/01b-language-sheet');
     await tapText(t, 'हिन्दी');
     await settle(t, const Duration(seconds: 2));
     await shot(t, 'welcome/02-first-page-hindi');
@@ -109,6 +122,8 @@ void main() {
     await settle(t);
     await tapText(t, en.startJourney);
     await pumpUntil(t, find.text(en.obNotifTitle));
+    await hideKeyboard(t);
+    await settle(t, const Duration(seconds: 1));
     await shot(t, 'welcome/03-notifications');
     await tapText(t, en.obNotifLater);
     await pumpUntil(t, find.text(en.obTermsTitle));
@@ -117,6 +132,7 @@ void main() {
     await tapText(t, en.obTermsAgree);
     expect(find.text(en.obTermsTitle), findsOneWidget);
     await tapText(t, en.obTermsCheck1);
+    await shot(t, 'welcome/04b-data-page-one');
     await tapText(t, en.obTermsAgree);
     expect(find.text(en.obTermsTitle), findsOneWidget);
     await tapText(t, en.obTermsCheck2);
@@ -227,6 +243,7 @@ void main() {
     'privacy': '/more/settings/privacy',
     'app-drawer': '/more/settings/app-drawer',
     'notifications': '/more/settings/notifications',
+    'help': '/more/settings/help',
     'activity': '/more/settings/activity',
     'data': '/more/data',
   };
@@ -268,11 +285,44 @@ void main() {
     await tapFinder(t, find.byType(Switch).first);
     await go(t, '/more');
     await push(t, '/more/settings/look');
-    await tapText(t, en.bottomNavLabel);
-    await tapText(t, en.navClassicChoice, last: true);
+    await tapText(t, en.setBottomNav);
+    await tapText(t, en.setNavStandard, last: true);
     expect(c.read(settingsProvider).valueOrNull!.navBarStyle, NavBarStyle.classic);
-    await tapText(t, en.bottomNavLabel);
-    await tapText(t, en.navModernChoice, last: true);
+    await tapText(t, en.setBottomNav);
+    await tapText(t, en.setNavFloating, last: true);
+    expect(c.read(settingsProvider).valueOrNull!.navBarStyle, NavBarStyle.modern);
+    await tapText(t, en.setMoreLayout);
+    await tapText(t, en.setLayoutHero, last: true);
+    expect(c.read(moreTabLayoutProvider), MoreTabLayout.modern);
+    await tapText(t, en.setMoreLayout);
+    await tapText(t, en.simpleLabel, last: true);
+    expect(c.read(moreTabLayoutProvider), MoreTabLayout.simple);
+    await go(t, '/more');
+    await push(t, '/more/settings/preferences');
+    final swipe = find.descendant(of: find.byWidgetPredicate((w) => w is SettingsAnchor && w.id == 'swipe'), matching: find.byType(Switch));
+    await t.scrollUntilVisible(swipe, 300, scrollable: find.byType(Scrollable).first, maxScrolls: 20);
+    await settle(t);
+    await tapFinder(t, swipe);
+    expect(c.read(settingsProvider).valueOrNull!.swipeMode, SwipeMode.performActions);
+    await tapFinder(t, swipe);
+    expect(c.read(settingsProvider).valueOrNull!.swipeMode, SwipeMode.changeTabs);
+    await t.scrollUntilVisible(find.text(en.setNumberFormat), -300, scrollable: find.byType(Scrollable).first, maxScrolls: 20);
+    await settle(t);
+    await tapText(t, en.setNumberFormat);
+    await tapText(t, en.setNumMillion, last: true);
+    expect(c.read(settingsProvider).valueOrNull!.numberSystem, NumberSystem.international);
+    await tapText(t, en.setNumberFormat);
+    await tapText(t, en.setNumLakh, last: true);
+    expect(c.read(settingsProvider).valueOrNull!.numberSystem, NumberSystem.indian);
+    await go(t, '/more');
+    await push(t, '/more/settings/notifications');
+    await settle(t);
+    // Works only with notifications allowed: this run has them.
+    final kinds = c.read(notificationKindsProvider);
+    await tapFinder(t, find.byType(Switch).first);
+    expect(c.read(notificationKindsProvider), isNot(kinds));
+    await tapFinder(t, find.byType(Switch).first);
+    expect(c.read(notificationKindsProvider), kinds);
     expectNoErrors(t);
   });
 
@@ -290,7 +340,7 @@ void main() {
       '/widget-editor/analytics': null,
       // These scroll to the row, so the row is what must show.
       '/more/settings/preferences?row=language': 'Language',
-      '/more/settings/preferences?row=defaultAccount': 'Default Account',
+      '/more/settings/preferences?row=defaultAccount': 'Default account',
       '/more/settings/preferences?row=currency': 'Currency',
       '/more/settings/look?row=theme': 'Theme',
       '/more/settings/privacy?row=privacyMode': 'Privacy',
@@ -325,20 +375,135 @@ void main() {
       await settle(t);
       final entry = kSettingsIndex.firstWhere((x) => x.id == e.value);
       final title = entry.title(en);
-      await pumpUntil(t, find.text(title), reason: title);
+      final row = find.text(title, findRichText: true);
+      await pumpUntil(t, row, reason: title);
       if (e.key == 'lock') await shot(t, 'settings/search-results');
       if (entry.id == 'cardsPin') {
         // Shown once a vault exists.
         await back(t);
         continue;
       }
-      await tapText(t, title, last: true);
+      await tapFinder(t, row.last);
       await settle(t, const Duration(milliseconds: 500));
       if (e.key == 'lock') await shot(t, 'settings/search-highlight');
       expect(find.byType(SettingsAnchor), findsWidgets, reason: e.key);
       await settle(t, const Duration(seconds: 2));
       expectNoErrors(t);
     }
+  });
+
+  smokeTest('C4: search across every kind of result', (t) async {
+    await boot(t);
+    final c = container(t);
+    final bank = (await db.accounts.where().findFirst())!;
+    await db.writeTxn(() async {
+      await db.accounts.putAll([
+        Account()
+          ..name = 'HDFC Savings'
+          ..type = 'bank'
+          ..initialBalance = 84210
+          ..icon = 'account_balance',
+        Account()
+          ..name = 'HDFC Millennia'
+          ..type = 'bank'
+          ..isCreditCard = true
+          ..initialBalance = 0
+          ..icon = 'credit_card',
+      ]);
+      await db.tags.put(Tag()
+        ..name = "Rahul's wedding"
+        ..createdAt = DateTime(2026, 10, 1));
+      await db.ledgers.put(Ledger()
+        ..uid = 'search-ledger'
+        ..personName = 'Rahul Verma'
+        ..personNameLower = 'rahul verma'
+        ..type = 'lent'
+        ..originalAmount = 5000
+        ..accountId = '${bank.id}'
+        ..categoryId = '1'
+        ..expectedDate = DateTime(2026, 11, 30)
+        ..createdAt = DateTime(2026, 10, 1)
+        ..updatedAt = DateTime(2026, 10, 1));
+      await db.reminders.put(Reminder()
+        ..title = 'Renew HDFC FD'
+        ..dueAt = DateTime(2026, 11, 18, 9)
+        ..status = 'pending'
+        ..createdAt = DateTime(2026, 10, 1)
+        ..updatedAt = DateTime(2026, 10, 1));
+      await db.storedCards.put(StoredCard()
+        ..nickname = 'HDFC Millennia'
+        ..last4 = '4242'
+        ..cardType = 'credit');
+      await db.kuberNotes.put(KuberNote()
+        ..title = 'HDFC netbanking steps'
+        ..content = '[{"insert":"my hidden text"}]'
+        ..createdAt = DateTime(2026, 11, 2)
+        ..updatedAt = DateTime(2026, 11, 2));
+    });
+    for (final p in <ProviderOrFamily>[allAccountsProvider, accountBalancesProvider, tagListProvider, ledgerListProvider, remindersStreamProvider, storedCardsProvider, notesStreamProvider]) {
+      c.invalidate(p);
+    }
+    Future<void> openSearch() async {
+      await go(t, '/');
+      await go(t, '/more');
+      await tapFinder(t, find.byIcon(Icons.search_rounded));
+      await settle(t, const Duration(seconds: 1));
+    }
+
+    Future<void> search(String q, String shotName) async {
+      t.state<EditableTextState>(find.byType(EditableText).last).userUpdateTextEditingValue(
+          TextEditingValue(text: q, selection: TextSelection.collapsed(offset: q.length)),
+          SelectionChangedCause.keyboard);
+      await settle(t, const Duration(milliseconds: 900));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(t, const Duration(milliseconds: 400));
+      await shot(t, 'search/$shotName');
+    }
+
+    final privacy = c.read(privacyModeProvider);
+    if (privacy) await c.read(settingsProvider.notifier).togglePrivacyMode();
+    await openSearch();
+    await shot(t, 'search/01-empty');
+    await search('hdfc', '02-hdfc');
+    expect(find.text('HDFC Savings', findRichText: true), findsOneWidget);
+    await search('rah', '03-rah');
+    await search('emi', '04-emi');
+    await search('card', '05-card');
+    await search('dark', '06-keyword-dark');
+    expect(find.textContaining('Matches', findRichText: true), findsWidgets);
+    await search('4242', '07-never-a-card-number');
+    expect(find.text(en.searchNoResults('4242'), findRichText: true), findsOneWidget);
+    await search('hidden', '08-never-note-text');
+    await search('zomato gold', '09-no-results');
+    await search('groceries', '10-category');
+    await search('hdfc', '02b-hdfc');
+    await tapText(t, en.menuAccounts);
+    await settle(t, const Duration(milliseconds: 600));
+    await shot(t, 'search/11-filter-accounts');
+    await tapText(t, en.searchAll);
+    await settle(t);
+    // Open one of each kind.
+    await tapFinder(t, find.text('HDFC Savings', findRichText: true).first);
+    await settle(t, const Duration(seconds: 1));
+    await shot(t, 'search/12-account-opened');
+    await back(t);
+    await settle(t);
+    await openSearch();
+    await shot(t, 'search/13-recent');
+    await search('groceries', '10b-category');
+    await tapFinder(t, find.text('Groceries', findRichText: true).first);
+    await settle(t, const Duration(seconds: 1));
+    await shot(t, 'search/14-category-opened');
+    await back(t);
+    await settle(t);
+    // Privacy mode hides every amount.
+    await c.read(settingsProvider.notifier).togglePrivacyMode();
+    await openSearch();
+    await search('hdfc', '15-hdfc-privacy');
+    expect(find.textContaining('84,210'), findsNothing);
+    expect(find.textContaining('••••'), findsWidgets);
+    await c.read(settingsProvider.notifier).togglePrivacyMode();
+    expectNoErrors(t);
   });
 
   smokeTest('F: path sheet from 5 depths and a deep link', (t) async {
