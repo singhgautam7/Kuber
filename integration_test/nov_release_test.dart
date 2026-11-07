@@ -145,12 +145,15 @@ void main() {
     await tapText(t, en.msLoansViewSchedule);
     await settle(t, const Duration(seconds: 2));
     await shot(t, 'loans/03-schedule-today');
+    await t.fling(find.byType(Scrollable).first, const Offset(0, 3000), 3000);
+    await settle(t);
+    await tapText(t, en.msLoansYear);
+    await shot(t, 'loans/05-schedule-years');
+    await tapText(t, en.msLoansMonth);
     await tapFinder(t, find.byIcon(Icons.arrow_drop_down_rounded));
     await tapText(t, '2017', last: true);
     await settle(t, const Duration(seconds: 1));
     await shot(t, 'loans/04-schedule-2017');
-    await tapText(t, en.msLoansYear);
-    await shot(t, 'loans/05-schedule-years');
     expectNoErrors(t);
   });
 

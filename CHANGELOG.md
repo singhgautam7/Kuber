@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Loans that grow in parts: add each part as the bank pays it out, and pick
+  the account it reached. Interest is charged only on what has been released.
+- Interest before EMIs: pay it every month or let the bank add it to the loan.
+  Kuber works it out day by day, the way banks do.
+- Add to loan: record more money released, charges or unpaid interest.
+- Settings is a short list of pages, and More keeps only what you use most.
+  Search in More finds any setting and takes you right to it.
+- A new first page: pick your language, restore a backup or import a CSV.
+- Tap a page title, or long-press back, to jump to any earlier page.
+- Answers to common questions on the Kuber Pro page.
+- New themes: Saffron, Sky and Ruby. Meadow and Coral are gone.
+- The app lock and the Kuber Cards biometric are now separate settings.
+
 - Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
   reminder, card due date and money you lent or borrowed on a month grid,
   with what went out and came in. Tap a day to see its list, long-press a day

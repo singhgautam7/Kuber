@@ -115,6 +115,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   bool _saving = false;
   String? _fromCalc;
 
+  /// Anything that decides the loan's numbers changed since the form opened.
+  /// An edit that only renames must save them as stored, not re-derive them.
+  bool _numbersTouched = false;
+  bool _whenTouched = false;
+
   // Released in parts and interest before EMIs (A1, A2).
   DateTime? _loanStart;
   int? _receivedId;
@@ -185,7 +190,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       if (hasNumbers) {
         _advanced = true;
         if (l.principalAmount > 0) _principal.text = _amt(l.principalAmount);
-        if (l.annualRate != null) _rate.text = _num(l.annualRate!);
+        if (l.annualRate != null) _rate.text = _rateText(l.annualRate!);
         final months = l.tenureMonths!;
         _tenureYears = months % 12 == 0;
         _tenure.text = _tenureYears ? '${months ~/ 12}' : '$months';
@@ -197,6 +202,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       }
       if (l.principalPaidBefore > 0) _pastPrincipal.text = _amt(l.principalPaidBefore);
       if (l.interestPaidBefore > 0) _pastInterest.text = _amt(l.interestPaidBefore);
+      if (hasNumbers) {
+        _recompute();
+        _numbersTouched = false;
+      }
     } else {
       if (widget.lenderPrefill != null) _lender.text = widget.lenderPrefill!;
       if ((widget.emiPrefill ?? 0) > 0) {
@@ -241,6 +250,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   }
 
   static String _num(double v) => v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+
+  /// A stored rate as it is: rounding it here would change the loan on save.
+  static String _rateText(double v) => v % 1 == 0 ? v.toStringAsFixed(0) : '$v';
 
   /// Amount text as the user would type it, grouped per the number format.
   String _amt(num v) => CurrencyInputFormatter(
@@ -363,6 +375,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
   /// Solves the missing number and writes it into its field.
   void _recompute() {
+    _numbersTouched = true;
     final calc = _calculated;
     final total = _val(_total);
     final pre = _ledgerNow = _ledger();
@@ -423,23 +436,28 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final l = _existing?.copy() ?? Loan();
     final s = _solution;
     final numbers = _advanced && s != null && s.ok;
+    // A stored loan keeps its numbers unless the user changed them.
+    final stored = _existing;
+    final keep = stored != null && hasLoanNumbers(stored) && (!_numbersTouched || !numbers);
     l
       ..name = _name.text.trim()
       ..loanType = _type
       ..lenderName = _lender.text.trim()
       ..accountId = '${_accountId ?? ''}'
-      ..emiAmount = _val(_emi) ?? (numbers ? s.emi : 0)
-      ..mode = numbers ? LoanMode.advanced : LoanMode.simple
+      ..emiAmount = keep ? stored.emiAmount : (_val(_emi) ?? (numbers ? s.emi : 0))
+      ..mode = numbers || keep ? LoanMode.advanced : LoanMode.simple
       ..interestType = _interest
       ..interestOnlyMonths = _io
       ..alreadyRunning = _running
-      ..countOnlyInterest = numbers && _onlyInterest
-      ..countOnlyInterestFrom = numbers && _onlyInterest
+      ..countOnlyInterest = (numbers || keep) && _onlyInterest
+      ..countOnlyInterestFrom = (numbers || keep) && _onlyInterest
           ? (_existing?.countOnlyInterest == true
               ? _existing!.countOnlyInterestFrom
               : DateUtils.dateOnly(DateTime.now()))
           : null;
-    if (!numbers || (_running && _start == LoanStartingPoint.trackEmiOnly)) {
+    if (keep) {
+      // The copy above already holds them.
+    } else if (!numbers || (_running && _start == LoanStartingPoint.trackEmiOnly)) {
       l
         ..startingPoint = LoanStartingPoint.trackEmiOnly
         // A new loan has no principal yet (late field): 0 = not tracked.
@@ -467,8 +485,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         ..tenureMonths = s.months;
     }
     l.createdAt = _existing?.createdAt ?? DateTime.now();
+    if (keep && !_whenTouched) {
+      l.schedule = stored.schedule?.copy()?..autoRecord = _autoRecord;
+    } else {
+      l.schedule = _schedule(l);
+    }
+    if (keep) return l;
     _applyReleases(l, numbers);
-    l.schedule = _schedule(l);
     // Run 1: an overridden outstanding is stored as an opening adjustment.
     if (numbers && _running && _start == LoanStartingPoint.originalDetails) {
       final calc = LoanService.openingValues(l)?.outstanding;
@@ -756,6 +779,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                   value: _when,
                   onChanged: (v) => setState(() {
                     _when = v;
+                    _whenTouched = true;
                     if (v.endType == ScheduleEnd.afterCount && v.endCount != null &&
                         _order.contains(LoanField.tenure) == false && _advanced) {
                       _tenureYears = false;
@@ -1149,8 +1173,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             label: l.msLoansReceivedInShort,
             selectedId: p.accountId,
             noneLabel: l.msLoansNotRecorded,
-            onNone: () => setState(() => p.accountId = null),
-            onChanged: (id) => setState(() => p.accountId = id),
+            onNone: () => setState(() {
+              p.accountId = null;
+              _numbersTouched = true;
+            }),
+            onChanged: (id) => setState(() {
+              p.accountId = id;
+              _numbersTouched = true;
+            }),
           ),
           if (afterFirstEmi) ...[
             const SizedBox(height: 12),
@@ -1207,8 +1237,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           label: l.msLoansReceivedIn,
           selectedId: _receivedId,
           noneLabel: l.msLoansNotRecorded,
-          onNone: () => setState(() => _receivedId = null),
-          onChanged: (id) => setState(() => _receivedId = id),
+          onNone: () => setState(() {
+            _receivedId = null;
+            _numbersTouched = true;
+          }),
+          onChanged: (id) => setState(() {
+            _receivedId = id;
+            _numbersTouched = true;
+          }),
         ),
         const SizedBox(height: 4),
         Text(l.msLoansReceivedInHelp, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
@@ -1364,6 +1400,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final today = DateUtils.dateOnly(DateTime.now());
     void setStart(DateTime d) {
       _when = _when.copyWith(start: d, anchorDay: d.day);
+      _whenTouched = true;
       _recompute();
     }
 
@@ -1409,7 +1446,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
               controller: _outstanding,
               symbol: fmt.symbol,
               indianGrouping: indian,
-              onChanged: (_) => setState(() => _outstandingEdited = true),
+              onChanged: (_) => setState(() {
+                _outstandingEdited = true;
+                _numbersTouched = true;
+              }),
             ),
           ]);
           final entered = _val(_outstanding);
@@ -1462,7 +1502,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           controller: _outstanding,
           symbol: fmt.symbol,
           indianGrouping: indian,
-          onChanged: (_) => setState(() => _outstandingEdited = true),
+          onChanged: (_) => setState(() {
+            _outstandingEdited = true;
+            _numbersTouched = true;
+          }),
         ));
         final o = _val(_outstanding);
         final rate = _val(_rate);
