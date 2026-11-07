@@ -28,12 +28,27 @@ class OnboardingDataTermsPage extends StatelessWidget {
     final l = context.l10n;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    Widget check(bool value, ValueChanged<bool> onChanged, String text) => CheckboxListTile(
-          value: value,
-          onChanged: (v) => onChanged(v ?? false),
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
-          title: Text(text, style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurface)),
+    Widget check(bool value, ValueChanged<bool> onChanged, String text) => Semantics(
+          checked: value,
+          child: InkWell(
+            onTap: () => onChanged(!value),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: KuberSpace.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ExcludeSemantics(
+                    child: Checkbox(value: value, onChanged: (v) => onChanged(v ?? false)),
+                  ),
+                  const SizedBox(width: KuberSpace.sm),
+                  Expanded(
+                    child: Text(text,
+                        style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurface)),
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
     return CustomScrollView(
       slivers: [

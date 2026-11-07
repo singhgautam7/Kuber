@@ -27,7 +27,8 @@ void main() {
     await initialiseIsarForTests();
     isar = await openTestIsar();
   });
-  tearDownAll(() => closeAndCleanIsar(isar));
+  // Providers of the pumped pages can hold a watcher, which close() waits on.
+  tearDownAll(() => closeAndCleanIsar(isar).timeout(const Duration(seconds: 3), onTimeout: () {}));
 
   Widget host(Widget page) => ProviderScope(
         overrides: [

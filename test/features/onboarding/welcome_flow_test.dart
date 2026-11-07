@@ -66,7 +66,10 @@ void main() {
     expect(primary(l.obStartFresh), findsOneWidget);
     expect(find.text('English'), findsWidgets);
     await t.tap(primary(l.obStartFresh));
-    await t.pump(const Duration(milliseconds: 600));
+    for (var i = 0; i < 40; i++) {
+      await t.pump(const Duration(milliseconds: 16));
+    }
+    await t.pump(const Duration(milliseconds: 400));
     expect(find.text(l.obStartRestore).hitTestable(), findsNothing);
     expect(primary(l.getStarted), findsOneWidget);
   });
@@ -96,7 +99,7 @@ void main() {
     testWidgets('boxes start unchecked and report taps', (t) async {
       final got = <bool>[];
       await t.pumpWidget(page(false, false, onA: got.add));
-      expect(t.widget<CheckboxListTile>(find.byType(CheckboxListTile).first).value, isFalse);
+      expect(t.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
       await t.tap(find.text(l.obTermsCheck1));
       expect(got, [true]);
       expect(find.text(l.obTermsTitle), findsOneWidget);
@@ -106,10 +109,9 @@ void main() {
     testWidgets('fits the largest font size without an overflow', (t) async {
       await t.binding.setSurfaceSize(const Size(360, 640));
       addTearDown(() => t.binding.setSurfaceSize(null));
-      await t.pumpWidget(MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: page(true, false),
-      ));
+      t.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+      await t.pumpWidget(page(true, false));
       await t.pump();
       expect(t.takeException(), isNull);
     });
