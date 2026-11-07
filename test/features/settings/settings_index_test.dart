@@ -113,6 +113,13 @@ void main() {
       test('"$q" finds $id', () => expect(find(q), contains(id)));
     }
 
+    test('a short query stays a short list, titles first', () {
+      for (final q in ['da', 'ba', 'co', 'a', 'se']) {
+        expect(s.search(q).length, lessThanOrEqualTo(SettingsSearch.maxResults), reason: q);
+      }
+      expect(find('theme').first, 'theme');
+    });
+
     test('results carry the path', () {
       final e = kSettingsIndex.firstWhere((e) => e.id == 'biometric');
       expect(settingsPath(e.area, l, l.settingsTitle), 'Settings › Privacy and security');

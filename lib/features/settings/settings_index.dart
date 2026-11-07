@@ -85,13 +85,17 @@ final List<SettingsEntry> kSettingsIndex = [
   SettingsEntry('clear', SettingsArea.data, Icons.delete_forever_rounded, (l) => l.clearAllData, (l) => l.setKwClear),
 ];
 
-/// Lowercased title + keywords per entry, built once per language so typing
+/// Lowercased title and keywords per entry, built once per language so typing
 /// never rebuilds them.
 class SettingsSearch {
   SettingsSearch._(this._locale, this._rows);
 
+  /// More than this and a keystroke lays out a long list in one frame: a
+  /// two-letter query can hit most keyword lists.
+  static const maxResults = 8;
+
   final String _locale;
-  final List<(SettingsEntry, String)> _rows;
+  final List<(SettingsEntry, String title, String all)> _rows;
   static SettingsSearch? _cached;
 
   factory SettingsSearch.of(AppLocalizations l) {
@@ -101,19 +105,29 @@ class SettingsSearch {
     final en = lookupAppLocalizations(const Locale('en'));
     return _cached = SettingsSearch._(l.localeName, [
       for (final e in kSettingsIndex)
-        (e, '${e.title(l)} ${e.keywords(l)} ${e.title(en)} ${e.keywords(en)}'.toLowerCase()),
+        (
+          e,
+          e.title(l).toLowerCase(),
+          '${e.title(l)} ${e.keywords(l)} ${e.title(en)} ${e.keywords(en)}'.toLowerCase(),
+        ),
     ]);
   }
 
+  /// Title matches first, then keywords. One letter matches the start of a
+  /// title only: it would hit nearly every keyword list.
   List<SettingsEntry> search(String query) {
     final q = query.trim().toLowerCase();
     if (q.isEmpty) return const [];
-    // One letter hits nearly every keyword list: match the start only, so the
-    // first keystroke doesn't lay out the whole index.
-    return [
-      for (final (e, text) in _rows)
-        if (q.length == 1 ? text.startsWith(q) : text.contains(q)) e,
+    final titles = [
+      for (final (e, title, _) in _rows)
+        if (q.length == 1 ? title.startsWith(q) : title.contains(q)) e,
     ];
+    if (q.length == 1) return titles.take(maxResults).toList();
+    return [
+      ...titles,
+      for (final (e, title, all) in _rows)
+        if (!title.contains(q) && all.contains(q)) e,
+    ].take(maxResults).toList();
   }
 }
 
