@@ -246,7 +246,8 @@ class LoanSheet extends ConsumerWidget {
                   ),
           ),
         if (st.totalInterest != null)
-          KvGrid(items: [
+          // Two columns once the longer "added to loan" labels are in it.
+          KvGrid(columns: st.addedInterest > 0 || st.addedCharges > 0 ? 2 : 3, items: [
             KvItem(l.msLoansTotalInterest, m(st.totalInterest!)),
             KvItem(l.msLoansInterestPaid, m(st.interestPaid ?? 0)),
             KvItem(l.msLoansPrincipalPaid, m(st.principalPaid ?? 0)),
@@ -858,7 +859,7 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
           if (st.totalEmis != null) KuberLinearProgress(value: st.progress),
           if (st.totalInterest != null) ...[
             const SizedBox(height: 16),
-            KvGrid(items: [
+            KvGrid(columns: st.addedInterest > 0 || st.addedCharges > 0 ? 2 : 3, items: [
               KvItem(l.msLoansTotalInterest, m(st.totalInterest!)),
               KvItem(l.msLoansInterestPaid, m(st.interestPaid ?? 0)),
               KvItem(l.msLoansPrincipalPaid, m(st.principalPaid ?? 0)),

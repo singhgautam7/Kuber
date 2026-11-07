@@ -351,19 +351,25 @@ void main() {
       await shot(t, 'path-sheet/$name');
     }
 
+    // Closes the sheet, leaving the page under it.
+    Future<void> close() async {
+      Navigator.of(rootContext(t)).pop();
+      await settle(t);
+    }
+
     await push(t, '/more/settings');
     await open('depth-1');
-    await back(t);
+    await close();
     await push(t, '/more/settings/look');
     await open('depth-2');
-    await back(t);
+    await close();
     await push(t, '/more/settings/theme');
     await open('depth-3');
-    await back(t);
+    await close();
     await push(t, '/more/loans');
     await dismissInfo(t);
     await open('depth-4');
-    await back(t);
+    await close();
     await push(t, '/more/data');
     await push(t, '/more/data/automatic-backups');
     await open('depth-5');
@@ -397,6 +403,8 @@ void main() {
     }
     await settings.setThemeVariant(ThemeVariant.signature);
     await settings.setThemeMode(ThemeMode.light);
+    // The widget re-tint is debounced: let it run before the app is torn down.
+    await settle(t, const Duration(seconds: 3));
   });
 
   smokeTest('E: Pro page FAQ', (t) async {
@@ -404,7 +412,7 @@ void main() {
     await go(t, '/more');
     await push(t, '/pro');
     await settle(t, const Duration(seconds: 2));
-    await t.scrollUntilVisible(find.byType(ProFaqSection), 400, scrollable: find.byType(Scrollable).first, maxScrolls: 40);
+    await t.scrollUntilVisible(find.byType(ProFaqSection), 400, scrollable: find.byType(Scrollable).first, maxScrolls: 60);
     await t.ensureVisible(find.text(en.proFaqTitle));
     await tapText(t, en.proFaqLifetimeQ);
     await settle(t);

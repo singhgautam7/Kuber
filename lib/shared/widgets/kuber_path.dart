@@ -233,19 +233,22 @@ class _PathTreeRow extends StatelessWidget {
                 Icon(entry.icon, size: _iconSize, color: current ? cs.primary : cs.onSurfaceVariant),
                 const SizedBox(width: KuberSpace.md),
                 Expanded(
-                  child: Text(
-                    entry.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium!.copyWith(
-                      color: current ? cs.primary : cs.onSurface,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          color: current ? cs.primary : cs.onSurface,
+                        ),
+                      ),
+                      if (current) KuberPill(label: l.pathSheetCurrent),
+                    ],
                   ),
                 ),
-                if (current)
-                  Flexible(child: KuberPill(label: l.pathSheetCurrent))
-                else
-                  const KuberChevron(),
+                if (!current) const KuberChevron(),
               ],
             ),
           ),

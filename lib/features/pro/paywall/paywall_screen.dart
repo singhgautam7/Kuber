@@ -155,6 +155,8 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       const _TipJarSection(),
       const SizedBox(height: KuberSpace.xl),
       const _TrustFooter(),
+      const SizedBox(height: KuberSpace.xl),
+      const ProFaqSection(),
     ];
   }
 
