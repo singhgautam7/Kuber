@@ -413,7 +413,6 @@ void main() {
     await push(t, '/pro');
     await settle(t, const Duration(seconds: 2));
     await t.scrollUntilVisible(find.byType(ProFaqSection), 400, scrollable: find.byType(Scrollable).first, maxScrolls: 60);
-    await t.ensureVisible(find.text(en.proFaqTitle));
     await tapText(t, en.proFaqLifetimeQ);
     await settle(t);
     await shot(t, 'pro/faq-open');
