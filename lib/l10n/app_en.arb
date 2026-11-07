@@ -6029,5 +6029,162 @@
         "type": "int"
       }
     }
-  }
+  },
+  "msLoansReceivedIn": "Loan amount received in",
+  "msLoansReceivedInHelp": "Pick the account the bank paid the loan into. Kuber adds it there without counting it as income.",
+  "msLoansNotRecorded": "Not recorded",
+  "msLoansInParts": "Loan released in parts?",
+  "msLoansInPartsSub": "The bank pays it out in stages",
+  "msLoansSanctioned": "Sanctioned amount",
+  "msLoansReleasedSoFar": "Released so far",
+  "msLoansAddPart": "Add part",
+  "msLoansReceivedInShort": "Received in",
+  "msLoansPartsHelp": "Home loans are often paid straight to the builder. Choose Not recorded if the money didn't reach you.",
+  "msLoansPartsSummary": "{released} of {sanctioned} released",
+  "@msLoansPartsSummary": {
+    "placeholders": {
+      "released": {
+        "type": "String"
+      },
+      "sanctioned": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansFullyReleased": "Fully released",
+  "msLoansErrOverSanctioned": "The total released can't be more than the sanctioned amount.",
+  "msLoansErrPartDate": "A part's date can't be before the start date or in the future.",
+  "msLoansErrPartAmount": "Amounts must be above 0.",
+  "msLoansStartDate": "Loan start date",
+  "msLoansPartTitle": "Part {number}",
+  "@msLoansPartTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansDeletePartTitle": "Delete this part?",
+  "msLoansDeletePartBody": "It takes this amount off the loan.",
+  "msLoansDeletePartTxnBody": "It takes this amount off the loan. It also has a transaction in your account. Delete that too?",
+  "msLoansKeepTxn": "Keep transaction",
+  "msLoansDeleteTxn": "Delete transaction",
+  "msLoansPartsOffTitle": "Keep only the first part?",
+  "msLoansPartsOffBody": "The other parts and their transactions will be removed.",
+  "msLoansPreEmiTitle": "Interest before EMIs start",
+  "msLoansPreEmiPay": "I pay it every month",
+  "msLoansPreEmiPaySub": "Kuber records each month's interest from your EMI account.",
+  "msLoansPreEmiAdd": "Bank adds it to the loan",
+  "msLoansPreEmiAddSub": "It joins what you owe. No money leaves any account.",
+  "msLoansPreEmiDay": "Interest charged on day",
+  "msLoansPreEmiDayHelp": "Usually your EMI day. Check your bank statement.",
+  "msLoansPreEmiAdded": "Interest added before EMIs",
+  "msLoansPreEmiNotice": "Kuber now calculates {amount}. Use this instead?",
+  "@msLoansPreEmiNotice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansUse": "Use",
+  "msLoansKeepMine": "Keep mine",
+  "msLoansPreEmiPreview": "EMIs start on {amount} · ends {date} · total interest {interest}",
+  "@msLoansPreEmiPreview": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansAddToLoan": "Add to loan",
+  "msLoansWhatAdded": "What was added",
+  "msLoansAddReleased": "Money released",
+  "msLoansAddReleasedSub": "A new part of the loan.",
+  "msLoansAddCharges": "Charges added",
+  "msLoansAddChargesSub": "Insurance or fees the bank added to the loan.",
+  "msLoansAddInterest": "Unpaid interest",
+  "msLoansAddInterestSub": "Interest the bank added to what you owe.",
+  "msLoansNote": "Note",
+  "msLoansAddedSaved": "Added to the loan",
+  "msLoansAboveSanctioned": "This takes the loan above {amount}. Increase the sanctioned amount?",
+  "@msLoansAboveSanctioned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansIncrease": "Increase",
+  "msLoansEventReleased": "Released {amount} · {date}",
+  "@msLoansEventReleased": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventChargeAdded": "Charge added {amount} · {date}",
+  "@msLoansEventChargeAdded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventUnpaidInterest": "Unpaid interest {amount} · {date}",
+  "@msLoansEventUnpaidInterest": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansReleasedOf": "Released {released} of {sanctioned}",
+  "@msLoansReleasedOf": {
+    "placeholders": {
+      "released": {
+        "type": "String"
+      },
+      "sanctioned": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansChargesAdded": "Charges added to loan",
+  "msLoansCycleAdded": "Interest added",
+  "msLoansCyclePaid": "Interest paid",
+  "msLoansPreEmiAdjusted": "Matched to your figure {amount}",
+  "@msLoansPreEmiAdjusted": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPartDeleted": "Part deleted",
+  "msInfoPartsLine": "Some loans, like home loans for a house still being built, are paid out in parts. Interest is charged only on what has been released.",
+  "msInfoReceivedInLine": "The account the loan money reached. Kuber adds it to that account's balance. It is never counted as income. Choose Not recorded if the bank paid someone else.",
+  "msInfoPreEmiPayLine": "You pay the interest on what has been released each month until EMIs begin. Kuber records it from your EMI account as interest expense. This is the same as an interest-only period.",
+  "msInfoPreEmiAddLine": "You pay nothing until EMIs begin. Each month's interest joins what you owe, and interest builds on it from then on. No money leaves any account, so it never appears in your spending.",
+  "msInfoPreEmiCalcLine": "What the time before EMIs adds to the released amount: interest and charges added, minus any payments you made. Kuber works it out day by day at your rate over 365 days. Change it if your bank statement says something else, and your figure is used from the first EMI.",
+  "msInfoAddReleasedLine": "The bank paid out more of the loan. It joins what you owe, and interest builds on it from that date.",
+  "msInfoAddChargesLine": "Something the bank added to the loan, like insurance or a processing fee. Interest builds on it from that date. It isn't spending, because no money left any account.",
+  "msInfoAddInterestLine": "Interest you didn't pay and the bank added to the loan, like during a moratorium. It raises what you owe and counts toward your total interest.",
+  "msLoansKeepFirst": "Keep first part"
 }

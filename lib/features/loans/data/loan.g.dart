@@ -159,52 +159,85 @@ const LoanSchema = CollectionSchema(
       name: r'pastEmisAddedAt',
       type: IsarType.dateTime,
     ),
-    r'principalAmount': PropertySchema(
+    r'preEmiCalculated': PropertySchema(
       id: 30,
+      name: r'preEmiCalculated',
+      type: IsarType.double,
+    ),
+    r'preEmiCycleDay': PropertySchema(
+      id: 31,
+      name: r'preEmiCycleDay',
+      type: IsarType.long,
+    ),
+    r'preEmiMode': PropertySchema(
+      id: 32,
+      name: r'preEmiMode',
+      type: IsarType.string,
+      enumMap: _LoanpreEmiModeEnumValueMap,
+    ),
+    r'preEmiOverride': PropertySchema(
+      id: 33,
+      name: r'preEmiOverride',
+      type: IsarType.double,
+    ),
+    r'principalAmount': PropertySchema(
+      id: 34,
       name: r'principalAmount',
       type: IsarType.double,
     ),
     r'principalPaidBefore': PropertySchema(
-      id: 31,
+      id: 35,
       name: r'principalPaidBefore',
       type: IsarType.double,
     ),
     r'rateType': PropertySchema(
-      id: 32,
+      id: 36,
       name: r'rateType',
       type: IsarType.string,
     ),
     r'referenceNumber': PropertySchema(
-      id: 33,
+      id: 37,
       name: r'referenceNumber',
       type: IsarType.string,
     ),
+    r'releasedInParts': PropertySchema(
+      id: 38,
+      name: r'releasedInParts',
+      type: IsarType.bool,
+    ),
+    r'releases': PropertySchema(
+      id: 39,
+      name: r'releases',
+      type: IsarType.objectList,
+
+      target: r'LoanRelease',
+    ),
     r'schedule': PropertySchema(
-      id: 34,
+      id: 40,
       name: r'schedule',
       type: IsarType.object,
 
       target: r'Schedule',
     ),
     r'startDate': PropertySchema(
-      id: 35,
+      id: 41,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
     r'startingPoint': PropertySchema(
-      id: 36,
+      id: 42,
       name: r'startingPoint',
       type: IsarType.string,
       enumMap: _LoanstartingPointEnumValueMap,
     ),
     r'tenureMonths': PropertySchema(
-      id: 37,
+      id: 43,
       name: r'tenureMonths',
       type: IsarType.long,
     ),
-    r'uid': PropertySchema(id: 38, name: r'uid', type: IsarType.string),
+    r'uid': PropertySchema(id: 44, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 39,
+      id: 45,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -217,7 +250,11 @@ const LoanSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {r'Schedule': ScheduleSchema, r'LoanEvent': LoanEventSchema},
+  embeddedSchemas: {
+    r'Schedule': ScheduleSchema,
+    r'LoanEvent': LoanEventSchema,
+    r'LoanRelease': LoanReleaseSchema,
+  },
 
   getId: _loanGetId,
   getLinks: _loanGetLinks,
@@ -252,6 +289,7 @@ int _loanEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.preEmiMode.name.length * 3;
   {
     final value = object.rateType;
     if (value != null) {
@@ -262,6 +300,14 @@ int _loanEstimateSize(
     final value = object.referenceNumber;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.releases.length * 3;
+  {
+    final offsets = allOffsets[LoanRelease]!;
+    for (var i = 0; i < object.releases.length; i++) {
+      final value = object.releases[i];
+      bytesCount += LoanReleaseSchema.estimateSize(value, offsets, allOffsets);
     }
   }
   {
@@ -318,21 +364,32 @@ void _loanSerialize(
   writer.writeString(offsets[27], object.notes);
   writer.writeDouble(offsets[28], object.outstandingAtStart);
   writer.writeDateTime(offsets[29], object.pastEmisAddedAt);
-  writer.writeDouble(offsets[30], object.principalAmount);
-  writer.writeDouble(offsets[31], object.principalPaidBefore);
-  writer.writeString(offsets[32], object.rateType);
-  writer.writeString(offsets[33], object.referenceNumber);
+  writer.writeDouble(offsets[30], object.preEmiCalculated);
+  writer.writeLong(offsets[31], object.preEmiCycleDay);
+  writer.writeString(offsets[32], object.preEmiMode.name);
+  writer.writeDouble(offsets[33], object.preEmiOverride);
+  writer.writeDouble(offsets[34], object.principalAmount);
+  writer.writeDouble(offsets[35], object.principalPaidBefore);
+  writer.writeString(offsets[36], object.rateType);
+  writer.writeString(offsets[37], object.referenceNumber);
+  writer.writeBool(offsets[38], object.releasedInParts);
+  writer.writeObjectList<LoanRelease>(
+    offsets[39],
+    allOffsets,
+    LoanReleaseSchema.serialize,
+    object.releases,
+  );
   writer.writeObject<Schedule>(
-    offsets[34],
+    offsets[40],
     allOffsets,
     ScheduleSchema.serialize,
     object.schedule,
   );
-  writer.writeDateTime(offsets[35], object.startDate);
-  writer.writeString(offsets[36], object.startingPoint.name);
-  writer.writeLong(offsets[37], object.tenureMonths);
-  writer.writeString(offsets[38], object.uid);
-  writer.writeDateTime(offsets[39], object.updatedAt);
+  writer.writeDateTime(offsets[41], object.startDate);
+  writer.writeString(offsets[42], object.startingPoint.name);
+  writer.writeLong(offsets[43], object.tenureMonths);
+  writer.writeString(offsets[44], object.uid);
+  writer.writeDateTime(offsets[45], object.updatedAt);
 }
 
 Loan _loanDeserialize(
@@ -384,22 +441,37 @@ Loan _loanDeserialize(
   object.notes = reader.readStringOrNull(offsets[27]);
   object.outstandingAtStart = reader.readDoubleOrNull(offsets[28]);
   object.pastEmisAddedAt = reader.readDateTimeOrNull(offsets[29]);
-  object.principalAmount = reader.readDouble(offsets[30]);
-  object.principalPaidBefore = reader.readDouble(offsets[31]);
-  object.rateType = reader.readStringOrNull(offsets[32]);
-  object.referenceNumber = reader.readStringOrNull(offsets[33]);
+  object.preEmiCalculated = reader.readDoubleOrNull(offsets[30]);
+  object.preEmiCycleDay = reader.readLongOrNull(offsets[31]);
+  object.preEmiMode =
+      _LoanpreEmiModeValueEnumMap[reader.readStringOrNull(offsets[32])] ??
+      LoanPreEmi.none;
+  object.preEmiOverride = reader.readDoubleOrNull(offsets[33]);
+  object.principalAmount = reader.readDouble(offsets[34]);
+  object.principalPaidBefore = reader.readDouble(offsets[35]);
+  object.rateType = reader.readStringOrNull(offsets[36]);
+  object.referenceNumber = reader.readStringOrNull(offsets[37]);
+  object.releasedInParts = reader.readBool(offsets[38]);
+  object.releases =
+      reader.readObjectList<LoanRelease>(
+        offsets[39],
+        LoanReleaseSchema.deserialize,
+        allOffsets,
+        LoanRelease(),
+      ) ??
+      [];
   object.schedule = reader.readObjectOrNull<Schedule>(
-    offsets[34],
+    offsets[40],
     ScheduleSchema.deserialize,
     allOffsets,
   );
-  object.startDate = reader.readDateTime(offsets[35]);
+  object.startDate = reader.readDateTime(offsets[41]);
   object.startingPoint =
-      _LoanstartingPointValueEnumMap[reader.readStringOrNull(offsets[36])] ??
+      _LoanstartingPointValueEnumMap[reader.readStringOrNull(offsets[42])] ??
       LoanStartingPoint.originalDetails;
-  object.tenureMonths = reader.readLongOrNull(offsets[37]);
-  object.uid = reader.readString(offsets[38]);
-  object.updatedAt = reader.readDateTime(offsets[39]);
+  object.tenureMonths = reader.readLongOrNull(offsets[43]);
+  object.uid = reader.readString(offsets[44]);
+  object.updatedAt = reader.readDateTime(offsets[45]);
   return object;
 }
 
@@ -482,31 +554,52 @@ P _loanDeserializeProp<P>(
     case 29:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 30:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 31:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 32:
-      return (reader.readStringOrNull(offset)) as P;
+      return (_LoanpreEmiModeValueEnumMap[reader.readStringOrNull(offset)] ??
+              LoanPreEmi.none)
+          as P;
     case 33:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 34:
+      return (reader.readDouble(offset)) as P;
+    case 35:
+      return (reader.readDouble(offset)) as P;
+    case 36:
+      return (reader.readStringOrNull(offset)) as P;
+    case 37:
+      return (reader.readStringOrNull(offset)) as P;
+    case 38:
+      return (reader.readBool(offset)) as P;
+    case 39:
+      return (reader.readObjectList<LoanRelease>(
+                offset,
+                LoanReleaseSchema.deserialize,
+                allOffsets,
+                LoanRelease(),
+              ) ??
+              [])
+          as P;
+    case 40:
       return (reader.readObjectOrNull<Schedule>(
             offset,
             ScheduleSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 35:
+    case 41:
       return (reader.readDateTime(offset)) as P;
-    case 36:
+    case 42:
       return (_LoanstartingPointValueEnumMap[reader.readStringOrNull(offset)] ??
               LoanStartingPoint.originalDetails)
           as P;
-    case 37:
+    case 43:
       return (reader.readLongOrNull(offset)) as P;
-    case 38:
+    case 44:
       return (reader.readString(offset)) as P;
-    case 39:
+    case 45:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -527,6 +620,16 @@ const _LoanmodeEnumValueMap = {r'simple': r'simple', r'advanced': r'advanced'};
 const _LoanmodeValueEnumMap = {
   r'simple': LoanMode.simple,
   r'advanced': LoanMode.advanced,
+};
+const _LoanpreEmiModeEnumValueMap = {
+  r'none': r'none',
+  r'payMonthly': r'payMonthly',
+  r'addToLoan': r'addToLoan',
+};
+const _LoanpreEmiModeValueEnumMap = {
+  r'none': LoanPreEmi.none,
+  r'payMonthly': LoanPreEmi.payMonthly,
+  r'addToLoan': LoanPreEmi.addToLoan,
 };
 const _LoanstartingPointEnumValueMap = {
   r'originalDetails': r'originalDetails',
@@ -3140,6 +3243,407 @@ extension LoanQueryFilter on QueryBuilder<Loan, Loan, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCalculatedIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'preEmiCalculated'),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCalculatedIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'preEmiCalculated'),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCalculatedEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'preEmiCalculated',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCalculatedGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'preEmiCalculated',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCalculatedLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'preEmiCalculated',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCalculatedBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'preEmiCalculated',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCycleDayIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'preEmiCycleDay'),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCycleDayIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'preEmiCycleDay'),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCycleDayEqualTo(
+    int? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'preEmiCycleDay', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCycleDayGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'preEmiCycleDay',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCycleDayLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'preEmiCycleDay',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiCycleDayBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'preEmiCycleDay',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeEqualTo(
+    LoanPreEmi value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'preEmiMode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeGreaterThan(
+    LoanPreEmi value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'preEmiMode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeLessThan(
+    LoanPreEmi value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'preEmiMode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeBetween(
+    LoanPreEmi lower,
+    LoanPreEmi upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'preEmiMode',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'preEmiMode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'preEmiMode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'preEmiMode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'preEmiMode',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'preEmiMode', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'preEmiMode', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiOverrideIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'preEmiOverride'),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiOverrideIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'preEmiOverride'),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiOverrideEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'preEmiOverride',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiOverrideGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'preEmiOverride',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiOverrideLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'preEmiOverride',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> preEmiOverrideBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'preEmiOverride',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterFilterCondition> principalAmountEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -3609,6 +4113,71 @@ extension LoanQueryFilter on QueryBuilder<Loan, Loan, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'referenceNumber', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasedInPartsEqualTo(
+    bool value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'releasedInParts', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesLengthEqualTo(
+    int length,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'releases', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'releases', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'releases', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'releases', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'releases', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'releases',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
       );
     });
   }
@@ -4124,6 +4693,14 @@ extension LoanQueryObject on QueryBuilder<Loan, Loan, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> releasesElement(
+    FilterQuery<LoanRelease> q,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'releases');
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterFilterCondition> schedule(
     FilterQuery<Schedule> q,
   ) {
@@ -4484,6 +5061,54 @@ extension LoanQuerySortBy on QueryBuilder<Loan, Loan, QSortBy> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiCalculated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCalculated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiCalculatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCalculated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiCycleDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCycleDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiCycleDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCycleDay', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiOverride() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiOverride', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByPreEmiOverrideDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiOverride', Sort.desc);
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterSortBy> sortByPrincipalAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'principalAmount', Sort.asc);
@@ -4529,6 +5154,18 @@ extension LoanQuerySortBy on QueryBuilder<Loan, Loan, QSortBy> {
   QueryBuilder<Loan, Loan, QAfterSortBy> sortByReferenceNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'referenceNumber', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByReleasedInParts() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releasedInParts', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByReleasedInPartsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releasedInParts', Sort.desc);
     });
   }
 
@@ -4954,6 +5591,54 @@ extension LoanQuerySortThenBy on QueryBuilder<Loan, Loan, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiCalculated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCalculated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiCalculatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCalculated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiCycleDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCycleDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiCycleDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiCycleDay', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiOverride() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiOverride', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByPreEmiOverrideDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'preEmiOverride', Sort.desc);
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterSortBy> thenByPrincipalAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'principalAmount', Sort.asc);
@@ -4999,6 +5684,18 @@ extension LoanQuerySortThenBy on QueryBuilder<Loan, Loan, QSortThenBy> {
   QueryBuilder<Loan, Loan, QAfterSortBy> thenByReferenceNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'referenceNumber', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByReleasedInParts() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releasedInParts', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByReleasedInPartsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releasedInParts', Sort.desc);
     });
   }
 
@@ -5254,6 +5951,32 @@ extension LoanQueryWhereDistinct on QueryBuilder<Loan, Loan, QDistinct> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QDistinct> distinctByPreEmiCalculated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'preEmiCalculated');
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QDistinct> distinctByPreEmiCycleDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'preEmiCycleDay');
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QDistinct> distinctByPreEmiMode({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'preEmiMode', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QDistinct> distinctByPreEmiOverride() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'preEmiOverride');
+    });
+  }
+
   QueryBuilder<Loan, Loan, QDistinct> distinctByPrincipalAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'principalAmount');
@@ -5282,6 +6005,12 @@ extension LoanQueryWhereDistinct on QueryBuilder<Loan, Loan, QDistinct> {
         r'referenceNumber',
         caseSensitive: caseSensitive,
       );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QDistinct> distinctByReleasedInParts() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'releasedInParts');
     });
   }
 
@@ -5512,6 +6241,30 @@ extension LoanQueryProperty on QueryBuilder<Loan, Loan, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Loan, double?, QQueryOperations> preEmiCalculatedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'preEmiCalculated');
+    });
+  }
+
+  QueryBuilder<Loan, int?, QQueryOperations> preEmiCycleDayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'preEmiCycleDay');
+    });
+  }
+
+  QueryBuilder<Loan, LoanPreEmi, QQueryOperations> preEmiModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'preEmiMode');
+    });
+  }
+
+  QueryBuilder<Loan, double?, QQueryOperations> preEmiOverrideProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'preEmiOverride');
+    });
+  }
+
   QueryBuilder<Loan, double, QQueryOperations> principalAmountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'principalAmount');
@@ -5533,6 +6286,18 @@ extension LoanQueryProperty on QueryBuilder<Loan, Loan, QQueryProperty> {
   QueryBuilder<Loan, String?, QQueryOperations> referenceNumberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'referenceNumber');
+    });
+  }
+
+  QueryBuilder<Loan, bool, QQueryOperations> releasedInPartsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'releasedInParts');
+    });
+  }
+
+  QueryBuilder<Loan, List<LoanRelease>, QQueryOperations> releasesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'releases');
     });
   }
 
@@ -5606,14 +6371,15 @@ const LoanEventSchema = Schema(
       enumMap: _LoanEventkindEnumValueMap,
     ),
     r'newRate': PropertySchema(id: 6, name: r'newRate', type: IsarType.double),
+    r'note': PropertySchema(id: 7, name: r'note', type: IsarType.string),
     r'reason': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'reason',
       type: IsarType.string,
       enumMap: _LoanEventreasonEnumValueMap,
     ),
     r'transactionId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'transactionId',
       type: IsarType.long,
     ),
@@ -5633,6 +6399,12 @@ int _loanEventEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.adjust.name.length * 3;
   bytesCount += 3 + object.kind.name.length * 3;
+  {
+    final value = object.note;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.reason.name.length * 3;
   return bytesCount;
 }
@@ -5650,8 +6422,9 @@ void _loanEventSerialize(
   writer.writeDateTime(offsets[4], object.date);
   writer.writeString(offsets[5], object.kind.name);
   writer.writeDouble(offsets[6], object.newRate);
-  writer.writeString(offsets[7], object.reason.name);
-  writer.writeLong(offsets[8], object.transactionId);
+  writer.writeString(offsets[7], object.note);
+  writer.writeString(offsets[8], object.reason.name);
+  writer.writeLong(offsets[9], object.transactionId);
 }
 
 LoanEvent _loanEventDeserialize(
@@ -5672,10 +6445,11 @@ LoanEvent _loanEventDeserialize(
       _LoanEventkindValueEnumMap[reader.readStringOrNull(offsets[5])] ??
       LoanEventKind.rateChange;
   object.newRate = reader.readDoubleOrNull(offsets[6]);
+  object.note = reader.readStringOrNull(offsets[7]);
   object.reason =
-      _LoanEventreasonValueEnumMap[reader.readStringOrNull(offsets[7])] ??
+      _LoanEventreasonValueEnumMap[reader.readStringOrNull(offsets[8])] ??
       LoanAdjustReason.matchBank;
-  object.transactionId = reader.readLongOrNull(offsets[8]);
+  object.transactionId = reader.readLongOrNull(offsets[9]);
   return object;
 }
 
@@ -5705,10 +6479,12 @@ P _loanEventDeserializeProp<P>(
     case 6:
       return (reader.readDoubleOrNull(offset)) as P;
     case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (_LoanEventreasonValueEnumMap[reader.readStringOrNull(offset)] ??
               LoanAdjustReason.matchBank)
           as P;
-    case 8:
+    case 9:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -5725,12 +6501,14 @@ const _LoanEventkindEnumValueMap = {
   r'prepayment': r'prepayment',
   r'charge': r'charge',
   r'adjustment': r'adjustment',
+  r'chargeAdded': r'chargeAdded',
 };
 const _LoanEventkindValueEnumMap = {
   r'rateChange': LoanEventKind.rateChange,
   r'prepayment': LoanEventKind.prepayment,
   r'charge': LoanEventKind.charge,
   r'adjustment': LoanEventKind.adjustment,
+  r'chargeAdded': LoanEventKind.chargeAdded,
 };
 const _LoanEventreasonEnumValueMap = {
   r'matchBank': r'matchBank',
@@ -6421,6 +7199,168 @@ extension LoanEventQueryFilter
     });
   }
 
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'note'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'note'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'note',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'note',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'note', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> noteIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'note', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<LoanEvent, LoanEvent, QAfterFilterCondition> reasonEqualTo(
     LoanAdjustReason value, {
     bool caseSensitive = true,
@@ -6643,3 +7583,823 @@ extension LoanEventQueryFilter
 
 extension LoanEventQueryObject
     on QueryBuilder<LoanEvent, LoanEvent, QFilterCondition> {}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const LoanReleaseSchema = Schema(
+  name: r'LoanRelease',
+  id: 3192835989676211464,
+  properties: {
+    r'accountId': PropertySchema(
+      id: 0,
+      name: r'accountId',
+      type: IsarType.string,
+    ),
+    r'adjust': PropertySchema(
+      id: 1,
+      name: r'adjust',
+      type: IsarType.string,
+      enumMap: _LoanReleaseadjustEnumValueMap,
+    ),
+    r'amount': PropertySchema(id: 2, name: r'amount', type: IsarType.double),
+    r'date': PropertySchema(id: 3, name: r'date', type: IsarType.dateTime),
+    r'note': PropertySchema(id: 4, name: r'note', type: IsarType.string),
+    r'transactionId': PropertySchema(
+      id: 5,
+      name: r'transactionId',
+      type: IsarType.long,
+    ),
+  },
+
+  estimateSize: _loanReleaseEstimateSize,
+  serialize: _loanReleaseSerialize,
+  deserialize: _loanReleaseDeserialize,
+  deserializeProp: _loanReleaseDeserializeProp,
+);
+
+int _loanReleaseEstimateSize(
+  LoanRelease object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  {
+    final value = object.accountId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.adjust.name.length * 3;
+  {
+    final value = object.note;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _loanReleaseSerialize(
+  LoanRelease object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.accountId);
+  writer.writeString(offsets[1], object.adjust.name);
+  writer.writeDouble(offsets[2], object.amount);
+  writer.writeDateTime(offsets[3], object.date);
+  writer.writeString(offsets[4], object.note);
+  writer.writeLong(offsets[5], object.transactionId);
+}
+
+LoanRelease _loanReleaseDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = LoanRelease();
+  object.accountId = reader.readStringOrNull(offsets[0]);
+  object.adjust =
+      _LoanReleaseadjustValueEnumMap[reader.readStringOrNull(offsets[1])] ??
+      LoanAdjust.tenure;
+  object.amount = reader.readDouble(offsets[2]);
+  object.date = reader.readDateTimeOrNull(offsets[3]);
+  object.note = reader.readStringOrNull(offsets[4]);
+  object.transactionId = reader.readLongOrNull(offsets[5]);
+  return object;
+}
+
+P _loanReleaseDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (_LoanReleaseadjustValueEnumMap[reader.readStringOrNull(offset)] ??
+              LoanAdjust.tenure)
+          as P;
+    case 2:
+      return (reader.readDouble(offset)) as P;
+    case 3:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readLongOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+const _LoanReleaseadjustEnumValueMap = {r'tenure': r'tenure', r'emi': r'emi'};
+const _LoanReleaseadjustValueEnumMap = {
+  r'tenure': LoanAdjust.tenure,
+  r'emi': LoanAdjust.emi,
+};
+
+extension LoanReleaseQueryFilter
+    on QueryBuilder<LoanRelease, LoanRelease, QFilterCondition> {
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'accountId'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'accountId'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'accountId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'accountId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'accountId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'accountId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'accountId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'accountId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'accountId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'accountId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'accountId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  accountIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'accountId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> adjustEqualTo(
+    LoanAdjust value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'adjust',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  adjustGreaterThan(
+    LoanAdjust value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'adjust',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> adjustLessThan(
+    LoanAdjust value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'adjust',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> adjustBetween(
+    LoanAdjust lower,
+    LoanAdjust upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'adjust',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  adjustStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'adjust',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> adjustEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'adjust',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> adjustContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'adjust',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> adjustMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'adjust',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  adjustIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'adjust', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  adjustIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'adjust', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> amountEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'amount',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  amountGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'amount',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> amountLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'amount',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> amountBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'amount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> dateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'date'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  dateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'date'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> dateEqualTo(
+    DateTime? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'date', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> dateGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'date',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> dateLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'date',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> dateBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'date',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'note'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  noteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'note'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'note',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'note',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition> noteIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'note', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  noteIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'note', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  transactionIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'transactionId'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  transactionIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'transactionId'),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  transactionIdEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'transactionId', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  transactionIdGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'transactionId',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  transactionIdLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'transactionId',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<LoanRelease, LoanRelease, QAfterFilterCondition>
+  transactionIdBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'transactionId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+}
+
+extension LoanReleaseQueryObject
+    on QueryBuilder<LoanRelease, LoanRelease, QFilterCondition> {}

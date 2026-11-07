@@ -493,6 +493,7 @@ const _TransactionsubTypeEnumValueMap = {
   r'borrowed': r'borrowed',
   r'investmentReturn': r'investment_return',
   r'loanReceived': r'loan_received',
+  r'loanDisbursement': r'loan_disbursement',
 };
 const _TransactionsubTypeValueEnumMap = {
   r'loan_repayment': TxnSubType.loanRepayment,
@@ -502,6 +503,7 @@ const _TransactionsubTypeValueEnumMap = {
   r'borrowed': TxnSubType.borrowed,
   r'investment_return': TxnSubType.investmentReturn,
   r'loan_received': TxnSubType.loanReceived,
+  r'loan_disbursement': TxnSubType.loanDisbursement,
 };
 
 Id _transactionGetId(Transaction object) {

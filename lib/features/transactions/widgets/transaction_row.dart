@@ -261,7 +261,15 @@ class TransactionRow extends ConsumerWidget {
     final Color amountColor;
     final String amountPrefix;
 
-    if (isAdjustment) {
+    if (transaction.isLoanDisbursement) {
+      // Loan money reaching an account: its own look, not a correction.
+      iconData = Icons.south_west_rounded;
+      iconColor = cs.primary;
+      displayName = transaction.name;
+      subtitle = account?.name ?? context.l10n.unknownLabel;
+      amountColor = context.kuberMoney.income;
+      amountPrefix = '+';
+    } else if (isAdjustment) {
       iconData = Icons.account_balance_rounded;
       iconColor = cs.onSurfaceVariant;
       displayName = transaction.name;

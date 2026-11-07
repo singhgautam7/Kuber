@@ -47,9 +47,10 @@ typedef ImportProgressCallback = void Function(
 class JsonBackupService {
   /// 2 = vNext (schedules, loan / investment fields, sub types, processed
   /// ledger). 3 = loan accuracy (edited EMI splits, past EMIs, outstanding
-  /// adjustments, Overdraft accounts). Older backups still restore:
-  /// version 1 through the vNext migration, the new fields default.
-  static const version = 3;
+  /// adjustments, Overdraft accounts). 4 = November release (loan releases,
+  /// pre-EMI interest, loan_disbursement sub type). Older backups still
+  /// restore: version 1 through the vNext migration, the new fields default.
+  static const version = 4;
 
   Future<String> writeScheduledBackup({
     required Isar isar,
@@ -664,6 +665,16 @@ class JsonBackupService {
     ..addPastEmis = (m['addPastEmis'] as bool?) ?? false
     ..pastEmisAddedAt = _date(m['pastEmisAddedAt'])
     ..closedAt = _date(m['closedAt'])
+    ..releases = [
+      for (final r in (m['releases'] as List? ?? const []))
+        LoanRelease.fromMap((r as Map).cast<String, dynamic>())
+    ]
+    ..releasedInParts = (m['releasedInParts'] as bool?) ?? false
+    ..preEmiMode = LoanPreEmi.values.firstWhere((v) => v.name == m['preEmiMode'],
+        orElse: () => LoanPreEmi.none)
+    ..preEmiCycleDay = m['preEmiCycleDay'] as int?
+    ..preEmiOverride = (m['preEmiOverride'] as num?)?.toDouble()
+    ..preEmiCalculated = (m['preEmiCalculated'] as num?)?.toDouble()
     ..dataVersion = (m['dataVersion'] as int?) ?? 0;
 
   Investment _mapToInvestment(Map<String, dynamic> m) => Investment()

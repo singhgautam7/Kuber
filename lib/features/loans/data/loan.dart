@@ -11,7 +11,12 @@ enum LoanInterestType { reducingBalance, flatRate, interestOnlyFirst }
 /// "Already running?" starting point.
 enum LoanStartingPoint { originalDetails, outstandingToday, trackEmiOnly }
 
-enum LoanEventKind { rateChange, prepayment, charge, adjustment }
+/// Stored by name; [chargeAdded] is a charge the bank added to the loan (it
+/// raises the outstanding), [charge] a fee paid from an account.
+enum LoanEventKind { rateChange, prepayment, charge, adjustment, chargeAdded }
+
+/// "Interest before EMIs start" (nov-release A2). [none]: not modelled.
+enum LoanPreEmi { none, payMonthly, addToLoan }
 
 /// Why the outstanding was updated (adjustment events).
 enum LoanAdjustReason { matchBank, interestAdded }
@@ -47,6 +52,9 @@ class LoanEvent {
   int? transactionId;
   int? chargeTransactionId;
 
+  /// Add to loan: the user's note.
+  String? note;
+
   LoanEvent();
 
   Map<String, dynamic> toMap() => {
@@ -59,6 +67,7 @@ class LoanEvent {
     'transactionId': transactionId,
     'chargeTransactionId': chargeTransactionId,
     'reason': reason.name,
+    'note': note,
   };
 
   static LoanEvent fromMap(Map<String, dynamic> m) => LoanEvent()
@@ -73,7 +82,57 @@ class LoanEvent {
     ..transactionId = m['transactionId'] as int?
     ..chargeTransactionId = m['chargeTransactionId'] as int?
     ..reason = LoanAdjustReason.values.firstWhere((r) => r.name == m['reason'],
-        orElse: () => LoanAdjustReason.matchBank);
+        orElse: () => LoanAdjustReason.matchBank)
+    ..note = m['note'] as String?;
+}
+
+/// One payout of the loan (nov-release A1). Loans saved before this have none:
+/// they read as one release of the full principal (see `loanReleases`).
+@embedded
+class LoanRelease {
+  DateTime? date;
+
+  double amount = 0;
+
+  /// The account the money reached; null = "Not recorded" (no transaction).
+  String? accountId;
+
+  /// The `loan_disbursement` transaction, when [accountId] is set.
+  int? transactionId;
+
+  /// After EMIs started: what the extra balance changes.
+  @Enumerated(EnumType.name)
+  LoanAdjust adjust = LoanAdjust.tenure;
+
+  String? note;
+
+  LoanRelease();
+
+  LoanRelease copy() => LoanRelease()
+    ..date = date
+    ..amount = amount
+    ..accountId = accountId
+    ..transactionId = transactionId
+    ..adjust = adjust
+    ..note = note;
+
+  Map<String, dynamic> toMap() => {
+    'date': date?.toIso8601String(),
+    'amount': amount,
+    'accountId': accountId,
+    'transactionId': transactionId,
+    'adjust': adjust.name,
+    'note': note,
+  };
+
+  static LoanRelease fromMap(Map<String, dynamic> m) => LoanRelease()
+    ..date = m['date'] == null ? null : DateTime.parse(m['date'] as String)
+    ..amount = (m['amount'] as num?)?.toDouble() ?? 0
+    ..accountId = m['accountId'] as String?
+    ..transactionId = m['transactionId'] as int?
+    ..adjust = LoanAdjust.values.firstWhere((a) => a.name == m['adjust'],
+        orElse: () => LoanAdjust.tenure)
+    ..note = m['note'] as String?;
 }
 
 @collection
@@ -166,6 +225,29 @@ class Loan {
 
   DateTime? closedAt;
 
+  // ── November release: loan released in parts, interest before EMIs. All
+  // default to "nothing new", so older rows and backups read unchanged. ──
+
+  /// Payouts, in date order. One entry with the switch off (it only carries
+  /// the "received in" account), none on loans that never set it.
+  List<LoanRelease> releases = [];
+
+  bool releasedInParts = false;
+
+  @Enumerated(EnumType.name)
+  LoanPreEmi preEmiMode = LoanPreEmi.none;
+
+  /// Day of month interest is charged before EMIs. Null = the EMI day.
+  int? preEmiCycleDay;
+
+  /// "Interest added before EMIs" edited by the user: what the pre-EMI period
+  /// adds to the released amount. Applied on the first EMI date.
+  double? preEmiOverride;
+
+  /// Kuber's own figure when [preEmiOverride] was last accepted, to notice
+  /// when it moves ("Kuber now calculates").
+  double? preEmiCalculated;
+
   /// 0 = not migrated to vNext yet.
   int dataVersion = 0;
 
@@ -211,6 +293,12 @@ class Loan {
     ..addPastEmis = addPastEmis
     ..pastEmisAddedAt = pastEmisAddedAt
     ..closedAt = closedAt
+    ..releases = [for (final r in releases) r.copy()]
+    ..releasedInParts = releasedInParts
+    ..preEmiMode = preEmiMode
+    ..preEmiCycleDay = preEmiCycleDay
+    ..preEmiOverride = preEmiOverride
+    ..preEmiCalculated = preEmiCalculated
     ..dataVersion = dataVersion;
 
   Map<String, dynamic> toMap() => {
@@ -254,6 +342,12 @@ class Loan {
     'addPastEmis': addPastEmis,
     'pastEmisAddedAt': pastEmisAddedAt?.toIso8601String(),
     'closedAt': closedAt?.toIso8601String(),
+    'releases': releases.map((r) => r.toMap()).toList(),
+    'releasedInParts': releasedInParts,
+    'preEmiMode': preEmiMode.name,
+    'preEmiCycleDay': preEmiCycleDay,
+    'preEmiOverride': preEmiOverride,
+    'preEmiCalculated': preEmiCalculated,
     'dataVersion': dataVersion,
   };
 }

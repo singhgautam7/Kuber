@@ -262,7 +262,7 @@ void main() {
     final st1 = loanStatus(await reload(l), rec1.linked, deletedDays: rec1.deleted);
 
     final json = await JsonBackupService().exportJson(isar);
-    expect(json, contains('"version":3'));
+    expect(json, contains('"version":4'));
     final res = await JsonBackupService().importJson(isar, json);
     expect(res.error, isNull);
 

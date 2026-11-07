@@ -56,7 +56,10 @@ class LoanService {
   /// An edit keeps the stored watermark, posted count and skips, so nothing
   /// in the past is ever posted by the background run.
   /// [schedule] is the EMI schedule from the form.
-  Future<Loan> save(Loan l, Schedule schedule, {bool isNew = false}) async {
+  /// [keepTransactionIds]: disbursement transactions of removed parts the
+  /// user chose to keep.
+  Future<Loan> save(Loan l, Schedule schedule,
+      {bool isNew = false, Set<int> keepTransactionIds = const {}}) async {
     final now = DateTime.now();
     l.updatedAt = now;
     if (isNew) {
@@ -102,8 +105,185 @@ class LoanService {
       ..endDate = lastDate(schedule.copy()..processedThrough = 0) == null
           ? null
           : dayOf(lastDate(schedule.copy()..processedThrough = 0)!);
-    await isar.writeTxn(() => isar.loans.put(l));
+    final old = isNew || l.id == Isar.autoIncrement
+        ? const <LoanRelease>[]
+        : (await isar.loans.get(l.id))?.releases ?? const <LoanRelease>[];
+    final category = await _receivedCategory(l);
+    await isar.writeTxn(() async {
+      await _syncReleaseTxns(l, old, category, keep: keepTransactionIds);
+      await isar.loans.put(l);
+    });
     return l;
+  }
+
+  // ── Released in parts (A1) and Add to loan (A3) ──────────────────────
+
+  /// The system category of "loan received" transactions, when a release
+  /// needs a new one (no category is created otherwise).
+  Future<String> _receivedCategory(Loan l) async {
+    if (!l.releases.any((r) => r.accountId != null && r.transactionId == null)) return '';
+    return systemCategory(isar, 'Loan received', icon: 'account_balance', type: 'income');
+  }
+
+  /// Makes the disbursement transactions match [l]'s releases. Call inside a
+  /// write transaction. Those of parts in [old] that are gone are deleted,
+  /// except [keep] ("Delete the transaction too?" answered no). A disbursement
+  /// is an income row marked as a balance adjustment: it moves the account's
+  /// balance and every income and spending total already skips those.
+  Future<void> _syncReleaseTxns(Loan l, List<LoanRelease> old, String categoryId,
+      {Set<int> keep = const {}}) async {
+    final now = DateTime.now();
+    final live = {for (final r in l.releases) r.transactionId};
+    final gone = [
+      for (final o in old)
+        if (o.transactionId != null && !live.contains(o.transactionId) && !keep.contains(o.transactionId))
+          o.transactionId!,
+    ];
+    if (gone.isNotEmpty) await isar.transactions.deleteAll(gone);
+    for (final r in l.releases) {
+      final id = r.transactionId;
+      if (r.accountId == null) {
+        if (id != null) await isar.transactions.delete(id);
+        r.transactionId = null;
+        continue;
+      }
+      final d = r.date!;
+      final at = DateTime(d.year, d.month, d.day, now.hour, now.minute);
+      final name = '${l.name} received';
+      if (id == null) {
+        r.transactionId = await isar.transactions.put(Transaction()
+          ..name = name
+          ..nameLower = name.toLowerCase()
+          ..amount = r.amount
+          ..type = 'income'
+          ..isBalanceAdjustment = true
+          ..subType = TxnSubType.loanDisbursement
+          ..accountId = r.accountId!
+          ..categoryId = categoryId
+          ..linkedRuleId = l.uid
+          ..linkedRuleType = 'loan'
+          ..sourceType = 'loan'
+          ..sourceId = l.uid
+          ..notes = r.note
+          ..createdAt = at
+          ..updatedAt = now);
+      } else {
+        final t = await isar.transactions.get(id);
+        if (t == null) continue; // Deleted from History: the part stays.
+        final sameDay = dayKey(t.createdAt) == dayKey(d);
+        t
+          ..name = name
+          ..nameLower = name.toLowerCase()
+          ..amount = r.amount
+          ..accountId = r.accountId!
+          ..createdAt = sameDay ? t.createdAt : at
+          ..updatedAt = now;
+        await isar.transactions.put(t);
+      }
+    }
+  }
+
+  /// The release list [l] continues from: its parts, or the one release a
+  /// loan without parts stands for ("outstanding today" has no history).
+  static List<LoanRelease> partsOf(Loan l) => l.releasedInParts
+      ? [...l.releases]
+      : (l.startingPoint == LoanStartingPoint.outstandingToday ? [] : loanReleases(l));
+
+  /// Add to loan > Money released: adds [release] (or edits [replace]), which
+  /// turns "released in parts" on. [growSanctioned]: the total went above the
+  /// sanctioned amount and the user agreed to raise it.
+  Future<void> saveRelease(Loan l, LoanRelease release,
+      {LoanRelease? replace, bool growSanctioned = false}) async {
+    final old = [...l.releases];
+    final parts = [
+      for (final r in partsOf(l))
+        if (!identical(r, replace)) r,
+      release,
+    ]..sort((a, b) => a.date!.compareTo(b.date!));
+    l
+      ..releases = parts
+      ..releasedInParts = true
+      ..mode = LoanMode.advanced
+      ..updatedAt = DateTime.now();
+    if (growSanctioned) {
+      l.principalAmount = parts.fold(0.0, (s, r) => s + r.amount);
+    }
+    final category = await _receivedCategory(l);
+    await isar.writeTxn(() async {
+      await _syncReleaseTxns(l, old, category);
+      await isar.loans.put(l);
+    });
+  }
+
+  /// Removes a part. [deleteTransaction] false keeps its transaction.
+  Future<void> deleteRelease(Loan l, LoanRelease r, {required bool deleteTransaction}) async {
+    final old = [...l.releases];
+    l
+      ..releases = [
+        for (final x in l.releases)
+          if (!identical(x, r)) x,
+      ]
+      ..updatedAt = DateTime.now();
+    await isar.writeTxn(() async {
+      await _syncReleaseTxns(l, old, '',
+          keep: {if (!deleteTransaction && r.transactionId != null) r.transactionId!});
+      await isar.loans.put(l);
+    });
+  }
+
+  /// Add to loan > Charges added or Unpaid interest (new or [replace]).
+  /// No money moves, so no transaction.
+  Future<void> saveAddition(Loan l,
+      {required bool interest,
+      required DateTime date,
+      required double amount,
+      required LoanAdjust adjust,
+      String? note,
+      LoanEvent? replace}) async {
+    final e = LoanEvent()
+      ..kind = interest ? LoanEventKind.adjustment : LoanEventKind.chargeAdded
+      ..reason = interest ? LoanAdjustReason.interestAdded : LoanAdjustReason.matchBank
+      ..date = DateTime(date.year, date.month, date.day)
+      ..amount = amount
+      ..adjust = adjust
+      ..note = note;
+    l
+      ..events = [
+        for (final x in l.events)
+          if (!identical(x, replace)) x,
+        e,
+      ]
+      ..mode = LoanMode.advanced
+      ..updatedAt = DateTime.now();
+    await isar.writeTxn(() => isar.loans.put(l));
+  }
+
+  /// Kuber's figure for "Interest added before EMIs" right now, ignoring the
+  /// user's edit. Null when the field doesn't apply.
+  static double? preEmiCalculatedNow(Loan l) {
+    if (l.preEmiMode != LoanPreEmi.addToLoan) return null;
+    return loanAmortization(l)?.preEmi?.calculatedAdded;
+  }
+
+  /// The new figure when the user's edit is older than the numbers.
+  static double? preEmiNotice(Loan l) {
+    final override = l.preEmiOverride, seen = l.preEmiCalculated;
+    if (override == null || seen == null) return null;
+    final now = preEmiCalculatedNow(l);
+    return now != null && (now - seen).abs() >= 1 ? now : null;
+  }
+
+  /// Use: back to Kuber's figure. Keep mine: stops asking until it moves again.
+  Future<void> resolvePreEmiNotice(Loan l, {required bool useKuber}) async {
+    if (useKuber) {
+      l
+        ..preEmiOverride = null
+        ..preEmiCalculated = null;
+    } else {
+      l.preEmiCalculated = preEmiCalculatedNow(l);
+    }
+    l.updatedAt = DateTime.now();
+    await isar.writeTxn(() => isar.loans.put(l));
   }
 
   /// Extra payment: principal part as a loan repayment (outstanding goes down
@@ -499,7 +679,7 @@ class LoanService {
     if (base == null || after == null) return null;
     final next = after.rows.where((r) => r.day > dayKey(date)).firstOrNull;
     return (
-      saved: base.totalInterest - after.totalInterest,
+      saved: base.allInterest - after.allInterest,
       monthsSooner: base.rows.length - after.rows.length,
       newEmi: next?.payment ?? l.emiAmount,
       // Paying it all off before the next EMI: it ends on the payment day.
@@ -528,7 +708,7 @@ class LoanService {
     return (
       newEmi: next?.payment ?? l.emiAmount,
       monthsDelta: base.rows.length - after.rows.length,
-      interestDelta: base.totalInterest - after.totalInterest,
+      interestDelta: base.allInterest - after.allInterest,
       endDay: after.rows.isEmpty ? null : after.rows.last.day,
     );
   }

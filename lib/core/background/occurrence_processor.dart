@@ -20,6 +20,7 @@ import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/services/suggestion_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../money_math/investment_math.dart';
+import '../money_math/loan_math.dart';
 import '../schedule/processed_occurrence.dart';
 import '../schedule/schedule.dart';
 import '../schedule/schedule_engine.dart';
@@ -54,11 +55,79 @@ class OccurrenceProcessor {
     }
     for (final l in await _activeLoans(isar)) {
       n += dueOccurrences(l.schedule!, today).length;
+      if (l.preEmiMode == LoanPreEmi.payMonthly) {
+        final ledger = await _handledDays(isar, l);
+        n += _preEmiDue(l, today).where((c) => !ledger.contains(c.day)).length;
+      }
     }
     for (final i in await _activeSips(isar)) {
       n += dueOccurrences(i.sip!, today).length;
     }
     return n;
+  }
+
+  static Future<Set<int>> _handledDays(Isar isar, Loan l) async => {
+        for (final p in await isar.processedOccurrences
+            .filter()
+            .sourceTypeEqualTo('loan')
+            .sourceIdEqualTo(l.uid)
+            .findAll())
+          p.occurrenceDate,
+      };
+
+  /// "I pay it every month": interest cycles due by [today]. Cycles before the
+  /// loan reached Kuber are opening history, like EMIs before it.
+  static List<PreEmiCycle> _preEmiDue(Loan l, int today) {
+    final from = l.addPastEmis ? 0 : dayKey(l.createdAt);
+    return [
+      for (final c in loanAmortization(l)?.preEmi?.cycles ?? const <PreEmiCycle>[])
+        if (c.day <= today && c.day >= from && c.interest > 0) c,
+    ];
+  }
+
+  /// Posts a cycle's interest from the EMI account: interest expense, one
+  /// ledger row, exactly once.
+  Future<void> _postPreEmi(List<Loan> loans, DateTime at, ProcessSummary summary,
+      List<Transaction> created) async {
+    for (final l in loans.where((l) => l.preEmiMode == LoanPreEmi.payMonthly)) {
+      for (final c in _preEmiDue(l, dayKey(at))) {
+        final key = ProcessedOccurrence.keyOf('loan', l.uid, c.day);
+        await isar.writeTxn(() async {
+          if (await isar.processedOccurrences.getByKey(key) != null) return;
+          final name = '$preEmiTxnPrefix${l.name}';
+          final t = Transaction()
+            ..name = name
+            ..nameLower = name.toLowerCase()
+            ..amount = c.interest
+            ..type = 'expense'
+            ..categoryId = l.categoryId
+            ..accountId = l.accountId
+            ..createdAt = DateTime(c.day ~/ 10000, c.day ~/ 100 % 100, c.day % 100,
+                at.hour, at.minute, at.second)
+            ..updatedAt = DateTime.now()
+            ..occurrenceDate = c.day
+            ..sourceType = 'loan'
+            ..sourceId = l.uid
+            ..linkedRuleType = 'loan'
+            ..linkedRuleId = l.uid
+            ..subType = TxnSubType.loanRepayment
+            ..principalPart = 0
+            ..interestPart = c.interest;
+          final id = await isar.transactions.put(t);
+          await isar.processedOccurrences.put(ProcessedOccurrence()
+            ..key = key
+            ..sourceType = 'loan'
+            ..sourceId = l.uid
+            ..occurrenceDate = c.day
+            ..status = 'posted'
+            ..transactionId = id
+            ..runId = runId
+            ..createdAt = DateTime.now());
+          created.add(t);
+          summary.emis++;
+        });
+      }
+    }
   }
 
   static Future<List<Loan>> _activeLoans(Isar isar) async => (await isar.loans
@@ -125,6 +194,12 @@ class OccurrenceProcessor {
         }
         done++;
       }
+    }
+    try {
+      await _postPreEmi(loans, at, summary, created);
+    } catch (e) {
+      summary.failed++;
+      summary.log.add('Failed pre-EMI interest: $e');
     }
     onProgress?.call(total, total, const {});
 

@@ -2,6 +2,8 @@
 // Isar models (no Flutter), shared by the EMI processor, the loan sheet /
 // full screen, Upcoming events and Ask Kuber.
 
+import 'dart:math' show min;
+
 import '../../../core/money_math/loan_math.dart';
 import '../../../core/schedule/schedule.dart';
 import '../../../core/schedule/schedule_engine.dart';
@@ -46,6 +48,42 @@ List<int> loanEmiDays(Loan l, {int extra = 360}) {
   return upcomingOccurrences(copy, limit: n).map((o) => o.day).toList();
 }
 
+/// The loan's payouts in date order. A loan saved before releases existed (or
+/// with the switch off) is one release of the full principal.
+List<LoanRelease> loanReleases(Loan l) {
+  if (l.releasedInParts && l.releases.isNotEmpty) {
+    return [...l.releases]..sort((a, b) => a.date!.compareTo(b.date!));
+  }
+  return [
+    LoanRelease()
+      ..date = l.loanStartDate ?? l.schedule?.startDate ?? l.startDate
+      ..amount = l.principalAmount
+      ..accountId = l.releases.firstOrNull?.accountId
+      ..transactionId = l.releases.firstOrNull?.transactionId,
+  ];
+}
+
+/// Released so far (the full principal unless released in parts).
+double loanReleasedTotal(Loan l) =>
+    loanReleases(l).fold(0.0, (s, r) => s + r.amount);
+
+/// Walks the first release to the first EMI instead of starting on the
+/// principal. Off for every loan without the new settings, so their numbers
+/// stay exact; "outstanding today" has no history to walk.
+bool usesPreEmiLedger(Loan l) =>
+    l.startingPoint != LoanStartingPoint.outstandingToday &&
+    (l.releasedInParts || l.preEmiMode != LoanPreEmi.none);
+
+PreEmiInterest _preEmiKind(Loan l) => switch (l.preEmiMode) {
+      LoanPreEmi.none => PreEmiInterest.none,
+      LoanPreEmi.payMonthly => PreEmiInterest.paid,
+      LoanPreEmi.addToLoan => PreEmiInterest.added,
+    };
+
+/// Day of month pre-EMI interest is charged on.
+int preEmiCycleDayOf(Loan l) =>
+    l.preEmiCycleDay ?? l.schedule?.anchorDay ?? l.schedule?.startDate?.day ?? l.billDate;
+
 List<AmortEvent> amortEventsOf(Loan l) => [
       for (final e in l.events)
         if (e.date != null)
@@ -56,6 +94,7 @@ List<AmortEvent> amortEventsOf(Loan l) => [
               LoanEventKind.prepayment => AmortEventKind.prepayment,
               LoanEventKind.charge => AmortEventKind.charge,
               LoanEventKind.adjustment => AmortEventKind.adjustment,
+              LoanEventKind.chargeAdded => AmortEventKind.chargeAdded,
             },
             amount: e.amount,
             newRate: e.newRate,
@@ -85,19 +124,59 @@ Amortization? loanAmortization(Loan l,
     int decimals = 2}) {
   if (!hasLoanNumbers(l)) return null;
   final running = l.startingPoint == LoanStartingPoint.outstandingToday;
-  return amortize(
-    principal: running ? l.outstandingAtStart! : l.principalAmount,
-    rate: l.annualRate!,
+  final emiDays = loanEmiDays(l);
+  var events = amortEventsOf(l);
+  PreEmi? pre;
+  if (usesPreEmiLedger(l) && emiDays.isNotEmpty) {
+    final first = emiDays.first;
+    bool before(AmortEvent e) => e.day < first || (e.day == first && !e.afterEmi);
+    final all = [
+      for (final r in loanReleases(l))
+        // The switch off: the one release is there on the first EMI at the latest.
+        l.releasedInParts ? r : (r.copy()..date = dayOf(min(dayKey(r.date!), first))),
+    ];
+    final releases = [
+      for (final r in all)
+        if (dayKey(r.date!) <= first) (dayKey(r.date!), r.amount),
+    ];
+    final later = [
+      for (final r in all)
+        if (dayKey(r.date!) > first)
+          AmortEvent(dayKey(r.date!), AmortEventKind.release,
+              amount: r.amount, adjustEmi: r.adjust == LoanAdjust.emi),
+    ];
+    pre = preEmiLedger(
+      rate: l.annualRate!,
+      mode: _preEmiKind(l),
+      cycleDay: preEmiCycleDayOf(l),
+      firstEmiDay: first,
+      releases: releases,
+      events: events.where(before).toList(),
+      override: l.preEmiMode == LoanPreEmi.addToLoan ? l.preEmiOverride : null,
+    );
+    events = [...events.where((e) => !before(e)), ...later];
+  } else if (running) {
+    events = [
+      ...events,
+      for (final r in l.releases)
+        AmortEvent(dayKey(r.date!), AmortEventKind.release,
+            amount: r.amount, adjustEmi: r.adjust == LoanAdjust.emi),
+    ];
+  }
+  final a = amortize(
+    principal: pre?.balance ?? (running ? l.outstandingAtStart! : l.principalAmount),
+    rate: pre?.rate ?? l.annualRate!,
     months: l.tenureMonths!,
-    emiDays: loanEmiDays(l),
+    emiDays: emiDays,
     kind: rateKindOf(l),
     ioMonths: l.interestOnlyMonths,
     emi: l.emiAmount > 0 ? l.emiAmount : null,
-    events: amortEventsOf(l),
+    events: events,
     recorded: recordedEmis(linked, recalculateFrom: recalculateFrom),
     unpaid: deletedDays,
     decimals: decimals,
   );
+  return pre == null ? a : Amortization(a.rows, a.events, a.openingBalance, preEmi: pre);
 }
 
 /// Recorded EMIs with a split, by schedule day.
@@ -141,6 +220,11 @@ OutstandingCheck outstandingError(double v) => v < 0
     ? OutstandingCheck.negative
     : (v < 0.005 ? OutstandingCheck.closes : OutstandingCheck.ok);
 
+const preEmiTxnPrefix = 'Pre-EMI interest - ';
+
+/// A cycle's interest under "I pay it every month".
+bool isPreEmiTransaction(Transaction t) => t.name.startsWith(preEmiTxnPrefix);
+
 /// True for transactions that are a regular EMI (not an extra payment,
 /// charge or closure).
 bool isEmiTransaction(Transaction t) =>
@@ -151,6 +235,7 @@ bool isEditableEmi(Transaction t) =>
     t.subType == TxnSubType.loanRepayment &&
     t.sourceType == 'loan' &&
     isEmiTransaction(t) &&
+    !isPreEmiTransaction(t) &&
     t.principalPart != null &&
     t.interestPart != null;
 
@@ -167,6 +252,12 @@ class LoanStatus {
 
   /// Unpaid interest the bank added to the loan (part of [totalInterest]).
   final double addedInterest;
+
+  /// Charges the bank added to the loan (not interest, not spending).
+  final double addedCharges;
+
+  /// Released so far, when that is less than the sanctioned amount.
+  final double? partlyReleased;
   final int? endDay;
   final bool closed;
 
@@ -181,6 +272,8 @@ class LoanStatus {
     this.principalPaid,
     this.totalInterest,
     this.addedInterest = 0,
+    this.addedCharges = 0,
+    this.partlyReleased,
     this.endDay,
     this.closed = false,
   });
@@ -227,6 +320,14 @@ LoanStatus loanStatus(Loan l, List<Transaction> linked,
   }
   final running = l.startingPoint == LoanStartingPoint.outstandingToday;
   final row = next == null ? null : a.rowOn(next);
+  final pre = a.preEmi;
+  var prePaid = 0.0;
+  if (pre != null && pre.mode == PreEmiInterest.paid) {
+    for (final c in pre.cycles) {
+      if (c.day <= today) prePaid += c.interest;
+    }
+  }
+  final released = l.releasedInParts && !running ? loanReleasedTotal(l) : null;
   return LoanStatus(
     outstanding: closed ? 0 : a.balanceOn(paidThrough, eventsThrough: today),
     emisPaid: paid + (running ? l.emisPaidBefore : 0),
@@ -234,11 +335,16 @@ LoanStatus loanStatus(Loan l, List<Transaction> linked,
     nextDay: row == null ? null : next,
     nextAmount: row?.payment,
     nextRow: row,
-    interestPaid: interest + (running ? l.interestPaidBefore : 0),
+    interestPaid: interest + prePaid + (running ? l.interestPaidBefore : 0),
     principalPaid: principal + (running ? l.principalPaidBefore : 0),
-    totalInterest:
-        a.totalInterest + a.addedInterest + (running ? l.interestPaidBefore : 0),
+    totalInterest: a.totalInterest +
+        a.addedInterest +
+        (pre?.paidInterest ?? 0) +
+        (running ? l.interestPaidBefore : 0),
     addedInterest: a.addedInterest,
+    addedCharges: a.addedCharges,
+    partlyReleased:
+        released != null && released < l.principalAmount - 0.005 ? released : null,
     endDay: a.rows.isEmpty ? null : a.rows.last.day,
     closed: closed,
   );

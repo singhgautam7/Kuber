@@ -14693,6 +14693,402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 message dismissed} other{{count} messages dismissed}}'**
   String smsDismissedSnack(int count);
+
+  /// No description provided for @msLoansReceivedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan amount received in'**
+  String get msLoansReceivedIn;
+
+  /// No description provided for @msLoansReceivedInHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the account the bank paid the loan into. Kuber adds it there without counting it as income.'**
+  String get msLoansReceivedInHelp;
+
+  /// No description provided for @msLoansNotRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded'**
+  String get msLoansNotRecorded;
+
+  /// No description provided for @msLoansInParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan released in parts?'**
+  String get msLoansInParts;
+
+  /// No description provided for @msLoansInPartsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank pays it out in stages'**
+  String get msLoansInPartsSub;
+
+  /// No description provided for @msLoansSanctioned.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanctioned amount'**
+  String get msLoansSanctioned;
+
+  /// No description provided for @msLoansReleasedSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Released so far'**
+  String get msLoansReleasedSoFar;
+
+  /// No description provided for @msLoansAddPart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add part'**
+  String get msLoansAddPart;
+
+  /// No description provided for @msLoansReceivedInShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Received in'**
+  String get msLoansReceivedInShort;
+
+  /// No description provided for @msLoansPartsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Home loans are often paid straight to the builder. Choose Not recorded if the money didn\'t reach you.'**
+  String get msLoansPartsHelp;
+
+  /// No description provided for @msLoansPartsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{released} of {sanctioned} released'**
+  String msLoansPartsSummary(String released, String sanctioned);
+
+  /// No description provided for @msLoansFullyReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully released'**
+  String get msLoansFullyReleased;
+
+  /// No description provided for @msLoansErrOverSanctioned.
+  ///
+  /// In en, this message translates to:
+  /// **'The total released can\'t be more than the sanctioned amount.'**
+  String get msLoansErrOverSanctioned;
+
+  /// No description provided for @msLoansErrPartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'A part\'s date can\'t be before the start date or in the future.'**
+  String get msLoansErrPartDate;
+
+  /// No description provided for @msLoansErrPartAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts must be above 0.'**
+  String get msLoansErrPartAmount;
+
+  /// No description provided for @msLoansStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan start date'**
+  String get msLoansStartDate;
+
+  /// No description provided for @msLoansPartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Part {number}'**
+  String msLoansPartTitle(String number);
+
+  /// No description provided for @msLoansDeletePartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this part?'**
+  String get msLoansDeletePartTitle;
+
+  /// No description provided for @msLoansDeletePartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It takes this amount off the loan.'**
+  String get msLoansDeletePartBody;
+
+  /// No description provided for @msLoansDeletePartTxnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It takes this amount off the loan. It also has a transaction in your account. Delete that too?'**
+  String get msLoansDeletePartTxnBody;
+
+  /// No description provided for @msLoansKeepTxn.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep transaction'**
+  String get msLoansKeepTxn;
+
+  /// No description provided for @msLoansDeleteTxn.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete transaction'**
+  String get msLoansDeleteTxn;
+
+  /// No description provided for @msLoansPartsOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep only the first part?'**
+  String get msLoansPartsOffTitle;
+
+  /// No description provided for @msLoansPartsOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The other parts and their transactions will be removed.'**
+  String get msLoansPartsOffBody;
+
+  /// No description provided for @msLoansPreEmiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest before EMIs start'**
+  String get msLoansPreEmiTitle;
+
+  /// No description provided for @msLoansPreEmiPay.
+  ///
+  /// In en, this message translates to:
+  /// **'I pay it every month'**
+  String get msLoansPreEmiPay;
+
+  /// No description provided for @msLoansPreEmiPaySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber records each month\'s interest from your EMI account.'**
+  String get msLoansPreEmiPaySub;
+
+  /// No description provided for @msLoansPreEmiAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank adds it to the loan'**
+  String get msLoansPreEmiAdd;
+
+  /// No description provided for @msLoansPreEmiAddSub.
+  ///
+  /// In en, this message translates to:
+  /// **'It joins what you owe. No money leaves any account.'**
+  String get msLoansPreEmiAddSub;
+
+  /// No description provided for @msLoansPreEmiDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest charged on day'**
+  String get msLoansPreEmiDay;
+
+  /// No description provided for @msLoansPreEmiDayHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually your EMI day. Check your bank statement.'**
+  String get msLoansPreEmiDayHelp;
+
+  /// No description provided for @msLoansPreEmiAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest added before EMIs'**
+  String get msLoansPreEmiAdded;
+
+  /// No description provided for @msLoansPreEmiNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber now calculates {amount}. Use this instead?'**
+  String msLoansPreEmiNotice(String amount);
+
+  /// No description provided for @msLoansUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get msLoansUse;
+
+  /// No description provided for @msLoansKeepMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get msLoansKeepMine;
+
+  /// No description provided for @msLoansPreEmiPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs start on {amount} · ends {date} · total interest {interest}'**
+  String msLoansPreEmiPreview(String amount, String date, String interest);
+
+  /// No description provided for @msLoansAddToLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to loan'**
+  String get msLoansAddToLoan;
+
+  /// No description provided for @msLoansWhatAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'What was added'**
+  String get msLoansWhatAdded;
+
+  /// No description provided for @msLoansAddReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Money released'**
+  String get msLoansAddReleased;
+
+  /// No description provided for @msLoansAddReleasedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A new part of the loan.'**
+  String get msLoansAddReleasedSub;
+
+  /// No description provided for @msLoansAddCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges added'**
+  String get msLoansAddCharges;
+
+  /// No description provided for @msLoansAddChargesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance or fees the bank added to the loan.'**
+  String get msLoansAddChargesSub;
+
+  /// No description provided for @msLoansAddInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid interest'**
+  String get msLoansAddInterest;
+
+  /// No description provided for @msLoansAddInterestSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest the bank added to what you owe.'**
+  String get msLoansAddInterestSub;
+
+  /// No description provided for @msLoansNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get msLoansNote;
+
+  /// No description provided for @msLoansAddedSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the loan'**
+  String get msLoansAddedSaved;
+
+  /// No description provided for @msLoansAboveSanctioned.
+  ///
+  /// In en, this message translates to:
+  /// **'This takes the loan above {amount}. Increase the sanctioned amount?'**
+  String msLoansAboveSanctioned(String amount);
+
+  /// No description provided for @msLoansIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase'**
+  String get msLoansIncrease;
+
+  /// No description provided for @msLoansEventReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Released {amount} · {date}'**
+  String msLoansEventReleased(String amount, String date);
+
+  /// No description provided for @msLoansEventChargeAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge added {amount} · {date}'**
+  String msLoansEventChargeAdded(String amount, String date);
+
+  /// No description provided for @msLoansEventUnpaidInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid interest {amount} · {date}'**
+  String msLoansEventUnpaidInterest(String amount, String date);
+
+  /// No description provided for @msLoansReleasedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Released {released} of {sanctioned}'**
+  String msLoansReleasedOf(String released, String sanctioned);
+
+  /// No description provided for @msLoansChargesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges added to loan'**
+  String get msLoansChargesAdded;
+
+  /// No description provided for @msLoansCycleAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest added'**
+  String get msLoansCycleAdded;
+
+  /// No description provided for @msLoansCyclePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest paid'**
+  String get msLoansCyclePaid;
+
+  /// No description provided for @msLoansPreEmiAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched to your figure {amount}'**
+  String msLoansPreEmiAdjusted(String amount);
+
+  /// No description provided for @msLoansPartDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Part deleted'**
+  String get msLoansPartDeleted;
+
+  /// No description provided for @msInfoPartsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Some loans, like home loans for a house still being built, are paid out in parts. Interest is charged only on what has been released.'**
+  String get msInfoPartsLine;
+
+  /// No description provided for @msInfoReceivedInLine.
+  ///
+  /// In en, this message translates to:
+  /// **'The account the loan money reached. Kuber adds it to that account\'s balance. It is never counted as income. Choose Not recorded if the bank paid someone else.'**
+  String get msInfoReceivedInLine;
+
+  /// No description provided for @msInfoPreEmiPayLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay the interest on what has been released each month until EMIs begin. Kuber records it from your EMI account as interest expense. This is the same as an interest-only period.'**
+  String get msInfoPreEmiPayLine;
+
+  /// No description provided for @msInfoPreEmiAddLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay nothing until EMIs begin. Each month\'s interest joins what you owe, and interest builds on it from then on. No money leaves any account, so it never appears in your spending.'**
+  String get msInfoPreEmiAddLine;
+
+  /// No description provided for @msInfoPreEmiCalcLine.
+  ///
+  /// In en, this message translates to:
+  /// **'What the time before EMIs adds to the released amount: interest and charges added, minus any payments you made. Kuber works it out day by day at your rate over 365 days. Change it if your bank statement says something else, and your figure is used from the first EMI.'**
+  String get msInfoPreEmiCalcLine;
+
+  /// No description provided for @msInfoAddReleasedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank paid out more of the loan. It joins what you owe, and interest builds on it from that date.'**
+  String get msInfoAddReleasedLine;
+
+  /// No description provided for @msInfoAddChargesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Something the bank added to the loan, like insurance or a processing fee. Interest builds on it from that date. It isn\'t spending, because no money left any account.'**
+  String get msInfoAddChargesLine;
+
+  /// No description provided for @msInfoAddInterestLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest you didn\'t pay and the bank added to the loan, like during a moratorium. It raises what you owe and counts toward your total interest.'**
+  String get msInfoAddInterestLine;
+
+  /// No description provided for @msLoansKeepFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep first part'**
+  String get msLoansKeepFirst;
 }
 
 class _AppLocalizationsDelegate

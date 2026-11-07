@@ -3,7 +3,8 @@
 // variant), record EMIs. Advanced options: interest type, loan numbers (any 3
 // of principal / rate / tenure / EMI give the 4th, total payable can replace
 // the rate, swap keeps the fill order), "Already running?" with three starting
-// points, and "Count only interest as expense".
+// points, "Count only interest as expense", and (November release) received
+// in, released in parts and interest before EMIs start.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +34,25 @@ import '../data/loan.dart';
 import '../domain/loan_engine.dart';
 import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
+import '../widgets/loan_add_sheet.dart';
+import '../widgets/loan_adjust_sheet.dart';
 import '../widgets/loan_sheet.dart';
+
+/// One row of "Released so far".
+class _Part {
+  DateTime date;
+  final TextEditingController amount;
+  int? accountId;
+  LoanAdjust adjust;
+
+  /// The stored release this row edits (keeps its transaction link and note).
+  final LoanRelease? origin;
+
+  _Part(this.date, String amountText, {this.accountId, this.adjust = LoanAdjust.tenure, this.origin})
+      : amount = TextEditingController(text: amountText);
+
+  double get value => KuberAmountField.valueOf(amount);
+}
 
 class AddLoanScreen extends ConsumerStatefulWidget {
   final Loan? existing;
@@ -96,6 +115,19 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   bool _saving = false;
   String? _fromCalc;
 
+  // Released in parts and interest before EMIs (A1, A2).
+  DateTime? _loanStart;
+  int? _receivedId;
+  bool _inParts = false;
+  final List<_Part> _parts = [];
+  final Set<int> _keepTxnIds = {};
+  LoanPreEmi _preEmi = LoanPreEmi.payMonthly;
+  final _preEmiDay = TextEditingController();
+  final _preEmiAdded = TextEditingController();
+  bool _preEmiEdited = false;
+  double? _preEmiSeen;
+  PreEmi? _ledgerNow;
+
   /// Fill order of the loan numbers (most recent last), at most 3; the
   /// missing one is calculated. All 4 present = mismatch check.
   final List<LoanField> _order = [];
@@ -131,6 +163,24 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       });
       _onlyInterest = l.countOnlyInterest;
       if (l.interestOnlyMonths > 0) _ioMonths.text = '${l.interestOnlyMonths}';
+      _loanStart = l.loanStartDate;
+      _inParts = l.releasedInParts;
+      if (l.releasedInParts) {
+        _parts.addAll([
+          for (final r in loanReleases(l))
+            _Part(r.date!, _amt(r.amount),
+                accountId: int.tryParse(r.accountId ?? ''), adjust: r.adjust, origin: r),
+        ]);
+      } else {
+        _receivedId = int.tryParse(l.releases.firstOrNull?.accountId ?? '');
+      }
+      if (l.preEmiMode != LoanPreEmi.none) _preEmi = l.preEmiMode;
+      if (l.preEmiCycleDay != null) _preEmiDay.text = '${l.preEmiCycleDay}';
+      if (l.preEmiOverride != null) {
+        _preEmiEdited = true;
+        _preEmiAdded.text = _amt(l.preEmiOverride!);
+        _preEmiSeen = l.preEmiCalculated;
+      }
       final hasNumbers = hasLoanNumbers(l);
       if (hasNumbers) {
         _advanced = true;
@@ -182,7 +232,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   void dispose() {
     for (final c in [
       _name, _lender, _emi, _principal, _rate, _tenure, _total, _ioMonths,
-      _outstanding, _pastPrincipal, _pastInterest
+      _outstanding, _pastPrincipal, _pastInterest, _preEmiDay, _preEmiAdded,
+      for (final p in _parts) p.amount,
     ]) {
       c.dispose();
     }
@@ -256,10 +307,70 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
   LoanSolution? _solution;
 
+  /// Parts and pre-EMI interest need a history to walk, which "outstanding
+  /// today" and "just track the EMI" don't have.
+  bool get _releasesApply => !_running || _start == LoanStartingPoint.originalDetails;
+
+  /// An existing interest-only-first loan keeps its own card and months; the
+  /// section below is the same thing for every other loan.
+  bool get _legacyIo => _interest == LoanInterestType.interestOnlyFirst;
+
+  DateTime get _startDay {
+    final first = DateUtils.dateOnly(_when.firstOccurrence);
+    final s = _loanStart;
+    return s == null || s.isAfter(first) ? first : s;
+  }
+
+  /// First release to first EMI is longer than one EMI cycle, or in parts.
+  bool get _preEmiShown {
+    if (!_advanced || !_releasesApply || _legacyIo) return false;
+    final s = _startDay;
+    final oneCycle = DateTime(s.year, s.month + 1, s.day);
+    return _inParts || oneCycle.isBefore(DateUtils.dateOnly(_when.firstOccurrence));
+  }
+
+  /// The walk to the first EMI as the form stands, or null when off.
+  PreEmi? _ledger() {
+    if (!_advanced || !_releasesApply) return null;
+    final shown = _preEmiShown;
+    if (!_inParts && !shown) return null;
+    final rate = _val(_rate);
+    if (rate == null) return null;
+    final first = dayKey(_when.firstOccurrence);
+    final releases = <(int, double)>[
+      if (_inParts)
+        for (final p in _parts)
+          if (dayKey(p.date) <= first) (dayKey(p.date), p.value),
+      if (!_inParts)
+        (dayKey(_startDay), _val(_principal) ?? 0),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+    if (releases.isEmpty) return null;
+    final existing = _existing;
+    bool before(AmortEvent e) => e.day < first || (e.day == first && !e.afterEmi);
+    final mode = !shown
+        ? PreEmiInterest.none
+        : (_preEmi == LoanPreEmi.addToLoan ? PreEmiInterest.added : PreEmiInterest.paid);
+    return preEmiLedger(
+      rate: rate,
+      mode: mode,
+      cycleDay: int.tryParse(_preEmiDay.text) ?? _when.effectiveAnchor,
+      firstEmiDay: first,
+      releases: releases,
+      events: existing == null ? const [] : amortEventsOf(existing).where(before).toList(),
+      override: mode == PreEmiInterest.added && _preEmiEdited ? _val(_preEmiAdded) : null,
+    );
+  }
+
   /// Solves the missing number and writes it into its field.
   void _recompute() {
     final calc = _calculated;
     final total = _val(_total);
+    final pre = _ledgerNow = _ledger();
+    if (pre != null && pre.mode == PreEmiInterest.added && !_preEmiEdited) {
+      _preEmiAdded.text = _amt(pre.calculatedAdded.round());
+    }
+    // A calculated EMI uses the outstanding on the first EMI date.
+    final emiPrincipal = pre != null && pre.balance > 0 ? pre.balance : null;
     LoanSolution? s;
     if (total != null && total > 0) {
       s = solveLoan(
@@ -271,7 +382,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           ioMonths: _io);
     } else if (calc != null || _order.length == 4) {
       s = solveLoan(
-        principal: calc == LoanField.principal ? null : _val(_principal),
+        principal: calc == LoanField.principal ? null : (emiPrincipal ?? _val(_principal)),
         rate: calc == LoanField.rate ? null : _val(_rate),
         months: calc == LoanField.tenure ? null : _months,
         emi: calc == LoanField.emi ? null : _val(_emi),
@@ -350,11 +461,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     } else {
       l
         ..startingPoint = LoanStartingPoint.originalDetails
-        ..principalAmount = s.principal
+        // The sanctioned amount, not what the EMI was worked out on.
+        ..principalAmount = _ledgerNow != null ? (_val(_principal) ?? s.principal) : s.principal
         ..annualRate = s.rate
         ..tenureMonths = s.months;
     }
     l.createdAt = _existing?.createdAt ?? DateTime.now();
+    _applyReleases(l, numbers);
     l.schedule = _schedule(l);
     // Run 1: an overridden outstanding is stored as an opening adjustment.
     if (numbers && _running && _start == LoanStartingPoint.originalDetails) {
@@ -367,6 +480,47 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       l.adjustment = 0;
     }
     return l;
+  }
+
+  /// Writes the "received in", parts and pre-EMI choices onto the draft.
+  void _applyReleases(Loan l, bool numbers) {
+    final on = numbers && _releasesApply;
+    final stored = _existing?.releases.firstOrNull;
+    l
+      ..loanStartDate = on && _loanStart != null ? _loanStart : _existing?.loanStartDate
+      ..releasedInParts = on && _inParts;
+    if (on && _inParts) {
+      l.releases = [
+        for (final p in [..._parts]..sort((a, b) => a.date.compareTo(b.date)))
+          LoanRelease()
+            ..date = p.date
+            ..amount = p.value
+            ..accountId = p.accountId?.toString()
+            ..transactionId = p.origin?.transactionId
+            ..adjust = p.adjust
+            ..note = p.origin?.note,
+      ];
+    } else if (on && _receivedId != null) {
+      final today = DateUtils.dateOnly(DateTime.now());
+      l.releases = [
+        LoanRelease()
+          ..date = _startDay.isAfter(today) ? today : _startDay
+          ..amount = l.principalAmount
+          ..accountId = '$_receivedId'
+          ..transactionId = stored?.transactionId,
+      ];
+    } else {
+      l.releases = [];
+    }
+    final shown = _preEmiShown;
+    l
+      ..preEmiMode = shown ? _preEmi : LoanPreEmi.none
+      ..preEmiCycleDay = shown ? int.tryParse(_preEmiDay.text) : null
+      ..preEmiOverride =
+          shown && _preEmi == LoanPreEmi.addToLoan && _preEmiEdited ? _val(_preEmiAdded) : null
+      ..preEmiCalculated = shown && _preEmi == LoanPreEmi.addToLoan && _preEmiEdited
+          ? (_preEmiSeen ?? _ledgerNow?.calculatedAdded)
+          : null;
   }
 
   Schedule _schedule(Loan l) {
@@ -403,7 +557,26 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       _accountId != null &&
       (_val(_emi) ?? 0) > 0 &&
       _when.error(context.l10n) == null &&
-      !(_advanced && _solution != null && !_solution!.ok);
+      !(_advanced && _solution != null && !_solution!.ok) &&
+      _partsError == null;
+
+  /// The first problem with "Released so far".
+  String? get _partsError {
+    if (!_advanced || !_releasesApply || !_inParts) return null;
+    final l = context.l10n;
+    final today = DateUtils.dateOnly(DateTime.now());
+    if (_parts.any((p) => p.value <= 0)) return l.msLoansErrPartAmount;
+    final start = _parts.map((p) => p.date).reduce((a, b) => a.isBefore(b) ? a : b);
+    final from = _loanStart ?? start;
+    if (_parts.any((p) => p.date.isBefore(from) || p.date.isAfter(today))) {
+      return l.msLoansErrPartDate;
+    }
+    final total = _parts.fold(0.0, (s, p) => s + p.value);
+    if (total > (_val(_principal) ?? double.infinity) + 0.005) {
+      return l.msLoansErrOverSanctioned;
+    }
+    return null;
+  }
 
   /// Back to where the form was opened from; opened by a link or shortcut
   /// there is nothing below it, so go to Loans.
@@ -440,7 +613,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     try {
       final draft = _draft();
       final service = LoanService(ref.read(isarProvider));
-      final saved = await service.save(draft, draft.schedule!, isNew: _existing == null);
+      final saved = await service.save(draft, draft.schedule!,
+          isNew: _existing == null, keepTransactionIds: _keepTxnIds);
+      container.invalidate(transactionListProvider);
       ref.invalidate(loanListProvider);
       if (wasOn && !wantOn) {
         final (removed, kept) = await service.removePastEmis(saved, remove: remove ?? false);
@@ -628,7 +803,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       const SizedBox(height: 24),
       CapsLabel(l.msLoansInterestType),
       const SizedBox(height: 8),
-      for (final t in LoanInterestType.values) ...[
+      // Interest-only first lives in "Interest before EMIs start" now; a loan
+      // already saved with it keeps its card and its exact numbers.
+      for (final t in LoanInterestType.values)
+        if (t != LoanInterestType.interestOnlyFirst ||
+            _existing?.interestType == LoanInterestType.interestOnlyFirst) ...[
         KuberSelectCard(
           title: switch (t) {
             LoanInterestType.reducingBalance => l.msLoansReducing,
@@ -693,7 +872,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       ],
       const SizedBox(height: 8),
       KuberAmountField(
-        label: l.msLoansPrincipal,
+        label: _inParts ? l.msLoansSanctioned : l.msLoansPrincipal,
         controller: _principal,
         symbol: fmt.symbol,
         indianGrouping: indian,
@@ -768,6 +947,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       ),
       const SizedBox(height: 12),
       ..._previewOrNotice(context, s),
+      if (_releasesApply) ..._releaseSection(context),
       const SizedBox(height: 24),
       KuberSwitchRow(
         icon: Icons.history_rounded,
@@ -820,6 +1000,23 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     if (!s.ok) return const [];
     final end = DateTime(_when.firstOccurrence.year, _when.firstOccurrence.month + s.months - 1);
     final totalInterest = s.emi * (s.months - _io) + s.ioEmi * _io - s.principal;
+    final pre = _ledgerNow;
+    if (pre != null) {
+      final a = loanAmortization(_draft());
+      return [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.largeR),
+          child: Text(
+            l.msLoansPreEmiPreview(
+                m(pre.balance),
+                fmtMonthYear(a == null || a.rows.isEmpty ? end : dayOf(a.rows.last.day)),
+                m(a?.allInterest ?? totalInterest)),
+            style: tt.titleSmall!.copyWith(color: cs.onSecondaryContainer),
+          ),
+        ),
+      ];
+    }
     final widgets = <Widget>[];
     if (s.mismatch.abs() >= 1) {
       final diff = m(s.mismatch.abs());
@@ -842,6 +1039,294 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       ),
     ));
     return widgets;
+  }
+
+  void _setParts(bool on) async {
+    final l = context.l10n;
+    if (on) {
+      setState(() {
+        _inParts = true;
+        if (_parts.isEmpty) {
+          _parts.add(_Part(_startDay, _principal.text, accountId: _receivedId));
+        }
+      });
+      _recompute();
+      return;
+    }
+    if (_parts.length > 1) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l.msLoansPartsOffTitle, style: localeFont(fontWeight: FontWeight.w600)),
+          content: Text(l.msLoansPartsOffBody, style: localeFont()),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancelLabel)),
+            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.msLoansKeepFirst)),
+          ],
+        ),
+      );
+      if (ok != true) return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _inParts = false;
+      if (_parts.isNotEmpty) {
+        _parts.sort((a, b) => a.date.compareTo(b.date));
+        _receivedId = _parts.first.accountId;
+        _parts.removeRange(1, _parts.length);
+      }
+    });
+    _recompute();
+  }
+
+  void _addPart() {
+    final today = DateUtils.dateOnly(DateTime.now());
+    setState(() => _parts.add(_Part(today, '')));
+    _recompute();
+  }
+
+  Future<void> _removePart(_Part p) async {
+    final id = p.origin?.transactionId;
+    final choice = await confirmDeletePart(context, hasTransaction: id != null);
+    if (choice == null || !mounted) return;
+    if (choice == false && id != null) _keepTxnIds.add(id);
+    setState(() => _parts.remove(p));
+    _recompute();
+  }
+
+  Widget _partCard(BuildContext context, int i, _Part p, bool afterFirstEmi) {
+    final l = context.l10n;
+    final fmt = ref.watch(formatterProvider);
+    final cs = Theme.of(context).colorScheme;
+    final today = DateUtils.dateOnly(DateTime.now());
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          borderRadius: KuberShape.largeR,
+          border: Border.all(color: cs.outlineVariant),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(children: [
+            Expanded(child: Text(l.msLoansPartTitle('${i + 1}'), style: Theme.of(context).textTheme.titleSmall)),
+            if (i > 0)
+              IconButton(
+                icon: Icon(Icons.delete_outline_rounded, color: cs.error),
+                tooltip: l.deleteLabel,
+                onPressed: () => _removePart(p),
+              )
+            else
+              const SizedBox(height: 48),
+          ]),
+          KuberAmountField(
+            label: l.msRecAmount,
+            controller: p.amount,
+            symbol: fmt.symbol,
+            indianGrouping: fmt.system == NumberSystem.indian,
+            onChanged: (_) => _recompute(),
+          ),
+          const SizedBox(height: 8),
+          DatePickerRow(
+            label: i == 0 ? l.msLoansStartDate : l.msInvDate,
+            value: fmtDayLong(p.date),
+            initial: p.date.isAfter(today) ? today : p.date,
+            last: today,
+            onChanged: (d) {
+              p.date = d;
+              if (i == 0) _loanStart = d;
+              setState(() => _parts.sort((a, b) => a.date.compareTo(b.date)));
+              _recompute();
+            },
+          ),
+          const SizedBox(height: 8),
+          AccountPickerRow(
+            label: l.msLoansReceivedInShort,
+            selectedId: p.accountId,
+            noneLabel: l.msLoansNotRecorded,
+            onNone: () => setState(() => p.accountId = null),
+            onChanged: (id) => setState(() => p.accountId = id),
+          ),
+          if (afterFirstEmi) ...[
+            const SizedBox(height: 12),
+            LoanKeepChoice(
+              value: p.adjust,
+              onChanged: (v) => setState(() {
+                p.adjust = v;
+                _recompute();
+              }),
+            ),
+          ],
+        ]),
+      ),
+    );
+  }
+
+  List<Widget> _releaseSection(BuildContext context) {
+    final l = context.l10n;
+    final fmt = ref.watch(formatterProvider);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final indian = fmt.system == NumberSystem.indian;
+    String m(num v) => fmt.formatCurrency(v.round());
+    final today = DateUtils.dateOnly(DateTime.now());
+    final firstEmi = dayKey(_when.firstOccurrence);
+    final out = <Widget>[
+      const SizedBox(height: 24),
+      if (!_inParts) ...[
+        DatePickerRow(
+          label: l.msLoansStartDate,
+          value: fmtDayLong(_startDay),
+          initial: _startDay.isAfter(today) ? today : _startDay,
+          last: today,
+          onChanged: (d) {
+            _loanStart = d;
+            _recompute();
+          },
+        ),
+        const SizedBox(height: 12),
+      ],
+      KuberSwitchRow(
+        icon: Icons.account_tree_outlined,
+        name: l.msLoansInParts,
+        sub: l.msLoansInPartsSub,
+        value: _inParts,
+        onChanged: _setParts,
+        onInfo: () => showMoneyInfo(context, ref, MoneyInfo.releasedParts),
+      ),
+    ];
+    if (!_inParts) {
+      out.addAll([
+        const SizedBox(height: 12),
+        AccountPickerRow(
+          label: l.msLoansReceivedIn,
+          selectedId: _receivedId,
+          noneLabel: l.msLoansNotRecorded,
+          onNone: () => setState(() => _receivedId = null),
+          onChanged: (id) => setState(() => _receivedId = id),
+        ),
+        const SizedBox(height: 4),
+        Text(l.msLoansReceivedInHelp, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+      ]);
+    } else {
+      final released = _parts.fold(0.0, (s, p) => s + p.value);
+      final sanctioned = _val(_principal) ?? 0;
+      final error = _partsError;
+      out.addAll([
+        const SizedBox(height: 16),
+        CapsLabel(l.msLoansReleasedSoFar,
+            trailing: KuberInfoGlyph(onTap: () => showMoneyInfo(context, ref, MoneyInfo.receivedIn))),
+        const SizedBox(height: 8),
+        for (final (i, p) in _parts.indexed) _partCard(context, i, p, dayKey(p.date) > firstEmi),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: _addPart,
+            icon: const Icon(Icons.add_rounded),
+            label: Text(l.msLoansAddPart),
+          ),
+        ),
+        if (sanctioned > 0)
+          Text(
+            (released - sanctioned).abs() < 0.005
+                ? l.msLoansFullyReleased
+                : l.msLoansPartsSummary(m(released), m(sanctioned)),
+            style: tt.titleSmall,
+          ),
+        const SizedBox(height: 4),
+        Text(l.msLoansPartsHelp, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+        if (error != null) ...[
+          const SizedBox(height: 8),
+          KuberCallout.text(error, tone: KuberCalloutTone.error),
+        ],
+      ]);
+    }
+    if (_preEmiShown) {
+      out.addAll([
+        const SizedBox(height: 24),
+        CapsLabel(l.msLoansPreEmiTitle),
+        const SizedBox(height: 8),
+        KuberSelectCard(
+          title: l.msLoansPreEmiPay,
+          subtitle: l.msLoansPreEmiPaySub,
+          selected: _preEmi == LoanPreEmi.payMonthly,
+          onTap: () {
+            _preEmi = LoanPreEmi.payMonthly;
+            _recompute();
+          },
+          onInfo: () => showMoneyInfo(context, ref, MoneyInfo.preEmiPay),
+        ),
+        const SizedBox(height: 8),
+        KuberSelectCard(
+          title: l.msLoansPreEmiAdd,
+          subtitle: l.msLoansPreEmiAddSub,
+          selected: _preEmi == LoanPreEmi.addToLoan,
+          onTap: () {
+            _preEmi = LoanPreEmi.addToLoan;
+            _recompute();
+          },
+          onInfo: () => showMoneyInfo(context, ref, MoneyInfo.preEmiAdd),
+        ),
+        const SizedBox(height: 12),
+        KuberTextField.number(
+          label: l.msLoansPreEmiDay,
+          controller: _preEmiDay,
+          decimal: false,
+          hint: '${_when.effectiveAnchor}',
+          helperText: l.msLoansPreEmiDayHelp,
+          onChanged: (_) => _recompute(),
+        ),
+      ]);
+      final pre = _ledgerNow;
+      if (_preEmi == LoanPreEmi.addToLoan && pre != null) {
+        final calc = pre.calculatedAdded;
+        final moved = _preEmiEdited && _preEmiSeen != null && (calc - _preEmiSeen!).abs() >= 1;
+        out.addAll([
+          const SizedBox(height: 12),
+          KuberAmountField(
+            label: l.msLoansPreEmiAdded,
+            controller: _preEmiAdded,
+            symbol: fmt.symbol,
+            indianGrouping: indian,
+            calculatedLabel: _preEmiEdited ? l.msTxnEdited : l.msCalculated,
+            onInfo: () => showMoneyInfo(context, ref, MoneyInfo.preEmiCalculated),
+            onChanged: (v) {
+              _preEmiEdited = v.trim().isNotEmpty;
+              _preEmiSeen = _preEmiEdited ? (_preEmiSeen ?? calc) : null;
+              _recompute();
+            },
+          ),
+          if (moved) ...[
+            const SizedBox(height: 8),
+            KuberCallout(
+              tone: KuberCalloutTone.info,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l.msLoansPreEmiNotice(m(calc))),
+                Wrap(spacing: 8, children: [
+                  TextButton(
+                    onPressed: () {
+                      _preEmiEdited = false;
+                      _preEmiSeen = null;
+                      _recompute();
+                    },
+                    child: Text(l.msLoansUse),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _preEmiSeen = calc;
+                      _recompute();
+                    },
+                    child: Text(l.msLoansKeepMine),
+                  ),
+                ]),
+              ]),
+            ),
+          ],
+        ]);
+      }
+    }
+    return out;
   }
 
   List<Widget> _runningSection(BuildContext context) {

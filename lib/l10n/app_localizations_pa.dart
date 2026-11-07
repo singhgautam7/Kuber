@@ -8412,4 +8412,241 @@ class AppLocalizationsPa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get msLoansReceivedIn => 'Loan amount received in';
+
+  @override
+  String get msLoansReceivedInHelp =>
+      'Pick the account the bank paid the loan into. Kuber adds it there without counting it as income.';
+
+  @override
+  String get msLoansNotRecorded => 'Not recorded';
+
+  @override
+  String get msLoansInParts => 'Loan released in parts?';
+
+  @override
+  String get msLoansInPartsSub => 'The bank pays it out in stages';
+
+  @override
+  String get msLoansSanctioned => 'Sanctioned amount';
+
+  @override
+  String get msLoansReleasedSoFar => 'Released so far';
+
+  @override
+  String get msLoansAddPart => 'Add part';
+
+  @override
+  String get msLoansReceivedInShort => 'Received in';
+
+  @override
+  String get msLoansPartsHelp =>
+      'Home loans are often paid straight to the builder. Choose Not recorded if the money didn\'t reach you.';
+
+  @override
+  String msLoansPartsSummary(String released, String sanctioned) {
+    return '$released of $sanctioned released';
+  }
+
+  @override
+  String get msLoansFullyReleased => 'Fully released';
+
+  @override
+  String get msLoansErrOverSanctioned =>
+      'The total released can\'t be more than the sanctioned amount.';
+
+  @override
+  String get msLoansErrPartDate =>
+      'A part\'s date can\'t be before the start date or in the future.';
+
+  @override
+  String get msLoansErrPartAmount => 'Amounts must be above 0.';
+
+  @override
+  String get msLoansStartDate => 'Loan start date';
+
+  @override
+  String msLoansPartTitle(String number) {
+    return 'Part $number';
+  }
+
+  @override
+  String get msLoansDeletePartTitle => 'Delete this part?';
+
+  @override
+  String get msLoansDeletePartBody => 'It takes this amount off the loan.';
+
+  @override
+  String get msLoansDeletePartTxnBody =>
+      'It takes this amount off the loan. It also has a transaction in your account. Delete that too?';
+
+  @override
+  String get msLoansKeepTxn => 'Keep transaction';
+
+  @override
+  String get msLoansDeleteTxn => 'Delete transaction';
+
+  @override
+  String get msLoansPartsOffTitle => 'Keep only the first part?';
+
+  @override
+  String get msLoansPartsOffBody =>
+      'The other parts and their transactions will be removed.';
+
+  @override
+  String get msLoansPreEmiTitle => 'Interest before EMIs start';
+
+  @override
+  String get msLoansPreEmiPay => 'I pay it every month';
+
+  @override
+  String get msLoansPreEmiPaySub =>
+      'Kuber records each month\'s interest from your EMI account.';
+
+  @override
+  String get msLoansPreEmiAdd => 'Bank adds it to the loan';
+
+  @override
+  String get msLoansPreEmiAddSub =>
+      'It joins what you owe. No money leaves any account.';
+
+  @override
+  String get msLoansPreEmiDay => 'Interest charged on day';
+
+  @override
+  String get msLoansPreEmiDayHelp =>
+      'Usually your EMI day. Check your bank statement.';
+
+  @override
+  String get msLoansPreEmiAdded => 'Interest added before EMIs';
+
+  @override
+  String msLoansPreEmiNotice(String amount) {
+    return 'Kuber now calculates $amount. Use this instead?';
+  }
+
+  @override
+  String get msLoansUse => 'Use';
+
+  @override
+  String get msLoansKeepMine => 'Keep mine';
+
+  @override
+  String msLoansPreEmiPreview(String amount, String date, String interest) {
+    return 'EMIs start on $amount · ends $date · total interest $interest';
+  }
+
+  @override
+  String get msLoansAddToLoan => 'Add to loan';
+
+  @override
+  String get msLoansWhatAdded => 'What was added';
+
+  @override
+  String get msLoansAddReleased => 'Money released';
+
+  @override
+  String get msLoansAddReleasedSub => 'A new part of the loan.';
+
+  @override
+  String get msLoansAddCharges => 'Charges added';
+
+  @override
+  String get msLoansAddChargesSub =>
+      'Insurance or fees the bank added to the loan.';
+
+  @override
+  String get msLoansAddInterest => 'Unpaid interest';
+
+  @override
+  String get msLoansAddInterestSub =>
+      'Interest the bank added to what you owe.';
+
+  @override
+  String get msLoansNote => 'Note';
+
+  @override
+  String get msLoansAddedSaved => 'Added to the loan';
+
+  @override
+  String msLoansAboveSanctioned(String amount) {
+    return 'This takes the loan above $amount. Increase the sanctioned amount?';
+  }
+
+  @override
+  String get msLoansIncrease => 'Increase';
+
+  @override
+  String msLoansEventReleased(String amount, String date) {
+    return 'Released $amount · $date';
+  }
+
+  @override
+  String msLoansEventChargeAdded(String amount, String date) {
+    return 'Charge added $amount · $date';
+  }
+
+  @override
+  String msLoansEventUnpaidInterest(String amount, String date) {
+    return 'Unpaid interest $amount · $date';
+  }
+
+  @override
+  String msLoansReleasedOf(String released, String sanctioned) {
+    return 'Released $released of $sanctioned';
+  }
+
+  @override
+  String get msLoansChargesAdded => 'Charges added to loan';
+
+  @override
+  String get msLoansCycleAdded => 'Interest added';
+
+  @override
+  String get msLoansCyclePaid => 'Interest paid';
+
+  @override
+  String msLoansPreEmiAdjusted(String amount) {
+    return 'Matched to your figure $amount';
+  }
+
+  @override
+  String get msLoansPartDeleted => 'Part deleted';
+
+  @override
+  String get msInfoPartsLine =>
+      'Some loans, like home loans for a house still being built, are paid out in parts. Interest is charged only on what has been released.';
+
+  @override
+  String get msInfoReceivedInLine =>
+      'The account the loan money reached. Kuber adds it to that account\'s balance. It is never counted as income. Choose Not recorded if the bank paid someone else.';
+
+  @override
+  String get msInfoPreEmiPayLine =>
+      'You pay the interest on what has been released each month until EMIs begin. Kuber records it from your EMI account as interest expense. This is the same as an interest-only period.';
+
+  @override
+  String get msInfoPreEmiAddLine =>
+      'You pay nothing until EMIs begin. Each month\'s interest joins what you owe, and interest builds on it from then on. No money leaves any account, so it never appears in your spending.';
+
+  @override
+  String get msInfoPreEmiCalcLine =>
+      'What the time before EMIs adds to the released amount: interest and charges added, minus any payments you made. Kuber works it out day by day at your rate over 365 days. Change it if your bank statement says something else, and your figure is used from the first EMI.';
+
+  @override
+  String get msInfoAddReleasedLine =>
+      'The bank paid out more of the loan. It joins what you owe, and interest builds on it from that date.';
+
+  @override
+  String get msInfoAddChargesLine =>
+      'Something the bank added to the loan, like insurance or a processing fee. Interest builds on it from that date. It isn\'t spending, because no money left any account.';
+
+  @override
+  String get msInfoAddInterestLine =>
+      'Interest you didn\'t pay and the bank added to the loan, like during a moratorium. It raises what you owe and counts toward your total interest.';
+
+  @override
+  String get msLoansKeepFirst => 'Keep first part';
 }

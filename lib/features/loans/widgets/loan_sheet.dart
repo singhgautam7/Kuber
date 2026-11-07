@@ -40,6 +40,7 @@ import '../data/loan.dart';
 import '../domain/loan_engine.dart';
 import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
+import 'loan_add_sheet.dart';
 import 'loan_adjust_sheet.dart';
 
 void showLoanSheet(BuildContext context, WidgetRef ref, Loan loan) =>
@@ -212,6 +213,11 @@ class LoanSheet extends ConsumerWidget {
           MoneyHeadline(label: l.msLoansOutstanding, value: m(st.outstanding!))
         else
           MoneyHeadline(label: l.msLoansEmi, value: m(loan.emiAmount)),
+        if (st.partlyReleased != null)
+          Text(l.msLoansReleasedOf(m(st.partlyReleased!), m(loan.principalAmount)),
+              style: Theme.of(context).textTheme.bodySmall),
+        if (LoanService.preEmiNotice(loan) case final calc?)
+          PreEmiNotice(loan: loan, amount: m(calc)),
         if (st.totalEmis != null)
           Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             KuberLinearProgress(value: st.progress),
@@ -245,6 +251,7 @@ class LoanSheet extends ConsumerWidget {
             KvItem(l.msLoansInterestPaid, m(st.interestPaid ?? 0)),
             KvItem(l.msLoansPrincipalPaid, m(st.principalPaid ?? 0)),
             if (st.addedInterest > 0) KvItem(l.msLoansInterestAdded, m(st.addedInterest)),
+            if (st.addedCharges > 0) KvItem(l.msLoansChargesAdded, m(st.addedCharges)),
           ]),
         if (loanCalculatorLinks(context, loan, st).isNotEmpty)
           CalculatorLinkChips(links: loanCalculatorLinks(context, loan, st)),
@@ -278,6 +285,15 @@ class LoanSheet extends ConsumerWidget {
               if (blockIfProcessing(context, ref, 'loan:${loan.uid}')) return;
               context.push('/loans/edit', extra: loan);
             }),
+        if (!st.closed && hasLoanNumbers(loan))
+          SheetAction(
+              label: l.msLoansAddToLoan,
+              icon: Icons.add_card_rounded,
+              overflowOnly: true,
+              onPressed: () {
+                nav.pop();
+                showAddToLoanSheet(context, loan);
+              }),
         if (!st.closed && hasLoanNumbers(loan))
           SheetAction(
               label: l.msLoansUpdateOutstanding,
@@ -318,6 +334,36 @@ class LoanSheet extends ConsumerWidget {
       details: (_) => LoanFullScreen(loan: loan),
       detailsLabel: l.msLoansViewSchedule,
       detailsAsPrimary: true,
+    );
+  }
+}
+
+/// "Kuber now calculates ₹X. Use this instead?" after the user's "Interest
+/// added before EMIs" went out of date.
+class PreEmiNotice extends ConsumerWidget {
+  final Loan loan;
+  final String amount;
+  const PreEmiNotice({super.key, required this.loan, required this.amount});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    Future<void> answer(bool use) async {
+      final container = ProviderScope.containerOf(context, listen: false);
+      await LoanService(container.read(isarProvider)).resolvePreEmiNotice(loan, useKuber: use);
+      container.invalidate(loanListProvider);
+      if (context.mounted) Navigator.of(context).maybePop();
+    }
+
+    return KuberCallout(
+      tone: KuberCalloutTone.info,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l.msLoansPreEmiNotice(amount)),
+        Wrap(spacing: 8, children: [
+          TextButton(onPressed: () => answer(true), child: Text(l.msLoansUse)),
+          TextButton(onPressed: () => answer(false), child: Text(l.msLoansKeepMine)),
+        ]),
+      ]),
     );
   }
 }
@@ -538,6 +584,9 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
           rateBefore = newRate;
         case LoanEventKind.charge:
           monthChildren.add(eventRow(Icons.receipt_long_rounded, l.msLoansEventCharge(m(e.amount), d), ''));
+        case LoanEventKind.chargeAdded:
+          monthChildren.add(eventRow(Icons.receipt_long_rounded, l.msLoansEventChargeAdded(m(e.amount), d), e.note ?? '',
+              onTap: st.closed ? null : () => showAddToLoanSheet(context, loan, charge: e)));
         case LoanEventKind.adjustment:
           final signed = '${e.amount >= 0 ? '+' : '-'}${m(e.amount.abs())}';
           monthChildren.add(eventRow(
@@ -545,10 +594,91 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
                   ? Icons.add_card_rounded
                   : Icons.edit_note_rounded,
               e.reason == LoanAdjustReason.interestAdded
-                  ? l.msLoansEventInterestAdded(m(e.amount), d)
+                  ? l.msLoansEventUnpaidInterest(m(e.amount), d)
                   : l.msLoansEventAdjusted(signed, d),
-              e.adjust == LoanAdjust.tenure ? l.msLoansEventAdjSubTenure : l.msLoansEventAdjSubEmi,
-              onTap: st.closed ? null : () => showUpdateOutstandingSheet(context, loan, existing: e)));
+              e.note ??
+                  (e.adjust == LoanAdjust.tenure ? l.msLoansEventAdjSubTenure : l.msLoansEventAdjSubEmi),
+              onTap: st.closed
+                  ? null
+                  : () => e.reason == LoanAdjustReason.interestAdded
+                      ? showAddToLoanSheet(context, loan, interest: e)
+                      : showUpdateOutstandingSheet(context, loan, existing: e)));
+      }
+    }
+
+    // Releases are markers too, in date order with the events.
+    final releases = loan.releasedInParts ? loanReleases(loan) : const <LoanRelease>[];
+    var rel = 0;
+    void addRelease(LoanRelease x, List<Widget> into) => into.add(eventRow(
+        Icons.south_rounded,
+        l.msLoansEventReleased(m(x.amount), fmtDayShort(x.date!)),
+        x.note ?? '',
+        onTap: st.closed ? null : () => showAddToLoanSheet(context, loan, release: x)));
+    void flushMarkers(int upTo, List<Widget> into, {AmortRow? row, bool Function(LoanEvent)? hold}) {
+      while (true) {
+        final e = ev < events.length ? events[ev] : null;
+        final x = rel < releases.length ? releases[rel] : null;
+        final eDay = e == null || dayKey(e.date!) > upTo || (hold?.call(e) ?? false)
+            ? null
+            : dayKey(e.date!);
+        final xDay = x == null || dayKey(x.date!) > upTo ? null : dayKey(x.date!);
+        if (eDay == null && xDay == null) break;
+        if (xDay != null && (eDay == null || xDay <= eDay)) {
+          addRelease(x!, into);
+          rel++;
+        } else {
+          addEvent(e!, row ?? AmortRow.marker(eDay!), into);
+          ev++;
+        }
+      }
+    }
+
+    // Before the first EMI: a row per interest cycle, among the markers.
+    Widget cycleRow(PreEmiCycle c) {
+      final paid = a!.preEmi!.mode == PreEmiInterest.paid;
+      final txn = txnByDay[c.day];
+      return InkWell(
+        onTap: txn == null ? null : () => showTransactionDetailSheet(context, ref, txn),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(children: [
+            Icon(paid ? Icons.check_circle_rounded : Icons.add_rounded,
+                size: 20, color: cs.onSurfaceVariant),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(paid ? l.msLoansCyclePaid : l.msLoansCycleAdded,
+                    style: tt.titleSmall!.copyWith(color: cs.onSurfaceVariant)),
+                Text(fmtDayShort(dayOf(c.day)),
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+              ]),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(m(c.interest), style: tt.titleSmall!.copyWith(color: cs.onSurfaceVariant)),
+              Text(l.msLoansRowBal(m(c.balance)),
+                  style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+            ]),
+            if (txn != null)
+              Icon(Icons.chevron_right_rounded, size: 20, color: cs.onSurfaceVariant)
+            else
+              const SizedBox(width: 20),
+          ]),
+        ),
+      );
+    }
+
+    final pre = a?.preEmi;
+    if (pre != null) {
+      for (final c in pre.cycles) {
+        final into = monthByYear.putIfAbsent(c.day ~/ 10000, () => []);
+        flushMarkers(addDays(c.day, -1), into);
+        into.add(cycleRow(c));
+      }
+      final into = monthByYear.putIfAbsent(pre.firstEmiDay ~/ 10000, () => []);
+      flushMarkers(addDays(pre.firstEmiDay, -1), into);
+      if (pre.overrideDelta.abs() >= 0.5) {
+        into.add(eventRow(Icons.edit_note_rounded,
+            l.msLoansPreEmiAdjusted(m(pre.balance - pre.released)), ''));
       }
     }
 
@@ -558,11 +688,7 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
       // their marker goes below the row; other events go above it.
       bool sameDayAdjustment(LoanEvent e) =>
           dayKey(e.date!) == r.day && e.kind == LoanEventKind.adjustment;
-      while (ev < events.length &&
-          dayKey(events[ev].date!) <= r.day &&
-          !sameDayAdjustment(events[ev])) {
-        addEvent(events[ev++], r, monthChildren);
-      }
+      flushMarkers(r.day, monthChildren, row: r, hold: sameDayAdjustment);
       if (loan.interestType == LoanInterestType.interestOnlyFirst &&
           a != null &&
           r.index == loan.interestOnlyMonths + 1) {
@@ -577,6 +703,9 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
 
     // Year rows.
     final byYear = <int, List<AmortRow>>{};
+    for (final c in pre?.cycles ?? const <PreEmiCycle>[]) {
+      byYear.putIfAbsent(c.day ~/ 10000, () => []).add(AmortRow.cycle(c));
+    }
     for (final r in rows) {
       byYear.putIfAbsent(r.day ~/ 10000, () => []).add(r);
     }
@@ -592,8 +721,8 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('${e.key}', style: tt.titleSmall),
                   Text(
-                      l.msLoansYearSub('${e.value.length}',
-                          '${e.value.where((r) => r.day <= today).length}'),
+                      l.msLoansYearSub('${e.value.where((r) => r.index > 0).length}',
+                          '${e.value.where((r) => r.index > 0 && r.day <= today).length}'),
                       style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
                 ]),
               ),
@@ -734,6 +863,7 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
               KvItem(l.msLoansInterestPaid, m(st.interestPaid ?? 0)),
               KvItem(l.msLoansPrincipalPaid, m(st.principalPaid ?? 0)),
               if (st.addedInterest > 0) KvItem(l.msLoansInterestAdded, m(st.addedInterest)),
+              if (st.addedCharges > 0) KvItem(l.msLoansChargesAdded, m(st.addedCharges)),
             ]),
           ],
         ]),

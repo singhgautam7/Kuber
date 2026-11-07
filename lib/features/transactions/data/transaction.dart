@@ -13,7 +13,9 @@ enum TxnSubType {
   // Income side.
   borrowed('borrowed'),
   investmentReturn('investment_return'),
-  loanReceived('loan_received');
+  loanReceived('loan_received'),
+  // Loan money reaching an account: moves a balance, never income or spending.
+  loanDisbursement('loan_disbursement');
 
   const TxnSubType(this.value);
   final String value;
@@ -115,6 +117,10 @@ class Transaction {
       linkedRuleType == 'recurring' ||
       (linkedRuleType == 'loan' && name.startsWith('EMI - ')) ||
       (linkedRuleType == 'investment' && name.startsWith('Contribution - '));
+
+  /// Loan money reaching an account (see `TxnSubType.loanDisbursement`).
+  @ignore
+  bool get isLoanDisbursement => subType == TxnSubType.loanDisbursement;
 
   @ignore
   double get spendAmount =>
