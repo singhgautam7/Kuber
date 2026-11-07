@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
 /// The row a More search result is opening, for the [SettingsAnchor]s below.
-class _SettingsHighlight extends InheritedWidget {
+class SettingsHighlight extends InheritedWidget {
   final String? rowId;
-  const _SettingsHighlight({required this.rowId, required super.child});
+  const SettingsHighlight({super.key, required this.rowId, required super.child});
 
   @override
-  bool updateShouldNotify(_SettingsHighlight old) => old.rowId != rowId;
+  bool updateShouldNotify(SettingsHighlight old) => old.rowId != rowId;
 }
 
 /// One Settings page: the shared header over a plain scrolling column.
@@ -32,7 +33,7 @@ class SettingsPageFrame extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surface,
       // Plain slivers, like the long Settings page had: a scroll-away header
       // over a nested scroll view cost three times as much on first open.
-      body: _SettingsHighlight(
+      body: SettingsHighlight(
         rowId: highlight,
         child: CustomScrollView(
           slivers: [
@@ -59,7 +60,8 @@ class SettingsPageFrame extends StatelessWidget {
 }
 
 /// Wraps a settings row with its `settings_index.dart` id: search scrolls to it
-/// and tints it briefly. Costs nothing unless it is the row being opened.
+/// and plays the arrival highlight: primary 16%, in 150 ms, hold 1 s, out
+/// 600 ms. Costs nothing unless it is the row being opened.
 class SettingsAnchor extends StatefulWidget {
   final String id;
   final Widget child;
@@ -69,6 +71,9 @@ class SettingsAnchor extends StatefulWidget {
   State<SettingsAnchor> createState() => _SettingsAnchorState();
 }
 
+const int _in = 150, _hold = 1000, _out = 600;
+const _total = Duration(milliseconds: _in + _hold + _out);
+
 class _SettingsAnchorState extends State<SettingsAnchor>
     with SingleTickerProviderStateMixin {
   AnimationController? _glow;
@@ -77,15 +82,11 @@ class _SettingsAnchorState extends State<SettingsAnchor>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final highlight = context
-        .dependOnInheritedWidgetOfExactType<_SettingsHighlight>()
+        .dependOnInheritedWidgetOfExactType<SettingsHighlight>()
         ?.rowId;
     if (highlight != widget.id || _glow != null) return;
-    final c = _glow = AnimationController(
-      vsync: this,
-      duration: KuberMotion.reduced(context)
-          ? const Duration(milliseconds: 600)
-          : const Duration(milliseconds: 1500),
-    );
+    final c = _glow = AnimationController(vsync: this, duration: _total);
+    final view = View.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       await Scrollable.ensureVisible(
@@ -94,8 +95,31 @@ class _SettingsAnchorState extends State<SettingsAnchor>
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
       );
-      if (mounted) c.forward();
+      if (!mounted) return;
+      c.forward();
+      // TalkBack hears the row once.
+      final text = _rowLabel();
+      if (text != null) {
+        SemanticsService.sendAnnouncement(view, text, Directionality.of(context));
+      }
     });
+  }
+
+  /// The row's own title.
+  String? _rowLabel() {
+    String? found;
+    void visit(Element e) {
+      if (found != null) return;
+      final w = e.widget;
+      if (w is Text && w.data != null) {
+        found = w.data;
+        return;
+      }
+      e.visitChildren(visit);
+    }
+
+    (context as Element).visitChildren(visit);
+    return found;
   }
 
   @override
@@ -117,10 +141,13 @@ class _SettingsAnchorState extends State<SettingsAnchor>
             child: AnimatedBuilder(
               animation: glow,
               builder: (_, _) {
-                final t = glow.value;
-                // Up fast, then a slow fade.
-                final a = t < 0.15 ? t / 0.15 : (1 - t) / 0.85;
-                return ColoredBox(color: tint.withValues(alpha: 0.2 * a));
+                final ms = glow.value * _total.inMilliseconds;
+                final a = ms < _in
+                    ? ms / _in
+                    : ms < _in + _hold
+                        ? 1.0
+                        : (_total.inMilliseconds - ms) / _out;
+                return ColoredBox(color: tint.withValues(alpha: 0.16 * a));
               },
             ),
           ),

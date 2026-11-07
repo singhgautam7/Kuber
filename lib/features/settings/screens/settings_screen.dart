@@ -9,9 +9,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/supported_locales.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
-import '../../more/screens/more_screen.dart' show launchTutorialFromMore;
+import '../../../shared/widgets/kuber_list.dart';
+import '../../backups/providers/backup_provider.dart';
+import '../../kuber_cards/providers/kuber_cards_provider.dart';
 import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../providers/settings_provider.dart';
+import 'settings_pages.dart';
 import '../settings_index.dart';
 import '../widgets/settings_anchor.dart';
 import '../widgets/settings_section.dart';
@@ -54,7 +57,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final variant = ref.watch(themeVariantProvider);
     final textLevel = ref.watch(textSizeLevelProvider);
     final locale = ref.watch(localeProvider);
@@ -63,87 +67,102 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             orElse: () => kSupportedLanguages.first)
         .nativeName;
     final currency = ref.watch(currencyProvider);
+    final number = ref.watch(settingsProvider.select((s) => s.valueOrNull?.numberSystem ?? NumberSystem.automatic));
     final appLock = ref.watch(settingsProvider.select((s) => s.valueOrNull?.biometricsEnabled ?? false));
+    final hasPin = ref.watch(hasVaultProvider);
+    final drawer = ref.watch(appDrawerEntriesProvider).valueOrNull ?? const <AppDrawerEntry>{};
+    final backup = ref.watch(backupSettingsProvider.select((s) => s.valueOrNull?.lastBackupAt));
+    final notifOff = ref.watch(notificationsAllowedProvider).valueOrNull == false;
+    final version = ref.watch(appVersionProvider).valueOrNull;
 
-    Widget row(IconData icon, String title, String subtitle, String route) => SettingsTile(
+    Widget group(IconData icon, String title, String subtitle, SettingsArea area, {bool warn = false}) => KuberGroupRow(
           icon: icon,
-          label: title,
+          title: title,
           subtitle: subtitle,
-          onTap: () => context.push(route),
-          trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
+          warn: warn,
+          warnIcon: Icons.notifications_off_outlined,
+          onTap: () => context.push(area.route),
         );
-    Widget line() => Divider(height: 1, color: cs.outlineVariant);
 
     return SettingsPageFrame(
       title: l.settingsTitle,
       highlight: widget.highlight,
       children: [
         const SettingsAnchor('pro', child: KuberProSettingsSection()),
-        const SizedBox(height: KuberSpace.lg),
-        SettingsCard(
+        const SizedBox(height: KuberSpace.md),
+        SettingsBlock(
           children: [
             SettingsAnchor('name', child: SettingsTile(
               icon: Icons.person_outline_rounded,
-              label: l.yourNameLabel,
+              label: l.setYourNameRow,
               onTap: () => _showNameBottomSheet(context),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     _userNameController.text.isEmpty ? l.setYourName : _userNameController.text,
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                    style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                   ),
-                  const SizedBox(width: KuberSpace.sm),
-                  Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
+                  const SizedBox(width: KuberSpace.lg),
+                  const KuberChevron(),
                 ],
               ),
             )),
           ],
         ),
-        const SizedBox(height: KuberSpace.lg),
-        SettingsCard(
+        SettingsBlock(
+          title: l.setSecYours,
           children: [
-            row(Icons.palette_outlined, l.setGroupLook,
-                '${themeFamilyName(variant)} · ${textSizeLabel(context, textLevel)}', SettingsArea.look.route),
-            line(),
-            row(Icons.tune_rounded, l.setGroupPrefs, '$language · ${currency.code}', SettingsArea.prefs.route),
-            line(),
-            row(Icons.shield_outlined, l.setGroupPrivacy,
-                appLock ? l.setPrivacyLockOn : l.setPrivacyLockOff, SettingsArea.privacy.route),
-            if (AppDrawerEntries.supported) ...[
-              line(),
-              row(Icons.apps_rounded, l.appDrawerSection, l.appDrawerDescription, SettingsArea.drawer.route),
-            ],
+            group(Icons.palette_outlined, l.setGroupLook,
+                l.setLookSub(themeFamilyName(variant), textSizeLabel(context, textLevel)), SettingsArea.look),
+            group(Icons.tune_rounded, l.setGroupPrefs,
+                l.setPrefsSub(language, '${currency.symbol} ${currency.code}', numberSystemName(l, number)),
+                SettingsArea.prefs),
+            if (AppDrawerEntries.supported)
+              group(
+                Icons.apps_rounded,
+                l.appDrawerSection,
+                drawer.isEmpty
+                    ? l.setDrawerNone
+                    : [
+                        if (drawer.contains(AppDrawerEntry.cards)) l.appDrawerCards,
+                        if (drawer.contains(AppDrawerEntry.notes)) l.appDrawerNotes,
+                        if (drawer.contains(AppDrawerEntry.reminders)) l.appDrawerReminders,
+                      ].join(', '),
+                SettingsArea.drawer,
+              ),
           ],
         ),
-        const SizedBox(height: KuberSpace.lg),
-        SettingsCard(
+        SettingsBlock(
+          title: l.setSecSafe,
           children: [
-            row(Icons.storage_rounded, l.setGroupData, l.menuDataDesc, SettingsArea.data.route),
-            line(),
-            row(Icons.notifications_outlined, l.menuNotifications, l.menuNotificationsDesc,
-                SettingsArea.notifications.route),
-            line(),
-            row(Icons.event_note_outlined, l.setGroupActivity, l.setGroupActivitySub, SettingsArea.activity.route),
+            group(
+              Icons.shield_outlined,
+              l.setGroupPrivacy,
+              [appLock ? l.setPrivacyLockOn : l.setPrivacyLockOff, if (hasPin) l.setPrivacyPinOn].join(' · '),
+              SettingsArea.privacy,
+            ),
+            group(Icons.cloud_sync_rounded, l.setGroupData,
+                backup == null ? l.setNoBackupYet : l.setLastBackupAgo(backupAgo(l, backup)), SettingsArea.data),
+            group(Icons.notifications_outlined, l.menuNotifications, notifOff ? l.setOff : l.setOn,
+                SettingsArea.notifications, warn: notifOff),
           ],
         ),
-        const SizedBox(height: KuberSpace.lg),
-        SettingsCard(
+        SettingsBlock(
+          title: l.setSecHelp,
           children: [
-            SettingsAnchor('tutorial', child: SettingsTile(
-              icon: Icons.school_rounded,
-              label: l.menuTutorial,
-              subtitle: l.menuTutorialDesc,
-              onTap: () => launchTutorialFromMore(context, ref),
-              trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
-            )),
-            line(),
+            group(Icons.help_outline_rounded, l.setHelpTitle, l.setHelpSub, SettingsArea.help),
+            group(Icons.event_note_outlined, l.setGroupActivity, l.setActivitySub, SettingsArea.activity),
+          ],
+        ),
+        SettingsBlock(
+          children: [
             SettingsAnchor('about', child: SettingsTile(
               icon: Icons.info_outline_rounded,
               label: l.aboutKuberLabel,
-              subtitle: l.aboutKuberSubtitle,
+              subtitle: version == null ? null : l.setVersion(version),
               onTap: () => context.push('/more/about'),
-              trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
+              trailing: const KuberChevron(),
             )),
           ],
         ),

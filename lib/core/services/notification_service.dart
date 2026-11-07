@@ -67,6 +67,49 @@ const Map<NotificationType, _Channel> _typeChannels = {
   ),
 };
 
+/// What the Notifications page can switch off. The inbox still records them.
+enum NotificationKind {
+  payments(PrefsKeys.notifyPayments),
+  budgets(PrefsKeys.notifyBudgets),
+  backups(PrefsKeys.notifyBackups);
+
+  const NotificationKind(this.key);
+  final String key;
+
+  static NotificationKind? of(NotificationType type) => switch (type) {
+        NotificationType.recurringTransaction || NotificationType.loanEmi => payments,
+        NotificationType.budgetAlert => budgets,
+        NotificationType.backup => backups,
+        _ => null,
+      };
+}
+
+/// The kinds that are on. Everything is on until switched off.
+class NotificationKindsNotifier extends Notifier<Set<NotificationKind>> {
+  @override
+  Set<NotificationKind> build() {
+    _load();
+    return NotificationKind.values.toSet();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = {
+      for (final k in NotificationKind.values)
+        if (prefs.getBool(k.key) ?? true) k,
+    };
+  }
+
+  Future<void> set(NotificationKind kind, bool on) async {
+    state = on ? {...state, kind} : ({...state}..remove(kind));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(kind.key, on);
+  }
+}
+
+final notificationKindsProvider =
+    NotifierProvider<NotificationKindsNotifier, Set<NotificationKind>>(NotificationKindsNotifier.new);
+
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -216,6 +259,14 @@ class NotificationService {
     await prefs.setBool(PrefsKeys.notificationPermissionAsked, true);
   }
 
+  Future<bool> _kindOn(NotificationKind? kind) async {
+    if (kind == null) return true;
+    final prefs = await SharedPreferences.getInstance();
+    // A background run shares the file, not this isolate's cache.
+    await prefs.reload();
+    return prefs.getBool(kind.key) ?? true;
+  }
+
   /// Generic OS notification for app-domain events (the five [NotificationType]s).
   /// Each type maps to its own Android channel. Payload should be the same
   /// string written to [AppNotification.payload] so the tap handler can
@@ -227,6 +278,7 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
+    if (!await _kindOn(NotificationKind.of(type))) return;
     await maybeRequestPermissionOnce();
 
     final channel = _typeChannels[type]!;
@@ -395,6 +447,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+    if (!await _kindOn(NotificationKind.budgets)) return;
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'budget_alerts',

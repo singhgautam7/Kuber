@@ -137,6 +137,17 @@ class AppDrawerEntries {
   }
 }
 
+/// The phone's security settings, where a fingerprint or face is set up.
+Future<void> openSecuritySettings() async {
+  try {
+    await const MethodChannel('com.grs.kuber/shortcuts').invokeMethod<bool>('openSecuritySettings');
+  } on PlatformException {
+    // Nothing to open on this platform.
+  } on MissingPluginException {
+    // Nothing to open on this platform.
+  }
+}
+
 /// Which entries are in the app drawer right now.
 final appDrawerEntriesProvider =
     FutureProvider<Set<AppDrawerEntry>>((ref) => AppDrawerEntries.enabled());

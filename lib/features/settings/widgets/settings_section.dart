@@ -2,6 +2,7 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_list.dart';
 
 /// Shared settings-list primitives, lifted verbatim from `settings_screen.dart`
 /// so the Kuber Cards settings page reads identically to the main Settings page.
@@ -51,14 +52,39 @@ class SettingsCard extends StatelessWidget {
   }
 }
 
-/// One settings row: leading squircle icon, label + optional subtitle, optional
-/// trailing widget (chevron / switch).
+/// One block of a Settings page: optional caps heading, the rows in a card,
+/// then the gap to the next block.
+class SettingsBlock extends StatelessWidget {
+  final String? title;
+  final List<Widget> inline;
+  final List<Widget> children;
+  const SettingsBlock({super.key, this.title, this.inline = const [], required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) KuberSectionHeader(title: title!, inline: inline),
+          KuberGroup(children: children),
+        ],
+      ),
+    );
+  }
+}
+
+/// One settings row: 24 icon, label, optional subtitle, optional trailing
+/// widget (chevron / switch). 56 tall, 72 with a subtitle. [disabled] dims it.
 class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final bool disabled;
+  final bool destructive;
 
   /// Shown right after the label (a Beta pill).
   final Widget? labelTag;
@@ -71,25 +97,34 @@ class SettingsTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.labelTag,
+    this.disabled = false,
+    this.destructive = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final dim = disabled ? 0.38 : 1.0;
 
-    // Board 3.11 row: plain 24 icon, titleMedium label, value / chevron right.
     return InkWell(
       onTap: onTap,
+      overlayColor: kuberPressedLayer(cs),
       child: Container(
-        constraints: const BoxConstraints(minHeight: KuberSpace.listItem1),
+        constraints: BoxConstraints(
+          minHeight: subtitle == null ? KuberSpace.listItem1 : KuberSpace.listItem2,
+        ),
         padding: const EdgeInsets.symmetric(
           horizontal: KuberSpace.lg,
-          vertical: KuberSpace.md,
+          vertical: KuberSpace.sm,
         ),
         child: Row(
           children: [
-            Icon(icon, size: 24, color: cs.onSurfaceVariant),
+            Icon(
+              icon,
+              size: 24,
+              color: destructive ? cs.error : cs.onSurfaceVariant.withValues(alpha: dim),
+            ),
             const SizedBox(width: KuberSpace.lg),
             Expanded(
               child: Column(
@@ -100,7 +135,9 @@ class SettingsTile extends StatelessWidget {
                       Flexible(
                         child: Text(
                           label,
-                          style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                          style: tt.titleMedium!.copyWith(
+                            color: destructive ? cs.error : cs.onSurface.withValues(alpha: dim),
+                          ),
                         ),
                       ),
                       if (labelTag case final Widget tag) ...[
@@ -112,17 +149,17 @@ class SettingsTile extends StatelessWidget {
                   if (subtitle case final s?)
                     Text(
                       s,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: tt.bodyMedium!.copyWith(
-                        color: cs.onSurfaceVariant,
+                        color: cs.onSurfaceVariant.withValues(alpha: disabled ? 0.6 : 1),
                       ),
                     ),
                 ],
               ),
             ),
-            const SizedBox(width: KuberSpace.sm),
-            if (trailing case final Widget t) t,
+            if (trailing case final Widget t) ...[
+              const SizedBox(width: KuberSpace.lg),
+              t,
+            ],
           ],
         ),
       ),

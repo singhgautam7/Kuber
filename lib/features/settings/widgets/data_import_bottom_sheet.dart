@@ -15,13 +15,13 @@ import 'settings_widgets.dart';
 // Show helper
 // ---------------------------------------------------------------------------
 
-void showDataImportBottomSheet(BuildContext context) {
+void showDataImportBottomSheet(BuildContext context, {bool json = false}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => const DataImportBottomSheet(),
+    builder: (_) => DataImportBottomSheet(json: json),
   );
 }
 
@@ -36,7 +36,9 @@ enum _ImportFmt { csv, json }
 // ---------------------------------------------------------------------------
 
 class DataImportBottomSheet extends ConsumerStatefulWidget {
-  const DataImportBottomSheet({super.key});
+  /// Starts on the JSON option (Restore, Import Kuber file).
+  final bool json;
+  const DataImportBottomSheet({super.key, this.json = false});
 
   @override
   ConsumerState<DataImportBottomSheet> createState() =>
@@ -44,7 +46,7 @@ class DataImportBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
-  _ImportFmt _format = _ImportFmt.csv;
+  late _ImportFmt _format = widget.json ? _ImportFmt.json : _ImportFmt.csv;
   bool _override = false;
   bool _isDownloadingTemplate = false;
 

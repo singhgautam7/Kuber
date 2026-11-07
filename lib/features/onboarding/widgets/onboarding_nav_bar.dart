@@ -26,9 +26,13 @@ class OnboardingNavBar extends StatelessWidget {
   /// False hides the dots (the first page, before the flow begins).
   final bool showDots;
 
-  /// A plain second action above the buttons ("Not now").
+  /// A plain second action under the button ("Not now").
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
+
+  /// False drops the arrow after the label (the pages whose design has none,
+  /// and until the last page's button is enabled).
+  final bool showArrow;
 
   const OnboardingNavBar({
     super.key,
@@ -44,6 +48,7 @@ class OnboardingNavBar extends StatelessWidget {
     this.showDots = true,
     this.secondaryLabel,
     this.onSecondary,
+    this.showArrow = true,
   });
 
   @override
@@ -54,19 +59,15 @@ class OnboardingNavBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           KuberSpace.screenMargin,
-          KuberSpace.md,
+          showDots ? KuberSpace.md : KuberSpace.xl,
           KuberSpace.screenMargin,
           KuberSpace.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (secondaryLabel != null) ...[
-              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
-              const SizedBox(height: KuberSpace.sm),
-            ],
             if (showDots) ...[
               OnboardingDotsIndicator(
                 currentPage: currentPage,
@@ -192,13 +193,12 @@ class OnboardingNavBar extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (!busy) ...[
-                                const SizedBox(width: KuberSpace.sm),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  size: 20,
-                                ),
-                              ],
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                child: !busy && showArrow
+                                    ? const _ArrowIn()
+                                    : const SizedBox.shrink(),
+                              ),
                             ],
                           ),
                         ),
@@ -208,8 +208,35 @@ class OnboardingNavBar extends StatelessWidget {
                 ],
               ),
             ),
+            if (secondaryLabel != null) ...[
+              const SizedBox(height: KuberSpace.xs),
+              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The arrow after the label: slides 8 in and fades, a beat after the button
+/// turns on.
+class _ArrowIn extends StatelessWidget {
+  const _ArrowIn();
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 250),
+      curve: const Interval(0.4, 1, curve: Curves.easeOut),
+      child: const Padding(
+        padding: EdgeInsetsDirectional.only(start: KuberSpace.sm),
+        child: Icon(Icons.arrow_forward_rounded, size: 20),
+      ),
+      builder: (_, t, c) => Opacity(
+        opacity: t,
+        child: Transform.translate(offset: Offset(-8 * (1 - t), 0), child: c),
       ),
     );
   }

@@ -457,7 +457,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                       GoRoute(
                         path: 'theme',
                         parentNavigatorKey: rootNavigatorKey,
-                        builder: (_, _) => const ThemeScreen(),
+                        builder: (_, s) => ThemeScreen(highlight: _row(s)),
                       ),
                       GoRoute(
                         path: 'look',
@@ -483,6 +483,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                         path: 'notifications',
                         parentNavigatorKey: rootNavigatorKey,
                         builder: (_, s) => NotificationsSettingsScreen(highlight: _row(s)),
+                      ),
+                      GoRoute(
+                        path: 'help',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => HelpSettingsScreen(highlight: _row(s)),
                       ),
                       GoRoute(
                         path: 'activity',

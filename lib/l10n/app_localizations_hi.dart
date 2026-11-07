@@ -8829,16 +8829,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get setKwAbout => 'परिचय संस्करण लाइसेंस संपर्क निजता नीति';
 
   @override
-  String get obStartRestore => 'बैकअप से रीस्टोर करें';
+  String get obStartRestore => 'बैकअप से वापस लाएँ';
 
   @override
-  String get obStartRestoreSub => 'Kuber बैकअप फ़ाइल से सब वापस लाएँ';
+  String get obStartRestoreSub => 'Kuber बैकअप से अपना डेटा वापस लाएँ';
 
   @override
-  String get obStartCsv => 'CSV से इंपोर्ट करें';
+  String get obStartCsv => 'CSV से इम्पोर्ट करें';
 
   @override
-  String get obStartCsvSub => 'स्प्रेडशीट से लेन-देन लाएँ';
+  String get obStartCsvSub => 'दूसरे ऐप या स्प्रेडशीट से डेटा लाएँ';
 
   @override
   String get obStartFresh => 'नई शुरुआत करें';
@@ -8908,7 +8908,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pathSheetHint => 'इस पेज का रास्ता दिखाता है';
 
   @override
-  String get pathSheetLongPress => 'इस पेज का रास्ता देखने के लिए दबाकर रखें';
+  String get pathSheetLongPress => 'रास्ता दिखाएँ';
 
   @override
   String get setPathTip =>
@@ -8988,4 +8988,566 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get proFaqRefundA =>
       'रिफ़ंड Google Play अपनी रिफ़ंड नीति के तहत संभालता है।';
+
+  @override
+  String get obStartTagline => 'आपका पैसा, आपके फ़ोन पर';
+
+  @override
+  String get obLangTitle => 'भाषा चुनें';
+
+  @override
+  String get obLangSub => 'आप इसे बाद में सेटिंग्स में बदल सकते हैं';
+
+  @override
+  String get obRestoreBusy => 'आपका डेटा वापस आ रहा है';
+
+  @override
+  String obRestoreStepTxns(String done, String total) {
+    return '$total में से $done लेन-देन';
+  }
+
+  @override
+  String obRestoreStepItems(String done, String total) {
+    return '$total में से $done आइटम';
+  }
+
+  @override
+  String get obRestoreFailed => 'यह बैकअप वापस नहीं लाया जा सका';
+
+  @override
+  String get obRestoreFailedSub =>
+      'यह फ़ाइल Kuber बैकअप नहीं है या खराब है। आपके फ़ोन पर कुछ नहीं बदला।';
+
+  @override
+  String get obRestoreRetry => 'फिर कोशिश करें';
+
+  @override
+  String get obRestoreOtherFile => 'दूसरी फ़ाइल चुनें';
+
+  @override
+  String get obCsvBusy => 'आपकी CSV इम्पोर्ट हो रही है';
+
+  @override
+  String obCsvStep(String done, String total) {
+    return '$total में से $done पंक्तियाँ';
+  }
+
+  @override
+  String get obCsvFailed => 'यह फ़ाइल इम्पोर्ट नहीं हो सकी';
+
+  @override
+  String get obCsvFailedSub =>
+      'Kuber यह CSV नहीं पढ़ सकता या यह खराब है। आपके फ़ोन पर कुछ नहीं बदला।';
+
+  @override
+  String get obNotifEmi => 'EMI और रिकरिंग रिमाइंडर';
+
+  @override
+  String get obNotifEmiSub => 'हर भुगतान से पहले सूचना';
+
+  @override
+  String get obNotifBudget => 'बजट अलर्ट';
+
+  @override
+  String get obNotifBudgetSub => 'जब आप सीमा के करीब हों';
+
+  @override
+  String get obNotifBackupRow => 'बैकअप रिमाइंडर';
+
+  @override
+  String get obNotifBackupSub => 'ताकि आपका डेटा सुरक्षित रहे';
+
+  @override
+  String get obNotifSampleTitle => 'EMI कल देय है';
+
+  @override
+  String get obNotifSampleBody => 'SBI होम लोन · ₹24,350';
+
+  @override
+  String get pathSheetSub => 'किसी भी पेज पर वापस जाने के लिए टैप करें';
+
+  @override
+  String get pathSheetFromNotification => 'सूचना से खोला गया';
+
+  @override
+  String get setSecYours => 'अपने हिसाब से';
+
+  @override
+  String get setSecSafe => 'सुरक्षित रखें';
+
+  @override
+  String get setSecHelp => 'मदद और अधिक';
+
+  @override
+  String get setYourNameRow => 'आपका नाम';
+
+  @override
+  String setLookSub(String theme, String size) {
+    return '$theme · $size टेक्स्ट साइज़';
+  }
+
+  @override
+  String setPrefsSub(String language, String currency, String format) {
+    return '$language · $currency · $format फ़ॉर्मैट';
+  }
+
+  @override
+  String get setDrawerNone => 'कोई अतिरिक्त आइकन नहीं';
+
+  @override
+  String get setPrivacyPinOn => 'Cards PIN चालू';
+
+  @override
+  String setLastBackupAgo(String ago) {
+    return 'पिछला बैकअप $ago';
+  }
+
+  @override
+  String get setNoBackupYet => 'अभी कोई बैकअप नहीं';
+
+  @override
+  String get setNoBackupSub => 'अपना डेटा सुरक्षित रखने के लिए अभी बैकअप लें';
+
+  @override
+  String get setOn => 'चालू';
+
+  @override
+  String get setOff => 'बंद';
+
+  @override
+  String get setHelpTitle => 'मदद';
+
+  @override
+  String get setHelpSub => 'ऐप ट्यूटोरियल, फ़ीडबैक भेजें';
+
+  @override
+  String get setActivitySub => 'आने वाले इवेंट, मनी स्टोरी आर्काइव';
+
+  @override
+  String setVersion(String version) {
+    return 'संस्करण $version';
+  }
+
+  @override
+  String get setBottomNav => 'नीचे का नेविगेशन';
+
+  @override
+  String get setNavStandard => 'स्टैंडर्ड';
+
+  @override
+  String get setNavFloating => 'फ़्लोटिंग';
+
+  @override
+  String get setMoreLayout => 'More टैब लेआउट';
+
+  @override
+  String get setMoreLayoutSub => 'सरल सूची या हीरो लेआउट';
+
+  @override
+  String get setLayoutHero => 'हीरो';
+
+  @override
+  String get setSecHomeAnalytics => 'होम और एनालिटिक्स';
+
+  @override
+  String get setHomeWidgets => 'होम विजेट';
+
+  @override
+  String get setAnalyticsWidgets => 'एनालिटिक्स विजेट';
+
+  @override
+  String setWidgetsOn(String count) {
+    return '$count चालू · क्रम बदलने के लिए खींचें';
+  }
+
+  @override
+  String get setGallerySub => 'आपके फ़ोन की होम स्क्रीन पर Kuber';
+
+  @override
+  String get setSecShortcuts => 'शॉर्टकट';
+
+  @override
+  String get setQuickActions => 'त्वरित क्रियाएँ';
+
+  @override
+  String get setQuickActionsSub => 'शॉर्टकट के लिए टैब को देर तक दबाएँ';
+
+  @override
+  String get setAddMenu => 'ऐड मेन्यू';
+
+  @override
+  String get setAddMenuSub => 'त्वरित एंट्री के लिए + को देर तक दबाएँ';
+
+  @override
+  String get setSecMoney => 'भाषा और पैसा';
+
+  @override
+  String get setCurrencySub => 'राशि पर दिखने वाला चिह्न';
+
+  @override
+  String get setNumberFormat => 'नंबर फ़ॉर्मैट';
+
+  @override
+  String get setNumLakh => 'लाख';
+
+  @override
+  String get setNumMillion => 'मिलियन';
+
+  @override
+  String get setShowCode => 'मुद्रा कोड दिखाएँ';
+
+  @override
+  String get setShowCodeSub => '₹500 की जगह INR 500';
+
+  @override
+  String get setDefaultAccount => 'डिफ़ॉल्ट खाता';
+
+  @override
+  String get setDefaultAccountSub => 'Quick Add में पहले चुना जाता है';
+
+  @override
+  String get setSecGestures => 'जेस्चर';
+
+  @override
+  String get setSwipe => 'हॉरिज़ॉन्टल स्वाइप';
+
+  @override
+  String get setSwipeSub => 'टैब बदलने के लिए बाएँ या दाएँ स्वाइप करें';
+
+  @override
+  String get setPrivacyMode => 'प्राइवेसी मोड';
+
+  @override
+  String get setPrivacyModeSub => 'बैलेंस और राशियाँ छिपाएँ';
+
+  @override
+  String get setAppLock => 'ऐप लॉक';
+
+  @override
+  String get setAppLockSub => 'Kuber खोलने पर फ़िंगरप्रिंट या चेहरा माँगें';
+
+  @override
+  String get setAppLockNoFp => 'इस फ़ोन पर फ़िंगरप्रिंट या चेहरा चाहिए';
+
+  @override
+  String get setCardsFp => 'फ़िंगरप्रिंट से अनलॉक करें';
+
+  @override
+  String get setCardsFpSub => 'केवल Kuber Cards के लिए';
+
+  @override
+  String get setCardsFpNone => 'इस फ़ोन पर सेट नहीं है';
+
+  @override
+  String get setCardsFpSearch => 'फ़िंगरप्रिंट से Kuber Cards अनलॉक करें';
+
+  @override
+  String get setCardsPinRow => 'Cards PIN';
+
+  @override
+  String get setCardsPinRowSub => 'चालू · PIN बदलें';
+
+  @override
+  String get setCardsPinSearch => 'Kuber Cards PIN';
+
+  @override
+  String get setNotesLock => 'Notes के लिए ऐप लॉक ज़रूरी करें';
+
+  @override
+  String get setNotesLockOn => 'Notes खोलने पर फ़िंगरप्रिंट या चेहरा माँगें';
+
+  @override
+  String get setNotesLockOff => 'पहले ऐप लॉक चालू करें';
+
+  @override
+  String get setLocksInfo =>
+      'ऐप लॉक और Kuber Cards अनलॉक अलग हैं। एक बदलने से दूसरा नहीं बदलता।';
+
+  @override
+  String get setLocksTitle => 'दो अलग लॉक';
+
+  @override
+  String get setLocksApp =>
+      'हर बार Kuber खोलने पर आपका फ़िंगरप्रिंट या चेहरा माँगता है।';
+
+  @override
+  String get setLocksCards =>
+      'का अपना लॉक है: आपका Cards PIN, और यहाँ चालू करने पर फ़िंगरप्रिंट। यह ऐप लॉक बंद होने पर भी काम करता है।';
+
+  @override
+  String get setLocksNeither => 'एक को चालू या बंद करने से दूसरा नहीं बदलता।';
+
+  @override
+  String get setGotIt => 'समझ गया';
+
+  @override
+  String get setNoFp =>
+      'इस फ़ोन पर फ़िंगरप्रिंट या फ़ेस अनलॉक सेट नहीं है। आपका Kuber Cards PIN फिर भी काम करता है।';
+
+  @override
+  String get setNoFpOpen => 'फ़ोन सेटिंग्स खोलें';
+
+  @override
+  String get setDrawerBody =>
+      'Kuber Cards, Notes या Reminders को अपने फ़ोन की ऐप सूची में अलग आइकन दें। हर आइकन सीधे उसी फ़ीचर को खोलता है।';
+
+  @override
+  String get setDrawerPreview => 'आपकी ऐप सूची में पूर्वावलोकन';
+
+  @override
+  String get setDrawerRowSub => 'ऐप सूची में अलग आइकन';
+
+  @override
+  String get setLastBackup => 'पिछला बैकअप';
+
+  @override
+  String get setBackupNow => 'अभी बैकअप लें';
+
+  @override
+  String get setSecBackup => 'बैकअप';
+
+  @override
+  String get setAutoBackups => 'ऑटोमैटिक बैकअप';
+
+  @override
+  String get setRestoreSub => 'इस फ़ोन का डेटा बदलें';
+
+  @override
+  String get setSecImport => 'इम्पोर्ट और एक्सपोर्ट';
+
+  @override
+  String get setImportCsvSub => 'स्प्रेडशीट से लेन-देन लाएँ';
+
+  @override
+  String get setImportKuber => 'Kuber फ़ाइल इम्पोर्ट करें';
+
+  @override
+  String get setImportKuberSub => 'Kuber से एक्सपोर्ट की गई JSON फ़ाइल';
+
+  @override
+  String get setExport => 'डेटा एक्सपोर्ट करें';
+
+  @override
+  String get setExportSub => 'सब कुछ JSON फ़ाइल में सहेजें';
+
+  @override
+  String get setSecDanger => 'खतरे का क्षेत्र';
+
+  @override
+  String get setClear => 'सारा डेटा मिटाएँ';
+
+  @override
+  String get setClearSub =>
+      'इस फ़ोन पर सब कुछ मिटा देता है। वापस नहीं लाया जा सकता।';
+
+  @override
+  String get setMockData => 'प्रयोगात्मक डेटा उत्पन्न करें';
+
+  @override
+  String get setNotifOffBody => 'रिमाइंडर और अलर्ट आप तक नहीं पहुँचेंगे।';
+
+  @override
+  String get setTurnOn => 'चालू करें';
+
+  @override
+  String get setNotifAllowedShort => 'फ़ोन सेटिंग्स में अनुमति है';
+
+  @override
+  String get setSecSends => 'Kuber क्या भेजता है';
+
+  @override
+  String get setNotifEmiSub => 'जब भुगतान दर्ज होता है';
+
+  @override
+  String get setNotifBudgetSub => 'बजट पर तय की गई सीमाओं पर';
+
+  @override
+  String get setNotifBackupSub => 'जब ऑटोमैटिक बैकअप विफल हो';
+
+  @override
+  String get setNotifInboxSub => 'हाल के अलर्ट और रिमाइंडर';
+
+  @override
+  String get setAppTutorial => 'ऐप ट्यूटोरियल';
+
+  @override
+  String get setAppTutorialSub => 'गाइडेड टूर दोबारा देखें';
+
+  @override
+  String get setSendFeedback => 'फ़ीडबैक भेजें';
+
+  @override
+  String get setSendFeedbackSub => 'बताएँ क्या ठीक करना या जोड़ना है';
+
+  @override
+  String get setUpcoming => 'आने वाले इवेंट';
+
+  @override
+  String get setUpcomingSub => 'आने वाला सब कुछ, एक जगह';
+
+  @override
+  String get setStories => 'मनी स्टोरी आर्काइव';
+
+  @override
+  String get proCardTry => 'Kuber Pro आज़माएँ';
+
+  @override
+  String get proCardTrySub =>
+      'हर फ़ीचर अनलॉक करें। एक बार भुगतान, कोई खाता नहीं।';
+
+  @override
+  String proCardActive(String date) {
+    return '$date से सक्रिय। धन्यवाद!';
+  }
+
+  @override
+  String get proCardMonthly => 'मासिक';
+
+  @override
+  String get proCardYearly => 'वार्षिक';
+
+  @override
+  String get proCardLifetime => 'लाइफ़टाइम';
+
+  @override
+  String get proCardPromo => 'प्रोमो';
+
+  @override
+  String get proCardPromoForever => 'लाइफ़टाइम मुफ़्त। धन्यवाद!';
+
+  @override
+  String proCardPromoUntil(String date) {
+    return '$date तक मुफ़्त';
+  }
+
+  @override
+  String get searchHint => 'More में खोजें';
+
+  @override
+  String get searchAll => 'सभी';
+
+  @override
+  String get searchFeatures => 'फ़ीचर';
+
+  @override
+  String get searchLoan => 'लोन';
+
+  @override
+  String get searchInvestment => 'निवेश';
+
+  @override
+  String get searchReminder => 'रिमाइंडर';
+
+  @override
+  String get searchYouLent => 'आपने उधार दिया';
+
+  @override
+  String get searchYouBorrowed => 'आपने उधार लिया';
+
+  @override
+  String get searchSettled => 'चुकता';
+
+  @override
+  String searchDue(String date) {
+    return '$date तक देय';
+  }
+
+  @override
+  String searchEdited(String date) {
+    return '$date को बदला';
+  }
+
+  @override
+  String searchEveryDay(String amount) {
+    return '$amount हर दिन';
+  }
+
+  @override
+  String searchEveryWeek(String amount) {
+    return '$amount हर हफ़्ते';
+  }
+
+  @override
+  String searchEveryMonth(String amount) {
+    return '$amount हर महीने';
+  }
+
+  @override
+  String searchEveryYear(String amount) {
+    return '$amount हर साल';
+  }
+
+  @override
+  String searchSeeAll(String count) {
+    return 'सभी $count देखें';
+  }
+
+  @override
+  String searchMatches(String words) {
+    return 'मेल: $words';
+  }
+
+  @override
+  String get searchRecent => 'हाल के';
+
+  @override
+  String get searchClear => 'मिटाएँ';
+
+  @override
+  String get searchTry => 'यह खोजकर देखें';
+
+  @override
+  String get searchTryDark => 'डार्क मोड';
+
+  @override
+  String get searchTryBackup => 'बैकअप';
+
+  @override
+  String get searchTryEmi => 'EMI कैलकुलेटर';
+
+  @override
+  String searchNoResults(String query) {
+    return '“$query” के लिए कुछ नहीं मिला';
+  }
+
+  @override
+  String get searchNoResultsBody =>
+      'खोज More के नाम और शीर्षक देखती है: सेटिंग्स, खाते, कैटेगरी, टैग, मनी प्लान, लोग, कार्ड, नोट्स और टूल। छोटा शब्द आज़माएँ।';
+
+  @override
+  String searchShorter(String word) {
+    return '“$word” खोजें';
+  }
+
+  @override
+  String get searchTransaction => 'कोई लेन-देन ढूँढ रहे हैं?';
+
+  @override
+  String get searchInHistory => 'History में खोजें';
+
+  @override
+  String get searchLoading => 'आपके खाते, लोन और बाकी में देख रहे हैं';
+
+  @override
+  String get searchPrivateNote =>
+      'Kuber Cards और Notes सिर्फ़ नाम और शीर्षक से मिलते हैं। कार्ड नंबर और नोट का टेक्स्ट कभी नहीं खोजा जाता।';
+
+  @override
+  String get setKwFeedback => 'फ़ीडबैक समस्या सुझाव संपर्क';
+
+  @override
+  String get setKwExpressive => 'रंग चमकीला';
+
+  @override
+  String get setKwPureBlack => 'डार्क काला थीम';
+
+  @override
+  String searchTagSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count लेन-देन',
+    );
+    return 'टैग · $_temp0';
+  }
 }

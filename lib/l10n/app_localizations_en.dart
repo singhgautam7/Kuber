@@ -8836,14 +8836,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obStartRestore => 'Restore from backup';
 
   @override
-  String get obStartRestoreSub =>
-      'Bring everything back from a Kuber backup file';
+  String get obStartRestoreSub => 'Bring back your data from a Kuber backup';
 
   @override
   String get obStartCsv => 'Import from CSV';
 
   @override
-  String get obStartCsvSub => 'Bring in transactions from a spreadsheet';
+  String get obStartCsvSub => 'Move in from another app or a spreadsheet';
 
   @override
   String get obStartFresh => 'Start fresh';
@@ -8914,8 +8913,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathSheetHint => 'Shows the path to this page';
 
   @override
-  String get pathSheetLongPress =>
-      'Press and hold to see the path to this page';
+  String get pathSheetLongPress => 'Show path';
 
   @override
   String get setPathTip =>
@@ -8992,4 +8990,567 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get proFaqRefundA =>
       'Refunds are handled by Google Play under its refund policy.';
+
+  @override
+  String get obStartTagline => 'Your money, on your phone';
+
+  @override
+  String get obLangTitle => 'Choose language';
+
+  @override
+  String get obLangSub => 'You can change this later in Settings';
+
+  @override
+  String get obRestoreBusy => 'Restoring your data';
+
+  @override
+  String obRestoreStepTxns(String done, String total) {
+    return '$done of $total transactions';
+  }
+
+  @override
+  String obRestoreStepItems(String done, String total) {
+    return '$done of $total items';
+  }
+
+  @override
+  String get obRestoreFailed => 'Couldn\'t restore this backup';
+
+  @override
+  String get obRestoreFailedSub =>
+      'This file isn\'t a Kuber backup, or it\'s damaged. Nothing on your phone was changed.';
+
+  @override
+  String get obRestoreRetry => 'Try again';
+
+  @override
+  String get obRestoreOtherFile => 'Choose another file';
+
+  @override
+  String get obCsvBusy => 'Importing your CSV';
+
+  @override
+  String obCsvStep(String done, String total) {
+    return '$done of $total rows';
+  }
+
+  @override
+  String get obCsvFailed => 'Couldn\'t import this file';
+
+  @override
+  String get obCsvFailedSub =>
+      'Kuber can\'t read this CSV, or it\'s damaged. Nothing on your phone was changed.';
+
+  @override
+  String get obNotifEmi => 'EMI and recurring reminders';
+
+  @override
+  String get obNotifEmiSub => 'A heads-up before each payment';
+
+  @override
+  String get obNotifBudget => 'Budget alerts';
+
+  @override
+  String get obNotifBudgetSub => 'When you get close to a limit';
+
+  @override
+  String get obNotifBackupRow => 'Backup reminders';
+
+  @override
+  String get obNotifBackupSub => 'So your data stays safe';
+
+  @override
+  String get obNotifSampleTitle => 'EMI due tomorrow';
+
+  @override
+  String get obNotifSampleBody => 'SBI Home Loan · ₹24,350';
+
+  @override
+  String get pathSheetSub => 'Tap any page to go back to it';
+
+  @override
+  String get pathSheetFromNotification => 'Opened from a notification';
+
+  @override
+  String get setSecYours => 'Make it yours';
+
+  @override
+  String get setSecSafe => 'Keep it safe';
+
+  @override
+  String get setSecHelp => 'Help and more';
+
+  @override
+  String get setYourNameRow => 'Your name';
+
+  @override
+  String setLookSub(String theme, String size) {
+    return '$theme · $size text size';
+  }
+
+  @override
+  String setPrefsSub(String language, String currency, String format) {
+    return '$language · $currency · $format format';
+  }
+
+  @override
+  String get setDrawerNone => 'No extra icons';
+
+  @override
+  String get setPrivacyPinOn => 'Cards PIN on';
+
+  @override
+  String setLastBackupAgo(String ago) {
+    return 'Last backup $ago';
+  }
+
+  @override
+  String get setNoBackupYet => 'No backup yet';
+
+  @override
+  String get setNoBackupSub => 'Back up now to keep your data safe';
+
+  @override
+  String get setOn => 'On';
+
+  @override
+  String get setOff => 'Off';
+
+  @override
+  String get setHelpTitle => 'Help';
+
+  @override
+  String get setHelpSub => 'App tutorial, send feedback';
+
+  @override
+  String get setActivitySub => 'Upcoming events, Money story archive';
+
+  @override
+  String setVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get setBottomNav => 'Bottom navigation';
+
+  @override
+  String get setNavStandard => 'Standard';
+
+  @override
+  String get setNavFloating => 'Floating';
+
+  @override
+  String get setMoreLayout => 'More tab layout';
+
+  @override
+  String get setMoreLayoutSub => 'Simple list or hero layout';
+
+  @override
+  String get setLayoutHero => 'Hero';
+
+  @override
+  String get setSecHomeAnalytics => 'Home and Analytics';
+
+  @override
+  String get setHomeWidgets => 'Home widgets';
+
+  @override
+  String get setAnalyticsWidgets => 'Analytics widgets';
+
+  @override
+  String setWidgetsOn(String count) {
+    return '$count on · drag to reorder';
+  }
+
+  @override
+  String get setGallerySub => 'Kuber on your phone\'s home screen';
+
+  @override
+  String get setSecShortcuts => 'Shortcuts';
+
+  @override
+  String get setQuickActions => 'Quick actions';
+
+  @override
+  String get setQuickActionsSub => 'Long-press a tab for shortcuts';
+
+  @override
+  String get setAddMenu => 'Add menu';
+
+  @override
+  String get setAddMenuSub => 'Long-press + for quick entries';
+
+  @override
+  String get setSecMoney => 'Language and money';
+
+  @override
+  String get setCurrencySub => 'Symbol shown on amounts';
+
+  @override
+  String get setNumberFormat => 'Number format';
+
+  @override
+  String get setNumLakh => 'Lakh';
+
+  @override
+  String get setNumMillion => 'Million';
+
+  @override
+  String get setShowCode => 'Show currency code';
+
+  @override
+  String get setShowCodeSub => 'INR 500 instead of ₹500';
+
+  @override
+  String get setDefaultAccount => 'Default account';
+
+  @override
+  String get setDefaultAccountSub => 'Picked first in Quick Add';
+
+  @override
+  String get setSecGestures => 'Gestures';
+
+  @override
+  String get setSwipe => 'Horizontal swipe';
+
+  @override
+  String get setSwipeSub => 'Swipe left or right to change tabs';
+
+  @override
+  String get setPrivacyMode => 'Privacy mode';
+
+  @override
+  String get setPrivacyModeSub => 'Hide balances and amounts';
+
+  @override
+  String get setAppLock => 'App lock';
+
+  @override
+  String get setAppLockSub => 'Ask for fingerprint or face to open Kuber';
+
+  @override
+  String get setAppLockNoFp => 'Needs a fingerprint or face on this phone';
+
+  @override
+  String get setCardsFp => 'Unlock with fingerprint';
+
+  @override
+  String get setCardsFpSub => 'Only for Kuber Cards';
+
+  @override
+  String get setCardsFpNone => 'Not set up on this phone';
+
+  @override
+  String get setCardsFpSearch => 'Unlock Kuber Cards with fingerprint';
+
+  @override
+  String get setCardsPinRow => 'Cards PIN';
+
+  @override
+  String get setCardsPinRowSub => 'On · Change PIN';
+
+  @override
+  String get setCardsPinSearch => 'Kuber Cards PIN';
+
+  @override
+  String get setNotesLock => 'Require app lock for Notes';
+
+  @override
+  String get setNotesLockOn => 'Ask for fingerprint or face to open Notes';
+
+  @override
+  String get setNotesLockOff => 'Turn on App lock first';
+
+  @override
+  String get setLocksInfo =>
+      'App lock and Kuber Cards unlock are separate. Changing one never changes the other.';
+
+  @override
+  String get setLocksTitle => 'Two separate locks';
+
+  @override
+  String get setLocksApp =>
+      'asks for your fingerprint or face each time you open Kuber.';
+
+  @override
+  String get setLocksCards =>
+      'has its own lock: your Cards PIN, and fingerprint if you turn it on here. It works even when App lock is off.';
+
+  @override
+  String get setLocksNeither =>
+      'Turning one on or off never changes the other.';
+
+  @override
+  String get setGotIt => 'Got it';
+
+  @override
+  String get setNoFp =>
+      'This phone has no fingerprint or face unlock set up. Your Kuber Cards PIN still works.';
+
+  @override
+  String get setNoFpOpen => 'Open phone settings';
+
+  @override
+  String get setDrawerBody =>
+      'Give Kuber Cards, Notes or Reminders their own icon in your phone\'s app list. Each icon opens straight into that feature.';
+
+  @override
+  String get setDrawerPreview => 'Preview in your app list';
+
+  @override
+  String get setDrawerRowSub => 'Own icon in the app list';
+
+  @override
+  String get setLastBackup => 'Last backup';
+
+  @override
+  String get setBackupNow => 'Back up now';
+
+  @override
+  String get setSecBackup => 'Backup';
+
+  @override
+  String get setAutoBackups => 'Automatic backups';
+
+  @override
+  String get setRestoreSub => 'Replace the data on this phone';
+
+  @override
+  String get setSecImport => 'Import and export';
+
+  @override
+  String get setImportCsvSub => 'Bring in transactions from a spreadsheet';
+
+  @override
+  String get setImportKuber => 'Import Kuber file';
+
+  @override
+  String get setImportKuberSub => 'A JSON file exported from Kuber';
+
+  @override
+  String get setExport => 'Export data';
+
+  @override
+  String get setExportSub => 'Save everything as a JSON file';
+
+  @override
+  String get setSecDanger => 'Danger zone';
+
+  @override
+  String get setClear => 'Clear all data';
+
+  @override
+  String get setClearSub =>
+      'Deletes everything on this phone. Cannot be undone.';
+
+  @override
+  String get setMockData => 'Generate mock data';
+
+  @override
+  String get setNotifOffBody => 'Reminders and alerts won\'t reach you.';
+
+  @override
+  String get setTurnOn => 'Turn on';
+
+  @override
+  String get setNotifAllowedShort => 'Allowed in phone settings';
+
+  @override
+  String get setSecSends => 'What Kuber sends';
+
+  @override
+  String get setNotifEmiSub => 'When a payment is recorded';
+
+  @override
+  String get setNotifBudgetSub => 'At the limits you set on a budget';
+
+  @override
+  String get setNotifBackupSub => 'When an automatic backup fails';
+
+  @override
+  String get setNotifInboxSub => 'Recent alerts and reminders';
+
+  @override
+  String get setAppTutorial => 'App tutorial';
+
+  @override
+  String get setAppTutorialSub => 'Replay the guided tour';
+
+  @override
+  String get setSendFeedback => 'Send feedback';
+
+  @override
+  String get setSendFeedbackSub => 'Tell us what to fix or add';
+
+  @override
+  String get setUpcoming => 'Upcoming events';
+
+  @override
+  String get setUpcomingSub => 'Everything coming up, in one place';
+
+  @override
+  String get setStories => 'Money story archive';
+
+  @override
+  String get proCardTry => 'Try Kuber Pro';
+
+  @override
+  String get proCardTrySub => 'Unlock every feature. Pay once, no account.';
+
+  @override
+  String proCardActive(String date) {
+    return 'Active since $date. Thank you!';
+  }
+
+  @override
+  String get proCardMonthly => 'Monthly';
+
+  @override
+  String get proCardYearly => 'Yearly';
+
+  @override
+  String get proCardLifetime => 'Lifetime';
+
+  @override
+  String get proCardPromo => 'Promo';
+
+  @override
+  String get proCardPromoForever => 'Free lifetime. Thanks!';
+
+  @override
+  String proCardPromoUntil(String date) {
+    return 'Free until $date';
+  }
+
+  @override
+  String get searchHint => 'Search More';
+
+  @override
+  String get searchAll => 'All';
+
+  @override
+  String get searchFeatures => 'Features';
+
+  @override
+  String get searchLoan => 'Loan';
+
+  @override
+  String get searchInvestment => 'Investment';
+
+  @override
+  String get searchReminder => 'Reminder';
+
+  @override
+  String get searchYouLent => 'You lent';
+
+  @override
+  String get searchYouBorrowed => 'You borrowed';
+
+  @override
+  String get searchSettled => 'Settled';
+
+  @override
+  String searchDue(String date) {
+    return 'due $date';
+  }
+
+  @override
+  String searchEdited(String date) {
+    return 'edited $date';
+  }
+
+  @override
+  String searchEveryDay(String amount) {
+    return '$amount every day';
+  }
+
+  @override
+  String searchEveryWeek(String amount) {
+    return '$amount every week';
+  }
+
+  @override
+  String searchEveryMonth(String amount) {
+    return '$amount every month';
+  }
+
+  @override
+  String searchEveryYear(String amount) {
+    return '$amount every year';
+  }
+
+  @override
+  String searchSeeAll(String count) {
+    return 'See all $count';
+  }
+
+  @override
+  String searchMatches(String words) {
+    return 'Matches: $words';
+  }
+
+  @override
+  String get searchRecent => 'Recent';
+
+  @override
+  String get searchClear => 'Clear';
+
+  @override
+  String get searchTry => 'Try searching';
+
+  @override
+  String get searchTryDark => 'Dark mode';
+
+  @override
+  String get searchTryBackup => 'Backup';
+
+  @override
+  String get searchTryEmi => 'EMI calculator';
+
+  @override
+  String searchNoResults(String query) {
+    return 'No results for “$query”';
+  }
+
+  @override
+  String get searchNoResultsBody =>
+      'Search looks at names and titles across More: settings, accounts, categories, tags, money plans, people, cards, notes and tools. Try a shorter word.';
+
+  @override
+  String searchShorter(String word) {
+    return 'Search “$word”';
+  }
+
+  @override
+  String get searchTransaction => 'Looking for a transaction?';
+
+  @override
+  String get searchInHistory => 'Search in History';
+
+  @override
+  String get searchLoading => 'Looking in your accounts, loans and more';
+
+  @override
+  String get searchPrivateNote =>
+      'Kuber Cards and Notes match by name and title only. Card numbers and note text are never searched.';
+
+  @override
+  String get setKwFeedback => 'feedback bug report suggest contact';
+
+  @override
+  String get setKwExpressive => 'expressive colour color vivid tint';
+
+  @override
+  String get setKwPureBlack => 'dark black amoled oled night theme';
+
+  @override
+  String searchTagSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return 'Tag · $_temp0';
+  }
 }

@@ -12,6 +12,7 @@ import '../../features/settings/providers/settings_provider.dart';
 import 'app_icon_button.dart';
 import 'kuber_info_bottom_sheet.dart';
 import 'kuber_menu.dart';
+import 'kuber_list.dart';
 import 'kuber_path.dart';
 import 'kuber_search_pill.dart';
 
@@ -205,13 +206,28 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
         style: theme.textTheme.titleLarge!.copyWith(color: cs.onSurface),
       );
       if (hasPath) {
-        titleWidget = Semantics(
-          button: true,
-          hint: AppLocalizations.of(context)!.pathSheetHint,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => KuberPath.open(context),
-            child: titleWidget,
+        // The press sits 8 out from the text, so the title stays on its edge.
+        titleWidget = Transform.translate(
+          offset: const Offset(-KuberSpace.sm, 0),
+          child: Semantics(
+            button: true,
+            hint: AppLocalizations.of(context)!.pathSheetHint,
+            child: InkWell(
+              onTap: () => KuberPath.open(context),
+              borderRadius: KuberShape.mediumR,
+              overlayColor: kuberPressedLayer(cs),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 40),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: KuberSpace.sm),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: 1,
+                    child: titleWidget,
+                  ),
+                ),
+              ),
+            ),
           ),
         );
       }

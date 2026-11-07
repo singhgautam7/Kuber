@@ -193,6 +193,10 @@ class MainActivity : FlutterFragmentActivity() {
             when (call.method) {
                 "isPinShortcutSupported" ->
                     result.success(ShortcutManagerCompat.isRequestPinShortcutSupported(this))
+                "openSecuritySettings" -> {
+                    startActivity(Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS))
+                    result.success(true)
+                }
                 // Optional app-drawer entries (LauncherEntryActivity).
                 "launcherEntries" -> result.success(LauncherEntryActivity.states(this))
                 "setLauncherEntry" -> result.success(

@@ -21,8 +21,8 @@ class OnboardingDotsIndicator extends StatelessWidget {
       children: List.generate(pageCount, (index) {
         final active = index == currentPage;
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubicEmphasized,
           width: active ? 24 : 8,
           height: 8,
           margin: const EdgeInsets.symmetric(horizontal: 4),

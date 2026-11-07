@@ -60,6 +60,14 @@ class PrefsKeys {
   // Quick Add
   static const defaultAccountId = 'kuber_default_account_id';
 
+  // More search: recent searches, newest first.
+  static const moreSearchRecent = 'kuber_more_search_recent';
+
+  // Notifications page switches
+  static const notifyPayments = 'kuber_notify_payments';
+  static const notifyBudgets = 'kuber_notify_budgets';
+  static const notifyBackups = 'kuber_notify_backups';
+
   // Privacy
   static const privacyMode = 'kuber_privacy_mode';
 

@@ -15447,7 +15447,7 @@ abstract class AppLocalizations {
   /// No description provided for @obStartRestoreSub.
   ///
   /// In en, this message translates to:
-  /// **'Bring everything back from a Kuber backup file'**
+  /// **'Bring back your data from a Kuber backup'**
   String get obStartRestoreSub;
 
   /// No description provided for @obStartCsv.
@@ -15459,7 +15459,7 @@ abstract class AppLocalizations {
   /// No description provided for @obStartCsvSub.
   ///
   /// In en, this message translates to:
-  /// **'Bring in transactions from a spreadsheet'**
+  /// **'Move in from another app or a spreadsheet'**
   String get obStartCsvSub;
 
   /// No description provided for @obStartFresh.
@@ -15591,7 +15591,7 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetLongPress.
   ///
   /// In en, this message translates to:
-  /// **'Press and hold to see the path to this page'**
+  /// **'Show path'**
   String get pathSheetLongPress;
 
   /// No description provided for @setPathTip.
@@ -15725,6 +15725,1014 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refunds are handled by Google Play under its refund policy.'**
   String get proFaqRefundA;
+
+  /// No description provided for @obStartTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your money, on your phone'**
+  String get obStartTagline;
+
+  /// No description provided for @obLangTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose language'**
+  String get obLangTitle;
+
+  /// No description provided for @obLangSub.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this later in Settings'**
+  String get obLangSub;
+
+  /// No description provided for @obRestoreBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring your data'**
+  String get obRestoreBusy;
+
+  /// No description provided for @obRestoreStepTxns.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} transactions'**
+  String obRestoreStepTxns(String done, String total);
+
+  /// No description provided for @obRestoreStepItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} items'**
+  String obRestoreStepItems(String done, String total);
+
+  /// No description provided for @obRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t restore this backup'**
+  String get obRestoreFailed;
+
+  /// No description provided for @obRestoreFailedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'This file isn\'t a Kuber backup, or it\'s damaged. Nothing on your phone was changed.'**
+  String get obRestoreFailedSub;
+
+  /// No description provided for @obRestoreRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get obRestoreRetry;
+
+  /// No description provided for @obRestoreOtherFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another file'**
+  String get obRestoreOtherFile;
+
+  /// No description provided for @obCsvBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing your CSV'**
+  String get obCsvBusy;
+
+  /// No description provided for @obCsvStep.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} rows'**
+  String obCsvStep(String done, String total);
+
+  /// No description provided for @obCsvFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t import this file'**
+  String get obCsvFailed;
+
+  /// No description provided for @obCsvFailedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber can\'t read this CSV, or it\'s damaged. Nothing on your phone was changed.'**
+  String get obCsvFailedSub;
+
+  /// No description provided for @obNotifEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI and recurring reminders'**
+  String get obNotifEmi;
+
+  /// No description provided for @obNotifEmiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A heads-up before each payment'**
+  String get obNotifEmiSub;
+
+  /// No description provided for @obNotifBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget alerts'**
+  String get obNotifBudget;
+
+  /// No description provided for @obNotifBudgetSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When you get close to a limit'**
+  String get obNotifBudgetSub;
+
+  /// No description provided for @obNotifBackupRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup reminders'**
+  String get obNotifBackupRow;
+
+  /// No description provided for @obNotifBackupSub.
+  ///
+  /// In en, this message translates to:
+  /// **'So your data stays safe'**
+  String get obNotifBackupSub;
+
+  /// No description provided for @obNotifSampleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI due tomorrow'**
+  String get obNotifSampleTitle;
+
+  /// No description provided for @obNotifSampleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'SBI Home Loan · ₹24,350'**
+  String get obNotifSampleBody;
+
+  /// No description provided for @pathSheetSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any page to go back to it'**
+  String get pathSheetSub;
+
+  /// No description provided for @pathSheetFromNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened from a notification'**
+  String get pathSheetFromNotification;
+
+  /// No description provided for @setSecYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Make it yours'**
+  String get setSecYours;
+
+  /// No description provided for @setSecSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it safe'**
+  String get setSecSafe;
+
+  /// No description provided for @setSecHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and more'**
+  String get setSecHelp;
+
+  /// No description provided for @setYourNameRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get setYourNameRow;
+
+  /// No description provided for @setLookSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{theme} · {size} text size'**
+  String setLookSub(String theme, String size);
+
+  /// No description provided for @setPrefsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{language} · {currency} · {format} format'**
+  String setPrefsSub(String language, String currency, String format);
+
+  /// No description provided for @setDrawerNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No extra icons'**
+  String get setDrawerNone;
+
+  /// No description provided for @setPrivacyPinOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards PIN on'**
+  String get setPrivacyPinOn;
+
+  /// No description provided for @setLastBackupAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup {ago}'**
+  String setLastBackupAgo(String ago);
+
+  /// No description provided for @setNoBackupYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup yet'**
+  String get setNoBackupYet;
+
+  /// No description provided for @setNoBackupSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now to keep your data safe'**
+  String get setNoBackupSub;
+
+  /// No description provided for @setOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get setOn;
+
+  /// No description provided for @setOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get setOff;
+
+  /// No description provided for @setHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get setHelpTitle;
+
+  /// No description provided for @setHelpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'App tutorial, send feedback'**
+  String get setHelpSub;
+
+  /// No description provided for @setActivitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming events, Money story archive'**
+  String get setActivitySub;
+
+  /// No description provided for @setVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String setVersion(String version);
+
+  /// No description provided for @setBottomNav.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom navigation'**
+  String get setBottomNav;
+
+  /// No description provided for @setNavStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get setNavStandard;
+
+  /// No description provided for @setNavFloating.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating'**
+  String get setNavFloating;
+
+  /// No description provided for @setMoreLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'More tab layout'**
+  String get setMoreLayout;
+
+  /// No description provided for @setMoreLayoutSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple list or hero layout'**
+  String get setMoreLayoutSub;
+
+  /// No description provided for @setLayoutHero.
+  ///
+  /// In en, this message translates to:
+  /// **'Hero'**
+  String get setLayoutHero;
+
+  /// No description provided for @setSecHomeAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Home and Analytics'**
+  String get setSecHomeAnalytics;
+
+  /// No description provided for @setHomeWidgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Home widgets'**
+  String get setHomeWidgets;
+
+  /// No description provided for @setAnalyticsWidgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics widgets'**
+  String get setAnalyticsWidgets;
+
+  /// No description provided for @setWidgetsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} on · drag to reorder'**
+  String setWidgetsOn(String count);
+
+  /// No description provided for @setGallerySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber on your phone\'s home screen'**
+  String get setGallerySub;
+
+  /// No description provided for @setSecShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get setSecShortcuts;
+
+  /// No description provided for @setQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get setQuickActions;
+
+  /// No description provided for @setQuickActionsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press a tab for shortcuts'**
+  String get setQuickActionsSub;
+
+  /// No description provided for @setAddMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Add menu'**
+  String get setAddMenu;
+
+  /// No description provided for @setAddMenuSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press + for quick entries'**
+  String get setAddMenuSub;
+
+  /// No description provided for @setSecMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Language and money'**
+  String get setSecMoney;
+
+  /// No description provided for @setCurrencySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbol shown on amounts'**
+  String get setCurrencySub;
+
+  /// No description provided for @setNumberFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Number format'**
+  String get setNumberFormat;
+
+  /// No description provided for @setNumLakh.
+  ///
+  /// In en, this message translates to:
+  /// **'Lakh'**
+  String get setNumLakh;
+
+  /// No description provided for @setNumMillion.
+  ///
+  /// In en, this message translates to:
+  /// **'Million'**
+  String get setNumMillion;
+
+  /// No description provided for @setShowCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show currency code'**
+  String get setShowCode;
+
+  /// No description provided for @setShowCodeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'INR 500 instead of ₹500'**
+  String get setShowCodeSub;
+
+  /// No description provided for @setDefaultAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Default account'**
+  String get setDefaultAccount;
+
+  /// No description provided for @setDefaultAccountSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked first in Quick Add'**
+  String get setDefaultAccountSub;
+
+  /// No description provided for @setSecGestures.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures'**
+  String get setSecGestures;
+
+  /// No description provided for @setSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal swipe'**
+  String get setSwipe;
+
+  /// No description provided for @setSwipeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to change tabs'**
+  String get setSwipeSub;
+
+  /// No description provided for @setPrivacyMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy mode'**
+  String get setPrivacyMode;
+
+  /// No description provided for @setPrivacyModeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide balances and amounts'**
+  String get setPrivacyModeSub;
+
+  /// No description provided for @setAppLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get setAppLock;
+
+  /// No description provided for @setAppLockSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for fingerprint or face to open Kuber'**
+  String get setAppLockSub;
+
+  /// No description provided for @setAppLockNoFp.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a fingerprint or face on this phone'**
+  String get setAppLockNoFp;
+
+  /// No description provided for @setCardsFp.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with fingerprint'**
+  String get setCardsFp;
+
+  /// No description provided for @setCardsFpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only for Kuber Cards'**
+  String get setCardsFpSub;
+
+  /// No description provided for @setCardsFpNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up on this phone'**
+  String get setCardsFpNone;
+
+  /// No description provided for @setCardsFpSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Kuber Cards with fingerprint'**
+  String get setCardsFpSearch;
+
+  /// No description provided for @setCardsPinRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards PIN'**
+  String get setCardsPinRow;
+
+  /// No description provided for @setCardsPinRowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On · Change PIN'**
+  String get setCardsPinRowSub;
+
+  /// No description provided for @setCardsPinSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Cards PIN'**
+  String get setCardsPinSearch;
+
+  /// No description provided for @setNotesLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Require app lock for Notes'**
+  String get setNotesLock;
+
+  /// No description provided for @setNotesLockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for fingerprint or face to open Notes'**
+  String get setNotesLockOn;
+
+  /// No description provided for @setNotesLockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on App lock first'**
+  String get setNotesLockOff;
+
+  /// No description provided for @setLocksInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock and Kuber Cards unlock are separate. Changing one never changes the other.'**
+  String get setLocksInfo;
+
+  /// No description provided for @setLocksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two separate locks'**
+  String get setLocksTitle;
+
+  /// No description provided for @setLocksApp.
+  ///
+  /// In en, this message translates to:
+  /// **'asks for your fingerprint or face each time you open Kuber.'**
+  String get setLocksApp;
+
+  /// No description provided for @setLocksCards.
+  ///
+  /// In en, this message translates to:
+  /// **'has its own lock: your Cards PIN, and fingerprint if you turn it on here. It works even when App lock is off.'**
+  String get setLocksCards;
+
+  /// No description provided for @setLocksNeither.
+  ///
+  /// In en, this message translates to:
+  /// **'Turning one on or off never changes the other.'**
+  String get setLocksNeither;
+
+  /// No description provided for @setGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get setGotIt;
+
+  /// No description provided for @setNoFp.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no fingerprint or face unlock set up. Your Kuber Cards PIN still works.'**
+  String get setNoFp;
+
+  /// No description provided for @setNoFpOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings'**
+  String get setNoFpOpen;
+
+  /// No description provided for @setDrawerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Give Kuber Cards, Notes or Reminders their own icon in your phone\'s app list. Each icon opens straight into that feature.'**
+  String get setDrawerBody;
+
+  /// No description provided for @setDrawerPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview in your app list'**
+  String get setDrawerPreview;
+
+  /// No description provided for @setDrawerRowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Own icon in the app list'**
+  String get setDrawerRowSub;
+
+  /// No description provided for @setLastBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup'**
+  String get setLastBackup;
+
+  /// No description provided for @setBackupNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get setBackupNow;
+
+  /// No description provided for @setSecBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get setSecBackup;
+
+  /// No description provided for @setAutoBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups'**
+  String get setAutoBackups;
+
+  /// No description provided for @setRestoreSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the data on this phone'**
+  String get setRestoreSub;
+
+  /// No description provided for @setSecImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import and export'**
+  String get setSecImport;
+
+  /// No description provided for @setImportCsvSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring in transactions from a spreadsheet'**
+  String get setImportCsvSub;
+
+  /// No description provided for @setImportKuber.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Kuber file'**
+  String get setImportKuber;
+
+  /// No description provided for @setImportKuberSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A JSON file exported from Kuber'**
+  String get setImportKuberSub;
+
+  /// No description provided for @setExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export data'**
+  String get setExport;
+
+  /// No description provided for @setExportSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Save everything as a JSON file'**
+  String get setExportSub;
+
+  /// No description provided for @setSecDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get setSecDanger;
+
+  /// No description provided for @setClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all data'**
+  String get setClear;
+
+  /// No description provided for @setClearSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes everything on this phone. Cannot be undone.'**
+  String get setClearSub;
+
+  /// No description provided for @setMockData.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate mock data'**
+  String get setMockData;
+
+  /// No description provided for @setNotifOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders and alerts won\'t reach you.'**
+  String get setNotifOffBody;
+
+  /// No description provided for @setTurnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get setTurnOn;
+
+  /// No description provided for @setNotifAllowedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed in phone settings'**
+  String get setNotifAllowedShort;
+
+  /// No description provided for @setSecSends.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kuber sends'**
+  String get setSecSends;
+
+  /// No description provided for @setNotifEmiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When a payment is recorded'**
+  String get setNotifEmiSub;
+
+  /// No description provided for @setNotifBudgetSub.
+  ///
+  /// In en, this message translates to:
+  /// **'At the limits you set on a budget'**
+  String get setNotifBudgetSub;
+
+  /// No description provided for @setNotifBackupSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When an automatic backup fails'**
+  String get setNotifBackupSub;
+
+  /// No description provided for @setNotifInboxSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent alerts and reminders'**
+  String get setNotifInboxSub;
+
+  /// No description provided for @setAppTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'App tutorial'**
+  String get setAppTutorial;
+
+  /// No description provided for @setAppTutorialSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay the guided tour'**
+  String get setAppTutorialSub;
+
+  /// No description provided for @setSendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get setSendFeedback;
+
+  /// No description provided for @setSendFeedbackSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what to fix or add'**
+  String get setSendFeedbackSub;
+
+  /// No description provided for @setUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming events'**
+  String get setUpcoming;
+
+  /// No description provided for @setUpcomingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything coming up, in one place'**
+  String get setUpcomingSub;
+
+  /// No description provided for @setStories.
+  ///
+  /// In en, this message translates to:
+  /// **'Money story archive'**
+  String get setStories;
+
+  /// No description provided for @proCardTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Kuber Pro'**
+  String get proCardTry;
+
+  /// No description provided for @proCardTrySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock every feature. Pay once, no account.'**
+  String get proCardTrySub;
+
+  /// No description provided for @proCardActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active since {date}. Thank you!'**
+  String proCardActive(String date);
+
+  /// No description provided for @proCardMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get proCardMonthly;
+
+  /// No description provided for @proCardYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get proCardYearly;
+
+  /// No description provided for @proCardLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get proCardLifetime;
+
+  /// No description provided for @proCardPromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo'**
+  String get proCardPromo;
+
+  /// No description provided for @proCardPromoForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Free lifetime. Thanks!'**
+  String get proCardPromoForever;
+
+  /// No description provided for @proCardPromoUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Free until {date}'**
+  String proCardPromoUntil(String date);
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search More'**
+  String get searchHint;
+
+  /// No description provided for @searchAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get searchAll;
+
+  /// No description provided for @searchFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get searchFeatures;
+
+  /// No description provided for @searchLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan'**
+  String get searchLoan;
+
+  /// No description provided for @searchInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment'**
+  String get searchInvestment;
+
+  /// No description provided for @searchReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get searchReminder;
+
+  /// No description provided for @searchYouLent.
+  ///
+  /// In en, this message translates to:
+  /// **'You lent'**
+  String get searchYouLent;
+
+  /// No description provided for @searchYouBorrowed.
+  ///
+  /// In en, this message translates to:
+  /// **'You borrowed'**
+  String get searchYouBorrowed;
+
+  /// No description provided for @searchSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get searchSettled;
+
+  /// No description provided for @searchDue.
+  ///
+  /// In en, this message translates to:
+  /// **'due {date}'**
+  String searchDue(String date);
+
+  /// No description provided for @searchEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'edited {date}'**
+  String searchEdited(String date);
+
+  /// No description provided for @searchEveryDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every day'**
+  String searchEveryDay(String amount);
+
+  /// No description provided for @searchEveryWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every week'**
+  String searchEveryWeek(String amount);
+
+  /// No description provided for @searchEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every month'**
+  String searchEveryMonth(String amount);
+
+  /// No description provided for @searchEveryYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every year'**
+  String searchEveryYear(String amount);
+
+  /// No description provided for @searchSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all {count}'**
+  String searchSeeAll(String count);
+
+  /// No description provided for @searchMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches: {words}'**
+  String searchMatches(String words);
+
+  /// No description provided for @searchRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get searchRecent;
+
+  /// No description provided for @searchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get searchClear;
+
+  /// No description provided for @searchTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try searching'**
+  String get searchTry;
+
+  /// No description provided for @searchTryDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get searchTryDark;
+
+  /// No description provided for @searchTryBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get searchTryBackup;
+
+  /// No description provided for @searchTryEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI calculator'**
+  String get searchTryEmi;
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for “{query}”'**
+  String searchNoResults(String query);
+
+  /// No description provided for @searchNoResultsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Search looks at names and titles across More: settings, accounts, categories, tags, money plans, people, cards, notes and tools. Try a shorter word.'**
+  String get searchNoResultsBody;
+
+  /// No description provided for @searchShorter.
+  ///
+  /// In en, this message translates to:
+  /// **'Search “{word}”'**
+  String searchShorter(String word);
+
+  /// No description provided for @searchTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for a transaction?'**
+  String get searchTransaction;
+
+  /// No description provided for @searchInHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in History'**
+  String get searchInHistory;
+
+  /// No description provided for @searchLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking in your accounts, loans and more'**
+  String get searchLoading;
+
+  /// No description provided for @searchPrivateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Cards and Notes match by name and title only. Card numbers and note text are never searched.'**
+  String get searchPrivateNote;
+
+  /// No description provided for @setKwFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'feedback bug report suggest contact'**
+  String get setKwFeedback;
+
+  /// No description provided for @setKwExpressive.
+  ///
+  /// In en, this message translates to:
+  /// **'expressive colour color vivid tint'**
+  String get setKwExpressive;
+
+  /// No description provided for @setKwPureBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'dark black amoled oled night theme'**
+  String get setKwPureBlack;
+
+  /// No description provided for @searchTagSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag · {count, plural, one{1 transaction} other{{count} transactions}}'**
+  String searchTagSub(int count);
 }
 
 class _AppLocalizationsDelegate

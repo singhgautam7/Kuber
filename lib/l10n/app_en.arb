@@ -6246,9 +6246,9 @@
   "setKwTutorial": "tutorial help guide walkthrough learn",
   "setKwAbout": "about version licence contact privacy policy",
   "obStartRestore": "Restore from backup",
-  "obStartRestoreSub": "Bring everything back from a Kuber backup file",
+  "obStartRestoreSub": "Bring back your data from a Kuber backup",
   "obStartCsv": "Import from CSV",
-  "obStartCsvSub": "Bring in transactions from a spreadsheet",
+  "obStartCsvSub": "Move in from another app or a spreadsheet",
   "obStartFresh": "Start fresh",
   "obRestoreCancelled": "Restore cancelled. Nothing changed.",
   "obImportCancelled": "Import cancelled. Nothing changed.",
@@ -6270,7 +6270,7 @@
   "pathSheetTitle": "How you got here",
   "pathSheetCurrent": "You are here",
   "pathSheetHint": "Shows the path to this page",
-  "pathSheetLongPress": "Press and hold to see the path to this page",
+  "pathSheetLongPress": "Show path",
   "setPathTip": "Tap a page title, or long-press back, to jump to any earlier page.",
   "proFaqTitle": "Frequently asked questions",
   "proFaqLifetimeQ": "Is Lifetime a one-time payment?",
@@ -6292,5 +6292,338 @@
   "proFaqPaymentQ": "Can Kuber see my payment details?",
   "proFaqPaymentA": "No. Google Play handles payments, and Kuber never sees your card or bank details.",
   "proFaqRefundQ": "Can I get a refund?",
-  "proFaqRefundA": "Refunds are handled by Google Play under its refund policy."
+  "proFaqRefundA": "Refunds are handled by Google Play under its refund policy.",
+  "obStartTagline": "Your money, on your phone",
+  "obLangTitle": "Choose language",
+  "obLangSub": "You can change this later in Settings",
+  "obRestoreBusy": "Restoring your data",
+  "obRestoreStepTxns": "{done} of {total} transactions",
+  "@obRestoreStepTxns": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "obRestoreStepItems": "{done} of {total} items",
+  "@obRestoreStepItems": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "obRestoreFailed": "Couldn't restore this backup",
+  "obRestoreFailedSub": "This file isn't a Kuber backup, or it's damaged. Nothing on your phone was changed.",
+  "obRestoreRetry": "Try again",
+  "obRestoreOtherFile": "Choose another file",
+  "obCsvBusy": "Importing your CSV",
+  "obCsvStep": "{done} of {total} rows",
+  "@obCsvStep": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "obCsvFailed": "Couldn't import this file",
+  "obCsvFailedSub": "Kuber can't read this CSV, or it's damaged. Nothing on your phone was changed.",
+  "obNotifEmi": "EMI and recurring reminders",
+  "obNotifEmiSub": "A heads-up before each payment",
+  "obNotifBudget": "Budget alerts",
+  "obNotifBudgetSub": "When you get close to a limit",
+  "obNotifBackupRow": "Backup reminders",
+  "obNotifBackupSub": "So your data stays safe",
+  "obNotifSampleTitle": "EMI due tomorrow",
+  "obNotifSampleBody": "SBI Home Loan · ₹24,350",
+  "pathSheetSub": "Tap any page to go back to it",
+  "pathSheetFromNotification": "Opened from a notification",
+  "setSecYours": "Make it yours",
+  "setSecSafe": "Keep it safe",
+  "setSecHelp": "Help and more",
+  "setYourNameRow": "Your name",
+  "setLookSub": "{theme} · {size} text size",
+  "@setLookSub": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "setPrefsSub": "{language} · {currency} · {format} format",
+  "@setPrefsSub": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "setDrawerNone": "No extra icons",
+  "setPrivacyPinOn": "Cards PIN on",
+  "setLastBackupAgo": "Last backup {ago}",
+  "@setLastBackupAgo": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "setNoBackupYet": "No backup yet",
+  "setNoBackupSub": "Back up now to keep your data safe",
+  "setOn": "On",
+  "setOff": "Off",
+  "setHelpTitle": "Help",
+  "setHelpSub": "App tutorial, send feedback",
+  "setActivitySub": "Upcoming events, Money story archive",
+  "setVersion": "Version {version}",
+  "@setVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "setBottomNav": "Bottom navigation",
+  "setNavStandard": "Standard",
+  "setNavFloating": "Floating",
+  "setMoreLayout": "More tab layout",
+  "setMoreLayoutSub": "Simple list or hero layout",
+  "setLayoutHero": "Hero",
+  "setSecHomeAnalytics": "Home and Analytics",
+  "setHomeWidgets": "Home widgets",
+  "setAnalyticsWidgets": "Analytics widgets",
+  "setWidgetsOn": "{count} on · drag to reorder",
+  "@setWidgetsOn": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "setGallerySub": "Kuber on your phone's home screen",
+  "setSecShortcuts": "Shortcuts",
+  "setQuickActions": "Quick actions",
+  "setQuickActionsSub": "Long-press a tab for shortcuts",
+  "setAddMenu": "Add menu",
+  "setAddMenuSub": "Long-press + for quick entries",
+  "setSecMoney": "Language and money",
+  "setCurrencySub": "Symbol shown on amounts",
+  "setNumberFormat": "Number format",
+  "setNumLakh": "Lakh",
+  "setNumMillion": "Million",
+  "setShowCode": "Show currency code",
+  "setShowCodeSub": "INR 500 instead of ₹500",
+  "setDefaultAccount": "Default account",
+  "setDefaultAccountSub": "Picked first in Quick Add",
+  "setSecGestures": "Gestures",
+  "setSwipe": "Horizontal swipe",
+  "setSwipeSub": "Swipe left or right to change tabs",
+  "setPrivacyMode": "Privacy mode",
+  "setPrivacyModeSub": "Hide balances and amounts",
+  "setAppLock": "App lock",
+  "setAppLockSub": "Ask for fingerprint or face to open Kuber",
+  "setAppLockNoFp": "Needs a fingerprint or face on this phone",
+  "setCardsFp": "Unlock with fingerprint",
+  "setCardsFpSub": "Only for Kuber Cards",
+  "setCardsFpNone": "Not set up on this phone",
+  "setCardsFpSearch": "Unlock Kuber Cards with fingerprint",
+  "setCardsPinRow": "Cards PIN",
+  "setCardsPinRowSub": "On · Change PIN",
+  "setCardsPinSearch": "Kuber Cards PIN",
+  "setNotesLock": "Require app lock for Notes",
+  "setNotesLockOn": "Ask for fingerprint or face to open Notes",
+  "setNotesLockOff": "Turn on App lock first",
+  "setLocksInfo": "App lock and Kuber Cards unlock are separate. Changing one never changes the other.",
+  "setLocksTitle": "Two separate locks",
+  "setLocksApp": "asks for your fingerprint or face each time you open Kuber.",
+  "setLocksCards": "has its own lock: your Cards PIN, and fingerprint if you turn it on here. It works even when App lock is off.",
+  "setLocksNeither": "Turning one on or off never changes the other.",
+  "setGotIt": "Got it",
+  "setNoFp": "This phone has no fingerprint or face unlock set up. Your Kuber Cards PIN still works.",
+  "setNoFpOpen": "Open phone settings",
+  "setDrawerBody": "Give Kuber Cards, Notes or Reminders their own icon in your phone's app list. Each icon opens straight into that feature.",
+  "setDrawerPreview": "Preview in your app list",
+  "setDrawerRowSub": "Own icon in the app list",
+  "setLastBackup": "Last backup",
+  "setBackupNow": "Back up now",
+  "setSecBackup": "Backup",
+  "setAutoBackups": "Automatic backups",
+  "setRestoreSub": "Replace the data on this phone",
+  "setSecImport": "Import and export",
+  "setImportCsvSub": "Bring in transactions from a spreadsheet",
+  "setImportKuber": "Import Kuber file",
+  "setImportKuberSub": "A JSON file exported from Kuber",
+  "setExport": "Export data",
+  "setExportSub": "Save everything as a JSON file",
+  "setSecDanger": "Danger zone",
+  "setClear": "Clear all data",
+  "setClearSub": "Deletes everything on this phone. Cannot be undone.",
+  "setMockData": "Generate mock data",
+  "setNotifOffBody": "Reminders and alerts won't reach you.",
+  "setTurnOn": "Turn on",
+  "setNotifAllowedShort": "Allowed in phone settings",
+  "setSecSends": "What Kuber sends",
+  "setNotifEmiSub": "When a payment is recorded",
+  "setNotifBudgetSub": "At the limits you set on a budget",
+  "setNotifBackupSub": "When an automatic backup fails",
+  "setNotifInboxSub": "Recent alerts and reminders",
+  "setAppTutorial": "App tutorial",
+  "setAppTutorialSub": "Replay the guided tour",
+  "setSendFeedback": "Send feedback",
+  "setSendFeedbackSub": "Tell us what to fix or add",
+  "setUpcoming": "Upcoming events",
+  "setUpcomingSub": "Everything coming up, in one place",
+  "setStories": "Money story archive",
+  "proCardTry": "Try Kuber Pro",
+  "proCardTrySub": "Unlock every feature. Pay once, no account.",
+  "proCardActive": "Active since {date}. Thank you!",
+  "@proCardActive": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proCardMonthly": "Monthly",
+  "proCardYearly": "Yearly",
+  "proCardLifetime": "Lifetime",
+  "proCardPromo": "Promo",
+  "proCardPromoForever": "Free lifetime. Thanks!",
+  "proCardPromoUntil": "Free until {date}",
+  "@proCardPromoUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchHint": "Search More",
+  "searchAll": "All",
+  "searchFeatures": "Features",
+  "searchLoan": "Loan",
+  "searchInvestment": "Investment",
+  "searchReminder": "Reminder",
+  "searchYouLent": "You lent",
+  "searchYouBorrowed": "You borrowed",
+  "searchSettled": "Settled",
+  "searchDue": "due {date}",
+  "@searchDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEdited": "edited {date}",
+  "@searchEdited": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryDay": "{amount} every day",
+  "@searchEveryDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryWeek": "{amount} every week",
+  "@searchEveryWeek": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryMonth": "{amount} every month",
+  "@searchEveryMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryYear": "{amount} every year",
+  "@searchEveryYear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchSeeAll": "See all {count}",
+  "@searchSeeAll": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "searchMatches": "Matches: {words}",
+  "@searchMatches": {
+    "placeholders": {
+      "words": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecent": "Recent",
+  "searchClear": "Clear",
+  "searchTry": "Try searching",
+  "searchTryDark": "Dark mode",
+  "searchTryBackup": "Backup",
+  "searchTryEmi": "EMI calculator",
+  "searchNoResults": "No results for “{query}”",
+  "@searchNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchNoResultsBody": "Search looks at names and titles across More: settings, accounts, categories, tags, money plans, people, cards, notes and tools. Try a shorter word.",
+  "searchShorter": "Search “{word}”",
+  "@searchShorter": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "searchTransaction": "Looking for a transaction?",
+  "searchInHistory": "Search in History",
+  "searchLoading": "Looking in your accounts, loans and more",
+  "searchPrivateNote": "Kuber Cards and Notes match by name and title only. Card numbers and note text are never searched.",
+  "setKwFeedback": "feedback bug report suggest contact",
+  "setKwExpressive": "expressive colour color vivid tint",
+  "setKwPureBlack": "dark black amoled oled night theme",
+  "searchTagSub": "Tag · {count, plural, one{1 transaction} other{{count} transactions}}",
+  "@searchTagSub": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

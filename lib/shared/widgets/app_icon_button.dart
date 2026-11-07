@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -164,12 +166,7 @@ class AppIconButton extends StatelessWidget {
         child: button,
       );
     } else if (longPressHint != null) {
-      // The long-press itself acts, so this one shows on hover and focus.
-      button = Tooltip(
-        message: longPressHint!,
-        triggerMode: TooltipTriggerMode.manual,
-        child: button,
-      );
+      button = _HoldHint(message: longPressHint!, child: button);
     }
 
     return Semantics(
@@ -180,6 +177,74 @@ class AppIconButton extends StatelessWidget {
       onLongPress: onLongPress,
       excludeSemantics: true,
       child: button,
+    );
+  }
+}
+
+/// The hint on a long-press action: hover, focus, and the start of a hold (the
+/// long-press itself then acts). A held button gets a soft ring.
+class _HoldHint extends StatefulWidget {
+  final String message;
+  final Widget child;
+  const _HoldHint({required this.message, required this.child});
+
+  @override
+  State<_HoldHint> createState() => _HoldHintState();
+}
+
+class _HoldHintState extends State<_HoldHint> {
+  final _tip = GlobalKey<TooltipState>();
+  Timer? _timer;
+  bool _held = false;
+
+  void _down(PointerDownEvent _) {
+    // A plain tap never sees it.
+    _timer = Timer(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      setState(() => _held = true);
+      _tip.currentState?.ensureTooltipVisible();
+    });
+  }
+
+  void _up(PointerEvent _) {
+    _timer?.cancel();
+    if (_held) setState(() => _held = false);
+    Tooltip.dismissAllToolTips();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Listener(
+      onPointerDown: _down,
+      onPointerUp: _up,
+      onPointerCancel: _up,
+      child: Tooltip(
+        key: _tip,
+        message: widget.message,
+        triggerMode: TooltipTriggerMode.manual,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (_held)
+              Container(
+                width: KuberSpace.tapTarget,
+                height: KuberSpace.tapTarget,
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            widget.child,
+          ],
+        ),
+      ),
     );
   }
 }

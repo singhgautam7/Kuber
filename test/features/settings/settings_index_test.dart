@@ -9,6 +9,7 @@ import 'package:kuber/features/kuber_cards/providers/kuber_cards_provider.dart';
 import 'package:kuber/features/settings/screens/data_management_screen.dart';
 import 'package:kuber/features/settings/screens/settings_pages.dart';
 import 'package:kuber/features/settings/screens/settings_screen.dart';
+import 'package:kuber/features/settings/screens/theme_screen.dart';
 import 'package:kuber/features/settings/settings_index.dart';
 import 'package:kuber/features/settings/widgets/settings_anchor.dart';
 import 'package:kuber/features/settings/widgets/settings_section.dart';
@@ -70,7 +71,9 @@ void main() {
     SettingsArea.privacy: const PrivacySecurityScreen(),
     SettingsArea.drawer: const AppDrawerScreen(),
     SettingsArea.notifications: const NotificationsSettingsScreen(),
+    SettingsArea.help: const HelpSettingsScreen(),
     SettingsArea.activity: const ActivitySettingsScreen(),
+    SettingsArea.theme: const ThemeScreen(),
     SettingsArea.data: const DataManagementScreen(),
   };
 

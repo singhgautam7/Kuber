@@ -46,7 +46,7 @@ List<SettingsChoice<MoreTabLayout>> moreTabLayoutChoices(
   ),
   SettingsChoice(
     value: MoreTabLayout.modern,
-    label: context.l10n.navModernChoice,
+    label: context.l10n.setLayoutHero,
     subtitle: context.l10n.moreTabModernSubtitle,
     icon: Icons.grid_view_rounded,
   ),

@@ -351,7 +351,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                                           perCategoryThisMonthCount[catIdStr] ??
                                           0,
                                       groupName: searchTag,
-                                      onTap: () => _showCategoryDetails(
+                                      onTap: () => showCategoryDetails(
                                         context,
                                         ref,
                                         cat,
@@ -413,7 +413,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                                               perCategoryThisMonthCount[cat.id
                                                   .toString()] ??
                                               0,
-                                          onTap: () => _showCategoryDetails(
+                                          onTap: () => showCategoryDetails(
                                             context,
                                             ref,
                                             cat,
@@ -455,7 +455,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                                             perCategoryThisMonthCount[cat.id
                                                 .toString()] ??
                                             0,
-                                        onTap: () => _showCategoryDetails(
+                                        onTap: () => showCategoryDetails(
                                           context,
                                           ref,
                                           cat,
@@ -676,174 +676,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
-  void _showCategoryDetails(
-    BuildContext context,
-    WidgetRef ref,
-    Category cat,
-    String? groupName,
-  ) {
-    final typeValue = cat.effectiveType == 'both'
-        ? context.l10n.incomeAndExpense
-        : cat.effectiveType == 'income'
-        ? context.l10n.incomeLabel
-        : context.l10n.expenseLabel;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => KuberBottomSheet(
-        title: cat.name,
-        subtitle: context.l10n.categoryDetail,
-        leadingIcon: CategoryIcon.square(
-          icon: IconMapper.fromString(cat.icon),
-          rawColor: Color(cat.colorValue),
-          size: 48,
-        ),
-        actions: SheetButtonSection(
-          padding: EdgeInsets.zero,
-          primary: SheetAction(
-            label: context.l10n.viewTransactions,
-            icon: Icons.receipt_long_rounded,
-            onPressed: () {
-              ref.read(historyFilterProvider.notifier).clearAll();
-              ref
-                  .read(historyFilterProvider.notifier)
-                  .setFilters(categoryIds: {cat.id.toString()});
-              context.go('/history');
-            },
-          ),
-          actions: [
-            SheetAction(
-              label: context.l10n.editLabel,
-              icon: Icons.edit_outlined,
-              onPressed: () {
-                Navigator.pop(context);
-                context.push(
-                  '/category/add',
-                  extra: CategoryRouteArgs(category: cat),
-                );
-              },
-            ),
-            SheetAction(
-              label: context.l10n.deleteLabel,
-              icon: Icons.delete_outline_rounded,
-              destructive: true,
-              onPressed: () {
-                Navigator.pop(context);
-                _confirmDelete(context, ref, cat);
-              },
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Consumer(
-              builder: (context, ref, _) {
-                final lastTxn = ref
-                    .watch(categoryRecentTransactionProvider(cat.id))
-                    .valueOrNull;
-                final rows = <InfoTableRow>[
-                  InfoTableDataRow(
-                    label: context.l10n.typeLabel,
-                    value: typeValue,
-                  ),
-                  if (groupName != null)
-                    InfoTableDataRow(
-                      label: context.l10n.groupLabel,
-                      value: groupName,
-                    ),
-                  if (lastTxn != null)
-                    InfoTableDataRow(
-                      label: context.l10n.lastTransactionLabel,
-                      value:
-                          '${DateFormat('MMM d').format(lastTxn.createdAt)} • ${DateFormatter.time(lastTxn.createdAt)}',
-                    ),
-                ];
-                return InfoTable(rows: rows);
-              },
-            ),
-            const SizedBox(height: 22),
-            _BudgetStatusSection(category: cat),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, WidgetRef ref, Category cat) async {
-    final cs = Theme.of(context).colorScheme;
-    final repo = ref.read(categoryRepositoryProvider);
-    final hasTxns = await repo.hasTransactions(cat.id);
-
-    if (!context.mounted) return;
-
-    if (hasTxns) {
-      showDialog(
-        context: context,
-        builder: (dialogCtx) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberShape.extraLarge),
-            side: BorderSide(color: cs.outlineVariant, width: 1),
-          ),
-          title: Text(
-            context.l10n.cannotDeleteCategory,
-            style: localeFont(fontWeight: FontWeight.w600, color: cs.onSurface),
-          ),
-          content: Text(
-            context.l10n.cannotDeleteCategoryBody,
-            style: localeFont(color: cs.onSurfaceVariant),
-          ),
-          actions: [
-            AppButton(
-              label: context.l10n.okLabel,
-              type: AppButtonType.primary,
-              onPressed: () => Navigator.of(dialogCtx).pop(),
-            ),
-          ],
-        ),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (dialogCtx) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberShape.extraLarge),
-            side: BorderSide(color: cs.outlineVariant, width: 1),
-          ),
-          title: Text(
-            context.l10n.deleteCategoryConfirm,
-            style: localeFont(fontWeight: FontWeight.w600, color: cs.onSurface),
-          ),
-          content: Text(
-            context.l10n.deleteCategoryBody(cat.name),
-            style: localeFont(color: cs.onSurfaceVariant),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(),
-              child: Text(
-                context.l10n.cancelLabel,
-                style: localeFont(color: cs.onSurfaceVariant),
-              ),
-            ),
-            AppButton(
-              label: context.l10n.deleteLabel,
-              type: AppButtonType.danger,
-              onPressed: () async {
-                await ref.read(categoryRepositoryProvider).delete(cat.id);
-                ref.invalidate(categoryListProvider);
-                if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
-              },
-            ),
-          ],
-        ),
-      );
-    }
-  }
 }
 
 /// Group section header (board 3.16): caps name with its own "···" menu
@@ -1377,3 +1209,175 @@ class _BudgetStatusSection extends ConsumerWidget {
     );
   }
 }
+
+/// The category's detail sheet, from the list and from More search.
+void showCategoryDetails(
+  BuildContext context,
+  WidgetRef ref,
+  Category cat,
+  String? groupName,
+) {
+  final typeValue = cat.effectiveType == 'both'
+      ? context.l10n.incomeAndExpense
+      : cat.effectiveType == 'income'
+      ? context.l10n.incomeLabel
+      : context.l10n.expenseLabel;
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    useRootNavigator: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => KuberBottomSheet(
+      title: cat.name,
+      subtitle: context.l10n.categoryDetail,
+      leadingIcon: CategoryIcon.square(
+        icon: IconMapper.fromString(cat.icon),
+        rawColor: Color(cat.colorValue),
+        size: 48,
+      ),
+      actions: SheetButtonSection(
+        padding: EdgeInsets.zero,
+        primary: SheetAction(
+          label: context.l10n.viewTransactions,
+          icon: Icons.receipt_long_rounded,
+          onPressed: () {
+            ref.read(historyFilterProvider.notifier).clearAll();
+            ref
+                .read(historyFilterProvider.notifier)
+                .setFilters(categoryIds: {cat.id.toString()});
+            context.go('/history');
+          },
+        ),
+        actions: [
+          SheetAction(
+            label: context.l10n.editLabel,
+            icon: Icons.edit_outlined,
+            onPressed: () {
+              Navigator.pop(context);
+              context.push(
+                '/category/add',
+                extra: CategoryRouteArgs(category: cat),
+              );
+            },
+          ),
+          SheetAction(
+            label: context.l10n.deleteLabel,
+            icon: Icons.delete_outline_rounded,
+            destructive: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDelete(context, ref, cat);
+            },
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Consumer(
+            builder: (context, ref, _) {
+              final lastTxn = ref
+                  .watch(categoryRecentTransactionProvider(cat.id))
+                  .valueOrNull;
+              final rows = <InfoTableRow>[
+                InfoTableDataRow(
+                  label: context.l10n.typeLabel,
+                  value: typeValue,
+                ),
+                if (groupName != null)
+                  InfoTableDataRow(
+                    label: context.l10n.groupLabel,
+                    value: groupName,
+                  ),
+                if (lastTxn != null)
+                  InfoTableDataRow(
+                    label: context.l10n.lastTransactionLabel,
+                    value:
+                        '${DateFormat('MMM d').format(lastTxn.createdAt)} • ${DateFormatter.time(lastTxn.createdAt)}',
+                  ),
+              ];
+              return InfoTable(rows: rows);
+            },
+          ),
+          const SizedBox(height: 22),
+          _BudgetStatusSection(category: cat),
+        ],
+      ),
+    ),
+  );
+}
+
+
+void _confirmDelete(BuildContext context, WidgetRef ref, Category cat) async {
+  final cs = Theme.of(context).colorScheme;
+  final repo = ref.read(categoryRepositoryProvider);
+  final hasTxns = await repo.hasTransactions(cat.id);
+
+  if (!context.mounted) return;
+
+  if (hasTxns) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant, width: 1),
+        ),
+        title: Text(
+          context.l10n.cannotDeleteCategory,
+          style: localeFont(fontWeight: FontWeight.w600, color: cs.onSurface),
+        ),
+        content: Text(
+          context.l10n.cannotDeleteCategoryBody,
+          style: localeFont(color: cs.onSurfaceVariant),
+        ),
+        actions: [
+          AppButton(
+            label: context.l10n.okLabel,
+            type: AppButtonType.primary,
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+          ),
+        ],
+      ),
+    );
+  } else {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant, width: 1),
+        ),
+        title: Text(
+          context.l10n.deleteCategoryConfirm,
+          style: localeFont(fontWeight: FontWeight.w600, color: cs.onSurface),
+        ),
+        content: Text(
+          context.l10n.deleteCategoryBody(cat.name),
+          style: localeFont(color: cs.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              context.l10n.cancelLabel,
+              style: localeFont(color: cs.onSurfaceVariant),
+            ),
+          ),
+          AppButton(
+            label: context.l10n.deleteLabel,
+            type: AppButtonType.danger,
+            onPressed: () async {
+              await ref.read(categoryRepositoryProvider).delete(cat.id);
+              ref.invalidate(categoryListProvider);
+              if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+

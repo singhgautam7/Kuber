@@ -8872,17 +8872,18 @@ class AppLocalizationsTe extends AppLocalizations {
   String get setKwAbout => 'గురించి వెర్షన్ లైసెన్స్ సంప్రదింపు గోప్యతా విధానం';
 
   @override
-  String get obStartRestore => 'బ్యాకప్ నుండి పునరుద్ధరించండి';
+  String get obStartRestore => 'బ్యాకప్ నుండి తిరిగి తీసుకురండి';
 
   @override
   String get obStartRestoreSub =>
-      'Kuber బ్యాకప్ ఫైల్ నుండి అన్నీ తిరిగి తెచ్చుకోండి';
+      'Kuber బ్యాకప్ నుండి మీ డేటాను తిరిగి తీసుకురండి';
 
   @override
-  String get obStartCsv => 'CSV నుండి దిగుమతి చేయండి';
+  String get obStartCsv => 'CSV నుండి ఇంపోర్ట్ చేయండి';
 
   @override
-  String get obStartCsvSub => 'స్ప్రెడ్‌షీట్ నుండి లావాదేవీలు తెచ్చుకోండి';
+  String get obStartCsvSub =>
+      'వేరే యాప్ లేదా స్ప్రెడ్‌షీట్ నుండి డేటా తీసుకురండి';
 
   @override
   String get obStartFresh => 'కొత్తగా ప్రారంభించండి';
@@ -8952,7 +8953,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get pathSheetHint => 'ఈ పేజీకి దారి చూపిస్తుంది';
 
   @override
-  String get pathSheetLongPress => 'ఈ పేజీకి దారి చూడటానికి నొక్కి పట్టుకోండి';
+  String get pathSheetLongPress => 'మార్గం చూపండి';
 
   @override
   String get setPathTip =>
@@ -9030,4 +9031,568 @@ class AppLocalizationsTe extends AppLocalizations {
   @override
   String get proFaqRefundA =>
       'రీఫండ్‌లను Google Play తన రీఫండ్ విధానం ప్రకారం చూసుకుంటుంది.';
+
+  @override
+  String get obStartTagline => 'మీ డబ్బు, మీ ఫోన్‌లో';
+
+  @override
+  String get obLangTitle => 'భాష ఎంచుకోండి';
+
+  @override
+  String get obLangSub => 'దీన్ని తర్వాత సెట్టింగ్స్‌లో మార్చవచ్చు';
+
+  @override
+  String get obRestoreBusy => 'మీ డేటా తిరిగి వస్తోంది';
+
+  @override
+  String obRestoreStepTxns(String done, String total) {
+    return '$total లో $done లావాదేవీలు';
+  }
+
+  @override
+  String obRestoreStepItems(String done, String total) {
+    return '$total లో $done అంశాలు';
+  }
+
+  @override
+  String get obRestoreFailed => 'ఈ బ్యాకప్‌ను తిరిగి తీసుకురాలేకపోయాము';
+
+  @override
+  String get obRestoreFailedSub =>
+      'ఈ ఫైల్ Kuber బ్యాకప్ కాదు లేదా పాడైంది. మీ ఫోన్‌లో ఏమీ మారలేదు.';
+
+  @override
+  String get obRestoreRetry => 'మళ్లీ ప్రయత్నించండి';
+
+  @override
+  String get obRestoreOtherFile => 'వేరే ఫైల్ ఎంచుకోండి';
+
+  @override
+  String get obCsvBusy => 'మీ CSV ఇంపోర్ట్ అవుతోంది';
+
+  @override
+  String obCsvStep(String done, String total) {
+    return '$total లో $done వరుసలు';
+  }
+
+  @override
+  String get obCsvFailed => 'ఈ ఫైల్‌ను ఇంపోర్ట్ చేయలేకపోయాము';
+
+  @override
+  String get obCsvFailedSub =>
+      'Kuber ఈ CSV ను చదవలేకపోయింది లేదా అది పాడైంది. మీ ఫోన్‌లో ఏమీ మారలేదు.';
+
+  @override
+  String get obNotifEmi => 'EMI మరియు రికరింగ్ రిమైండర్లు';
+
+  @override
+  String get obNotifEmiSub => 'ప్రతి చెల్లింపుకు ముందు సూచన';
+
+  @override
+  String get obNotifBudget => 'బడ్జెట్ హెచ్చరికలు';
+
+  @override
+  String get obNotifBudgetSub => 'పరిమితికి దగ్గరగా ఉన్నప్పుడు';
+
+  @override
+  String get obNotifBackupRow => 'బ్యాకప్ రిమైండర్లు';
+
+  @override
+  String get obNotifBackupSub => 'మీ డేటా సురక్షితంగా ఉండేందుకు';
+
+  @override
+  String get obNotifSampleTitle => 'EMI రేపు చెల్లించాలి';
+
+  @override
+  String get obNotifSampleBody => 'SBI గృహ రుణం · ₹24,350';
+
+  @override
+  String get pathSheetSub => 'ఏ పేజీకైనా తిరిగి వెళ్లడానికి నొక్కండి';
+
+  @override
+  String get pathSheetFromNotification => 'నోటిఫికేషన్ నుండి తెరవబడింది';
+
+  @override
+  String get setSecYours => 'మీకు నచ్చినట్లు';
+
+  @override
+  String get setSecSafe => 'సురక్షితంగా ఉంచండి';
+
+  @override
+  String get setSecHelp => 'సహాయం మరియు మరిన్ని';
+
+  @override
+  String get setYourNameRow => 'మీ పేరు';
+
+  @override
+  String setLookSub(String theme, String size) {
+    return '$theme · $size టెక్స్ట్ పరిమాణం';
+  }
+
+  @override
+  String setPrefsSub(String language, String currency, String format) {
+    return '$language · $currency · $format ఫార్మాట్';
+  }
+
+  @override
+  String get setDrawerNone => 'అదనపు ఐకాన్లు లేవు';
+
+  @override
+  String get setPrivacyPinOn => 'Cards PIN ఆన్';
+
+  @override
+  String setLastBackupAgo(String ago) {
+    return 'చివరి బ్యాకప్ $ago';
+  }
+
+  @override
+  String get setNoBackupYet => 'ఇంకా బ్యాకప్ లేదు';
+
+  @override
+  String get setNoBackupSub => 'మీ డేటా భద్రత కోసం ఇప్పుడే బ్యాకప్ తీసుకోండి';
+
+  @override
+  String get setOn => 'ఆన్';
+
+  @override
+  String get setOff => 'ఆఫ్';
+
+  @override
+  String get setHelpTitle => 'సహాయం';
+
+  @override
+  String get setHelpSub => 'యాప్ ట్యుటోరియల్, అభిప్రాయం పంపండి';
+
+  @override
+  String get setActivitySub => 'రాబోయే ఈవెంట్లు, మనీ స్టోరీ ఆర్కైవ్';
+
+  @override
+  String setVersion(String version) {
+    return 'వెర్షన్ $version';
+  }
+
+  @override
+  String get setBottomNav => 'కింది నావిగేషన్';
+
+  @override
+  String get setNavStandard => 'స్టాండర్డ్';
+
+  @override
+  String get setNavFloating => 'ఫ్లోటింగ్';
+
+  @override
+  String get setMoreLayout => 'More ట్యాబ్ లేఅవుట్';
+
+  @override
+  String get setMoreLayoutSub => 'సాధారణ జాబితా లేదా హీరో లేఅవుట్';
+
+  @override
+  String get setLayoutHero => 'హీరో';
+
+  @override
+  String get setSecHomeAnalytics => 'హోమ్ మరియు అనలిటిక్స్';
+
+  @override
+  String get setHomeWidgets => 'హోమ్ విడ్జెట్లు';
+
+  @override
+  String get setAnalyticsWidgets => 'అనలిటిక్స్ విడ్జెట్లు';
+
+  @override
+  String setWidgetsOn(String count) {
+    return '$count ఆన్ · క్రమం మార్చడానికి లాగండి';
+  }
+
+  @override
+  String get setGallerySub => 'మీ ఫోన్ హోమ్ స్క్రీన్‌పై Kuber';
+
+  @override
+  String get setSecShortcuts => 'షార్ట్‌కట్లు';
+
+  @override
+  String get setQuickActions => 'త్వరిత చర్యలు';
+
+  @override
+  String get setQuickActionsSub =>
+      'షార్ట్‌కట్ల కోసం ట్యాబ్‌ను నొక్కి పట్టుకోండి';
+
+  @override
+  String get setAddMenu => 'జోడించు మెనూ';
+
+  @override
+  String get setAddMenuSub => 'త్వరిత ఎంట్రీల కోసం + నొక్కి పట్టుకోండి';
+
+  @override
+  String get setSecMoney => 'భాష మరియు డబ్బు';
+
+  @override
+  String get setCurrencySub => 'మొత్తాలపై చూపే గుర్తు';
+
+  @override
+  String get setNumberFormat => 'సంఖ్య ఫార్మాట్';
+
+  @override
+  String get setNumLakh => 'లక్ష';
+
+  @override
+  String get setNumMillion => 'మిలియన్';
+
+  @override
+  String get setShowCode => 'కరెన్సీ కోడ్ చూపండి';
+
+  @override
+  String get setShowCodeSub => '₹500 బదులు INR 500';
+
+  @override
+  String get setDefaultAccount => 'డిఫాల్ట్ ఖాతా';
+
+  @override
+  String get setDefaultAccountSub => 'Quick Add లో మొదట ఎంచుకోబడుతుంది';
+
+  @override
+  String get setSecGestures => 'సంజ్ఞలు';
+
+  @override
+  String get setSwipe => 'అడ్డంగా స్వైప్';
+
+  @override
+  String get setSwipeSub =>
+      'ట్యాబ్‌లు మార్చడానికి ఎడమ లేదా కుడికి స్వైప్ చేయండి';
+
+  @override
+  String get setPrivacyMode => 'ప్రైవసీ మోడ్';
+
+  @override
+  String get setPrivacyModeSub => 'బ్యాలెన్స్‌లు, మొత్తాలు దాచండి';
+
+  @override
+  String get setAppLock => 'యాప్ లాక్';
+
+  @override
+  String get setAppLockSub => 'Kuber తెరవడానికి వేలిముద్ర లేదా ముఖం అడగండి';
+
+  @override
+  String get setAppLockNoFp => 'ఈ ఫోన్‌లో వేలిముద్ర లేదా ముఖం అవసరం';
+
+  @override
+  String get setCardsFp => 'వేలిముద్రతో అన్‌లాక్ చేయండి';
+
+  @override
+  String get setCardsFpSub => 'Kuber Cards కోసం మాత్రమే';
+
+  @override
+  String get setCardsFpNone => 'ఈ ఫోన్‌లో సెట్ చేయలేదు';
+
+  @override
+  String get setCardsFpSearch => 'వేలిముద్రతో Kuber Cards అన్‌లాక్ చేయండి';
+
+  @override
+  String get setCardsPinRow => 'Cards PIN';
+
+  @override
+  String get setCardsPinRowSub => 'ఆన్ · PIN మార్చండి';
+
+  @override
+  String get setCardsPinSearch => 'Kuber Cards PIN';
+
+  @override
+  String get setNotesLock => 'Notes కోసం యాప్ లాక్ అవసరం';
+
+  @override
+  String get setNotesLockOn => 'Notes తెరవడానికి వేలిముద్ర లేదా ముఖం అడగండి';
+
+  @override
+  String get setNotesLockOff => 'ముందు యాప్ లాక్ ఆన్ చేయండి';
+
+  @override
+  String get setLocksInfo =>
+      'యాప్ లాక్, Kuber Cards అన్‌లాక్ వేర్వేరు. ఒకటి మార్చినా మరొకటి మారదు.';
+
+  @override
+  String get setLocksTitle => 'రెండు వేర్వేరు లాక్‌లు';
+
+  @override
+  String get setLocksApp =>
+      'Kuber తెరిచిన ప్రతిసారీ మీ వేలిముద్ర లేదా ముఖం అడుగుతుంది.';
+
+  @override
+  String get setLocksCards =>
+      'కు సొంత లాక్ ఉంది: మీ Cards PIN, ఇక్కడ ఆన్ చేస్తే వేలిముద్ర. యాప్ లాక్ ఆఫ్‌లో ఉన్నా ఇది పనిచేస్తుంది.';
+
+  @override
+  String get setLocksNeither => 'ఒకటి ఆన్ లేదా ఆఫ్ చేసినా మరొకటి మారదు.';
+
+  @override
+  String get setGotIt => 'అర్థమైంది';
+
+  @override
+  String get setNoFp =>
+      'ఈ ఫోన్‌లో వేలిముద్ర లేదా ఫేస్ అన్‌లాక్ సెట్ చేయలేదు. మీ Kuber Cards PIN పనిచేస్తుంది.';
+
+  @override
+  String get setNoFpOpen => 'ఫోన్ సెట్టింగ్స్ తెరవండి';
+
+  @override
+  String get setDrawerBody =>
+      'Kuber Cards, Notes లేదా Reminders కు మీ ఫోన్ యాప్ జాబితాలో సొంత ఐకాన్ ఇవ్వండి. ప్రతి ఐకాన్ నేరుగా ఆ ఫీచర్‌ను తెరుస్తుంది.';
+
+  @override
+  String get setDrawerPreview => 'మీ యాప్ జాబితాలో ప్రివ్యూ';
+
+  @override
+  String get setDrawerRowSub => 'యాప్ జాబితాలో సొంత ఐకాన్';
+
+  @override
+  String get setLastBackup => 'చివరి బ్యాకప్';
+
+  @override
+  String get setBackupNow => 'ఇప్పుడే బ్యాకప్ తీసుకోండి';
+
+  @override
+  String get setSecBackup => 'బ్యాకప్';
+
+  @override
+  String get setAutoBackups => 'ఆటోమేటిక్ బ్యాకప్‌లు';
+
+  @override
+  String get setRestoreSub => 'ఈ ఫోన్‌లోని డేటాను మార్చండి';
+
+  @override
+  String get setSecImport => 'ఇంపోర్ట్ మరియు ఎక్స్‌పోర్ట్';
+
+  @override
+  String get setImportCsvSub => 'స్ప్రెడ్‌షీట్ నుండి లావాదేవీలు తీసుకురండి';
+
+  @override
+  String get setImportKuber => 'Kuber ఫైల్ ఇంపోర్ట్ చేయండి';
+
+  @override
+  String get setImportKuberSub => 'Kuber నుండి ఎక్స్‌పోర్ట్ చేసిన JSON ఫైల్';
+
+  @override
+  String get setExport => 'డేటా ఎక్స్‌పోర్ట్ చేయండి';
+
+  @override
+  String get setExportSub => 'అన్నింటినీ JSON ఫైల్‌గా సేవ్ చేయండి';
+
+  @override
+  String get setSecDanger => 'ప్రమాద విభాగం';
+
+  @override
+  String get setClear => 'మొత్తం డేటా తొలగించండి';
+
+  @override
+  String get setClearSub =>
+      'ఈ ఫోన్‌లోని అన్నింటినీ తొలగిస్తుంది. తిరిగి పొందలేరు.';
+
+  @override
+  String get setMockData => 'మాక్ డేటాను సృష్టించండి';
+
+  @override
+  String get setNotifOffBody => 'రిమైండర్లు, హెచ్చరికలు మీకు చేరవు.';
+
+  @override
+  String get setTurnOn => 'ఆన్ చేయండి';
+
+  @override
+  String get setNotifAllowedShort => 'ఫోన్ సెట్టింగ్స్‌లో అనుమతి ఉంది';
+
+  @override
+  String get setSecSends => 'Kuber ఏమి పంపుతుంది';
+
+  @override
+  String get setNotifEmiSub => 'చెల్లింపు నమోదైనప్పుడు';
+
+  @override
+  String get setNotifBudgetSub => 'బడ్జెట్‌పై మీరు పెట్టిన పరిమితుల వద్ద';
+
+  @override
+  String get setNotifBackupSub => 'ఆటోమేటిక్ బ్యాకప్ విఫలమైనప్పుడు';
+
+  @override
+  String get setNotifInboxSub => 'ఇటీవలి హెచ్చరికలు, రిమైండర్లు';
+
+  @override
+  String get setAppTutorial => 'యాప్ ట్యుటోరియల్';
+
+  @override
+  String get setAppTutorialSub => 'గైడెడ్ టూర్ మళ్లీ చూడండి';
+
+  @override
+  String get setSendFeedback => 'అభిప్రాయం పంపండి';
+
+  @override
+  String get setSendFeedbackSub => 'ఏమి సరిచేయాలో లేదా జోడించాలో చెప్పండి';
+
+  @override
+  String get setUpcoming => 'రాబోయే ఈవెంట్లు';
+
+  @override
+  String get setUpcomingSub => 'రాబోయేవన్నీ ఒకే చోట';
+
+  @override
+  String get setStories => 'మనీ స్టోరీ ఆర్కైవ్';
+
+  @override
+  String get proCardTry => 'Kuber Pro ప్రయత్నించండి';
+
+  @override
+  String get proCardTrySub =>
+      'ప్రతి ఫీచర్ అన్‌లాక్ చేయండి. ఒకసారి చెల్లింపు, ఖాతా అవసరం లేదు.';
+
+  @override
+  String proCardActive(String date) {
+    return '$date నుండి సక్రియం. ధన్యవాదాలు!';
+  }
+
+  @override
+  String get proCardMonthly => 'నెలవారీ';
+
+  @override
+  String get proCardYearly => 'వార్షిక';
+
+  @override
+  String get proCardLifetime => 'జీవితకాలం';
+
+  @override
+  String get proCardPromo => 'ప్రోమో';
+
+  @override
+  String get proCardPromoForever => 'జీవితకాలం ఉచితం. ధన్యవాదాలు!';
+
+  @override
+  String proCardPromoUntil(String date) {
+    return '$date వరకు ఉచితం';
+  }
+
+  @override
+  String get searchHint => 'More లో వెతకండి';
+
+  @override
+  String get searchAll => 'అన్నీ';
+
+  @override
+  String get searchFeatures => 'ఫీచర్లు';
+
+  @override
+  String get searchLoan => 'రుణం';
+
+  @override
+  String get searchInvestment => 'పెట్టుబడి';
+
+  @override
+  String get searchReminder => 'రిమైండర్';
+
+  @override
+  String get searchYouLent => 'మీరు అప్పు ఇచ్చారు';
+
+  @override
+  String get searchYouBorrowed => 'మీరు అప్పు తీసుకున్నారు';
+
+  @override
+  String get searchSettled => 'పరిష్కరించబడింది';
+
+  @override
+  String searchDue(String date) {
+    return '$date లోపు';
+  }
+
+  @override
+  String searchEdited(String date) {
+    return '$date న సవరించారు';
+  }
+
+  @override
+  String searchEveryDay(String amount) {
+    return '$amount ప్రతి రోజు';
+  }
+
+  @override
+  String searchEveryWeek(String amount) {
+    return '$amount ప్రతి వారం';
+  }
+
+  @override
+  String searchEveryMonth(String amount) {
+    return '$amount ప్రతి నెల';
+  }
+
+  @override
+  String searchEveryYear(String amount) {
+    return '$amount ప్రతి సంవత్సరం';
+  }
+
+  @override
+  String searchSeeAll(String count) {
+    return 'అన్నీ $count చూడండి';
+  }
+
+  @override
+  String searchMatches(String words) {
+    return 'సరిపోలింది: $words';
+  }
+
+  @override
+  String get searchRecent => 'ఇటీవలివి';
+
+  @override
+  String get searchClear => 'తొలగించండి';
+
+  @override
+  String get searchTry => 'ఇవి వెతికి చూడండి';
+
+  @override
+  String get searchTryDark => 'డార్క్ మోడ్';
+
+  @override
+  String get searchTryBackup => 'బ్యాకప్';
+
+  @override
+  String get searchTryEmi => 'EMI కాలిక్యులేటర్';
+
+  @override
+  String searchNoResults(String query) {
+    return '“$query” కోసం ఫలితాలు లేవు';
+  }
+
+  @override
+  String get searchNoResultsBody =>
+      'శోధన More లోని పేర్లు, శీర్షికలు చూస్తుంది: సెట్టింగ్స్, ఖాతాలు, వర్గాలు, ట్యాగ్‌లు, మనీ ప్లాన్‌లు, వ్యక్తులు, కార్డులు, నోట్స్, టూల్స్. చిన్న పదం ప్రయత్నించండి.';
+
+  @override
+  String searchShorter(String word) {
+    return '“$word” వెతకండి';
+  }
+
+  @override
+  String get searchTransaction => 'లావాదేవీ కోసం వెతుకుతున్నారా?';
+
+  @override
+  String get searchInHistory => 'History లో వెతకండి';
+
+  @override
+  String get searchLoading => 'మీ ఖాతాలు, రుణాలు ఇంకా మరిన్నింటిలో వెతుకుతోంది';
+
+  @override
+  String get searchPrivateNote =>
+      'Kuber Cards, Notes పేరు, శీర్షికతో మాత్రమే సరిపోలుతాయి. కార్డు నంబర్లు, నోట్ టెక్స్ట్ ఎప్పుడూ వెతకబడవు.';
+
+  @override
+  String get setKwFeedback => 'అభిప్రాయం సమస్య సూచన సంప్రదింపు';
+
+  @override
+  String get setKwExpressive => 'రంగు ప్రకాశవంతం';
+
+  @override
+  String get setKwPureBlack => 'డార్క్ నలుపు థీమ్';
+
+  @override
+  String searchTagSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count లావాదేవీలు',
+    );
+    return 'ట్యాగ్ · $_temp0';
+  }
 }

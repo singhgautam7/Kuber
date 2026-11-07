@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -66,8 +65,9 @@ class KuberPath {
 
   static const _icons = <String, IconData>{
     'settings': Icons.settings_rounded,
-    'theme': Icons.palette_outlined,
+    'theme': Icons.contrast_rounded,
     'look': Icons.palette_outlined,
+    'help': Icons.help_outline_rounded,
     'preferences': Icons.tune_rounded,
     'privacy': Icons.shield_outlined,
     'app-drawer': Icons.apps_rounded,
@@ -100,15 +100,39 @@ class KuberPath {
   static void open(BuildContext context) {
     final entries = read(context);
     if (entries.length < 2) return;
-    HapticFeedback.mediumImpact();
+    final reduced = KuberMotion.reduced(context);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => KuberPathSheet(entries: entries, router: GoRouter.of(context)),
+      barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.32),
+      sheetAnimationStyle: reduced
+          ? const AnimationStyle(
+              duration: Duration(milliseconds: 150),
+              reverseDuration: Duration(milliseconds: 150),
+            )
+          : const AnimationStyle(
+              duration: Duration(milliseconds: 300),
+              reverseDuration: Duration(milliseconds: 200),
+              curve: Easing.emphasizedDecelerate,
+              reverseCurve: Easing.emphasizedAccelerate,
+            ),
+      builder: (_) => KuberPathSheet(
+        entries: entries,
+        router: GoRouter.of(context),
+        fromNotification: observer.routes.any((r) => r.isActive && _fromNotification[r] == true),
+      ),
     );
+  }
+
+  static final _fromNotification = Expando<bool>('kuberPathNotification');
+
+  /// A notification tap just opened the page on top: the sheet says so.
+  static void markFromNotification() {
+    final top = observer.routes.lastWhere((r) => r is PageRoute, orElse: () => observer.routes.last);
+    _fromNotification[top] = true;
   }
 }
 
@@ -142,12 +166,19 @@ class KuberPathEntry {
   const KuberPathEntry(this.icon, this.title, {this.route, this.tabLocation});
 }
 
-/// The path to the current page. An earlier entry pops straight back to that
-/// page: the ones in between close and it is not rebuilt.
+/// The path to the current page, as a tree (Components 2m). An earlier entry
+/// pops straight back to that page: the ones in between close and it is not
+/// rebuilt.
 class KuberPathSheet extends StatelessWidget {
   final List<KuberPathEntry> entries;
   final GoRouter router;
-  const KuberPathSheet({super.key, required this.entries, required this.router});
+  final bool fromNotification;
+  const KuberPathSheet({
+    super.key,
+    required this.entries,
+    required this.router,
+    this.fromNotification = false,
+  });
 
   void _jump(BuildContext context, KuberPathEntry e) {
     final nav = Navigator.of(context, rootNavigator: true);
@@ -163,50 +194,203 @@ class KuberPathSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return KuberBottomSheet(
       title: l.pathSheetTitle,
-      child: LayoutBuilder(
-        builder: (context, box) {
-          // Each page sits one step in from the page before it; a deep path
-          // tightens the steps so titles keep their room.
-          final last = entries.length - 1;
-          final step = last == 0 ? 0.0 : math.min(_treeStep, (box.maxWidth - _titleRoom) / last);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final (i, e) in entries.indexed)
-                _PathTreeRow(
-                  entry: e,
-                  depth: i,
-                  step: step,
-                  current: i == last,
-                  onTap: i == last ? null : () => _jump(context, e),
-                ),
-            ],
-          );
-        },
+      description: l.pathSheetSub,
+      bodyPadding: const EdgeInsets.fromLTRB(12, 4, 12, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (fromNotification)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.notifications_outlined, size: 18, color: cs.onSurfaceVariant),
+                  const SizedBox(width: KuberSpace.sm),
+                  Expanded(
+                    child: Text(l.pathSheetFromNotification,
+                        style: theme.textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+                  ),
+                ],
+              ),
+            ),
+          KuberPathTree(entries: entries, onJump: (e) => _jump(context, e)),
+        ],
       ),
     );
   }
 }
 
-const double _treeStep = 28;
-const double _titleRoom = 200;
-const double _iconSize = 24;
+/// Row sizes of the tree. From 6 levels the rows tighten so titles keep room.
+class _TreeSize {
+  final double row, step, tile, glyph, radius;
+  const _TreeSize(this.row, this.step, this.tile, this.glyph, this.radius);
+  static const normal = _TreeSize(56, 28, 32, 18, 10);
+  static const dense = _TreeSize(48, 22, 28, 16, 8);
+}
 
-/// One page of the tree: its branch from the page above, icon and title.
-class _PathTreeRow extends StatelessWidget {
+const double _treeBase = 12;
+const double _titleRoom = 140;
+const double _elbow = 10;
+// A deep path scrolls inside this height, opened at the current page.
+const double _deepHeight = 300;
+
+// Stagger: rows come in once the sheet is about 60% up.
+const int _treeDelay = 90;
+const int _rowMs = 180;
+const int _rowGap = 30;
+const int _staggered = 8;
+
+/// One row per page on the stack, the last being the current page.
+class KuberPathTree extends StatefulWidget {
+  final List<KuberPathEntry> entries;
+  final ValueChanged<KuberPathEntry> onJump;
+  const KuberPathTree({super.key, required this.entries, required this.onJump});
+
+  @override
+  State<KuberPathTree> createState() => _KuberPathTreeState();
+}
+
+class _KuberPathTreeState extends State<KuberPathTree> with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  final _scroll = ScrollController();
+  var _started = false;
+
+  int get _total => _treeDelay + _rowGap * (math.min(widget.entries.length, _staggered) - 1) + _rowMs;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: Duration(milliseconds: _total));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    if (KuberMotion.reduced(context)) {
+      _c.value = 1;
+    } else {
+      _c.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  Animation<double> _rowAnim(int i, double ms) {
+    final at = _treeDelay + _rowGap * math.min(i, _staggered - 1);
+    return CurvedAnimation(
+      parent: _c,
+      curve: Interval(at / _total, math.min(1, (at + ms) / _total), curve: Easing.emphasizedDecelerate),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = widget.entries.length;
+    final size = n > 5 ? _TreeSize.dense : _TreeSize.normal;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final last = n - 1;
+        final room = box.maxWidth - _treeBase - size.tile - KuberSpace.md - _titleRoom;
+        final step = last == 0 ? 0.0 : math.min(size.step, math.max(8.0, room / last));
+        final tree = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (i, e) in widget.entries.indexed)
+              _TreeRow(
+                entry: e,
+                depth: i,
+                step: step,
+                size: size,
+                current: i == last,
+                fade: _rowAnim(i, _rowMs.toDouble()),
+                line: _rowAnim(i, 120),
+                onTap: i == last ? null : () => widget.onJump(e),
+              ),
+          ],
+        );
+        if (n * size.row <= _deepHeight) return tree;
+        return _DeepTree(controller: _scroll, child: tree);
+      },
+    );
+  }
+}
+
+/// A path too long for the sheet: opens on the current page, with a fade and a
+/// bar at the top edge to say there's more above.
+class _DeepTree extends StatelessWidget {
+  final ScrollController controller;
+  final Widget child;
+  const _DeepTree({required this.controller, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final sheet = cs.surfaceContainerLow;
+    return SizedBox(
+      height: _deepHeight,
+      child: Stack(
+        children: [
+          RawScrollbar(
+            controller: controller,
+            thumbVisibility: true,
+            thickness: 4,
+            radius: const Radius.circular(KuberShape.full),
+            thumbColor: cs.onSurfaceVariant.withValues(alpha: 0.4),
+            child: SingleChildScrollView(controller: controller, reverse: true, child: child),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            height: 40,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [sheet, sheet.withValues(alpha: 0)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One page of the tree: its branch from the page above, tile and title.
+class _TreeRow extends StatelessWidget {
   final KuberPathEntry entry;
   final int depth;
   final double step;
+  final _TreeSize size;
   final bool current;
+  final Animation<double> fade;
+  final Animation<double> line;
   final VoidCallback? onTap;
 
-  const _PathTreeRow({
+  const _TreeRow({
     required this.entry,
     required this.depth,
     required this.step,
+    required this.size,
     required this.current,
+    required this.fade,
+    required this.line,
     this.onTap,
   });
 
@@ -215,80 +399,169 @@ class _PathTreeRow extends StatelessWidget {
     final l = context.l10n;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: KuberShape.mediumR,
-      child: CustomPaint(
-        painter: _PathBranchPainter(depth: depth, step: step, color: cs.outlineVariant),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: KuberSpace.listItem1),
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: depth * step,
-              top: KuberSpace.sm,
-              bottom: KuberSpace.sm,
+    final left = _treeBase + depth * step;
+    final title = current
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                entry.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium!.copyWith(color: cs.onSurface),
+              ),
+              const SizedBox(height: KuberSpace.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.fullR),
+                child: Text(
+                  l.pathSheetCurrent,
+                  style: theme.textTheme.labelSmall!.copyWith(color: cs.onSecondaryContainer),
+                ),
+              ),
+            ],
+          )
+        : Text(
+            entry.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
+          );
+    final content = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: size.row),
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: left,
+          end: KuberSpace.md,
+          top: (size.row - size.tile) / 2,
+          bottom: (size.row - size.tile) / 2,
+        ),
+        child: Row(
+          children: [
+            KuberIconTile(
+              icon: entry.icon,
+              size: size.tile,
+              glyph: size.glyph,
+              radius: size.radius,
+              color: current ? cs.primary : cs.surfaceContainerHigh,
+              iconColor: current ? cs.onPrimary : cs.onSurfaceVariant,
             ),
-            child: Row(
-              children: [
-                Icon(entry.icon, size: _iconSize, color: current ? cs.primary : cs.onSurfaceVariant),
-                const SizedBox(width: KuberSpace.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium!.copyWith(
-                          color: current ? cs.primary : cs.onSurface,
-                        ),
-                      ),
-                      if (current) KuberPill(label: l.pathSheetCurrent),
-                    ],
+            const SizedBox(width: KuberSpace.md),
+            Expanded(child: title),
+          ],
+        ),
+      ),
+    );
+    return Semantics(
+      button: onTap != null,
+      label: current ? '${entry.title}, ${l.pathSheetCurrent}' : entry.title,
+      excludeSemantics: true,
+      child: CustomPaint(
+        painter: _TreeLinkPainter(
+          depth: depth,
+          step: step,
+          tile: size.tile,
+          current: current,
+          color: cs.outlineVariant,
+          progress: line,
+        ),
+        child: Stack(
+          children: [
+            if (onTap != null)
+              PositionedDirectional(
+                start: left - 6,
+                end: 0,
+                top: 4,
+                bottom: 4,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    onTap: onTap,
+                    borderRadius: BorderRadius.circular(14),
+                    overlayColor: kuberPressedLayer(cs),
                   ),
                 ),
-                if (!current) const KuberChevron(),
-              ],
+              ),
+            IgnorePointer(
+              child: FadeTransition(
+                opacity: fade,
+                child: AnimatedBuilder(
+                  animation: fade,
+                  builder: (_, c) => Transform.translate(
+                    offset: Offset(-8 * (1 - fade.value), 0),
+                    child: c,
+                  ),
+                  child: content,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// The tree line: down from the parent's icon, then across to this row's icon.
-class _PathBranchPainter extends CustomPainter {
+/// The connectors: down from the parent's tile with a rounded elbow into this
+/// row's tile, and on down towards the child. Redraws itself as they grow.
+class _TreeLinkPainter extends CustomPainter {
   final int depth;
   final double step;
+  final double tile;
+  final bool current;
   final Color color;
-  const _PathBranchPainter({required this.depth, required this.step, required this.color});
+  final Animation<double> progress;
+
+  _TreeLinkPainter({
+    required this.depth,
+    required this.step,
+    required this.tile,
+    required this.current,
+    required this.color,
+    required this.progress,
+  }) : super(repaint: progress);
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (depth == 0) return;
+    final t = progress.value;
+    if (t == 0) return;
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
-    final x = (depth - 1) * step + _iconSize / 2;
+      ..strokeWidth = 2;
     final mid = size.height / 2;
-    final end = depth * step - 4;
-    // Starts in the row above, under the parent's icon.
-    canvas.drawPath(
-      Path()
-        ..moveTo(x, -size.height / 2 + _iconSize / 2 + 4)
-        ..lineTo(x, mid)
-        ..lineTo(end, mid),
-      paint,
-    );
+    final left = _treeBase + depth * step;
+    final path = Path();
+    if (depth > 0) {
+      final parent = left - step + tile / 2;
+      final elbow = math.min(_elbow, math.max(0.0, left - parent));
+      path
+        ..moveTo(parent, 0)
+        ..lineTo(parent, mid - elbow)
+        ..quadraticBezierTo(parent, mid, parent + elbow, mid)
+        ..lineTo(left, mid);
+    }
+    if (!current) {
+      final x = left + tile / 2;
+      path
+        ..moveTo(x, mid + tile / 2)
+        ..lineTo(x, size.height);
+    }
+    if (t >= 1) {
+      canvas.drawPath(path, paint);
+      return;
+    }
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height * t));
+    canvas.drawPath(path, paint);
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_PathBranchPainter old) =>
-      old.depth != depth || old.step != step || old.color != color;
+  bool shouldRepaint(_TreeLinkPainter old) =>
+      old.depth != depth || old.step != step || old.tile != tile ||
+      old.current != current || old.color != color;
 }
 
 /// The tab shell tells [KuberPath] which route and tab it is.

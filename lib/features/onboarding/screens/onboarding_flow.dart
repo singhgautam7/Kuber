@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../../../core/database/seed_service.dart';
+import '../../../core/services/data_service.dart' show ImportCancelled;
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -29,6 +31,7 @@ import '../pages/onboarding_page_1.dart';
 import '../pages/onboarding_page_4.dart';
 import '../pages/onboarding_start_page.dart';
 import '../pages/onboarding_tracking_page.dart';
+import '../widgets/onboarding_entrance.dart';
 import '../widgets/onboarding_nav_bar.dart';
 
 /// Welcome flow (specs/home-v3.3/plan.md §5, nov-release Part B): first page
@@ -85,6 +88,14 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Locale _selectedLocale = const Locale('en');
   bool _saving = false;
 
+  /// The first page's restore or import, running or failed.
+  StartJob? _job;
+  StartJob? _failed;
+  String _fileName = '';
+
+  /// Whether Android asks for the notification permission at all.
+  bool _notifPrompt = true;
+
   @override
   void initState() {
     super.initState();
@@ -95,11 +106,19 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     _selectedTheme = ThemeMode.light;
     _selectedLocale = settings?.locale ?? const Locale('en');
     _loadVersion();
+    _loadPermissionKind();
   }
 
   Future<void> _loadVersion() async {
     final info = await PackageInfo.fromPlatform();
     if (mounted) setState(() => _version = 'v${info.version}');
+  }
+
+  /// Android 12 and older has no notification prompt: the page only explains.
+  Future<void> _loadPermissionKind() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+    final info = await DeviceInfoPlugin().androidInfo;
+    if (mounted) setState(() => _notifPrompt = info.version.sdkInt >= 33);
   }
 
   @override
@@ -144,8 +163,9 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     _goToPage(_notificationsPage);
   }
 
-  /// Picks a file and runs the existing import. True when it finished.
-  Future<bool> _import(String ext,
+  /// Picks a file and runs the existing import. True when it finished. The
+  /// card shows the run; a failure stays on it with its ways on.
+  Future<bool> _import(StartJob job, String ext,
       {required bool json, required String cancelled, ValueChanged<String>? onRead}) async {
     final messenger = context;
     final picked = await FilePicker.pickFile(
@@ -157,20 +177,41 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       showKuberSnackBar(messenger, cancelled);
       return false;
     }
-    final content = await File(picked!.path!).readAsString();
-    onRead?.call(content);
+    setState(() {
+      _job = job;
+      _failed = null;
+      _fileName = picked!.path!.split('/').last;
+    });
     final data = ref.read(dataControllerProvider.notifier);
-    await data.runImport(content, isJson: json);
-    if (!mounted) return false;
-    final state = ref.read(dataControllerProvider);
-    final ok = state.status == DataOpStatus.success;
-    final locked = state.lockedCardsFound;
-    if (state.message != null && context.mounted) {
-      showKuberSnackBar(context, state.message!, isError: !ok);
+    var ok = false;
+    var locked = false;
+    String? message;
+    var wasCancelled = false;
+    try {
+      final content = await File(picked!.path!).readAsString();
+      onRead?.call(content);
+      await data.runImport(content, isJson: json);
+      final state = ref.read(dataControllerProvider);
+      ok = state.status == DataOpStatus.success;
+      locked = state.lockedCardsFound;
+      message = state.message;
+      wasCancelled = message?.contains(ImportCancelled.message) ?? false;
+    } on FileSystemException {
+      ok = false;
     }
+    if (!mounted) return false;
     data.reset();
+    setState(() {
+      _job = null;
+      _failed = ok || wasCancelled ? null : job;
+    });
+    if (wasCancelled) {
+      showKuberSnackBar(context, cancelled);
+      return false;
+    }
+    if (ok && message != null) showKuberSnackBar(context, message);
     // A restore with encrypted cards asks for the backup's PIN, as in Data.
-    if (ok && locked && context.mounted) showImportedCardsPrompt(context);
+    if (ok && locked) showImportedCardsPrompt(context);
     return ok;
   }
 
@@ -178,7 +219,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   /// to Notifications. An older backup has neither: Make it yours asks.
   Future<void> _restore() async {
     String? content;
-    final ok = await _import('json', json: true,
+    final ok = await _import(StartJob.restore, 'json', json: true,
         cancelled: context.l10n.obRestoreCancelled, onRead: (c) => content = c);
     if (!ok || !mounted) return;
     final data = await compute(jsonDecode, content!) as Map<String, dynamic>;
@@ -203,14 +244,14 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   /// CSV: the importer makes accounts and categories itself, but a CSV has no
   /// name or currency, so Make it yours asks for those (decisions.md D9).
   Future<void> _importCsv() async {
-    final ok = await _import('csv', json: false, cancelled: context.l10n.obImportCancelled);
+    final ok = await _import(StartJob.csv, 'csv', json: false, cancelled: context.l10n.obImportCancelled);
     if (!ok || !mounted) return;
     saveTrackingChoices(const {}, skipped: true);
     _pageController.jumpToPage(_setupPage);
   }
 
   Future<void> _allowNotifications() async {
-    await requestNotifications();
+    if (_notifPrompt) await requestNotifications();
     if (mounted) _goToPage(_termsPage);
   }
 
@@ -226,6 +267,17 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     // the Get started card. App Tutorial stays in More.
     context.go('/');
   }
+
+  /// Start fresh rises with the first page's cards; a replay has no first page.
+  Widget _startEntrance(Widget bar) => widget.isReplay
+      ? bar
+      : OnboardingEntrance(
+          delay: const Duration(milliseconds: 230),
+          duration: const Duration(milliseconds: 250),
+          beginOffset: Offset.zero,
+          rise: 16,
+          child: bar,
+        );
 
   void _onPageChanged(int page) {
     if (!mounted) return;
@@ -264,7 +316,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           ? (localizations?.starting ?? 'Starting...')
           : (localizations?.startJourney ?? 'Start my journey');
     } else if (page == _notificationsPage) {
-      primaryLabel = l.obNotifAllow;
+      primaryLabel = _notifPrompt ? l.obNotifAllow : l.continueLabel;
     } else if (page == _termsPage) {
       primaryLabel = l.obTermsAgree;
     } else if (page < _trackingPage - 1) {
@@ -273,6 +325,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     } else {
       primaryLabel = localizations?.continueLabel ?? 'Continue';
     }
+    final termsOk = _termsBackups && _termsResponsibility;
     // After a restore the pages before Notifications are done with.
     final firstPage = _restored ? _notificationsPage : 0;
     void back() => _goToPage(page == _notificationsPage && !_restored ? _setupPage : page - 1);
@@ -314,7 +367,15 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                   onPageChanged: _onPageChanged,
                   children: [
                     if (!replay)
-                      OnboardingStartPage(onRestore: _restore, onImportCsv: _importCsv),
+                      OnboardingStartPage(
+                        job: _job,
+                        failed: _failed,
+                        fileName: _fileName,
+                        onRestore: _restore,
+                        onImportCsv: _importCsv,
+                        onCancelImport: ref.read(dataControllerProvider.notifier).cancelImport,
+                        onLocaleChanged: (locale) => setState(() => _selectedLocale = locale),
+                      ),
                     OnboardingPageOne(version: _version, onSkip: _skip),
                     for (var i = 0; i < WhyKuberPage.count; i++)
                       WhyKuberPage(
@@ -366,20 +427,24 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                   ],
                 ),
               ),
-              OnboardingNavBar(
-                currentPage: page - _welcomePage,
-                pageCount: replay ? _trackingPage : _pageCount - _welcomePage,
-                showDots: !isStart,
-                compactBack: page == _setupPage || page >= _notificationsPage,
-                showBack: page != 0 && page != firstPage,
-                busy: page == _setupPage && _saving,
-                primaryEnabled: (page != _trackingPage || _tracking.isNotEmpty) &&
-                    (page != _termsPage || (_termsBackups && _termsResponsibility)),
-                onBack: page == firstPage ? null : back,
-                primaryLabel: primaryLabel,
-                onPrimary: onPrimary,
-                secondaryLabel: page == _notificationsPage ? l.obNotifLater : null,
-                onSecondary: () => _goToPage(_termsPage),
+              _startEntrance(
+                OnboardingNavBar(
+                  currentPage: page - _welcomePage,
+                  pageCount: replay ? _trackingPage : _pageCount - _welcomePage,
+                  showDots: !isStart,
+                  compactBack: page == _setupPage || page >= _notificationsPage,
+                  showBack: page != 0 && page != firstPage && page != _notificationsPage,
+                  busy: page == _setupPage && _saving,
+                  primaryEnabled: (page != _trackingPage || _tracking.isNotEmpty) &&
+                      (page != _termsPage || termsOk) &&
+                      (!isStart || _job == null),
+                  onBack: page == firstPage ? null : back,
+                  primaryLabel: primaryLabel,
+                  onPrimary: onPrimary,
+                  showArrow: page != _notificationsPage && (page != _termsPage || termsOk),
+                  secondaryLabel: page == _notificationsPage && _notifPrompt ? l.obNotifLater : null,
+                  onSecondary: () => _goToPage(_termsPage),
+                ),
               ),
             ],
           ),

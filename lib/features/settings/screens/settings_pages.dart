@@ -7,10 +7,16 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/services/biometric_service.dart';
 import '../../../core/services/shortcut_pin_service.dart';
+import '../../../core/services/notification_service.dart' show NotificationKind, notificationKindsProvider;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart' show KuberInfoGlyph;
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -19,6 +25,7 @@ import '../../home_v2/providers/home_v2_provider.dart';
 import '../../kuber_cards/data/card_biometric.dart';
 import '../../kuber_cards/providers/kuber_cards_provider.dart';
 import '../../more/more_content.dart' show openNotificationsSheet;
+import '../../more/screens/more_screen.dart' show launchTutorialFromMore;
 import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../notes/providers/notes_provider.dart';
 import '../../widget_editor/models/home_widget_config.dart';
@@ -46,7 +53,7 @@ Widget _trailing(BuildContext context, {String? text}) {
             context,
           ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
         ),
-        const SizedBox(width: KuberSpace.sm),
+        const SizedBox(width: KuberSpace.lg),
       ],
       Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
     ],
@@ -68,13 +75,13 @@ void _showBottomNavSheet(BuildContext context, WidgetRef ref, NavBarStyle curren
       choices: [
         SettingsChoice(
           value: NavBarStyle.classic,
-          label: context.l10n.navClassicChoice,
+          label: context.l10n.setNavStandard,
           subtitle: context.l10n.navSubtitleClassic,
           icon: Icons.view_headline_rounded,
         ),
         SettingsChoice(
           value: NavBarStyle.modern,
-          label: context.l10n.navModernChoice,
+          label: context.l10n.setNavFloating,
           subtitle: context.l10n.navSubtitleModern,
           icon: Icons.lens_rounded,
         ),
@@ -127,52 +134,19 @@ void _showNumberFormatSheet(BuildContext context, WidgetRef ref, NumberSystem cu
         ),
         SettingsChoice(
           value: NumberSystem.indian,
-          label: context.l10n.numFormatIndian,
+          label: context.l10n.setNumLakh,
           subtitle: '1,23,000.00',
           icon: Icons.language_rounded,
         ),
         SettingsChoice(
           value: NumberSystem.international,
-          label: context.l10n.numFormatInternational,
+          label: context.l10n.setNumMillion,
           subtitle: '123,000.00',
           icon: Icons.public_rounded,
         ),
       ],
       onSelected: (val) {
         ref.read(settingsProvider.notifier).setNumberSystem(val);
-      },
-    ),
-  );
-}
-
-
-void _showHorizontalSwipeSheet(BuildContext context, WidgetRef ref, SwipeMode current) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    useRootNavigator: true,
-    backgroundColor: Colors.transparent,
-    builder: (_) => SettingsChoiceSheet<SwipeMode>(
-      title: context.l10n.horizontalSwipeLabel,
-      subtitle: context.l10n.transactionsCategory,
-      selectedValue: current,
-      choices: [
-        SettingsChoice(
-          value: SwipeMode.changeTabs,
-          label: context.l10n.swipeChangeTabs,
-          subtitle: context.l10n.swipeSubtitleChangeTabs,
-          icon: Icons.swap_horiz_rounded,
-        ),
-        SettingsChoice(
-          value: SwipeMode.performActions,
-          label: context.l10n.swipeRowActions,
-          subtitle: context.l10n.swipeSubtitleRowActions,
-          icon: Icons.swipe_rounded,
-        ),
-      ],
-      onSelected: (val) {
-        ref.read(settingsProvider.notifier).setSwipeMode(val);
       },
     ),
   );
@@ -346,7 +320,54 @@ void _showDefaultAccountPicker(
 }
 
 
-Widget _divider(ColorScheme cs) => Divider(height: 1, color: cs.outlineVariant);
+/// Runs [onResume] when the user comes back to the app (from phone settings).
+class _OnResume extends StatefulWidget {
+  final VoidCallback onResume;
+  final Widget child;
+  const _OnResume({required this.onResume, required this.child});
+
+  @override
+  State<_OnResume> createState() => _OnResumeState();
+}
+
+class _OnResumeState extends State<_OnResume> {
+  late final _listener = AppLifecycleListener(onResume: () => widget.onResume());
+
+  @override
+  void initState() {
+    super.initState();
+    _listener;
+  }
+
+  @override
+  void dispose() {
+    _listener.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// "today", "yesterday" or "3 days ago".
+String backupAgo(AppLocalizations l, DateTime at) {
+  final days = DateUtils.dateOnly(DateTime.now()).difference(DateUtils.dateOnly(at)).inDays;
+  return days <= 0 ? l.todayLower : l.daysAgo(days);
+}
+
+/// Theme mode as a word.
+String themeModeName(AppLocalizations l, ThemeMode mode) => switch (mode) {
+      ThemeMode.light => l.themeLightChoice,
+      ThemeMode.dark => l.themeDarkChoice,
+      ThemeMode.system => l.themeSystemChoice,
+    };
+
+/// "Lakh", "Million" or "Automatic".
+String numberSystemName(AppLocalizations l, NumberSystem n) => switch (n) {
+      NumberSystem.indian => l.setNumLakh,
+      NumberSystem.international => l.setNumMillion,
+      NumberSystem.automatic => l.numFormatAutomatic,
+    };
 
 /// Look and feel: theme, text size, layouts, Home and Analytics widgets.
 class LookAndFeelScreen extends ConsumerWidget {
@@ -356,32 +377,25 @@ class LookAndFeelScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
     final mode = ref.watch(themeModeProvider);
     final variant = ref.watch(themeVariantProvider);
     final nav = ref.watch(settingsProvider.select((s) => s.valueOrNull?.navBarStyle ?? NavBarStyle.modern));
     final layout = ref.watch(moreTabLayoutProvider);
-    final themeStr = mode == ThemeMode.light
-        ? l.themeLightChoice
-        : mode == ThemeMode.dark
-        ? l.themeDarkChoice
-        : l.themeSystemChoice;
     final homeWidgets = ref.watch(homeWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
     final analyticsWidgets = ref.watch(analyticsWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
     return SettingsPageFrame(
       title: l.setGroupLook,
       highlight: highlight,
       children: [
-        SettingsCard(
+        SettingsBlock(
           children: [
             SettingsAnchor('theme', child: SettingsTile(
-              icon: Icons.palette_outlined,
+              icon: Icons.contrast_rounded,
               label: l.themeLabel,
-              subtitle: '${themeFamilyName(variant)} • $themeStr',
+              subtitle: '${themeFamilyName(variant)} · ${themeModeName(l, mode)}',
               onTap: () => context.push('/more/settings/theme'),
               trailing: _trailing(context),
             )),
-            _divider(cs),
             SettingsAnchor('textSize', child: SettingsTile(
               icon: Icons.format_size_rounded,
               label: l.textSizeTitle,
@@ -389,49 +403,45 @@ class LookAndFeelScreen extends ConsumerWidget {
               onTap: () => TextSizeSheet.show(context),
               trailing: _trailing(context, text: textSizeLabel(context, ref.watch(textSizeLevelProvider))),
             )),
-            _divider(cs),
             SettingsAnchor('bottomNav', child: SettingsTile(
               icon: Icons.space_dashboard_outlined,
-              label: l.bottomNavLabel,
+              label: l.setBottomNav,
               subtitle: l.bottomNavSubtitle,
               onTap: () => _showBottomNavSheet(context, ref, nav),
-              trailing: _trailing(context, text: nav == NavBarStyle.classic ? l.navClassicChoice : l.navModernChoice),
+              trailing: _trailing(context, text: nav == NavBarStyle.classic ? l.setNavStandard : l.setNavFloating),
             )),
-            _divider(cs),
             SettingsAnchor('moreLayout', child: SettingsTile(
               icon: Icons.grid_view_outlined,
-              label: l.moreTabLayoutLabel,
-              subtitle: l.moreTabLayoutSubtitle,
+              label: l.setMoreLayout,
+              subtitle: l.setMoreLayoutSub,
               onTap: () => _showMoreTabLayoutSheet(context, ref, layout),
-              trailing: _trailing(context, text: layout == MoreTabLayout.simple ? l.simpleLabel : l.navModernChoice),
+              trailing: _trailing(context, text: layout == MoreTabLayout.simple ? l.simpleLabel : l.setLayoutHero),
             )),
           ],
         ),
-        const SizedBox(height: KuberSpace.xl),
-        SettingsCard(
+        SettingsBlock(
+          title: l.setSecHomeAnalytics,
           children: [
             SettingsAnchor('homeWidgets', child: SettingsTile(
               icon: Icons.home_outlined,
-              label: l.homeWidgetsLabel,
-              subtitle: l.homeWidgetsSubtitle('${homeWidgets.where((w) => w.enabled).length}'),
+              label: l.setHomeWidgets,
+              subtitle: l.setWidgetsOn('${homeWidgets.where((w) => w.enabled).length}'),
               onTap: () => context.push('/widget-editor/home'),
               trailing: _trailing(context),
             )),
-            _divider(cs),
             SettingsAnchor('analyticsWidgets', child: SettingsTile(
               icon: Icons.insert_chart_outlined_rounded,
-              label: l.analyticsWidgetsLabel,
-              subtitle: l.analyticsWidgetsSubtitle('${analyticsWidgets.where((w) => w.enabled).length}'),
+              label: l.setAnalyticsWidgets,
+              subtitle: l.setWidgetsOn('${analyticsWidgets.where((w) => w.enabled).length}'),
               onTap: () => context.push('/widget-editor/analytics'),
               trailing: _trailing(context),
             )),
             // Home v2 installs only (board HV2.2 Settings).
-            ...const _HomeV2SettingsRows().rows(context, ref, cs),
-            _divider(cs),
+            ...const _HomeV2SettingsRows().rows(context, ref),
             SettingsAnchor('gallery', child: SettingsTile(
               icon: Icons.widgets_outlined,
               label: l.setHomeScreenWidgets,
-              subtitle: l.menuWidgetsDesc,
+              subtitle: l.setGallerySub,
               onTap: () => context.push('/more/widgets-gallery'),
               trailing: _trailing(context),
             )),
@@ -460,90 +470,90 @@ class AppPreferencesScreen extends ConsumerWidget {
     final currency = currencyFromCode(currencyCode);
     final numberSystem = settings?.numberSystem ?? NumberSystem.automatic;
     final swipe = settings?.swipeMode ?? SwipeMode.changeTabs;
-    final numberStr = switch (numberSystem) {
-      NumberSystem.indian => l.numFormatIndian,
-      NumberSystem.international => l.numFormatInternational,
-      NumberSystem.automatic => l.numFormatAutomatic,
-    };
+    final numberStr = numberSystemName(l, numberSystem);
     return SettingsPageFrame(
       title: l.setGroupPrefs,
       highlight: highlight,
       children: [
-        // English-only literals, like other Kuber-signature surfaces.
-        SettingsCard(
+        SettingsBlock(
+          title: l.setSecShortcuts,
           children: [
             SettingsAnchor('quickActions', child: SettingsTile(
               icon: Icons.bolt_outlined,
-              label: 'Quick Actions',
-              subtitle: 'Nav-bar long-press · controls & shortcuts',
+              label: l.setQuickActions,
+              subtitle: l.setQuickActionsSub,
               onTap: () => context.push('/settings/quick-actions'),
-              trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+              trailing: _trailing(context),
             )),
-            _divider(cs),
             SettingsAnchor('addMenu', child: SettingsTile(
               icon: Icons.add_circle_outline_rounded,
-              label: 'Add Menu',
-              subtitle: '+ button long-press · add-entry shortcuts',
+              label: l.setAddMenu,
+              subtitle: l.setAddMenuSub,
               onTap: () => context.push('/settings/add-menu'),
-              trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+              trailing: _trailing(context),
             )),
           ],
         ),
-        const SizedBox(height: KuberSpace.md),
-        const _ShortcutsDiscoveryTip(),
-        const SizedBox(height: KuberSpace.sm),
-        Text(l.setPathTip, style: Theme.of(context).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
-        const SizedBox(height: KuberSpace.xl),
-        SettingsCard(
+        Padding(
+          padding: const EdgeInsets.only(top: 0, bottom: KuberSpace.sectionGap),
+          child: KuberInfoLine(text: l.setPathTip),
+        ),
+        SettingsBlock(
+          title: l.setSecMoney,
           children: [
             const SettingsAnchor('language', child: SettingsLanguageRow()),
-            _divider(cs),
             SettingsAnchor('currency', child: SettingsTile(
-              icon: Icons.account_balance_wallet_outlined,
+              icon: Icons.currency_rupee_rounded,
               label: l.currencyLabel,
-              subtitle: l.currencySubtitle,
+              subtitle: l.setCurrencySub,
               // Currency selection is free for everyone.
               onTap: () => showCurrencyPicker(context: context, ref: ref, currentCode: currencyCode, onSelected: (_) {}),
               trailing: _trailing(context, text: '${currency.symbol} ${currency.code}'),
             )),
-            _divider(cs),
             SettingsAnchor('numberFormat', child: SettingsTile(
-              icon: Icons.money_outlined,
-              label: l.numberFormatLabel,
-              subtitle: l.numberFormatSubtitle,
+              icon: Icons.pin_rounded,
+              label: l.setNumberFormat,
+              subtitle: switch (numberSystem) {
+                NumberSystem.indian => '$numberStr · 1,23,456',
+                NumberSystem.international => '$numberStr · 123,456',
+                NumberSystem.automatic => l.numFormatAutomaticSub,
+              },
               onTap: () => _showNumberFormatSheet(context, ref, numberSystem),
               trailing: _trailing(context, text: numberStr),
             )),
-            _divider(cs),
             SettingsAnchor('currencyCode', child: SettingsTile(
               icon: Icons.abc_rounded,
-              label: l.showCurrencyCode,
-              subtitle: l.showCurrencyCodeSub,
+              label: l.setShowCode,
+              subtitle: l.setShowCodeSub,
               trailing: Switch(
                 value: settings?.showCurrencyCode ?? false,
                 onChanged: (v) => ref.read(settingsProvider.notifier).setShowCurrencyCode(v),
                 activeTrackColor: cs.primary,
               ),
             )),
-          ],
-        ),
-        const SizedBox(height: KuberSpace.xl),
-        SettingsCard(
-          children: [
             SettingsAnchor('defaultAccount', child: SettingsTile(
-              icon: Icons.account_balance_wallet_outlined,
-              label: l.defaultAccountLabel,
-              subtitle: l.defaultAccountSubtitle,
+              icon: Icons.account_balance_outlined,
+              label: l.setDefaultAccount,
+              subtitle: l.setDefaultAccountSub,
               onTap: () => _showDefaultAccountPicker(context, ref, accounts, defaultAccId),
               trailing: _trailing(context, text: defaultAccName),
             )),
-            _divider(cs),
+          ],
+        ),
+        SettingsBlock(
+          title: l.setSecGestures,
+          children: [
             SettingsAnchor('swipe', child: SettingsTile(
-              icon: Icons.swap_horiz_rounded,
-              label: l.horizontalSwipeLabel,
-              subtitle: l.horizontalSwipeSubtitle,
-              onTap: () => _showHorizontalSwipeSheet(context, ref, swipe),
-              trailing: _trailing(context, text: swipe == SwipeMode.changeTabs ? l.swipeChangeTabs : l.swipeRowActions),
+              icon: Icons.swipe_rounded,
+              label: l.setSwipe,
+              subtitle: l.setSwipeSub,
+              trailing: Switch(
+                value: swipe == SwipeMode.changeTabs,
+                onChanged: (v) => ref
+                    .read(settingsProvider.notifier)
+                    .setSwipeMode(v ? SwipeMode.changeTabs : SwipeMode.performActions),
+                activeTrackColor: cs.primary,
+              ),
             )),
           ],
         ),
@@ -551,6 +561,12 @@ class AppPreferencesScreen extends ConsumerWidget {
     );
   }
 }
+
+/// Whether this phone can unlock with a fingerprint or face right now.
+final biometricEnrolledProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final bio = BiometricService();
+  return await bio.canAuthenticate() && await bio.hasEnrolled();
+});
 
 /// Privacy and security. The app lock and the Kuber Cards biometric are two
 /// settings: each has its own switch and check, and neither touches the other.
@@ -590,51 +606,164 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
     }
   }
 
+  void _showLocksSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final l = ctx.l10n;
+        final theme = Theme.of(ctx);
+        final cs = theme.colorScheme;
+        final body = theme.textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant);
+        Widget line(String lead, String rest) => Padding(
+              padding: const EdgeInsets.only(bottom: KuberSpace.lg),
+              child: Text.rich(
+                TextSpan(
+                  style: body,
+                  children: [
+                    TextSpan(text: lead, style: body.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
+                    TextSpan(text: ' $rest'),
+                  ],
+                ),
+              ),
+            );
+        return KuberBottomSheet(
+          title: l.setLocksTitle,
+          actions: AppButton(
+            label: l.setGotIt,
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              line(l.setAppLock, l.setLocksApp),
+              line(l.appDrawerCards, l.setLocksCards),
+              Text(l.setLocksNeither, style: body),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final appLock = ref.watch(settingsProvider.select((s) => s.valueOrNull?.biometricsEnabled ?? false));
     final meta = ref.watch(cardVaultMetaProvider).valueOrNull;
     final hasVault = meta != null;
-    return SettingsPageFrame(
-      title: l.setGroupPrivacy,
-      highlight: widget.highlight,
-      children: [
-        SettingsCard(
-          children: [
-            SettingsAnchor('privacyMode', child: SettingsTile(
-              icon: Icons.visibility_off_outlined,
-              label: l.privacyModeLabel,
-              subtitle: l.privacyModeSubtitle,
-              trailing: Switch(
-                value: ref.watch(privacyModeProvider),
-                onChanged: (_) => ref.read(settingsProvider.notifier).togglePrivacyMode(),
-                activeTrackColor: cs.primary,
+    final noBiometric = ref.watch(biometricEnrolledProvider).valueOrNull == false;
+    // With nothing enrolled a switch that is on must still turn off.
+    final lockOff = noBiometric && !appLock;
+    final cardsOff = noBiometric && !(meta?.biometricEnabled ?? false);
+    return _OnResume(
+      onResume: () => ref.invalidate(biometricEnrolledProvider),
+      child: SettingsPageFrame(
+        title: l.setGroupPrivacy,
+        highlight: widget.highlight,
+        children: [
+          if (noBiometric)
+            Container(
+              margin: const EdgeInsets.only(bottom: KuberSpace.lg),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(KuberShape.large),
               ),
-            )),
-            _divider(cs),
-            SettingsAnchor('biometric', child: SettingsTile(
-              icon: Icons.fingerprint_rounded,
-              label: l.biometricLockLabel,
-              subtitle: l.biometricLockSubtitle,
-              trailing: Switch(
-                value: appLock,
-                onChanged: _setAppLock,
-                activeTrackColor: cs.primary,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.fingerprint_rounded, size: 20, color: cs.onSurfaceVariant),
+                      const SizedBox(width: KuberSpace.md),
+                      Expanded(
+                        child: Text(l.setNoFp, style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurface)),
+                      ),
+                    ],
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton(onPressed: openSecuritySettings, child: Text(l.setNoFpOpen)),
+                  ),
+                ],
               ),
-            )),
-            _divider(cs),
-            // Notes-specific gate. Greyed out until the app-wide biometric
-            // toggle above is on (per design 1l).
-            SettingsAnchor('notesBiometric', child: Opacity(
-              opacity: appLock ? 1 : 0.45,
-              child: SettingsTile(
+            ),
+          SettingsBlock(
+            children: [
+              SettingsAnchor('privacyMode', child: SettingsTile(
+                icon: Icons.visibility_off_outlined,
+                label: l.setPrivacyMode,
+                subtitle: l.setPrivacyModeSub,
+                trailing: Switch(
+                  value: ref.watch(privacyModeProvider),
+                  onChanged: (_) => ref.read(settingsProvider.notifier).togglePrivacyMode(),
+                  activeTrackColor: cs.primary,
+                ),
+              )),
+              SettingsAnchor('biometric', child: SettingsTile(
                 icon: Icons.lock_outline_rounded,
-                label: 'Require biometric to open Notes',
-                subtitle: appLock
-                    ? 'Ask for Face / fingerprint unlock'
-                    : 'Turn on Biometric unlock above first',
+                label: l.setAppLock,
+                subtitle: lockOff ? l.setAppLockNoFp : l.setAppLockSub,
+                disabled: lockOff,
+                trailing: Switch(
+                  value: appLock,
+                  onChanged: lockOff ? null : _setAppLock,
+                  activeTrackColor: cs.primary,
+                ),
+              )),
+            ],
+          ),
+          // Shown once a vault exists: there is nothing to protect or change
+          // until the user has set up Kuber Cards.
+          if (hasVault)
+            SettingsBlock(
+              title: l.appDrawerCards,
+              inline: [KuberInfoGlyph(onTap: _showLocksSheet)],
+              children: [
+                SettingsAnchor('cardsBiometric', child: SettingsTile(
+                  icon: Icons.fingerprint_rounded,
+                  label: l.setCardsFp,
+                  subtitle: cardsOff ? l.setCardsFpNone : l.setCardsFpSub,
+                  disabled: cardsOff,
+                  trailing: Switch(
+                    value: meta.biometricEnabled,
+                    onChanged: cardsOff
+                        ? null
+                        : (v) => toggleCardBiometric(context, ref, v,
+                            onNeedsUnlock: () => context.push('/cards')),
+                    activeTrackColor: cs.primary,
+                  ),
+                )),
+                SettingsAnchor('cardsPin', child: SettingsTile(
+                  icon: Icons.password_rounded,
+                  label: l.setCardsPinRow,
+                  subtitle: l.setCardsPinRowSub,
+                  trailing: _trailing(context),
+                  // Kuber Cards is free up to 2 cards, so managing the unlock
+                  // PIN is free too. No entry-level Pro gate.
+                  onTap: () => context.push('/cards/change-pin'),
+                )),
+              ],
+            ),
+          SettingsBlock(
+            title: l.appDrawerNotes,
+            children: [
+              // Notes-specific gate. Greyed out until the app lock above is on
+              // (per design 1l).
+              SettingsAnchor('notesBiometric', child: SettingsTile(
+                icon: Icons.sticky_note_2_outlined,
+                label: l.setNotesLock,
+                subtitle: appLock ? l.setNotesLockOn : l.setNotesLockOff,
+                disabled: !appLock,
                 trailing: Switch(
                   value: appLock && ref.watch(notesBiometricRequiredProvider),
                   onChanged: !appLock
@@ -647,37 +776,12 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
                         },
                   activeTrackColor: cs.primary,
                 ),
-              ),
-            )),
-            // Shown once a vault exists: there is nothing to protect or
-            // change until the user has set up Kuber Cards.
-            if (hasVault) ...[
-              _divider(cs),
-              SettingsAnchor('cardsBiometric', child: SettingsTile(
-                icon: Icons.credit_card_outlined,
-                label: l.setCardsBiometric,
-                subtitle: l.setCardsBiometricSub,
-                trailing: Switch(
-                  value: meta.biometricEnabled,
-                  onChanged: (v) => toggleCardBiometric(context, ref, v,
-                      onNeedsUnlock: () => context.push('/cards')),
-                  activeTrackColor: cs.primary,
-                ),
-              )),
-              _divider(cs),
-              SettingsAnchor('cardsPin', child: SettingsTile(
-                icon: Icons.password_rounded,
-                label: l.setCardsPin,
-                subtitle: l.setCardsPinSub,
-                trailing: Icon(Icons.chevron_right_rounded, size: 20, color: cs.onSurfaceVariant),
-                // Kuber Cards is free up to 2 cards, so managing the unlock
-                // PIN is free too. No entry-level Pro gate.
-                onTap: () => context.push('/cards/change-pin'),
               )),
             ],
-          ],
-        ),
-      ],
+          ),
+          if (hasVault) KuberInfoLine(text: l.setLocksInfo),
+        ],
+      ),
     );
   }
 }
@@ -690,36 +794,84 @@ class AppDrawerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
-    final on = ref.watch(appDrawerEntriesProvider).valueOrNull;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final on = ref.watch(appDrawerEntriesProvider).valueOrNull ?? const <AppDrawerEntry>{};
+    Widget preview(IconData icon, String label, bool lit, Color bg, Color fg) => Opacity(
+          opacity: lit ? 1 : 0.38,
+          child: SizedBox(
+            width: 64,
+            child: Column(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: bg,
+                    shape: BoxShape.circle,
+                    border: lit ? null : Border.all(color: cs.outline, width: 1.5),
+                  ),
+                  child: Icon(icon, size: 26, color: fg),
+                ),
+                const SizedBox(height: 6),
+                Text(label,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall!.copyWith(color: cs.onSurface)),
+              ],
+            ),
+          ),
+        );
     return SettingsPageFrame(
       title: l.appDrawerSection,
       highlight: highlight,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpace.md),
-          child: Text(l.appDrawerDescription,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
+          padding: const EdgeInsets.only(bottom: KuberSpace.lg),
+          child: Text(l.setDrawerBody, style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
         ),
-        SettingsCard(
+        Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
+          child: KuberCard(
+            color: cs.surfaceContainerLow,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(l.setDrawerPreview.toUpperCase(), style: sectionHeaderStyle(context)),
+                const SizedBox(height: KuberSpace.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    preview(Icons.currency_rupee_rounded, 'Kuber', true, cs.primaryContainer, cs.onPrimaryContainer),
+                    for (final (e, icon, label, bg, fg) in [
+                      (AppDrawerEntry.cards, Icons.credit_card_rounded, l.appDrawerCards, cs.secondaryContainer, cs.onSecondaryContainer),
+                      (AppDrawerEntry.notes, Icons.sticky_note_2_rounded, l.appDrawerNotes, cs.tertiaryContainer, cs.onTertiaryContainer),
+                      (AppDrawerEntry.reminders, Icons.alarm_rounded, l.appDrawerReminders, cs.surfaceContainerHigh, cs.onSurfaceVariant),
+                    ])
+                      preview(icon, label, on.contains(e), bg, fg),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        SettingsBlock(
           children: [
-            for (final (i, e) in [
-              (AppDrawerEntry.cards, 'drawerCards', Icons.wallet_rounded, l.appDrawerCards, l.appDrawerCardsSub),
-              (AppDrawerEntry.notes, 'drawerNotes', Icons.sticky_note_2_outlined, l.appDrawerNotes, l.appDrawerNotesSub),
-              (AppDrawerEntry.reminders, 'drawerReminders', Icons.notifications_none_rounded, l.appDrawerReminders, l.appDrawerRemindersSub),
-            ].indexed) ...[
-              if (i > 0) _divider(cs),
-              SettingsAnchor(e.$2, child: SettingsTile(
-                icon: e.$3,
-                label: e.$4,
-                subtitle: e.$5,
+            for (final (e, id, icon, label) in [
+              (AppDrawerEntry.cards, 'drawerCards', Icons.credit_card_rounded, l.appDrawerCards),
+              (AppDrawerEntry.notes, 'drawerNotes', Icons.sticky_note_2_outlined, l.appDrawerNotes),
+              (AppDrawerEntry.reminders, 'drawerReminders', Icons.alarm_rounded, l.appDrawerReminders),
+            ])
+              SettingsAnchor(id, child: SettingsTile(
+                icon: icon,
+                label: label,
+                subtitle: l.setDrawerRowSub,
                 trailing: Switch(
-                  value: on?.contains(e.$1) ?? false,
-                  onChanged: (v) => toggleAppDrawerEntry(context, ref, e.$1, v),
+                  value: on.contains(e),
+                  onChanged: (v) => toggleAppDrawerEntry(context, ref, e, v),
                   activeTrackColor: cs.primary,
                 ),
               )),
-            ],
           ],
         ),
       ],
@@ -739,7 +891,7 @@ Future<bool> requestNotifications() async {
   return status.isGranted;
 }
 
-/// Notifications: the current state, a way to turn them on, and the inbox.
+/// Notifications: the current state, what Kuber sends, and the inbox.
 class NotificationsSettingsScreen extends ConsumerWidget {
   final String? highlight;
   const NotificationsSettingsScreen({super.key, this.highlight});
@@ -749,30 +901,101 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final allowed = ref.watch(notificationsAllowedProvider).valueOrNull ?? true;
+    final kinds = ref.watch(notificationKindsProvider);
+    return _OnResume(
+      onResume: () => ref.invalidate(notificationsAllowedProvider),
+      child: SettingsPageFrame(
+        title: l.menuNotifications,
+        highlight: highlight,
+        children: [
+          SettingsAnchor('notifPermission', child: allowed
+              ? SettingsBlock(
+                  children: [
+                    SettingsTile(
+                      icon: Icons.notifications_active_outlined,
+                      label: l.setNotifAllowed,
+                      subtitle: l.setNotifAllowedShort,
+                      onTap: openAppSettings,
+                      trailing: Icon(Icons.open_in_new_rounded, size: 20, color: cs.onSurfaceVariant),
+                    ),
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
+                  child: KuberStatusBanner(
+                    icon: Icons.notifications_off_outlined,
+                    title: l.setNotifBlocked,
+                    body: l.setNotifOffBody,
+                    actionLabel: l.setTurnOn,
+                    onAction: openAppSettings,
+                  ),
+                )),
+          SettingsBlock(
+            title: l.setSecSends,
+            children: [
+              for (final (kind, id, icon, label, sub) in [
+                (NotificationKind.payments, 'notifEmi', Icons.event_repeat_rounded, l.obNotifEmi, l.setNotifEmiSub),
+                (NotificationKind.budgets, 'notifBudget', Icons.donut_large_rounded, l.obNotifBudget, l.setNotifBudgetSub),
+                (NotificationKind.backups, 'notifBackup', Icons.backup_outlined, l.obNotifBackupRow, l.setNotifBackupSub),
+              ])
+                SettingsAnchor(id, child: SettingsTile(
+                  icon: icon,
+                  label: label,
+                  subtitle: sub,
+                  disabled: !allowed,
+                  trailing: Switch(
+                    value: allowed && kinds.contains(kind),
+                    onChanged: allowed
+                        ? (v) => ref.read(notificationKindsProvider.notifier).set(kind, v)
+                        : null,
+                    activeTrackColor: cs.primary,
+                  ),
+                )),
+            ],
+          ),
+          SettingsBlock(
+            children: [
+              SettingsAnchor('notifInbox', child: SettingsTile(
+                icon: Icons.inbox_outlined,
+                label: l.setNotifInbox,
+                subtitle: l.setNotifInboxSub,
+                onTap: () => openNotificationsSheet(context, ref),
+                trailing: _trailing(context),
+              )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Help: the tutorial and feedback.
+class HelpSettingsScreen extends ConsumerWidget {
+  final String? highlight;
+  const HelpSettingsScreen({super.key, this.highlight});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     return SettingsPageFrame(
-      title: l.menuNotifications,
+      title: l.setHelpTitle,
       highlight: highlight,
       children: [
-        SettingsCard(
+        SettingsBlock(
           children: [
-            SettingsAnchor('notifPermission', child: SettingsTile(
-              icon: allowed ? Icons.notifications_active_outlined : Icons.notifications_off_outlined,
-              label: allowed ? l.setNotifAllowed : l.setNotifBlocked,
-              subtitle: allowed ? l.setNotifAllowedSub : l.setNotifBlockedSub,
-              onTap: allowed
-                  ? null
-                  : () async {
-                      await requestNotifications();
-                      ref.invalidate(notificationsAllowedProvider);
-                    },
-              trailing: allowed ? null : _trailing(context),
+            SettingsAnchor('tutorial', child: SettingsTile(
+              icon: Icons.school_rounded,
+              label: l.setAppTutorial,
+              subtitle: l.setAppTutorialSub,
+              onTap: () => launchTutorialFromMore(context, ref),
+              trailing: _trailing(context),
             )),
-            _divider(cs),
-            SettingsAnchor('notifInbox', child: SettingsTile(
-              icon: Icons.inbox_outlined,
-              label: l.setNotifInbox,
-              subtitle: l.menuNotificationsDesc,
-              onTap: () => openNotificationsSheet(context, ref),
+            SettingsAnchor('feedback', child: SettingsTile(
+              icon: Icons.rate_review_outlined,
+              label: l.setSendFeedback,
+              subtitle: l.setSendFeedbackSub,
+              onTap: () => context.push('/more/feedback'),
               trailing: _trailing(context),
             )),
           ],
@@ -790,24 +1013,22 @@ class ActivitySettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
     return SettingsPageFrame(
       title: l.setGroupActivity,
       highlight: highlight,
       children: [
-        SettingsCard(
+        SettingsBlock(
           children: [
             SettingsAnchor('upcoming', child: SettingsTile(
               icon: Icons.calendar_month_rounded,
-              label: 'Upcoming Events',
-              subtitle: 'Everything coming up, in one place',
+              label: l.setUpcoming,
+              subtitle: l.setUpcomingSub,
               onTap: () => context.push('/more/upcoming-events'),
               trailing: _trailing(context),
             )),
-            _divider(cs),
             SettingsAnchor('stories', child: SettingsTile(
               icon: Icons.auto_stories_rounded,
-              label: l.menuStoriesArchive,
+              label: l.setStories,
               subtitle: l.menuStoriesArchiveDesc,
               onTap: () => context.push('/more/stories-archive'),
               trailing: _trailing(context),
@@ -819,74 +1040,12 @@ class ActivitySettingsScreen extends StatelessWidget {
   }
 }
 
-/// Discovery tip below the SHORTCUTS card — teaches both long-press gestures so
-/// the feature is findable without knowing them. Dashed primary-tinted bar.
-class _ShortcutsDiscoveryTip extends StatelessWidget {
-  const _ShortcutsDiscoveryTip();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(KuberSpace.md),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.28)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: cs.primary,
-              borderRadius: BorderRadius.circular(KuberShape.small),
-            ),
-            child: Icon(Icons.touch_app_rounded, size: 18, color: cs.onPrimary),
-          ),
-          const SizedBox(width: KuberSpace.md),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                style: localeFont(
-                  fontSize: 12,
-                  color: cs.onSurface,
-                  height: 1.45,
-                ),
-                children: [
-                  TextSpan(
-                    text: 'Tip: ',
-                    style: localeFont(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary,
-                    ),
-                  ),
-                  const TextSpan(
-                    text:
-                        'long-press any bottom-nav tab (Home, History, '
-                        'Analytics, More) for Quick Actions, or long-press the '
-                        '+ button for the Add menu.',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
 /// Home v2 rows in Settings › Widgets: "Get started card" (for 30 days after
 /// install) and "Suggestions on Home". Nothing for v1.
 class _HomeV2SettingsRows {
   const _HomeV2SettingsRows();
 
-  List<Widget> rows(BuildContext context, WidgetRef ref, ColorScheme cs) {
+  List<Widget> rows(BuildContext context, WidgetRef ref) {
     final s = ref.watch(homeV2Provider);
     if (!s.isV2) return const [];
     final l = context.l10n;
@@ -899,13 +1058,11 @@ class _HomeV2SettingsRows {
             DateTime.now().difference(installedAt) <= const Duration(days: 30));
     final notifier = ref.read(homeV2Provider.notifier);
     return [
-      if (showGs) ...[
-        Divider(height: 1, color: cs.outlineVariant),
+      if (showGs)
         SettingsAnchor('getStarted', child: SettingsTile(
           icon: Icons.flag_outlined,
           label: l.homeV2SetGsTitle,
           subtitle: l.homeV2SetGsSub,
-          onTap: () {},
           trailing: Switch(
             value: s.gsEligible,
             onChanged: (on) => notifier.update(
@@ -929,13 +1086,10 @@ class _HomeV2SettingsRows {
             ),
           ),
         )),
-      ],
-      Divider(height: 1, color: cs.outlineVariant),
       SettingsAnchor('suggestions', child: SettingsTile(
         icon: Icons.lightbulb_outline_rounded,
         label: l.homeV2SetSgTitle,
         subtitle: l.homeV2SetSgSub,
-        onTap: () {},
         trailing: Switch(
           value: s.sgSetting,
           onChanged: (on) => notifier.update((x) => x.copyWith(sgSetting: on)),

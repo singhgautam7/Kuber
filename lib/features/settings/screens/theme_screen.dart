@@ -13,6 +13,7 @@ import '../../pro/feature_gates/pro_gate.dart';
 import '../../pro/paywall/pro_state.dart';
 import '../providers/settings_provider.dart';
 import '../providers/theme_options_provider.dart';
+import '../widgets/settings_anchor.dart';
 
 /// More → Settings → Theme. Copied from Mull `features/settings/theme_screen.dart`:
 /// Light / Dark / System; a true-black row while dark is in effect; a
@@ -20,7 +21,8 @@ import '../providers/theme_options_provider.dart';
 /// wallpaper" row; a live preview card. Kuber Signature is free, every other
 /// family and the wallpaper colour are Pro (unchanged gate).
 class ThemeScreen extends ConsumerWidget {
-  const ThemeScreen({super.key});
+  final String? highlight;
+  const ThemeScreen({super.key, this.highlight});
 
   bool _gate(BuildContext context, WidgetRef ref) =>
       proGate(context, ref, showThemesGateSheet);
@@ -99,7 +101,9 @@ class ThemeScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      body: KuberScrollAwayHeader(
+      body: SettingsHighlight(
+        rowId: highlight,
+        child: KuberScrollAwayHeader(
         header: KuberAppBar(showBack: true, title: context.l10n.themeLabel),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -124,7 +128,7 @@ class ThemeScreen extends ConsumerWidget {
             // Expressive colours and Pure black (theme-surfaces-v1): always
             // shown, free on every family. Pure black only acts in dark.
             const SizedBox(height: KuberSpace.md),
-            optionRow(
+            SettingsAnchor('expressive', child: optionRow(
               leading: Container(
                 width: 30,
                 height: 30,
@@ -151,9 +155,9 @@ class ThemeScreen extends ConsumerWidget {
                 HapticFeedback.selectionClick();
                 optionsCtl.setExpressive(v);
               },
-            ),
+            )),
             const SizedBox(height: KuberSpace.md),
-            Semantics(
+            SettingsAnchor('pureBlack', child: Semantics(
               label: mode == ThemeMode.light ? l.themePureBlackDisabledA11y : null,
               excludeSemantics: mode == ThemeMode.light,
               child: optionRow(
@@ -175,7 +179,7 @@ class ThemeScreen extends ConsumerWidget {
                   optionsCtl.setPureBlack(v);
                 },
               ),
-            ),
+            )),
             // System only: when Pure black applies. (Light shows no helper,
             // the dimmed row says it; user review.)
             if (mode == ThemeMode.system)
@@ -308,6 +312,7 @@ class ThemeScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

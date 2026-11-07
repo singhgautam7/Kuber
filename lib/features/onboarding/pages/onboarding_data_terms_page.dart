@@ -3,12 +3,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_option_card.dart';
 
 const kPrivacyPolicyUrl = 'https://kuber.pages.dev/docs/privacy-policy/';
 
-/// Data responsibility, the last page. Layout (top to bottom): a quiet icon,
-/// the two checkboxes, then title and description sitting on the flow's
-/// button. Scrolls at large font sizes.
+/// Your data, the last page: both boxes are required. Scrolls at large font
+/// sizes.
 class OnboardingDataTermsPage extends StatelessWidget {
   final bool backups;
   final bool responsibility;
@@ -28,55 +29,56 @@ class OnboardingDataTermsPage extends StatelessWidget {
     final l = context.l10n;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    Widget check(bool value, ValueChanged<bool> onChanged, String text) => Semantics(
-          checked: value,
-          child: InkWell(
-            onTap: () => onChanged(!value),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: KuberSpace.sm),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ExcludeSemantics(
-                    child: Checkbox(value: value, onChanged: (v) => onChanged(v ?? false)),
-                  ),
-                  const SizedBox(width: KuberSpace.sm),
-                  Expanded(
-                    child: Text(text,
-                        style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurface)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
     return CustomScrollView(
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpace.xl),
+            padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, 56, KuberSpace.screenMargin, 0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: KuberSpace.xxl),
-                Icon(Icons.phone_android_rounded, size: 56, color: cs.onSurfaceVariant),
-                const Spacer(),
-                check(backups, onBackups, l.obTermsCheck1),
-                check(responsibility, onResponsibility, l.obTermsCheck2),
-                const Spacer(),
-                Text(l.obTermsTitle,
-                    style: theme.textTheme.headlineMedium!.copyWith(color: cs.onSurface)),
-                const SizedBox(height: KuberSpace.sm),
-                Text(l.obTermsBody,
-                    style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
+                Center(
+                  child: Container(
+                    width: 88,
+                    height: 88,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerLow,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: cs.outlineVariant),
+                    ),
+                    child: const KuberIconTile(icon: Icons.shield_outlined, size: 56, glyph: 30, circle: true),
+                  ),
+                ),
+                const SizedBox(height: KuberSpace.xl - 4),
+                KuberConsentRow(text: l.obTermsCheck1, value: backups, onChanged: onBackups),
+                const SizedBox(height: KuberSpace.md),
+                KuberConsentRow(text: l.obTermsCheck2, value: responsibility, onChanged: onResponsibility),
+                const SizedBox(height: KuberSpace.xl),
+                Text(l.obTermsTitle, style: theme.textTheme.titleLarge!.copyWith(color: cs.onSurface)),
+                const SizedBox(height: 6),
+                Text(l.obTermsBody, style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
+                const SizedBox(height: 6),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: TextButton(
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                    onPressed: () => launchUrl(Uri.parse(kPrivacyPolicyUrl),
-                        mode: LaunchMode.externalApplication),
-                    child: Text(l.obTermsPrivacy),
+                  child: InkWell(
+                    onTap: () => launchUrl(Uri.parse(kPrivacyPolicyUrl), mode: LaunchMode.externalApplication),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: KuberSpace.tapTarget),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(l.obTermsPrivacy,
+                                style: theme.textTheme.labelLarge!.copyWith(color: cs.primary)),
+                          ),
+                          const SizedBox(width: KuberSpace.xs),
+                          Icon(Icons.open_in_new_rounded, size: 16, color: cs.primary),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
