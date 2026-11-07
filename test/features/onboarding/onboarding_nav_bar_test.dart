@@ -30,4 +30,29 @@ void main() {
     }
     expect(find.text('Back'), findsOneWidget);
   });
+
+  testWidgets('a long label stays inside the button at the largest font', (t) async {
+    await t.binding.setSurfaceSize(const Size(360, 640));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    t.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+    await t.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: OnboardingNavBar(
+          currentPage: 1,
+          pageCount: 9,
+          compactBack: true,
+          onBack: () {},
+          primaryLabel: 'Agree and continue',
+          onPrimary: () {},
+        ),
+      ),
+    ));
+    await t.pump(const Duration(milliseconds: 400));
+    final button = t.getRect(find.byType(FilledButton));
+    final label = t.getRect(find.text('Agree and continue'));
+    expect(t.takeException(), isNull);
+    expect(label.right, lessThanOrEqualTo(button.right));
+    expect(label.left, greaterThanOrEqualTo(button.left));
+  });
 }

@@ -176,15 +176,19 @@ class OnboardingNavBar extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Shrinks only when the label runs out of room
+                              // (the largest system font sizes).
                               Flexible(
-                                child: Text(
-                                  primaryLabel,
-                                  overflow: TextOverflow.visible,
-                                  softWrap: false,
-                                  style: localeFont(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.1,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    primaryLabel,
+                                    softWrap: false,
+                                    style: localeFont(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.1,
+                                    ),
                                   ),
                                 ),
                               ),
