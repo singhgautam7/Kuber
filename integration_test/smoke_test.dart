@@ -31,13 +31,19 @@ void main() {
 
   smokeTest('onboarding: skip to setup, name, start', (t) async {
     app.main();
-    await pumpUntil(t, find.text(en.getStarted), timeout: const Duration(seconds: 40));
+    await pumpUntil(t, find.text(en.obStartFresh), timeout: const Duration(seconds: 40));
+    await tapText(t, en.obStartFresh);
+    await pumpUntil(t, find.text(en.getStarted));
     await tapText(t, en.getStarted);
     await tapText(t, en.skip);
     await pumpUntil(t, find.byType(TextFormField));
     await t.enterText(find.byType(TextFormField).first, 'Gaurav');
     await settle(t);
     await tapText(t, en.startJourney);
+    await tapText(t, en.obNotifLater);
+    await tapText(t, en.obTermsCheck1);
+    await tapText(t, en.obTermsCheck2);
+    await tapText(t, en.obTermsAgree);
     await pumpUntil(t, find.byType(AppScaffold), timeout: const Duration(seconds: 30));
     expect(await db.accounts.count(), greaterThanOrEqualTo(3));
     expectNoErrors(t);
@@ -357,7 +363,8 @@ void main() {
   smokeTest('Currency switch: format follows, amounts unchanged', (t) async {
     await boot(t);
     final sum = (await db.transactions.where().findAll()).fold(0.0, (s, x) => s + x.amount);
-    await go(t, '/more/settings');
+    await go(t, '/more');
+    await push(t, '/more/settings/preferences');
     await tapTextScroll(t, en.currencyLabel);
     final search = find.byType(TextField);
     await pumpUntil(t, search);
@@ -369,7 +376,8 @@ void main() {
     await expectText(t, r'$');
     expect((await db.transactions.where().findAll()).fold(0.0, (s, x) => s + x.amount), sum);
     // Back to INR.
-    await go(t, '/more/settings');
+    await go(t, '/more');
+    await push(t, '/more/settings/preferences');
     await tapTextScroll(t, en.currencyLabel);
     await t.enterText(find.byType(TextField).last, 'INR');
     await settle(t);
@@ -379,13 +387,15 @@ void main() {
 
   smokeTest('Language switch: Hindi and back', (t) async {
     await boot(t);
-    await go(t, '/more/settings');
+    await go(t, '/more');
+    await push(t, '/more/settings/preferences');
     await tapTextScroll(t, en.language);
     await tapText(t, 'हिन्दी');
     await settle(t, const Duration(seconds: 2));
     final hi = l10n(t);
     expect(hi.localeName, 'hi');
-    await go(t, '/more/settings');
+    await go(t, '/more');
+    await push(t, '/more/settings/preferences');
     await tapTextScroll(t, hi.language);
     await tapText(t, 'English');
     await settle(t, const Duration(seconds: 2));

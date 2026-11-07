@@ -35,12 +35,12 @@ class OnboardingDataTermsPage extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           title: Text(text, style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurface)),
         );
-    return LayoutBuilder(
-      builder: (context, box) => SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: KuberSpace.xl),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: box.maxHeight),
-          child: IntrinsicHeight(
+    return CustomScrollView(
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: KuberSpace.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -68,7 +68,7 @@ class OnboardingDataTermsPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

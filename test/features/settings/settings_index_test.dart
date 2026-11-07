@@ -22,6 +22,8 @@ void main() {
   late Isar isar;
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({'kuber_onboarded': true});
+    // Created here: first use inside fake async deadlocks.
+    await SharedPreferences.getInstance();
     await initialiseIsarForTests();
     isar = await openTestIsar();
   });
@@ -74,9 +76,9 @@ void main() {
   for (final e in pages.entries) {
     testWidgets('index matches the rows on ${e.key.name}', (t) async {
       final rendered = await anchors(t, e.value);
-      // "Get started card" only shows for the first 30 days.
-      final want = indexed(e.key)..remove(e.key == SettingsArea.look ? 'getStarted' : '');
-      expect(rendered..remove('getStarted'), want);
+      // Home v2 rows only show for Home v2 installs.
+      const conditional = {'getStarted', 'suggestions'};
+      expect(rendered.difference(conditional), indexed(e.key).difference(conditional));
     });
   }
 

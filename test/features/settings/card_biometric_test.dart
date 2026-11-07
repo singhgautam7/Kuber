@@ -35,12 +35,8 @@ void main() {
     // The Keystore channel: stores and clears, nothing else.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('com.grs.kuber/cards_keystore'), (_) async => null);
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
   });
-  tearDownAll(() async {
-    debugDefaultTargetPlatformOverride = null;
-    await closeAndCleanIsar(isar);
-  });
+  tearDownAll(() => closeAndCleanIsar(isar));
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await isar.writeTxn(() async {
@@ -86,7 +82,7 @@ void main() {
         expect(ref.read(settingsProvider).valueOrNull?.biometricsEnabled, !app);
         expect(await cardsOn(), !cards);
       });
-    });
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   }
 
   testWidgets('no biometrics on the phone: a clear result, the PIN still works', (t) async {
