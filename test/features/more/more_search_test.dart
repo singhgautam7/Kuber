@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/core/database/isar_service.dart';
@@ -200,10 +201,19 @@ void main() {
       });
       await t.pumpWidget(UncontrolledProviderScope(
         container: c,
-        child: MaterialApp(
+        child: MaterialApp.router(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(builder: (ctx) => MoreSearchScreen(hostContext: ctx)),
+          routerConfig: GoRouter(routes: [
+            // Search sits over a page, as it does over More.
+            GoRoute(path: '/', builder: (_, _) => const SizedBox(), routes: [
+              GoRoute(
+                path: 'search',
+                builder: (_, _) => Builder(builder: (ctx) => MoreSearchScreen(hostContext: ctx)),
+              ),
+            ]),
+            GoRoute(path: '/cards', builder: (_, _) => const Text('cards page')),
+          ], initialLocation: '/search'),
         ),
       ));
       for (var i = 0; i < 8; i++) {
@@ -242,8 +252,6 @@ void main() {
       await type(t, 'axis');
       await t.tap(find.byIcon(Icons.lock_outline_rounded).first);
       await t.pump();
-      // This host has no router to open Kuber Cards; the lock comes first.
-      t.takeException();
       expect(last.read(cardSessionProvider).isUnlocked, isFalse);
       await t.pumpWidget(const SizedBox());
       await t.pump(const Duration(seconds: 1));
