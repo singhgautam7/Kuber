@@ -4405,11 +4405,11 @@ class AppLocalizationsHi extends AppLocalizations {
       'आपका ऑन-डिवाइस AI असिस्टेंट। निजी तौर पर अपने खर्च के बारे में सवाल पूछें।';
 
   @override
-  String get tutCh4St2Title => 'आपका डेटा';
+  String get tutCh4St2Title => 'सेटिंग्स और आपका डेटा';
 
   @override
   String get tutCh4St2Desc =>
-      'CSV के रूप में एक्सपोर्ट करें, बैकअप से इंपोर्ट करें, या सैंपल डेटा जेनरेट करें। सब कुछ आपके डिवाइस पर ही रहता है।';
+      'एक्सपोर्ट, इंपोर्ट और बैकअप सेटिंग्स में मिलेंगे। सब कुछ आपके डिवाइस पर ही रहता है।';
 
   @override
   String get tutorialUpper => 'ट्यूटोरियल';
@@ -4435,11 +4435,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get replayHint =>
-      'आप इसे हमेशा मोर → ट्यूटोरियल से दोबारा चला सकते हैं।';
+      'आप इसे हमेशा सेटिंग्स → ट्यूटोरियल से दोबारा चला सकते हैं।';
 
   @override
   String get replayHintApp =>
-      'आप इसे हमेशा मोर → ऐप ट्यूटोरियल से दोबारा चला सकते हैं।';
+      'आप इसे हमेशा सेटिंग्स → ऐप ट्यूटोरियल से दोबारा चला सकते हैं।';
 
   @override
   String tutStepsAndMin(String count, String mins) {
@@ -8417,582 +8417,575 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get msLoansReceivedIn => 'Loan amount received in';
+  String get msLoansReceivedIn => 'लोन की राशि कहाँ मिली';
 
   @override
   String get msLoansReceivedInHelp =>
-      'Pick the account the bank paid the loan into. Kuber adds it there without counting it as income.';
+      'वह खाता चुनें जिसमें बैंक ने लोन दिया। Kuber इसे वहाँ जोड़ता है, आय में नहीं गिनता।';
 
   @override
-  String get msLoansNotRecorded => 'Not recorded';
+  String get msLoansNotRecorded => 'दर्ज नहीं';
 
   @override
-  String get msLoansInParts => 'Loan released in parts?';
+  String get msLoansInParts => 'लोन किस्तों में मिला?';
 
   @override
-  String get msLoansInPartsSub => 'The bank pays it out in stages';
+  String get msLoansInPartsSub => 'बैंक इसे चरणों में देता है';
 
   @override
-  String get msLoansSanctioned => 'Sanctioned amount';
+  String get msLoansSanctioned => 'स्वीकृत राशि';
 
   @override
-  String get msLoansReleasedSoFar => 'Released so far';
+  String get msLoansReleasedSoFar => 'अब तक मिला';
 
   @override
-  String get msLoansAddPart => 'Add part';
+  String get msLoansAddPart => 'हिस्सा जोड़ें';
 
   @override
-  String get msLoansReceivedInShort => 'Received in';
+  String get msLoansReceivedInShort => 'कहाँ मिला';
 
   @override
   String get msLoansPartsHelp =>
-      'Home loans are often paid straight to the builder. Choose Not recorded if the money didn\'t reach you.';
+      'होम लोन अक्सर सीधे बिल्डर को दिए जाते हैं। अगर पैसा आपको नहीं मिला तो दर्ज नहीं चुनें।';
 
   @override
   String msLoansPartsSummary(String released, String sanctioned) {
-    return '$released of $sanctioned released';
+    return '$sanctioned में से $released मिला';
   }
 
   @override
-  String get msLoansFullyReleased => 'Fully released';
+  String get msLoansFullyReleased => 'पूरा मिल गया';
 
   @override
   String get msLoansErrOverSanctioned =>
-      'The total released can\'t be more than the sanctioned amount.';
+      'कुल मिली राशि स्वीकृत राशि से ज़्यादा नहीं हो सकती।';
 
   @override
   String get msLoansErrPartDate =>
-      'A part\'s date can\'t be before the start date or in the future.';
+      'हिस्से की तारीख शुरुआत से पहले या भविष्य में नहीं हो सकती।';
 
   @override
-  String get msLoansErrPartAmount => 'Amounts must be above 0.';
+  String get msLoansErrPartAmount => 'राशि 0 से ज़्यादा होनी चाहिए।';
 
   @override
-  String get msLoansStartDate => 'Loan start date';
+  String get msLoansStartDate => 'लोन शुरू होने की तारीख';
 
   @override
   String msLoansPartTitle(String number) {
-    return 'Part $number';
+    return 'हिस्सा $number';
   }
 
   @override
-  String get msLoansDeletePartTitle => 'Delete this part?';
+  String get msLoansDeletePartTitle => 'यह हिस्सा हटाएँ?';
 
   @override
-  String get msLoansDeletePartBody => 'It takes this amount off the loan.';
+  String get msLoansDeletePartBody => 'इससे यह राशि लोन से घट जाएगी।';
 
   @override
   String get msLoansDeletePartTxnBody =>
-      'It takes this amount off the loan. It also has a transaction in your account. Delete that too?';
+      'इससे यह राशि लोन से घट जाएगी। इसका आपके खाते में एक लेन-देन भी है। उसे भी हटाएँ?';
 
   @override
-  String get msLoansKeepTxn => 'Keep transaction';
+  String get msLoansKeepTxn => 'लेन-देन रखें';
 
   @override
-  String get msLoansDeleteTxn => 'Delete transaction';
+  String get msLoansDeleteTxn => 'लेन-देन हटाएँ';
 
   @override
-  String get msLoansPartsOffTitle => 'Keep only the first part?';
+  String get msLoansPartsOffTitle => 'सिर्फ़ पहला हिस्सा रखें?';
 
   @override
   String get msLoansPartsOffBody =>
-      'The other parts and their transactions will be removed.';
+      'बाकी हिस्से और उनके लेन-देन हटा दिए जाएँगे।';
 
   @override
-  String get msLoansPreEmiTitle => 'Interest before EMIs start';
+  String get msLoansPreEmiTitle => 'EMI शुरू होने से पहले का ब्याज';
 
   @override
-  String get msLoansPreEmiPay => 'I pay it every month';
+  String get msLoansPreEmiPay => 'मैं हर महीने भरता हूँ';
 
   @override
   String get msLoansPreEmiPaySub =>
-      'Kuber records each month\'s interest from your EMI account.';
+      'Kuber हर महीने का ब्याज आपके EMI खाते से दर्ज करता है।';
 
   @override
-  String get msLoansPreEmiAdd => 'Bank adds it to the loan';
+  String get msLoansPreEmiAdd => 'बैंक इसे लोन में जोड़ता है';
 
   @override
   String get msLoansPreEmiAddSub =>
-      'It joins what you owe. No money leaves any account.';
+      'यह आपके बकाया में जुड़ता है। किसी खाते से पैसा नहीं जाता।';
 
   @override
-  String get msLoansPreEmiDay => 'Interest charged on day';
+  String get msLoansPreEmiDay => 'ब्याज लगने का दिन';
 
   @override
   String get msLoansPreEmiDayHelp =>
-      'Usually your EMI day. Check your bank statement.';
+      'आमतौर पर आपकी EMI का दिन। अपना बैंक स्टेटमेंट देखें।';
 
   @override
-  String get msLoansPreEmiAdded => 'Interest added before EMIs';
+  String get msLoansPreEmiAdded => 'EMI से पहले जुड़ा ब्याज';
 
   @override
   String msLoansPreEmiNotice(String amount) {
-    return 'Kuber now calculates $amount. Use this instead?';
+    return 'Kuber अब $amount निकाल रहा है। इसे इस्तेमाल करें?';
   }
 
   @override
-  String get msLoansUse => 'Use';
+  String get msLoansUse => 'इस्तेमाल करें';
 
   @override
-  String get msLoansKeepMine => 'Keep mine';
+  String get msLoansKeepMine => 'मेरा रखें';
 
   @override
   String msLoansPreEmiPreview(String amount, String date, String interest) {
-    return 'EMIs start on $amount · ends $date · total interest $interest';
+    return 'EMI $amount पर शुरू · $date को खत्म · कुल ब्याज $interest';
   }
 
   @override
-  String get msLoansAddToLoan => 'Add to loan';
+  String get msLoansAddToLoan => 'लोन में जोड़ें';
 
   @override
-  String get msLoansWhatAdded => 'What was added';
+  String get msLoansWhatAdded => 'क्या जोड़ा गया';
 
   @override
-  String get msLoansAddReleased => 'Money released';
+  String get msLoansAddReleased => 'पैसा मिला';
 
   @override
-  String get msLoansAddReleasedSub => 'A new part of the loan.';
+  String get msLoansAddReleasedSub => 'लोन का एक नया हिस्सा।';
 
   @override
-  String get msLoansAddCharges => 'Charges added';
+  String get msLoansAddCharges => 'शुल्क जोड़े गए';
 
   @override
-  String get msLoansAddChargesSub =>
-      'Insurance or fees the bank added to the loan.';
+  String get msLoansAddChargesSub => 'बीमा या शुल्क जो बैंक ने लोन में जोड़े।';
 
   @override
-  String get msLoansAddInterest => 'Unpaid interest';
+  String get msLoansAddInterest => 'बकाया ब्याज';
 
   @override
-  String get msLoansAddInterestSub =>
-      'Interest the bank added to what you owe.';
+  String get msLoansAddInterestSub => 'ब्याज जो बैंक ने आपके बकाया में जोड़ा।';
 
   @override
-  String get msLoansNote => 'Note';
+  String get msLoansNote => 'नोट';
 
   @override
-  String get msLoansAddedSaved => 'Added to the loan';
+  String get msLoansAddedSaved => 'लोन में जोड़ा गया';
 
   @override
   String msLoansAboveSanctioned(String amount) {
-    return 'This takes the loan above $amount. Increase the sanctioned amount?';
+    return 'इससे लोन $amount से ऊपर चला जाएगा। स्वीकृत राशि बढ़ाएँ?';
   }
 
   @override
-  String get msLoansIncrease => 'Increase';
+  String get msLoansIncrease => 'बढ़ाएँ';
 
   @override
   String msLoansEventReleased(String amount, String date) {
-    return 'Released $amount · $date';
+    return 'मिला $amount · $date';
   }
 
   @override
   String msLoansEventChargeAdded(String amount, String date) {
-    return 'Charge added $amount · $date';
+    return 'शुल्क जोड़ा $amount · $date';
   }
 
   @override
   String msLoansEventUnpaidInterest(String amount, String date) {
-    return 'Unpaid interest $amount · $date';
+    return 'बकाया ब्याज $amount · $date';
   }
 
   @override
   String msLoansReleasedOf(String released, String sanctioned) {
-    return 'Released $released of $sanctioned';
+    return '$sanctioned में से $released मिला';
   }
 
   @override
-  String get msLoansChargesAdded => 'Charges added to loan';
+  String get msLoansChargesAdded => 'लोन में जुड़े शुल्क';
 
   @override
-  String get msLoansCycleAdded => 'Interest added';
+  String get msLoansCycleAdded => 'ब्याज जोड़ा गया';
 
   @override
-  String get msLoansCyclePaid => 'Interest paid';
+  String get msLoansCyclePaid => 'ब्याज भरा';
 
   @override
   String msLoansPreEmiAdjusted(String amount) {
-    return 'Matched to your figure $amount';
+    return 'आपके आँकड़े $amount से मिलाया';
   }
 
   @override
-  String get msLoansPartDeleted => 'Part deleted';
+  String get msLoansPartDeleted => 'हटा दिया गया';
 
   @override
   String get msInfoPartsLine =>
-      'Some loans, like home loans for a house still being built, are paid out in parts. Interest is charged only on what has been released.';
+      'कुछ लोन, जैसे बन रहे घर के होम लोन, हिस्सों में दिए जाते हैं। ब्याज सिर्फ़ मिली राशि पर लगता है।';
 
   @override
   String get msInfoReceivedInLine =>
-      'The account the loan money reached. Kuber adds it to that account\'s balance. It is never counted as income. Choose Not recorded if the bank paid someone else.';
+      'वह खाता जहाँ लोन का पैसा पहुँचा। Kuber इसे उस खाते के बैलेंस में जोड़ता है। यह कभी आय नहीं गिना जाता। अगर बैंक ने किसी और को दिया तो दर्ज नहीं चुनें।';
 
   @override
   String get msInfoPreEmiPayLine =>
-      'You pay the interest on what has been released each month until EMIs begin. Kuber records it from your EMI account as interest expense. This is the same as an interest-only period.';
+      'EMI शुरू होने तक आप हर महीने मिली राशि का ब्याज भरते हैं। Kuber इसे आपके EMI खाते से ब्याज खर्च के रूप में दर्ज करता है। यह ब्याज-केवल अवधि जैसा ही है।';
 
   @override
   String get msInfoPreEmiAddLine =>
-      'You pay nothing until EMIs begin. Each month\'s interest joins what you owe, and interest builds on it from then on. No money leaves any account, so it never appears in your spending.';
+      'EMI शुरू होने तक आप कुछ नहीं भरते। हर महीने का ब्याज आपके बकाया में जुड़ता है और आगे उस पर भी ब्याज लगता है। किसी खाते से पैसा नहीं जाता, इसलिए यह आपके खर्च में नहीं दिखता।';
 
   @override
   String get msInfoPreEmiCalcLine =>
-      'What the time before EMIs adds to the released amount: interest and charges added, minus any payments you made. Kuber works it out day by day at your rate over 365 days. Change it if your bank statement says something else, and your figure is used from the first EMI.';
+      'EMI से पहले का समय मिली राशि में कितना जोड़ता है: जुड़ा ब्याज और शुल्क, घटाकर आपके भुगतान। Kuber इसे आपकी दर पर 365 दिन के हिसाब से रोज़ निकालता है। बैंक स्टेटमेंट में कुछ और हो तो बदलें, पहली EMI से आपका आँकड़ा चलेगा।';
 
   @override
   String get msInfoAddReleasedLine =>
-      'The bank paid out more of the loan. It joins what you owe, and interest builds on it from that date.';
+      'बैंक ने लोन का और हिस्सा दिया। यह आपके बकाया में जुड़ता है और उस तारीख से उस पर ब्याज लगता है।';
 
   @override
   String get msInfoAddChargesLine =>
-      'Something the bank added to the loan, like insurance or a processing fee. Interest builds on it from that date. It isn\'t spending, because no money left any account.';
+      'कुछ ऐसा जो बैंक ने लोन में जोड़ा, जैसे बीमा या प्रोसेसिंग फ़ीस। उस तारीख से उस पर ब्याज लगता है। यह खर्च नहीं है, क्योंकि किसी खाते से पैसा नहीं गया।';
 
   @override
   String get msInfoAddInterestLine =>
-      'Interest you didn\'t pay and the bank added to the loan, like during a moratorium. It raises what you owe and counts toward your total interest.';
+      'ब्याज जो आपने नहीं भरा और बैंक ने लोन में जोड़ दिया, जैसे मोरेटोरियम में। इससे बकाया बढ़ता है और यह आपके कुल ब्याज में गिना जाता है।';
 
   @override
-  String get msLoansKeepFirst => 'Keep first part';
+  String get msLoansKeepFirst => 'पहला हिस्सा रखें';
 
   @override
-  String get cardBiometricOn => 'Biometric unlock enabled for Kuber Cards.';
+  String get cardBiometricOn => 'Kuber Cards के लिए बायोमेट्रिक अनलॉक चालू।';
 
   @override
-  String get cardBiometricOff => 'Biometric unlock disabled for Kuber Cards.';
+  String get cardBiometricOff => 'Kuber Cards के लिए बायोमेट्रिक अनलॉक बंद।';
 
   @override
   String get cardBiometricUnavailable =>
-      'No fingerprint, face or screen lock is set up on this phone. Use your Kuber Cards PIN.';
+      'इस फ़ोन पर फ़िंगरप्रिंट, फ़ेस या स्क्रीन लॉक सेट नहीं है। अपना Kuber Cards PIN इस्तेमाल करें।';
 
   @override
   String get cardBiometricUnlockFirst =>
-      'Unlock Kuber Cards with your PIN first, then turn this on.';
+      'पहले PIN से Kuber Cards खोलें, फिर इसे चालू करें।';
 
   @override
-  String get cardBiometricOpen => 'Open';
+  String get cardBiometricOpen => 'खोलें';
 
   @override
-  String get cardBiometricFailed => 'Could not turn on biometric unlock.';
+  String get cardBiometricFailed => 'बायोमेट्रिक अनलॉक चालू नहीं हो सका।';
 
   @override
-  String get setCardsBiometric => 'Kuber Cards biometric';
+  String get setCardsBiometric => 'Kuber Cards बायोमेट्रिक';
 
   @override
-  String get setCardsBiometricSub =>
-      'Unlock your cards with fingerprint or face';
+  String get setCardsBiometricSub => 'फ़िंगरप्रिंट या फ़ेस से कार्ड खोलें';
 
   @override
-  String get setCardsPin => 'Change Kuber Cards PIN';
+  String get setCardsPin => 'Kuber Cards PIN बदलें';
 
   @override
-  String get setCardsPinSub => 'Update the PIN that unlocks your cards';
+  String get setCardsPinSub => 'कार्ड खोलने वाला PIN बदलें';
 
   @override
-  String get setGroupLook => 'Look and feel';
+  String get setGroupLook => 'रूप और अनुभव';
 
   @override
-  String get setGroupPrefs => 'App preferences';
+  String get setGroupPrefs => 'ऐप पसंद';
 
   @override
-  String get setGroupPrivacy => 'Privacy and security';
+  String get setGroupPrivacy => 'निजता और सुरक्षा';
 
   @override
-  String get setGroupData => 'Data and backup';
+  String get setGroupData => 'डेटा और बैकअप';
 
   @override
-  String get setGroupActivity => 'Activity';
+  String get setGroupActivity => 'गतिविधि';
 
   @override
-  String get setGroupActivitySub => 'Upcoming events and your story archive';
+  String get setGroupActivitySub => 'आने वाले इवेंट और आपकी स्टोरी आर्काइव';
 
   @override
-  String get setPrivacyLockOn => 'App lock on';
+  String get setPrivacyLockOn => 'ऐप लॉक चालू';
 
   @override
-  String get setPrivacyLockOff => 'App lock off';
+  String get setPrivacyLockOff => 'ऐप लॉक बंद';
 
   @override
-  String get setNotifAllowed => 'Notifications are on';
+  String get setNotifAllowed => 'सूचनाएँ चालू हैं';
 
   @override
-  String get setNotifBlocked => 'Notifications are off';
+  String get setNotifBlocked => 'सूचनाएँ बंद हैं';
 
   @override
-  String get setNotifAllowedSub => 'Kuber can send your reminders and alerts.';
+  String get setNotifAllowedSub => 'Kuber आपके रिमाइंडर और अलर्ट भेज सकता है।';
 
   @override
   String get setNotifBlockedSub =>
-      'Reminders and alerts won\'t reach you. Tap to turn them on.';
+      'रिमाइंडर और अलर्ट आप तक नहीं पहुँचेंगे। चालू करने के लिए टैप करें।';
 
   @override
-  String get setNotifInbox => 'Notification inbox';
+  String get setNotifInbox => 'सूचना इनबॉक्स';
 
   @override
-  String get setHomeScreenWidgets => 'Home screen widgets';
+  String get setHomeScreenWidgets => 'होम स्क्रीन विजेट';
 
   @override
-  String get setKwPro =>
-      'subscribe upgrade premium plan purchase redeem restore lifetime';
+  String get setKwPro => 'प्रो सदस्यता खरीद प्रीमियम लाइफ़टाइम';
 
   @override
-  String get setKwName => 'name profile me user';
+  String get setKwName => 'नाम प्रोफ़ाइल';
 
   @override
-  String get setKwTheme =>
-      'dark light colour color mode night black appearance amoled';
+  String get setKwTheme => 'डार्क लाइट रंग मोड थीम रात';
 
   @override
-  String get setKwTextSize => 'font text size bigger smaller large';
+  String get setKwTextSize => 'फ़ॉन्ट अक्षर आकार बड़ा छोटा';
 
   @override
-  String get setKwBottomNav => 'navigation tabs bar bottom';
+  String get setKwBottomNav => 'नेविगेशन टैब बार नीचे';
 
   @override
-  String get setKwMoreLayout => 'more grid list classic modern layout';
+  String get setKwMoreLayout => 'मोर ग्रिड सूची क्लासिक मॉडर्न लेआउट';
 
   @override
-  String get setKwHomeWidgets => 'home cards dashboard arrange order widgets';
+  String get setKwHomeWidgets => 'होम कार्ड डैशबोर्ड क्रम विजेट';
 
   @override
-  String get setKwAnalyticsWidgets => 'analytics charts arrange order widgets';
+  String get setKwAnalyticsWidgets => 'एनालिटिक्स चार्ट क्रम विजेट';
 
   @override
-  String get setKwSuggestions => 'tips suggestions home hints';
+  String get setKwSuggestions => 'सुझाव टिप होम';
 
   @override
-  String get setKwGetStarted => 'get started setup checklist';
+  String get setKwGetStarted => 'शुरुआत सेटअप चेकलिस्ट';
 
   @override
-  String get setKwGallery => 'launcher homescreen widget balance shortcut';
+  String get setKwGallery => 'लॉन्चर होम स्क्रीन विजेट बैलेंस';
 
   @override
-  String get setKwQuickActions => 'long press shortcuts nav quick';
+  String get setKwQuickActions => 'शॉर्टकट लंबा दबाएँ त्वरित';
 
   @override
-  String get setKwAddMenu => 'plus button long press add shortcuts';
+  String get setKwAddMenu => 'प्लस बटन जोड़ें शॉर्टकट';
 
   @override
-  String get setKwLanguage => 'language hindi tamil translate locale';
+  String get setKwLanguage => 'भाषा हिंदी अनुवाद';
 
   @override
-  String get setKwCurrency => 'rupee dollar money symbol inr usd';
+  String get setKwCurrency => 'रुपया डॉलर मुद्रा चिह्न';
 
   @override
-  String get setKwNumberFormat => 'lakh crore million comma grouping digits';
+  String get setKwNumberFormat => 'लाख करोड़ मिलियन अल्पविराम अंक';
 
   @override
-  String get setKwCurrencyCode => 'inr usd code symbol';
+  String get setKwCurrencyCode => 'कोड चिह्न मुद्रा';
 
   @override
-  String get setKwDefaultAccount => 'default bank wallet account';
+  String get setKwDefaultAccount => 'डिफ़ॉल्ट बैंक वॉलेट खाता';
 
   @override
-  String get setKwSwipe => 'swipe gesture tabs delete';
+  String get setKwSwipe => 'स्वाइप टैब हटाएँ';
 
   @override
-  String get setKwPrivacyMode => 'hide amounts blur privacy mask';
+  String get setKwPrivacyMode => 'राशि छिपाएँ धुंधला निजता';
 
   @override
-  String get setKwBiometric =>
-      'lock fingerprint face unlock security app lock password';
+  String get setKwBiometric => 'लॉक फ़िंगरप्रिंट फ़ेस अनलॉक सुरक्षा';
 
   @override
-  String get setKwNotesBiometric => 'notes lock fingerprint';
+  String get setKwNotesBiometric => 'नोट्स लॉक फ़िंगरप्रिंट';
 
   @override
-  String get setKwCardsBiometric => 'cards vault lock fingerprint face';
+  String get setKwCardsBiometric => 'कार्ड वॉल्ट लॉक फ़िंगरप्रिंट फ़ेस';
 
   @override
-  String get setKwCardsPin => 'cards vault pin password';
+  String get setKwCardsPin => 'कार्ड वॉल्ट पिन पासवर्ड';
 
   @override
-  String get setKwDrawer => 'launcher icon app list drawer';
+  String get setKwDrawer => 'लॉन्चर आइकन ऐप सूची ड्रॉअर';
 
   @override
-  String get setKwNotifications =>
-      'alerts reminders permission allow push inbox';
+  String get setKwNotifications => 'अलर्ट रिमाइंडर अनुमति इनबॉक्स सूचना';
 
   @override
-  String get setKwUpcoming => 'calendar due bills upcoming events';
+  String get setKwUpcoming => 'कैलेंडर बिल आने वाले इवेंट';
 
   @override
-  String get setKwStories => 'stories recap archive money wrapped';
+  String get setKwStories => 'स्टोरी सार आर्काइव मनी';
 
   @override
-  String get setKwExport => 'export csv pdf download share';
+  String get setKwExport => 'निर्यात एक्सपोर्ट CSV PDF डाउनलोड';
 
   @override
-  String get setKwImport => 'import csv restore backup upload';
+  String get setKwImport => 'आयात इंपोर्ट CSV रीस्टोर बैकअप';
 
   @override
-  String get setKwBackup => 'backup automatic drive save restore';
+  String get setKwBackup => 'बैकअप स्वचालित सहेजें रीस्टोर';
 
   @override
-  String get setKwClear => 'delete reset erase wipe clear';
+  String get setKwClear => 'हटाएँ रीसेट मिटाएँ साफ़';
 
   @override
-  String get setKwTutorial => 'tutorial help guide walkthrough learn';
+  String get setKwTutorial => 'ट्यूटोरियल मदद गाइड सीखें';
 
   @override
-  String get setKwAbout => 'about version licence contact privacy policy';
+  String get setKwAbout => 'परिचय संस्करण लाइसेंस संपर्क निजता नीति';
 
   @override
-  String get obStartRestore => 'Restore from backup';
+  String get obStartRestore => 'बैकअप से रीस्टोर करें';
 
   @override
-  String get obStartRestoreSub =>
-      'Bring everything back from a Kuber backup file';
+  String get obStartRestoreSub => 'Kuber बैकअप फ़ाइल से सब वापस लाएँ';
 
   @override
-  String get obStartCsv => 'Import from CSV';
+  String get obStartCsv => 'CSV से इंपोर्ट करें';
 
   @override
-  String get obStartCsvSub => 'Bring in transactions from a spreadsheet';
+  String get obStartCsvSub => 'स्प्रेडशीट से लेन-देन लाएँ';
 
   @override
-  String get obStartFresh => 'Start fresh';
+  String get obStartFresh => 'नई शुरुआत करें';
 
   @override
-  String get obRestoreCancelled => 'Restore cancelled. Nothing changed.';
+  String get obRestoreCancelled => 'रीस्टोर रद्द। कुछ नहीं बदला।';
 
   @override
-  String get obImportCancelled => 'Import cancelled. Nothing changed.';
+  String get obImportCancelled => 'इंपोर्ट रद्द। कुछ नहीं बदला।';
 
   @override
-  String get obNotifTitle => 'Stay on top of your money';
+  String get obNotifTitle => 'अपने पैसों पर नज़र रखें';
 
   @override
-  String get obNotifReminders => 'Reminders you set';
+  String get obNotifReminders => 'आपके सेट किए रिमाइंडर';
 
   @override
-  String get obNotifCards => 'Credit card bills and due dates';
+  String get obNotifCards => 'क्रेडिट कार्ड बिल और देय तारीखें';
 
   @override
-  String get obNotifBudgets => 'Budget alerts when you near a limit';
+  String get obNotifBudgets => 'सीमा के पास पहुँचने पर बजट अलर्ट';
 
   @override
-  String get obNotifRecorded =>
-      'EMIs and recurring payments as they\'re recorded';
+  String get obNotifRecorded => 'EMI और दोहराए जाने वाले भुगतान दर्ज होने पर';
 
   @override
-  String get obNotifBackup => 'Automatic backup problems';
+  String get obNotifBackup => 'स्वचालित बैकअप की समस्याएँ';
 
   @override
   String get obNotifPromise =>
-      'Kuber never sends promotional notifications. Only reminders and alerts that matter to you.';
+      'Kuber कभी प्रचार वाली सूचनाएँ नहीं भेजता। सिर्फ़ आपके काम के रिमाइंडर और अलर्ट।';
 
   @override
-  String get obNotifAllow => 'Allow notifications';
+  String get obNotifAllow => 'सूचनाओं की अनुमति दें';
 
   @override
-  String get obNotifLater => 'Not now';
+  String get obNotifLater => 'अभी नहीं';
 
   @override
-  String get obTermsTitle => 'Your data lives on this phone';
+  String get obTermsTitle => 'आपका डेटा इसी फ़ोन पर रहता है';
 
   @override
   String get obTermsBody =>
-      'Kuber has no servers and no account. What you add never leaves your phone, so nobody else can recover it for you. Back up often to keep it safe.';
+      'Kuber का कोई सर्वर और खाता नहीं है। आप जो जोड़ते हैं वह आपके फ़ोन से बाहर नहीं जाता, इसलिए कोई और उसे वापस नहीं ला सकता। सुरक्षित रखने के लिए अक्सर बैकअप लें।';
 
   @override
   String get obTermsCheck1 =>
-      'I\'ll back up my data regularly, so I don\'t lose it if my phone is lost, reset, or Kuber is uninstalled.';
+      'मैं नियमित बैकअप लूँगा/लूँगी, ताकि फ़ोन खोने, रीसेट होने या Kuber हटने पर डेटा न खोए।';
 
   @override
   String get obTermsCheck2 =>
-      'I understand the developer can\'t recover lost data, and that backups and restores are my responsibility.';
+      'मैं समझता/समझती हूँ कि डेवलपर खोया डेटा वापस नहीं ला सकता, और बैकअप व रीस्टोर मेरी ज़िम्मेदारी है।';
 
   @override
-  String get obTermsAgree => 'Agree and continue';
+  String get obTermsAgree => 'सहमत और आगे बढ़ें';
 
   @override
-  String get obTermsPrivacy => 'Privacy policy';
+  String get obTermsPrivacy => 'निजता नीति';
 
   @override
-  String get pathSheetTitle => 'How you got here';
+  String get pathSheetTitle => 'आप यहाँ कैसे पहुँचे';
 
   @override
-  String get pathSheetCurrent => 'You are here';
+  String get pathSheetCurrent => 'आप यहाँ हैं';
 
   @override
-  String get pathSheetHint => 'Shows the path to this page';
+  String get pathSheetHint => 'इस पेज का रास्ता दिखाता है';
 
   @override
-  String get pathSheetLongPress =>
-      'Press and hold to see the path to this page';
+  String get pathSheetLongPress => 'इस पेज का रास्ता देखने के लिए दबाकर रखें';
 
   @override
   String get setPathTip =>
-      'Tap a page title, or long-press back, to jump to any earlier page.';
+      'किसी भी पिछले पेज पर जाने के लिए पेज के शीर्षक पर टैप करें या बैक दबाकर रखें।';
 
   @override
-  String get proFaqTitle => 'Frequently asked questions';
+  String get proFaqTitle => 'अक्सर पूछे जाने वाले सवाल';
 
   @override
-  String get proFaqLifetimeQ => 'Is Lifetime a one-time payment?';
+  String get proFaqLifetimeQ => 'क्या लाइफ़टाइम एक बार का भुगतान है?';
 
   @override
-  String get proFaqLifetimeA => 'Yes. You pay once and it never renews.';
+  String get proFaqLifetimeA =>
+      'हाँ। आप एक बार भुगतान करते हैं और यह कभी रिन्यू नहीं होता।';
 
   @override
-  String get proFaqIncludedQ => 'What do I get with Pro, and what stays free?';
+  String get proFaqIncludedQ =>
+      'Pro में क्या मिलता है, और क्या मुफ़्त रहता है?';
 
   @override
   String get proFaqIncludedA =>
-      'Pro adds Advanced Analytics, Reminders, Automatic Backups and custom themes, and removes the limits on SMS Import, Kuber Notes, Ask Kuber and Kuber Cards. Tracking, accounts, budgets, loans, investments, analytics and manual backup stay free.';
+      'Pro में Advanced Analytics, रिमाइंडर, स्वचालित बैकअप और कस्टम थीम मिलते हैं, और SMS Import, Kuber Notes, Ask Kuber और Kuber Cards की सीमाएँ हट जाती हैं। ट्रैकिंग, खाते, बजट, लोन, निवेश, एनालिटिक्स और मैनुअल बैकअप मुफ़्त रहते हैं।';
 
   @override
-  String get proFaqDevicesQ => 'Can I use Pro on more than one device?';
+  String get proFaqDevicesQ =>
+      'क्या मैं Pro एक से ज़्यादा डिवाइस पर इस्तेमाल कर सकता हूँ?';
 
   @override
   String get proFaqDevicesA =>
-      'Yes, on any phone signed in to the same Google account. Install Kuber and tap Restore purchases. Your data doesn\'t sync between phones, so use a backup to move it.';
+      'हाँ, उसी Google खाते से साइन इन किसी भी फ़ोन पर। Kuber इंस्टॉल करें और Restore purchases पर टैप करें। आपका डेटा फ़ोनों के बीच सिंक नहीं होता, उसे ले जाने के लिए बैकअप इस्तेमाल करें।';
 
   @override
-  String get proFaqCancelQ => 'How do I cancel my subscription?';
+  String get proFaqCancelQ => 'अपनी सदस्यता कैसे रद्द करूँ?';
 
   @override
   String get proFaqCancelA =>
-      'Open the Play Store, tap your profile, then Payments and subscriptions. Pro stays on until the end of the period you\'ve paid for.';
+      'Play Store खोलें, अपनी प्रोफ़ाइल पर टैप करें, फिर Payments and subscriptions। भुगतान की गई अवधि के अंत तक Pro चालू रहता है।';
 
   @override
-  String get proFaqEndsQ => 'What happens to my data if Pro ends?';
+  String get proFaqEndsQ => 'Pro खत्म होने पर मेरे डेटा का क्या होता है?';
 
   @override
   String get proFaqEndsA =>
-      'Nothing is deleted. Your data stays on your phone, and Pro features go back to their free limits. The theme returns to Kuber Signature.';
+      'कुछ नहीं हटता। आपका डेटा फ़ोन पर रहता है, और Pro सुविधाएँ मुफ़्त सीमाओं पर लौट आती हैं। थीम Kuber Signature पर लौट आती है।';
 
   @override
-  String get proFaqPhoneQ => 'I changed phones. How do I get Pro back?';
+  String get proFaqPhoneQ => 'मैंने फ़ोन बदला। Pro वापस कैसे पाऊँ?';
 
   @override
   String get proFaqPhoneA =>
-      'Sign in with the same Google account, install Kuber, and tap Restore purchases on this page. To bring your data too, restore a backup.';
+      'उसी Google खाते से साइन इन करें, Kuber इंस्टॉल करें, और इस पेज पर Restore purchases टैप करें। डेटा भी लाने के लिए बैकअप रीस्टोर करें।';
 
   @override
-  String get proFaqPromoQ => 'How do I use a promo code?';
+  String get proFaqPromoQ => 'प्रोमो कोड कैसे इस्तेमाल करूँ?';
 
   @override
   String get proFaqPromoA =>
-      'Tap Redeem promo code on this page and enter your code. Kuber opens Google Play\'s redeem page. When you come back, Kuber checks for it automatically.';
+      'इस पेज पर Redeem promo code टैप करें और अपना कोड डालें। Kuber Google Play का रिडीम पेज खोलता है। लौटने पर Kuber अपने आप जाँच लेता है।';
 
   @override
-  String get proFaqSecureQ => 'Is my financial data secure?';
+  String get proFaqSecureQ => 'क्या मेरा वित्तीय डेटा सुरक्षित है?';
 
   @override
   String get proFaqSecureA =>
-      'It stays on your phone. Kuber has no servers, no account and no analytics.';
+      'यह आपके फ़ोन पर रहता है। Kuber का कोई सर्वर, खाता या एनालिटिक्स नहीं है।';
 
   @override
-  String get proFaqPaymentQ => 'Can Kuber see my payment details?';
+  String get proFaqPaymentQ => 'क्या Kuber मेरी भुगतान जानकारी देख सकता है?';
 
   @override
   String get proFaqPaymentA =>
-      'No. Google Play handles payments, and Kuber never sees your card or bank details.';
+      'नहीं। भुगतान Google Play संभालता है, और Kuber आपका कार्ड या बैंक विवरण कभी नहीं देखता।';
 
   @override
-  String get proFaqRefundQ => 'Can I get a refund?';
+  String get proFaqRefundQ => 'क्या मुझे रिफ़ंड मिल सकता है?';
 
   @override
   String get proFaqRefundA =>
-      'Refunds are handled by Google Play under its refund policy.';
+      'रिफ़ंड Google Play अपनी रिफ़ंड नीति के तहत संभालता है।';
 }

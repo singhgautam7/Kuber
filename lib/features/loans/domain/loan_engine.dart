@@ -220,6 +220,10 @@ OutstandingCheck outstandingError(double v) => v < 0
     ? OutstandingCheck.negative
     : (v < 0.005 ? OutstandingCheck.closes : OutstandingCheck.ok);
 
+/// True when the EMI no longer covers the interest, so the schedule runs out
+/// with money still owed (keep EMI on a big addition).
+bool loanNeverEnds(Amortization a) => a.rows.isNotEmpty && a.rows.last.balance > 1;
+
 const preEmiTxnPrefix = 'Pre-EMI interest - ';
 
 /// A cycle's interest under "I pay it every month".

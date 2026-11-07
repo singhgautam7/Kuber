@@ -97,9 +97,11 @@ class SettingsSearch {
   factory SettingsSearch.of(AppLocalizations l) {
     final c = _cached;
     if (c != null && c._locale == l.localeName) return c;
+    // English keywords too: many people search in English in any language.
+    final en = lookupAppLocalizations(const Locale('en'));
     return _cached = SettingsSearch._(l.localeName, [
       for (final e in kSettingsIndex)
-        (e, '${e.title(l)} ${e.keywords(l)}'.toLowerCase()),
+        (e, '${e.title(l)} ${e.keywords(l)} ${e.title(en)} ${e.keywords(en)}'.toLowerCase()),
     ]);
   }
 

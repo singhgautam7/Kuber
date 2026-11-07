@@ -575,6 +575,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     if (total > (_val(_principal) ?? double.infinity) + 0.005) {
       return l.msLoansErrOverSanctioned;
     }
+    if (_solution?.ok ?? false) {
+      final a = loanAmortization(_draft());
+      if (a != null && loanNeverEnds(a)) return l.msLoansErrNeverEnds;
+    }
     return null;
   }
 

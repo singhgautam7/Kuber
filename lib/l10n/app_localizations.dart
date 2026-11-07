@@ -8015,13 +8015,13 @@ abstract class AppLocalizations {
   /// No description provided for @tutCh4St2Title.
   ///
   /// In en, this message translates to:
-  /// **'Your data'**
+  /// **'Settings and your data'**
   String get tutCh4St2Title;
 
   /// No description provided for @tutCh4St2Desc.
   ///
   /// In en, this message translates to:
-  /// **'Export as CSV, import from backup, or generate sample data. Everything stays on your device.'**
+  /// **'Find export, import and backups in Settings. Everything stays on your device.'**
   String get tutCh4St2Desc;
 
   /// No description provided for @tutorialUpper.
@@ -8069,13 +8069,13 @@ abstract class AppLocalizations {
   /// No description provided for @replayHint.
   ///
   /// In en, this message translates to:
-  /// **'You can always replay it from More → Tutorial.'**
+  /// **'You can always replay it from Settings → Tutorial.'**
   String get replayHint;
 
   /// No description provided for @replayHintApp.
   ///
   /// In en, this message translates to:
-  /// **'You can always replay it from More → App Tutorial.'**
+  /// **'You can always replay it from Settings → App Tutorial.'**
   String get replayHintApp;
 
   /// No description provided for @tutStepsAndMin.

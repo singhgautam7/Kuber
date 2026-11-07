@@ -2520,8 +2520,8 @@
   "tutCh4St0Desc": "Set monthly spending limits per category. Kuber tracks your progress automatically.",
   "tutCh4St1Title": "Ask Kuber",
   "tutCh4St1Desc": "Your on-device AI assistant. Ask questions about your spending privately.",
-  "tutCh4St2Title": "Your data",
-  "tutCh4St2Desc": "Export as CSV, import from backup, or generate sample data. Everything stays on your device.",
+  "tutCh4St2Title": "Settings and your data",
+  "tutCh4St2Desc": "Find export, import and backups in Settings. Everything stays on your device.",
   "tutorialUpper": "TUTORIAL",
   "pickChapter": "Pick a chapter.",
   "pickChapterSubtitle": "Five quick chapters, about 2 minutes each. Jump in anywhere.",
@@ -2529,8 +2529,8 @@
   "skipTutorialConfirm": "Skip tutorial?",
   "keepGoing": "Keep going",
   "skipLabel": "Skip",
-  "replayHint": "You can always replay it from More → Tutorial.",
-  "replayHintApp": "You can always replay it from More → App Tutorial.",
+  "replayHint": "You can always replay it from Settings → Tutorial.",
+  "replayHintApp": "You can always replay it from Settings → App Tutorial.",
   "tutStepsAndMin": "{count} steps · ~{mins} min",
   "@tutStepsAndMin": {
     "placeholders": {

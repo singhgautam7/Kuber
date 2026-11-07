@@ -4393,11 +4393,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your on-device AI assistant. Ask questions about your spending privately.';
 
   @override
-  String get tutCh4St2Title => 'Your data';
+  String get tutCh4St2Title => 'Settings and your data';
 
   @override
   String get tutCh4St2Desc =>
-      'Export as CSV, import from backup, or generate sample data. Everything stays on your device.';
+      'Find export, import and backups in Settings. Everything stays on your device.';
 
   @override
   String get tutorialUpper => 'TUTORIAL';
@@ -4422,11 +4422,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skipLabel => 'Skip';
 
   @override
-  String get replayHint => 'You can always replay it from More → Tutorial.';
+  String get replayHint => 'You can always replay it from Settings → Tutorial.';
 
   @override
   String get replayHintApp =>
-      'You can always replay it from More → App Tutorial.';
+      'You can always replay it from Settings → App Tutorial.';
 
   @override
   String tutStepsAndMin(String count, String mins) {

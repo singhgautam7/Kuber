@@ -160,7 +160,8 @@ class _AddToLoanSheetState extends ConsumerState<_AddToLoanSheet> {
     final preview = afterEmis && _value > 0 ? loanAmortizationWith(_after(), rec) : null;
     final next = preview?.rows.where((r) => r.day >= day && !r.recorded).firstOrNull;
     final endDay = preview == null || preview.rows.isEmpty ? null : preview.rows.last.day;
-    final canSave = _value > 0 && !_saving;
+    final neverEnds = preview != null && _adjust == LoanAdjust.tenure && loanNeverEnds(preview);
+    final canSave = _value > 0 && !_saving && !neverEnds;
 
     KuberSelectCard card(_Added k, String title, String sub, MoneyInfo info) => KuberSelectCard(
           title: title,
@@ -239,6 +240,10 @@ class _AddToLoanSheetState extends ConsumerState<_AddToLoanSheet> {
             nextEmiText: next == null ? null : m(next.payment),
             endText: endDay == null ? null : fmtMonthYear(dayOf(endDay)),
           ),
+          if (neverEnds) ...[
+            const SizedBox(height: 8),
+            KuberCallout.text(l.msLoansErrNeverEnds, tone: KuberCalloutTone.error),
+          ],
         ],
       ]),
     );
