@@ -108,9 +108,11 @@ class SettingsSearch {
   List<SettingsEntry> search(String query) {
     final q = query.trim().toLowerCase();
     if (q.isEmpty) return const [];
+    // One letter hits nearly every keyword list: match the start only, so the
+    // first keystroke doesn't lay out the whole index.
     return [
       for (final (e, text) in _rows)
-        if (text.contains(q)) e,
+        if (q.length == 1 ? text.startsWith(q) : text.contains(q)) e,
     ];
   }
 }

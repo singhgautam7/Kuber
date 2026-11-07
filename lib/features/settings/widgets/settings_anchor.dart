@@ -30,22 +30,28 @@ class SettingsPageFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      // Plain slivers, like the long Settings page had: a scroll-away header
+      // over a nested scroll view cost three times as much on first open.
       body: _SettingsHighlight(
         rowId: highlight,
-        child: KuberScrollAwayHeader(
-          header: KuberAppBar(showBack: true, title: title),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpace.screenMargin,
-              KuberSpace.xs,
-              KuberSpace.screenMargin,
-              KuberSpace.xxxl,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: KuberAppBar(showBack: true, title: title)),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                KuberSpace.screenMargin,
+                KuberSpace.xs,
+                KuberSpace.screenMargin,
+                KuberSpace.xxxl,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
+                ),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
-            ),
-          ),
+          ],
         ),
       ),
     );
