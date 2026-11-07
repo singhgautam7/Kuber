@@ -54,7 +54,7 @@ class KnowledgeHandler extends QueryHandler {
 const _rDevTools = '/more/dev-tools';
 const _rSettings = '/more/settings';
 const _rData = '/more/data';
-const _rPrivacy = '/more/settings'; // privacy toggle lives inside Settings
+const _rPrivacy = '/more/settings/privacy?row=privacyMode';
 const _rPaywall = '/pro';
 const _rAbout = '/more/about';
 const _rSmsImport = '/more/sms-import';

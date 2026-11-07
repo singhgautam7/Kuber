@@ -100,8 +100,8 @@ class HowToHandler extends QueryHandler {
       ['where do i change theme', 'how to change theme', 'change theme',
         'switch theme', 'dark mode', 'light mode', 'change the theme'],
       HowToResponse(
-        'Go to More, Settings to switch between light and dark themes.',
-        deepLinkRoute: '/more/settings',
+        'Go to More, Settings, Look and feel to switch between light and dark themes.',
+        deepLinkRoute: '/more/settings/look?row=theme',
         deepLinkLabel: 'Take me there',
       ),
     ),
@@ -109,8 +109,8 @@ class HowToHandler extends QueryHandler {
       ['where do i change currency', 'how to change currency',
         'change currency', 'set currency', 'change the currency'],
       HowToResponse(
-        'More, Settings, Currency.',
-        deepLinkRoute: '/more/settings',
+        'More, Settings, App preferences, Currency.',
+        deepLinkRoute: '/more/settings/preferences?row=currency',
         deepLinkLabel: 'Take me there',
       ),
     ),
@@ -118,8 +118,8 @@ class HowToHandler extends QueryHandler {
       ['where do i change language', 'how to change language',
         'change language', 'set language', 'switch language'],
       HowToResponse(
-        'More, Settings, Language. Kuber supports English, Hindi, Marathi, Punjabi, Bengali, Tamil, Telugu, Malayalam and Kannada',
-        deepLinkRoute: '/more/settings',
+        'More, Settings, App preferences, Language. Kuber supports English, Hindi, Marathi, Punjabi, Bengali, Tamil, Telugu, Malayalam and Kannada',
+        deepLinkRoute: '/more/settings/preferences?row=language',
         deepLinkLabel: 'Take me there',
       ),
     ),
@@ -127,7 +127,7 @@ class HowToHandler extends QueryHandler {
       ['how do i back up', 'how to backup', 'how to back up', 'back up my data',
         'backup my data', 'automatic backup', 'how do i backup'],
       HowToResponse(
-        'More, Data, Automatic Backups. Pick a folder and frequency.',
+        'More, Settings, Data and backup, Automatic Backups. Pick a folder and frequency.',
         deepLinkRoute: '/more/data/automatic-backups',
         deepLinkLabel: 'Take me there',
       ),
@@ -136,7 +136,7 @@ class HowToHandler extends QueryHandler {
       ['how do i export', 'how to export', 'export my data', 'export data',
         'save a csv', 'download my data', 'export to csv'],
       HowToResponse(
-        'More, Data, Export. You can save a CSV of your transactions.',
+        'More, Settings, Data and backup, Export. You can save a CSV of your transactions.',
         deepLinkRoute: '/more/data',
         deepLinkLabel: 'Take me there',
       ),
@@ -171,7 +171,7 @@ class HowToHandler extends QueryHandler {
       ['generate mock data', 'mock data', 'sample data', 'test data',
         'fake data', 'dummy data', 'how to generate mock', 'demo data'],
       HowToResponse(
-        'More, Data, then under Danger Zone tap Generate Mock Data. It replaces '
+        'More, Settings, Data and backup, then under Danger Zone tap Generate Mock Data. It replaces '
         'everything with realistic sample data for testing.',
         deepLinkRoute: '/more/data',
         deepLinkLabel: 'Take me there',
@@ -182,7 +182,7 @@ class HowToHandler extends QueryHandler {
         'i see mock data', 'get rid of mock data', 'reset app data',
         'erase data', 'how do i clear', 'wipe my data', 'delete everything'],
       HowToResponse(
-        'More, Data, then under Danger Zone tap Clear All Data. If you are '
+        'More, Settings, Data and backup, then under Danger Zone tap Clear All Data. If you are '
         'seeing sample data from Generate Mock Data, this removes it. Back up '
         'first if you want to keep anything.',
         deepLinkRoute: '/more/data',
@@ -193,9 +193,9 @@ class HowToHandler extends QueryHandler {
       ['set default account', 'default account', 'change default account',
         'no default account', 'set a default account', 'pick a default account'],
       HowToResponse(
-        'More, Settings, under Transactions choose your Default Account. New '
+        'More, Settings, App preferences, then choose your Default Account. New '
         'quick entries and Ask Kuber additions use it.',
-        deepLinkRoute: '/more/settings',
+        deepLinkRoute: '/more/settings/preferences?row=defaultAccount',
         deepLinkLabel: 'Take me there',
       ),
     ),
@@ -213,7 +213,7 @@ class HowToHandler extends QueryHandler {
       ['restore backup', 'restore my data', 'restore from backup',
         'import backup', 'recover my data', 'restore data', 'load a backup'],
       HowToResponse(
-        'More, Data, Import Data. Pick your backup file to restore it. Merge '
+        'More, Settings, Data and backup, Import Data. Pick your backup file to restore it. Merge '
         'keeps what you have, Override replaces it.',
         deepLinkRoute: '/more/data',
         deepLinkLabel: 'Take me there',

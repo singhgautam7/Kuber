@@ -187,7 +187,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
             type: AppButtonType.primary,
             onPressed: () {
               Navigator.pop(ctx);
-              context.push('/more/settings');
+              context.push('/more/settings/preferences?row=defaultAccount');
             },
           ),
         ],

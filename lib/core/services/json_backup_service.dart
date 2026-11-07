@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:isar_community/isar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/prefs_keys.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/categories/data/category.dart';
@@ -131,10 +133,21 @@ class JsonBackupService {
     final storedCards = await isar.storedCards.where().findAll();
     final cardVaultMeta = await isar.cardVaultMetas.get(0);
     final processed = await isar.processedOccurrences.where().findAll();
+    // Name and currency, so a first-run restore can skip those steps. Only
+    // the welcome flow reads this. Best-effort: never fails a backup.
+    Map<String, dynamic>? profile;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      profile = {
+        'userName': prefs.getString(PrefsKeys.userName),
+        'currency': prefs.getString(PrefsKeys.currency),
+      };
+    } catch (_) {}
 
     return {
       'version': version,
       'exportedAt': DateTime.now().toIso8601String(),
+      'profile': profile,
       'transactions': transactions.map(_txToMap).toList(),
       'categories': categories.map(_catToMap).toList(),
       'categoryGroups': categoryGroups.map(_groupToMap).toList(),

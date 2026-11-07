@@ -25,6 +25,7 @@ import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
 import '../../features/quick_add/screens/quick_add_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
+import '../../shared/widgets/kuber_path.dart';
 import '../../shared/widgets/screen_entrance.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
@@ -42,6 +43,7 @@ import '../../features/more/screens/add_edit_category_screen.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/recurring/screens/add_recurring_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
+import '../../features/settings/screens/settings_pages.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
 import '../../features/backups/screens/automatic_backups_screen.dart';
@@ -120,6 +122,9 @@ import '../../features/tools/saved/saved_calculations_screen.dart';
 CalculatorPrefill? _prefill(GoRouterState s) =>
     s.extra is CalculatorPrefill ? s.extra as CalculatorPrefill : null;
 
+/// `?row=` from a More search result: the settings row to scroll to.
+String? _row(GoRouterState s) => s.uri.queryParameters['row'];
+
 int? _savedId(GoRouterState state) =>
     int.tryParse(state.uri.queryParameters['savedId'] ?? '');
 
@@ -144,6 +149,7 @@ final initialLocationProvider = Provider<String>((ref) => '/');
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
+    observers: [KuberPath.observer],
     initialLocation: ref.read(initialLocationProvider),
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
@@ -374,7 +380,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             navigationShell, // The shell is rendered via navigatorContainerBuilder
         navigatorContainerBuilder: (context, navigationShell, children) =>
-            AppScaffold(navigationShell: navigationShell, children: children),
+            KuberPathShell(
+              tab: navigationShell.currentIndex,
+              child: AppScaffold(navigationShell: navigationShell, children: children),
+            ),
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellDashboardKey,
@@ -443,12 +452,42 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'settings',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const SettingsScreen(),
+                    builder: (_, s) => SettingsScreen(highlight: _row(s)),
                     routes: [
                       GoRoute(
                         path: 'theme',
                         parentNavigatorKey: rootNavigatorKey,
                         builder: (_, _) => const ThemeScreen(),
+                      ),
+                      GoRoute(
+                        path: 'look',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => LookAndFeelScreen(highlight: _row(s)),
+                      ),
+                      GoRoute(
+                        path: 'preferences',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => AppPreferencesScreen(highlight: _row(s)),
+                      ),
+                      GoRoute(
+                        path: 'privacy',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => PrivacySecurityScreen(highlight: _row(s)),
+                      ),
+                      GoRoute(
+                        path: 'app-drawer',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => AppDrawerScreen(highlight: _row(s)),
+                      ),
+                      GoRoute(
+                        path: 'notifications',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => NotificationsSettingsScreen(highlight: _row(s)),
+                      ),
+                      GoRoute(
+                        path: 'activity',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, s) => ActivitySettingsScreen(highlight: _row(s)),
                       ),
                     ],
                   ),
@@ -460,7 +499,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'data',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const DataManagementScreen(),
+                    builder: (_, s) => DataManagementScreen(highlight: _row(s)),
                     routes: [
                       GoRoute(
                         path: 'automatic-backups',

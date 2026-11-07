@@ -12,7 +12,7 @@ import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/widgets/settings_section.dart';
 import '../card_info_configs.dart';
-import '../data/card_keystore.dart';
+import '../data/card_biometric.dart';
 import '../providers/kuber_cards_provider.dart';
 import '../widgets/cards_secure_scaffold.dart';
 
@@ -80,7 +80,7 @@ class _CardsSettingsScreenState extends ConsumerState<CardsSettingsScreen> {
                         trailing: Switch(
                           value: biometricOn,
                           onChanged: _biometricAvailable
-                              ? (v) => _toggleBiometric(v)
+                              ? (v) => toggleCardBiometric(context, ref, v)
                               : null,
                           activeTrackColor: cs.primary,
                         ),
@@ -158,39 +158,6 @@ class _CardsSettingsScreenState extends ConsumerState<CardsSettingsScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _toggleBiometric(bool enable) async {
-    final service = ref.read(cardVaultServiceProvider);
-    if (enable) {
-      // The vault is unlocked here, so the session holds the derived key: a
-      // biometric check then stores that key (never the PIN). See plan §2.5.
-      final key = ref.read(cardSessionProvider).key;
-      if (key == null) return;
-      final ok = await _biometric.authenticate();
-      if (!ok || !mounted) return;
-      final stored = await CardKeystore.storeKey(key);
-      if (!stored) {
-        if (mounted) {
-          showKuberSnackBar(
-            context,
-            'Could not enable biometrics.',
-            isError: true,
-          );
-        }
-        return;
-      }
-      await service.setBiometricEnabled(true);
-      ref.invalidate(cardVaultMetaProvider);
-      if (mounted) showKuberSnackBar(context, 'Biometric unlock enabled.');
-    } else {
-      final ok = await _biometric.authenticate();
-      if (!ok || !mounted) return;
-      await CardKeystore.clear();
-      await service.setBiometricEnabled(false);
-      ref.invalidate(cardVaultMetaProvider);
-      if (mounted) showKuberSnackBar(context, 'Biometric unlock disabled.');
-    }
   }
 
   Future<void> _exportCardsOnly() async {

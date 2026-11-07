@@ -166,6 +166,10 @@ class PrefsKeys {
   // Upcoming events: 'list' | 'calendar' (upcoming-calendar-v1).
   static const upcomingEventsView = 'upcoming_events_view';
   // Theme surfaces (theme-surfaces-v1). Pure black keeps `themeAmoled`.
+  // Data responsibility page: when it was accepted, and its wording version.
+  static const dataTermsAcceptedAt = 'data_terms_accepted_at';
+  static const dataTermsVersion = 'data_terms_version';
+
   static const themeExpressive = 'theme_expressive';
   static const themeSurfacesMigrated = 'theme_surfaces_migrated_v1';
 }

@@ -212,7 +212,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   Future<void> _setDefaultAccount() async {
     _focusNode.unfocus();
-    await context.push('/more/settings');
+    await context.push('/more/settings/preferences?row=defaultAccount');
     if (mounted) _recompute();
   }
 

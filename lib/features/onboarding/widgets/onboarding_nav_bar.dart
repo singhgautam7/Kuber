@@ -23,6 +23,13 @@ class OnboardingNavBar extends StatelessWidget {
   /// False: the primary button is disabled (e.g. no pick yet).
   final bool primaryEnabled;
 
+  /// False hides the dots (the first page, before the flow begins).
+  final bool showDots;
+
+  /// A plain second action above the buttons ("Not now").
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
   const OnboardingNavBar({
     super.key,
     required this.currentPage,
@@ -34,6 +41,9 @@ class OnboardingNavBar extends StatelessWidget {
     this.pageCount = 4,
     this.compactBack = false,
     this.primaryEnabled = true,
+    this.showDots = true,
+    this.secondaryLabel,
+    this.onSecondary,
   });
 
   @override
@@ -53,11 +63,17 @@ class OnboardingNavBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            OnboardingDotsIndicator(
-              currentPage: currentPage,
-              pageCount: pageCount,
-            ),
-            const SizedBox(height: KuberSpace.lg),
+            if (secondaryLabel != null) ...[
+              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
+              const SizedBox(height: KuberSpace.sm),
+            ],
+            if (showDots) ...[
+              OnboardingDotsIndicator(
+                currentPage: currentPage,
+                pageCount: pageCount,
+              ),
+              const SizedBox(height: KuberSpace.lg),
+            ],
             AnimatedSize(
               duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,

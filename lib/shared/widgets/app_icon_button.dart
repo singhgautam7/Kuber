@@ -39,6 +39,7 @@ class AppIconButton extends StatelessWidget {
     this.badgeColor,
     this.onBadgeColor,
     this.onLongPress,
+    this.longPressHint,
     this.tooltip = true,
     super.key,
   });
@@ -62,6 +63,9 @@ class AppIconButton extends StatelessWidget {
   final Color? badgeColor;
   final Color? onBadgeColor;
   final VoidCallback? onLongPress;
+
+  /// What [onLongPress] does, for screen readers and the tooltip.
+  final String? longPressHint;
 
   /// Show [semanticLabel] as a plain tooltip on long-press.
   final bool tooltip;
@@ -159,12 +163,21 @@ class AppIconButton extends StatelessWidget {
         triggerMode: TooltipTriggerMode.longPress,
         child: button,
       );
+    } else if (longPressHint != null) {
+      // The long-press itself acts, so this one shows on hover and focus.
+      button = Tooltip(
+        message: longPressHint!,
+        triggerMode: TooltipTriggerMode.manual,
+        child: button,
+      );
     }
 
     return Semantics(
       button: true,
       enabled: !disabled,
       label: semanticLabel,
+      hint: longPressHint,
+      onLongPress: onLongPress,
       excludeSemantics: true,
       child: button,
     );

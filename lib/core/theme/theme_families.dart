@@ -26,12 +26,21 @@ enum ThemeVariant {
   coral,
   citron,
   neon,
+  saffron,
+  sky,
+  ruby,
 }
 
-/// Azure was dropped from the picker (too close to Perch, review round 3).
-/// The enum value stays because the index is persisted; a stored Azure
-/// resolves to Perch.
-const Set<ThemeVariant> kRetiredVariants = {ThemeVariant.azure};
+/// Dropped from the picker, with where a saved choice goes. Enum values stay
+/// because the index is persisted. Azure: too close to Perch (review round 3).
+/// Meadow and Coral: measured duplicates of Neon and Ember (nov-release D15).
+const Map<ThemeVariant, ThemeVariant> kRetiredVariantMap = {
+  ThemeVariant.azure: ThemeVariant.perch,
+  ThemeVariant.meadow: ThemeVariant.neon,
+  ThemeVariant.coral: ThemeVariant.ember,
+};
+
+Set<ThemeVariant> get kRetiredVariants => kRetiredVariantMap.keys.toSet();
 
 /// The families offered on the Theme screen, in display order.
 List<ThemeVariant> get kSelectableVariants => [
@@ -41,7 +50,7 @@ List<ThemeVariant> get kSelectableVariants => [
 
 /// Maps a stored variant to one that is still offered.
 ThemeVariant resolveVariant(ThemeVariant v) =>
-    v == ThemeVariant.azure ? ThemeVariant.perch : v;
+    kRetiredVariantMap[v] ?? v;
 
 /// One family x brightness: the M3 scheme, Kuber money colours and the viz
 /// ramp.
@@ -306,6 +315,9 @@ class MullFamily {
   static const iris = MullFamily(id: 'iris', name: 'Iris', blurb: 'purple', neutralHue: 290, neutralChroma: 1, primaryHue: 290, primaryLightness: 0.55, primaryChroma: 0.12, primaryContainerChroma: 0.04);
   static const coral = MullFamily(id: 'coral', name: 'Coral', blurb: 'red orange', neutralHue: 30, neutralChroma: 1.2, primaryHue: 30, primaryLightness: 0.56, primaryChroma: 0.12, primaryContainerChroma: 0.04);
   static const citron = MullFamily(id: 'citron', name: 'Citron', blurb: 'yellow green', neutralHue: 113, neutralChroma: 1.2, primaryHue: 113, primaryLightness: 0.55, primaryChroma: 0.10, primaryContainerChroma: 0.04);
+  static const saffron = MullFamily(id: 'saffron', name: 'Saffron', blurb: 'gold', neutralHue: 90, neutralChroma: 1.25, primaryHue: 90, primaryLightness: 0.60, primaryChroma: 0.12, primaryContainerChroma: 0.05);
+  static const sky = MullFamily(id: 'sky', name: 'Sky', blurb: 'light blue', neutralHue: 238, neutralChroma: 1, primaryHue: 238, primaryLightness: 0.56, primaryChroma: 0.11, primaryContainerChroma: 0.04);
+  static const ruby = MullFamily(id: 'ruby', name: 'Ruby', blurb: 'red', neutralHue: 18, neutralChroma: 1.15, primaryHue: 18, primaryLightness: 0.50, primaryChroma: 0.16, primaryContainerChroma: 0.05);
   static const neon = MullFamily(id: 'neon', name: 'Neon', blurb: 'vivid green', neutralHue: 147, neutralChroma: 0.8, primaryHue: 147, primaryLightness: 0.60, primaryChroma: 0.14, primaryContainerChroma: 0.05);
 
 
@@ -326,6 +338,9 @@ class MullFamily {
         ThemeVariant.coral => coral,
         ThemeVariant.citron => citron,
         ThemeVariant.neon => neon,
+        ThemeVariant.saffron => saffron,
+        ThemeVariant.sky => sky,
+        ThemeVariant.ruby => ruby,
       };
 
   /// Android hands over one wallpaper seed; the rest is derived exactly as a

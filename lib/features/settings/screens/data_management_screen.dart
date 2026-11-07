@@ -7,15 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/app_button.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
 import '../../backups/providers/backup_provider.dart';
 import '../../kuber_cards/widgets/imported_cards_prompt.dart';
 import '../widgets/data_action_widgets.dart';
+import '../widgets/settings_anchor.dart';
 import '../widgets/data_export_bottom_sheet.dart';
 import '../widgets/data_import_bottom_sheet.dart';
 
@@ -181,7 +180,8 @@ String _getProcessingLabel(String lang) {
 }
 
 class DataManagementScreen extends ConsumerWidget {
-  const DataManagementScreen({super.key});
+  final String? highlight;
+  const DataManagementScreen({super.key, this.highlight});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -207,40 +207,28 @@ class DataManagementScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
-                  showBack: true,
-                  title: context.l10n.dataManagementTitle,
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpace.screenMargin,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
+    return Stack(
+      children: [
+        SettingsPageFrame(
+          title: context.l10n.setGroupData,
+          highlight: highlight,
+          children: [
                     const _SectionLabel(label: 'IMPORT / EXPORT'),
                     KuberGroup(
                       children: [
-                        DataActionRow(
+                        SettingsAnchor('export', child: DataActionRow(
                           icon: Icons.upload_file_rounded,
                           title: context.l10n.exportData,
                           description: context.l10n.exportDataDesc,
                           onPressed: () => showDataExportBottomSheet(context),
-                        ),
-                        DataActionRow(
+                        )),
+                        SettingsAnchor('import', child: DataActionRow(
                           icon: Icons.download_rounded,
                           title: context.l10n.importData,
                           description: context.l10n.importDataDesc,
                           onPressed: () => showDataImportBottomSheet(context),
-                        ),
-                        DataActionRow(
+                        )),
+                        SettingsAnchor('backup', child: DataActionRow(
                           icon: backupFailed
                               ? Icons.warning_amber_rounded
                               : Icons.backup_outlined,
@@ -251,7 +239,7 @@ class DataManagementScreen extends ConsumerWidget {
                           alert: backupFailed,
                           onPressed: () =>
                               context.push('/more/data/automatic-backups'),
-                        ),
+                        )),
                       ],
                     ),
                     const SizedBox(height: KuberSpace.sectionGap - 4),
@@ -264,29 +252,22 @@ class DataManagementScreen extends ConsumerWidget {
                           description: _getMockDataDesc(lang),
                           onPressed: () => _confirmMockData(context, ref),
                         ),
-                        DataActionRow(
+                        SettingsAnchor('clear', child: DataActionRow(
                           icon: Icons.delete_forever_rounded,
                           title: context.l10n.clearAllData,
                           description: context.l10n.clearAllDataDesc,
                           destructive: true,
                           onPressed: () => _confirmClearData(context, ref),
-                        ),
+                        )),
                       ],
                     ),
-                    SizedBox(
-                      height: KuberSpace.xxl + systemNavBarInset(context),
-                    ),
-                  ]),
-                ),
-              ),
-            ],
+          ],
+        ),
+        if (state.status == DataOpStatus.loading)
+          DataLoadingOverlay(
+            message: state.loadingMessage ?? _getProcessingLabel(lang),
           ),
-          if (state.status == DataOpStatus.loading)
-            DataLoadingOverlay(
-              message: state.loadingMessage ?? _getProcessingLabel(lang),
-            ),
-        ],
-      ),
+      ],
     );
   }
 

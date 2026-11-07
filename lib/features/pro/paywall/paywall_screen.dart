@@ -20,6 +20,7 @@ import 'billing_ui_state.dart';
 import 'paywall_error_state.dart';
 import 'paywall_loading_state.dart';
 import 'paywall_manage_state.dart';
+import 'pro_faq_section.dart';
 import 'pro_page_extras.dart';
 import 'pro_state.dart';
 import 'subscription_offer.dart';
@@ -165,6 +166,8 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       _sectionTitle('What Pro includes'),
       const SizedBox(height: KuberSpace.sm),
       const KuberComparisonTable(rows: kProComparisonRows),
+      const SizedBox(height: KuberSpace.xl),
+      const ProFaqSection(),
     ];
   }
 

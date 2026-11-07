@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_search_pill.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../dev/providers/dev_mode_provider.dart';
+import '../../settings/settings_index.dart';
 import '../more_content.dart';
 
 /// More search (board 3.7): an inline search pill over a grouped list of
@@ -48,6 +51,8 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                 e.subtitle.toLowerCase().contains(q))
               (s, e),
     ];
+    final l = context.l10n;
+    final settings = SettingsSearch.of(l).search(q);
 
     return Scaffold(
       body: SafeArea(
@@ -78,11 +83,11 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                 children: [
                   if (q.isNotEmpty) ...[
                     KuberSectionHeader(
-                      title: results.length == 1
+                      title: results.length + settings.length == 1
                           ? '1 result'
-                          : '${results.length} results',
+                          : '${results.length + settings.length} results',
                     ),
-                    if (results.isNotEmpty)
+                    if (results.isNotEmpty || settings.isNotEmpty)
                       KuberGroup(
                         children: [
                           for (final (s, e) in results)
@@ -104,6 +109,20 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                               onTap: () {
                                 Navigator.of(context).pop();
                                 e.onTap();
+                              },
+                            ),
+                          for (final e in settings)
+                            KuberListRow(
+                              leading: Icon(e.icon, size: 24, color: cs.primary),
+                              title: e.title(l),
+                              subtitle: settingsPath(e.area, l, l.settingsTitle),
+                              trailing: const KuberChevron(),
+                              onTap: () {
+                                final host = widget.hostContext;
+                                Navigator.of(context).pop();
+                                host.push(e.area == SettingsArea.pro
+                                    ? e.area.route
+                                    : '${e.area.route}?row=${e.id}');
                               },
                             ),
                         ],

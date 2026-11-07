@@ -12,6 +12,7 @@ import '../../features/settings/providers/settings_provider.dart';
 import 'app_icon_button.dart';
 import 'kuber_info_bottom_sheet.dart';
 import 'kuber_menu.dart';
+import 'kuber_path.dart';
 import 'kuber_search_pill.dart';
 
 /// The one header (components/header.md, board 2b).
@@ -146,6 +147,11 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
     final horizontalPadding = w.horizontalPadding;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final route = ModalRoute.of(context);
+    if (title != null && route != null) KuberPath.setTitle(route, title);
+    // The path sheet: pages with a plain back button (forms close instead,
+    // and a custom back means the page wants a say).
+    final hasPath = showBack && !w.closeIcon && w.onBack == null && title != null;
 
     // Board 3.9a: once a screen has an overflow, "How it works" and "Add to
     // home screen" live in it (first), destructive items last.
@@ -198,6 +204,17 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.titleLarge!.copyWith(color: cs.onSurface),
       );
+      if (hasPath) {
+        titleWidget = Semantics(
+          button: true,
+          hint: AppLocalizations.of(context)!.pathSheetHint,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => KuberPath.open(context),
+            child: titleWidget,
+          ),
+        );
+      }
     } else if (w.showBrand) {
       final currency = ref.watch(currencyProvider);
       titleWidget = Row(
@@ -315,6 +332,12 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
                                 semanticLabel: w.closeIcon ? 'Close' : 'Back',
                                 onPressed:
                                     w.onBack ?? () => Navigator.pop(context),
+                                onLongPress: hasPath
+                                    ? () => KuberPath.open(context)
+                                    : null,
+                                longPressHint: hasPath
+                                    ? AppLocalizations.of(context)!.pathSheetLongPress
+                                    : null,
                               ),
                             if (showHome)
                               AppIconButton(

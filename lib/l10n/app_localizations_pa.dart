@@ -8649,4 +8649,347 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get msLoansKeepFirst => 'Keep first part';
+
+  @override
+  String get cardBiometricOn => 'Biometric unlock enabled for Kuber Cards.';
+
+  @override
+  String get cardBiometricOff => 'Biometric unlock disabled for Kuber Cards.';
+
+  @override
+  String get cardBiometricUnavailable =>
+      'No fingerprint, face or screen lock is set up on this phone. Use your Kuber Cards PIN.';
+
+  @override
+  String get cardBiometricUnlockFirst =>
+      'Unlock Kuber Cards with your PIN first, then turn this on.';
+
+  @override
+  String get cardBiometricOpen => 'Open';
+
+  @override
+  String get cardBiometricFailed => 'Could not turn on biometric unlock.';
+
+  @override
+  String get setCardsBiometric => 'Kuber Cards biometric';
+
+  @override
+  String get setCardsBiometricSub =>
+      'Unlock your cards with fingerprint or face';
+
+  @override
+  String get setCardsPin => 'Change Kuber Cards PIN';
+
+  @override
+  String get setCardsPinSub => 'Update the PIN that unlocks your cards';
+
+  @override
+  String get setGroupLook => 'Look and feel';
+
+  @override
+  String get setGroupPrefs => 'App preferences';
+
+  @override
+  String get setGroupPrivacy => 'Privacy and security';
+
+  @override
+  String get setGroupData => 'Data and backup';
+
+  @override
+  String get setGroupActivity => 'Activity';
+
+  @override
+  String get setGroupActivitySub => 'Upcoming events and your story archive';
+
+  @override
+  String get setPrivacyLockOn => 'App lock on';
+
+  @override
+  String get setPrivacyLockOff => 'App lock off';
+
+  @override
+  String get setNotifAllowed => 'Notifications are on';
+
+  @override
+  String get setNotifBlocked => 'Notifications are off';
+
+  @override
+  String get setNotifAllowedSub => 'Kuber can send your reminders and alerts.';
+
+  @override
+  String get setNotifBlockedSub =>
+      'Reminders and alerts won\'t reach you. Tap to turn them on.';
+
+  @override
+  String get setNotifInbox => 'Notification inbox';
+
+  @override
+  String get setHomeScreenWidgets => 'Home screen widgets';
+
+  @override
+  String get setKwPro =>
+      'subscribe upgrade premium plan purchase redeem restore lifetime';
+
+  @override
+  String get setKwName => 'name profile me user';
+
+  @override
+  String get setKwTheme =>
+      'dark light colour color mode night black appearance amoled';
+
+  @override
+  String get setKwTextSize => 'font text size bigger smaller large';
+
+  @override
+  String get setKwBottomNav => 'navigation tabs bar bottom';
+
+  @override
+  String get setKwMoreLayout => 'more grid list classic modern layout';
+
+  @override
+  String get setKwHomeWidgets => 'home cards dashboard arrange order widgets';
+
+  @override
+  String get setKwAnalyticsWidgets => 'analytics charts arrange order widgets';
+
+  @override
+  String get setKwSuggestions => 'tips suggestions home hints';
+
+  @override
+  String get setKwGetStarted => 'get started setup checklist';
+
+  @override
+  String get setKwGallery => 'launcher homescreen widget balance shortcut';
+
+  @override
+  String get setKwQuickActions => 'long press shortcuts nav quick';
+
+  @override
+  String get setKwAddMenu => 'plus button long press add shortcuts';
+
+  @override
+  String get setKwLanguage => 'language hindi tamil translate locale';
+
+  @override
+  String get setKwCurrency => 'rupee dollar money symbol inr usd';
+
+  @override
+  String get setKwNumberFormat => 'lakh crore million comma grouping digits';
+
+  @override
+  String get setKwCurrencyCode => 'inr usd code symbol';
+
+  @override
+  String get setKwDefaultAccount => 'default bank wallet account';
+
+  @override
+  String get setKwSwipe => 'swipe gesture tabs delete';
+
+  @override
+  String get setKwPrivacyMode => 'hide amounts blur privacy mask';
+
+  @override
+  String get setKwBiometric =>
+      'lock fingerprint face unlock security app lock password';
+
+  @override
+  String get setKwNotesBiometric => 'notes lock fingerprint';
+
+  @override
+  String get setKwCardsBiometric => 'cards vault lock fingerprint face';
+
+  @override
+  String get setKwCardsPin => 'cards vault pin password';
+
+  @override
+  String get setKwDrawer => 'launcher icon app list drawer';
+
+  @override
+  String get setKwNotifications =>
+      'alerts reminders permission allow push inbox';
+
+  @override
+  String get setKwUpcoming => 'calendar due bills upcoming events';
+
+  @override
+  String get setKwStories => 'stories recap archive money wrapped';
+
+  @override
+  String get setKwExport => 'export csv pdf download share';
+
+  @override
+  String get setKwImport => 'import csv restore backup upload';
+
+  @override
+  String get setKwBackup => 'backup automatic drive save restore';
+
+  @override
+  String get setKwClear => 'delete reset erase wipe clear';
+
+  @override
+  String get setKwTutorial => 'tutorial help guide walkthrough learn';
+
+  @override
+  String get setKwAbout => 'about version licence contact privacy policy';
+
+  @override
+  String get obStartRestore => 'Restore from backup';
+
+  @override
+  String get obStartRestoreSub =>
+      'Bring everything back from a Kuber backup file';
+
+  @override
+  String get obStartCsv => 'Import from CSV';
+
+  @override
+  String get obStartCsvSub => 'Bring in transactions from a spreadsheet';
+
+  @override
+  String get obStartFresh => 'Start fresh';
+
+  @override
+  String get obRestoreCancelled => 'Restore cancelled. Nothing changed.';
+
+  @override
+  String get obImportCancelled => 'Import cancelled. Nothing changed.';
+
+  @override
+  String get obNotifTitle => 'Stay on top of your money';
+
+  @override
+  String get obNotifReminders => 'Reminders you set';
+
+  @override
+  String get obNotifCards => 'Credit card bills and due dates';
+
+  @override
+  String get obNotifBudgets => 'Budget alerts when you near a limit';
+
+  @override
+  String get obNotifRecorded =>
+      'EMIs and recurring payments as they\'re recorded';
+
+  @override
+  String get obNotifBackup => 'Automatic backup problems';
+
+  @override
+  String get obNotifPromise =>
+      'Kuber never sends promotional notifications. Only reminders and alerts that matter to you.';
+
+  @override
+  String get obNotifAllow => 'Allow notifications';
+
+  @override
+  String get obNotifLater => 'Not now';
+
+  @override
+  String get obTermsTitle => 'Your data lives on this phone';
+
+  @override
+  String get obTermsBody =>
+      'Kuber has no servers and no account. What you add never leaves your phone, so nobody else can recover it for you. Back up often to keep it safe.';
+
+  @override
+  String get obTermsCheck1 =>
+      'I\'ll back up my data regularly, so I don\'t lose it if my phone is lost, reset, or Kuber is uninstalled.';
+
+  @override
+  String get obTermsCheck2 =>
+      'I understand the developer can\'t recover lost data, and that backups and restores are my responsibility.';
+
+  @override
+  String get obTermsAgree => 'Agree and continue';
+
+  @override
+  String get obTermsPrivacy => 'Privacy policy';
+
+  @override
+  String get pathSheetTitle => 'How you got here';
+
+  @override
+  String get pathSheetCurrent => 'You are here';
+
+  @override
+  String get pathSheetHint => 'Shows the path to this page';
+
+  @override
+  String get pathSheetLongPress =>
+      'Press and hold to see the path to this page';
+
+  @override
+  String get setPathTip =>
+      'Tap a page title, or long-press back, to jump to any earlier page.';
+
+  @override
+  String get proFaqTitle => 'Frequently asked questions';
+
+  @override
+  String get proFaqLifetimeQ => 'Is Lifetime a one-time payment?';
+
+  @override
+  String get proFaqLifetimeA => 'Yes. You pay once and it never renews.';
+
+  @override
+  String get proFaqIncludedQ => 'What do I get with Pro, and what stays free?';
+
+  @override
+  String get proFaqIncludedA =>
+      'Pro adds Advanced Analytics, Reminders, Automatic Backups and custom themes, and removes the limits on SMS Import, Kuber Notes, Ask Kuber and Kuber Cards. Tracking, accounts, budgets, loans, investments, analytics and manual backup stay free.';
+
+  @override
+  String get proFaqDevicesQ => 'Can I use Pro on more than one device?';
+
+  @override
+  String get proFaqDevicesA =>
+      'Yes, on any phone signed in to the same Google account. Install Kuber and tap Restore purchases. Your data doesn\'t sync between phones, so use a backup to move it.';
+
+  @override
+  String get proFaqCancelQ => 'How do I cancel my subscription?';
+
+  @override
+  String get proFaqCancelA =>
+      'Open the Play Store, tap your profile, then Payments and subscriptions. Pro stays on until the end of the period you\'ve paid for.';
+
+  @override
+  String get proFaqEndsQ => 'What happens to my data if Pro ends?';
+
+  @override
+  String get proFaqEndsA =>
+      'Nothing is deleted. Your data stays on your phone, and Pro features go back to their free limits. The theme returns to Kuber Signature.';
+
+  @override
+  String get proFaqPhoneQ => 'I changed phones. How do I get Pro back?';
+
+  @override
+  String get proFaqPhoneA =>
+      'Sign in with the same Google account, install Kuber, and tap Restore purchases on this page. To bring your data too, restore a backup.';
+
+  @override
+  String get proFaqPromoQ => 'How do I use a promo code?';
+
+  @override
+  String get proFaqPromoA =>
+      'Tap Redeem promo code on this page and enter your code. Kuber opens Google Play\'s redeem page. When you come back, Kuber checks for it automatically.';
+
+  @override
+  String get proFaqSecureQ => 'Is my financial data secure?';
+
+  @override
+  String get proFaqSecureA =>
+      'It stays on your phone. Kuber has no servers, no account and no analytics.';
+
+  @override
+  String get proFaqPaymentQ => 'Can Kuber see my payment details?';
+
+  @override
+  String get proFaqPaymentA =>
+      'No. Google Play handles payments, and Kuber never sees your card or bank details.';
+
+  @override
+  String get proFaqRefundQ => 'Can I get a refund?';
+
+  @override
+  String get proFaqRefundA =>
+      'Refunds are handled by Google Play under its refund policy.';
 }

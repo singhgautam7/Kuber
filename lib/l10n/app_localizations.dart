@@ -15089,6 +15089,642 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep first part'**
   String get msLoansKeepFirst;
+
+  /// No description provided for @cardBiometricOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock enabled for Kuber Cards.'**
+  String get cardBiometricOn;
+
+  /// No description provided for @cardBiometricOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock disabled for Kuber Cards.'**
+  String get cardBiometricOff;
+
+  /// No description provided for @cardBiometricUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No fingerprint, face or screen lock is set up on this phone. Use your Kuber Cards PIN.'**
+  String get cardBiometricUnavailable;
+
+  /// No description provided for @cardBiometricUnlockFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Kuber Cards with your PIN first, then turn this on.'**
+  String get cardBiometricUnlockFirst;
+
+  /// No description provided for @cardBiometricOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get cardBiometricOpen;
+
+  /// No description provided for @cardBiometricFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not turn on biometric unlock.'**
+  String get cardBiometricFailed;
+
+  /// No description provided for @setCardsBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Cards biometric'**
+  String get setCardsBiometric;
+
+  /// No description provided for @setCardsBiometricSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock your cards with fingerprint or face'**
+  String get setCardsBiometricSub;
+
+  /// No description provided for @setCardsPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Kuber Cards PIN'**
+  String get setCardsPin;
+
+  /// No description provided for @setCardsPinSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the PIN that unlocks your cards'**
+  String get setCardsPinSub;
+
+  /// No description provided for @setGroupLook.
+  ///
+  /// In en, this message translates to:
+  /// **'Look and feel'**
+  String get setGroupLook;
+
+  /// No description provided for @setGroupPrefs.
+  ///
+  /// In en, this message translates to:
+  /// **'App preferences'**
+  String get setGroupPrefs;
+
+  /// No description provided for @setGroupPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy and security'**
+  String get setGroupPrivacy;
+
+  /// No description provided for @setGroupData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data and backup'**
+  String get setGroupData;
+
+  /// No description provided for @setGroupActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get setGroupActivity;
+
+  /// No description provided for @setGroupActivitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming events and your story archive'**
+  String get setGroupActivitySub;
+
+  /// No description provided for @setPrivacyLockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock on'**
+  String get setPrivacyLockOn;
+
+  /// No description provided for @setPrivacyLockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock off'**
+  String get setPrivacyLockOff;
+
+  /// No description provided for @setNotifAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are on'**
+  String get setNotifAllowed;
+
+  /// No description provided for @setNotifBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off'**
+  String get setNotifBlocked;
+
+  /// No description provided for @setNotifAllowedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber can send your reminders and alerts.'**
+  String get setNotifAllowedSub;
+
+  /// No description provided for @setNotifBlockedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders and alerts won\'t reach you. Tap to turn them on.'**
+  String get setNotifBlockedSub;
+
+  /// No description provided for @setNotifInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification inbox'**
+  String get setNotifInbox;
+
+  /// No description provided for @setHomeScreenWidgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Home screen widgets'**
+  String get setHomeScreenWidgets;
+
+  /// No description provided for @setKwPro.
+  ///
+  /// In en, this message translates to:
+  /// **'subscribe upgrade premium plan purchase redeem restore lifetime'**
+  String get setKwPro;
+
+  /// No description provided for @setKwName.
+  ///
+  /// In en, this message translates to:
+  /// **'name profile me user'**
+  String get setKwName;
+
+  /// No description provided for @setKwTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'dark light colour color mode night black appearance amoled'**
+  String get setKwTheme;
+
+  /// No description provided for @setKwTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'font text size bigger smaller large'**
+  String get setKwTextSize;
+
+  /// No description provided for @setKwBottomNav.
+  ///
+  /// In en, this message translates to:
+  /// **'navigation tabs bar bottom'**
+  String get setKwBottomNav;
+
+  /// No description provided for @setKwMoreLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'more grid list classic modern layout'**
+  String get setKwMoreLayout;
+
+  /// No description provided for @setKwHomeWidgets.
+  ///
+  /// In en, this message translates to:
+  /// **'home cards dashboard arrange order widgets'**
+  String get setKwHomeWidgets;
+
+  /// No description provided for @setKwAnalyticsWidgets.
+  ///
+  /// In en, this message translates to:
+  /// **'analytics charts arrange order widgets'**
+  String get setKwAnalyticsWidgets;
+
+  /// No description provided for @setKwSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'tips suggestions home hints'**
+  String get setKwSuggestions;
+
+  /// No description provided for @setKwGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'get started setup checklist'**
+  String get setKwGetStarted;
+
+  /// No description provided for @setKwGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'launcher homescreen widget balance shortcut'**
+  String get setKwGallery;
+
+  /// No description provided for @setKwQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'long press shortcuts nav quick'**
+  String get setKwQuickActions;
+
+  /// No description provided for @setKwAddMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'plus button long press add shortcuts'**
+  String get setKwAddMenu;
+
+  /// No description provided for @setKwLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'language hindi tamil translate locale'**
+  String get setKwLanguage;
+
+  /// No description provided for @setKwCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'rupee dollar money symbol inr usd'**
+  String get setKwCurrency;
+
+  /// No description provided for @setKwNumberFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'lakh crore million comma grouping digits'**
+  String get setKwNumberFormat;
+
+  /// No description provided for @setKwCurrencyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'inr usd code symbol'**
+  String get setKwCurrencyCode;
+
+  /// No description provided for @setKwDefaultAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'default bank wallet account'**
+  String get setKwDefaultAccount;
+
+  /// No description provided for @setKwSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'swipe gesture tabs delete'**
+  String get setKwSwipe;
+
+  /// No description provided for @setKwPrivacyMode.
+  ///
+  /// In en, this message translates to:
+  /// **'hide amounts blur privacy mask'**
+  String get setKwPrivacyMode;
+
+  /// No description provided for @setKwBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'lock fingerprint face unlock security app lock password'**
+  String get setKwBiometric;
+
+  /// No description provided for @setKwNotesBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'notes lock fingerprint'**
+  String get setKwNotesBiometric;
+
+  /// No description provided for @setKwCardsBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'cards vault lock fingerprint face'**
+  String get setKwCardsBiometric;
+
+  /// No description provided for @setKwCardsPin.
+  ///
+  /// In en, this message translates to:
+  /// **'cards vault pin password'**
+  String get setKwCardsPin;
+
+  /// No description provided for @setKwDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'launcher icon app list drawer'**
+  String get setKwDrawer;
+
+  /// No description provided for @setKwNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'alerts reminders permission allow push inbox'**
+  String get setKwNotifications;
+
+  /// No description provided for @setKwUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'calendar due bills upcoming events'**
+  String get setKwUpcoming;
+
+  /// No description provided for @setKwStories.
+  ///
+  /// In en, this message translates to:
+  /// **'stories recap archive money wrapped'**
+  String get setKwStories;
+
+  /// No description provided for @setKwExport.
+  ///
+  /// In en, this message translates to:
+  /// **'export csv pdf download share'**
+  String get setKwExport;
+
+  /// No description provided for @setKwImport.
+  ///
+  /// In en, this message translates to:
+  /// **'import csv restore backup upload'**
+  String get setKwImport;
+
+  /// No description provided for @setKwBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'backup automatic drive save restore'**
+  String get setKwBackup;
+
+  /// No description provided for @setKwClear.
+  ///
+  /// In en, this message translates to:
+  /// **'delete reset erase wipe clear'**
+  String get setKwClear;
+
+  /// No description provided for @setKwTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'tutorial help guide walkthrough learn'**
+  String get setKwTutorial;
+
+  /// No description provided for @setKwAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'about version licence contact privacy policy'**
+  String get setKwAbout;
+
+  /// No description provided for @obStartRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from backup'**
+  String get obStartRestore;
+
+  /// No description provided for @obStartRestoreSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring everything back from a Kuber backup file'**
+  String get obStartRestoreSub;
+
+  /// No description provided for @obStartCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from CSV'**
+  String get obStartCsv;
+
+  /// No description provided for @obStartCsvSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring in transactions from a spreadsheet'**
+  String get obStartCsvSub;
+
+  /// No description provided for @obStartFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Start fresh'**
+  String get obStartFresh;
+
+  /// No description provided for @obRestoreCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore cancelled. Nothing changed.'**
+  String get obRestoreCancelled;
+
+  /// No description provided for @obImportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Import cancelled. Nothing changed.'**
+  String get obImportCancelled;
+
+  /// No description provided for @obNotifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay on top of your money'**
+  String get obNotifTitle;
+
+  /// No description provided for @obNotifReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders you set'**
+  String get obNotifReminders;
+
+  /// No description provided for @obNotifCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card bills and due dates'**
+  String get obNotifCards;
+
+  /// No description provided for @obNotifBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget alerts when you near a limit'**
+  String get obNotifBudgets;
+
+  /// No description provided for @obNotifRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs and recurring payments as they\'re recorded'**
+  String get obNotifRecorded;
+
+  /// No description provided for @obNotifBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup problems'**
+  String get obNotifBackup;
+
+  /// No description provided for @obNotifPromise.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber never sends promotional notifications. Only reminders and alerts that matter to you.'**
+  String get obNotifPromise;
+
+  /// No description provided for @obNotifAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications'**
+  String get obNotifAllow;
+
+  /// No description provided for @obNotifLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get obNotifLater;
+
+  /// No description provided for @obTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data lives on this phone'**
+  String get obTermsTitle;
+
+  /// No description provided for @obTermsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber has no servers and no account. What you add never leaves your phone, so nobody else can recover it for you. Back up often to keep it safe.'**
+  String get obTermsBody;
+
+  /// No description provided for @obTermsCheck1.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll back up my data regularly, so I don\'t lose it if my phone is lost, reset, or Kuber is uninstalled.'**
+  String get obTermsCheck1;
+
+  /// No description provided for @obTermsCheck2.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand the developer can\'t recover lost data, and that backups and restores are my responsibility.'**
+  String get obTermsCheck2;
+
+  /// No description provided for @obTermsAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree and continue'**
+  String get obTermsAgree;
+
+  /// No description provided for @obTermsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get obTermsPrivacy;
+
+  /// No description provided for @pathSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How you got here'**
+  String get pathSheetTitle;
+
+  /// No description provided for @pathSheetCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'You are here'**
+  String get pathSheetCurrent;
+
+  /// No description provided for @pathSheetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows the path to this page'**
+  String get pathSheetHint;
+
+  /// No description provided for @pathSheetLongPress.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold to see the path to this page'**
+  String get pathSheetLongPress;
+
+  /// No description provided for @setPathTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a page title, or long-press back, to jump to any earlier page.'**
+  String get setPathTip;
+
+  /// No description provided for @proFaqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently asked questions'**
+  String get proFaqTitle;
+
+  /// No description provided for @proFaqLifetimeQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Lifetime a one-time payment?'**
+  String get proFaqLifetimeQ;
+
+  /// No description provided for @proFaqLifetimeA.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. You pay once and it never renews.'**
+  String get proFaqLifetimeA;
+
+  /// No description provided for @proFaqIncludedQ.
+  ///
+  /// In en, this message translates to:
+  /// **'What do I get with Pro, and what stays free?'**
+  String get proFaqIncludedQ;
+
+  /// No description provided for @proFaqIncludedA.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro adds Advanced Analytics, Reminders, Automatic Backups and custom themes, and removes the limits on SMS Import, Kuber Notes, Ask Kuber and Kuber Cards. Tracking, accounts, budgets, loans, investments, analytics and manual backup stay free.'**
+  String get proFaqIncludedA;
+
+  /// No description provided for @proFaqDevicesQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I use Pro on more than one device?'**
+  String get proFaqDevicesQ;
+
+  /// No description provided for @proFaqDevicesA.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, on any phone signed in to the same Google account. Install Kuber and tap Restore purchases. Your data doesn\'t sync between phones, so use a backup to move it.'**
+  String get proFaqDevicesA;
+
+  /// No description provided for @proFaqCancelQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I cancel my subscription?'**
+  String get proFaqCancelQ;
+
+  /// No description provided for @proFaqCancelA.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Play Store, tap your profile, then Payments and subscriptions. Pro stays on until the end of the period you\'ve paid for.'**
+  String get proFaqCancelA;
+
+  /// No description provided for @proFaqEndsQ.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens to my data if Pro ends?'**
+  String get proFaqEndsQ;
+
+  /// No description provided for @proFaqEndsA.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is deleted. Your data stays on your phone, and Pro features go back to their free limits. The theme returns to Kuber Signature.'**
+  String get proFaqEndsA;
+
+  /// No description provided for @proFaqPhoneQ.
+  ///
+  /// In en, this message translates to:
+  /// **'I changed phones. How do I get Pro back?'**
+  String get proFaqPhoneQ;
+
+  /// No description provided for @proFaqPhoneA.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with the same Google account, install Kuber, and tap Restore purchases on this page. To bring your data too, restore a backup.'**
+  String get proFaqPhoneA;
+
+  /// No description provided for @proFaqPromoQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I use a promo code?'**
+  String get proFaqPromoQ;
+
+  /// No description provided for @proFaqPromoA.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Redeem promo code on this page and enter your code. Kuber opens Google Play\'s redeem page. When you come back, Kuber checks for it automatically.'**
+  String get proFaqPromoA;
+
+  /// No description provided for @proFaqSecureQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Is my financial data secure?'**
+  String get proFaqSecureQ;
+
+  /// No description provided for @proFaqSecureA.
+  ///
+  /// In en, this message translates to:
+  /// **'It stays on your phone. Kuber has no servers, no account and no analytics.'**
+  String get proFaqSecureA;
+
+  /// No description provided for @proFaqPaymentQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Can Kuber see my payment details?'**
+  String get proFaqPaymentQ;
+
+  /// No description provided for @proFaqPaymentA.
+  ///
+  /// In en, this message translates to:
+  /// **'No. Google Play handles payments, and Kuber never sees your card or bank details.'**
+  String get proFaqPaymentA;
+
+  /// No description provided for @proFaqRefundQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I get a refund?'**
+  String get proFaqRefundQ;
+
+  /// No description provided for @proFaqRefundA.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds are handled by Google Play under its refund policy.'**
+  String get proFaqRefundA;
 }
 
 class _AppLocalizationsDelegate

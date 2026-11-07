@@ -1,7 +1,7 @@
 // "Modern" layout for the More tab (board 3.7 + review round 3): the slim
 // Kuber Pro strip and the Manage grid with live counts, then the previous
 // design's sections restored in M3 styling: a 2-column Signature card grid,
-// App / Tutorial / About lists, Help us (with Buy me a coffee) and the footer.
+// the About list, Help us (with Buy me a coffee) and the footer.
 // Routing and entries come from more_content.dart, same as the Classic layout.
 
 import 'package:flutter/material.dart';
@@ -122,10 +122,6 @@ class MoreScreenModern extends ConsumerWidget {
                       _ToolCard(entry: e),
                   ],
                 ),
-                const SizedBox(height: KuberSpace.sectionGap),
-                list(byId(MoreSectionId.app)),
-                const SizedBox(height: KuberSpace.sectionGap),
-                list(byId(MoreSectionId.tutorial)),
                 const SizedBox(height: KuberSpace.sectionGap),
                 list(byId(MoreSectionId.about)),
                 const SizedBox(height: KuberSpace.sectionGap),
