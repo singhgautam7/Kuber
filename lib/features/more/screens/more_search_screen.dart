@@ -27,6 +27,16 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
   String _query = '';
 
   @override
+  void initState() {
+    super.initState();
+    // Builds the settings index once the page has landed, so the first
+    // keystroke doesn't pay for it.
+    Future<void>.delayed(const Duration(milliseconds: 350), () {
+      if (mounted) SettingsSearch.of(context.l10n);
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
