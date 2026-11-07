@@ -3,7 +3,6 @@
 // check prints a KUBER_LOAN line; the test report is built from them.
 //   flutter test integration_test/loan_e2e_test.dart -d emulator-5554
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:isar_community/isar.dart';

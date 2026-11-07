@@ -58,6 +58,9 @@ const _rPrivacy = '/more/settings/privacy?row=privacyMode';
 const _rPaywall = '/pro';
 const _rAbout = '/more/about';
 const _rSmsImport = '/more/sms-import';
+const _rAccounts = '/more/accounts';
+const _rCards = '/cards';
+const _rNotes = '/more/notes';
 
 class _KnowledgeMatch {
   final String topicLabel;
@@ -113,6 +116,291 @@ const List<_KnowledgeMatch> _topics = [
     ],
   ),
 
+  // ---- Accounts and Kuber Cards -------------------------------------------
+  _KnowledgeMatch(
+    topicLabel: 'Accounts and Kuber Cards',
+    phrases: [
+      'difference between account and kuber card',
+      'difference between accounts and kuber cards',
+      'difference between an account and a kuber card',
+      'difference between kuber cards and accounts',
+      'difference between kuber card and account',
+      'account or kuber card',
+      'account or kuber cards',
+      'kuber cards or account',
+      'accounts vs kuber cards',
+      'account vs kuber card',
+      'kuber cards vs accounts',
+      'kuber card vs account',
+      'should i add my card as an account',
+      'should i add my credit card to kuber cards',
+      'where do i add my credit card',
+      'where should i add my card',
+      'are kuber cards linked to transactions',
+      'is kuber cards linked to transactions',
+      'what is kuber cards',
+      'what are kuber cards',
+    ],
+    response:
+        'They do two different jobs.\n\n'
+        '**Accounts** are where your money moves. Every transaction you add '
+        'comes from or goes to an account: a bank account, cash, a wallet or a '
+        'credit card. Balances, budgets and analytics are built from them. Add '
+        'your credit card as an account to track what you spend on it and its '
+        'bill.\n\n'
+        '**Kuber Cards** is a locked vault for card details: number, expiry, '
+        'name on the card and your own notes. It is not linked to '
+        'transactions, never changes a balance, and opens only with your Cards '
+        'PIN or fingerprint. Use it so the details are at hand when you pay '
+        'online.\n\n'
+        'Many people use both: the card as an account to track spending, and '
+        'in Kuber Cards to keep its details safe.',
+    followUps: [
+      NavChipAction(label: 'Open Accounts', route: _rAccounts),
+      NavChipAction(label: 'Open Kuber Cards', route: _rCards),
+    ],
+  ),
+
+  // ---- What's free and the limits -----------------------------------------
+  _KnowledgeMatch(
+    topicLabel: 'SMS Import limit',
+    phrases: [
+      'limit on sms import',
+      'sms import limit',
+      'how many sms can i import',
+      'how many sms imports',
+      'is sms import free',
+      'is sms import paid',
+      'is import from sms free',
+    ],
+    response:
+        'Import from SMS is free to use. Free users can import **5 messages a '
+        'week** (a rolling 7 days); with Kuber Pro there is no limit. Scanning '
+        'your inbox and pasting a message by hand are always free and never '
+        'count towards the 5.',
+    followUps: [
+      NavChipAction(label: 'Open Import from SMS', route: _rSmsImport),
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'Kuber Cards limit',
+    phrases: [
+      'limit on kuber cards',
+      'kuber cards limit',
+      'how many cards can i add',
+      'how many cards can i save',
+      'how many kuber cards',
+      'is kuber cards free',
+      'is kuber cards paid',
+    ],
+    response:
+        'Kuber Cards is free for **2 cards**. You can add more, but from the '
+        'third card on they stay hidden until you have Kuber Pro. Pro removes '
+        'the limit. Changing your Cards PIN and fingerprint unlock are free.',
+    followUps: [
+      NavChipAction(label: 'Open Kuber Cards', route: _rCards),
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'Kuber Notes limit',
+    phrases: [
+      'limit on kuber notes',
+      'limit on notes',
+      'kuber notes limit',
+      'notes limit',
+      'how many notes can i',
+      'how many kuber notes',
+      'is kuber notes free',
+      'are kuber notes free',
+      'is kuber notes paid',
+    ],
+    response:
+        'Kuber Notes is free for **2 notes**. Kuber Pro gives you as many as '
+        'you like. Notes you already have are never deleted if Pro ends.',
+    followUps: [
+      NavChipAction(label: 'Open Kuber Notes', route: _rNotes),
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'Ask Kuber limit',
+    phrases: [
+      'limit on ask kuber',
+      'ask kuber limit',
+      'how many messages can i send',
+      'how many questions can i ask',
+      'how many ask kuber messages',
+      'is ask kuber free',
+      'is ask kuber paid',
+    ],
+    response:
+        'Ask Kuber is free for **5 messages a week**. Kuber Pro makes it '
+        'unlimited. Everything runs on your phone, so your questions never '
+        'leave it.',
+    followUps: [
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'Pro only features',
+    phrases: [
+      'is reminders free',
+      'are reminders free',
+      'is advanced analytics free',
+      'are automatic backups free',
+      'is automatic backup free',
+      'are themes free',
+      'are custom themes free',
+      'which features are paid',
+      'what features are paid',
+      'which features are pro',
+      'what is paid',
+    ],
+    response:
+        'Four features are only in Kuber Pro: **Advanced Analytics**, '
+        '**Reminders**, **Automatic Backups** and **custom themes** (Kuber '
+        'Signature, light and dark, is free).\n\n'
+        'Four more are free with a limit that Pro removes:\n'
+        '- Import from SMS: 5 imports a week\n'
+        '- Kuber Notes: 2 notes\n'
+        '- Ask Kuber: 5 messages a week\n'
+        '- Kuber Cards: 2 cards\n\n'
+        'Everything else is free.',
+    followUps: [
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+      AskChipAction('Which features are free?'),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'free features',
+    phrases: [
+      'which features are free',
+      'what features are free',
+      'what is free',
+      "what's free",
+      'is kuber free',
+      'what stays free',
+    ],
+    response:
+        'Kuber is free to use, with no ads and no account. Free for everyone:\n'
+        '- Transactions, History, accounts, categories, tags and budgets\n'
+        '- Recurring payments, loans, investments, and lend and borrow\n'
+        '- Analytics, Money Stories with full history, and Upcoming events\n'
+        '- Calculators and tools, Quick Add, home screen widgets\n'
+        '- CSV and PDF export, manual backup and restore\n'
+        '- App lock, Privacy mode, every currency and all 9 languages\n\n'
+        'Free with a limit: Import from SMS (5 imports a week), Kuber Notes '
+        '(2 notes), Ask Kuber (5 messages a week) and Kuber Cards (2 cards).\n\n'
+        'Only in Pro: Advanced Analytics, Reminders, Automatic Backups and '
+        'custom themes.',
+    followUps: [
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+      AskChipAction('What is in Kuber Pro?'),
+    ],
+  ),
+
+  // ---- Pro page questions (the FAQ on the Pro page) -----------------------
+  _KnowledgeMatch(
+    topicLabel: 'Lifetime plan',
+    phrases: [
+      'is lifetime a one-time payment',
+      'is lifetime a one time payment',
+      'is lifetime one time',
+      'does lifetime renew',
+      'lifetime plan',
+    ],
+    response: 'Yes. Lifetime is a one-time payment and it never renews.',
+    followUps: [
+      NavChipAction(label: 'See Pro options', route: _rPaywall),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'Pro on more than one phone',
+    phrases: [
+      'more than one device',
+      'more than one phone',
+      'another phone',
+      'second phone',
+      'two phones',
+      'multiple devices',
+    ],
+    response:
+        'Yes, Pro works on any phone signed in to the same Google account. '
+        'Install Kuber and tap Restore purchases on the Pro page. Your data '
+        "doesn't sync between phones, so use a backup to move it.",
+    followUps: [
+      NavChipAction(label: 'Open Pro page', route: _rPaywall),
+      AskChipAction('How do I back up my data?'),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'changing phones',
+    phrases: [
+      'i changed phones',
+      'i changed my phone',
+      'new phone',
+      'get pro back',
+    ],
+    response:
+        'Sign in with the same Google account, install Kuber, and tap Restore '
+        'purchases on the Pro page. To bring your data too, restore a backup '
+        'from your old phone.',
+    followUps: [
+      NavChipAction(label: 'Open Pro page', route: _rPaywall),
+      AskChipAction('How do I restore from backup?'),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'when Pro ends',
+    phrases: [
+      'what happens to my data if pro ends',
+      'what happens if pro ends',
+      'what happens when pro ends',
+      'if my subscription ends',
+      'if pro expires',
+      'what happens if i cancel pro',
+    ],
+    response:
+        'Nothing is deleted. Your data stays on your phone, and Pro features go '
+        'back to their free limits. The theme returns to Kuber Signature.',
+    followUps: [
+      AskChipAction('Which features are free?'),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'promo codes',
+    phrases: [
+      'promo code',
+      'redeem a code',
+      'redeem code',
+      'coupon',
+    ],
+    response:
+        'Open the Pro page, tap Redeem promo code and enter your code. Kuber '
+        "opens Google Play's redeem page. When you come back, Kuber checks for "
+        'it automatically.',
+    followUps: [
+      NavChipAction(label: 'Open Pro page', route: _rPaywall),
+    ],
+  ),
+  _KnowledgeMatch(
+    topicLabel: 'payment details',
+    phrases: [
+      'can kuber see my payment details',
+      'can kuber see my card details',
+      'does kuber see my payment',
+      'payment details',
+    ],
+    response:
+        'No. Google Play handles payments, and Kuber never sees your card or '
+        'bank details.',
+    followUps: [
+      AskChipAction('Is my financial data secure?'),
+    ],
+  ),
+
   // ---- Kuber Pro ----------------------------------------------------------
   _KnowledgeMatch(
     topicLabel: 'free vs Pro',
@@ -127,26 +415,20 @@ const List<_KnowledgeMatch> _topics = [
     ],
     response:
         'Kuber Pro unlocks the advanced features. Here\'s how the two compare:\n\n'
-        '**Free tier includes:**\n'
-        '- Manual transaction entry, budgets, categories, tags\n'
-        '- All 13 calculators and tools\n'
-        '- Basic analytics\n'
-        '- Money Stories (last 30 days)\n'
-        '- CSV export and import\n'
-        '- 5 Ask Kuber messages per week\n'
-        '- Up to 2 Kuber Notes\n'
-        '- 1 account balance home widget\n\n'
-        '**Kuber Pro adds:**\n'
-        '- SMS Import (auto-detect bank transactions)\n'
-        '- Unlimited Kuber Notes\n'
-        '- Unlimited Ask Kuber messages\n'
+        '**Free for everyone:** transactions, accounts, budgets, categories, '
+        'tags, recurring, loans, investments, lend and borrow, analytics, Money '
+        'Stories, calculators, widgets, CSV and PDF export, manual backup, app '
+        'lock, every currency and all 9 languages.\n\n'
+        '**Free with a limit Pro removes:**\n'
+        '- Import from SMS: 5 imports a week\n'
+        '- Kuber Notes: 2 notes\n'
+        '- Ask Kuber: 5 messages a week\n'
+        '- Kuber Cards: 2 cards\n\n'
+        '**Only in Kuber Pro:**\n'
+        '- Advanced Analytics\n'
         '- Reminders\n'
         '- Automatic Backups\n'
-        '- Advanced Analytics with custom ranges\n'
-        '- Multi-currency support\n'
-        '- Custom themes\n'
-        '- Full Money Stories history\n'
-        '- Multiple account balance widgets\n\n'
+        '- Custom themes\n\n'
         'All Pro purchases are through Google Play. No account needed, works '
         'fully offline like the rest of Kuber.',
     followUps: [
@@ -360,6 +642,8 @@ const List<_KnowledgeMatch> _topics = [
     topicLabel: 'data safety',
     phrases: [
       'is my data safe',
+      'is my financial data secure',
+      'is my data secure',
       'is kuber secure',
       'how does kuber protect my data',
     ],
@@ -442,12 +726,13 @@ const List<_KnowledgeMatch> _topics = [
         '- Loans, EMIs, investments\n'
         '- Lend/Borrow ledger\n'
         '- Reminders (Pro)\n'
-        '- SMS import from banks (Pro)\n'
-        '- Kuber Notes with math-in-notes\n'
+        '- SMS import from banks (5 a week free, unlimited with Pro)\n'
+        '- Kuber Notes with math in notes\n'
+        '- Kuber Cards, a locked vault for card details\n'
         '- Money Stories with daily and weekly insights\n'
         '- 13 finance calculators\n'
         '- Analytics with charts and category breakdowns\n'
-        '- 5 regional languages\n'
+        '- 9 languages\n'
         '- Both light and dark themes\n\n'
         'All offline, no accounts needed.',
     followUps: [

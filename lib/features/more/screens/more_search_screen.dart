@@ -336,7 +336,9 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
             !hostRef.read(notesUnlockedThisSessionProvider);
         host.push(locked ? '/more/notes' : '/notes/editor?id=$id');
       case int _:
-        // Opens on the Cards PIN first.
+        // Always asks for the Cards PIN or fingerprint, even with the vault
+        // unlocked earlier in this session.
+        hostRef.read(cardSessionProvider.notifier).lock();
         host.push('/cards');
     }
   }

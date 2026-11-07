@@ -126,10 +126,8 @@ class MoreScreenSimple extends ConsumerWidget {
   }
 }
 
-/// One More entry as a list row: 24 icon, title + subtitle, Beta pill,
-/// chevron.
-/// Icon on a 40 surfaceContainerHigh disc, the same treatment as the header
-/// overflow button (review round 3).
+/// A More entry's icon: the tinted squircle Settings uses (user review), so
+/// every row in More and Settings reads the same.
 class MoreIconDisc extends StatelessWidget {
   final MoreEntry entry;
   const MoreIconDisc({super.key, required this.entry});
@@ -137,19 +135,15 @@ class MoreIconDisc extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    if (entry.iconWidget == null) return KuberIconTile(icon: entry.icon, glyph: 22);
     return Container(
       width: 40,
       height: 40,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.mediumR),
       child: IconTheme(
-        data: IconThemeData(color: cs.onSurfaceVariant, size: 20),
-        child: entry.iconWidget != null
-            ? SizedBox(width: 20, height: 20, child: entry.iconWidget)
-            : Icon(entry.icon),
+        data: IconThemeData(color: cs.onSecondaryContainer, size: 22),
+        child: SizedBox(width: 22, height: 22, child: entry.iconWidget),
       ),
     );
   }

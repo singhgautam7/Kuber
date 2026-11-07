@@ -75,8 +75,9 @@ class SettingsBlock extends StatelessWidget {
   }
 }
 
-/// One settings row: 24 icon, label, optional subtitle, optional trailing
-/// widget (chevron / switch). 56 tall, 72 with a subtitle. [disabled] dims it.
+/// One settings row: tinted 40 icon tile, label, optional subtitle, optional
+/// trailing widget (chevron / switch). 56 tall, 72 with a subtitle. [disabled]
+/// dims it.
 class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -120,10 +121,14 @@ class SettingsTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 24,
-              color: destructive ? cs.error : cs.onSurfaceVariant.withValues(alpha: dim),
+            // The same tinted squircle as Settings' group rows (user review).
+            Opacity(
+              opacity: dim,
+              child: KuberIconTile(
+                icon: icon,
+                glyph: 22,
+                tone: destructive ? KuberTone.error : KuberTone.secondary,
+              ),
             ),
             const SizedBox(width: KuberSpace.lg),
             Expanded(

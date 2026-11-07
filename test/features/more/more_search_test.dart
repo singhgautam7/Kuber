@@ -11,6 +11,7 @@ import 'package:kuber/features/accounts/data/account.dart';
 import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/categories/data/category_group.dart';
 import 'package:kuber/features/kuber_cards/data/stored_card.dart';
+import 'package:kuber/features/kuber_cards/providers/kuber_cards_provider.dart';
 import 'package:kuber/features/more/more_search_index.dart';
 import 'package:kuber/features/more/screens/more_search_screen.dart';
 import 'package:kuber/features/notes/data/kuber_note.dart';
@@ -187,8 +188,9 @@ void main() {
     });
     tearDownAll(() => closeAndCleanIsar(isar).timeout(const Duration(seconds: 3), onTimeout: () {}));
 
+    late ProviderContainer last;
     Future<void> open(WidgetTester t, {required bool privacy}) async {
-      final c = ProviderContainer(overrides: [isarProvider.overrideWithValue(isar)]);
+      final c = last = ProviderContainer(overrides: [isarProvider.overrideWithValue(isar)]);
       addTearDown(c.dispose);
       await t.runAsync(() async {
         await c.read(settingsProvider.future);
@@ -229,6 +231,20 @@ void main() {
       await type(t, 'hdfc');
       expect(find.textContaining('84,210'), findsNothing);
       expect(find.textContaining('••••'), findsOneWidget);
+      await t.pumpWidget(const SizedBox());
+      await t.pump(const Duration(seconds: 1));
+    });
+
+    testWidgets('a card from search always asks for the PIN or fingerprint', (t) async {
+      await open(t, privacy: false);
+      last.read(cardSessionProvider.notifier).unlock(List.filled(32, 1));
+      expect(last.read(cardSessionProvider).isUnlocked, isTrue);
+      await type(t, 'axis');
+      await t.tap(find.byIcon(Icons.lock_outline_rounded).first);
+      await t.pump();
+      // This host has no router to open Kuber Cards; the lock comes first.
+      t.takeException();
+      expect(last.read(cardSessionProvider).isUnlocked, isFalse);
       await t.pumpWidget(const SizedBox());
       await t.pump(const Duration(seconds: 1));
     });

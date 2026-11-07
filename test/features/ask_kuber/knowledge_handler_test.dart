@@ -20,7 +20,49 @@ void main() {
       ]) {
         final text = await answer(q);
         expect(text, isNotNull, reason: q);
-        expect(text, contains('Free tier includes'));
+        expect(text, contains('Only in Kuber Pro'));
+      }
+    });
+
+    test('tells Accounts from Kuber Cards, with links to both', () async {
+      for (final q in [
+        'What is the difference between an account and a Kuber card?',
+        'Should I add my card as an account?',
+        'accounts vs kuber cards',
+        'What is Kuber Cards?',
+      ]) {
+        final r = await handler.tryHandle(QueryContext.forTest(raw: q));
+        expect(r?.text, contains('not linked to transactions'), reason: q);
+        final routes = r!.followUps.whereType<NavChipAction>().map((c) => c.route).toList();
+        expect(routes, containsAll(['/more/accounts', '/cards']), reason: q);
+      }
+    });
+
+    test('answers what is free, what is paid and each limit', () async {
+      expect(await answer('Which features are free?'), contains('Only in Pro'));
+      expect(await answer('which features are paid'), contains('Advanced Analytics'));
+      expect(await answer('What is the limit on SMS import?'), contains('5 messages a week'));
+      expect(await answer('How many cards can I add?'), contains('2 cards'));
+      expect(await answer('how many notes can I make'), contains('2 notes'));
+      expect(await answer('Is Ask Kuber free?'), contains('5 messages a week'));
+      expect(await answer('are reminders free'), contains('only in Kuber Pro'));
+    });
+
+    test('answers the Pro page questions', () async {
+      expect(await answer('Is Lifetime a one-time payment?'), contains('never renews'));
+      expect(await answer('Can I use Pro on more than one device?'), contains('same Google account'));
+      expect(await answer('What happens to my data if Pro ends?'), contains('Nothing is deleted'));
+      expect(await answer('I changed phones. How do I get Pro back?'), contains('Restore purchases'));
+      expect(await answer('How do I use a promo code?'), contains('Redeem promo code'));
+      expect(await answer('Is my financial data secure?'), isNotNull);
+      expect(await answer('Can Kuber see my payment details?'), contains('Google Play'));
+      expect(await answer('How do I cancel my subscription?'), contains('Google Play'));
+      expect(await answer('Can I get a refund?'), contains('refund'));
+    });
+
+    test('new answers use plain English: no long dashes', () async {
+      for (final q in ['accounts vs kuber cards', 'which features are free', 'which features are paid', 'sms import limit']) {
+        expect(await answer(q), isNot(matches(RegExp('[—–]'))), reason: q);
       }
     });
 
