@@ -210,9 +210,12 @@ void main() {
     await go(t, '/more/loans');
     await push(t, '/loans/edit', extra: l);
     await settle(t);
-    await tapTextScroll(t, en.msLoansReleasedSoFar);
+    final form = find.byType(Scrollable).first;
+    await t.scrollUntilVisible(find.text(en.msLoansAddPart), 300, scrollable: form, maxScrolls: 40);
+    await settle(t);
     await shot(t, 'loans/08-form-parts');
-    await tapTextScroll(t, en.msLoansPreEmiAdded);
+    await t.scrollUntilVisible(find.text(en.msLoansPreEmiAdd), 300, scrollable: form, maxScrolls: 40);
+    await settle(t);
     await shot(t, 'loans/09-form-pre-emi');
     expectNoErrors(t);
   });
@@ -285,11 +288,12 @@ void main() {
       '/settings/add-menu': null,
       '/widget-editor/home': null,
       '/widget-editor/analytics': null,
-      '/more/settings/preferences?row=language': 'App preferences',
-      '/more/settings/preferences?row=defaultAccount': 'App preferences',
-      '/more/settings/preferences?row=currency': 'App preferences',
-      '/more/settings/look?row=theme': 'Look and feel',
-      '/more/settings/privacy?row=privacyMode': 'Privacy and security',
+      // These scroll to the row, so the row is what must show.
+      '/more/settings/preferences?row=language': 'Language',
+      '/more/settings/preferences?row=defaultAccount': 'Default Account',
+      '/more/settings/preferences?row=currency': 'Currency',
+      '/more/settings/look?row=theme': 'Theme',
+      '/more/settings/privacy?row=privacyMode': 'Privacy',
       '/more/about': null,
       '/pro': null,
       '/widgets-gallery': null,
