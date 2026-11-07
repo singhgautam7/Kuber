@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/l10n_ext.dart';
 import 'kuber_bottom_sheet.dart';
 import 'kuber_list.dart';
@@ -160,23 +163,129 @@ class KuberPathSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
     return KuberBottomSheet(
       title: l.pathSheetTitle,
-      child: KuberGroup(
-        children: [
-          for (final (i, e) in entries.indexed)
-            KuberListRow(
-              leading: Icon(e.icon, size: 24, color: cs.onSurfaceVariant),
-              title: e.title,
-              titleTrailing: i == entries.length - 1 ? KuberPill(label: l.pathSheetCurrent) : null,
-              trailing: i == entries.length - 1 ? null : const KuberChevron(),
-              onTap: i == entries.length - 1 ? null : () => _jump(context, e),
-            ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, box) {
+          // Each page sits one step in from the page before it; a deep path
+          // tightens the steps so titles keep their room.
+          final last = entries.length - 1;
+          final step = last == 0 ? 0.0 : math.min(_treeStep, (box.maxWidth - _titleRoom) / last);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final (i, e) in entries.indexed)
+                _PathTreeRow(
+                  entry: e,
+                  depth: i,
+                  step: step,
+                  current: i == last,
+                  onTap: i == last ? null : () => _jump(context, e),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
+}
+
+const double _treeStep = 28;
+const double _titleRoom = 200;
+const double _iconSize = 24;
+
+/// One page of the tree: its branch from the page above, icon and title.
+class _PathTreeRow extends StatelessWidget {
+  final KuberPathEntry entry;
+  final int depth;
+  final double step;
+  final bool current;
+  final VoidCallback? onTap;
+
+  const _PathTreeRow({
+    required this.entry,
+    required this.depth,
+    required this.step,
+    required this.current,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: KuberShape.mediumR,
+      child: CustomPaint(
+        painter: _PathBranchPainter(depth: depth, step: step, color: cs.outlineVariant),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: KuberSpace.listItem1),
+          child: Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: depth * step,
+              top: KuberSpace.sm,
+              bottom: KuberSpace.sm,
+            ),
+            child: Row(
+              children: [
+                Icon(entry.icon, size: _iconSize, color: current ? cs.primary : cs.onSurfaceVariant),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
+                  child: Text(
+                    entry.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      color: current ? cs.primary : cs.onSurface,
+                    ),
+                  ),
+                ),
+                if (current)
+                  Flexible(child: KuberPill(label: l.pathSheetCurrent))
+                else
+                  const KuberChevron(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The tree line: down from the parent's icon, then across to this row's icon.
+class _PathBranchPainter extends CustomPainter {
+  final int depth;
+  final double step;
+  final Color color;
+  const _PathBranchPainter({required this.depth, required this.step, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (depth == 0) return;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    final x = (depth - 1) * step + _iconSize / 2;
+    final mid = size.height / 2;
+    final end = depth * step - 4;
+    // Starts in the row above, under the parent's icon.
+    canvas.drawPath(
+      Path()
+        ..moveTo(x, -size.height / 2 + _iconSize / 2 + 4)
+        ..lineTo(x, mid)
+        ..lineTo(end, mid),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PathBranchPainter old) =>
+      old.depth != depth || old.step != step || old.color != color;
 }
 
 /// The tab shell tells [KuberPath] which route and tab it is.

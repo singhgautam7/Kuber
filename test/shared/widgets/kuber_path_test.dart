@@ -125,6 +125,32 @@ void main() {
     expect(titles, ['Home', 'More', 'Settings', 'Look and feel', 'Theme']);
   });
 
+  testWidgets('it reads as a tree: each page steps in from the one before', (t) async {
+    await app(t, '/more');
+    await deep(t);
+    await t.tap(find.text('Theme').last);
+    await t.pumpAndSettle();
+    final xs = [
+      for (final s in ['Home', 'More', 'Settings', 'Look and feel', 'Theme'])
+        t.getTopLeft(sheetRow(s)).dx,
+    ];
+    for (var i = 1; i < xs.length; i++) {
+      expect(xs[i], greaterThan(xs[i - 1]), reason: 'level $i');
+    }
+  });
+
+  testWidgets('a deep path fits at the largest font size', (t) async {
+    await t.binding.setSurfaceSize(const Size(360, 640));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    t.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+    await app(t, '/more');
+    await deep(t);
+    await t.tap(find.text('Theme').last);
+    await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('long-press back opens it too', (t) async {
     await app(t, '/more');
     await deep(t);
