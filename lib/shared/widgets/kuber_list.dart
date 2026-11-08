@@ -378,22 +378,23 @@ class KuberGroupRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: theme.textTheme.titleMedium!.copyWith(color: cs.onSurface)),
-                  Row(
-                    children: [
-                      if (warn && warnIcon != null) ...[
+                  // A plain line unless it needs its warning glyph: eight of
+                  // these build on every Settings open.
+                  if (warn && warnIcon != null)
+                    Row(
+                      children: [
                         Icon(warnIcon, size: 16, color: cs.error),
                         const SizedBox(width: KuberSpace.xs),
-                      ],
-                      Expanded(
-                        child: Text(
-                          subtitle,
-                          style: theme.textTheme.bodyMedium!.copyWith(
-                            color: warn ? cs.error : cs.onSurfaceVariant,
-                          ),
+                        Expanded(
+                          child: Text(subtitle, style: theme.textTheme.bodyMedium!.copyWith(color: cs.error)),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    )
+                  else
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodyMedium!.copyWith(color: warn ? cs.error : cs.onSurfaceVariant),
+                    ),
                 ],
               ),
             ),
