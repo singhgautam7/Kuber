@@ -70,6 +70,7 @@ class _ToolLineChartState extends ConsumerState<ToolLineChart> {
     final currency = ref.watch(currencyProvider);
     final maxY = _maxY;
     final n = widget.xLabels.length;
+    final step = max(1, (n / 5).ceil());
     final targetColor = widget.targetColor ?? context.kuberMoney.income;
 
     return Column(
@@ -136,7 +137,11 @@ class _ToolLineChartState extends ConsumerState<ToolLineChart> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 20,
-                      interval: max(1, (n / 5).ceilToDouble()),
+                      interval: step.toDouble(),
+                      // fl_chart also labels the last point; next to a
+                      // regular label that overlaps ('37'38), so it shows
+                      // only at least half a step away.
+                      maxIncluded: (n - 1) % step == 0 || (n - 1) % step * 2 >= step,
                       getTitlesWidget: (value, meta) {
                         final i = value.round();
                         if (i < 0 || i >= n) return const SizedBox.shrink();
