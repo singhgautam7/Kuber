@@ -76,7 +76,7 @@ class KuberChip extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Container(
-            height: 32,
+            constraints: const BoxConstraints(minHeight: 32),
             padding: EdgeInsets.only(
               left: lead != null ? 8 : 16,
               right: hasTrail ? 8 : 16,

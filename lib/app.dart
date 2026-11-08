@@ -1,3 +1,7 @@
+import 'core/services/shortcut_pin_service.dart' show appDrawerEntriesProvider;
+import 'features/backups/providers/backup_provider.dart' show backupSettingsProvider;
+import 'features/kuber_cards/providers/kuber_cards_provider.dart' show cardVaultMetaProvider;
+import 'features/settings/screens/settings_pages.dart' show notificationsAllowedProvider;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -153,6 +157,12 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(analyticsComputedProvider);
       ref.read(historyViewProvider.future).ignore();
       ref.read(transferPairAccountIdsProvider.future).ignore();
+      // Settings' subtitles, so opening it runs no reads of its own.
+      ref.read(appDrawerEntriesProvider.future).ignore();
+      ref.read(backupSettingsProvider.future).ignore();
+      ref.read(cardVaultMetaProvider.future).ignore();
+      ref.read(appVersionProvider.future).ignore();
+      ref.read(notificationsAllowedProvider.future).ignore();
     } catch (e, stack) {
       debugPrint('Kuber: tab provider warm-up failed (non-fatal): $e\n$stack');
     }

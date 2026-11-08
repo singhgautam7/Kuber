@@ -18,11 +18,17 @@ class AccountPickerSheet extends ConsumerStatefulWidget {
   final ValueChanged<int> onSelected;
   final int? excludeAccountId;
 
+  /// A "no account" choice above the search (Received in > Not recorded).
+  final String? noneLabel;
+  final VoidCallback? onNone;
+
   const AccountPickerSheet({
     super.key,
     required this.selectedAccountId,
     required this.onSelected,
     this.excludeAccountId,
+    this.noneLabel,
+    this.onNone,
   });
 
   @override
@@ -149,6 +155,16 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
             ],
           ),
         ),
+
+        if (widget.noneLabel != null && widget.onNone != null)
+          ListTile(
+            leading: Icon(Icons.block_rounded, color: cs.onSurfaceVariant),
+            title: Text(widget.noneLabel!, style: textTheme.bodyLarge),
+            trailing: widget.selectedAccountId == null
+                ? Icon(Icons.check_rounded, color: cs.primary)
+                : null,
+            onTap: widget.onNone,
+          ),
 
         // Account list
         Flexible(

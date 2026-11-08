@@ -46,6 +46,16 @@ enum MoneyInfo {
   adjustInterest,
   remainingInterest,
   pastEmis,
+  // November release.
+  releasedParts,
+  receivedIn,
+  preEmiPay,
+  preEmiAdd,
+  preEmiCalculated,
+  addReleased,
+  addCharges,
+  addInterest,
+  interestMethod,
 }
 
 void showMoneyInfo(BuildContext context, WidgetRef ref, MoneyInfo kind) {
@@ -288,5 +298,29 @@ KuberInfoConfig moneyInfoConfig(AppLocalizations l, AppFormatter f, MoneyInfo ki
       return cfg(l.msLoansRemainingInterest, l.msInfoRemainingLine);
     case MoneyInfo.pastEmis:
       return cfg(l.msLoansPastEmis, l.msInfoPastEmisLine);
+    case MoneyInfo.interestMethod:
+      // 10,00,000 at 9%: a twelfth of the year's interest, or the days.
+      return cfg(l.msLoansInterestCalc, l.msInfoMethodLine,
+          ex: ex(sentence: l.msInfoMethodSentence(m(1000000)), [
+            row(l.msInfoMethodRow1, m(1000000 * 0.09 / 12)),
+            row(l.msInfoMethodRow2, m(1000000 * 0.09 / 365 * 31)),
+            row(l.msInfoMethodRow3, m(1000000 * 0.09 / 365 * 28)),
+          ]));
+    case MoneyInfo.releasedParts:
+      return cfg(l.msLoansInParts, l.msInfoPartsLine);
+    case MoneyInfo.receivedIn:
+      return cfg(l.msLoansReceivedIn, l.msInfoReceivedInLine);
+    case MoneyInfo.preEmiPay:
+      return cfg(l.msLoansPreEmiPay, l.msInfoPreEmiPayLine);
+    case MoneyInfo.preEmiAdd:
+      return cfg(l.msLoansPreEmiAdd, l.msInfoPreEmiAddLine);
+    case MoneyInfo.preEmiCalculated:
+      return cfg(l.msLoansPreEmiAdded, l.msInfoPreEmiCalcLine);
+    case MoneyInfo.addReleased:
+      return cfg(l.msLoansAddReleased, l.msInfoAddReleasedLine);
+    case MoneyInfo.addCharges:
+      return cfg(l.msLoansAddCharges, l.msInfoAddChargesLine);
+    case MoneyInfo.addInterest:
+      return cfg(l.msLoansAddInterest, l.msInfoAddInterestLine);
   }
 }

@@ -992,7 +992,10 @@ class InsightEngine {
     for (final loan in loans) {
       final paid = allTransactions
           .where(
-            (t) => t.linkedRuleType == 'loan' && t.linkedRuleId == loan.uid,
+            (t) =>
+                t.linkedRuleType == 'loan' &&
+                t.linkedRuleId == loan.uid &&
+                !t.isLoanDisbursement,
           )
           .fold<double>(0, (sum, t) => sum + t.spendAmount);
       if (paid > loan.principalAmount) {

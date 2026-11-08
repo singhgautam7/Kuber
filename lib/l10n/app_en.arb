@@ -20,8 +20,6 @@
   "@getStarted": {},
   "starting": "Starting...",
   "@starting": {},
-  "startJourney": "Start my journey",
-  "@startJourney": {},
   "yourMoneyYourRules": "Your money.\nYour rules.",
   "@yourMoneyYourRules": {},
   "onboardingPage1Description": "An expense manager that lives on your device. No cloud, no signup, no compromises.",
@@ -2520,8 +2518,8 @@
   "tutCh4St0Desc": "Set monthly spending limits per category. Kuber tracks your progress automatically.",
   "tutCh4St1Title": "Ask Kuber",
   "tutCh4St1Desc": "Your on-device AI assistant. Ask questions about your spending privately.",
-  "tutCh4St2Title": "Your data",
-  "tutCh4St2Desc": "Export as CSV, import from backup, or generate sample data. Everything stays on your device.",
+  "tutCh4St2Title": "Settings and your data",
+  "tutCh4St2Desc": "Find export, import and backups in Settings. Everything stays on your device.",
   "tutorialUpper": "TUTORIAL",
   "pickChapter": "Pick a chapter.",
   "pickChapterSubtitle": "Five quick chapters, about 2 minutes each. Jump in anywhere.",
@@ -2529,8 +2527,8 @@
   "skipTutorialConfirm": "Skip tutorial?",
   "keepGoing": "Keep going",
   "skipLabel": "Skip",
-  "replayHint": "You can always replay it from More → Tutorial.",
-  "replayHintApp": "You can always replay it from More → App Tutorial.",
+  "replayHint": "You can always replay it from Settings → Tutorial.",
+  "replayHintApp": "You can always replay it from Settings → App Tutorial.",
   "tutStepsAndMin": "{count} steps · ~{mins} min",
   "@tutStepsAndMin": {
     "placeholders": {
@@ -3247,13 +3245,6 @@
     }
   },
   "homeV33P5A11y": "Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.",
-  "homeV3TrkTitle": "What do you want to track?",
-  "homeV3TrkBody": "Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.",
-  "homeV31TrkBudgets": "Budgets",
-  "homeV3TrkLoans": "Loans and EMIs",
-  "homeV3TrkInvest": "Investments and SIPs",
-  "homeV3TrkLedger": "Money lent or borrowed",
-  "homeV3TrkSubs": "Subscriptions",
   "homeV33EdNeedsTxn": "Appears after your first transaction",
   "homeV33SgQuickTitle": "Add in one line with Quick Add",
   "homeV33SgQuickBody": "Type something like \"250 lunch\" or tap the mic and say it. Kuber turns it into a transaction.",
@@ -6029,5 +6020,653 @@
         "type": "int"
       }
     }
-  }
+  },
+  "msLoansReceivedIn": "Loan amount received in",
+  "msLoansReceivedInHelp": "Pick the account the bank paid the loan into. Kuber adds it there without counting it as income.",
+  "msLoansNotRecorded": "Not recorded",
+  "msLoansInParts": "Loan released in parts?",
+  "msLoansInPartsSub": "The bank pays it out in stages",
+  "msLoansSanctioned": "Sanctioned amount",
+  "msLoansReleasedSoFar": "Released so far",
+  "msLoansAddPart": "Add part",
+  "msLoansReceivedInShort": "Received in",
+  "msLoansPartsHelp": "Home loans are often paid straight to the builder. Choose Not recorded if the money didn't reach you.",
+  "msLoansPartsSummary": "{released} of {sanctioned} released",
+  "@msLoansPartsSummary": {
+    "placeholders": {
+      "released": {
+        "type": "String"
+      },
+      "sanctioned": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansFullyReleased": "Fully released",
+  "msLoansErrOverSanctioned": "The total released can't be more than the sanctioned amount.",
+  "msLoansErrPartDate": "A part's date can't be before the start date or in the future.",
+  "msLoansErrPartAmount": "Amounts must be above 0.",
+  "msLoansStartDate": "Loan start date",
+  "msLoansPartTitle": "Part {number}",
+  "@msLoansPartTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansDeletePartTitle": "Delete this part?",
+  "msLoansDeletePartBody": "It takes this amount off the loan.",
+  "msLoansDeletePartTxnBody": "It takes this amount off the loan. It also has a transaction in your account. Delete that too?",
+  "msLoansKeepTxn": "Keep transaction",
+  "msLoansDeleteTxn": "Delete transaction",
+  "msLoansPartsOffTitle": "Keep only the first part?",
+  "msLoansPartsOffBody": "The other parts and their transactions will be removed.",
+  "msLoansPreEmiTitle": "Interest before EMIs start",
+  "msLoansPreEmiPay": "I pay it every month",
+  "msLoansPreEmiPaySub": "Kuber records each month's interest from your EMI account.",
+  "msLoansPreEmiAdd": "Bank adds it to the loan",
+  "msLoansPreEmiAddSub": "It joins what you owe. No money leaves any account.",
+  "msLoansPreEmiDay": "Interest charged on day",
+  "msLoansPreEmiDayHelp": "Usually your EMI day. Check your bank statement.",
+  "msLoansPreEmiAdded": "Interest added before EMIs",
+  "msLoansPreEmiNotice": "Kuber now calculates {amount}. Use this instead?",
+  "@msLoansPreEmiNotice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansUse": "Use",
+  "msLoansKeepMine": "Keep mine",
+  "msLoansPreEmiPreview": "EMIs start on {amount} · ends {date} · total interest {interest}",
+  "@msLoansPreEmiPreview": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansAddToLoan": "Add to loan",
+  "msLoansWhatAdded": "What was added",
+  "msLoansAddReleased": "Money released",
+  "msLoansAddReleasedSub": "A new part of the loan.",
+  "msLoansAddCharges": "Charges added",
+  "msLoansAddChargesSub": "Insurance or fees the bank added to the loan.",
+  "msLoansAddInterest": "Unpaid interest",
+  "msLoansAddInterestSub": "Interest the bank added to what you owe.",
+  "msLoansNote": "Note",
+  "msLoansAddedSaved": "Added to the loan",
+  "msLoansAboveSanctioned": "This takes the loan above {amount}. Increase the sanctioned amount?",
+  "@msLoansAboveSanctioned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansIncrease": "Increase",
+  "msLoansEventReleased": "Released {amount} · {date}",
+  "@msLoansEventReleased": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventChargeAdded": "Charge added {amount} · {date}",
+  "@msLoansEventChargeAdded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansEventUnpaidInterest": "Unpaid interest {amount} · {date}",
+  "@msLoansEventUnpaidInterest": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansReleasedOf": "Released {released} of {sanctioned}",
+  "@msLoansReleasedOf": {
+    "placeholders": {
+      "released": {
+        "type": "String"
+      },
+      "sanctioned": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansChargesAdded": "Charges added to loan",
+  "msLoansCycleAdded": "Interest added",
+  "msLoansCyclePaid": "Interest paid",
+  "msLoansPreEmiAdjusted": "Matched to your figure {amount}",
+  "@msLoansPreEmiAdjusted": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansPartDeleted": "Part deleted",
+  "msInfoPartsLine": "Some loans, like home loans for a house still being built, are paid out in parts. Interest is charged only on what has been released.",
+  "msInfoReceivedInLine": "The account the loan money reached. Kuber adds it to that account's balance. It is never counted as income. Choose Not recorded if the bank paid someone else.",
+  "msInfoPreEmiPayLine": "You pay the interest on what has been released each month until EMIs begin. Kuber records it from your EMI account as interest expense. This is the same as an interest-only period.",
+  "msInfoPreEmiAddLine": "You pay nothing until EMIs begin. Each month's interest joins what you owe, and interest builds on it from then on. No money leaves any account, so it never appears in your spending.",
+  "msInfoPreEmiCalcLine": "What the time before EMIs adds to the released amount: interest and charges added, minus any payments you made. Kuber works it out day by day at your rate over 365 days. Change it if your bank statement says something else, and your figure is used from the first EMI.",
+  "msInfoAddReleasedLine": "The bank paid out more of the loan. It joins what you owe, and interest builds on it from that date.",
+  "msInfoAddChargesLine": "Something the bank added to the loan, like insurance or a processing fee. Interest builds on it from that date. It isn't spending, because no money left any account.",
+  "msInfoAddInterestLine": "Interest you didn't pay and the bank added to the loan, like during a moratorium. It raises what you owe and counts toward your total interest.",
+  "msLoansKeepFirst": "Keep first part",
+  "cardBiometricOn": "Biometric unlock enabled for Kuber Cards.",
+  "cardBiometricOff": "Biometric unlock disabled for Kuber Cards.",
+  "cardBiometricUnavailable": "No fingerprint, face or screen lock is set up on this phone. Use your Kuber Cards PIN.",
+  "cardBiometricUnlockFirst": "Unlock Kuber Cards with your PIN first, then turn this on.",
+  "cardBiometricOpen": "Open",
+  "cardBiometricFailed": "Could not turn on biometric unlock.",
+  "setCardsBiometric": "Kuber Cards biometric",
+  "setCardsBiometricSub": "Unlock your cards with fingerprint or face",
+  "setCardsPin": "Change Kuber Cards PIN",
+  "setCardsPinSub": "Update the PIN that unlocks your cards",
+  "setGroupLook": "Look and feel",
+  "setGroupPrefs": "App preferences",
+  "setGroupPrivacy": "Privacy and security",
+  "setGroupData": "Data and backup",
+  "setGroupActivity": "Activity",
+  "setGroupActivitySub": "Upcoming events and your story archive",
+  "setPrivacyLockOn": "App lock on",
+  "setPrivacyLockOff": "App lock off",
+  "setNotifAllowed": "Notifications are on",
+  "setNotifBlocked": "Notifications are off",
+  "setNotifAllowedSub": "Kuber can send your reminders and alerts.",
+  "setNotifBlockedSub": "Reminders and alerts won't reach you. Tap to turn them on.",
+  "setNotifInbox": "Notification inbox",
+  "setHomeScreenWidgets": "Home screen widgets",
+  "setKwPro": "subscribe upgrade premium plan purchase redeem restore lifetime",
+  "setKwName": "name profile me user",
+  "setKwTheme": "dark light colour color mode night black appearance amoled",
+  "setKwTextSize": "font text size bigger smaller large",
+  "setKwBottomNav": "navigation tabs bar bottom",
+  "setKwMoreLayout": "more grid list classic modern layout",
+  "setKwHomeWidgets": "home cards dashboard arrange order widgets",
+  "setKwAnalyticsWidgets": "analytics charts arrange order widgets",
+  "setKwSuggestions": "tips suggestions home hints",
+  "setKwGetStarted": "get started setup checklist",
+  "setKwGallery": "launcher homescreen widget balance shortcut",
+  "setKwQuickActions": "long press shortcuts nav quick",
+  "setKwAddMenu": "plus button long press add shortcuts",
+  "setKwLanguage": "language hindi tamil translate locale",
+  "setKwCurrency": "rupee dollar money symbol inr usd",
+  "setKwNumberFormat": "lakh crore million comma grouping digits",
+  "setKwCurrencyCode": "inr usd code symbol",
+  "setKwDefaultAccount": "default bank wallet account",
+  "setKwSwipe": "swipe gesture tabs delete",
+  "setKwPrivacyMode": "hide amounts blur privacy mask",
+  "setKwBiometric": "lock fingerprint face unlock security app lock password",
+  "setKwNotesBiometric": "notes lock fingerprint",
+  "setKwCardsBiometric": "cards vault lock fingerprint face",
+  "setKwCardsPin": "cards vault pin password",
+  "setKwDrawer": "launcher icon app list drawer",
+  "setKwNotifications": "alerts reminders permission allow push inbox",
+  "setKwUpcoming": "calendar due bills upcoming events",
+  "setKwStories": "stories recap archive money wrapped",
+  "setKwExport": "export csv pdf download share",
+  "setKwImport": "import csv restore backup upload",
+  "setKwBackup": "backup automatic drive save restore",
+  "setKwClear": "delete reset erase wipe clear",
+  "setKwTutorial": "tutorial help guide walkthrough learn",
+  "setKwAbout": "about version licence contact privacy policy",
+  "obStartRestore": "Restore from backup",
+  "obStartRestoreSub": "Bring back your data from a Kuber backup",
+  "obStartCsv": "Import from CSV",
+  "obStartCsvSub": "Move in from another app or a spreadsheet",
+  "obStartFresh": "Start fresh",
+  "obRestoreCancelled": "Restore cancelled. Nothing changed.",
+  "obImportCancelled": "Import cancelled. Nothing changed.",
+  "obNotifTitle": "Stay on top of your money",
+  "obNotifReminders": "Reminders you set",
+  "obNotifCards": "Credit card bills and due dates",
+  "obNotifBudgets": "Budget alerts when you near a limit",
+  "obNotifRecorded": "EMIs and recurring payments as they're recorded",
+  "obNotifBackup": "Automatic backup problems",
+  "obNotifPromise": "Kuber never sends promotional notifications. Only reminders and alerts that matter to you.",
+  "obNotifAllow": "Allow notifications",
+  "obNotifAllowShort": "Allow",
+  "obNotifLater": "Not now",
+  "obTermsTitle": "Your data lives on this phone",
+  "obTermsBody": "Kuber has no servers and no account. What you add never leaves your phone, so nobody else can recover it for you. Back up often to keep it safe.",
+  "obTermsCheck1": "I'll back up my data regularly, so I don't lose it if my phone is lost, reset, or Kuber is uninstalled.",
+  "obTermsCheck2": "I understand the developer can't recover lost data, and that backups and restores are my responsibility.",
+  "obTermsAgree": "Agree and continue",
+  "obTermsPrivacy": "Privacy policy",
+  "pathSheetTitle": "How you got here",
+  "pathSheetCurrent": "You are here",
+  "pathSheetHint": "Shows the path to this page",
+  "pathSheetLongPress": "Show path",
+  "setPathTip": "Tap a page title, or long-press back, to jump to any earlier page.",
+  "proFaqTitle": "Frequently asked questions",
+  "proFaqLifetimeQ": "Is Lifetime a one-time payment?",
+  "proFaqLifetimeA": "Yes. You pay once and it never renews.",
+  "proFaqIncludedQ": "What do I get with Pro, and what stays free?",
+  "proFaqIncludedA": "Pro adds Advanced Analytics, Reminders, Automatic Backups and custom themes, and removes the limits on SMS Import, Kuber Notes, Ask Kuber and Kuber Cards. Tracking, accounts, budgets, loans, investments, analytics and manual backup stay free.",
+  "proFaqDevicesQ": "Can I use Pro on more than one device?",
+  "proFaqDevicesA": "Yes, on any phone signed in to the same Google account. Install Kuber and tap Restore purchases. Your data doesn't sync between phones, so use a backup to move it.",
+  "proFaqCancelQ": "How do I cancel my subscription?",
+  "proFaqCancelA": "Open the Play Store, tap your profile, then Payments and subscriptions. Pro stays on until the end of the period you've paid for.",
+  "proFaqEndsQ": "What happens to my data if Pro ends?",
+  "proFaqEndsA": "Nothing is deleted. Your data stays on your phone, and Pro features go back to their free limits. The theme returns to Kuber Signature.",
+  "proFaqPhoneQ": "I changed phones. How do I get Pro back?",
+  "proFaqPhoneA": "Sign in with the same Google account, install Kuber, and tap Restore purchases on this page. To bring your data too, restore a backup.",
+  "proFaqPromoQ": "How do I use a promo code?",
+  "proFaqPromoA": "Tap Redeem promo code on this page and enter your code. Kuber opens Google Play's redeem page. When you come back, Kuber checks for it automatically.",
+  "proFaqSecureQ": "Is my financial data secure?",
+  "proFaqSecureA": "It stays on your phone. Kuber has no servers, no account and no analytics.",
+  "proFaqPaymentQ": "Can Kuber see my payment details?",
+  "proFaqPaymentA": "No. Google Play handles payments, and Kuber never sees your card or bank details.",
+  "proFaqRefundQ": "Can I get a refund?",
+  "proFaqRefundA": "Refunds are handled by Google Play under its refund policy.",
+  "obStartTagline": "Your money, on your phone",
+  "obLangTitle": "Choose language",
+  "obLangSub": "You can change this later in Settings",
+  "obRestoreBusy": "Restoring your data",
+  "obRestoreStepTxns": "{done} of {total} transactions",
+  "@obRestoreStepTxns": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "obRestoreStepItems": "{done} of {total} items",
+  "@obRestoreStepItems": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "obRestoreFailed": "Couldn't restore this backup",
+  "obRestoreFailedSub": "This file isn't a Kuber backup, or it's damaged. Nothing on your phone was changed.",
+  "obRestoreRetry": "Try again",
+  "obRestoreOtherFile": "Choose another file",
+  "obCsvBusy": "Importing your CSV",
+  "obCsvStep": "{done} of {total} rows",
+  "@obCsvStep": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "obCsvFailed": "Couldn't import this file",
+  "obCsvFailedSub": "Kuber can't read this CSV, or it's damaged. Nothing on your phone was changed.",
+  "obNotifEmi": "EMI, SIP or Subscriptions",
+  "obNotifRemindersSub": "A heads-up before any payment",
+  "setNotifLedger": "Lend and borrow reminders",
+  "setNotifLedgerSub": "On the due dates you set",
+  "setNotifPhoneHint": "These follow your phone's settings. Tap one to change it there.",
+  "obNotifBudget": "Budget alerts",
+  "obNotifBudgetSub": "When you get close to a limit",
+  "obNotifBackupRow": "Backup problems",
+  "obNotifSampleTitle": "EMI due tomorrow",
+  "obNotifSampleBody": "SBI Home Loan · ₹24,350",
+  "pathSheetSub": "Tap any page to go back to it",
+  "pathSheetFromNotification": "Opened from a notification",
+  "setSecYours": "Make it yours",
+  "setSecSafe": "Keep it safe",
+  "setSecHelp": "Help and more",
+  "setYourNameRow": "Your name",
+  "setLookSub": "{theme} · {size} text size",
+  "@setLookSub": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "setPrefsSub": "{language} · {currency} · {format} format",
+  "@setPrefsSub": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "setDrawerNone": "No extra icons",
+  "setPrivacyPinOn": "Cards PIN on",
+  "setLastBackupAgo": "Last backup {ago}",
+  "@setLastBackupAgo": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "setNoBackupYet": "No backup yet",
+  "setNoBackupSub": "Back up now to keep your data safe",
+  "setOn": "On",
+  "setOff": "Off",
+  "setHelpTitle": "Help",
+  "setHelpSub": "App tutorial, send feedback",
+  "setActivitySub": "Upcoming events, Money story archive",
+  "setVersion": "Version {version}",
+  "@setVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "setBottomNav": "Bottom navigation",
+  "setNavStandard": "Standard",
+  "setNavFloating": "Floating",
+  "setMoreLayout": "More tab layout",
+  "setMoreLayoutSub": "Simple list or hero layout",
+  "setLayoutHero": "Hero",
+  "setSecHomeAnalytics": "Home and Analytics",
+  "setHomeWidgets": "Home widgets",
+  "setAnalyticsWidgets": "Analytics widgets",
+  "setWidgetsOn": "{count} on · drag to reorder",
+  "@setWidgetsOn": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "setGallerySub": "Kuber on your phone's home screen",
+  "setSecShortcuts": "Shortcuts",
+  "setQuickActions": "Quick actions",
+  "setQuickActionsSub": "Long-press a tab for shortcuts",
+  "setAddMenu": "Add menu",
+  "setAddMenuSub": "Long-press + for quick entries",
+  "setSecMoney": "Language and money",
+  "setCurrencySub": "Symbol shown on amounts",
+  "setNumberFormat": "Number format",
+  "setNumLakh": "Lakh",
+  "setNumMillion": "Million",
+  "setShowCode": "Show currency code",
+  "setShowCodeSub": "{withCode} instead of {withSymbol}",
+  "@setShowCodeSub": {
+    "placeholders": {
+      "withCode": {
+        "type": "String",
+        "example": "USD 500"
+      },
+      "withSymbol": {
+        "type": "String",
+        "example": "$500"
+      }
+    }
+  },
+  "setDefaultAccount": "Default account",
+  "setDefaultAccountSub": "Picked first in Quick Add",
+  "setSecGestures": "Gestures",
+  "setSwipe": "Horizontal swipe",
+  "setSwipeSub": "Swipe left or right to change tabs",
+  "setPrivacyMode": "Privacy mode",
+  "setPrivacyModeSub": "Hide balances and amounts",
+  "setAppLock": "App lock",
+  "setAppLockSub": "Ask for fingerprint or face to open Kuber",
+  "setAppLockNoFp": "Needs a fingerprint or face on this phone",
+  "setCardsFp": "Unlock with fingerprint",
+  "setCardsFpSub": "Only for Kuber Cards",
+  "setCardsFpNone": "Not set up on this phone",
+  "setCardsFpSearch": "Unlock Kuber Cards with fingerprint",
+  "setCardsPinRow": "Cards PIN",
+  "setCardsPinRowSub": "On · Change PIN",
+  "setCardsPinSearch": "Kuber Cards PIN",
+  "setNotesLock": "Require app lock for Notes",
+  "setNotesLockOn": "Ask for fingerprint or face to open Notes",
+  "setNotesLockOff": "Turn on App lock first",
+  "setLocksInfo": "App lock and Kuber Cards unlock are separate. Changing one never changes the other.",
+  "setLocksTitle": "Two separate locks",
+  "setLocksApp": "asks for your fingerprint or face each time you open Kuber.",
+  "setLocksCards": "has its own lock: your Cards PIN, and fingerprint if you turn it on here. It works even when App lock is off.",
+  "setLocksNeither": "Turning one on or off never changes the other.",
+  "setGotIt": "Got it",
+  "setNoFp": "This phone has no fingerprint or face unlock set up. Your Kuber Cards PIN still works.",
+  "setNoFpOpen": "Open phone settings",
+  "setDrawerBody": "Give Kuber Cards, Notes or Reminders their own icon in your phone's app list. Each icon opens straight into that feature.",
+  "setDrawerPreview": "Preview in your app list",
+  "setDrawerRowSub": "Own icon in the app list",
+  "setLastBackup": "Last backup",
+  "setBackupNow": "Back up now",
+  "setSecBackup": "Backup",
+  "setAutoBackups": "Automatic backups",
+  "setRestoreSub": "Replace the data on this phone",
+  "setSecImport": "Import and export",
+  "setImportCsvSub": "Bring in transactions from a spreadsheet",
+  "setImportKuber": "Import Kuber file",
+  "setImportKuberSub": "A JSON file exported from Kuber",
+  "setExport": "Export data",
+  "setExportSub": "Save everything as a JSON file",
+  "setSecDanger": "Danger zone",
+  "setClear": "Clear all data",
+  "setClearSub": "Deletes everything on this phone. Cannot be undone.",
+  "setMockData": "Generate mock data",
+  "setNotifOffBody": "Reminders and alerts won't reach you.",
+  "setTurnOn": "Turn on",
+  "setNotifAllowedShort": "Allowed in phone settings",
+  "setSecSends": "What Kuber sends",
+  "setNotifEmiSub": "When a payment is recorded",
+  "setNotifBudgetSub": "At the limits you set on a budget",
+  "setNotifBackupSub": "When an automatic backup fails",
+  "setNotifInboxSub": "Recent alerts and reminders",
+  "setAppTutorial": "App tutorial",
+  "setAppTutorialSub": "Replay the guided tour",
+  "setSendFeedback": "Send feedback",
+  "setSendFeedbackSub": "Tell us what to fix or add",
+  "setUpcoming": "Upcoming events",
+  "setUpcomingSub": "Everything coming up, in one place",
+  "setStories": "Money story archive",
+  "proCardTry": "Try Kuber Pro",
+  "proCardTrySub": "Unlock every feature. Pay once, no account.",
+  "proCardActive": "Active since {date}. Thank you!",
+  "@proCardActive": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proCardMonthly": "Monthly",
+  "proCardYearly": "Yearly",
+  "proCardLifetime": "Lifetime",
+  "proCardPromo": "Promo",
+  "proCardPromoForever": "Free lifetime. Thanks!",
+  "proCardPromoUntil": "Free until {date}",
+  "@proCardPromoUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchHint": "Search More",
+  "searchAll": "All",
+  "searchFeatures": "Features",
+  "searchLoan": "Loan",
+  "searchInvestment": "Investment",
+  "searchReminder": "Reminder",
+  "searchYouLent": "You lent",
+  "searchYouBorrowed": "You borrowed",
+  "searchSettled": "Settled",
+  "searchDue": "due {date}",
+  "@searchDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEdited": "edited {date}",
+  "@searchEdited": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryDay": "{amount} every day",
+  "@searchEveryDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryWeek": "{amount} every week",
+  "@searchEveryWeek": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryMonth": "{amount} every month",
+  "@searchEveryMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEveryYear": "{amount} every year",
+  "@searchEveryYear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchSeeAll": "See all {count}",
+  "@searchSeeAll": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "searchMatches": "Matches: {words}",
+  "@searchMatches": {
+    "placeholders": {
+      "words": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecent": "Recent",
+  "searchClear": "Clear",
+  "searchTry": "Try searching",
+  "searchTryDark": "Dark mode",
+  "searchTryBackup": "Backup",
+  "searchTryEmi": "EMI calculator",
+  "searchNoResults": "No results for “{query}”",
+  "@searchNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchNoResultsBody": "Search looks at names and titles across More: settings, accounts, categories, tags, money plans, people, cards, notes and tools. Try a shorter word.",
+  "searchShorter": "Search “{word}”",
+  "@searchShorter": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "searchTransaction": "Looking for a transaction?",
+  "searchInHistory": "Search in History",
+  "searchLoading": "Looking in your accounts, loans and more",
+  "searchPrivateNote": "Kuber Cards and Notes match by name and title only. Card numbers and note text are never searched.",
+  "setKwFeedback": "feedback bug report suggest contact",
+  "setKwExpressive": "expressive colour color vivid tint",
+  "setKwPureBlack": "dark black amoled oled night theme",
+  "searchTagSub": "Tag · {count, plural, one{1 transaction} other{{count} transactions}}",
+  "@searchTagSub": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msLoansInterestCalc": "Interest calculation",
+  "msLoansInterestCalcValue": "Interest calculation: {method}",
+  "@msLoansInterestCalcValue": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansMethodMonthly": "Monthly",
+  "msLoansMethodDaily": "Daily",
+  "msLoansMethodMonthlySub": "The yearly rate divided by 12, the same every month",
+  "msLoansMethodDailySub": "The actual days since your last EMI, like most banks",
+  "msLoansLastEmi": "Last EMI",
+  "msLoansMethodRecorded": "EMIs you've already recorded stay as they are. Only the ones ahead change.",
+  "msLoansMethodSwitch": "Switch to {method}",
+  "@msLoansMethodSwitch": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansDailyHint": "Your bank may count interest by days.",
+  "msInfoMethodLine": "Monthly: your yearly rate divided by 12 is charged every month, so every month costs the same.\n\nDaily: interest is counted for the actual days since your last EMI, at your yearly rate divided by 365. A 31-day month costs a little more and February a little less. Over a year they come out almost the same.\n\nMost Indian banks use daily. If your statement doesn't match Kuber, try it.",
+  "msInfoMethodRow1": "Monthly, any month",
+  "msInfoMethodRow2": "Daily, a 31-day month",
+  "msInfoMethodRow3": "Daily, February",
+  "msInfoMethodSentence": "Interest on {amount} at 9% a year:",
+  "@msInfoMethodSentence": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteLoanAction": "Delete loan"
 }

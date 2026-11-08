@@ -137,6 +137,17 @@ class AppDrawerEntries {
   }
 }
 
+/// The phone's security settings, where a fingerprint or face is set up.
+Future<void> openSecuritySettings() async {
+  try {
+    await const MethodChannel('com.grs.kuber/shortcuts').invokeMethod<bool>('openSecuritySettings');
+  } on PlatformException {
+    // Nothing to open on this platform.
+  } on MissingPluginException {
+    // Nothing to open on this platform.
+  }
+}
+
 /// Which entries are in the app drawer right now.
 final appDrawerEntriesProvider =
     FutureProvider<Set<AppDrawerEntry>>((ref) => AppDrawerEntries.enabled());
@@ -159,4 +170,17 @@ Future<void> toggleAppDrawerEntry(
     !ok ? l.appDrawerFailed : (enable ? l.appDrawerAdded(name) : l.appDrawerRemoved(name)),
     isError: !ok,
   );
+}
+
+/// The phone's page for one notification category ([channel]), or for all of
+/// Kuber's notifications.
+Future<void> openNotificationSettings([String? channel]) async {
+  try {
+    await const MethodChannel('com.grs.kuber/shortcuts')
+        .invokeMethod<bool>('openNotificationSettings', {'channel': channel});
+  } on PlatformException {
+    // Nothing to open on this platform.
+  } on MissingPluginException {
+    // Nothing to open on this platform.
+  }
 }

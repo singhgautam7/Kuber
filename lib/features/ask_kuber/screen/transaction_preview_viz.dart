@@ -163,7 +163,7 @@ class _TransactionPreviewVizViewState
   }
 
   Future<void> _openAccountSettings() async {
-    await context.push('/more/settings');
+    await context.push('/more/settings/preferences?row=defaultAccount');
     if (mounted) setState(() {});
   }
 

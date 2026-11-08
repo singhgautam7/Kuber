@@ -30,6 +30,12 @@ class ImportResult {
   });
 }
 
+/// The user stopped a CSV import. Thrown inside the write so it all rolls back.
+class ImportCancelled implements Exception {
+  const ImportCancelled();
+  static const message = 'cancelled';
+}
+
 class DataService {
   final Isar isar;
   final CsvService _csvService = CsvService();
@@ -139,14 +145,29 @@ class DataService {
   /// [_importTransactions]), so a failure during an override import rolls the
   /// wipe back too — the user can never be left with erased or partially
   /// imported data.
-  Future<ImportResult> importData(String csvContent, {bool override = false}) async {
+  ///
+  /// [onProgress] gets rows done and total. [cancelled] is checked per row: a
+  /// true throws inside the transaction, so nothing is kept.
+  Future<ImportResult> importData(
+    String csvContent, {
+    bool override = false,
+    void Function(int done, int total)? onProgress,
+    bool Function()? cancelled,
+  }) async {
     try {
       final rows = parseCsv(csvContent);
       if (rows.isEmpty) {
         return ImportResult(successCount: 0, failureCount: 0, error: 'Empty file');
       }
 
-      return await _importTransactions(rows, clearFirst: override);
+      return await _importTransactions(
+        rows,
+        clearFirst: override,
+        onProgress: onProgress,
+        cancelled: cancelled,
+      );
+    } on ImportCancelled {
+      return ImportResult(successCount: 0, failureCount: 0, error: ImportCancelled.message);
     } catch (e) {
       return ImportResult(successCount: 0, failureCount: 0, error: e.toString());
     }
@@ -177,6 +198,8 @@ class DataService {
   Future<ImportResult> _importTransactions(
     List<Map<String, String>> rows, {
     bool clearFirst = false,
+    void Function(int done, int total)? onProgress,
+    bool Function()? cancelled,
   }) async {
     int success = 0;
     int failure = 0;
@@ -206,7 +229,10 @@ class DataService {
       };
       final groupMap = {for (var g in existingGroups) g.name.toLowerCase(): g};
 
+      var index = 0;
       for (final row in rows) {
+        if (cancelled?.call() ?? false) throw const ImportCancelled();
+        if (index++ % 25 == 0) onProgress?.call(index, rows.length);
         try {
           final dateStr = row['date'] ?? '';
           final name = row['name'] ?? 'Imported Transaction';

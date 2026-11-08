@@ -20,10 +20,12 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/entity_picker_rows.dart';
+import '../../../core/money_math/loan_math.dart' show RateKind;
 import '../data/loan.dart';
 import '../domain/loan_engine.dart';
 import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
+import 'loan_sheet.dart' show showInterestMethodSheet;
 
 void showUpdateOutstandingSheet(BuildContext context, Loan loan, {LoanEvent? existing}) =>
     showMoneySheet<void>(context, _UpdateOutstandingSheet(loan: loan, existing: existing));
@@ -50,7 +52,8 @@ class _UpdateOutstandingSheet extends ConsumerStatefulWidget {
 class _UpdateOutstandingSheetState extends ConsumerState<_UpdateOutstandingSheet> {
   final _amount = TextEditingController();
   late DateTime _date = widget.existing?.date ?? DateUtils.dateOnly(DateTime.now());
-  late LoanAdjustReason _reason = widget.existing?.reason ?? LoanAdjustReason.matchBank;
+  // No reason picker any more; an older "unpaid interest" edit keeps its own.
+  late final LoanAdjustReason _reason = widget.existing?.reason ?? LoanAdjustReason.matchBank;
   late LoanAdjust _adjust = widget.existing?.adjust ?? LoanAdjust.tenure;
   bool _saving = false;
   bool _filled = false;
@@ -159,24 +162,6 @@ class _UpdateOutstandingSheetState extends ConsumerState<_UpdateOutstandingSheet
           onChanged: (d) => setState(() => _date = d),
         ),
         const SizedBox(height: 16),
-        CapsLabel(l.msLoansAdjReason),
-        const SizedBox(height: 8),
-        KuberSelectCard(
-          title: l.msLoansAdjMatchBank,
-          subtitle: l.msLoansAdjMatchBankSub,
-          selected: _reason == LoanAdjustReason.matchBank,
-          onTap: () => setState(() => _reason = LoanAdjustReason.matchBank),
-          onInfo: () => showMoneyInfo(context, ref, MoneyInfo.adjustBank),
-        ),
-        const SizedBox(height: 8),
-        KuberSelectCard(
-          title: l.msLoansAdjInterestAdded,
-          subtitle: l.msLoansAdjInterestAddedSub,
-          selected: _reason == LoanAdjustReason.interestAdded,
-          onTap: () => setState(() => _reason = LoanAdjustReason.interestAdded),
-          onInfo: () => showMoneyInfo(context, ref, MoneyInfo.adjustInterest),
-        ),
-        const SizedBox(height: 16),
         InfoTable(rows: [
           InfoTableDataRow(label: l.msLoansKuberOutstandingOn(fmtDayShort(_date)), value: m(kuber)),
           InfoTableDataRow(
@@ -184,29 +169,34 @@ class _UpdateOutstandingSheetState extends ConsumerState<_UpdateOutstandingSheet
             value: entered == null ? '-' : '${diff >= 0 ? '+' : '-'}${m(diff.abs())}',
           ),
         ]),
+        // Far off on a monthly loan: the bank probably counts days.
+        if (diff.abs() > 500 &&
+            hasLoanNumbers(base) &&
+            rateKindOf(base) == RateKind.reducing &&
+            base.interestMethod == LoanInterestMethod.monthly) ...[
+          const SizedBox(height: 8),
+          Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
+            Text(l.msLoansDailyHint,
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+            TextButton(
+              onPressed: () {
+                final nav = Navigator.of(context);
+                final host = nav.context;
+                nav.pop();
+                showInterestMethodSheet(host, widget.loan);
+              },
+              child: Text(l.msLoansMethodSwitch(l.msLoansMethodDaily)),
+            ),
+          ]),
+        ],
         if (hasLoanNumbers(base)) ...[
           const SizedBox(height: 16),
-          CapsLabel(l.msLoansExtraChoose),
-          const SizedBox(height: 8),
-          KuberSelectCard(
-            title: l.msLoansKeepEmiChangeEnd,
-            subtitle: _adjust == LoanAdjust.tenure && endDay != null
-                ? l.msLoansKeepEmiResult(m(next?.payment ?? widget.loan.emiAmount),
-                    fmtMonthYear(dayOf(endDay)))
-                : l.msLoansEventAdjSubTenure,
-            selected: _adjust == LoanAdjust.tenure,
-            onTap: () => setState(() => _adjust = LoanAdjust.tenure),
-            onInfo: () => showMoneyInfo(context, ref, MoneyInfo.tenureEmi),
-          ),
-          const SizedBox(height: 8),
-          KuberSelectCard(
-            title: l.msLoansKeepEndChangeEmi,
-            subtitle: _adjust == LoanAdjust.emi && endDay != null && next != null
-                ? l.msLoansKeepEndResult(fmtMonthYear(dayOf(endDay)), m(next.payment))
-                : l.msLoansEventAdjSubEmi,
-            selected: _adjust == LoanAdjust.emi,
-            onTap: () => setState(() => _adjust = LoanAdjust.emi),
-            onInfo: () => showMoneyInfo(context, ref, MoneyInfo.tenureEmi),
+          LoanKeepChoice(
+            value: _adjust,
+            onChanged: (v) => setState(() => _adjust = v),
+            emiText: m(next?.payment ?? widget.loan.emiAmount),
+            nextEmiText: next == null ? null : m(next.payment),
+            endText: endDay == null ? null : fmtMonthYear(dayOf(endDay)),
           ),
           if (remaining != null && error == null) ...[
             const SizedBox(height: 16),
@@ -279,6 +269,51 @@ class _UpdateOutstandingSheetState extends ConsumerState<_UpdateOutstandingSheet
     if (!host.mounted) return;
     showKuberSnackBar(host, l.msLoansEventDeleted);
     await askRecalculate(host, container, widget.loan, addDays(dayKey(widget.existing!.date!), 1));
+  }
+}
+
+/// Keep EMI, change end date / Keep end date, change EMI, with the live
+/// result on the selected card. Shared by Update outstanding, Add to loan and
+/// a part released after EMIs started.
+class LoanKeepChoice extends ConsumerWidget {
+  final LoanAdjust value;
+  final ValueChanged<LoanAdjust> onChanged;
+  final String? emiText, nextEmiText, endText;
+  const LoanKeepChoice({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.emiText,
+    this.nextEmiText,
+    this.endText,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      CapsLabel(l.msLoansExtraChoose),
+      const SizedBox(height: 8),
+      KuberSelectCard(
+        title: l.msLoansKeepEmiChangeEnd,
+        subtitle: value == LoanAdjust.tenure && endText != null && emiText != null
+            ? l.msLoansKeepEmiResult(emiText!, endText!)
+            : l.msLoansEventAdjSubTenure,
+        selected: value == LoanAdjust.tenure,
+        onTap: () => onChanged(LoanAdjust.tenure),
+        onInfo: () => showMoneyInfo(context, ref, MoneyInfo.tenureEmi),
+      ),
+      const SizedBox(height: 8),
+      KuberSelectCard(
+        title: l.msLoansKeepEndChangeEmi,
+        subtitle: value == LoanAdjust.emi && endText != null && nextEmiText != null
+            ? l.msLoansKeepEndResult(endText!, nextEmiText!)
+            : l.msLoansEventAdjSubEmi,
+        selected: value == LoanAdjust.emi,
+        onTap: () => onChanged(LoanAdjust.emi),
+        onInfo: () => showMoneyInfo(context, ref, MoneyInfo.tenureEmi),
+      ),
+    ]);
   }
 }
 

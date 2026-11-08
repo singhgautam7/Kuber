@@ -41,6 +41,11 @@ class DataState {
   /// "Encrypted cards found" prompt. Reset by [reset].
   final bool lockedCardsFound;
 
+  /// Import progress: records done and total, and what they are.
+  final int progressDone;
+  final int progressTotal;
+  final String? progressLabel;
+
   DataState({
     this.status = DataOpStatus.initial,
     this.message,
@@ -50,6 +55,9 @@ class DataState {
     this.filePaths,
     this.loadingMessage,
     this.lockedCardsFound = false,
+    this.progressDone = 0,
+    this.progressTotal = 0,
+    this.progressLabel,
   });
 
   DataState copyWith({
@@ -61,6 +69,9 @@ class DataState {
     List<String>? filePaths,
     String? loadingMessage,
     bool? lockedCardsFound,
+    int? progressDone,
+    int? progressTotal,
+    String? progressLabel,
   }) {
     return DataState(
       status: status ?? this.status,
@@ -71,6 +82,9 @@ class DataState {
       filePaths: filePaths ?? this.filePaths,
       loadingMessage: loadingMessage ?? this.loadingMessage,
       lockedCardsFound: lockedCardsFound ?? this.lockedCardsFound,
+      progressDone: progressDone ?? this.progressDone,
+      progressTotal: progressTotal ?? this.progressTotal,
+      progressLabel: progressLabel ?? this.progressLabel,
     );
   }
 }
@@ -325,6 +339,11 @@ class DataController extends StateNotifier<DataState> {
     }
   }
 
+  bool _cancelImport = false;
+
+  /// Stops a running CSV import; it rolls back. A JSON restore can't stop.
+  void cancelImport() => _cancelImport = true;
+
   Future<void> runImport(
     String content, {
     required bool isJson,
@@ -349,11 +368,26 @@ class DataController extends StateNotifier<DataState> {
             } else {
               msg = 'Importing $label…';
             }
-            state = state.copyWith(loadingMessage: msg);
+            state = state.copyWith(
+              loadingMessage: msg,
+              progressDone: current,
+              progressTotal: total,
+              progressLabel: label,
+            );
           },
         );
       } else {
-        result = await _service.importData(content, override: override);
+        _cancelImport = false;
+        result = await _service.importData(
+          content,
+          override: override,
+          onProgress: (done, total) {
+            if (mounted) {
+              state = state.copyWith(progressDone: done, progressTotal: total, progressLabel: 'rows');
+            }
+          },
+          cancelled: () => _cancelImport,
+        );
       }
       if (result.error != null) throw Exception(result.error);
       // Before the refresh: the dashboard reseeds missing Home rows on read.

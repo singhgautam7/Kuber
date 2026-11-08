@@ -91,6 +91,6 @@ void main() {
   test('non-English input routes to the language handler, not fallback', () async {
     final r = await orchestrator.process(ctx('मेरा खर्च कितना है'));
     expect(r.text, contains('9 languages'));
-    expect((r.followUps.single as NavChipAction).route, '/more/settings');
+    expect((r.followUps.single as NavChipAction).route, '/more/settings/preferences?row=language');
   });
 }

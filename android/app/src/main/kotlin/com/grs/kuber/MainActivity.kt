@@ -193,6 +193,23 @@ class MainActivity : FlutterFragmentActivity() {
             when (call.method) {
                 "isPinShortcutSupported" ->
                     result.success(ShortcutManagerCompat.isRequestPinShortcutSupported(this))
+                // A notification category's page, or the app's notification
+                // page when there is no id (or no categories before Android 8).
+                "openNotificationSettings" -> {
+                    val id = call.argument<String>("channel")
+                    val intent = if (id != null && android.os.Build.VERSION.SDK_INT >= 26) {
+                        Intent(android.provider.Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            .putExtra(android.provider.Settings.EXTRA_CHANNEL_ID, id)
+                    } else {
+                        Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    }.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                    startActivity(intent)
+                    result.success(true)
+                }
+                "openSecuritySettings" -> {
+                    startActivity(Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS))
+                    result.success(true)
+                }
                 // Optional app-drawer entries (LauncherEntryActivity).
                 "launcherEntries" -> result.success(LauncherEntryActivity.states(this))
                 "setLauncherEntry" -> result.success(

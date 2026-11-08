@@ -5,17 +5,20 @@ import 'package:flutter/material.dart';
 import '../../../core/services/mock_data_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/app_button.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
 import '../../backups/providers/backup_provider.dart';
 import '../../kuber_cards/widgets/imported_cards_prompt.dart';
+import 'settings_pages.dart' show backupAgo;
 import '../widgets/data_action_widgets.dart';
+import '../widgets/settings_anchor.dart';
+import '../widgets/settings_section.dart';
 import '../widgets/data_export_bottom_sheet.dart';
 import '../widgets/data_import_bottom_sheet.dart';
 
@@ -181,11 +184,12 @@ String _getProcessingLabel(String lang) {
 }
 
 class DataManagementScreen extends ConsumerWidget {
-  const DataManagementScreen({super.key});
+  final String? highlight;
+  const DataManagementScreen({super.key, this.highlight});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final l = context.l10n;
     final state = ref.watch(dataControllerProvider);
     final backupSettings = ref.watch(backupSettingsProvider).valueOrNull;
     final backupFailed = backupSettings?.status == BackupStatus.failed;
@@ -207,87 +211,115 @@ class DataManagementScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
-                  showBack: true,
-                  title: context.l10n.dataManagementTitle,
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpace.screenMargin,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    const _SectionLabel(label: 'IMPORT / EXPORT'),
-                    KuberGroup(
-                      children: [
-                        DataActionRow(
-                          icon: Icons.upload_file_rounded,
-                          title: context.l10n.exportData,
-                          description: context.l10n.exportDataDesc,
-                          onPressed: () => showDataExportBottomSheet(context),
-                        ),
-                        DataActionRow(
-                          icon: Icons.download_rounded,
-                          title: context.l10n.importData,
-                          description: context.l10n.importDataDesc,
-                          onPressed: () => showDataImportBottomSheet(context),
-                        ),
-                        DataActionRow(
-                          icon: backupFailed
-                              ? Icons.warning_amber_rounded
-                              : Icons.backup_outlined,
-                          title: context.l10n.backupTitle,
-                          description: backupFailed
-                              ? _getBackupFailedLabel(lang)
-                              : context.l10n.backupDesc,
-                          alert: backupFailed,
-                          onPressed: () =>
-                              context.push('/more/data/automatic-backups'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: KuberSpace.sectionGap - 4),
-                    _SectionLabel(label: 'DANGER ZONE', color: cs.error),
-                    KuberGroup(
-                      children: [
-                        DataActionRow(
-                          icon: Icons.science_outlined,
-                          title: _getMockDataTitle(lang),
-                          description: _getMockDataDesc(lang),
-                          onPressed: () => _confirmMockData(context, ref),
-                        ),
-                        DataActionRow(
-                          icon: Icons.delete_forever_rounded,
-                          title: context.l10n.clearAllData,
-                          description: context.l10n.clearAllDataDesc,
-                          destructive: true,
-                          onPressed: () => _confirmClearData(context, ref),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: KuberSpace.xxl + systemNavBarInset(context),
-                    ),
-                  ]),
-                ),
-              ),
-            ],
-          ),
-          if (state.status == DataOpStatus.loading)
-            DataLoadingOverlay(
-              message: state.loadingMessage ?? _getProcessingLabel(lang),
+    return Stack(
+      children: [
+        SettingsPageFrame(
+          title: context.l10n.setGroupData,
+          highlight: highlight,
+          children: [
+            const _LastBackupCard(),
+            const SizedBox(height: KuberSpace.sectionGap),
+            SettingsBlock(
+              title: l.setSecBackup,
+              children: [
+                SettingsAnchor('backup', child: SettingsTile(
+                  icon: backupFailed ? Icons.warning_amber_rounded : Icons.event_repeat_rounded,
+                  label: l.setAutoBackups,
+                  subtitle: backupFailed ? _getBackupFailedLabel(lang) : _autoSub(l, backupSettings),
+                  onTap: () => context.push('/more/data/automatic-backups'),
+                  trailing: _value(context, backupSettings?.enabled == true ? l.setOn : l.setOff),
+                )),
+                SettingsAnchor('restore-data', child: SettingsTile(
+                  icon: Icons.settings_backup_restore_rounded,
+                  label: l.obStartRestore,
+                  subtitle: l.setRestoreSub,
+                  onTap: () => showDataImportBottomSheet(context, json: true),
+                  trailing: const KuberChevron(),
+                )),
+              ],
             ),
-        ],
-      ),
+            SettingsBlock(
+              title: l.setSecImport,
+              children: [
+                SettingsAnchor('import', child: SettingsTile(
+                  icon: Icons.upload_file_rounded,
+                  label: l.obStartCsv,
+                  subtitle: l.setImportCsvSub,
+                  onTap: () => showDataImportBottomSheet(context),
+                  trailing: const KuberChevron(),
+                )),
+                SettingsAnchor('importKuber', child: SettingsTile(
+                  icon: Icons.download_rounded,
+                  label: l.setImportKuber,
+                  subtitle: l.setImportKuberSub,
+                  onTap: () => showDataImportBottomSheet(context, json: true),
+                  trailing: const KuberChevron(),
+                )),
+                SettingsAnchor('export', child: SettingsTile(
+                  icon: Icons.ios_share_rounded,
+                  label: l.setExport,
+                  subtitle: l.setExportSub,
+                  onTap: () => showDataExportBottomSheet(context),
+                  trailing: const KuberChevron(),
+                )),
+              ],
+            ),
+            SettingsBlock(
+              title: l.setSecDanger,
+              children: [
+                SettingsAnchor('mockData', child: SettingsTile(
+                  icon: Icons.science_outlined,
+                  label: _getMockDataTitle(lang),
+                  subtitle: _getMockDataDesc(lang),
+                  onTap: () => _confirmMockData(context, ref),
+                  trailing: const KuberChevron(),
+                )),
+                SettingsAnchor('clear', child: SettingsTile(
+                  icon: Icons.delete_forever_rounded,
+                  label: l.setClear,
+                  subtitle: l.setClearSub,
+                  destructive: true,
+                  onTap: () => _confirmClearData(context, ref),
+                  trailing: const KuberChevron(),
+                )),
+              ],
+            ),
+          ],
+        ),
+        if (state.status == DataOpStatus.loading)
+          DataLoadingOverlay(
+            message: state.loadingMessage ?? _getProcessingLabel(lang),
+          ),
+      ],
     );
+  }
+
+  Widget _value(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        ),
+        const SizedBox(width: KuberSpace.lg),
+        const KuberChevron(),
+      ],
+    );
+  }
+
+  /// "Weekly · Downloads/Kuber".
+  String _autoSub(AppLocalizations l, BackupSettings? s) {
+    if (s == null || !s.enabled) return l.backupDesc;
+    final often = switch (s.frequency) {
+      BackupFrequency.daily => l.freqDaily,
+      BackupFrequency.weekly => l.freqWeekly,
+      BackupFrequency.monthly => l.freqMonthly,
+    };
+    return s.folderPath == null ? often : '$often · ${s.folderPath}';
   }
 
   void _confirmClearData(BuildContext context, WidgetRef ref) {
@@ -403,19 +435,86 @@ class DataManagementScreen extends ConsumerWidget {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final String label;
-  final Color? color;
-  const _SectionLabel({required this.label, this.color});
+/// Top of the page: when the last backup ran, and a way to run one now.
+class _LastBackupCard extends ConsumerStatefulWidget {
+  const _LastBackupCard();
+
+  @override
+  ConsumerState<_LastBackupCard> createState() => _LastBackupCardState();
+}
+
+class _LastBackupCardState extends ConsumerState<_LastBackupCard> {
+  bool _busy = false;
+
+  Future<void> _backUp(BackupSettings? s) async {
+    // Needs a folder, which is picked on the backups page.
+    if (s?.folderPath == null) {
+      context.push('/more/data/automatic-backups');
+      return;
+    }
+    setState(() => _busy = true);
+    final (ok, message) = await ref.read(backupSettingsProvider.notifier).backupNow();
+    if (!mounted) return;
+    setState(() => _busy = false);
+    showKuberSnackBar(context, message, isError: !ok);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final style = sectionHeaderStyle(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpace.sectionHeaderGap),
-      child: Text(
-        label,
-        style: color == null ? style : style.copyWith(color: color),
+    final l = context.l10n;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final s = ref.watch(backupSettingsProvider).valueOrNull;
+    final at = s?.lastBackupAt;
+    final failed = s?.status == BackupStatus.failed;
+    return KuberCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              KuberIconTile(
+                icon: failed ? Icons.warning_amber_rounded : Icons.cloud_done_rounded,
+                size: 48,
+                glyph: 24,
+                radius: 14,
+                tone: failed ? KuberTone.error : (at == null ? KuberTone.neutral : KuberTone.income),
+              ),
+              const SizedBox(width: KuberSpace.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.setLastBackup.toUpperCase(), style: sectionHeaderStyle(context)),
+                    Text(
+                      at == null ? l.setNoBackupYet : backupAgo(l, at),
+                      style: theme.textTheme.headlineSmall!.copyWith(color: cs.onSurface),
+                    ),
+                    Text(
+                      at == null
+                          ? l.setNoBackupSub
+                          : [
+                              DateFormat('EEE d MMM y, h:mm a', l.localeName).format(at),
+                              if (s?.folderPath != null) s!.folderPath!,
+                            ].join(' · '),
+                      style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpace.lg),
+          AppButton(
+            label: l.setBackupNow,
+            icon: Icons.backup_outlined,
+            fullWidth: true,
+            height: 40,
+            isLoading: _busy,
+            onPressed: () => _backUp(s),
+          ),
+        ],
       ),
     );
   }

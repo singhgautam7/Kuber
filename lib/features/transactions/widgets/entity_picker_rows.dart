@@ -18,11 +18,18 @@ class AccountPickerRow extends ConsumerWidget {
   final ValueChanged<int> onChanged;
   final String? label;
 
+  /// Adds a first choice for "no account" with this label; picking it calls
+  /// [onNone] and the row then reads as this label.
+  final String? noneLabel;
+  final VoidCallback? onNone;
+
   const AccountPickerRow({
     super.key,
     required this.selectedId,
     required this.onChanged,
     this.label,
+    this.noneLabel,
+    this.onNone,
   });
 
   @override
@@ -43,7 +50,7 @@ class AccountPickerRow extends ConsumerWidget {
               icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
             ),
       label: label ?? context.l10n.accountTitle,
-      value: acc?.name ?? context.l10n.selectAccountTitle,
+      value: acc?.name ?? noneLabel ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: () => showModalBottomSheet(
         context: context,
@@ -55,6 +62,13 @@ class AccountPickerRow extends ConsumerWidget {
             onChanged(id);
             Navigator.pop(sheet);
           },
+          noneLabel: noneLabel,
+          onNone: onNone == null
+              ? null
+              : () {
+                  onNone!();
+                  Navigator.pop(sheet);
+                },
         ),
       ).unfocusOnComplete(context),
     );

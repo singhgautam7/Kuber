@@ -39,9 +39,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get starting => 'Starting...';
 
   @override
-  String get startJourney => 'Start my journey';
-
-  @override
   String get yourMoneyYourRules => 'Your money.\nYour rules.';
 
   @override
@@ -4393,11 +4390,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your on-device AI assistant. Ask questions about your spending privately.';
 
   @override
-  String get tutCh4St2Title => 'Your data';
+  String get tutCh4St2Title => 'Settings and your data';
 
   @override
   String get tutCh4St2Desc =>
-      'Export as CSV, import from backup, or generate sample data. Everything stays on your device.';
+      'Find export, import and backups in Settings. Everything stays on your device.';
 
   @override
   String get tutorialUpper => 'TUTORIAL';
@@ -4422,11 +4419,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skipLabel => 'Skip';
 
   @override
-  String get replayHint => 'You can always replay it from More → Tutorial.';
+  String get replayHint => 'You can always replay it from Settings → Tutorial.';
 
   @override
   String get replayHintApp =>
-      'You can always replay it from More → App Tutorial.';
+      'You can always replay it from Settings → App Tutorial.';
 
   @override
   String tutStepsAndMin(String count, String mins) {
@@ -5540,28 +5537,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeV33P5A11y =>
       'Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.';
-
-  @override
-  String get homeV3TrkTitle => 'What do you want to track?';
-
-  @override
-  String get homeV3TrkBody =>
-      'Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.';
-
-  @override
-  String get homeV31TrkBudgets => 'Budgets';
-
-  @override
-  String get homeV3TrkLoans => 'Loans and EMIs';
-
-  @override
-  String get homeV3TrkInvest => 'Investments and SIPs';
-
-  @override
-  String get homeV3TrkLedger => 'Money lent or borrowed';
-
-  @override
-  String get homeV3TrkSubs => 'Subscriptions';
 
   @override
   String get homeV33EdNeedsTxn => 'Appears after your first transaction';
@@ -8412,4 +8387,1215 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get msLoansReceivedIn => 'Loan amount received in';
+
+  @override
+  String get msLoansReceivedInHelp =>
+      'Pick the account the bank paid the loan into. Kuber adds it there without counting it as income.';
+
+  @override
+  String get msLoansNotRecorded => 'Not recorded';
+
+  @override
+  String get msLoansInParts => 'Loan released in parts?';
+
+  @override
+  String get msLoansInPartsSub => 'The bank pays it out in stages';
+
+  @override
+  String get msLoansSanctioned => 'Sanctioned amount';
+
+  @override
+  String get msLoansReleasedSoFar => 'Released so far';
+
+  @override
+  String get msLoansAddPart => 'Add part';
+
+  @override
+  String get msLoansReceivedInShort => 'Received in';
+
+  @override
+  String get msLoansPartsHelp =>
+      'Home loans are often paid straight to the builder. Choose Not recorded if the money didn\'t reach you.';
+
+  @override
+  String msLoansPartsSummary(String released, String sanctioned) {
+    return '$released of $sanctioned released';
+  }
+
+  @override
+  String get msLoansFullyReleased => 'Fully released';
+
+  @override
+  String get msLoansErrOverSanctioned =>
+      'The total released can\'t be more than the sanctioned amount.';
+
+  @override
+  String get msLoansErrPartDate =>
+      'A part\'s date can\'t be before the start date or in the future.';
+
+  @override
+  String get msLoansErrPartAmount => 'Amounts must be above 0.';
+
+  @override
+  String get msLoansStartDate => 'Loan start date';
+
+  @override
+  String msLoansPartTitle(String number) {
+    return 'Part $number';
+  }
+
+  @override
+  String get msLoansDeletePartTitle => 'Delete this part?';
+
+  @override
+  String get msLoansDeletePartBody => 'It takes this amount off the loan.';
+
+  @override
+  String get msLoansDeletePartTxnBody =>
+      'It takes this amount off the loan. It also has a transaction in your account. Delete that too?';
+
+  @override
+  String get msLoansKeepTxn => 'Keep transaction';
+
+  @override
+  String get msLoansDeleteTxn => 'Delete transaction';
+
+  @override
+  String get msLoansPartsOffTitle => 'Keep only the first part?';
+
+  @override
+  String get msLoansPartsOffBody =>
+      'The other parts and their transactions will be removed.';
+
+  @override
+  String get msLoansPreEmiTitle => 'Interest before EMIs start';
+
+  @override
+  String get msLoansPreEmiPay => 'I pay it every month';
+
+  @override
+  String get msLoansPreEmiPaySub =>
+      'Kuber records each month\'s interest from your EMI account.';
+
+  @override
+  String get msLoansPreEmiAdd => 'Bank adds it to the loan';
+
+  @override
+  String get msLoansPreEmiAddSub =>
+      'It joins what you owe. No money leaves any account.';
+
+  @override
+  String get msLoansPreEmiDay => 'Interest charged on day';
+
+  @override
+  String get msLoansPreEmiDayHelp =>
+      'Usually your EMI day. Check your bank statement.';
+
+  @override
+  String get msLoansPreEmiAdded => 'Interest added before EMIs';
+
+  @override
+  String msLoansPreEmiNotice(String amount) {
+    return 'Kuber now calculates $amount. Use this instead?';
+  }
+
+  @override
+  String get msLoansUse => 'Use';
+
+  @override
+  String get msLoansKeepMine => 'Keep mine';
+
+  @override
+  String msLoansPreEmiPreview(String amount, String date, String interest) {
+    return 'EMIs start on $amount · ends $date · total interest $interest';
+  }
+
+  @override
+  String get msLoansAddToLoan => 'Add to loan';
+
+  @override
+  String get msLoansWhatAdded => 'What was added';
+
+  @override
+  String get msLoansAddReleased => 'Money released';
+
+  @override
+  String get msLoansAddReleasedSub => 'A new part of the loan.';
+
+  @override
+  String get msLoansAddCharges => 'Charges added';
+
+  @override
+  String get msLoansAddChargesSub =>
+      'Insurance or fees the bank added to the loan.';
+
+  @override
+  String get msLoansAddInterest => 'Unpaid interest';
+
+  @override
+  String get msLoansAddInterestSub =>
+      'Interest the bank added to what you owe.';
+
+  @override
+  String get msLoansNote => 'Note';
+
+  @override
+  String get msLoansAddedSaved => 'Added to the loan';
+
+  @override
+  String msLoansAboveSanctioned(String amount) {
+    return 'This takes the loan above $amount. Increase the sanctioned amount?';
+  }
+
+  @override
+  String get msLoansIncrease => 'Increase';
+
+  @override
+  String msLoansEventReleased(String amount, String date) {
+    return 'Released $amount · $date';
+  }
+
+  @override
+  String msLoansEventChargeAdded(String amount, String date) {
+    return 'Charge added $amount · $date';
+  }
+
+  @override
+  String msLoansEventUnpaidInterest(String amount, String date) {
+    return 'Unpaid interest $amount · $date';
+  }
+
+  @override
+  String msLoansReleasedOf(String released, String sanctioned) {
+    return 'Released $released of $sanctioned';
+  }
+
+  @override
+  String get msLoansChargesAdded => 'Charges added to loan';
+
+  @override
+  String get msLoansCycleAdded => 'Interest added';
+
+  @override
+  String get msLoansCyclePaid => 'Interest paid';
+
+  @override
+  String msLoansPreEmiAdjusted(String amount) {
+    return 'Matched to your figure $amount';
+  }
+
+  @override
+  String get msLoansPartDeleted => 'Part deleted';
+
+  @override
+  String get msInfoPartsLine =>
+      'Some loans, like home loans for a house still being built, are paid out in parts. Interest is charged only on what has been released.';
+
+  @override
+  String get msInfoReceivedInLine =>
+      'The account the loan money reached. Kuber adds it to that account\'s balance. It is never counted as income. Choose Not recorded if the bank paid someone else.';
+
+  @override
+  String get msInfoPreEmiPayLine =>
+      'You pay the interest on what has been released each month until EMIs begin. Kuber records it from your EMI account as interest expense. This is the same as an interest-only period.';
+
+  @override
+  String get msInfoPreEmiAddLine =>
+      'You pay nothing until EMIs begin. Each month\'s interest joins what you owe, and interest builds on it from then on. No money leaves any account, so it never appears in your spending.';
+
+  @override
+  String get msInfoPreEmiCalcLine =>
+      'What the time before EMIs adds to the released amount: interest and charges added, minus any payments you made. Kuber works it out day by day at your rate over 365 days. Change it if your bank statement says something else, and your figure is used from the first EMI.';
+
+  @override
+  String get msInfoAddReleasedLine =>
+      'The bank paid out more of the loan. It joins what you owe, and interest builds on it from that date.';
+
+  @override
+  String get msInfoAddChargesLine =>
+      'Something the bank added to the loan, like insurance or a processing fee. Interest builds on it from that date. It isn\'t spending, because no money left any account.';
+
+  @override
+  String get msInfoAddInterestLine =>
+      'Interest you didn\'t pay and the bank added to the loan, like during a moratorium. It raises what you owe and counts toward your total interest.';
+
+  @override
+  String get msLoansKeepFirst => 'Keep first part';
+
+  @override
+  String get cardBiometricOn => 'Biometric unlock enabled for Kuber Cards.';
+
+  @override
+  String get cardBiometricOff => 'Biometric unlock disabled for Kuber Cards.';
+
+  @override
+  String get cardBiometricUnavailable =>
+      'No fingerprint, face or screen lock is set up on this phone. Use your Kuber Cards PIN.';
+
+  @override
+  String get cardBiometricUnlockFirst =>
+      'Unlock Kuber Cards with your PIN first, then turn this on.';
+
+  @override
+  String get cardBiometricOpen => 'Open';
+
+  @override
+  String get cardBiometricFailed => 'Could not turn on biometric unlock.';
+
+  @override
+  String get setCardsBiometric => 'Kuber Cards biometric';
+
+  @override
+  String get setCardsBiometricSub =>
+      'Unlock your cards with fingerprint or face';
+
+  @override
+  String get setCardsPin => 'Change Kuber Cards PIN';
+
+  @override
+  String get setCardsPinSub => 'Update the PIN that unlocks your cards';
+
+  @override
+  String get setGroupLook => 'Look and feel';
+
+  @override
+  String get setGroupPrefs => 'App preferences';
+
+  @override
+  String get setGroupPrivacy => 'Privacy and security';
+
+  @override
+  String get setGroupData => 'Data and backup';
+
+  @override
+  String get setGroupActivity => 'Activity';
+
+  @override
+  String get setGroupActivitySub => 'Upcoming events and your story archive';
+
+  @override
+  String get setPrivacyLockOn => 'App lock on';
+
+  @override
+  String get setPrivacyLockOff => 'App lock off';
+
+  @override
+  String get setNotifAllowed => 'Notifications are on';
+
+  @override
+  String get setNotifBlocked => 'Notifications are off';
+
+  @override
+  String get setNotifAllowedSub => 'Kuber can send your reminders and alerts.';
+
+  @override
+  String get setNotifBlockedSub =>
+      'Reminders and alerts won\'t reach you. Tap to turn them on.';
+
+  @override
+  String get setNotifInbox => 'Notification inbox';
+
+  @override
+  String get setHomeScreenWidgets => 'Home screen widgets';
+
+  @override
+  String get setKwPro =>
+      'subscribe upgrade premium plan purchase redeem restore lifetime';
+
+  @override
+  String get setKwName => 'name profile me user';
+
+  @override
+  String get setKwTheme =>
+      'dark light colour color mode night black appearance amoled';
+
+  @override
+  String get setKwTextSize => 'font text size bigger smaller large';
+
+  @override
+  String get setKwBottomNav => 'navigation tabs bar bottom';
+
+  @override
+  String get setKwMoreLayout => 'more grid list classic modern layout';
+
+  @override
+  String get setKwHomeWidgets => 'home cards dashboard arrange order widgets';
+
+  @override
+  String get setKwAnalyticsWidgets => 'analytics charts arrange order widgets';
+
+  @override
+  String get setKwSuggestions => 'tips suggestions home hints';
+
+  @override
+  String get setKwGetStarted => 'get started setup checklist';
+
+  @override
+  String get setKwGallery => 'launcher homescreen widget balance shortcut';
+
+  @override
+  String get setKwQuickActions => 'long press shortcuts nav quick';
+
+  @override
+  String get setKwAddMenu => 'plus button long press add shortcuts';
+
+  @override
+  String get setKwLanguage => 'language hindi tamil translate locale';
+
+  @override
+  String get setKwCurrency => 'rupee dollar money symbol inr usd';
+
+  @override
+  String get setKwNumberFormat => 'lakh crore million comma grouping digits';
+
+  @override
+  String get setKwCurrencyCode => 'inr usd code symbol';
+
+  @override
+  String get setKwDefaultAccount => 'default bank wallet account';
+
+  @override
+  String get setKwSwipe => 'swipe gesture tabs delete';
+
+  @override
+  String get setKwPrivacyMode => 'hide amounts blur privacy mask';
+
+  @override
+  String get setKwBiometric =>
+      'lock fingerprint face unlock security app lock password';
+
+  @override
+  String get setKwNotesBiometric => 'notes lock fingerprint';
+
+  @override
+  String get setKwCardsBiometric => 'cards vault lock fingerprint face';
+
+  @override
+  String get setKwCardsPin => 'cards vault pin password';
+
+  @override
+  String get setKwDrawer => 'launcher icon app list drawer';
+
+  @override
+  String get setKwNotifications =>
+      'alerts reminders permission allow push inbox';
+
+  @override
+  String get setKwUpcoming => 'calendar due bills upcoming events';
+
+  @override
+  String get setKwStories => 'stories recap archive money wrapped';
+
+  @override
+  String get setKwExport => 'export csv pdf download share';
+
+  @override
+  String get setKwImport => 'import csv restore backup upload';
+
+  @override
+  String get setKwBackup => 'backup automatic drive save restore';
+
+  @override
+  String get setKwClear => 'delete reset erase wipe clear';
+
+  @override
+  String get setKwTutorial => 'tutorial help guide walkthrough learn';
+
+  @override
+  String get setKwAbout => 'about version licence contact privacy policy';
+
+  @override
+  String get obStartRestore => 'Restore from backup';
+
+  @override
+  String get obStartRestoreSub => 'Bring back your data from a Kuber backup';
+
+  @override
+  String get obStartCsv => 'Import from CSV';
+
+  @override
+  String get obStartCsvSub => 'Move in from another app or a spreadsheet';
+
+  @override
+  String get obStartFresh => 'Start fresh';
+
+  @override
+  String get obRestoreCancelled => 'Restore cancelled. Nothing changed.';
+
+  @override
+  String get obImportCancelled => 'Import cancelled. Nothing changed.';
+
+  @override
+  String get obNotifTitle => 'Stay on top of your money';
+
+  @override
+  String get obNotifReminders => 'Reminders you set';
+
+  @override
+  String get obNotifCards => 'Credit card bills and due dates';
+
+  @override
+  String get obNotifBudgets => 'Budget alerts when you near a limit';
+
+  @override
+  String get obNotifRecorded =>
+      'EMIs and recurring payments as they\'re recorded';
+
+  @override
+  String get obNotifBackup => 'Automatic backup problems';
+
+  @override
+  String get obNotifPromise =>
+      'Kuber never sends promotional notifications. Only reminders and alerts that matter to you.';
+
+  @override
+  String get obNotifAllow => 'Allow notifications';
+
+  @override
+  String get obNotifAllowShort => 'Allow';
+
+  @override
+  String get obNotifLater => 'Not now';
+
+  @override
+  String get obTermsTitle => 'Your data lives on this phone';
+
+  @override
+  String get obTermsBody =>
+      'Kuber has no servers and no account. What you add never leaves your phone, so nobody else can recover it for you. Back up often to keep it safe.';
+
+  @override
+  String get obTermsCheck1 =>
+      'I\'ll back up my data regularly, so I don\'t lose it if my phone is lost, reset, or Kuber is uninstalled.';
+
+  @override
+  String get obTermsCheck2 =>
+      'I understand the developer can\'t recover lost data, and that backups and restores are my responsibility.';
+
+  @override
+  String get obTermsAgree => 'Agree and continue';
+
+  @override
+  String get obTermsPrivacy => 'Privacy policy';
+
+  @override
+  String get pathSheetTitle => 'How you got here';
+
+  @override
+  String get pathSheetCurrent => 'You are here';
+
+  @override
+  String get pathSheetHint => 'Shows the path to this page';
+
+  @override
+  String get pathSheetLongPress => 'Show path';
+
+  @override
+  String get setPathTip =>
+      'Tap a page title, or long-press back, to jump to any earlier page.';
+
+  @override
+  String get proFaqTitle => 'Frequently asked questions';
+
+  @override
+  String get proFaqLifetimeQ => 'Is Lifetime a one-time payment?';
+
+  @override
+  String get proFaqLifetimeA => 'Yes. You pay once and it never renews.';
+
+  @override
+  String get proFaqIncludedQ => 'What do I get with Pro, and what stays free?';
+
+  @override
+  String get proFaqIncludedA =>
+      'Pro adds Advanced Analytics, Reminders, Automatic Backups and custom themes, and removes the limits on SMS Import, Kuber Notes, Ask Kuber and Kuber Cards. Tracking, accounts, budgets, loans, investments, analytics and manual backup stay free.';
+
+  @override
+  String get proFaqDevicesQ => 'Can I use Pro on more than one device?';
+
+  @override
+  String get proFaqDevicesA =>
+      'Yes, on any phone signed in to the same Google account. Install Kuber and tap Restore purchases. Your data doesn\'t sync between phones, so use a backup to move it.';
+
+  @override
+  String get proFaqCancelQ => 'How do I cancel my subscription?';
+
+  @override
+  String get proFaqCancelA =>
+      'Open the Play Store, tap your profile, then Payments and subscriptions. Pro stays on until the end of the period you\'ve paid for.';
+
+  @override
+  String get proFaqEndsQ => 'What happens to my data if Pro ends?';
+
+  @override
+  String get proFaqEndsA =>
+      'Nothing is deleted. Your data stays on your phone, and Pro features go back to their free limits. The theme returns to Kuber Signature.';
+
+  @override
+  String get proFaqPhoneQ => 'I changed phones. How do I get Pro back?';
+
+  @override
+  String get proFaqPhoneA =>
+      'Sign in with the same Google account, install Kuber, and tap Restore purchases on this page. To bring your data too, restore a backup.';
+
+  @override
+  String get proFaqPromoQ => 'How do I use a promo code?';
+
+  @override
+  String get proFaqPromoA =>
+      'Tap Redeem promo code on this page and enter your code. Kuber opens Google Play\'s redeem page. When you come back, Kuber checks for it automatically.';
+
+  @override
+  String get proFaqSecureQ => 'Is my financial data secure?';
+
+  @override
+  String get proFaqSecureA =>
+      'It stays on your phone. Kuber has no servers, no account and no analytics.';
+
+  @override
+  String get proFaqPaymentQ => 'Can Kuber see my payment details?';
+
+  @override
+  String get proFaqPaymentA =>
+      'No. Google Play handles payments, and Kuber never sees your card or bank details.';
+
+  @override
+  String get proFaqRefundQ => 'Can I get a refund?';
+
+  @override
+  String get proFaqRefundA =>
+      'Refunds are handled by Google Play under its refund policy.';
+
+  @override
+  String get obStartTagline => 'Your money, on your phone';
+
+  @override
+  String get obLangTitle => 'Choose language';
+
+  @override
+  String get obLangSub => 'You can change this later in Settings';
+
+  @override
+  String get obRestoreBusy => 'Restoring your data';
+
+  @override
+  String obRestoreStepTxns(String done, String total) {
+    return '$done of $total transactions';
+  }
+
+  @override
+  String obRestoreStepItems(String done, String total) {
+    return '$done of $total items';
+  }
+
+  @override
+  String get obRestoreFailed => 'Couldn\'t restore this backup';
+
+  @override
+  String get obRestoreFailedSub =>
+      'This file isn\'t a Kuber backup, or it\'s damaged. Nothing on your phone was changed.';
+
+  @override
+  String get obRestoreRetry => 'Try again';
+
+  @override
+  String get obRestoreOtherFile => 'Choose another file';
+
+  @override
+  String get obCsvBusy => 'Importing your CSV';
+
+  @override
+  String obCsvStep(String done, String total) {
+    return '$done of $total rows';
+  }
+
+  @override
+  String get obCsvFailed => 'Couldn\'t import this file';
+
+  @override
+  String get obCsvFailedSub =>
+      'Kuber can\'t read this CSV, or it\'s damaged. Nothing on your phone was changed.';
+
+  @override
+  String get obNotifEmi => 'EMI, SIP or Subscriptions';
+
+  @override
+  String get obNotifRemindersSub => 'A heads-up before any payment';
+
+  @override
+  String get setNotifLedger => 'Lend and borrow reminders';
+
+  @override
+  String get setNotifLedgerSub => 'On the due dates you set';
+
+  @override
+  String get setNotifPhoneHint =>
+      'These follow your phone\'s settings. Tap one to change it there.';
+
+  @override
+  String get obNotifBudget => 'Budget alerts';
+
+  @override
+  String get obNotifBudgetSub => 'When you get close to a limit';
+
+  @override
+  String get obNotifBackupRow => 'Backup problems';
+
+  @override
+  String get obNotifSampleTitle => 'EMI due tomorrow';
+
+  @override
+  String get obNotifSampleBody => 'SBI Home Loan · ₹24,350';
+
+  @override
+  String get pathSheetSub => 'Tap any page to go back to it';
+
+  @override
+  String get pathSheetFromNotification => 'Opened from a notification';
+
+  @override
+  String get setSecYours => 'Make it yours';
+
+  @override
+  String get setSecSafe => 'Keep it safe';
+
+  @override
+  String get setSecHelp => 'Help and more';
+
+  @override
+  String get setYourNameRow => 'Your name';
+
+  @override
+  String setLookSub(String theme, String size) {
+    return '$theme · $size text size';
+  }
+
+  @override
+  String setPrefsSub(String language, String currency, String format) {
+    return '$language · $currency · $format format';
+  }
+
+  @override
+  String get setDrawerNone => 'No extra icons';
+
+  @override
+  String get setPrivacyPinOn => 'Cards PIN on';
+
+  @override
+  String setLastBackupAgo(String ago) {
+    return 'Last backup $ago';
+  }
+
+  @override
+  String get setNoBackupYet => 'No backup yet';
+
+  @override
+  String get setNoBackupSub => 'Back up now to keep your data safe';
+
+  @override
+  String get setOn => 'On';
+
+  @override
+  String get setOff => 'Off';
+
+  @override
+  String get setHelpTitle => 'Help';
+
+  @override
+  String get setHelpSub => 'App tutorial, send feedback';
+
+  @override
+  String get setActivitySub => 'Upcoming events, Money story archive';
+
+  @override
+  String setVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get setBottomNav => 'Bottom navigation';
+
+  @override
+  String get setNavStandard => 'Standard';
+
+  @override
+  String get setNavFloating => 'Floating';
+
+  @override
+  String get setMoreLayout => 'More tab layout';
+
+  @override
+  String get setMoreLayoutSub => 'Simple list or hero layout';
+
+  @override
+  String get setLayoutHero => 'Hero';
+
+  @override
+  String get setSecHomeAnalytics => 'Home and Analytics';
+
+  @override
+  String get setHomeWidgets => 'Home widgets';
+
+  @override
+  String get setAnalyticsWidgets => 'Analytics widgets';
+
+  @override
+  String setWidgetsOn(String count) {
+    return '$count on · drag to reorder';
+  }
+
+  @override
+  String get setGallerySub => 'Kuber on your phone\'s home screen';
+
+  @override
+  String get setSecShortcuts => 'Shortcuts';
+
+  @override
+  String get setQuickActions => 'Quick actions';
+
+  @override
+  String get setQuickActionsSub => 'Long-press a tab for shortcuts';
+
+  @override
+  String get setAddMenu => 'Add menu';
+
+  @override
+  String get setAddMenuSub => 'Long-press + for quick entries';
+
+  @override
+  String get setSecMoney => 'Language and money';
+
+  @override
+  String get setCurrencySub => 'Symbol shown on amounts';
+
+  @override
+  String get setNumberFormat => 'Number format';
+
+  @override
+  String get setNumLakh => 'Lakh';
+
+  @override
+  String get setNumMillion => 'Million';
+
+  @override
+  String get setShowCode => 'Show currency code';
+
+  @override
+  String setShowCodeSub(String withCode, String withSymbol) {
+    return '$withCode instead of $withSymbol';
+  }
+
+  @override
+  String get setDefaultAccount => 'Default account';
+
+  @override
+  String get setDefaultAccountSub => 'Picked first in Quick Add';
+
+  @override
+  String get setSecGestures => 'Gestures';
+
+  @override
+  String get setSwipe => 'Horizontal swipe';
+
+  @override
+  String get setSwipeSub => 'Swipe left or right to change tabs';
+
+  @override
+  String get setPrivacyMode => 'Privacy mode';
+
+  @override
+  String get setPrivacyModeSub => 'Hide balances and amounts';
+
+  @override
+  String get setAppLock => 'App lock';
+
+  @override
+  String get setAppLockSub => 'Ask for fingerprint or face to open Kuber';
+
+  @override
+  String get setAppLockNoFp => 'Needs a fingerprint or face on this phone';
+
+  @override
+  String get setCardsFp => 'Unlock with fingerprint';
+
+  @override
+  String get setCardsFpSub => 'Only for Kuber Cards';
+
+  @override
+  String get setCardsFpNone => 'Not set up on this phone';
+
+  @override
+  String get setCardsFpSearch => 'Unlock Kuber Cards with fingerprint';
+
+  @override
+  String get setCardsPinRow => 'Cards PIN';
+
+  @override
+  String get setCardsPinRowSub => 'On · Change PIN';
+
+  @override
+  String get setCardsPinSearch => 'Kuber Cards PIN';
+
+  @override
+  String get setNotesLock => 'Require app lock for Notes';
+
+  @override
+  String get setNotesLockOn => 'Ask for fingerprint or face to open Notes';
+
+  @override
+  String get setNotesLockOff => 'Turn on App lock first';
+
+  @override
+  String get setLocksInfo =>
+      'App lock and Kuber Cards unlock are separate. Changing one never changes the other.';
+
+  @override
+  String get setLocksTitle => 'Two separate locks';
+
+  @override
+  String get setLocksApp =>
+      'asks for your fingerprint or face each time you open Kuber.';
+
+  @override
+  String get setLocksCards =>
+      'has its own lock: your Cards PIN, and fingerprint if you turn it on here. It works even when App lock is off.';
+
+  @override
+  String get setLocksNeither =>
+      'Turning one on or off never changes the other.';
+
+  @override
+  String get setGotIt => 'Got it';
+
+  @override
+  String get setNoFp =>
+      'This phone has no fingerprint or face unlock set up. Your Kuber Cards PIN still works.';
+
+  @override
+  String get setNoFpOpen => 'Open phone settings';
+
+  @override
+  String get setDrawerBody =>
+      'Give Kuber Cards, Notes or Reminders their own icon in your phone\'s app list. Each icon opens straight into that feature.';
+
+  @override
+  String get setDrawerPreview => 'Preview in your app list';
+
+  @override
+  String get setDrawerRowSub => 'Own icon in the app list';
+
+  @override
+  String get setLastBackup => 'Last backup';
+
+  @override
+  String get setBackupNow => 'Back up now';
+
+  @override
+  String get setSecBackup => 'Backup';
+
+  @override
+  String get setAutoBackups => 'Automatic backups';
+
+  @override
+  String get setRestoreSub => 'Replace the data on this phone';
+
+  @override
+  String get setSecImport => 'Import and export';
+
+  @override
+  String get setImportCsvSub => 'Bring in transactions from a spreadsheet';
+
+  @override
+  String get setImportKuber => 'Import Kuber file';
+
+  @override
+  String get setImportKuberSub => 'A JSON file exported from Kuber';
+
+  @override
+  String get setExport => 'Export data';
+
+  @override
+  String get setExportSub => 'Save everything as a JSON file';
+
+  @override
+  String get setSecDanger => 'Danger zone';
+
+  @override
+  String get setClear => 'Clear all data';
+
+  @override
+  String get setClearSub =>
+      'Deletes everything on this phone. Cannot be undone.';
+
+  @override
+  String get setMockData => 'Generate mock data';
+
+  @override
+  String get setNotifOffBody => 'Reminders and alerts won\'t reach you.';
+
+  @override
+  String get setTurnOn => 'Turn on';
+
+  @override
+  String get setNotifAllowedShort => 'Allowed in phone settings';
+
+  @override
+  String get setSecSends => 'What Kuber sends';
+
+  @override
+  String get setNotifEmiSub => 'When a payment is recorded';
+
+  @override
+  String get setNotifBudgetSub => 'At the limits you set on a budget';
+
+  @override
+  String get setNotifBackupSub => 'When an automatic backup fails';
+
+  @override
+  String get setNotifInboxSub => 'Recent alerts and reminders';
+
+  @override
+  String get setAppTutorial => 'App tutorial';
+
+  @override
+  String get setAppTutorialSub => 'Replay the guided tour';
+
+  @override
+  String get setSendFeedback => 'Send feedback';
+
+  @override
+  String get setSendFeedbackSub => 'Tell us what to fix or add';
+
+  @override
+  String get setUpcoming => 'Upcoming events';
+
+  @override
+  String get setUpcomingSub => 'Everything coming up, in one place';
+
+  @override
+  String get setStories => 'Money story archive';
+
+  @override
+  String get proCardTry => 'Try Kuber Pro';
+
+  @override
+  String get proCardTrySub => 'Unlock every feature. Pay once, no account.';
+
+  @override
+  String proCardActive(String date) {
+    return 'Active since $date. Thank you!';
+  }
+
+  @override
+  String get proCardMonthly => 'Monthly';
+
+  @override
+  String get proCardYearly => 'Yearly';
+
+  @override
+  String get proCardLifetime => 'Lifetime';
+
+  @override
+  String get proCardPromo => 'Promo';
+
+  @override
+  String get proCardPromoForever => 'Free lifetime. Thanks!';
+
+  @override
+  String proCardPromoUntil(String date) {
+    return 'Free until $date';
+  }
+
+  @override
+  String get searchHint => 'Search More';
+
+  @override
+  String get searchAll => 'All';
+
+  @override
+  String get searchFeatures => 'Features';
+
+  @override
+  String get searchLoan => 'Loan';
+
+  @override
+  String get searchInvestment => 'Investment';
+
+  @override
+  String get searchReminder => 'Reminder';
+
+  @override
+  String get searchYouLent => 'You lent';
+
+  @override
+  String get searchYouBorrowed => 'You borrowed';
+
+  @override
+  String get searchSettled => 'Settled';
+
+  @override
+  String searchDue(String date) {
+    return 'due $date';
+  }
+
+  @override
+  String searchEdited(String date) {
+    return 'edited $date';
+  }
+
+  @override
+  String searchEveryDay(String amount) {
+    return '$amount every day';
+  }
+
+  @override
+  String searchEveryWeek(String amount) {
+    return '$amount every week';
+  }
+
+  @override
+  String searchEveryMonth(String amount) {
+    return '$amount every month';
+  }
+
+  @override
+  String searchEveryYear(String amount) {
+    return '$amount every year';
+  }
+
+  @override
+  String searchSeeAll(String count) {
+    return 'See all $count';
+  }
+
+  @override
+  String searchMatches(String words) {
+    return 'Matches: $words';
+  }
+
+  @override
+  String get searchRecent => 'Recent';
+
+  @override
+  String get searchClear => 'Clear';
+
+  @override
+  String get searchTry => 'Try searching';
+
+  @override
+  String get searchTryDark => 'Dark mode';
+
+  @override
+  String get searchTryBackup => 'Backup';
+
+  @override
+  String get searchTryEmi => 'EMI calculator';
+
+  @override
+  String searchNoResults(String query) {
+    return 'No results for “$query”';
+  }
+
+  @override
+  String get searchNoResultsBody =>
+      'Search looks at names and titles across More: settings, accounts, categories, tags, money plans, people, cards, notes and tools. Try a shorter word.';
+
+  @override
+  String searchShorter(String word) {
+    return 'Search “$word”';
+  }
+
+  @override
+  String get searchTransaction => 'Looking for a transaction?';
+
+  @override
+  String get searchInHistory => 'Search in History';
+
+  @override
+  String get searchLoading => 'Looking in your accounts, loans and more';
+
+  @override
+  String get searchPrivateNote =>
+      'Kuber Cards and Notes match by name and title only. Card numbers and note text are never searched.';
+
+  @override
+  String get setKwFeedback => 'feedback bug report suggest contact';
+
+  @override
+  String get setKwExpressive => 'expressive colour color vivid tint';
+
+  @override
+  String get setKwPureBlack => 'dark black amoled oled night theme';
+
+  @override
+  String searchTagSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return 'Tag · $_temp0';
+  }
+
+  @override
+  String get msLoansInterestCalc => 'Interest calculation';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'Interest calculation: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'Monthly';
+
+  @override
+  String get msLoansMethodDaily => 'Daily';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'The yearly rate divided by 12, the same every month';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'The actual days since your last EMI, like most banks';
+
+  @override
+  String get msLoansLastEmi => 'Last EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'EMIs you\'ve already recorded stay as they are. Only the ones ahead change.';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return 'Switch to $method';
+  }
+
+  @override
+  String get msLoansDailyHint => 'Your bank may count interest by days.';
+
+  @override
+  String get msInfoMethodLine =>
+      'Monthly: your yearly rate divided by 12 is charged every month, so every month costs the same.\n\nDaily: interest is counted for the actual days since your last EMI, at your yearly rate divided by 365. A 31-day month costs a little more and February a little less. Over a year they come out almost the same.\n\nMost Indian banks use daily. If your statement doesn\'t match Kuber, try it.';
+
+  @override
+  String get msInfoMethodRow1 => 'Monthly, any month';
+
+  @override
+  String get msInfoMethodRow2 => 'Daily, a 31-day month';
+
+  @override
+  String get msInfoMethodRow3 => 'Daily, February';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return 'Interest on $amount at 9% a year:';
+  }
+
+  @override
+  String get deleteLoanAction => 'Delete loan';
 }

@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:isar_community/isar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/prefs_keys.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/categories/data/category.dart';
@@ -47,9 +49,10 @@ typedef ImportProgressCallback = void Function(
 class JsonBackupService {
   /// 2 = vNext (schedules, loan / investment fields, sub types, processed
   /// ledger). 3 = loan accuracy (edited EMI splits, past EMIs, outstanding
-  /// adjustments, Overdraft accounts). Older backups still restore:
-  /// version 1 through the vNext migration, the new fields default.
-  static const version = 3;
+  /// adjustments, Overdraft accounts). 4 = November release (loan releases,
+  /// pre-EMI interest, loan_disbursement sub type). Older backups still
+  /// restore: version 1 through the vNext migration, the new fields default.
+  static const version = 4;
 
   Future<String> writeScheduledBackup({
     required Isar isar,
@@ -130,10 +133,21 @@ class JsonBackupService {
     final storedCards = await isar.storedCards.where().findAll();
     final cardVaultMeta = await isar.cardVaultMetas.get(0);
     final processed = await isar.processedOccurrences.where().findAll();
+    // Name and currency, so a first-run restore can skip those steps. Only
+    // the welcome flow reads this. Best-effort: never fails a backup.
+    Map<String, dynamic>? profile;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      profile = {
+        'userName': prefs.getString(PrefsKeys.userName),
+        'currency': prefs.getString(PrefsKeys.currency),
+      };
+    } catch (_) {}
 
     return {
       'version': version,
       'exportedAt': DateTime.now().toIso8601String(),
+      'profile': profile,
       'transactions': transactions.map(_txToMap).toList(),
       'categories': categories.map(_catToMap).toList(),
       'categoryGroups': categoryGroups.map(_groupToMap).toList(),
@@ -664,6 +678,19 @@ class JsonBackupService {
     ..addPastEmis = (m['addPastEmis'] as bool?) ?? false
     ..pastEmisAddedAt = _date(m['pastEmisAddedAt'])
     ..closedAt = _date(m['closedAt'])
+    ..releases = [
+      for (final r in (m['releases'] as List? ?? const []))
+        LoanRelease.fromMap((r as Map).cast<String, dynamic>())
+    ]
+    ..releasedInParts = (m['releasedInParts'] as bool?) ?? false
+    ..preEmiMode = LoanPreEmi.values.firstWhere((v) => v.name == m['preEmiMode'],
+        orElse: () => LoanPreEmi.none)
+    ..preEmiCycleDay = m['preEmiCycleDay'] as int?
+    ..preEmiOverride = (m['preEmiOverride'] as num?)?.toDouble()
+    ..preEmiCalculated = (m['preEmiCalculated'] as num?)?.toDouble()
+    // Older backups have none: those loans were monthly.
+    ..interestMethod = LoanInterestMethod.values.firstWhere((v) => v.name == m['interestMethod'],
+        orElse: () => LoanInterestMethod.monthly)
     ..dataVersion = (m['dataVersion'] as int?) ?? 0;
 
   Investment _mapToInvestment(Map<String, dynamic> m) => Investment()

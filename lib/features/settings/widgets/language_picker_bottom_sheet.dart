@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../core/utils/supported_locales.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart' show kuberPressedLayer;
 
 Future<void> showLanguagePicker({
   required BuildContext context,
@@ -31,6 +33,106 @@ Future<void> showLanguagePicker({
       onSelected: onSelected,
     ),
   );
+}
+
+/// The welcome language sheet: every language in one list with its radio.
+Future<void> showWelcomeLanguageSheet({
+  required BuildContext context,
+  required Locale currentLocale,
+  required ValueChanged<Locale> onSelected,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    useRootNavigator: true,
+    backgroundColor: Colors.transparent,
+    sheetAnimationStyle: const AnimationStyle(
+      duration: Duration(milliseconds: 300),
+      reverseDuration: Duration(milliseconds: 200),
+    ),
+    builder: (ctx) {
+      final l = ctx.l10n;
+      return KuberBottomSheet(
+        title: l.obLangTitle,
+        description: l.obLangSub,
+        bodyPadding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+        child: Column(
+          children: [
+            for (final lang in kSupportedLanguages)
+              _RadioLanguageRow(
+                lang: lang,
+                selected: lang.locale.languageCode == currentLocale.languageCode,
+                onTap: () {
+                  Navigator.of(ctx, rootNavigator: true).pop();
+                  // The strings change once the sheet is out of the way.
+                  Future<void>.delayed(const Duration(milliseconds: 200), () => onSelected(lang.locale));
+                },
+              ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _RadioLanguageRow extends StatelessWidget {
+  final KuberLanguage lang;
+  final bool selected;
+  final VoidCallback onTap;
+  const _RadioLanguageRow({required this.lang, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final fg = selected ? cs.onSecondaryContainer : cs.onSurface;
+    final fg2 = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+    final showEnglish = lang.englishName.toLowerCase() != lang.nativeName.toLowerCase();
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        color: selected ? cs.secondaryContainer : Colors.transparent,
+        borderRadius: BorderRadius.circular(KuberShape.large),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          overlayColor: kuberPressedLayer(cs),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: KuberSpace.listItem1),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 12, 0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Icon(
+                      selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                      size: 22,
+                      color: selected ? cs.primary : cs.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: KuberSpace.sm),
+                  Expanded(
+                    child: Wrap(
+                      spacing: KuberSpace.sm,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(lang.nativeName,
+                            style: localeFont(locale: lang.locale, fontSize: 16, fontWeight: FontWeight.w600, color: fg)),
+                        if (showEnglish) Text(lang.englishName, style: localeFont(fontSize: 14, color: fg2)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _LanguagePickerSheet extends StatefulWidget {

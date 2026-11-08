@@ -35,6 +35,9 @@ class KuberBottomSheet extends StatefulWidget {
   /// actions include Cancel turn it off.
   final bool showClose;
 
+  /// Body padding, for bodies that run closer to the edge than 20.
+  final EdgeInsetsGeometry bodyPadding;
+
   const KuberBottomSheet({
     super.key,
     required this.title,
@@ -44,6 +47,7 @@ class KuberBottomSheet extends StatefulWidget {
     required this.child,
     this.actions,
     this.showClose = true,
+    this.bodyPadding = const EdgeInsets.fromLTRB(20, 4, 20, 16),
   });
 
   @override
@@ -157,7 +161,7 @@ class _KuberBottomSheetState extends State<KuberBottomSheet> {
               child: NotificationListener<ScrollNotification>(
                 onNotification: _onScroll,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                  padding: widget.bodyPadding,
                   child: widget.child,
                 ),
               ),

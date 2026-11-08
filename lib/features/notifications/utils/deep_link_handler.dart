@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
 
+import '../../../shared/widgets/kuber_path.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/router/app_router.dart' show rootNavigatorKey;
 import '../../../core/utils/l10n_ext.dart';
@@ -48,6 +49,7 @@ Future<void> handleNotificationTap(
   // Let the router swap pages first: a sheet pushed before that would be
   // attached to the outgoing page and dropped with it.
   await WidgetsBinding.instance.endOfFrame;
+  KuberPath.markFromNotification();
 
   final nav = rootNavigatorKey.currentState;
   final ctx = rootNavigatorKey.currentContext;

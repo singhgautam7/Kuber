@@ -231,7 +231,9 @@ final loanSummaryProvider =
         final linked = txns
             .where((t) => t.linkedRuleType == 'loan' && t.linkedRuleId == l.uid)
             .toList();
-        paid += linked.fold(0.0, (s, t) => s + t.amount);
+        paid += linked
+            .where((t) => !t.isLoanDisbursement)
+            .fold(0.0, (s, t) => s + t.amount);
         final st = loanStatus(l, linked, deletedDays: deleted[l.uid] ?? const {});
         if (!st.closed) outstanding += st.outstanding ?? 0;
       }

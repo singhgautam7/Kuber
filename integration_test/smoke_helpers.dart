@@ -176,3 +176,6 @@ Future<void> dismissInfo(WidgetTester t) async {
     await settle(t);
   }
 }
+
+/// A context under the root navigator, for opening sheets directly.
+BuildContext rootContext(WidgetTester t) => rootNavigatorKey.currentContext!;

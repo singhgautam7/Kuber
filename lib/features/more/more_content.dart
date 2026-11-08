@@ -12,7 +12,6 @@ import '../notifications/widgets/notifications_sheet.dart';
 import '../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../pro/feature_gates/pro_gate.dart';
 import '../tutorial/models/tutorial_step_keys.dart';
-import 'screens/more_screen.dart' show launchTutorialFromMore;
 
 /// Bumped to scroll the More tab to its Signature section (Why Kuber page 5
 /// Try it). Each More layout keys its Signature header for this.
@@ -61,7 +60,7 @@ class MoreEntry {
 /// Stable identity for a More section, so a layout can pick a bespoke rendering
 /// (the modern layout renders Manage as a hero + grid, Signature as a card
 /// grid, Help Us as an accent strip, etc.).
-enum MoreSectionId { manage, signature, app, tutorial, about, helpUs }
+enum MoreSectionId { manage, signature, about, helpUs }
 
 class MoreSection {
   final MoreSectionId id;
@@ -84,9 +83,8 @@ class MoreSection {
 /// Section order and membership are canonical across both layouts.
 List<MoreSection> buildMoreSections(
   BuildContext context,
-  WidgetRef ref, {
-  required bool isDevMode,
-}) {
+  WidgetRef ref,
+) {
   final l10n = context.l10n;
 
   return [
@@ -211,61 +209,23 @@ List<MoreSection> buildMoreSections(
       ],
     ),
 
-    // ── App: settings + app-level views ─────────────────────────────────────
+    // ── About ───────────────────────────────────────────────────────────────
     MoreSection(
-      id: MoreSectionId.app,
-      title: l10n.moreAppTitle,
+      id: MoreSectionId.about,
+      title: l10n.moreAboutTitle,
       entries: [
         MoreEntry(
           icon: Icons.settings,
           label: l10n.menuSettings,
           subtitle: l10n.menuSettingsDesc,
           onTap: () => context.push('/more/settings'),
-        ),
-        MoreEntry(
-          icon: Icons.storage_rounded,
-          label: l10n.menuData,
-          subtitle: l10n.menuDataDesc,
-          onTap: () => context.push('/more/data'),
           tutorialKey: TutorialStepKeys.moreDataItem,
         ),
         MoreEntry(
-          icon: Icons.notifications_outlined,
-          label: l10n.menuNotifications,
-          subtitle: l10n.menuNotificationsDesc,
-          onTap: () => openNotificationsSheet(context, ref),
-        ),
-        MoreEntry(
-          icon: Icons.calendar_month_rounded,
-          label: 'Upcoming Events',
-          subtitle: 'Everything coming up, in one place',
-          onTap: () => context.push('/more/upcoming-events'),
-        ),
-        MoreEntry(
-          icon: Icons.auto_stories_rounded,
-          label: l10n.menuStoriesArchive,
-          subtitle: l10n.menuStoriesArchiveDesc,
-          onTap: () => context.push('/more/stories-archive'),
-        ),
-        MoreEntry(
-          icon: Icons.widgets_outlined,
-          label: l10n.menuWidgets,
-          subtitle: l10n.menuWidgetsDesc,
-          onTap: () => context.push('/more/widgets-gallery'),
-        ),
-      ],
-    ),
-
-    // ── Tutorial ────────────────────────────────────────────────────────────
-    MoreSection(
-      id: MoreSectionId.tutorial,
-      title: l10n.moreTutorialTitle,
-      entries: [
-        MoreEntry(
-          icon: Icons.school_rounded,
-          label: l10n.menuTutorial,
-          subtitle: l10n.menuTutorialDesc,
-          onTap: () => launchTutorialFromMore(context, ref),
+          icon: Icons.info_outline_rounded,
+          label: l10n.menuAbout,
+          subtitle: l10n.menuAboutDesc,
+          onTap: () => context.pushNamed('about'),
         ),
         MoreEntry(
           icon: Icons.play_circle_outline_rounded,
@@ -274,33 +234,6 @@ List<MoreSection> buildMoreSections(
           // Starts at the Welcome screen (coin), then the five pages; no setup.
           onTap: () => context.push('/onboarding?replay=true'),
         ),
-      ],
-    ),
-
-    // ── About ───────────────────────────────────────────────────────────────
-    MoreSection(
-      id: MoreSectionId.about,
-      title: l10n.moreAboutTitle,
-      entries: [
-        MoreEntry(
-          icon: Icons.info_outline_rounded,
-          label: l10n.menuAbout,
-          subtitle: l10n.menuAboutDesc,
-          onTap: () => context.pushNamed('about'),
-        ),
-        MoreEntry(
-          icon: Icons.security_outlined,
-          label: l10n.menuPermissions,
-          subtitle: l10n.menuPermissionsDesc,
-          onTap: () => context.pushNamed('permissions'),
-        ),
-        if (isDevMode)
-          MoreEntry(
-            icon: Icons.bug_report,
-            label: l10n.menuDevTools,
-            subtitle: l10n.menuDevToolsDesc,
-            onTap: () => context.push('/more/dev-tools'),
-          ),
       ],
     ),
 

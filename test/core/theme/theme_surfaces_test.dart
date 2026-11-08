@@ -23,7 +23,7 @@ ColorScheme scheme(ThemeVariant v, int row) {
   return kuberPalette(v, dark ? Brightness.dark : Brightness.light, expressive: expr, pureBlack: black).scheme;
 }
 
-/// §6 page / card for all 16 themes.
+/// §6 page / card for all 17 themes (nov-release: Meadow and Coral out, Saffron, Sky and Ruby in).
 const pageCard = <ThemeVariant, List<String>>{
   ThemeVariant.signature: ['#F1F7FF/#E3EDFF', '#FFFFFF/#F3F3F3', '#0A1326/#152037', '#000000/#152037', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.mull: ['#F4FCFD/#E6F3F6', '#FFFFFF/#F3F3F3', '#11191B/#1B2527', '#000000/#1B2527', '#171717/#232323', '#000000/#232323'],
@@ -35,12 +35,13 @@ const pageCard = <ThemeVariant, List<String>>{
   ThemeVariant.ember: ['#FFF8F3/#FBEDE4', '#FFFFFF/#F3F3F3', '#1D1510/#2A211A', '#000000/#2A211A', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.fern: ['#F5FCF8/#E7F4EC', '#FFFFFF/#F3F3F3', '#121915/#1C2520', '#000000/#1C2520', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.tide: ['#F4FCFB/#E6F3F2', '#FFFFFF/#F3F3F3', '#111918/#1B2524', '#000000/#1B2524', '#171717/#232323', '#000000/#232323'],
-  ThemeVariant.meadow: ['#F7FCF6/#EAF3EA', '#FFFFFF/#F3F3F3', '#131913/#1E251E', '#000000/#1E251E', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.blush: ['#FFF8FA/#F9ECF0', '#FFFFFF/#F3F3F3', '#1C1517/#292023', '#000000/#292023', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.iris: ['#FAF9FF/#F0EFF9', '#FFFFFF/#F3F3F3', '#17161C/#232229', '#000000/#232229', '#171717/#232323', '#000000/#232323'],
-  ThemeVariant.coral: ['#FFF8F6/#FBECEA', '#FFFFFF/#F3F3F3', '#1D1513/#2A201E', '#000000/#2A201E', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.citron: ['#FAFBF4/#F0F2E5', '#FFFFFF/#F3F3F3', '#171810/#23241B', '#000000/#23241B', '#171717/#232323', '#000000/#232323'],
   ThemeVariant.neon: ['#F7FBF8/#EBF2EC', '#FFFFFF/#F3F3F3', '#141815/#1F2420', '#000000/#1F2420', '#171717/#232323', '#000000/#232323'],
+  ThemeVariant.saffron: ['#FDFAF3/#F5F0E3', '#FFFFFF/#F3F3F3', '#1A170F/#262319', '#000000/#262319', '#171717/#232323', '#000000/#232323'],
+  ThemeVariant.sky: ['#F5FBFF/#E8F2F9', '#FFFFFF/#F3F3F3', '#12181C/#1D2429', '#000000/#1D2429', '#171717/#232323', '#000000/#232323'],
+  ThemeVariant.ruby: ['#FFF8F8/#FBECEC', '#FFFFFF/#F3F3F3', '#1D1515/#2A2020', '#000000/#2A2020', '#171717/#232323', '#000000/#232323'],
 };
 
 /// §5 full role tables for the three showcase themes.
@@ -114,7 +115,7 @@ Color role(ColorScheme s, String name) => switch (name) {
     };
 
 void main() {
-  test('all 16 themes x 6 rows: page and card match the design (§6)', () {
+  test('all 17 themes x 6 rows: page and card match the design (§6)', () {
     expect(pageCard.keys.toSet(), kSelectableVariants.toSet());
     final bad = <String>[];
     for (final e in pageCard.entries) {
@@ -191,9 +192,10 @@ void main() {
     expect(dark.surfaceContainer, kuberPalette(ThemeVariant.signature, Brightness.dark, seed: seed).scheme.surfaceContainer);
   });
 
-  test('contrast guard: seven light primaries step down (§3c)', () {
+  test('contrast guard: eight light primaries step down (§3c)', () {
     const want = {
-      'vellum': .54, 'ember': .545, 'fern': .525, 'iris': .545, 'coral': .545, 'citron': .53, 'neon': .52,
+      'vellum': .54, 'ember': .545, 'fern': .525, 'iris': .545, 'citron': .53, 'neon': .52,
+      'saffron': .535, 'sky': .53,
     };
     for (final v in kSelectableVariants.where((v) => v != ThemeVariant.signature)) {
       final f = MullFamily.of(v);
@@ -237,7 +239,7 @@ void main() {
         }
       }
     }
-    expect(n, 16 * 6 * 16);
+    expect(n, 17 * 6 * 16);
     expect(bad, isEmpty);
   });
 

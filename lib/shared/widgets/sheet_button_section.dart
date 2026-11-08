@@ -158,7 +158,11 @@ class _OverflowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Builder(
-      builder: (anchor) => SizedBox(
+      builder: (anchor) => Semantics(
+        button: true,
+        label: MaterialLocalizations.of(context).moreButtonTooltip,
+        excludeSemantics: true,
+        child: SizedBox(
         width: 56,
         height: 56,
         child: Material(
@@ -185,6 +189,7 @@ class _OverflowButton extends StatelessWidget {
                 size: 24, color: cs.onSurfaceVariant),
           ),
         ),
+      ),
       ),
     );
   }

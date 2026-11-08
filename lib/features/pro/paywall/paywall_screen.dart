@@ -6,7 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/models/overflow_config.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
+import '../../onboarding/pages/onboarding_data_terms_page.dart' show kPrivacyPolicyUrl;
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_app_bar.dart';
 import '../../../../shared/widgets/kuber_comparison_table.dart';
@@ -20,6 +22,7 @@ import 'billing_ui_state.dart';
 import 'paywall_error_state.dart';
 import 'paywall_loading_state.dart';
 import 'paywall_manage_state.dart';
+import 'pro_faq_section.dart';
 import 'pro_page_extras.dart';
 import 'pro_state.dart';
 import 'subscription_offer.dart';
@@ -78,7 +81,11 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
           icon: Icons.open_in_new_rounded,
           label: 'Manage on Play Store',
           onTap: _openPlaySubscriptions,
-        ),
+        ),      KuberOverflowItem(
+        icon: Icons.privacy_tip_outlined,
+        label: context.l10n.obTermsPrivacy,
+        onTap: () => launchUrl(Uri.parse(kPrivacyPolicyUrl), mode: LaunchMode.externalApplication),
+      ),
     ];
 
     return Scaffold(
@@ -154,6 +161,8 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       const _TipJarSection(),
       const SizedBox(height: KuberSpace.xl),
       const _TrustFooter(),
+      const SizedBox(height: KuberSpace.xl),
+      const ProFaqSection(),
     ];
   }
 
@@ -165,6 +174,8 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       _sectionTitle('What Pro includes'),
       const SizedBox(height: KuberSpace.sm),
       const KuberComparisonTable(rows: kProComparisonRows),
+      const SizedBox(height: KuberSpace.xl),
+      const ProFaqSection(),
     ];
   }
 
@@ -622,9 +633,11 @@ class _TrustFooter extends StatelessWidget {
           ),
         ),
         const SizedBox(height: KuberSpace.sm),
+        // Wraps onto two lines at the largest font sizes.
         Consumer(
-          builder: (context, ref, _) => Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          builder: (context, ref, _) => Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               TextButton(
                 onPressed: () => restorePurchases(context, ref),

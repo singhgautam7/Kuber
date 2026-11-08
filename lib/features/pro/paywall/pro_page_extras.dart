@@ -102,7 +102,7 @@ const kProComparisonRows = <ComparisonEntry>[
     icon: Icons.palette_outlined,
     feature: 'Custom themes',
     free: 'Signature only',
-    pro: '7 themes',
+    pro: '17 themes',
   ),
   ComparisonGroup('Usage limits'),
   ComparisonRow(

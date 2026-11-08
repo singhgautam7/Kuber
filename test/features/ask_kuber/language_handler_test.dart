@@ -14,7 +14,7 @@ void main() {
     expect(r.text.toLowerCase(), contains('only'));
     final chip = r.followUps.single;
     expect(chip, isA<NavChipAction>());
-    expect((chip as NavChipAction).route, '/more/settings');
+    expect((chip as NavChipAction).route, '/more/settings/preferences?row=language');
   });
 
   test('catches non-English (Indic) input', () async {

@@ -7,7 +7,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_loader.dart';
 import '../../settings/providers/settings_provider.dart';
-import '../../dev/providers/dev_mode_provider.dart';
 import '../../tutorial/providers/tutorial_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
@@ -22,6 +21,8 @@ class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
   static int _scrolledFor = 0;
+  static MoreTabLayout? _firstLayout;
+  static bool _layoutChanged = false;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,14 +52,19 @@ class MoreScreen extends ConsumerWidget {
         }
       });
     }
-    // Classic <-> Modern cross-fades when the view changes (review round 3).
-    return AnimatedSwitcher(
+    // Classic <-> Modern fades in when the view changes (review round 3). One
+    // at a time: both carry the tutorial's global keys, so they can't overlap.
+    _firstLayout ??= layout;
+    if (layout != _firstLayout) _layoutChanged = true;
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(layout),
+      tween: Tween(begin: _layoutChanged ? 0 : 1, end: 1),
       duration: const Duration(milliseconds: 250),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
+      curve: Curves.easeOut,
+      builder: (_, t, c) => Opacity(opacity: t, child: c),
       child: switch (layout) {
-        MoreTabLayout.simple => const MoreScreenSimple(key: ValueKey('simple')),
-        MoreTabLayout.modern => const MoreScreenModern(key: ValueKey('modern')),
+        MoreTabLayout.simple => const MoreScreenSimple(),
+        MoreTabLayout.modern => const MoreScreenModern(),
       },
     );
   }
@@ -72,8 +78,7 @@ class MoreScreenSimple extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
-    final sections = buildMoreSections(context, ref, isDevMode: isDevMode);
+    final sections = buildMoreSections(context, ref);
 
     return Scaffold(
       body: CustomScrollView(
@@ -119,10 +124,8 @@ class MoreScreenSimple extends ConsumerWidget {
   }
 }
 
-/// One More entry as a list row: 24 icon, title + subtitle, Beta pill,
-/// chevron.
-/// Icon on a 40 surfaceContainerHigh disc, the same treatment as the header
-/// overflow button (review round 3).
+/// A More entry's icon: the tinted squircle Settings uses (user review), so
+/// every row in More and Settings reads the same.
 class MoreIconDisc extends StatelessWidget {
   final MoreEntry entry;
   const MoreIconDisc({super.key, required this.entry});
@@ -130,19 +133,15 @@ class MoreIconDisc extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    if (entry.iconWidget == null) return KuberIconTile(icon: entry.icon, glyph: 22);
     return Container(
       width: 40,
       height: 40,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.mediumR),
       child: IconTheme(
-        data: IconThemeData(color: cs.onSurfaceVariant, size: 20),
-        child: entry.iconWidget != null
-            ? SizedBox(width: 20, height: 20, child: entry.iconWidget)
-            : Icon(entry.icon),
+        data: IconThemeData(color: cs.onSecondaryContainer, size: 22),
+        child: SizedBox(width: 22, height: 22, child: entry.iconWidget),
       ),
     );
   }

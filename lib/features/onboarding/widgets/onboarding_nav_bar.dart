@@ -23,6 +23,21 @@ class OnboardingNavBar extends StatelessWidget {
   /// False: the primary button is disabled (e.g. no pick yet).
   final bool primaryEnabled;
 
+  /// False hides the dots (the first page, before the flow begins).
+  final bool showDots;
+
+  /// A second action in the outlined slot instead of Back ("Not now").
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
+  /// A centred line above the buttons naming what they decide
+  /// ("Allow notifications"), so the buttons themselves can stay short.
+  final String? caption;
+
+  /// False drops the arrow after the label (the pages whose design has none,
+  /// and until the last page's button is enabled).
+  final bool showArrow;
+
   const OnboardingNavBar({
     super.key,
     required this.currentPage,
@@ -34,30 +49,57 @@ class OnboardingNavBar extends StatelessWidget {
     this.pageCount = 4,
     this.compactBack = false,
     this.primaryEnabled = true,
+    this.showDots = true,
+    this.secondaryLabel,
+    this.onSecondary,
+    this.showArrow = true,
+    this.caption,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final backWidth = showBack ? (compactBack ? 56.0 : 112.0) : 0.0;
+    final second = secondaryLabel;
+    final outlined = showBack || second != null;
+    final backWidth = second != null
+        ? 128.0
+        : showBack
+        ? (compactBack ? 56.0 : 112.0)
+        : 0.0;
 
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           KuberSpace.screenMargin,
-          KuberSpace.md,
+          showDots ? KuberSpace.md : KuberSpace.xl,
           KuberSpace.screenMargin,
           KuberSpace.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            OnboardingDotsIndicator(
-              currentPage: currentPage,
-              pageCount: pageCount,
+            AnimatedSize(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              child: caption == null
+                  ? const SizedBox(width: double.infinity)
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpace.md),
+                      child: Text(
+                        caption!,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(color: cs.onSurface),
+                      ),
+                    ),
             ),
-            const SizedBox(height: KuberSpace.lg),
+            if (showDots) ...[
+              OnboardingDotsIndicator(
+                currentPage: currentPage,
+                pageCount: pageCount,
+              ),
+              const SizedBox(height: KuberSpace.lg),
+            ],
             AnimatedSize(
               duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,
@@ -70,14 +112,14 @@ class OnboardingNavBar extends StatelessWidget {
                     height: 56,
                     width: backWidth,
                     margin: EdgeInsets.only(
-                      right: showBack ? KuberSpace.md : 0,
+                      right: outlined ? KuberSpace.md : 0,
                     ),
                     child: ClipRect(
                       child: AnimatedOpacity(
                         duration: const Duration(milliseconds: 180),
-                        opacity: showBack ? 1 : 0,
+                        opacity: outlined ? 1 : 0,
                         child: OutlinedButton(
-                          onPressed: onBack,
+                          onPressed: second != null ? onSecondary : onBack,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: cs.onSurface,
                             side: BorderSide(color: cs.outlineVariant),
@@ -85,7 +127,25 @@ class OnboardingNavBar extends StatelessWidget {
                             minimumSize: const Size(56, 56),
                             shape: const StadiumBorder(),
                           ),
-                          child: compactBack
+                          child: second != null
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: KuberSpace.md,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      second,
+                                      softWrap: false,
+                                      style: localeFont(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.1,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : compactBack
                               ? const Icon(Icons.arrow_back_rounded, size: 24)
                               // Natural width while the slot animates open;
                               // the ClipRect above hides the rest.
@@ -160,25 +220,28 @@ class OnboardingNavBar extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Shrinks only when the label runs out of room
+                              // (the largest system font sizes).
                               Flexible(
-                                child: Text(
-                                  primaryLabel,
-                                  overflow: TextOverflow.visible,
-                                  softWrap: false,
-                                  style: localeFont(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.1,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    primaryLabel,
+                                    softWrap: false,
+                                    style: localeFont(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.1,
+                                    ),
                                   ),
                                 ),
                               ),
-                              if (!busy) ...[
-                                const SizedBox(width: KuberSpace.sm),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  size: 20,
-                                ),
-                              ],
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                child: !busy && showArrow
+                                    ? const _ArrowIn()
+                                    : const SizedBox.shrink(),
+                              ),
                             ],
                           ),
                         ),
@@ -190,6 +253,29 @@ class OnboardingNavBar extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The arrow after the label: slides 8 in and fades, a beat after the button
+/// turns on.
+class _ArrowIn extends StatelessWidget {
+  const _ArrowIn();
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 250),
+      curve: const Interval(0.4, 1, curve: Curves.easeOut),
+      child: const Padding(
+        padding: EdgeInsetsDirectional.only(start: KuberSpace.sm),
+        child: Icon(Icons.arrow_forward_rounded, size: 20),
+      ),
+      builder: (_, t, c) => Opacity(
+        opacity: t,
+        child: Transform.translate(offset: Offset(-8 * (1 - t), 0), child: c),
       ),
     );
   }

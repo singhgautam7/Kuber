@@ -1,42 +1,32 @@
-import 'package:kuber/core/utils/locale_font.dart';
-import 'package:kuber/core/utils/l10n_ext.dart';
-import '../../home_v2/providers/home_v2_provider.dart';
-import '../../home_v2/data/home_v2_state.dart';
 import 'package:flutter/material.dart';
-import '../../../core/services/shortcut_pin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/utils/locale_font.dart';
 
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/currency_data.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-
-import '../../accounts/data/account.dart';
-import '../../accounts/providers/account_provider.dart';
-import '../../pro/settings/kuber_pro_settings_section.dart';
-import '../../../shared/widgets/category_icon.dart';
-import '../../../core/utils/icon_mapper.dart';
-import '../providers/settings_provider.dart';
-
-import '../widgets/settings_section.dart';
-import '../widgets/settings_choice_sheet.dart';
-import '../widgets/currency_selector_sheet.dart';
-import '../widgets/settings_language_row.dart';
-import '../widgets/text_size_sheet.dart';
-import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/supported_locales.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
-import '../../../core/services/biometric_service.dart';
-import '../../notes/providers/notes_provider.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../backups/providers/backup_provider.dart';
+import '../../dev/providers/dev_mode_provider.dart';
 import '../../kuber_cards/providers/kuber_cards_provider.dart';
+import '../../pro/settings/kuber_pro_settings_section.dart';
+import '../providers/settings_provider.dart';
+import 'settings_pages.dart';
+import '../settings_index.dart';
+import '../widgets/settings_anchor.dart';
+import '../widgets/settings_section.dart';
+import '../widgets/text_size_sheet.dart';
 
-// Imports for widget configurations and count
-import '../../widget_editor/providers/widget_editor_provider.dart';
-import '../../widget_editor/models/home_widget_config.dart';
-
+/// Settings: a short list of pages. Each row shows what's inside; the rows
+/// themselves live on their page (settings_pages.dart). Subtitles read values
+/// already in memory, so this page does no work of its own.
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  final String? highlight;
+  const SettingsScreen({super.key, this.highlight});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -44,27 +34,12 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late TextEditingController _userNameController;
-  final _biometricService = BiometricService();
-  ThemeMode? _tempThemeMode;
-  String? _tempCurrencyCode;
-  SwipeMode? _tempSwipeMode;
-  NumberSystem? _tempNumberSystem;
-  NavBarStyle? _tempNavBarStyle;
-  MoreTabLayout? _tempMoreTabLayout;
-  bool? _tempBiometricsEnabled;
 
   @override
   void initState() {
     super.initState();
     final settings = ref.read(settingsProvider).valueOrNull;
     _userNameController = TextEditingController(text: settings?.userName ?? '');
-    _tempThemeMode = settings?.themeMode;
-    _tempCurrencyCode = settings?.currency;
-    _tempSwipeMode = settings?.swipeMode;
-    _tempNumberSystem = settings?.numberSystem;
-    _tempNavBarStyle = settings?.navBarStyle;
-    _tempMoreTabLayout = settings?.moreTabLayout;
-    _tempBiometricsEnabled = settings?.biometricsEnabled;
   }
 
   @override
@@ -80,804 +55,165 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  // The Theme sheet (family picker + mode) reads and writes settingsProvider
-  // directly; see theme_sheet.dart.
-
-  void _showBottomNavSheet(BuildContext context, NavBarStyle current) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<NavBarStyle>(
-        title: context.l10n.bottomNavLabel,
-        subtitle: context.l10n.appearanceCategory,
-        selectedValue: current,
-        choices: [
-          SettingsChoice(
-            value: NavBarStyle.classic,
-            label: context.l10n.navClassicChoice,
-            subtitle: context.l10n.navSubtitleClassic,
-            icon: Icons.view_headline_rounded,
-          ),
-          SettingsChoice(
-            value: NavBarStyle.modern,
-            label: context.l10n.navModernChoice,
-            subtitle: context.l10n.navSubtitleModern,
-            icon: Icons.lens_rounded,
-          ),
-        ],
-        onSelected: (val) {
-          setState(() => _tempNavBarStyle = val);
-          ref.read(settingsProvider.notifier).setNavBarStyle(val);
-        },
-      ),
-    );
-  }
-
-  void _showMoreTabLayoutSheet(BuildContext context, MoreTabLayout current) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<MoreTabLayout>(
-        title: context.l10n.moreTabLayoutLabel,
-        subtitle: context.l10n.appearanceCategory,
-        selectedValue: current,
-        choices: moreTabLayoutChoices(context),
-        onSelected: (val) {
-          setState(() => _tempMoreTabLayout = val);
-          ref.read(settingsProvider.notifier).setMoreTabLayout(val);
-        },
-      ),
-    );
-  }
-
-  void _showNumberFormatSheet(BuildContext context, NumberSystem current) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<NumberSystem>(
-        title: context.l10n.numberFormatLabel,
-        subtitle: context.l10n.moneyDisplayCategory,
-        selectedValue: current,
-        choices: [
-          SettingsChoice(
-            value: NumberSystem.automatic,
-            label: context.l10n.numFormatAutomatic,
-            subtitle: context.l10n.numFormatAutomaticSub,
-            icon: Icons.auto_awesome_outlined,
-          ),
-          SettingsChoice(
-            value: NumberSystem.indian,
-            label: context.l10n.numFormatIndian,
-            subtitle: '1,23,000.00',
-            icon: Icons.language_rounded,
-          ),
-          SettingsChoice(
-            value: NumberSystem.international,
-            label: context.l10n.numFormatInternational,
-            subtitle: '123,000.00',
-            icon: Icons.public_rounded,
-          ),
-        ],
-        onSelected: (val) {
-          setState(() => _tempNumberSystem = val);
-          ref.read(settingsProvider.notifier).setNumberSystem(val);
-        },
-      ),
-    );
-  }
-
-  void _showHorizontalSwipeSheet(BuildContext context, SwipeMode current) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<SwipeMode>(
-        title: context.l10n.horizontalSwipeLabel,
-        subtitle: context.l10n.transactionsCategory,
-        selectedValue: current,
-        choices: [
-          SettingsChoice(
-            value: SwipeMode.changeTabs,
-            label: context.l10n.swipeChangeTabs,
-            subtitle: context.l10n.swipeSubtitleChangeTabs,
-            icon: Icons.swap_horiz_rounded,
-          ),
-          SettingsChoice(
-            value: SwipeMode.performActions,
-            label: context.l10n.swipeRowActions,
-            subtitle: context.l10n.swipeSubtitleRowActions,
-            icon: Icons.swipe_rounded,
-          ),
-        ],
-        onSelected: (val) {
-          setState(() => _tempSwipeMode = val);
-          ref.read(settingsProvider.notifier).setSwipeMode(val);
-        },
-      ),
-    );
-  }
-
-  Widget _trailingWidget(BuildContext context, {String? text}) {
-    final cs = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (text != null && text.isNotEmpty) ...[
-          Text(
-            text,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(width: KuberSpace.sm),
-        ],
-        Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final settings = ref.watch(settingsProvider).valueOrNull;
-    final accounts = ref.watch(accountListProvider).valueOrNull ?? <Account>[];
-    final defaultAccId = settings?.defaultAccountId;
-    final defaultAccName =
-        accounts
-            .where((a) => a.id.toString() == defaultAccId)
-            .firstOrNull
-            ?.name ??
-        context.l10n.notSet;
+    final l = context.l10n;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final variant = ref.watch(themeVariantProvider);
+    final textLevel = ref.watch(textSizeLevelProvider);
+    final locale = ref.watch(localeProvider);
+    final language = kSupportedLanguages
+        .firstWhere((x) => x.locale.languageCode == locale.languageCode,
+            orElse: () => kSupportedLanguages.first)
+        .nativeName;
+    final currency = ref.watch(currencyProvider);
+    final number = ref.watch(settingsProvider.select((s) => s.valueOrNull?.numberSystem ?? NumberSystem.automatic));
 
-    // Fallbacks if data isn't ready
-    final currentTheme =
-        _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
-    final currencyCode = _tempCurrencyCode ?? settings?.currency ?? 'INR';
-    final currentSwipeMode =
-        _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
-    final currentNumberSystem =
-        _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.automatic;
-    final currentNavBarStyle =
-        _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
-    final currentMoreTabLayout =
-        _tempMoreTabLayout ?? settings?.moreTabLayout ?? MoreTabLayout.simple;
-    final currentBiometricsEnabled =
-        _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
-    final hasCardsVault = ref.watch(cardVaultMetaProvider).valueOrNull != null;
-    final currency = currencyFromCode(currencyCode);
-
-    final themeStr = currentTheme == ThemeMode.light
-        ? context.l10n.themeLightChoice
-        : currentTheme == ThemeMode.dark
-        ? context.l10n.themeDarkChoice
-        : context.l10n.themeSystemChoice;
-    final navStr = currentNavBarStyle == NavBarStyle.classic
-        ? context.l10n.navClassicChoice
-        : context.l10n.navModernChoice;
-    final moreLayoutStr = currentMoreTabLayout == MoreTabLayout.simple
-        ? context.l10n.simpleLabel
-        : context.l10n.navModernChoice;
-    final numberStr = switch (currentNumberSystem) {
-      NumberSystem.indian => context.l10n.numFormatIndian,
-      NumberSystem.international => context.l10n.numFormatInternational,
-      NumberSystem.automatic => context.l10n.numFormatAutomatic,
-    };
-    final swipeStr = currentSwipeMode == SwipeMode.changeTabs
-        ? context.l10n.swipeChangeTabs
-        : context.l10n.swipeRowActions;
-
-    // Widget configurations and counts
-    final homeWidgets =
-        ref.watch(homeWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
-    final enabledHomeCount = homeWidgets.where((w) => w.enabled).length;
-
-    final analyticsWidgets =
-        ref.watch(analyticsWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
-    final enabledAnalyticsCount = analyticsWidgets
-        .where((w) => w.enabled)
-        .length;
-
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: KuberAppBar(
-              showBack: true,
-              title: context.l10n.settingsTitle,
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpace.screenMargin,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const KuberProSettingsSection(),
-                const SizedBox(height: KuberSpace.lg),
-                // PROFILE
-                _SectionLabel(label: context.l10n.profileSection),
-                _SectionDescription(context.l10n.profileDescription),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.person_outline_rounded,
-                      label: context.l10n.yourNameLabel,
-                      onTap: () => _showNameBottomSheet(context),
-                      trailing: _trailingWidget(
-                        context,
-                        text: _userNameController.text.isEmpty
-                            ? context.l10n.setYourName
-                            : _userNameController.text,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.xl),
-
-                // APPEARANCE
-                _SectionLabel(label: context.l10n.appearanceSection),
-                _SectionDescription(context.l10n.appearanceDescription),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.palette_outlined,
-                      label: context.l10n.themeLabel,
-                      subtitle:
-                          '${themeFamilyName(settings?.themeVariant ?? ThemeVariant.signature)} • $themeStr',
-                      onTap: () => context.push('/more/settings/theme'),
-                      trailing: _trailingWidget(context),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.format_size_rounded,
-                      label: context.l10n.textSizeTitle,
-                      subtitle: context.l10n.textSizeDesc,
-                      onTap: () => TextSizeSheet.show(context),
-                      trailing: _trailingWidget(
-                        context,
-                        text: textSizeLabel(
-                          context,
-                          ref.watch(textSizeLevelProvider),
-                        ),
-                      ),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.space_dashboard_outlined,
-                      label: context.l10n.bottomNavLabel,
-                      subtitle: context.l10n.bottomNavSubtitle,
-                      onTap: () =>
-                          _showBottomNavSheet(context, currentNavBarStyle),
-                      trailing: _trailingWidget(context, text: navStr),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.grid_view_outlined,
-                      label: context.l10n.moreTabLayoutLabel,
-                      subtitle: context.l10n.moreTabLayoutSubtitle,
-                      onTap: () => _showMoreTabLayoutSheet(
-                        context,
-                        currentMoreTabLayout,
-                      ),
-                      trailing: _trailingWidget(context, text: moreLayoutStr),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.xl),
-
-                // SHORTCUTS — Quick Actions (nav-bar long-press) + Add menu
-                // (FAB long-press). English-only literals, like other
-                // Kuber-signature surfaces.
-                const _SectionLabel(label: 'SHORTCUTS'),
-                const _SectionDescription('Personalize your long-press menus.'),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.bolt_outlined,
-                      label: 'Quick Actions',
-                      subtitle: 'Nav-bar long-press · controls & shortcuts',
-                      onTap: () => context.push('/settings/quick-actions'),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.add_circle_outline_rounded,
-                      label: 'Add Menu',
-                      subtitle: '+ button long-press · add-entry shortcuts',
-                      onTap: () => context.push('/settings/add-menu'),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.md),
-                const _ShortcutsDiscoveryTip(),
-                const SizedBox(height: KuberSpace.xl),
-
-
-                // WIDGETS
-                _SectionLabel(label: context.l10n.widgetsSection),
-                _SectionDescription(context.l10n.widgetsDescription),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.home_outlined,
-                      label: context.l10n.homeWidgetsLabel,
-                      subtitle: context.l10n.homeWidgetsSubtitle(
-                        '$enabledHomeCount',
-                      ),
-                      onTap: () => context.push('/widget-editor/home'),
-                      trailing: _trailingWidget(context),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.insert_chart_outlined_rounded,
-                      label: context.l10n.analyticsWidgetsLabel,
-                      subtitle: context.l10n.analyticsWidgetsSubtitle(
-                        '$enabledAnalyticsCount',
-                      ),
-                      onTap: () => context.push('/widget-editor/analytics'),
-                      trailing: _trailingWidget(context),
-                    ),
-                    // Home v2 installs only (board HV2.2 Settings).
-                    ...const _HomeV2SettingsRows().rows(context, ref, cs),
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.xl),
-
-                // MONEY DISPLAY
-                _SectionLabel(label: context.l10n.moneyDisplaySection),
-                _SectionDescription(context.l10n.moneyDisplayDescription),
-                _SettingsCard(
-                  children: [
-                    const SettingsLanguageRow(),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: context.l10n.currencyLabel,
-                      subtitle: context.l10n.currencySubtitle,
-                      // Currency selection is free for everyone.
-                      onTap: () => _showCurrencyPicker(context, currencyCode),
-                      trailing: _trailingWidget(
-                        context,
-                        text: '${currency.symbol} ${currency.code}',
-                      ),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.money_outlined,
-                      label: context.l10n.numberFormatLabel,
-                      subtitle: context.l10n.numberFormatSubtitle,
-                      onTap: () =>
-                          _showNumberFormatSheet(context, currentNumberSystem),
-                      trailing: _trailingWidget(context, text: numberStr),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.abc_rounded,
-                      label: context.l10n.showCurrencyCode,
-                      subtitle: context.l10n.showCurrencyCodeSub,
-                      trailing: Switch(
-                        value: settings?.showCurrencyCode ?? false,
-                        onChanged: (v) => ref
-                            .read(settingsProvider.notifier)
-                            .setShowCurrencyCode(v),
-                        activeTrackColor: cs.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.xl),
-
-                // TRANSACTIONS
-                _SectionLabel(label: context.l10n.transactionsSection),
-                _SectionDescription(context.l10n.transactionsDescription),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: context.l10n.defaultAccountLabel,
-                      subtitle: context.l10n.defaultAccountSubtitle,
-                      onTap: () => _showDefaultAccountPicker(
-                        context,
-                        accounts,
-                        defaultAccId,
-                      ),
-                      trailing: _trailingWidget(context, text: defaultAccName),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.swap_horiz_rounded,
-                      label: context.l10n.horizontalSwipeLabel,
-                      subtitle: context.l10n.horizontalSwipeSubtitle,
-                      onTap: () =>
-                          _showHorizontalSwipeSheet(context, currentSwipeMode),
-                      trailing: _trailingWidget(context, text: swipeStr),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.xl),
-
-                // PRIVACY & SECURITY
-                _SectionLabel(label: context.l10n.privacySecuritySection),
-                _SectionDescription(context.l10n.privacySecurityDescription),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.visibility_off_outlined,
-                      label: context.l10n.privacyModeLabel,
-                      subtitle: context.l10n.privacyModeSubtitle,
-                      trailing: Switch(
-                        value: ref.watch(privacyModeProvider),
-                        onChanged: (_) => ref
-                            .read(settingsProvider.notifier)
-                            .togglePrivacyMode(),
-                        activeTrackColor: cs.primary,
-                      ),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    _SettingsTile(
-                      icon: Icons.fingerprint_rounded,
-                      label: context.l10n.biometricLockLabel,
-                      subtitle: context.l10n.biometricLockSubtitle,
-                      trailing: Switch(
-                        value: currentBiometricsEnabled,
-                        onChanged: (val) async {
-                          if (val) {
-                            // Only authenticate if turning ON
-                            final canAuth = await _biometricService
-                                .canAuthenticate();
-                            if (!context.mounted) return;
-
-                            if (!canAuth) {
-                              showKuberSnackBar(
-                                context,
-                                context.l10n.biometricNotAvailable,
-                                isError: true,
-                              );
-                              return;
-                            }
-
-                            final success = await _biometricService
-                                .authenticate();
-                            if (!context.mounted) return;
-
-                            if (success) {
-                              setState(() => _tempBiometricsEnabled = true);
-                              await ref
-                                  .read(settingsProvider.notifier)
-                                  .setBiometricsEnabled(true);
-                              if (!context.mounted) return;
-                              showKuberSnackBar(
-                                context,
-                                context.l10n.biometricEnabledMsg,
-                              );
-                            }
-                          } else {
-                            // Require authentication before disabling biometric lock
-                            final success = await _biometricService
-                                .authenticate();
-                            if (!context.mounted) return;
-                            if (!success) return;
-
-                            setState(() => _tempBiometricsEnabled = false);
-                            await ref
-                                .read(settingsProvider.notifier)
-                                .setBiometricsEnabled(false);
-                            if (!context.mounted) return;
-                            showKuberSnackBar(
-                              context,
-                              context.l10n.biometricDisabledMsg,
-                            );
-                          }
-                        },
-                        activeTrackColor: cs.primary,
-                      ),
-                    ),
-                    Divider(height: 1, color: cs.outlineVariant),
-                    // Notes-specific gate. Greyed out until the app-wide
-                    // biometric toggle above is on (per design 1l).
-                    Opacity(
-                      opacity: currentBiometricsEnabled ? 1 : 0.45,
-                      child: _SettingsTile(
-                        icon: Icons.lock_outline_rounded,
-                        label: 'Require biometric to open Notes',
-                        subtitle: currentBiometricsEnabled
-                            ? 'Ask for Face / fingerprint unlock'
-                            : 'Turn on Biometric unlock above first',
-                        trailing: Switch(
-                          value:
-                              currentBiometricsEnabled &&
-                              ref.watch(notesBiometricRequiredProvider),
-                          onChanged: !currentBiometricsEnabled
-                              ? null
-                              : (val) async {
-                                  await ref
-                                      .read(
-                                        notesBiometricRequiredProvider.notifier,
-                                      )
-                                      .set(val);
-                                  if (!val) {
-                                    ref
-                                            .read(
-                                              notesUnlockedThisSessionProvider
-                                                  .notifier,
-                                            )
-                                            .state =
-                                        false;
-                                  }
-                                },
-                          activeTrackColor: cs.primary,
-                        ),
-                      ),
-                    ),
-                    // Change Kuber Cards PIN. Shown only once a vault exists —
-                    // there is no PIN to change until the user has set up Kuber
-                    // Cards. Routed through the Pro gate.
-                    if (hasCardsVault) ...[
-                      Divider(height: 1, color: cs.outlineVariant),
-                      _SettingsTile(
-                        icon: Icons.credit_card_outlined,
-                        label: 'Change Kuber Cards PIN',
-                        subtitle: 'Update the PIN that unlocks your cards',
-                        trailing: Icon(
-                          Icons.chevron_right_rounded,
-                          size: 20,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        // Kuber Cards is free up to 2 cards, so managing the
-                        // unlock PIN is free too. No entry-level Pro gate.
-                        onTap: () => context.push('/cards/change-pin'),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: KuberSpace.xl),
-
-                // APP DRAWER (Android): own launcher icons for three screens.
-                if (AppDrawerEntries.supported) ...[
-                  _SectionLabel(label: context.l10n.appDrawerSection),
-                  _SectionDescription(context.l10n.appDrawerDescription),
-                  _SettingsCard(
-                    children: [
-                      for (final (i, e) in [
-                        (AppDrawerEntry.cards, Icons.wallet_rounded, context.l10n.appDrawerCards, context.l10n.appDrawerCardsSub),
-                        (AppDrawerEntry.notes, Icons.sticky_note_2_outlined, context.l10n.appDrawerNotes, context.l10n.appDrawerNotesSub),
-                        (AppDrawerEntry.reminders, Icons.notifications_none_rounded, context.l10n.appDrawerReminders, context.l10n.appDrawerRemindersSub),
-                      ].indexed) ...[
-                        if (i > 0) Divider(height: 1, color: cs.outlineVariant),
-                        _SettingsTile(
-                          icon: e.$2,
-                          label: e.$3,
-                          subtitle: e.$4,
-                          trailing: Switch(
-                            value: ref.watch(appDrawerEntriesProvider).valueOrNull?.contains(e.$1) ?? false,
-                            onChanged: (v) => toggleAppDrawerEntry(context, ref, e.$1, v),
-                            activeTrackColor: cs.primary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: KuberSpace.xl),
-                ],
-
-                // ABOUT
-                _SectionLabel(label: context.l10n.aboutSection),
-                _SectionDescription(context.l10n.aboutDescription),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.info_outline_rounded,
-                      label: context.l10n.aboutKuberLabel,
-                      subtitle: context.l10n.aboutKuberSubtitle,
-                      onTap: () => context.push('/more/about'),
-                      trailing: _trailingWidget(context),
-                    ),
-                  ],
-                ),
-                SizedBox(height: KuberSpace.xxl + systemNavBarInset(context)),
-              ]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDefaultAccountPicker(
-    BuildContext context,
-    List<Account> accounts,
-    String? currentId,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(KuberShape.extraLarge),
-        ),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      builder: (ctx) {
-        final cs = Theme.of(ctx).colorScheme;
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          maxChildSize: 0.9,
-          minChildSize: 0.3,
-          expand: false,
-          builder: (ctx, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: KuberSpace.md),
-                Container(
-                  width: 32,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(KuberShape.full),
-                  ),
-                ),
-                const SizedBox(height: KuberSpace.lg),
-                Text(
-                  context.l10n.defaultAccountLabel,
-                  style: localeFont(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: KuberSpace.lg),
-                if (accounts.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(KuberSpace.xl),
-                    child: Text(
-                      context.l10n.noAccountsFound,
-                      style: localeFont(color: cs.onSurfaceVariant),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: accounts.length,
-                      itemBuilder: (ctx, i) {
-                        final a = accounts[i];
-                        final isSelected = a.id.toString() == currentId;
-                        return ListTile(
-                          leading: CategoryIcon.square(
-                            icon: a.icon != null
-                                ? IconMapper.fromString(a.icon!)
-                                : Icons.account_balance,
-                            rawColor: a.colorValue != null
-                                ? Color(a.colorValue!)
-                                : cs.primary,
-                            size: 44,
-                          ),
-                          title: Text(
-                            a.name,
-                            style: localeFont(
-                              fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          subtitle: Text(
-                            a.isCreditCard
-                                ? context.l10n.creditCardLabel
-                                : a.isOverdraft
-                                ? context.l10n.accountTypeOverdraft
-                                : context.l10n.bankCashLabel,
-                            style: localeFont(
-                              fontSize: 12,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                          trailing: isSelected
-                              ? Icon(
-                                  Icons.check_rounded,
-                                  color: cs.primary,
-                                  size: 20,
-                                )
-                              : null,
-                          onTap: () {
-                            ref
-                                .read(settingsProvider.notifier)
-                                .setDefaultAccountId(a.id.toString());
-                            Navigator.pop(ctx);
-                            showKuberSnackBar(
-                              context,
-                              context.l10n.setAsDefault(a.name),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                if (currentId != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      KuberSpace.lg,
-                      KuberSpace.sm,
-                      KuberSpace.lg,
-                      KuberSpace.lg,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setDefaultAccountId(null);
-                          Navigator.pop(ctx);
-                          showKuberSnackBar(
-                            context,
-                            context.l10n.defaultAccountCleared,
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: cs.error,
-                          side: BorderSide(
-                            color: cs.error.withValues(alpha: 0.5),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              KuberShape.medium,
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: Text(
-                          context.l10n.clearDefault,
-                          style: localeFont(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
+    // The rows fed by async values are Consumers: as each value lands only its
+    // row rebuilds, not the page.
+    Widget group(IconData icon, String title, String subtitle, SettingsArea area) => KuberGroupRow(
+          icon: icon,
+          title: title,
+          subtitle: subtitle,
+          onTap: () => context.push(area.route),
         );
-      },
-    );
-  }
 
-  void _showCurrencyPicker(BuildContext context, String currentCode) {
-    showCurrencyPicker(
-      context: context,
-      ref: ref,
-      currentCode: currentCode,
-      // The number format follows the currency (settings_provider), so drop
-      // the cached choice and show the saved one.
-      onSelected: (code) => setState(() {
-        _tempCurrencyCode = code;
-        _tempNumberSystem = null;
-      }),
+    return SettingsOnResume(
+      onResume: () => ref.invalidate(notificationsAllowedProvider),
+      child: SettingsPageFrame(
+      title: l.settingsTitle,
+      highlight: widget.highlight,
+      children: [
+        const SettingsAnchor('pro', child: KuberProSettingsSection()),
+        const SizedBox(height: KuberSpace.md),
+        SettingsBlock(
+          children: [
+            SettingsAnchor('name', child: SettingsTile(
+              icon: Icons.person_outline_rounded,
+              label: l.setYourNameRow,
+              onTap: () => _showNameBottomSheet(context),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _userNameController.text.isEmpty ? l.setYourName : _userNameController.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                  ),
+                  const SizedBox(width: KuberSpace.lg),
+                  const KuberChevron(),
+                ],
+              ),
+            )),
+          ],
+        ),
+        SettingsBlock(
+          title: l.setSecYours,
+          children: [
+            group(Icons.palette_outlined, l.setGroupLook,
+                l.setLookSub(themeFamilyName(variant), textSizeLabel(context, textLevel)), SettingsArea.look),
+            group(Icons.tune_rounded, l.setGroupPrefs,
+                l.setPrefsSub(language, '${currency.symbol} ${currency.code}', numberSystemName(l, number)),
+                SettingsArea.prefs),
+            if (AppDrawerEntries.supported)
+              Consumer(
+                builder: (_, ref, _) {
+                  final drawer = ref.watch(appDrawerEntriesProvider).valueOrNull ?? const <AppDrawerEntry>{};
+                  return group(
+                    Icons.apps_rounded,
+                    l.appDrawerSection,
+                    drawer.isEmpty
+                        ? l.setDrawerNone
+                        : [
+                            if (drawer.contains(AppDrawerEntry.cards)) l.appDrawerCards,
+                            if (drawer.contains(AppDrawerEntry.notes)) l.appDrawerNotes,
+                            if (drawer.contains(AppDrawerEntry.reminders)) l.appDrawerReminders,
+                          ].join(', '),
+                    SettingsArea.drawer,
+                  );
+                },
+              ),
+          ],
+        ),
+        SettingsBlock(
+          title: l.setSecSafe,
+          children: [
+            Consumer(
+              builder: (_, ref, _) {
+                final appLock = ref.watch(settingsProvider.select((s) => s.valueOrNull?.biometricsEnabled ?? false));
+                final hasPin = ref.watch(hasVaultProvider);
+                return group(
+                  Icons.shield_outlined,
+                  l.setGroupPrivacy,
+                  [appLock ? l.setPrivacyLockOn : l.setPrivacyLockOff, if (hasPin) l.setPrivacyPinOn].join(' · '),
+                  SettingsArea.privacy,
+                );
+              },
+            ),
+            Consumer(
+              builder: (_, ref, _) {
+                final backup = ref.watch(backupSettingsProvider.select((s) => s.valueOrNull?.lastBackupAt));
+                return group(Icons.cloud_sync_rounded, l.setGroupData,
+                    backup == null ? l.setNoBackupYet : l.setLastBackupAgo(backupAgo(l, backup)), SettingsArea.data);
+              },
+            ),
+            Consumer(
+              builder: (_, ref, _) {
+                final off = ref.watch(notificationsAllowedProvider).valueOrNull == false;
+                return group(Icons.notifications_outlined, l.menuNotifications, off ? l.setOff : l.setOn,
+                    SettingsArea.notifications);
+              },
+            ),
+          ],
+        ),
+        SettingsBlock(
+          title: l.setSecHelp,
+          children: [
+            group(Icons.help_outline_rounded, l.setHelpTitle, l.setHelpSub, SettingsArea.help),
+            group(Icons.event_note_outlined, l.setGroupActivity, l.setActivitySub, SettingsArea.activity),
+          ],
+        ),
+        SettingsBlock(
+          children: [
+            SettingsAnchor('about', child: Consumer(
+              builder: (_, ref, _) {
+                final version = ref.watch(appVersionProvider).valueOrNull;
+                return SettingsTile(
+                  icon: Icons.info_outline_rounded,
+                  label: l.aboutKuberLabel,
+                  subtitle: version == null ? null : l.setVersion(version),
+                  onTap: () => context.push('/more/about'),
+                  trailing: const KuberChevron(),
+                );
+              },
+            )),
+            SettingsAnchor('permissions', child: SettingsTile(
+              icon: Icons.security_outlined,
+              label: l.menuPermissions,
+              subtitle: l.menuPermissionsDesc,
+              onTap: () => context.pushNamed('permissions'),
+              trailing: const KuberChevron(),
+            )),
+            // Unlocked by tapping the version in About.
+            Consumer(
+              builder: (_, ref, _) => ref.watch(devModeProvider).valueOrNull ?? false
+                  ? SettingsTile(
+                      icon: Icons.bug_report_outlined,
+                      label: l.menuDevTools,
+                      subtitle: l.menuDevToolsDesc,
+                      onTap: () => context.push('/more/dev-tools'),
+                      trailing: const KuberChevron(),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ],
+      ),
     );
   }
 
@@ -1019,139 +355,5 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
     );
-  }
-}
-
-// These row primitives were lifted into the shared
-// `features/settings/widgets/settings_section.dart` so the Kuber Cards settings
-// page can reuse them verbatim. The old private names are kept as aliases so no
-// call site in this file changed.
-typedef _SectionLabel = SettingsSectionLabel;
-typedef _SectionDescription = SettingsSectionDescription;
-typedef _SettingsCard = SettingsCard;
-typedef _SettingsTile = SettingsTile;
-
-/// Discovery tip below the SHORTCUTS card — teaches both long-press gestures so
-/// the feature is findable without knowing them. Dashed primary-tinted bar.
-class _ShortcutsDiscoveryTip extends StatelessWidget {
-  const _ShortcutsDiscoveryTip();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(KuberSpace.md),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.28)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: cs.primary,
-              borderRadius: BorderRadius.circular(KuberShape.small),
-            ),
-            child: Icon(Icons.touch_app_rounded, size: 18, color: cs.onPrimary),
-          ),
-          const SizedBox(width: KuberSpace.md),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                style: localeFont(
-                  fontSize: 12,
-                  color: cs.onSurface,
-                  height: 1.45,
-                ),
-                children: [
-                  TextSpan(
-                    text: 'Tip: ',
-                    style: localeFont(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary,
-                    ),
-                  ),
-                  const TextSpan(
-                    text:
-                        'long-press any bottom-nav tab (Home, History, '
-                        'Analytics, More) for Quick Actions, or long-press the '
-                        '+ button for the Add menu.',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Home v2 rows in Settings › Widgets: "Get started card" (for 30 days after
-/// install) and "Suggestions on Home". Nothing for v1.
-class _HomeV2SettingsRows {
-  const _HomeV2SettingsRows();
-
-  List<Widget> rows(BuildContext context, WidgetRef ref, ColorScheme cs) {
-    final s = ref.watch(homeV2Provider);
-    if (!s.isV2) return const [];
-    final l = context.l10n;
-    final installedAt = s.installedAt;
-    // Existing users moved over by the update migration never get Get
-    // started (specs/home-v3.3/plan.md §2), so no switch for it either.
-    final showGs =
-        s.gsGraduationReason != GsGraduation.migrated &&
-        (installedAt == null ||
-            DateTime.now().difference(installedAt) <= const Duration(days: 30));
-    final notifier = ref.read(homeV2Provider.notifier);
-    return [
-      if (showGs) ...[
-        Divider(height: 1, color: cs.outlineVariant),
-        _SettingsTile(
-          icon: Icons.flag_outlined,
-          label: l.homeV2SetGsTitle,
-          subtitle: l.homeV2SetGsSub,
-          onTap: () {},
-          trailing: Switch(
-            value: s.gsEligible,
-            onChanged: (on) => notifier.update(
-              (x) => on
-                  // On: clears graduation; the card returns with current
-                  // progress and re-graduates if everything is done.
-                  ? x.copyWith(
-                      gsSetting: true,
-                      gsGraduatedAt: () => null,
-                      gsGraduationReason: () => null,
-                      gsSuccessShown: false,
-                    )
-                  // Off counts as dismissed.
-                  : x.copyWith(
-                      gsSetting: false,
-                      gsGraduatedAt: () => x.gsGraduatedAt ?? DateTime.now(),
-                      gsGraduationReason: () =>
-                          x.gsGraduationReason ?? GsGraduation.dismissed,
-                      gsSuccessShown: true,
-                    ),
-            ),
-          ),
-        ),
-      ],
-      Divider(height: 1, color: cs.outlineVariant),
-      _SettingsTile(
-        icon: Icons.lightbulb_outline_rounded,
-        label: l.homeV2SetSgTitle,
-        subtitle: l.homeV2SetSgSub,
-        onTap: () {},
-        trailing: Switch(
-          value: s.sgSetting,
-          onChanged: (on) => notifier.update((x) => x.copyWith(sgSetting: on)),
-        ),
-      ),
-    ];
   }
 }

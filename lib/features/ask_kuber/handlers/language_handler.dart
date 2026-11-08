@@ -36,7 +36,7 @@ class LanguageHandler extends QueryHandler {
           'Telugu, Malayalam and Kannada. You can switch any time in More, '
           'Settings, Language.',
       followUps: [
-        NavChipAction(label: 'Change language', route: '/more/settings'),
+        NavChipAction(label: 'Change language', route: '/more/settings/preferences?row=language'),
       ],
     );
   }

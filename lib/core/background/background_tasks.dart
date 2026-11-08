@@ -112,10 +112,14 @@ class BackgroundTasks {
           : null,
     );
     if (notify && run != null) {
+      final backupFailed = run.backupStatus == 'failed';
       if (run.status == 'done') {
         await notifications.clearBackground();
       } else {
-        final backupFailed = run.backupStatus == 'failed';
+        // Only the backup failed: it goes to the Backup problems category, so
+        // turning that off on the phone keeps it quiet.
+        final backupOnly = backupFailed && run.failedOccurrences == 0;
+        if (backupOnly) await notifications.clearBackground();
         await notifications.showBackgroundFailure(
           channelName: l10n.bgChannelName,
           channelDescription: l10n.bgChannelDesc,
@@ -123,6 +127,7 @@ class BackgroundTasks {
           body: resultText(run, l10n),
           retryLabel: l10n.bgRetry,
           payload: backupFailed ? 'background:backup' : 'background:recurring',
+          channelId: backupOnly ? KuberChannel.backups.id : NotificationService.backgroundChannelId,
         );
       }
     }

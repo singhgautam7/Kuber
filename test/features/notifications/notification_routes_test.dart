@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kuber/features/notifications/data/notification_repository.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/features/budgets/data/budget.dart';
 import 'package:kuber/features/categories/data/category.dart';
@@ -142,11 +143,16 @@ void main() {
           ..dataVersion = 1
           ..sip = scheduleFrom(start: start));
       });
+      // Each new row also goes to the phone hook (NotificationService.init).
+      final mirrored = <String?>[];
+      NotificationRepository.onAdded = (n) async => mirrored.add(n.payload);
+      addTearDown(() => NotificationRepository.onAdded = null);
       final s = await OccurrenceProcessor(isar, decimals: 2, l10n: AppLocalizationsEn())
           .run(now: DateTime(2026, 10, 1, 9));
       expect(s.posted, 3);
       final rows = await isar.appNotifications.where().findAll();
       expect(rows.length, 3);
+      expect(mirrored, unorderedEquals(rows.map((n) => n.payload)));
       for (final n in rows) {
         final route = resolveNotificationRoute(n.payload, type: n.type);
         expect(route.hasItem, isTrue, reason: n.payload);

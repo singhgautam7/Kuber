@@ -6,7 +6,6 @@ import '../../../core/utils/locale_font.dart';
 import '../../../core/utils/supported_locales.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
-import '../../../shared/widgets/kuber_list.dart' show KuberPill;
 import 'settings_section.dart' show SettingsTile;
 import 'language_picker_bottom_sheet.dart';
 
@@ -32,7 +31,6 @@ class SettingsLanguageRow extends ConsumerWidget {
     return SettingsTile(
       icon: Icons.language_rounded,
       label: labelText,
-      labelTag: KuberPill(label: localizations.betaTag),
       onTap: () => showLanguagePicker(
         context: context,
         ref: ref,
@@ -44,15 +42,19 @@ class SettingsLanguageRow extends ConsumerWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            lang.nativeName,
-            style: localeFont(
-              locale: lang.locale,
-              fontSize: 14,
-              color: cs.onSurfaceVariant,
+          Flexible(
+            child: Text(
+              lang.nativeName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: localeFont(
+                locale: lang.locale,
+                fontSize: 14,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
-          const SizedBox(width: KuberSpace.sm),
+          const SizedBox(width: KuberSpace.lg),
           Icon(
             Icons.chevron_right_rounded,
             color: cs.onSurfaceVariant,

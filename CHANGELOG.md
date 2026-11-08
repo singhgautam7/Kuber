@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+- Loans that grow in parts: add each part as the bank pays it out, and pick
+  the account it reached. Interest is charged only on what has been released.
+- Interest before EMIs: pay it every month or let the bank add it to the loan.
+  Kuber works it out day by day, the way banks do.
+- Add to loan: record more money released, charges or unpaid interest.
+- Settings is a short list of groups that show your current values, and More
+  keeps only what you use most. Notifications now has its own page, with
+  switches for EMI, budget and backup alerts.
+- Search in More now finds settings, accounts, categories, tags, money plans,
+  people, card names, note titles and tools. Recent searches stay on your phone.
+- A new first page: pick your language, restore a backup or import a CSV, and
+  watch the progress as it runs.
+- Tap a page title, or long-press back, to see how you got here as a tree and
+  jump to any earlier page.
+- Answers to common questions on the Kuber Pro page.
+- New themes: Saffron, Sky and Ruby. Meadow and Coral are gone.
+- The app lock and the Kuber Cards biometric are now separate settings.
+- Fixed a crash when Horizontal swipe was set to row actions.
+- Every row in More and Settings has the same tinted icon.
+- Ask Kuber can explain Accounts and Kuber Cards, what's free, what's in Pro
+  and each limit, and answers the questions on the Pro page.
+- Opening a card from search always asks for your Cards PIN or fingerprint.
+- Welcome is one page shorter: the "What do you want to track?" question is
+  gone.
+- EMI, recurring and SIP payments now show a phone notification when they're
+  recorded.
+- Notifications in Settings now match your phone's notification categories
+  exactly: each shows whether it's on, and a tap opens it in phone settings.
+  The categories have clear names in your language.
+- Dev Tools (once unlocked) and Permissions are now in Settings, under About.
+- Loans can count interest by days, like most banks: each EMI's interest is
+  for the actual days since the last one. New loans use it; an existing loan
+  can switch from its menu, with a preview of the new end date and total
+  interest first. EMIs you've already recorded don't change.
+- Update outstanding suggests daily interest when your bank's figure is more
+  than ₹500 away.
+- Delete loan is in the Edit loan menu, the EMI schedule opens at the top,
+  and a loan's sheet shows a placeholder while it loads.
+- Fixed: Settings could say notifications were Off after you allowed them.
+
 - Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
   reminder, card due date and money you lent or borrowed on a month grid,
   with what went out and came in. Tap a day to see its list, long-press a day

@@ -60,6 +60,9 @@ class PrefsKeys {
   // Quick Add
   static const defaultAccountId = 'kuber_default_account_id';
 
+  // More search: recent searches, newest first.
+  static const moreSearchRecent = 'kuber_more_search_recent';
+
   // Privacy
   static const privacyMode = 'kuber_privacy_mode';
 
@@ -160,12 +163,16 @@ class PrefsKeys {
   // SMS import.
   static const introQuickAddDone = 'intro_quick_add_done';
   static const introSmsDone = 'intro_sms_done';
-  // What do you want to track? (Welcome, Edit widgets › What you track).
+  // Picks from the old "What do you want to track?" welcome page (removed
+  // 2026-11); still read so earlier picks keep their cards first.
   static const trackingChoices = 'home_v3_tracking_choices';
-  static const trackingAnswer = 'home_v3_tracking_answer';
   // Upcoming events: 'list' | 'calendar' (upcoming-calendar-v1).
   static const upcomingEventsView = 'upcoming_events_view';
   // Theme surfaces (theme-surfaces-v1). Pure black keeps `themeAmoled`.
+  // Data responsibility page: when it was accepted, and its wording version.
+  static const dataTermsAcceptedAt = 'data_terms_accepted_at';
+  static const dataTermsVersion = 'data_terms_version';
+
   static const themeExpressive = 'theme_expressive';
   static const themeSurfacesMigrated = 'theme_surfaces_migrated_v1';
 }

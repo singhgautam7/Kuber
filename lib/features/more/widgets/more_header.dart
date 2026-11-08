@@ -22,7 +22,8 @@ class MoreHeader extends ConsumerWidget {
         AppIconButton(
           icon: Icons.search_rounded,
           semanticLabel: 'Search',
-          onPressed: () => Navigator.of(context).push(
+          // Over the tabs: search is a full page with no nav bar.
+          onPressed: () => Navigator.of(context, rootNavigator: true).push(
             MaterialPageRoute<void>(
               builder: (_) => MoreSearchScreen(hostContext: context),
             ),

@@ -1,71 +1,57 @@
 import 'dart:io';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../l10n/app_localizations.dart';
 import '../utils/prefs_keys.dart';
 import '../../features/notifications/data/app_notification.dart';
+import '../../features/notifications/data/notification_repository.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
 });
 
-/// Channel ids/names for notification types. These also drive the
-/// Android-side channel registration in [NotificationService.init].
-class _Channel {
+/// Kuber's notification categories as the phone lists them (App info ›
+/// Notifications). The phone keeps whether each is on: Settings ›
+/// Notifications shows that and opens the phone's page for it, so there is
+/// one switch per category, not one in Kuber and one in Android.
+enum KuberChannel {
+  payments('kuber_payments'),
+  budgets('budget_alerts'),
+  reminders('kuber_reminders'),
+  ledger('kuber_ledger_reminder'),
+  backups('kuber_backup');
+
+  const KuberChannel(this.id);
   final String id;
-  final String name;
-  final String description;
-  final Importance importance;
-  const _Channel(this.id, this.name, this.description, this.importance);
+
+  /// Name and description, in the app's language.
+  (String, String) text(AppLocalizations l) => switch (this) {
+        payments => (l.obNotifEmi, l.setNotifEmiSub),
+        budgets => (l.obNotifBudget, l.setNotifBudgetSub),
+        reminders => (l.appDrawerReminders, l.obNotifRemindersSub),
+        ledger => (l.setNotifLedger, l.setNotifLedgerSub),
+        backups => (l.obNotifBackupRow, l.setNotifBackupSub),
+      };
+
+  static KuberChannel? of(NotificationType type) => switch (type) {
+        NotificationType.recurringTransaction || NotificationType.loanEmi => payments,
+        NotificationType.budgetAlert => budgets,
+        NotificationType.reminderTrigger => reminders,
+        NotificationType.ledgerReminder => ledger,
+        NotificationType.backup => backups,
+        NotificationType.general => null,
+      };
 }
 
-const Map<NotificationType, _Channel> _typeChannels = {
-  NotificationType.general: _Channel(
-    'kuber_general',
-    'General',
-    'General app notifications',
-    Importance.defaultImportance,
-  ),
-  NotificationType.budgetAlert: _Channel(
-    'budget_alerts',
-    'Budget Alerts',
-    'Notifications for budget spending limits',
-    Importance.high,
-  ),
-  NotificationType.recurringTransaction: _Channel(
-    'kuber_recurring',
-    'Recurring Transactions',
-    'Notifications for new recurring transactions',
-    Importance.high,
-  ),
-  NotificationType.loanEmi: _Channel(
-    'kuber_loan_emi',
-    'Loan EMI',
-    'Notifications for loan EMI deductions',
-    Importance.high,
-  ),
-  NotificationType.ledgerReminder: _Channel(
-    'kuber_ledger_reminder',
-    'Ledger Reminders',
-    'Lend/borrow reminders',
-    Importance.high,
-  ),
-  NotificationType.backup: _Channel(
-    'kuber_backup',
-    'Backup Failures',
-    'Automatic backup failure notifications',
-    Importance.high,
-  ),
-  NotificationType.reminderTrigger: _Channel(
-    'kuber_reminders',
-    'Reminders',
-    'Money reminder alerts',
-    Importance.high,
-  ),
-};
+const _generalChannel = ('kuber_general', 'General', 'General app notifications');
+
+/// Merged into kuber_payments (EMI, SIP or Subscriptions).
+const _oldChannels = ['kuber_recurring', 'kuber_loan_emi'];
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -107,6 +93,21 @@ class NotificationService {
     void Function(String actionId, String payload)? onAction,
   }) async {
     if (_isInitialized) return;
+    // Recurring, EMI and SIP rows only reach the inbox on their own; this
+    // shows them on the phone too, unless their switch is off. Budgets and
+    // reminders post their own; a background backup failure has its own
+    // notice (background_tasks.dart).
+    NotificationRepository.onAdded = (n) async {
+      if (!_mirrored.contains(n.type)) return;
+      await showAppNotification(
+        type: n.type,
+        id: _mirrorIdBase + n.id % 100000000,
+        title: n.title,
+        body: n.body,
+        payload: n.payload,
+        ask: false,
+      );
+    };
 
     try {
       const AndroidInitializationSettings initializationSettingsAndroid =
@@ -137,22 +138,7 @@ class NotificationService {
       );
 
       // Register Android channels so they exist before any notification fires.
-      if (Platform.isAndroid) {
-        final androidPlugin = _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >();
-        for (final c in _typeChannels.values) {
-          await androidPlugin?.createNotificationChannel(
-            AndroidNotificationChannel(
-              c.id,
-              c.name,
-              description: c.description,
-              importance: c.importance,
-            ),
-          );
-        }
-      }
+      await registerChannels();
 
       // Detect cold-start launch from a notification tap or action button.
       final launchDetails = await _notificationsPlugin
@@ -216,6 +202,56 @@ class NotificationService {
     await prefs.setBool(PrefsKeys.notificationPermissionAsked, true);
   }
 
+  static const _mirrored = {
+    NotificationType.recurringTransaction,
+    NotificationType.loanEmi,
+  };
+  static const _mirrorIdBase = 700000000;
+
+  AndroidFlutterLocalNotificationsPlugin? get _android => Platform.isAndroid
+      ? _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      : null;
+
+  AppLocalizations _l10n = lookupAppLocalizations(const Locale('en'));
+
+  /// Creates the categories, or renames them into [locale] (on start and when
+  /// the language changes), and removes the two that were merged.
+  Future<void> registerChannels([Locale? locale]) async {
+    final android = _android;
+    if (android == null) return;
+    final code = locale?.languageCode ??
+        (await SharedPreferences.getInstance()).getString(PrefsKeys.language) ??
+        'en';
+    try {
+      _l10n = lookupAppLocalizations(Locale(code));
+    } catch (_) {}
+    for (final id in _oldChannels) {
+      await android.deleteNotificationChannel(channelId: id);
+    }
+    await android.createNotificationChannel(AndroidNotificationChannel(
+      _generalChannel.$1,
+      _generalChannel.$2,
+      description: _generalChannel.$3,
+    ));
+    for (final c in KuberChannel.values) {
+      final (name, description) = c.text(_l10n);
+      await android.createNotificationChannel(AndroidNotificationChannel(
+        c.id,
+        name,
+        description: description,
+        importance: Importance.high,
+      ));
+    }
+  }
+
+  /// Which categories are on in the phone's settings (all on where the
+  /// phone has no categories).
+  Future<Map<KuberChannel, bool>> channelStates() async {
+    final list = await _android?.getNotificationChannels() ?? const [];
+    final on = {for (final c in list) c.id: c.importance != Importance.none};
+    return {for (final c in KuberChannel.values) c: on[c.id] ?? true};
+  }
+
   /// Generic OS notification for app-domain events (the five [NotificationType]s).
   /// Each type maps to its own Android channel. Payload should be the same
   /// string written to [AppNotification.payload] so the tap handler can
@@ -226,18 +262,21 @@ class NotificationService {
     required String title,
     required String body,
     String? payload,
+    // False from background work, which can't show the permission prompt.
+    bool ask = true,
   }) async {
-    await maybeRequestPermissionOnce();
+    if (ask) await maybeRequestPermissionOnce();
 
-    final channel = _typeChannels[type]!;
+    // A category the user switched off on the phone drops it there.
+    final channel = KuberChannel.of(type);
+    final (name, description) =
+        channel?.text(_l10n) ?? (_generalChannel.$2, _generalChannel.$3);
     final androidDetails = AndroidNotificationDetails(
-      channel.id,
-      channel.name,
-      channelDescription: channel.description,
-      importance: channel.importance,
-      priority: channel.importance == Importance.high
-          ? Priority.high
-          : Priority.defaultPriority,
+      channel?.id ?? _generalChannel.$1,
+      name,
+      channelDescription: description,
+      importance: channel == null ? Importance.defaultImportance : Importance.high,
+      priority: channel == null ? Priority.defaultPriority : Priority.high,
       autoCancel: true,
       ticker: title,
     );
@@ -320,9 +359,12 @@ class NotificationService {
     required String body,
     required String retryLabel,
     required String payload,
+    // KuberChannel.backups.id when only the backup failed, so that category
+    // decides whether it shows.
+    String channelId = backgroundChannelId,
   }) async {
     final android = AndroidNotificationDetails(
-      backgroundChannelId,
+      channelId,
       channelName,
       channelDescription: channelDescription,
       importance: Importance.defaultImportance,
@@ -390,53 +432,6 @@ class NotificationService {
     }
   }
 
-  Future<void> showBudgetAlertNotification({
-    required int id,
-    required String title,
-    required String body,
-  }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          'budget_alerts',
-          'Budget Alerts',
-          channelDescription: 'Notifications for budget spending limits',
-          importance: Importance.high,
-          priority: Priority.high,
-          autoCancel: true,
-        );
-
-    const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: darwinDetails,
-      macOS: darwinDetails,
-    );
-
-    try {
-      await _notificationsPlugin.show(
-        id: id,
-        title: title,
-        body: body,
-        notificationDetails: notificationDetails,
-      );
-    } catch (e) {
-      // Silently fail
-    }
-  }
-
-  /// Schedules a reminder notification at [when] with "Mark done" and
-  /// "Snooze 1 hour" actions. Uses the reminder's Isar id, so re-scheduling
-  /// the same reminder replaces the previous alarm.
-  ///
-  /// Scheduling is duration-based (`now(tz.local) + (when - now)`), which
-  /// resolves to the correct absolute instant without needing the device's
-  /// IANA timezone name. Inexact scheduling avoids the Android 12+ exact
-  /// alarm permission.
   Future<void> scheduleReminderNotification({
     required int id,
     required String title,
