@@ -23,6 +23,7 @@ import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_progress.dart';
+import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../../shared/widgets/money_bar_chart.dart';
 import '../../../shared/widgets/money_info_sheets.dart';
 import '../../../shared/widgets/money_widgets.dart';
@@ -198,17 +199,24 @@ class LoanSheet extends ConsumerWidget {
     final l = context.l10n;
     final fmt = ref.watch(formatterProvider);
     final rec = ref.watch(loanRecordsProvider(loan.uid));
+    // Until the loan's transactions are read the numbers would jump: show a
+    // placeholder instead.
+    final loading = !ref.watch(loanTransactionsProvider(loan.uid)).hasValue ||
+        !ref.watch(loanDeletedDaysProvider).hasValue;
     final txns = rec.linked;
     final st = loanStatus(loan, txns, deletedDays: rec.deleted);
     String m(num v) => fmt.formatCurrency(v.round());
     final nav = Navigator.of(context);
     final row = st.nextRow;
+    final reducing = hasLoanNumbers(loan) && rateKindOf(loan) == RateKind.reducing;
     return MoneySummarySheet(
       contextLabel: [_loanTypeLabel(context, loan.loanType), if (loan.lenderName.isNotEmpty) loan.lenderName]
           .join(' · '),
       title: loan.name,
       leading: LoanIcon(loan, size: 48),
-      body: [
+      body: loading
+          ? const [_LoanSheetSkeleton()]
+          : [
         if (st.outstanding != null)
           MoneyHeadline(label: l.msLoansOutstanding, value: m(st.outstanding!))
         else
@@ -313,6 +321,17 @@ class LoanSheet extends ConsumerWidget {
                 nav.pop();
                 showRateChangeSheet(context, ref, loan);
               }),
+        if (!st.closed && reducing)
+          SheetAction(
+              label: l.msLoansInterestCalcValue(loan.interestMethod == LoanInterestMethod.daily
+                  ? l.msLoansMethodDaily
+                  : l.msLoansMethodMonthly),
+              icon: Icons.calendar_today_outlined,
+              overflowOnly: true,
+              onPressed: () {
+                nav.pop();
+                showInterestMethodSheet(context, loan);
+              }),
         if (!st.closed)
           SheetAction(
               label: l.msLoansCloseLoan,
@@ -394,7 +413,6 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
       if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 250));
     });
   }
-  bool _scrolled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -416,14 +434,6 @@ class _LoanFullScreenState extends ConsumerState<LoanFullScreen> {
     final today = todayKey();
     final tracking = trackingDay(loan);
     String m(num v) => fmt.formatCurrency(v.round());
-
-    if (!_scrolled) {
-      _scrolled = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final ctx = _nextKey.currentContext;
-        if (ctx != null) Scrollable.ensureVisible(ctx, alignment: 0.12);
-      });
-    }
 
     final txnByDay = <int, Transaction>{
       for (final t in txns.where(isEmiTransaction)) t.occurrenceDate ?? dayKey(t.createdAt): t,
@@ -1206,6 +1216,125 @@ class _RateChangeSheetState extends ConsumerState<_RateChangeSheet> {
         ],
         const SizedBox(height: 12),
         Text(l.msLoansFloatingHelp, style: Theme.of(context).textTheme.bodySmall),
+      ]),
+    );
+  }
+}
+
+
+/// Placeholder rows while a loan's transactions load.
+class _LoanSheetSkeleton extends StatelessWidget {
+  const _LoanSheetSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          KuberSkeleton(width: 120, height: 14),
+          SizedBox(height: 8),
+          KuberSkeleton(width: 200, height: 36),
+          SizedBox(height: 20),
+          KuberSkeleton(height: 8),
+          SizedBox(height: 20),
+          KuberSkeleton(height: 72),
+          SizedBox(height: 16),
+          KuberSkeleton(height: 56),
+        ],
+      );
+}
+
+/// Interest calculation (loan sheet menu): Monthly or Daily, with what the
+/// switch does to the last EMI and the total interest before it's saved.
+void showInterestMethodSheet(BuildContext context, Loan loan) => showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      builder: (_) => _InterestMethodSheet(loan: loan),
+    );
+
+class _InterestMethodSheet extends ConsumerStatefulWidget {
+  final Loan loan;
+  const _InterestMethodSheet({required this.loan});
+
+  @override
+  ConsumerState<_InterestMethodSheet> createState() => _InterestMethodSheetState();
+}
+
+class _InterestMethodSheetState extends ConsumerState<_InterestMethodSheet> {
+  late LoanInterestMethod _pick = widget.loan.interestMethod == LoanInterestMethod.daily
+      ? LoanInterestMethod.monthly
+      : LoanInterestMethod.daily;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final fmt = ref.watch(formatterProvider);
+    String m(num v) => fmt.formatCurrency(v.round());
+    String name(LoanInterestMethod x) => x == LoanInterestMethod.daily ? l.msLoansMethodDaily : l.msLoansMethodMonthly;
+    final loan = widget.loan;
+    final changed = _pick != loan.interestMethod;
+    final rec = ref.watch(loanRecordsProvider(loan.uid));
+    final now = loanAmortization(loan, linked: rec.linked, deletedDays: rec.deleted);
+    final then = loanAmortization(loan.copy()..interestMethod = _pick, linked: rec.linked, deletedDays: rec.deleted);
+    final p = now == null || then == null ? null : LoanService.interestMethodPreview(now, then);
+    String end(int? d) => d == null ? '' : fmtMonthYear(dayOf(d));
+    return KuberBottomSheet(
+      title: l.msLoansInterestCalc,
+      description: loan.name,
+      actions: AppButton(
+        label: l.msLoansMethodSwitch(name(_pick)),
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: !changed
+            ? null
+            : () async {
+                await LoanService(ref.read(isarProvider)).setInterestMethod(loan, _pick);
+                ref.invalidate(loanListProvider);
+                if (context.mounted) Navigator.of(context).pop();
+              },
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        KuberSegmented<LoanInterestMethod>(
+          groupValue: _pick,
+          onChanged: (v) => setState(() => _pick = v),
+          segments: [
+            KuberSegment(value: LoanInterestMethod.monthly, label: l.msLoansMethodMonthly),
+            KuberSegment(value: LoanInterestMethod.daily, label: l.msLoansMethodDaily),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(
+            child: Text(_pick == LoanInterestMethod.daily ? l.msLoansMethodDailySub : l.msLoansMethodMonthlySub,
+                style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+          ),
+          KuberInfoGlyph(onTap: () => showMoneyInfo(context, ref, MoneyInfo.interestMethod)),
+        ]),
+        if (changed && p != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: cs.secondaryContainer, borderRadius: KuberShape.largeR),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              for (final (label, a, b) in [
+                (l.msLoansLastEmi, end(p.endNow), end(p.endThen)),
+                (l.msLoansTotalInterest, m(p.interestNow), m(p.interestThen)),
+              ])
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(children: [
+                    Expanded(child: Text(label, style: tt.bodyMedium!.copyWith(color: cs.onSecondaryContainer))),
+                    Text('$a → $b', style: tt.titleSmall!.copyWith(color: cs.onSecondaryContainer)),
+                  ]),
+                ),
+            ]),
+          ),
+        ],
+        const SizedBox(height: 12),
+        Text(l.msLoansMethodRecorded, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
       ]),
     );
   }

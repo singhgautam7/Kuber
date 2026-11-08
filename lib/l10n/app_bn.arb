@@ -2760,5 +2760,21 @@
   "setKwFeedback": "মতামত সমস্যা পরামর্শ যোগাযোগ",
   "setKwExpressive": "রঙ উজ্জ্বল",
   "setKwPureBlack": "ডার্ক কালো থিম",
-  "searchTagSub": "ট্যাগ · {count, plural, other{{count}টি লেনদেন}}"
+  "searchTagSub": "ট্যাগ · {count, plural, other{{count}টি লেনদেন}}",
+  "msLoansInterestCalc": "সুদের হিসাব",
+  "msLoansInterestCalcValue": "সুদের হিসাব: {method}",
+  "msLoansMethodMonthly": "মাসিক",
+  "msLoansMethodDaily": "দৈনিক",
+  "msLoansMethodMonthlySub": "বার্ষিক হারকে 12 দিয়ে ভাগ, প্রতি মাসে একই",
+  "msLoansMethodDailySub": "শেষ EMI থেকে আসল দিনের হিসাবে, বেশিরভাগ ব্যাংকের মতো",
+  "msLoansLastEmi": "শেষ EMI",
+  "msLoansMethodRecorded": "যে EMI আগেই লেখা হয়েছে সেগুলো একই থাকবে। শুধু সামনেরগুলো বদলাবে।",
+  "msLoansMethodSwitch": "{method}-এ বদলান",
+  "msLoansDailyHint": "আপনার ব্যাংক হয়তো দিনের হিসাবে সুদ নেয়।",
+  "msInfoMethodLine": "মাসিক: বার্ষিক হারকে 12 দিয়ে ভাগ করে প্রতি মাসে নেওয়া হয়, তাই প্রতি মাস একই।\n\nদৈনিক: শেষ EMI থেকে আসল দিনের সুদ, বার্ষিক হারকে 365 দিয়ে ভাগ করে। 31 দিনের মাসে একটু বেশি আর ফেব্রুয়ারিতে একটু কম। বছরে দুটো প্রায় একই।\n\nবেশিরভাগ ভারতীয় ব্যাংক দৈনিক ব্যবহার করে। আপনার স্টেটমেন্ট Kuber-এর সঙ্গে না মিললে এটা চেষ্টা করুন।",
+  "msInfoMethodRow1": "মাসিক, যেকোনো মাস",
+  "msInfoMethodRow2": "দৈনিক, 31 দিনের মাস",
+  "msInfoMethodRow3": "দৈনিক, ফেব্রুয়ারি",
+  "msInfoMethodSentence": "{amount}-এ বছরে 9% সুদ:",
+  "deleteLoanAction": "লোন মুছুন"
 }

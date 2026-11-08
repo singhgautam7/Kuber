@@ -7,6 +7,7 @@
 // in, released in parts and interest before EMIs start.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/models/overflow_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -447,6 +448,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       ..emiAmount = keep ? stored.emiAmount : (_val(_emi) ?? (numbers ? s.emi : 0))
       ..mode = numbers || keep ? LoanMode.advanced : LoanMode.simple
       ..interestType = _interest
+      // New reducing loans count interest by days, like most banks. A saved
+      // loan keeps its own (Interest calculation in its sheet's menu).
+      ..interestMethod = _existing?.interestMethod ??
+          (_interest == LoanInterestType.reducingBalance ? LoanInterestMethod.daily : LoanInterestMethod.monthly)
       ..interestOnlyMonths = _io
       ..alreadyRunning = _running
       ..countOnlyInterest = (numbers || keep) && _onlyInterest
@@ -692,16 +697,20 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         closeIcon: true,
         onBack: _leave,
         title: _existing == null ? l.msLoansAdd : l.msLoansEdit,
-        actions: [
-          if (_existing != null)
-            IconButton(
-              icon: Icon(Icons.delete_outline_rounded, color: cs.error),
-              onPressed: () async {
-                final deleted = await confirmDeleteLoan(context, ref, _existing!);
-                if (deleted && context.mounted) context.pop();
-              },
-            ),
-        ],
+        // Delete sits in the menu, like the other pages' destructive actions.
+        overflowConfig: _existing == null
+            ? null
+            : KuberOverflowConfig(items: [
+                KuberOverflowItem(
+                  icon: Icons.delete_outline_rounded,
+                  label: l.deleteLoanAction,
+                  isDestructive: true,
+                  onTap: () async {
+                    final deleted = await confirmDeleteLoan(context, ref, _existing!);
+                    if (deleted && context.mounted) context.pop();
+                  },
+                ),
+              ]),
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),

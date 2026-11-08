@@ -9535,4 +9535,63 @@ class AppLocalizationsPa extends AppLocalizations {
     );
     return 'ਟੈਗ · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'ਵਿਆਜ ਦੀ ਗਿਣਤੀ';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'ਵਿਆਜ ਦੀ ਗਿਣਤੀ: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'ਮਹੀਨਾਵਾਰ';
+
+  @override
+  String get msLoansMethodDaily => 'ਰੋਜ਼ਾਨਾ';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'ਸਾਲਾਨਾ ਦਰ ਨੂੰ 12 ਨਾਲ ਵੰਡ ਕੇ, ਹਰ ਮਹੀਨੇ ਇੱਕੋ ਜਿਹਾ';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'ਪਿਛਲੀ EMI ਤੋਂ ਅਸਲ ਦਿਨਾਂ ਮੁਤਾਬਕ, ਜ਼ਿਆਦਾਤਰ ਬੈਂਕਾਂ ਵਾਂਗ';
+
+  @override
+  String get msLoansLastEmi => 'ਆਖਰੀ EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'ਜੋ EMI ਪਹਿਲਾਂ ਦਰਜ ਹਨ, ਉਹ ਉਵੇਂ ਹੀ ਰਹਿਣਗੀਆਂ। ਸਿਰਫ਼ ਅੱਗੇ ਵਾਲੀਆਂ ਬਦਲਣਗੀਆਂ।';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$method ਤੇ ਬਦਲੋ';
+  }
+
+  @override
+  String get msLoansDailyHint =>
+      'ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡਾ ਬੈਂਕ ਦਿਨਾਂ ਮੁਤਾਬਕ ਵਿਆਜ ਲੈਂਦਾ ਹੋਵੇ।';
+
+  @override
+  String get msInfoMethodLine =>
+      'ਮਹੀਨਾਵਾਰ: ਸਾਲਾਨਾ ਦਰ ਨੂੰ 12 ਨਾਲ ਵੰਡ ਕੇ ਹਰ ਮਹੀਨੇ ਲਿਆ ਜਾਂਦਾ ਹੈ, ਇਸ ਲਈ ਹਰ ਮਹੀਨਾ ਇੱਕੋ ਜਿਹਾ।\n\nਰੋਜ਼ਾਨਾ: ਪਿਛਲੀ EMI ਤੋਂ ਅਸਲ ਦਿਨਾਂ ਦਾ ਵਿਆਜ, ਸਾਲਾਨਾ ਦਰ ਨੂੰ 365 ਨਾਲ ਵੰਡ ਕੇ। 31 ਦਿਨਾਂ ਦਾ ਮਹੀਨਾ ਥੋੜ੍ਹਾ ਵੱਧ ਅਤੇ ਫ਼ਰਵਰੀ ਥੋੜ੍ਹਾ ਘੱਟ। ਸਾਲ ਵਿੱਚ ਦੋਵੇਂ ਲਗਭਗ ਬਰਾਬਰ।\n\nਜ਼ਿਆਦਾਤਰ ਭਾਰਤੀ ਬੈਂਕ ਰੋਜ਼ਾਨਾ ਵਰਤਦੇ ਹਨ। ਜੇ ਤੁਹਾਡੀ ਸਟੇਟਮੈਂਟ Kuber ਨਾਲ ਨਹੀਂ ਮਿਲਦੀ, ਤਾਂ ਇਹ ਅਜ਼ਮਾਓ।';
+
+  @override
+  String get msInfoMethodRow1 => 'ਮਹੀਨਾਵਾਰ, ਕੋਈ ਵੀ ਮਹੀਨਾ';
+
+  @override
+  String get msInfoMethodRow2 => 'ਰੋਜ਼ਾਨਾ, 31 ਦਿਨਾਂ ਦਾ ਮਹੀਨਾ';
+
+  @override
+  String get msInfoMethodRow3 => 'ਰੋਜ਼ਾਨਾ, ਫ਼ਰਵਰੀ';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amount ਤੇ ਸਾਲਾਨਾ 9% ਵਿਆਜ:';
+  }
+
+  @override
+  String get deleteLoanAction => 'ਕਰਜ਼ਾ ਮਿਟਾਓ';
 }

@@ -2760,5 +2760,21 @@
   "setKwFeedback": "ਫੀਡਬੈਕ ਸਮੱਸਿਆ ਸੁਝਾਅ ਸੰਪਰਕ",
   "setKwExpressive": "ਰੰਗ ਚਮਕੀਲਾ",
   "setKwPureBlack": "ਡਾਰਕ ਕਾਲਾ ਥੀਮ",
-  "searchTagSub": "ਟੈਗ · {count, plural, other{{count} ਲੈਣ-ਦੇਣ}}"
+  "searchTagSub": "ਟੈਗ · {count, plural, other{{count} ਲੈਣ-ਦੇਣ}}",
+  "msLoansInterestCalc": "ਵਿਆਜ ਦੀ ਗਿਣਤੀ",
+  "msLoansInterestCalcValue": "ਵਿਆਜ ਦੀ ਗਿਣਤੀ: {method}",
+  "msLoansMethodMonthly": "ਮਹੀਨਾਵਾਰ",
+  "msLoansMethodDaily": "ਰੋਜ਼ਾਨਾ",
+  "msLoansMethodMonthlySub": "ਸਾਲਾਨਾ ਦਰ ਨੂੰ 12 ਨਾਲ ਵੰਡ ਕੇ, ਹਰ ਮਹੀਨੇ ਇੱਕੋ ਜਿਹਾ",
+  "msLoansMethodDailySub": "ਪਿਛਲੀ EMI ਤੋਂ ਅਸਲ ਦਿਨਾਂ ਮੁਤਾਬਕ, ਜ਼ਿਆਦਾਤਰ ਬੈਂਕਾਂ ਵਾਂਗ",
+  "msLoansLastEmi": "ਆਖਰੀ EMI",
+  "msLoansMethodRecorded": "ਜੋ EMI ਪਹਿਲਾਂ ਦਰਜ ਹਨ, ਉਹ ਉਵੇਂ ਹੀ ਰਹਿਣਗੀਆਂ। ਸਿਰਫ਼ ਅੱਗੇ ਵਾਲੀਆਂ ਬਦਲਣਗੀਆਂ।",
+  "msLoansMethodSwitch": "{method} ਤੇ ਬਦਲੋ",
+  "msLoansDailyHint": "ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡਾ ਬੈਂਕ ਦਿਨਾਂ ਮੁਤਾਬਕ ਵਿਆਜ ਲੈਂਦਾ ਹੋਵੇ।",
+  "msInfoMethodLine": "ਮਹੀਨਾਵਾਰ: ਸਾਲਾਨਾ ਦਰ ਨੂੰ 12 ਨਾਲ ਵੰਡ ਕੇ ਹਰ ਮਹੀਨੇ ਲਿਆ ਜਾਂਦਾ ਹੈ, ਇਸ ਲਈ ਹਰ ਮਹੀਨਾ ਇੱਕੋ ਜਿਹਾ।\n\nਰੋਜ਼ਾਨਾ: ਪਿਛਲੀ EMI ਤੋਂ ਅਸਲ ਦਿਨਾਂ ਦਾ ਵਿਆਜ, ਸਾਲਾਨਾ ਦਰ ਨੂੰ 365 ਨਾਲ ਵੰਡ ਕੇ। 31 ਦਿਨਾਂ ਦਾ ਮਹੀਨਾ ਥੋੜ੍ਹਾ ਵੱਧ ਅਤੇ ਫ਼ਰਵਰੀ ਥੋੜ੍ਹਾ ਘੱਟ। ਸਾਲ ਵਿੱਚ ਦੋਵੇਂ ਲਗਭਗ ਬਰਾਬਰ।\n\nਜ਼ਿਆਦਾਤਰ ਭਾਰਤੀ ਬੈਂਕ ਰੋਜ਼ਾਨਾ ਵਰਤਦੇ ਹਨ। ਜੇ ਤੁਹਾਡੀ ਸਟੇਟਮੈਂਟ Kuber ਨਾਲ ਨਹੀਂ ਮਿਲਦੀ, ਤਾਂ ਇਹ ਅਜ਼ਮਾਓ।",
+  "msInfoMethodRow1": "ਮਹੀਨਾਵਾਰ, ਕੋਈ ਵੀ ਮਹੀਨਾ",
+  "msInfoMethodRow2": "ਰੋਜ਼ਾਨਾ, 31 ਦਿਨਾਂ ਦਾ ਮਹੀਨਾ",
+  "msInfoMethodRow3": "ਰੋਜ਼ਾਨਾ, ਫ਼ਰਵਰੀ",
+  "msInfoMethodSentence": "{amount} ਤੇ ਸਾਲਾਨਾ 9% ਵਿਆਜ:",
+  "deleteLoanAction": "ਕਰਜ਼ਾ ਮਿਟਾਓ"
 }

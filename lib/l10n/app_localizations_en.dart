@@ -9540,4 +9540,62 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Tag · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'Interest calculation';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'Interest calculation: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'Monthly';
+
+  @override
+  String get msLoansMethodDaily => 'Daily';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'The yearly rate divided by 12, the same every month';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'The actual days since your last EMI, like most banks';
+
+  @override
+  String get msLoansLastEmi => 'Last EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'EMIs you\'ve already recorded stay as they are. Only the ones ahead change.';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return 'Switch to $method';
+  }
+
+  @override
+  String get msLoansDailyHint => 'Your bank may count interest by days.';
+
+  @override
+  String get msInfoMethodLine =>
+      'Monthly: your yearly rate divided by 12 is charged every month, so every month costs the same.\n\nDaily: interest is counted for the actual days since your last EMI, at your yearly rate divided by 365. A 31-day month costs a little more and February a little less. Over a year they come out almost the same.\n\nMost Indian banks use daily. If your statement doesn\'t match Kuber, try it.';
+
+  @override
+  String get msInfoMethodRow1 => 'Monthly, any month';
+
+  @override
+  String get msInfoMethodRow2 => 'Daily, a 31-day month';
+
+  @override
+  String get msInfoMethodRow3 => 'Daily, February';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return 'Interest on $amount at 9% a year:';
+  }
+
+  @override
+  String get deleteLoanAction => 'Delete loan';
 }

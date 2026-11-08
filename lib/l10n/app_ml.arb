@@ -2760,5 +2760,21 @@
   "setKwFeedback": "ഫീഡ്ബാക്ക് പ്രശ്നം നിർദ്ദേശം ബന്ധപ്പെടുക",
   "setKwExpressive": "നിറം തിളക്കം",
   "setKwPureBlack": "ഡാർക്ക് കറുപ്പ് തീം",
-  "searchTagSub": "ടാഗ് · {count, plural, other{{count} ഇടപാടുകൾ}}"
+  "searchTagSub": "ടാഗ് · {count, plural, other{{count} ഇടപാടുകൾ}}",
+  "msLoansInterestCalc": "പലിശ കണക്കാക്കൽ",
+  "msLoansInterestCalcValue": "പലിശ കണക്കാക്കൽ: {method}",
+  "msLoansMethodMonthly": "പ്രതിമാസം",
+  "msLoansMethodDaily": "ദിവസേന",
+  "msLoansMethodMonthlySub": "വാർഷിക നിരക്കിനെ 12 കൊണ്ട് ഹരിച്ച്, എല്ലാ മാസവും ഒരുപോലെ",
+  "msLoansMethodDailySub": "അവസാന EMI മുതലുള്ള യഥാർഥ ദിവസങ്ങൾ, മിക്ക ബാങ്കുകളെയും പോലെ",
+  "msLoansLastEmi": "അവസാന EMI",
+  "msLoansMethodRecorded": "ഇതിനകം രേഖപ്പെടുത്തിയ EMIകൾ അതുപോലെ തുടരും. വരാനിരിക്കുന്നവ മാത്രം മാറും.",
+  "msLoansMethodSwitch": "{method} ആക്കുക",
+  "msLoansDailyHint": "നിങ്ങളുടെ ബാങ്ക് ദിവസം അനുസരിച്ച് പലിശ കണക്കാക്കുന്നുണ്ടാകാം.",
+  "msInfoMethodLine": "പ്രതിമാസം: വാർഷിക നിരക്കിനെ 12 കൊണ്ട് ഹരിച്ച് എല്ലാ മാസവും ഈടാക്കുന്നു, അതിനാൽ എല്ലാ മാസവും ഒരുപോലെ.\n\nദിവസേന: അവസാന EMI മുതലുള്ള യഥാർഥ ദിവസങ്ങളുടെ പലിശ, വാർഷിക നിരക്കിനെ 365 കൊണ്ട് ഹരിച്ച്. 31 ദിവസമുള്ള മാസം അൽപം കൂടുതലും ഫെബ്രുവരി അൽപം കുറവും. ഒരു വർഷത്തിൽ രണ്ടും ഏകദേശം ഒരുപോലെ.\n\nമിക്ക ഇന്ത്യൻ ബാങ്കുകളും ദിവസേന ഉപയോഗിക്കുന്നു. നിങ്ങളുടെ സ്റ്റേറ്റ്‌മെന്റ് Kuber-മായി ചേരുന്നില്ലെങ്കിൽ ഇത് പരീക്ഷിക്കുക.",
+  "msInfoMethodRow1": "പ്രതിമാസം, ഏത് മാസവും",
+  "msInfoMethodRow2": "ദിവസേന, 31 ദിവസമുള്ള മാസം",
+  "msInfoMethodRow3": "ദിവസേന, ഫെബ്രുവരി",
+  "msInfoMethodSentence": "{amount}-ന് വർഷം 9% പലിശ:",
+  "deleteLoanAction": "ലോൺ ഇല്ലാതാക്കുക"
 }

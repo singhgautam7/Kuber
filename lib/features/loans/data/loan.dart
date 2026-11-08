@@ -21,6 +21,11 @@ enum LoanPreEmi { none, payMonthly, addToLoan }
 /// Why the outstanding was updated (adjustment events).
 enum LoanAdjustReason { matchBank, interestAdded }
 
+/// How a reducing-balance loan's EMI splits into interest: rate / 12 every
+/// month, or the actual days since the last EMI at rate / 365 (most banks).
+/// Loans saved before this read as [monthly]; new ones start on [daily].
+enum LoanInterestMethod { monthly, daily }
+
 /// What a prepayment or rate change adjusts.
 enum LoanAdjust { tenure, emi }
 
@@ -248,6 +253,10 @@ class Loan {
   /// when it moves ("Kuber now calculates").
   double? preEmiCalculated;
 
+  /// Reducing balance only (flat and interest-only ignore it).
+  @Enumerated(EnumType.name)
+  LoanInterestMethod interestMethod = LoanInterestMethod.monthly;
+
   /// 0 = not migrated to vNext yet.
   int dataVersion = 0;
 
@@ -299,6 +308,7 @@ class Loan {
     ..preEmiCycleDay = preEmiCycleDay
     ..preEmiOverride = preEmiOverride
     ..preEmiCalculated = preEmiCalculated
+    ..interestMethod = interestMethod
     ..dataVersion = dataVersion;
 
   Map<String, dynamic> toMap() => {
@@ -348,6 +358,7 @@ class Loan {
     'preEmiCycleDay': preEmiCycleDay,
     'preEmiOverride': preEmiOverride,
     'preEmiCalculated': preEmiCalculated,
+    'interestMethod': interestMethod.name,
     'dataVersion': dataVersion,
   };
 }

@@ -175,6 +175,7 @@ Amortization? loanAmortization(Loan l,
     recorded: recordedEmis(linked, recalculateFrom: recalculateFrom),
     unpaid: deletedDays,
     decimals: decimals,
+    dailyInterest: l.interestMethod == LoanInterestMethod.daily,
   );
   return pre == null ? a : Amortization(a.rows, a.events, a.openingBalance, preEmi: pre);
 }

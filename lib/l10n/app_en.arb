@@ -6631,5 +6631,42 @@
         "type": "int"
       }
     }
-  }
+  },
+  "msLoansInterestCalc": "Interest calculation",
+  "msLoansInterestCalcValue": "Interest calculation: {method}",
+  "@msLoansInterestCalcValue": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansMethodMonthly": "Monthly",
+  "msLoansMethodDaily": "Daily",
+  "msLoansMethodMonthlySub": "The yearly rate divided by 12, the same every month",
+  "msLoansMethodDailySub": "The actual days since your last EMI, like most banks",
+  "msLoansLastEmi": "Last EMI",
+  "msLoansMethodRecorded": "EMIs you've already recorded stay as they are. Only the ones ahead change.",
+  "msLoansMethodSwitch": "Switch to {method}",
+  "@msLoansMethodSwitch": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "msLoansDailyHint": "Your bank may count interest by days.",
+  "msInfoMethodLine": "Monthly: your yearly rate divided by 12 is charged every month, so every month costs the same.\n\nDaily: interest is counted for the actual days since your last EMI, at your yearly rate divided by 365. A 31-day month costs a little more and February a little less. Over a year they come out almost the same.\n\nMost Indian banks use daily. If your statement doesn't match Kuber, try it.",
+  "msInfoMethodRow1": "Monthly, any month",
+  "msInfoMethodRow2": "Daily, a 31-day month",
+  "msInfoMethodRow3": "Daily, February",
+  "msInfoMethodSentence": "Interest on {amount} at 9% a year:",
+  "@msInfoMethodSentence": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteLoanAction": "Delete loan"
 }

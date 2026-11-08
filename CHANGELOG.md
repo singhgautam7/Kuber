@@ -32,6 +32,14 @@
   exactly: each shows whether it's on, and a tap opens it in phone settings.
   The categories have clear names in your language.
 - Dev Tools (once unlocked) and Permissions are now in Settings, under About.
+- Loans can count interest by days, like most banks: each EMI's interest is
+  for the actual days since the last one. New loans use it; an existing loan
+  can switch from its menu, with a preview of the new end date and total
+  interest first. EMIs you've already recorded don't change.
+- Update outstanding suggests daily interest when your bank's figure is more
+  than ₹500 away.
+- Delete loan is in the Edit loan menu, the EMI schedule opens at the top,
+  and a loan's sheet shows a placeholder while it loads.
 - Fixed: Settings could say notifications were Off after you allowed them.
 
 - Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,

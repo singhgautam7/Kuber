@@ -20,10 +20,12 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/entity_picker_rows.dart';
+import '../../../core/money_math/loan_math.dart' show RateKind;
 import '../data/loan.dart';
 import '../domain/loan_engine.dart';
 import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
+import 'loan_sheet.dart' show showInterestMethodSheet;
 
 void showUpdateOutstandingSheet(BuildContext context, Loan loan, {LoanEvent? existing}) =>
     showMoneySheet<void>(context, _UpdateOutstandingSheet(loan: loan, existing: existing));
@@ -167,6 +169,26 @@ class _UpdateOutstandingSheetState extends ConsumerState<_UpdateOutstandingSheet
             value: entered == null ? '-' : '${diff >= 0 ? '+' : '-'}${m(diff.abs())}',
           ),
         ]),
+        // Far off on a monthly loan: the bank probably counts days.
+        if (diff.abs() > 500 &&
+            hasLoanNumbers(base) &&
+            rateKindOf(base) == RateKind.reducing &&
+            base.interestMethod == LoanInterestMethod.monthly) ...[
+          const SizedBox(height: 8),
+          Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
+            Text(l.msLoansDailyHint,
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+            TextButton(
+              onPressed: () {
+                final nav = Navigator.of(context);
+                final host = nav.context;
+                nav.pop();
+                showInterestMethodSheet(host, widget.loan);
+              },
+              child: Text(l.msLoansMethodSwitch(l.msLoansMethodDaily)),
+            ),
+          ]),
+        ],
         if (hasLoanNumbers(base)) ...[
           const SizedBox(height: 16),
           LoanKeepChoice(

@@ -2760,5 +2760,21 @@
   "setKwFeedback": "கருத்து சிக்கல் பரிந்துரை தொடர்பு",
   "setKwExpressive": "நிறம் பிரகாசம்",
   "setKwPureBlack": "இருள் கருப்பு தீம்",
-  "searchTagSub": "குறிச்சொல் · {count, plural, other{{count} பரிவர்த்தனைகள்}}"
+  "searchTagSub": "குறிச்சொல் · {count, plural, other{{count} பரிவர்த்தனைகள்}}",
+  "msLoansInterestCalc": "வட்டி கணக்கீடு",
+  "msLoansInterestCalcValue": "வட்டி கணக்கீடு: {method}",
+  "msLoansMethodMonthly": "மாதாந்திர",
+  "msLoansMethodDaily": "தினசரி",
+  "msLoansMethodMonthlySub": "ஆண்டு வட்டியை 12 ஆல் வகுத்து, ஒவ்வொரு மாதமும் ஒரே அளவு",
+  "msLoansMethodDailySub": "கடைசி EMI முதல் உள்ள உண்மையான நாட்கள், பெரும்பாலான வங்கிகளைப் போல",
+  "msLoansLastEmi": "கடைசி EMI",
+  "msLoansMethodRecorded": "ஏற்கெனவே பதிவு செய்த EMIகள் அப்படியே இருக்கும். வரவிருப்பவை மட்டும் மாறும்.",
+  "msLoansMethodSwitch": "{method} க்கு மாற்று",
+  "msLoansDailyHint": "உங்கள் வங்கி நாட்களின்படி வட்டி கணக்கிடலாம்.",
+  "msInfoMethodLine": "மாதாந்திர: ஆண்டு வட்டியை 12 ஆல் வகுத்து ஒவ்வொரு மாதமும் வசூலிக்கப்படும், எனவே ஒவ்வொரு மாதமும் ஒரே அளவு.\n\nதினசரி: கடைசி EMI முதல் உள்ள உண்மையான நாட்களுக்கான வட்டி, ஆண்டு வட்டியை 365 ஆல் வகுத்து. 31 நாள் மாதம் சற்று அதிகம், பிப்ரவரி சற்று குறைவு. ஒரு ஆண்டில் இரண்டும் கிட்டத்தட்ட ஒரே அளவு.\n\nபெரும்பாலான இந்திய வங்கிகள் தினசரியைப் பயன்படுத்துகின்றன. உங்கள் அறிக்கை Kuber உடன் பொருந்தவில்லை என்றால் இதை முயற்சிக்கவும்.",
+  "msInfoMethodRow1": "மாதாந்திர, எந்த மாதமும்",
+  "msInfoMethodRow2": "தினசரி, 31 நாள் மாதம்",
+  "msInfoMethodRow3": "தினசரி, பிப்ரவரி",
+  "msInfoMethodSentence": "{amount} க்கு ஆண்டுக்கு 9% வட்டி:",
+  "deleteLoanAction": "கடனை நீக்கு"
 }

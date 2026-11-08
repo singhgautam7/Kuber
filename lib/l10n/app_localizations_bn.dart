@@ -9544,4 +9544,62 @@ class AppLocalizationsBn extends AppLocalizations {
     );
     return 'ট্যাগ · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'সুদের হিসাব';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'সুদের হিসাব: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'মাসিক';
+
+  @override
+  String get msLoansMethodDaily => 'দৈনিক';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'বার্ষিক হারকে 12 দিয়ে ভাগ, প্রতি মাসে একই';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'শেষ EMI থেকে আসল দিনের হিসাবে, বেশিরভাগ ব্যাংকের মতো';
+
+  @override
+  String get msLoansLastEmi => 'শেষ EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'যে EMI আগেই লেখা হয়েছে সেগুলো একই থাকবে। শুধু সামনেরগুলো বদলাবে।';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$method-এ বদলান';
+  }
+
+  @override
+  String get msLoansDailyHint => 'আপনার ব্যাংক হয়তো দিনের হিসাবে সুদ নেয়।';
+
+  @override
+  String get msInfoMethodLine =>
+      'মাসিক: বার্ষিক হারকে 12 দিয়ে ভাগ করে প্রতি মাসে নেওয়া হয়, তাই প্রতি মাস একই।\n\nদৈনিক: শেষ EMI থেকে আসল দিনের সুদ, বার্ষিক হারকে 365 দিয়ে ভাগ করে। 31 দিনের মাসে একটু বেশি আর ফেব্রুয়ারিতে একটু কম। বছরে দুটো প্রায় একই।\n\nবেশিরভাগ ভারতীয় ব্যাংক দৈনিক ব্যবহার করে। আপনার স্টেটমেন্ট Kuber-এর সঙ্গে না মিললে এটা চেষ্টা করুন।';
+
+  @override
+  String get msInfoMethodRow1 => 'মাসিক, যেকোনো মাস';
+
+  @override
+  String get msInfoMethodRow2 => 'দৈনিক, 31 দিনের মাস';
+
+  @override
+  String get msInfoMethodRow3 => 'দৈনিক, ফেব্রুয়ারি';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amount-এ বছরে 9% সুদ:';
+  }
+
+  @override
+  String get deleteLoanAction => 'লোন মুছুন';
 }

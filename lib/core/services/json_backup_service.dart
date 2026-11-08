@@ -688,6 +688,9 @@ class JsonBackupService {
     ..preEmiCycleDay = m['preEmiCycleDay'] as int?
     ..preEmiOverride = (m['preEmiOverride'] as num?)?.toDouble()
     ..preEmiCalculated = (m['preEmiCalculated'] as num?)?.toDouble()
+    // Older backups have none: those loans were monthly.
+    ..interestMethod = LoanInterestMethod.values.firstWhere((v) => v.name == m['interestMethod'],
+        orElse: () => LoanInterestMethod.monthly)
     ..dataVersion = (m['dataVersion'] as int?) ?? 0;
 
   Investment _mapToInvestment(Map<String, dynamic> m) => Investment()

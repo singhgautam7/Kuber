@@ -9649,4 +9649,62 @@ class AppLocalizationsTa extends AppLocalizations {
     );
     return 'குறிச்சொல் · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'வட்டி கணக்கீடு';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'வட்டி கணக்கீடு: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'மாதாந்திர';
+
+  @override
+  String get msLoansMethodDaily => 'தினசரி';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'ஆண்டு வட்டியை 12 ஆல் வகுத்து, ஒவ்வொரு மாதமும் ஒரே அளவு';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'கடைசி EMI முதல் உள்ள உண்மையான நாட்கள், பெரும்பாலான வங்கிகளைப் போல';
+
+  @override
+  String get msLoansLastEmi => 'கடைசி EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'ஏற்கெனவே பதிவு செய்த EMIகள் அப்படியே இருக்கும். வரவிருப்பவை மட்டும் மாறும்.';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$method க்கு மாற்று';
+  }
+
+  @override
+  String get msLoansDailyHint => 'உங்கள் வங்கி நாட்களின்படி வட்டி கணக்கிடலாம்.';
+
+  @override
+  String get msInfoMethodLine =>
+      'மாதாந்திர: ஆண்டு வட்டியை 12 ஆல் வகுத்து ஒவ்வொரு மாதமும் வசூலிக்கப்படும், எனவே ஒவ்வொரு மாதமும் ஒரே அளவு.\n\nதினசரி: கடைசி EMI முதல் உள்ள உண்மையான நாட்களுக்கான வட்டி, ஆண்டு வட்டியை 365 ஆல் வகுத்து. 31 நாள் மாதம் சற்று அதிகம், பிப்ரவரி சற்று குறைவு. ஒரு ஆண்டில் இரண்டும் கிட்டத்தட்ட ஒரே அளவு.\n\nபெரும்பாலான இந்திய வங்கிகள் தினசரியைப் பயன்படுத்துகின்றன. உங்கள் அறிக்கை Kuber உடன் பொருந்தவில்லை என்றால் இதை முயற்சிக்கவும்.';
+
+  @override
+  String get msInfoMethodRow1 => 'மாதாந்திர, எந்த மாதமும்';
+
+  @override
+  String get msInfoMethodRow2 => 'தினசரி, 31 நாள் மாதம்';
+
+  @override
+  String get msInfoMethodRow3 => 'தினசரி, பிப்ரவரி';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amount க்கு ஆண்டுக்கு 9% வட்டி:';
+  }
+
+  @override
+  String get deleteLoanAction => 'கடனை நீக்கு';
 }

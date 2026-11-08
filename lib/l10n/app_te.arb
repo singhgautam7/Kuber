@@ -2760,5 +2760,21 @@
   "setKwFeedback": "అభిప్రాయం సమస్య సూచన సంప్రదింపు",
   "setKwExpressive": "రంగు ప్రకాశవంతం",
   "setKwPureBlack": "డార్క్ నలుపు థీమ్",
-  "searchTagSub": "ట్యాగ్ · {count, plural, other{{count} లావాదేవీలు}}"
+  "searchTagSub": "ట్యాగ్ · {count, plural, other{{count} లావాదేవీలు}}",
+  "msLoansInterestCalc": "వడ్డీ లెక్కింపు",
+  "msLoansInterestCalcValue": "వడ్డీ లెక్కింపు: {method}",
+  "msLoansMethodMonthly": "నెలవారీ",
+  "msLoansMethodDaily": "రోజువారీ",
+  "msLoansMethodMonthlySub": "సంవత్సర రేటును 12తో భాగించి, ప్రతి నెలా ఒకేలా",
+  "msLoansMethodDailySub": "చివరి EMI నుంచి అసలు రోజుల ప్రకారం, చాలా బ్యాంకుల లాగా",
+  "msLoansLastEmi": "చివరి EMI",
+  "msLoansMethodRecorded": "ఇప్పటికే నమోదైన EMIలు అలాగే ఉంటాయి. రాబోయేవి మాత్రమే మారతాయి.",
+  "msLoansMethodSwitch": "{method}కి మార్చండి",
+  "msLoansDailyHint": "మీ బ్యాంక్ రోజుల ప్రకారం వడ్డీ లెక్కించవచ్చు.",
+  "msInfoMethodLine": "నెలవారీ: సంవత్సర రేటును 12తో భాగించి ప్రతి నెలా వసూలు చేస్తారు, కాబట్టి ప్రతి నెలా ఒకేలా.\n\nరోజువారీ: చివరి EMI నుంచి అసలు రోజులకు వడ్డీ, సంవత్సర రేటును 365తో భాగించి. 31 రోజుల నెల కొంచెం ఎక్కువ, ఫిబ్రవరి కొంచెం తక్కువ. ఏడాదిలో రెండూ దాదాపు ఒకేలా.\n\nచాలా భారతీయ బ్యాంకులు రోజువారీని వాడతాయి. మీ స్టేట్‌మెంట్ Kuberతో సరిపోలకపోతే దీన్ని ప్రయత్నించండి.",
+  "msInfoMethodRow1": "నెలవారీ, ఏ నెలైనా",
+  "msInfoMethodRow2": "రోజువారీ, 31 రోజుల నెల",
+  "msInfoMethodRow3": "రోజువారీ, ఫిబ్రవరి",
+  "msInfoMethodSentence": "{amount}పై ఏడాదికి 9% వడ్డీ:",
+  "deleteLoanAction": "లోన్ తొలగించండి"
 }

@@ -100,144 +100,150 @@ const LoanSchema = CollectionSchema(
 
       target: r'LoanEvent',
     ),
-    r'interestOnlyMonths': PropertySchema(
+    r'interestMethod': PropertySchema(
       id: 17,
+      name: r'interestMethod',
+      type: IsarType.string,
+      enumMap: _LoaninterestMethodEnumValueMap,
+    ),
+    r'interestOnlyMonths': PropertySchema(
+      id: 18,
       name: r'interestOnlyMonths',
       type: IsarType.long,
     ),
     r'interestPaidBefore': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'interestPaidBefore',
       type: IsarType.double,
     ),
     r'interestRate': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'interestRate',
       type: IsarType.double,
     ),
     r'interestType': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'interestType',
       type: IsarType.string,
       enumMap: _LoaninterestTypeEnumValueMap,
     ),
     r'isCompleted': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'isCompleted',
       type: IsarType.bool,
     ),
     r'lenderName': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'lenderName',
       type: IsarType.string,
     ),
     r'loanStartDate': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'loanStartDate',
       type: IsarType.dateTime,
     ),
     r'loanType': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'loanType',
       type: IsarType.string,
     ),
     r'mode': PropertySchema(
-      id: 25,
+      id: 26,
       name: r'mode',
       type: IsarType.string,
       enumMap: _LoanmodeEnumValueMap,
     ),
-    r'name': PropertySchema(id: 26, name: r'name', type: IsarType.string),
-    r'notes': PropertySchema(id: 27, name: r'notes', type: IsarType.string),
+    r'name': PropertySchema(id: 27, name: r'name', type: IsarType.string),
+    r'notes': PropertySchema(id: 28, name: r'notes', type: IsarType.string),
     r'outstandingAtStart': PropertySchema(
-      id: 28,
+      id: 29,
       name: r'outstandingAtStart',
       type: IsarType.double,
     ),
     r'pastEmisAddedAt': PropertySchema(
-      id: 29,
+      id: 30,
       name: r'pastEmisAddedAt',
       type: IsarType.dateTime,
     ),
     r'preEmiCalculated': PropertySchema(
-      id: 30,
+      id: 31,
       name: r'preEmiCalculated',
       type: IsarType.double,
     ),
     r'preEmiCycleDay': PropertySchema(
-      id: 31,
+      id: 32,
       name: r'preEmiCycleDay',
       type: IsarType.long,
     ),
     r'preEmiMode': PropertySchema(
-      id: 32,
+      id: 33,
       name: r'preEmiMode',
       type: IsarType.string,
       enumMap: _LoanpreEmiModeEnumValueMap,
     ),
     r'preEmiOverride': PropertySchema(
-      id: 33,
+      id: 34,
       name: r'preEmiOverride',
       type: IsarType.double,
     ),
     r'principalAmount': PropertySchema(
-      id: 34,
+      id: 35,
       name: r'principalAmount',
       type: IsarType.double,
     ),
     r'principalPaidBefore': PropertySchema(
-      id: 35,
+      id: 36,
       name: r'principalPaidBefore',
       type: IsarType.double,
     ),
     r'rateType': PropertySchema(
-      id: 36,
+      id: 37,
       name: r'rateType',
       type: IsarType.string,
     ),
     r'referenceNumber': PropertySchema(
-      id: 37,
+      id: 38,
       name: r'referenceNumber',
       type: IsarType.string,
     ),
     r'releasedInParts': PropertySchema(
-      id: 38,
+      id: 39,
       name: r'releasedInParts',
       type: IsarType.bool,
     ),
     r'releases': PropertySchema(
-      id: 39,
+      id: 40,
       name: r'releases',
       type: IsarType.objectList,
 
       target: r'LoanRelease',
     ),
     r'schedule': PropertySchema(
-      id: 40,
+      id: 41,
       name: r'schedule',
       type: IsarType.object,
 
       target: r'Schedule',
     ),
     r'startDate': PropertySchema(
-      id: 41,
+      id: 42,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
     r'startingPoint': PropertySchema(
-      id: 42,
+      id: 43,
       name: r'startingPoint',
       type: IsarType.string,
       enumMap: _LoanstartingPointEnumValueMap,
     ),
     r'tenureMonths': PropertySchema(
-      id: 43,
+      id: 44,
       name: r'tenureMonths',
       type: IsarType.long,
     ),
-    r'uid': PropertySchema(id: 44, name: r'uid', type: IsarType.string),
+    r'uid': PropertySchema(id: 45, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 45,
+      id: 46,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -278,6 +284,7 @@ int _loanEstimateSize(
       bytesCount += LoanEventSchema.estimateSize(value, offsets, allOffsets);
     }
   }
+  bytesCount += 3 + object.interestMethod.name.length * 3;
   bytesCount += 3 + object.interestType.name.length * 3;
   bytesCount += 3 + object.lenderName.length * 3;
   bytesCount += 3 + object.loanType.length * 3;
@@ -351,45 +358,46 @@ void _loanSerialize(
     LoanEventSchema.serialize,
     object.events,
   );
-  writer.writeLong(offsets[17], object.interestOnlyMonths);
-  writer.writeDouble(offsets[18], object.interestPaidBefore);
-  writer.writeDouble(offsets[19], object.interestRate);
-  writer.writeString(offsets[20], object.interestType.name);
-  writer.writeBool(offsets[21], object.isCompleted);
-  writer.writeString(offsets[22], object.lenderName);
-  writer.writeDateTime(offsets[23], object.loanStartDate);
-  writer.writeString(offsets[24], object.loanType);
-  writer.writeString(offsets[25], object.mode.name);
-  writer.writeString(offsets[26], object.name);
-  writer.writeString(offsets[27], object.notes);
-  writer.writeDouble(offsets[28], object.outstandingAtStart);
-  writer.writeDateTime(offsets[29], object.pastEmisAddedAt);
-  writer.writeDouble(offsets[30], object.preEmiCalculated);
-  writer.writeLong(offsets[31], object.preEmiCycleDay);
-  writer.writeString(offsets[32], object.preEmiMode.name);
-  writer.writeDouble(offsets[33], object.preEmiOverride);
-  writer.writeDouble(offsets[34], object.principalAmount);
-  writer.writeDouble(offsets[35], object.principalPaidBefore);
-  writer.writeString(offsets[36], object.rateType);
-  writer.writeString(offsets[37], object.referenceNumber);
-  writer.writeBool(offsets[38], object.releasedInParts);
+  writer.writeString(offsets[17], object.interestMethod.name);
+  writer.writeLong(offsets[18], object.interestOnlyMonths);
+  writer.writeDouble(offsets[19], object.interestPaidBefore);
+  writer.writeDouble(offsets[20], object.interestRate);
+  writer.writeString(offsets[21], object.interestType.name);
+  writer.writeBool(offsets[22], object.isCompleted);
+  writer.writeString(offsets[23], object.lenderName);
+  writer.writeDateTime(offsets[24], object.loanStartDate);
+  writer.writeString(offsets[25], object.loanType);
+  writer.writeString(offsets[26], object.mode.name);
+  writer.writeString(offsets[27], object.name);
+  writer.writeString(offsets[28], object.notes);
+  writer.writeDouble(offsets[29], object.outstandingAtStart);
+  writer.writeDateTime(offsets[30], object.pastEmisAddedAt);
+  writer.writeDouble(offsets[31], object.preEmiCalculated);
+  writer.writeLong(offsets[32], object.preEmiCycleDay);
+  writer.writeString(offsets[33], object.preEmiMode.name);
+  writer.writeDouble(offsets[34], object.preEmiOverride);
+  writer.writeDouble(offsets[35], object.principalAmount);
+  writer.writeDouble(offsets[36], object.principalPaidBefore);
+  writer.writeString(offsets[37], object.rateType);
+  writer.writeString(offsets[38], object.referenceNumber);
+  writer.writeBool(offsets[39], object.releasedInParts);
   writer.writeObjectList<LoanRelease>(
-    offsets[39],
+    offsets[40],
     allOffsets,
     LoanReleaseSchema.serialize,
     object.releases,
   );
   writer.writeObject<Schedule>(
-    offsets[40],
+    offsets[41],
     allOffsets,
     ScheduleSchema.serialize,
     object.schedule,
   );
-  writer.writeDateTime(offsets[41], object.startDate);
-  writer.writeString(offsets[42], object.startingPoint.name);
-  writer.writeLong(offsets[43], object.tenureMonths);
-  writer.writeString(offsets[44], object.uid);
-  writer.writeDateTime(offsets[45], object.updatedAt);
+  writer.writeDateTime(offsets[42], object.startDate);
+  writer.writeString(offsets[43], object.startingPoint.name);
+  writer.writeLong(offsets[44], object.tenureMonths);
+  writer.writeString(offsets[45], object.uid);
+  writer.writeDateTime(offsets[46], object.updatedAt);
 }
 
 Loan _loanDeserialize(
@@ -424,54 +432,57 @@ Loan _loanDeserialize(
       ) ??
       [];
   object.id = id;
-  object.interestOnlyMonths = reader.readLong(offsets[17]);
-  object.interestPaidBefore = reader.readDouble(offsets[18]);
-  object.interestRate = reader.readDoubleOrNull(offsets[19]);
+  object.interestMethod =
+      _LoaninterestMethodValueEnumMap[reader.readStringOrNull(offsets[17])] ??
+      LoanInterestMethod.monthly;
+  object.interestOnlyMonths = reader.readLong(offsets[18]);
+  object.interestPaidBefore = reader.readDouble(offsets[19]);
+  object.interestRate = reader.readDoubleOrNull(offsets[20]);
   object.interestType =
-      _LoaninterestTypeValueEnumMap[reader.readStringOrNull(offsets[20])] ??
+      _LoaninterestTypeValueEnumMap[reader.readStringOrNull(offsets[21])] ??
       LoanInterestType.reducingBalance;
-  object.isCompleted = reader.readBool(offsets[21]);
-  object.lenderName = reader.readString(offsets[22]);
-  object.loanStartDate = reader.readDateTimeOrNull(offsets[23]);
-  object.loanType = reader.readString(offsets[24]);
+  object.isCompleted = reader.readBool(offsets[22]);
+  object.lenderName = reader.readString(offsets[23]);
+  object.loanStartDate = reader.readDateTimeOrNull(offsets[24]);
+  object.loanType = reader.readString(offsets[25]);
   object.mode =
-      _LoanmodeValueEnumMap[reader.readStringOrNull(offsets[25])] ??
+      _LoanmodeValueEnumMap[reader.readStringOrNull(offsets[26])] ??
       LoanMode.simple;
-  object.name = reader.readString(offsets[26]);
-  object.notes = reader.readStringOrNull(offsets[27]);
-  object.outstandingAtStart = reader.readDoubleOrNull(offsets[28]);
-  object.pastEmisAddedAt = reader.readDateTimeOrNull(offsets[29]);
-  object.preEmiCalculated = reader.readDoubleOrNull(offsets[30]);
-  object.preEmiCycleDay = reader.readLongOrNull(offsets[31]);
+  object.name = reader.readString(offsets[27]);
+  object.notes = reader.readStringOrNull(offsets[28]);
+  object.outstandingAtStart = reader.readDoubleOrNull(offsets[29]);
+  object.pastEmisAddedAt = reader.readDateTimeOrNull(offsets[30]);
+  object.preEmiCalculated = reader.readDoubleOrNull(offsets[31]);
+  object.preEmiCycleDay = reader.readLongOrNull(offsets[32]);
   object.preEmiMode =
-      _LoanpreEmiModeValueEnumMap[reader.readStringOrNull(offsets[32])] ??
+      _LoanpreEmiModeValueEnumMap[reader.readStringOrNull(offsets[33])] ??
       LoanPreEmi.none;
-  object.preEmiOverride = reader.readDoubleOrNull(offsets[33]);
-  object.principalAmount = reader.readDouble(offsets[34]);
-  object.principalPaidBefore = reader.readDouble(offsets[35]);
-  object.rateType = reader.readStringOrNull(offsets[36]);
-  object.referenceNumber = reader.readStringOrNull(offsets[37]);
-  object.releasedInParts = reader.readBool(offsets[38]);
+  object.preEmiOverride = reader.readDoubleOrNull(offsets[34]);
+  object.principalAmount = reader.readDouble(offsets[35]);
+  object.principalPaidBefore = reader.readDouble(offsets[36]);
+  object.rateType = reader.readStringOrNull(offsets[37]);
+  object.referenceNumber = reader.readStringOrNull(offsets[38]);
+  object.releasedInParts = reader.readBool(offsets[39]);
   object.releases =
       reader.readObjectList<LoanRelease>(
-        offsets[39],
+        offsets[40],
         LoanReleaseSchema.deserialize,
         allOffsets,
         LoanRelease(),
       ) ??
       [];
   object.schedule = reader.readObjectOrNull<Schedule>(
-    offsets[40],
+    offsets[41],
     ScheduleSchema.deserialize,
     allOffsets,
   );
-  object.startDate = reader.readDateTime(offsets[41]);
+  object.startDate = reader.readDateTime(offsets[42]);
   object.startingPoint =
-      _LoanstartingPointValueEnumMap[reader.readStringOrNull(offsets[42])] ??
+      _LoanstartingPointValueEnumMap[reader.readStringOrNull(offsets[43])] ??
       LoanStartingPoint.originalDetails;
-  object.tenureMonths = reader.readLongOrNull(offsets[43]);
-  object.uid = reader.readString(offsets[44]);
-  object.updatedAt = reader.readDateTime(offsets[45]);
+  object.tenureMonths = reader.readLongOrNull(offsets[44]);
+  object.uid = reader.readString(offsets[45]);
+  object.updatedAt = reader.readDateTime(offsets[46]);
   return object;
 }
 
@@ -524,56 +535,62 @@ P _loanDeserializeProp<P>(
               [])
           as P;
     case 17:
-      return (reader.readLong(offset)) as P;
+      return (_LoaninterestMethodValueEnumMap[reader.readStringOrNull(
+                offset,
+              )] ??
+              LoanInterestMethod.monthly)
+          as P;
     case 18:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 19:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 20:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 21:
       return (_LoaninterestTypeValueEnumMap[reader.readStringOrNull(offset)] ??
               LoanInterestType.reducingBalance)
           as P;
-    case 21:
-      return (reader.readBool(offset)) as P;
     case 22:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 23:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 24:
       return (reader.readString(offset)) as P;
+    case 24:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 25:
+      return (reader.readString(offset)) as P;
+    case 26:
       return (_LoanmodeValueEnumMap[reader.readStringOrNull(offset)] ??
               LoanMode.simple)
           as P;
-    case 26:
-      return (reader.readString(offset)) as P;
     case 27:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 28:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 29:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 30:
       return (reader.readDoubleOrNull(offset)) as P;
+    case 30:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 31:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 32:
+      return (reader.readLongOrNull(offset)) as P;
+    case 33:
       return (_LoanpreEmiModeValueEnumMap[reader.readStringOrNull(offset)] ??
               LoanPreEmi.none)
           as P;
-    case 33:
-      return (reader.readDoubleOrNull(offset)) as P;
     case 34:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 35:
       return (reader.readDouble(offset)) as P;
     case 36:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 37:
       return (reader.readStringOrNull(offset)) as P;
     case 38:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 39:
+      return (reader.readBool(offset)) as P;
+    case 40:
       return (reader.readObjectList<LoanRelease>(
                 offset,
                 LoanReleaseSchema.deserialize,
@@ -582,30 +599,38 @@ P _loanDeserializeProp<P>(
               ) ??
               [])
           as P;
-    case 40:
+    case 41:
       return (reader.readObjectOrNull<Schedule>(
             offset,
             ScheduleSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 41:
-      return (reader.readDateTime(offset)) as P;
     case 42:
+      return (reader.readDateTime(offset)) as P;
+    case 43:
       return (_LoanstartingPointValueEnumMap[reader.readStringOrNull(offset)] ??
               LoanStartingPoint.originalDetails)
           as P;
-    case 43:
-      return (reader.readLongOrNull(offset)) as P;
     case 44:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 45:
+      return (reader.readString(offset)) as P;
+    case 46:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
+const _LoaninterestMethodEnumValueMap = {
+  r'monthly': r'monthly',
+  r'daily': r'daily',
+};
+const _LoaninterestMethodValueEnumMap = {
+  r'monthly': LoanInterestMethod.monthly,
+  r'daily': LoanInterestMethod.daily,
+};
 const _LoaninterestTypeEnumValueMap = {
   r'reducingBalance': r'reducingBalance',
   r'flatRate': r'flatRate',
@@ -1873,6 +1898,152 @@ extension LoanQueryFilter on QueryBuilder<Loan, Loan, QFilterCondition> {
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodEqualTo(
+    LoanInterestMethod value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'interestMethod',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodGreaterThan(
+    LoanInterestMethod value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'interestMethod',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodLessThan(
+    LoanInterestMethod value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'interestMethod',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodBetween(
+    LoanInterestMethod lower,
+    LoanInterestMethod upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'interestMethod',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'interestMethod',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'interestMethod',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'interestMethod',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'interestMethod',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'interestMethod', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> interestMethodIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'interestMethod', value: ''),
       );
     });
   }
@@ -4905,6 +5076,18 @@ extension LoanQuerySortBy on QueryBuilder<Loan, Loan, QSortBy> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByInterestMethod() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'interestMethod', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByInterestMethodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'interestMethod', Sort.desc);
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterSortBy> sortByInterestOnlyMonths() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'interestOnlyMonths', Sort.asc);
@@ -5435,6 +5618,18 @@ extension LoanQuerySortThenBy on QueryBuilder<Loan, Loan, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByInterestMethod() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'interestMethod', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByInterestMethodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'interestMethod', Sort.desc);
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterSortBy> thenByInterestOnlyMonths() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'interestOnlyMonths', Sort.asc);
@@ -5861,6 +6056,17 @@ extension LoanQueryWhereDistinct on QueryBuilder<Loan, Loan, QDistinct> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QDistinct> distinctByInterestMethod({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'interestMethod',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
   QueryBuilder<Loan, Loan, QDistinct> distinctByInterestOnlyMonths() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'interestOnlyMonths');
@@ -6159,6 +6365,13 @@ extension LoanQueryProperty on QueryBuilder<Loan, Loan, QQueryProperty> {
   QueryBuilder<Loan, List<LoanEvent>, QQueryOperations> eventsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'events');
+    });
+  }
+
+  QueryBuilder<Loan, LoanInterestMethod, QQueryOperations>
+  interestMethodProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'interestMethod');
     });
   }
 

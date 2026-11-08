@@ -9621,4 +9621,63 @@ class AppLocalizationsMl extends AppLocalizations {
     );
     return 'ടാഗ് · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'പലിശ കണക്കാക്കൽ';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'പലിശ കണക്കാക്കൽ: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'പ്രതിമാസം';
+
+  @override
+  String get msLoansMethodDaily => 'ദിവസേന';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'വാർഷിക നിരക്കിനെ 12 കൊണ്ട് ഹരിച്ച്, എല്ലാ മാസവും ഒരുപോലെ';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'അവസാന EMI മുതലുള്ള യഥാർഥ ദിവസങ്ങൾ, മിക്ക ബാങ്കുകളെയും പോലെ';
+
+  @override
+  String get msLoansLastEmi => 'അവസാന EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'ഇതിനകം രേഖപ്പെടുത്തിയ EMIകൾ അതുപോലെ തുടരും. വരാനിരിക്കുന്നവ മാത്രം മാറും.';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$method ആക്കുക';
+  }
+
+  @override
+  String get msLoansDailyHint =>
+      'നിങ്ങളുടെ ബാങ്ക് ദിവസം അനുസരിച്ച് പലിശ കണക്കാക്കുന്നുണ്ടാകാം.';
+
+  @override
+  String get msInfoMethodLine =>
+      'പ്രതിമാസം: വാർഷിക നിരക്കിനെ 12 കൊണ്ട് ഹരിച്ച് എല്ലാ മാസവും ഈടാക്കുന്നു, അതിനാൽ എല്ലാ മാസവും ഒരുപോലെ.\n\nദിവസേന: അവസാന EMI മുതലുള്ള യഥാർഥ ദിവസങ്ങളുടെ പലിശ, വാർഷിക നിരക്കിനെ 365 കൊണ്ട് ഹരിച്ച്. 31 ദിവസമുള്ള മാസം അൽപം കൂടുതലും ഫെബ്രുവരി അൽപം കുറവും. ഒരു വർഷത്തിൽ രണ്ടും ഏകദേശം ഒരുപോലെ.\n\nമിക്ക ഇന്ത്യൻ ബാങ്കുകളും ദിവസേന ഉപയോഗിക്കുന്നു. നിങ്ങളുടെ സ്റ്റേറ്റ്‌മെന്റ് Kuber-മായി ചേരുന്നില്ലെങ്കിൽ ഇത് പരീക്ഷിക്കുക.';
+
+  @override
+  String get msInfoMethodRow1 => 'പ്രതിമാസം, ഏത് മാസവും';
+
+  @override
+  String get msInfoMethodRow2 => 'ദിവസേന, 31 ദിവസമുള്ള മാസം';
+
+  @override
+  String get msInfoMethodRow3 => 'ദിവസേന, ഫെബ്രുവരി';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amount-ന് വർഷം 9% പലിശ:';
+  }
+
+  @override
+  String get deleteLoanAction => 'ലോൺ ഇല്ലാതാക്കുക';
 }

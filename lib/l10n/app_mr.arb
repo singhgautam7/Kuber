@@ -2760,5 +2760,21 @@
   "setKwFeedback": "अभिप्राय समस्या सूचना संपर्क",
   "setKwExpressive": "रंग उठावदार",
   "setKwPureBlack": "डार्क काळा थीम",
-  "searchTagSub": "टॅग · {count, plural, other{{count} व्यवहार}}"
+  "searchTagSub": "टॅग · {count, plural, other{{count} व्यवहार}}",
+  "msLoansInterestCalc": "व्याजाची गणना",
+  "msLoansInterestCalcValue": "व्याजाची गणना: {method}",
+  "msLoansMethodMonthly": "मासिक",
+  "msLoansMethodDaily": "दैनिक",
+  "msLoansMethodMonthlySub": "वार्षिक दराला 12 ने भागून, दर महिन्याला सारखे",
+  "msLoansMethodDailySub": "मागील EMI पासूनच्या खऱ्या दिवसांनुसार, बहुतेक बँकांसारखे",
+  "msLoansLastEmi": "शेवटचा EMI",
+  "msLoansMethodRecorded": "आधी नोंदवलेले EMI तसेच राहतील. फक्त पुढचे बदलतील.",
+  "msLoansMethodSwitch": "{method} वर बदला",
+  "msLoansDailyHint": "तुमची बँक कदाचित दिवसांनुसार व्याज घेते.",
+  "msInfoMethodLine": "मासिक: वार्षिक दराला 12 ने भागून दर महिन्याला व्याज घेतले जाते, त्यामुळे प्रत्येक महिना सारखा.\n\nदैनिक: मागील EMI पासूनच्या खऱ्या दिवसांचे व्याज, वार्षिक दराला 365 ने भागून. 31 दिवसांचा महिना थोडा जास्त आणि फेब्रुवारी थोडा कमी. वर्षभरात दोन्ही जवळपास सारखे.\n\nबहुतेक भारतीय बँका दैनिक वापरतात. तुमचे स्टेटमेंट Kuber शी जुळत नसेल तर हे वापरून पाहा.",
+  "msInfoMethodRow1": "मासिक, कोणताही महिना",
+  "msInfoMethodRow2": "दैनिक, 31 दिवसांचा महिना",
+  "msInfoMethodRow3": "दैनिक, फेब्रुवारी",
+  "msInfoMethodSentence": "{amount} वर वार्षिक 9% व्याज:",
+  "deleteLoanAction": "कर्ज हटवा"
 }

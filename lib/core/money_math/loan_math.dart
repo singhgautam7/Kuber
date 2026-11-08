@@ -501,6 +501,11 @@ class Amortization {
 /// them. [unpaid]: recorded EMIs the user deleted; nothing is paid that
 /// month, so their principal stays owed. [decimals]: the currency's minor
 /// units, to tell a recorded split from the rounded calculation.
+///
+/// [dailyInterest] (reducing loans only): each EMI's interest is the days
+/// since the last EMI at rate / 365 on that day's balance, rounded to the
+/// rupee, the way most Indian banks charge it. The EMI itself stays the monthly formula; only
+/// the split moves. Off: rate / 12 every month, as before.
 Amortization amortize({
   required double principal,
   required double rate,
@@ -514,8 +519,10 @@ Amortization amortize({
   Map<int, RecordedEmi> recorded = const {},
   Set<int> unpaid = const {},
   int decimals = 2,
+  bool dailyInterest = false,
 }) {
   final rows = <AmortRow>[];
+
   // By day; on the same day, after-EMI events last.
   final sorted = [...events]
     ..sort((a, b) => a.day != b.day
@@ -534,6 +541,19 @@ Amortization amortize({
   var base = flatBase ?? principal;
   var flatPrincipalPart = months > 0 ? principal / months : principal;
   var ev = 0;
+  final daily = dailyInterest && kind == RateKind.reducing;
+  // Daily: interest owed since [accFrom], banked as the balance or rate
+  // changes between EMIs. The first period starts a month before EMI 1.
+  var accFrom = emiDays.isEmpty ? 0 : monthBefore(emiDays.first);
+  var accFromN = _dayNumber(accFrom); // kept: one day count per period
+  var accrued = 0.0;
+  void accrue(int to) {
+    if (!daily || to <= accFrom) return;
+    final toN = _dayNumber(to);
+    accrued += bal * r / 100 / 365 * (toN - accFromN);
+    accFrom = to;
+    accFromN = toN;
+  }
   // EMIs still to pay at the current payment and rate (reducing loans past
   // any interest-only months); else the original plan's remainder.
   int keepEnd(int i, int remaining) {
@@ -543,6 +563,7 @@ Amortization amortize({
   }
 
   void apply(AmortEvent e, int i, int remaining) {
+    if (e.kind != AmortEventKind.charge) accrue(e.day);
     switch (e.kind) {
       case AmortEventKind.charge:
         break;
@@ -597,8 +618,12 @@ Amortization amortize({
     }
     if (bal <= 1e-6) break;
     if (unpaid.contains(day)) {
-      // Deleted by the user: no payment this month.
+      // Deleted by the user: no payment this month (and, as with monthly
+      // interest, none charged for it).
       bankRounded = false;
+      accrued = 0;
+      accFrom = day;
+      accFromN = _dayNumber(day);
       while (ev < sorted.length && sorted[ev].day <= day) {
         apply(sorted[ev++], i + 1, max(1, months - i - 1));
       }
@@ -609,6 +634,13 @@ Amortization amortize({
     if (kind == RateKind.flat) {
       interest = r == 0 ? 0 : monthlyInterest(base, r);
       princ = emi != null ? max(0, pay - interest) : flatPrincipalPart;
+    } else if (daily) {
+      accrue(day);
+      // Rounded to the rupee per period, as banks charge it (and as the
+      // pre-EMI cycles are).
+      interest = accrued.roundToDouble();
+      accrued = 0;
+      princ = pay - interest;
     } else {
       interest = monthlyInterest(bal, r);
       princ = isIo ? 0 : pay - interest;
@@ -746,9 +778,26 @@ int _nextMonthOn(int day, int anchor) {
   return ny * 10000 + nm * 100 + min<int>(anchor, last);
 }
 
-int _gapDays(int a, int b) => DateTime.utc(b ~/ 10000, b ~/ 100 % 100, b % 100)
-    .difference(DateTime.utc(a ~/ 10000, a ~/ 100 % 100, a % 100))
-    .inDays;
+/// The same day a month earlier (clamped: 31 Mar -> 28 or 29 Feb).
+int monthBefore(int day) {
+  final y = day ~/ 10000, m = day ~/ 100 % 100, d = day % 100;
+  final py = m == 1 ? y - 1 : y, pm = m == 1 ? 12 : m - 1;
+  final last = DateTime.utc(py, pm + 1, 0).day;
+  return py * 10000 + pm * 100 + min(d, last);
+}
+
+int _gapDays(int a, int b) => _dayNumber(b) - _dayNumber(a);
+
+/// Days since 1 Mar 0000 for a yyyymmdd key (civil calendar, integer maths:
+/// no DateTime per call, as daily interest asks for it every EMI).
+int _dayNumber(int ymd) {
+  var y = ymd ~/ 10000;
+  final m = ymd ~/ 100 % 100, d = ymd % 100;
+  if (m <= 2) y -= 1;
+  final era = y ~/ 400, yoe = y - era * 400;
+  final doy = (153 * (m > 2 ? m - 3 : m + 9) + 2) ~/ 5 + d - 1;
+  return era * 146097 + yoe * 365 + yoe ~/ 4 - yoe ~/ 100 + doy;
+}
 
 /// Dates pre-EMI interest is charged on: every [cycleDay] after [firstRelease]
 /// whose following month still ends on or before the first EMI (that last

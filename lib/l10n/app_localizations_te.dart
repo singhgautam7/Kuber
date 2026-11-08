@@ -9582,4 +9582,63 @@ class AppLocalizationsTe extends AppLocalizations {
     );
     return 'ట్యాగ్ · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'వడ్డీ లెక్కింపు';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'వడ్డీ లెక్కింపు: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'నెలవారీ';
+
+  @override
+  String get msLoansMethodDaily => 'రోజువారీ';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'సంవత్సర రేటును 12తో భాగించి, ప్రతి నెలా ఒకేలా';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'చివరి EMI నుంచి అసలు రోజుల ప్రకారం, చాలా బ్యాంకుల లాగా';
+
+  @override
+  String get msLoansLastEmi => 'చివరి EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'ఇప్పటికే నమోదైన EMIలు అలాగే ఉంటాయి. రాబోయేవి మాత్రమే మారతాయి.';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$methodకి మార్చండి';
+  }
+
+  @override
+  String get msLoansDailyHint =>
+      'మీ బ్యాంక్ రోజుల ప్రకారం వడ్డీ లెక్కించవచ్చు.';
+
+  @override
+  String get msInfoMethodLine =>
+      'నెలవారీ: సంవత్సర రేటును 12తో భాగించి ప్రతి నెలా వసూలు చేస్తారు, కాబట్టి ప్రతి నెలా ఒకేలా.\n\nరోజువారీ: చివరి EMI నుంచి అసలు రోజులకు వడ్డీ, సంవత్సర రేటును 365తో భాగించి. 31 రోజుల నెల కొంచెం ఎక్కువ, ఫిబ్రవరి కొంచెం తక్కువ. ఏడాదిలో రెండూ దాదాపు ఒకేలా.\n\nచాలా భారతీయ బ్యాంకులు రోజువారీని వాడతాయి. మీ స్టేట్‌మెంట్ Kuberతో సరిపోలకపోతే దీన్ని ప్రయత్నించండి.';
+
+  @override
+  String get msInfoMethodRow1 => 'నెలవారీ, ఏ నెలైనా';
+
+  @override
+  String get msInfoMethodRow2 => 'రోజువారీ, 31 రోజుల నెల';
+
+  @override
+  String get msInfoMethodRow3 => 'రోజువారీ, ఫిబ్రవరి';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amountపై ఏడాదికి 9% వడ్డీ:';
+  }
+
+  @override
+  String get deleteLoanAction => 'లోన్ తొలగించండి';
 }

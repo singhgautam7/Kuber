@@ -328,6 +328,29 @@ Future<void> main() async {
     await status('11 delete an EMI', 'noEmi');
     check('11 the EMI comes back to the bank', await balance() - b8, 13000, within: 0);
 
+    // 13. Daily interest, switched from the loan sheet's menu with real taps.
+    var l13 = await make('E2E daily', principal: 1200000, rate: 9.5, emi: 25202, months: 60,
+        start: DateTime(2027, 11, 30), firstEmi: DateTime(2027, 12, 31), account: bank);
+    check('13 a saved loan starts on monthly', l13.interestMethod == LoanInterestMethod.monthly ? 1 : 0, 1, within: 0);
+    c.invalidate(loanListProvider);
+    await settle(t, const Duration(seconds: 1));
+    await openSheet(t, l13);
+    await tapFinder(t, find.byIcon(Icons.more_horiz_rounded).last, reason: 'sheet overflow');
+    await tapText(t, en.msLoansInterestCalcValue(en.msLoansMethodMonthly));
+    await settle(t);
+    await shot(t, '13-interest-calculation');
+    await tapText(t, en.msLoansMethodSwitch(en.msLoansMethodDaily));
+    await settle(t, const Duration(seconds: 1));
+    l13 = await reload(l13);
+    check('13 switched to daily', l13.interestMethod == LoanInterestMethod.daily ? 1 : 0, 1, within: 0);
+    final rows13 = loanAmortization(l13)!.rows;
+    final days13 = (expected['s13Days'] as List).cast<int>();
+    for (final (i, want) in (expected['s13Interest'] as List).indexed) {
+      check('13 EMI ${i + 1} date', rows13[i].day, days13[i], within: 0);
+      check('13 EMI ${i + 1} interest (${days13[i]})', rows13[i].interest, want as num, within: 0);
+    }
+    check('13 outstanding after 15 EMIs', rows13[14].balance, expected['s13Balance'], within: 0.01);
+
     // On screen: sheet, schedule, Accounts, Analytics.
     c.invalidate(loanListProvider);
     await go(t, '/more/loans');

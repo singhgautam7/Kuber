@@ -286,6 +286,27 @@ class LoanService {
     await isar.writeTxn(() => isar.loans.put(l));
   }
 
+  /// What switching the interest method would do: the last EMI's date and
+  /// the total interest, now and after ([now] and [then] amortize the same
+  /// loan with its records, on each method).
+  static ({int? endNow, int? endThen, double interestNow, double interestThen}) interestMethodPreview(
+          Amortization now, Amortization then) =>
+      (
+        endNow: now.rows.lastOrNull?.day,
+        endThen: then.rows.lastOrNull?.day,
+        interestNow: now.allInterest,
+        interestThen: then.allInterest,
+      );
+
+  /// Interest calculation in the loan sheet's menu. Recorded EMIs keep their
+  /// split (the amortization takes them as recorded); only what's ahead moves.
+  Future<void> setInterestMethod(Loan l, LoanInterestMethod method) async {
+    l
+      ..interestMethod = method
+      ..updatedAt = DateTime.now();
+    await isar.writeTxn(() => isar.loans.put(l));
+  }
+
   /// Extra payment: principal part as a loan repayment (outstanding goes down
   /// from its date) and an optional charge as an expense in Loan charges.
   /// [towardPrincipal] false: only a fee (expense), outstanding unchanged.

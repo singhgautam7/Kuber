@@ -9537,4 +9537,63 @@ class AppLocalizationsHi extends AppLocalizations {
     );
     return 'टैग · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'ब्याज की गणना';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'ब्याज की गणना: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'मासिक';
+
+  @override
+  String get msLoansMethodDaily => 'दैनिक';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'सालाना दर को 12 से भाग, हर महीने एक जैसा';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'पिछली EMI से असली दिनों के हिसाब से, ज़्यादातर बैंकों की तरह';
+
+  @override
+  String get msLoansLastEmi => 'आखिरी EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'जो EMI आप दर्ज कर चुके हैं, वे वैसी ही रहेंगी। सिर्फ़ आगे वाली बदलेंगी।';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$method पर बदलें';
+  }
+
+  @override
+  String get msLoansDailyHint =>
+      'हो सकता है आपका बैंक ब्याज दिनों के हिसाब से लेता हो।';
+
+  @override
+  String get msInfoMethodLine =>
+      'मासिक: सालाना दर को 12 से भाग देकर हर महीने लिया जाता है, इसलिए हर महीना एक जैसा पड़ता है।\n\nदैनिक: पिछली EMI से असली दिनों का ब्याज, सालाना दर को 365 से भाग देकर। 31 दिन का महीना थोड़ा ज़्यादा और फ़रवरी थोड़ा कम पड़ता है। साल भर में दोनों लगभग बराबर रहते हैं।\n\nज़्यादातर भारतीय बैंक दैनिक इस्तेमाल करते हैं। अगर आपका स्टेटमेंट Kuber से मेल नहीं खाता, तो इसे आज़माएँ।';
+
+  @override
+  String get msInfoMethodRow1 => 'मासिक, कोई भी महीना';
+
+  @override
+  String get msInfoMethodRow2 => 'दैनिक, 31 दिन का महीना';
+
+  @override
+  String get msInfoMethodRow3 => 'दैनिक, फ़रवरी';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amount पर 9% सालाना ब्याज:';
+  }
+
+  @override
+  String get deleteLoanAction => 'लोन हटाएँ';
 }

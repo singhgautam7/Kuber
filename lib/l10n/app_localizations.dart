@@ -16703,6 +16703,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tag · {count, plural, one{1 transaction} other{{count} transactions}}'**
   String searchTagSub(int count);
+
+  /// No description provided for @msLoansInterestCalc.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest calculation'**
+  String get msLoansInterestCalc;
+
+  /// No description provided for @msLoansInterestCalcValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest calculation: {method}'**
+  String msLoansInterestCalcValue(String method);
+
+  /// No description provided for @msLoansMethodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get msLoansMethodMonthly;
+
+  /// No description provided for @msLoansMethodDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get msLoansMethodDaily;
+
+  /// No description provided for @msLoansMethodMonthlySub.
+  ///
+  /// In en, this message translates to:
+  /// **'The yearly rate divided by 12, the same every month'**
+  String get msLoansMethodMonthlySub;
+
+  /// No description provided for @msLoansMethodDailySub.
+  ///
+  /// In en, this message translates to:
+  /// **'The actual days since your last EMI, like most banks'**
+  String get msLoansMethodDailySub;
+
+  /// No description provided for @msLoansLastEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'Last EMI'**
+  String get msLoansLastEmi;
+
+  /// No description provided for @msLoansMethodRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs you\'ve already recorded stay as they are. Only the ones ahead change.'**
+  String get msLoansMethodRecorded;
+
+  /// No description provided for @msLoansMethodSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {method}'**
+  String msLoansMethodSwitch(String method);
+
+  /// No description provided for @msLoansDailyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank may count interest by days.'**
+  String get msLoansDailyHint;
+
+  /// No description provided for @msInfoMethodLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly: your yearly rate divided by 12 is charged every month, so every month costs the same.\n\nDaily: interest is counted for the actual days since your last EMI, at your yearly rate divided by 365. A 31-day month costs a little more and February a little less. Over a year they come out almost the same.\n\nMost Indian banks use daily. If your statement doesn\'t match Kuber, try it.'**
+  String get msInfoMethodLine;
+
+  /// No description provided for @msInfoMethodRow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly, any month'**
+  String get msInfoMethodRow1;
+
+  /// No description provided for @msInfoMethodRow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily, a 31-day month'**
+  String get msInfoMethodRow2;
+
+  /// No description provided for @msInfoMethodRow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily, February'**
+  String get msInfoMethodRow3;
+
+  /// No description provided for @msInfoMethodSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest on {amount} at 9% a year:'**
+  String msInfoMethodSentence(String amount);
+
+  /// No description provided for @deleteLoanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete loan'**
+  String get deleteLoanAction;
 }
 
 class _AppLocalizationsDelegate

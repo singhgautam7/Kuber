@@ -2760,5 +2760,21 @@
   "setKwFeedback": "ಪ್ರತಿಕ್ರಿಯೆ ಸಮಸ್ಯೆ ಸಲಹೆ ಸಂಪರ್ಕ",
   "setKwExpressive": "ಬಣ್ಣ ಪ್ರಕಾಶಮಾನ",
   "setKwPureBlack": "ಡಾರ್ಕ್ ಕಪ್ಪು ಥೀಮ್",
-  "searchTagSub": "ಟ್ಯಾಗ್ · {count, plural, other{{count} ವಹಿವಾಟುಗಳು}}"
+  "searchTagSub": "ಟ್ಯಾಗ್ · {count, plural, other{{count} ವಹಿವಾಟುಗಳು}}",
+  "msLoansInterestCalc": "ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ",
+  "msLoansInterestCalcValue": "ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ: {method}",
+  "msLoansMethodMonthly": "ಮಾಸಿಕ",
+  "msLoansMethodDaily": "ದೈನಂದಿನ",
+  "msLoansMethodMonthlySub": "ವಾರ್ಷಿಕ ದರವನ್ನು 12ರಿಂದ ಭಾಗಿಸಿ, ಪ್ರತಿ ತಿಂಗಳು ಒಂದೇ",
+  "msLoansMethodDailySub": "ಕೊನೆಯ EMIಯಿಂದ ನಿಜವಾದ ದಿನಗಳ ಪ್ರಕಾರ, ಹೆಚ್ಚಿನ ಬ್ಯಾಂಕ್‌ಗಳಂತೆ",
+  "msLoansLastEmi": "ಕೊನೆಯ EMI",
+  "msLoansMethodRecorded": "ಈಗಾಗಲೇ ದಾಖಲಿಸಿದ EMIಗಳು ಹಾಗೆಯೇ ಇರುತ್ತವೆ. ಮುಂದಿನವು ಮಾತ್ರ ಬದಲಾಗುತ್ತವೆ.",
+  "msLoansMethodSwitch": "{method}ಗೆ ಬದಲಿಸಿ",
+  "msLoansDailyHint": "ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ದಿನಗಳ ಪ್ರಕಾರ ಬಡ್ಡಿ ಲೆಕ್ಕಿಸಬಹುದು.",
+  "msInfoMethodLine": "ಮಾಸಿಕ: ವಾರ್ಷಿಕ ದರವನ್ನು 12ರಿಂದ ಭಾಗಿಸಿ ಪ್ರತಿ ತಿಂಗಳು ವಿಧಿಸಲಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಪ್ರತಿ ತಿಂಗಳು ಒಂದೇ.\n\nದೈನಂದಿನ: ಕೊನೆಯ EMIಯಿಂದ ನಿಜವಾದ ದಿನಗಳ ಬಡ್ಡಿ, ವಾರ್ಷಿಕ ದರವನ್ನು 365ರಿಂದ ಭಾಗಿಸಿ. 31 ದಿನಗಳ ತಿಂಗಳು ಸ್ವಲ್ಪ ಹೆಚ್ಚು, ಫೆಬ್ರವರಿ ಸ್ವಲ್ಪ ಕಡಿಮೆ. ವರ್ಷದಲ್ಲಿ ಎರಡೂ ಬಹುತೇಕ ಒಂದೇ.\n\nಹೆಚ್ಚಿನ ಭಾರತೀಯ ಬ್ಯಾಂಕ್‌ಗಳು ದೈನಂದಿನವನ್ನು ಬಳಸುತ್ತವೆ. ನಿಮ್ಮ ಸ್ಟೇಟ್‌ಮೆಂಟ್ Kuber ಜೊತೆ ಹೊಂದದಿದ್ದರೆ ಇದನ್ನು ಪ್ರಯತ್ನಿಸಿ.",
+  "msInfoMethodRow1": "ಮಾಸಿಕ, ಯಾವುದೇ ತಿಂಗಳು",
+  "msInfoMethodRow2": "ದೈನಂದಿನ, 31 ದಿನಗಳ ತಿಂಗಳು",
+  "msInfoMethodRow3": "ದೈನಂದಿನ, ಫೆಬ್ರವರಿ",
+  "msInfoMethodSentence": "{amount} ಮೇಲೆ ವರ್ಷಕ್ಕೆ 9% ಬಡ್ಡಿ:",
+  "deleteLoanAction": "ಸಾಲ ಅಳಿಸಿ"
 }

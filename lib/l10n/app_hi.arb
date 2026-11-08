@@ -2760,5 +2760,21 @@
   "setKwFeedback": "फ़ीडबैक समस्या सुझाव संपर्क",
   "setKwExpressive": "रंग चमकीला",
   "setKwPureBlack": "डार्क काला थीम",
-  "searchTagSub": "टैग · {count, plural, other{{count} लेन-देन}}"
+  "searchTagSub": "टैग · {count, plural, other{{count} लेन-देन}}",
+  "msLoansInterestCalc": "ब्याज की गणना",
+  "msLoansInterestCalcValue": "ब्याज की गणना: {method}",
+  "msLoansMethodMonthly": "मासिक",
+  "msLoansMethodDaily": "दैनिक",
+  "msLoansMethodMonthlySub": "सालाना दर को 12 से भाग, हर महीने एक जैसा",
+  "msLoansMethodDailySub": "पिछली EMI से असली दिनों के हिसाब से, ज़्यादातर बैंकों की तरह",
+  "msLoansLastEmi": "आखिरी EMI",
+  "msLoansMethodRecorded": "जो EMI आप दर्ज कर चुके हैं, वे वैसी ही रहेंगी। सिर्फ़ आगे वाली बदलेंगी।",
+  "msLoansMethodSwitch": "{method} पर बदलें",
+  "msLoansDailyHint": "हो सकता है आपका बैंक ब्याज दिनों के हिसाब से लेता हो।",
+  "msInfoMethodLine": "मासिक: सालाना दर को 12 से भाग देकर हर महीने लिया जाता है, इसलिए हर महीना एक जैसा पड़ता है।\n\nदैनिक: पिछली EMI से असली दिनों का ब्याज, सालाना दर को 365 से भाग देकर। 31 दिन का महीना थोड़ा ज़्यादा और फ़रवरी थोड़ा कम पड़ता है। साल भर में दोनों लगभग बराबर रहते हैं।\n\nज़्यादातर भारतीय बैंक दैनिक इस्तेमाल करते हैं। अगर आपका स्टेटमेंट Kuber से मेल नहीं खाता, तो इसे आज़माएँ।",
+  "msInfoMethodRow1": "मासिक, कोई भी महीना",
+  "msInfoMethodRow2": "दैनिक, 31 दिन का महीना",
+  "msInfoMethodRow3": "दैनिक, फ़रवरी",
+  "msInfoMethodSentence": "{amount} पर 9% सालाना ब्याज:",
+  "deleteLoanAction": "लोन हटाएँ"
 }

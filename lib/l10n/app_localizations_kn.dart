@@ -9592,4 +9592,63 @@ class AppLocalizationsKn extends AppLocalizations {
     );
     return 'ಟ್ಯಾಗ್ · $_temp0';
   }
+
+  @override
+  String get msLoansInterestCalc => 'ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ';
+
+  @override
+  String msLoansInterestCalcValue(String method) {
+    return 'ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ: $method';
+  }
+
+  @override
+  String get msLoansMethodMonthly => 'ಮಾಸಿಕ';
+
+  @override
+  String get msLoansMethodDaily => 'ದೈನಂದಿನ';
+
+  @override
+  String get msLoansMethodMonthlySub =>
+      'ವಾರ್ಷಿಕ ದರವನ್ನು 12ರಿಂದ ಭಾಗಿಸಿ, ಪ್ರತಿ ತಿಂಗಳು ಒಂದೇ';
+
+  @override
+  String get msLoansMethodDailySub =>
+      'ಕೊನೆಯ EMIಯಿಂದ ನಿಜವಾದ ದಿನಗಳ ಪ್ರಕಾರ, ಹೆಚ್ಚಿನ ಬ್ಯಾಂಕ್‌ಗಳಂತೆ';
+
+  @override
+  String get msLoansLastEmi => 'ಕೊನೆಯ EMI';
+
+  @override
+  String get msLoansMethodRecorded =>
+      'ಈಗಾಗಲೇ ದಾಖಲಿಸಿದ EMIಗಳು ಹಾಗೆಯೇ ಇರುತ್ತವೆ. ಮುಂದಿನವು ಮಾತ್ರ ಬದಲಾಗುತ್ತವೆ.';
+
+  @override
+  String msLoansMethodSwitch(String method) {
+    return '$methodಗೆ ಬದಲಿಸಿ';
+  }
+
+  @override
+  String get msLoansDailyHint =>
+      'ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ದಿನಗಳ ಪ್ರಕಾರ ಬಡ್ಡಿ ಲೆಕ್ಕಿಸಬಹುದು.';
+
+  @override
+  String get msInfoMethodLine =>
+      'ಮಾಸಿಕ: ವಾರ್ಷಿಕ ದರವನ್ನು 12ರಿಂದ ಭಾಗಿಸಿ ಪ್ರತಿ ತಿಂಗಳು ವಿಧಿಸಲಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಪ್ರತಿ ತಿಂಗಳು ಒಂದೇ.\n\nದೈನಂದಿನ: ಕೊನೆಯ EMIಯಿಂದ ನಿಜವಾದ ದಿನಗಳ ಬಡ್ಡಿ, ವಾರ್ಷಿಕ ದರವನ್ನು 365ರಿಂದ ಭಾಗಿಸಿ. 31 ದಿನಗಳ ತಿಂಗಳು ಸ್ವಲ್ಪ ಹೆಚ್ಚು, ಫೆಬ್ರವರಿ ಸ್ವಲ್ಪ ಕಡಿಮೆ. ವರ್ಷದಲ್ಲಿ ಎರಡೂ ಬಹುತೇಕ ಒಂದೇ.\n\nಹೆಚ್ಚಿನ ಭಾರತೀಯ ಬ್ಯಾಂಕ್‌ಗಳು ದೈನಂದಿನವನ್ನು ಬಳಸುತ್ತವೆ. ನಿಮ್ಮ ಸ್ಟೇಟ್‌ಮೆಂಟ್ Kuber ಜೊತೆ ಹೊಂದದಿದ್ದರೆ ಇದನ್ನು ಪ್ರಯತ್ನಿಸಿ.';
+
+  @override
+  String get msInfoMethodRow1 => 'ಮಾಸಿಕ, ಯಾವುದೇ ತಿಂಗಳು';
+
+  @override
+  String get msInfoMethodRow2 => 'ದೈನಂದಿನ, 31 ದಿನಗಳ ತಿಂಗಳು';
+
+  @override
+  String get msInfoMethodRow3 => 'ದೈನಂದಿನ, ಫೆಬ್ರವರಿ';
+
+  @override
+  String msInfoMethodSentence(String amount) {
+    return '$amount ಮೇಲೆ ವರ್ಷಕ್ಕೆ 9% ಬಡ್ಡಿ:';
+  }
+
+  @override
+  String get deleteLoanAction => 'ಸಾಲ ಅಳಿಸಿ';
 }
