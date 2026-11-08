@@ -5,6 +5,7 @@
 // A host script takes a screenshot on each KUBER_SHOT line
 // (specs/nov-release/perf-harness/shots.sh).
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -24,7 +25,12 @@ import 'package:kuber/features/loans/domain/loan_service.dart';
 import 'package:kuber/features/loans/providers/loan_provider.dart';
 import 'package:kuber/features/loans/widgets/loan_add_sheet.dart';
 import 'package:kuber/features/loans/widgets/loan_sheet.dart';
-import 'package:kuber/core/services/notification_service.dart' show notificationKindsProvider;
+import 'package:kuber/core/database/isar_service.dart';
+import 'package:kuber/core/services/notification_service.dart' show NotificationKind, notificationKindsProvider;
+import 'package:kuber/features/dev/providers/dev_mode_provider.dart';
+import 'package:kuber/features/notifications/data/app_notification.dart';
+import 'package:kuber/features/notifications/data/notification_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kuber/features/notes/data/kuber_note.dart';
 import 'package:kuber/features/notes/providers/notes_provider.dart';
 import 'package:kuber/features/notifications/utils/notification_routes.dart';
@@ -120,7 +126,7 @@ void main() {
     await pumpUntil(t, find.byType(TextFormField));
     await t.enterText(find.byType(TextFormField).first, 'Gaurav');
     await settle(t);
-    await tapText(t, en.startJourney);
+    await tapText(t, en.homeV33TourNext);
     await pumpUntil(t, find.text(en.obNotifTitle));
     await hideKeyboard(t);
     await settle(t, const Duration(seconds: 1));
@@ -584,6 +590,56 @@ void main() {
     expect(find.text(en.proFaqLifetimeA), findsOneWidget);
     await tapText(t, en.proFaqLifetimeQ);
     await settle(t);
+    expectNoErrors(t);
+  });
+
+  smokeTest('R2: second review', (t) async {
+    await boot(t);
+    final c = container(t);
+    // Settings: Permissions under About; Dev Tools only once unlocked.
+    await go(t, '/more');
+    expect(find.text(en.menuPermissions), findsNothing);
+    await push(t, '/more/settings');
+    await settle(t);
+    // Permission granted by the run: the row reads On, refreshed on open.
+    expect(find.text(en.setOn), findsOneWidget);
+    final perm = find.text(en.menuPermissions);
+    await t.scrollUntilVisible(perm, 300, scrollable: find.byType(Scrollable).first, maxScrolls: 30);
+    await settle(t);
+    expect(find.text(en.menuDevTools), findsNothing);
+    (await SharedPreferences.getInstance()).setBool('kuber_dev_mode', true);
+    c.invalidate(devModeProvider);
+    await settle(t);
+    expect(find.text(en.menuDevTools), findsOneWidget);
+    await shot(t, 'r2/settings-bottom');
+    await tapFinder(t, perm);
+    await settle(t);
+    await go(t, '/more');
+    // The currency code example follows the currency.
+    final settings = c.read(settingsProvider.notifier);
+    await settings.setCurrency('USD');
+    await push(t, '/more/settings/preferences');
+    await settle(t);
+    expect(find.text(r'USD 500 instead of $500'), findsOneWidget);
+    await shot(t, 'r2/currency-code-usd');
+    await settings.setCurrency('INR');
+    await go(t, '/more');
+    // Phone notifications: an EMI row shows with the switch on, not off.
+    final repo = NotificationRepository(c.read(isarProvider));
+    final kinds = c.read(notificationKindsProvider.notifier);
+    await kinds.set(NotificationKind.payments, true);
+    await repo.add(type: NotificationType.loanEmi, title: 'R2 on EMI', body: 'R2 check', payload: 'loan:r2on');
+    await kinds.set(NotificationKind.payments, false);
+    await repo.add(type: NotificationType.loanEmi, title: 'R2 off EMI', body: 'R2 check', payload: 'loan:r2off');
+    await kinds.set(NotificationKind.payments, true);
+    await settle(t, const Duration(seconds: 2));
+    final active = await FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
+        .getActiveNotifications();
+    final titles = active.map((n) => n.title).toList();
+    debugPrint('KUBER_NUM R2 on phone: $titles');
+    expect(titles, contains('R2 on EMI'));
+    expect(titles, isNot(contains('R2 off EMI')));
     expectNoErrors(t);
   });
 }

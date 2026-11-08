@@ -11,6 +11,7 @@ import '../../../core/utils/supported_locales.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../backups/providers/backup_provider.dart';
+import '../../dev/providers/dev_mode_provider.dart';
 import '../../kuber_cards/providers/kuber_cards_provider.dart';
 import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../providers/settings_provider.dart';
@@ -71,12 +72,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     // The rows fed by async values are Consumers: as each value lands only its
     // row rebuilds, not the page.
-    Widget group(IconData icon, String title, String subtitle, SettingsArea area, {bool warn = false}) => KuberGroupRow(
+    Widget group(IconData icon, String title, String subtitle, SettingsArea area) => KuberGroupRow(
           icon: icon,
           title: title,
           subtitle: subtitle,
-          warn: warn,
-          warnIcon: Icons.notifications_off_outlined,
           onTap: () => context.push(area.route),
         );
 
@@ -166,7 +165,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               builder: (_, ref, _) {
                 final off = ref.watch(notificationsAllowedProvider).valueOrNull == false;
                 return group(Icons.notifications_outlined, l.menuNotifications, off ? l.setOff : l.setOn,
-                    SettingsArea.notifications, warn: off);
+                    SettingsArea.notifications);
               },
             ),
           ],
@@ -192,6 +191,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             )),
+            SettingsAnchor('permissions', child: SettingsTile(
+              icon: Icons.security_outlined,
+              label: l.menuPermissions,
+              subtitle: l.menuPermissionsDesc,
+              onTap: () => context.pushNamed('permissions'),
+              trailing: const KuberChevron(),
+            )),
+            // Unlocked by tapping the version in About.
+            Consumer(
+              builder: (_, ref, _) => ref.watch(devModeProvider).valueOrNull ?? false
+                  ? SettingsTile(
+                      icon: Icons.bug_report_outlined,
+                      label: l.menuDevTools,
+                      subtitle: l.menuDevToolsDesc,
+                      onTap: () => context.push('/more/dev-tools'),
+                      trailing: const KuberChevron(),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ],

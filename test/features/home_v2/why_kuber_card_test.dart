@@ -6,7 +6,6 @@ import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/widget_editor/providers/widget_editor_provider.dart';
 import 'package:kuber/core/utils/prefs_keys.dart';
 import 'package:kuber/features/home_v2/data/home_v2_state.dart';
-import 'package:kuber/features/home_v2/data/tracking_choices.dart';
 import 'package:kuber/features/home_v2/engine/suggestion_engine.dart';
 import 'package:kuber/features/home_v2/engine/suggestion_scheduler.dart';
 import 'package:kuber/features/home_v2/providers/home_suggestion_provider.dart';
@@ -188,11 +187,5 @@ void main() {
       ).shown!.key,
       'loans',
     );
-  });
-
-  test('tracking choices map to their widgets', () {
-    expect(trackingWidgetsFor({'budgets'}), {'budget_snapshot'});
-    expect(trackingWidgetsFor({'loans', 'subscriptions'}), {'upcoming_events_widget'});
-    expect(trackingWidgetsFor(const {}), isEmpty);
   });
 }

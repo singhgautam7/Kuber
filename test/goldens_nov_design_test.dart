@@ -68,7 +68,7 @@ class _State {
   const _State(this.name, {this.page, this.query, this.overrides = const []});
 }
 
-Widget _welcome(Widget page, {required String label, bool dots = true, int at = 8, bool arrow = true, String? second, bool enabled = true, bool back = false}) =>
+Widget _welcome(Widget page, {required String label, bool dots = true, int at = 8, bool arrow = true, String? second, String? caption, bool enabled = true, bool back = false}) =>
     Scaffold(
       body: SafeArea(
         child: Column(
@@ -86,6 +86,8 @@ Widget _welcome(Widget page, {required String label, bool dots = true, int at = 
               showArrow: arrow,
               primaryEnabled: enabled,
               secondaryLabel: second,
+              onSecondary: () {},
+              caption: caption,
             ),
           ],
         ),
@@ -181,7 +183,7 @@ final _states = <_State>[
   _State('welcome_restore_failed', page: (c) => _welcome(_start(failed: StartJob.restore), label: 'Start fresh', dots: false)),
   _State('welcome_import_busy', page: (c) => _welcome(_start(job: StartJob.csv), label: 'Start fresh', dots: false, enabled: false)),
   _State('welcome_cards', page: (c) => _cards()),
-  _State('welcome_notifications', page: (c) => _welcome(const OnboardingNotificationsPage(), label: 'Allow notifications', arrow: false, second: 'Not now')),
+  _State('welcome_notifications', page: (c) => _welcome(const OnboardingNotificationsPage(), label: 'Allow', arrow: false, second: 'Not now', caption: 'Allow notifications')),
   _State('welcome_notifications_old_android', page: (c) => _welcome(const OnboardingNotificationsPage(), label: 'Continue', arrow: false)),
   _State('welcome_data_none', page: (c) => _welcome(_terms(false, false), label: 'Agree and continue', at: 9, arrow: false, enabled: false, back: true)),
   _State('welcome_data_one', page: (c) => _welcome(_terms(true, false), label: 'Agree and continue', at: 9, arrow: false, enabled: false, back: true)),

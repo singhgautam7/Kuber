@@ -7,7 +7,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_loader.dart';
 import '../../settings/providers/settings_provider.dart';
-import '../../dev/providers/dev_mode_provider.dart';
 import '../../tutorial/providers/tutorial_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
@@ -79,8 +78,7 @@ class MoreScreenSimple extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
-    final sections = buildMoreSections(context, ref, isDevMode: isDevMode);
+    final sections = buildMoreSections(context, ref);
 
     return Scaffold(
       body: CustomScrollView(

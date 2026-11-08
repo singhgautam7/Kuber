@@ -39,9 +39,6 @@ class AppLocalizationsPa extends AppLocalizations {
   String get starting => 'ਸ਼ੁਰੂ ਹੋ ਰਿਹਾ ਹੈ...';
 
   @override
-  String get startJourney => 'ਮੇਰੀ ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰੋ';
-
-  @override
   String get yourMoneyYourRules => 'ਤੁਹਾਡਾ ਪੈਸਾ।\nਤੁਹਾਡੇ ਨਿਯਮ।';
 
   @override
@@ -5550,28 +5547,6 @@ class AppLocalizationsPa extends AppLocalizations {
       'Ask Kuber ਇੱਕ ਸਵਾਲ ਦਾ ਜਵਾਬ ਦਿੰਦਾ ਹੈ, ਇੱਕ ਕਾਰਡ ਪਲਟਦਾ ਹੈ, ਇੱਕ ਨੋਟ ਜੋੜ ਕੇ ਲੈਣ-ਦੇਣ ਬਣਦਾ ਹੈ, ਇੱਕ ਕੈਲਕੁਲੇਟਰ ਨਤੀਜਾ ਦਿਖਾਉਂਦਾ ਹੈ, ਅਤੇ ਬਿੱਲ ਦਾ ਰਿਮਾਈਂਡਰ ਆਉਂਦਾ ਹੈ।';
 
   @override
-  String get homeV3TrkTitle => 'ਤੁਸੀਂ ਕੀ ਟਰੈਕ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?';
-
-  @override
-  String get homeV3TrkBody =>
-      'ਜਿੰਨੇ ਚਾਹੋ ਚੁਣੋ। Kuber ਮਿਲਦੇ ਵਿਜੇਟ ਤੁਹਾਡੇ ਹੋਮ ਉੱਤੇ ਜੋੜਦਾ ਹੈ। ਤੁਸੀਂ ਇਸਨੂੰ ਬਾਅਦ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।';
-
-  @override
-  String get homeV31TrkBudgets => 'ਬਜਟ';
-
-  @override
-  String get homeV3TrkLoans => 'ਕਰਜ਼ੇ ਅਤੇ EMI';
-
-  @override
-  String get homeV3TrkInvest => 'ਨਿਵੇਸ਼ ਅਤੇ SIP';
-
-  @override
-  String get homeV3TrkLedger => 'ਦਿੱਤਾ ਜਾਂ ਲਿਆ ਪੈਸਾ';
-
-  @override
-  String get homeV3TrkSubs => 'ਸਬਸਕ੍ਰਿਪਸ਼ਨ';
-
-  @override
   String get homeV33EdNeedsTxn => 'ਤੁਹਾਡੇ ਪਹਿਲੇ ਲੈਣ-ਦੇਣ ਤੋਂ ਬਾਅਦ ਦਿਖੇਗਾ';
 
   @override
@@ -8874,6 +8849,9 @@ class AppLocalizationsPa extends AppLocalizations {
   String get obNotifAllow => 'ਸੂਚਨਾਵਾਂ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ';
 
   @override
+  String get obNotifAllowShort => 'ਇਜਾਜ਼ਤ ਦਿਓ';
+
+  @override
   String get obNotifLater => 'ਹੁਣ ਨਹੀਂ';
 
   @override
@@ -9195,7 +9173,9 @@ class AppLocalizationsPa extends AppLocalizations {
   String get setShowCode => 'ਮੁਦਰਾ ਕੋਡ ਦਿਖਾਓ';
 
   @override
-  String get setShowCodeSub => '₹500 ਦੀ ਥਾਂ INR 500';
+  String setShowCodeSub(String withCode, String withSymbol) {
+    return '$withSymbol ਦੀ ਥਾਂ $withCode';
+  }
 
   @override
   String get setDefaultAccount => 'ਡਿਫੌਲਟ ਖਾਤਾ';

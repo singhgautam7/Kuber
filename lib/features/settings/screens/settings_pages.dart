@@ -10,6 +10,8 @@ import '../../../core/services/shortcut_pin_service.dart';
 import '../../../core/services/notification_service.dart' show NotificationKind, notificationKindsProvider;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../shared/widgets/brand_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -324,7 +326,8 @@ void _showDefaultAccountPicker(
 }
 
 
-/// Runs [onResume] when the user comes back to the app (from phone settings).
+/// Runs [onResume] when the page opens and when the user comes back to the app
+/// (from phone settings).
 class SettingsOnResume extends StatefulWidget {
   final VoidCallback onResume;
   final Widget child;
@@ -341,6 +344,11 @@ class _SettingsOnResumeState extends State<SettingsOnResume> {
   void initState() {
     super.initState();
     _listener;
+    // Also on open: the permission may have been granted from another screen
+    // (Welcome, Permissions, a reminder) since the value was cached.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onResume();
+    });
   }
 
   @override
@@ -528,7 +536,10 @@ class AppPreferencesScreen extends ConsumerWidget {
             SettingsAnchor('currencyCode', child: SettingsTile(
               icon: Icons.abc_rounded,
               label: l.setShowCode,
-              subtitle: l.setShowCodeSub,
+              subtitle: l.setShowCodeSub(
+                AppFormatter(currency: currency, showCode: true).formatCurrency(500),
+                AppFormatter(currency: currency).formatCurrency(500),
+              ),
               trailing: Switch(
                 value: settings?.showCurrencyCode ?? false,
                 onChanged: (v) => ref.read(settingsProvider.notifier).setShowCurrencyCode(v),
@@ -801,22 +812,26 @@ class AppDrawerScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final on = ref.watch(appDrawerEntriesProvider).valueOrNull ?? const <AppDrawerEntry>{};
-    Widget preview(IconData icon, String label, bool lit, Color bg, Color fg) => Opacity(
+    Widget preview(IconData? icon, String label, bool lit) => Opacity(
           opacity: lit ? 1 : 0.38,
           child: SizedBox(
             width: 64,
             child: Column(
               children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: bg,
-                    shape: BoxShape.circle,
-                    border: lit ? null : Border.all(color: cs.outline, width: 1.5),
+                // Kuber is the launcher icon itself, in the theme's tones.
+                if (icon == null)
+                  const BrandIcon(size: 52, radius: 26)
+                else
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: cs.secondaryContainer,
+                      shape: BoxShape.circle,
+                      border: lit ? null : Border.all(color: cs.outline, width: 1.5),
+                    ),
+                    child: Icon(icon, size: 26, color: cs.onSecondaryContainer),
                   ),
-                  child: Icon(icon, size: 26, color: fg),
-                ),
                 const SizedBox(height: 6),
                 Text(label,
                     textAlign: TextAlign.center,
@@ -846,13 +861,13 @@ class AppDrawerScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    preview(Icons.currency_rupee_rounded, 'Kuber', true, cs.primaryContainer, cs.onPrimaryContainer),
-                    for (final (e, icon, label, bg, fg) in [
-                      (AppDrawerEntry.cards, Icons.credit_card_rounded, l.appDrawerCards, cs.secondaryContainer, cs.onSecondaryContainer),
-                      (AppDrawerEntry.notes, Icons.sticky_note_2_rounded, l.appDrawerNotes, cs.tertiaryContainer, cs.onTertiaryContainer),
-                      (AppDrawerEntry.reminders, Icons.alarm_rounded, l.appDrawerReminders, cs.surfaceContainerHigh, cs.onSurfaceVariant),
+                    preview(null, 'Kuber', true),
+                    for (final (e, icon, label) in [
+                      (AppDrawerEntry.cards, Icons.credit_card_rounded, l.appDrawerCards),
+                      (AppDrawerEntry.notes, Icons.sticky_note_2_rounded, l.appDrawerNotes),
+                      (AppDrawerEntry.reminders, Icons.alarm_rounded, l.appDrawerReminders),
                     ])
-                      preview(icon, label, on.contains(e), bg, fg),
+                      preview(icon, label, on.contains(e)),
                   ],
                 ),
               ],

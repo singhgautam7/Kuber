@@ -21,7 +21,6 @@ import '../../settings/providers/data_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../settings/screens/settings_pages.dart' show requestNotifications;
 import '../../../core/utils/l10n_ext.dart';
-import '../../home_v2/data/tracking_choices.dart';
 import '../../why_kuber/why_kuber_screen.dart' show whyKuberTryIt;
 import '../../why_kuber/why_kuber_store.dart';
 import '../../why_kuber/widgets/why_kuber_page.dart';
@@ -30,15 +29,13 @@ import '../pages/onboarding_notifications_page.dart';
 import '../pages/onboarding_page_1.dart';
 import '../pages/onboarding_page_4.dart';
 import '../pages/onboarding_start_page.dart';
-import '../pages/onboarding_tracking_page.dart';
 import '../widgets/onboarding_entrance.dart';
 import '../widgets/onboarding_nav_bar.dart';
 
 /// Welcome flow (specs/home-v3.3/plan.md §5, nov-release Part B): first page
 /// (language, restore, CSV, Start fresh) → Welcome → Why Kuber pages 1 to 5 →
-/// What do you want to track? → Make it yours → Notifications → Data
-/// responsibility → Home. One PageView. Skip on the tracking question moves on
-/// without picks. `onboarded` is set only on the last page.
+/// Make it yours → Notifications → Data responsibility → Home. One PageView.
+/// `onboarded` is set only on the last page.
 ///
 /// [isReplay] (More › Why Kuber?): only Welcome and the 5 Why Kuber pages,
 /// with Try it; Skip closes it and page 5 reads Done. Nothing is saved or
@@ -66,15 +63,12 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   late final TextEditingController _nameController;
 
   int _currentPage = 0;
-  final _tracking = <String>{};
   final _played = <int>{};
 
-  // Page indexes: a replay has no first page, the tracking question or what
-  // follows it.
+  // Page indexes: a replay has no first page or the setup pages.
   late final int _welcomePage = widget.isReplay ? 0 : 1;
   late final int _tourFirst = _welcomePage + 1;
-  late final int _trackingPage = _tourFirst + WhyKuberPage.count;
-  late final int _setupPage = _trackingPage + 1;
+  late final int _setupPage = _tourFirst + WhyKuberPage.count;
   late final int _notificationsPage = _setupPage + 1;
   late final int _termsPage = _notificationsPage + 1;
   late final int _pageCount = _termsPage + 1;
@@ -141,8 +135,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       if (context.canPop()) context.pop();
       return;
     }
-    // The setup page stays required: Skip jumps there (tracking skipped).
-    saveTrackingChoices(const {}, skipped: true);
+    // The setup page stays required: Skip jumps there.
     _pageController.jumpToPage(_setupPage);
   }
 
@@ -228,7 +221,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final name = profile?['userName'] as String?;
     final currency = profile?['currency'] as String?;
     if (name == null || name.isEmpty || currency == null) {
-      saveTrackingChoices(const {}, skipped: true);
       _pageController.jumpToPage(_setupPage);
       return;
     }
@@ -246,7 +238,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Future<void> _importCsv() async {
     final ok = await _import(StartJob.csv, 'csv', json: false, cancelled: context.l10n.obImportCancelled);
     if (!ok || !mounted) return;
-    saveTrackingChoices(const {}, skipped: true);
     _pageController.jumpToPage(_setupPage);
   }
 
@@ -282,17 +273,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   void _onPageChanged(int page) {
     if (!mounted) return;
     setState(() => _currentPage = page);
-    if (page == _trackingPage - 1) WhyKuberStore.markSeen(); // reached page 5
-  }
-
-  Future<void> _continueTracking() async {
-    await applyWelcomeTracking(ref, {..._tracking});
-    if (mounted) _goToPage(_setupPage);
-  }
-
-  void _skipTracking() {
-    saveTrackingChoices(const {}, skipped: true);
-    _goToPage(_setupPage);
+    if (page == _setupPage - 1) WhyKuberStore.markSeen(); // reached page 5
   }
 
   @override
@@ -302,7 +283,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final l = context.l10n;
     final replay = widget.isReplay;
     final page = _currentPage;
-    final lastReplayPage = _trackingPage - 1;
+    final lastReplayPage = _setupPage - 1;
     final isStart = !replay && page == 0;
     final String primaryLabel;
     if (replay && page == lastReplayPage) {
@@ -312,15 +293,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     } else if (page == _welcomePage) {
       primaryLabel = localizations?.getStarted ?? 'Get started';
     } else if (page == _setupPage) {
-      primaryLabel = _saving
-          ? (localizations?.starting ?? 'Starting...')
-          : (localizations?.startJourney ?? 'Start my journey');
+      primaryLabel = l.homeV33TourNext;
     } else if (page == _notificationsPage) {
-      primaryLabel = _notifPrompt ? l.obNotifAllow : l.continueLabel;
+      primaryLabel = _notifPrompt ? l.obNotifAllowShort : l.continueLabel;
     } else if (page == _termsPage) {
       primaryLabel = l.obTermsAgree;
-    } else if (page < _trackingPage - 1) {
-      // Pages 1 to 4 of the tour; page 5 continues to the tracking question.
+    } else if (page < _setupPage - 1) {
+      // Pages 1 to 4 of the tour; page 5 continues to Make it yours.
       primaryLabel = l.homeV33TourNext;
     } else {
       primaryLabel = localizations?.continueLabel ?? 'Continue';
@@ -334,8 +313,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       onPrimary = _skip;
     } else if (page == _setupPage) {
       onPrimary = _saveAndStart;
-    } else if (page == _trackingPage) {
-      onPrimary = _continueTracking;
     } else if (page == _notificationsPage) {
       onPrimary = _allowNotifications;
     } else if (page == _termsPage) {
@@ -389,16 +366,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                             : null,
                       ),
                     if (!replay)
-                      OnboardingTrackingPage(
-                        selected: _tracking,
-                        onToggle: (key) => setState(
-                          () => _tracking.contains(key)
-                              ? _tracking.remove(key)
-                              : _tracking.add(key),
-                        ),
-                        onSkip: _skipTracking,
-                      ),
-                    if (!replay)
                       OnboardingPageFour(
                         formKey: _formKey,
                         nameController: _nameController,
@@ -430,19 +397,19 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               _startEntrance(
                 OnboardingNavBar(
                   currentPage: page - _welcomePage,
-                  pageCount: replay ? _trackingPage : _pageCount - _welcomePage,
+                  pageCount: replay ? _setupPage : _pageCount - _welcomePage,
                   showDots: !isStart,
                   compactBack: page == _setupPage || page >= _notificationsPage,
                   showBack: page != 0 && page != firstPage && page != _notificationsPage,
                   busy: page == _setupPage && _saving,
-                  primaryEnabled: (page != _trackingPage || _tracking.isNotEmpty) &&
-                      (page != _termsPage || termsOk) &&
+                  primaryEnabled: (page != _termsPage || termsOk) &&
                       (!isStart || _job == null),
                   onBack: page == firstPage ? null : back,
                   primaryLabel: primaryLabel,
                   onPrimary: onPrimary,
                   showArrow: page != _notificationsPage && (page != _termsPage || termsOk),
                   secondaryLabel: page == _notificationsPage && _notifPrompt ? l.obNotifLater : null,
+                  caption: page == _notificationsPage && _notifPrompt ? l.obNotifAllow : null,
                   onSecondary: () => _goToPage(_termsPage),
                 ),
               ),

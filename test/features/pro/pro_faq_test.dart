@@ -25,7 +25,8 @@ void main() {
     await t.tap(find.text(l.proFaqLifetimeQ));
     await t.pumpAndSettle();
     expect(answer.hitTestable(), findsNothing);
-    expect(find.text(l.obTermsPrivacy), findsOneWidget);
+    // The privacy policy is in the Pro page overflow menu, not under the FAQ.
+    expect(find.text(l.obTermsPrivacy), findsNothing);
   });
 
   test('no long dashes in any language', () {

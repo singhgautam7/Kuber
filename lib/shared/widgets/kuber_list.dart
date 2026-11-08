@@ -335,14 +335,11 @@ WidgetStateProperty<Color?> kuberPressedLayer(ColorScheme cs) =>
     );
 
 /// A row that opens a group of settings (Components 2m): 72 min, tonal tile,
-/// title, one line of live values, chevron. [warn] puts the value in error
-/// with [warnIcon].
+/// title, one line of live values, chevron.
 class KuberGroupRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool warn;
-  final IconData? warnIcon;
   final VoidCallback? onTap;
 
   const KuberGroupRow({
@@ -350,8 +347,6 @@ class KuberGroupRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.warn = false,
-    this.warnIcon,
     this.onTap,
   });
 
@@ -378,23 +373,10 @@ class KuberGroupRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: theme.textTheme.titleMedium!.copyWith(color: cs.onSurface)),
-                  // A plain line unless it needs its warning glyph: eight of
-                  // these build on every Settings open.
-                  if (warn && warnIcon != null)
-                    Row(
-                      children: [
-                        Icon(warnIcon, size: 16, color: cs.error),
-                        const SizedBox(width: KuberSpace.xs),
-                        Expanded(
-                          child: Text(subtitle, style: theme.textTheme.bodyMedium!.copyWith(color: cs.error)),
-                        ),
-                      ],
-                    )
-                  else
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium!.copyWith(color: warn ? cs.error : cs.onSurfaceVariant),
-                    ),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                  ),
                 ],
               ),
             ),

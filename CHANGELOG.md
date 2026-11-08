@@ -24,6 +24,13 @@
 - Ask Kuber can explain Accounts and Kuber Cards, what's free, what's in Pro
   and each limit, and answers the questions on the Pro page.
 - Opening a card from search always asks for your Cards PIN or fingerprint.
+- Welcome is one page shorter: the "What do you want to track?" question is
+  gone.
+- EMI, recurring and SIP payments now show a phone notification when they're
+  recorded, and the Notifications switches turn them, budget alerts and
+  backup problems on or off.
+- Dev Tools (once unlocked) and Permissions are now in Settings, under About.
+- Fixed: Settings could say notifications were Off after you allowed them.
 
 - Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
   reminder, card due date and money you lent or borrowed on a month grid,

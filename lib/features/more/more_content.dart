@@ -83,9 +83,8 @@ class MoreSection {
 /// Section order and membership are canonical across both layouts.
 List<MoreSection> buildMoreSections(
   BuildContext context,
-  WidgetRef ref, {
-  required bool isDevMode,
-}) {
+  WidgetRef ref,
+) {
   final l10n = context.l10n;
 
   return [
@@ -229,25 +228,12 @@ List<MoreSection> buildMoreSections(
           onTap: () => context.pushNamed('about'),
         ),
         MoreEntry(
-          icon: Icons.security_outlined,
-          label: l10n.menuPermissions,
-          subtitle: l10n.menuPermissionsDesc,
-          onTap: () => context.pushNamed('permissions'),
-        ),
-        MoreEntry(
           icon: Icons.play_circle_outline_rounded,
           label: l10n.homeV33TourName,
           subtitle: l10n.homeV33TourMoreSub,
           // Starts at the Welcome screen (coin), then the five pages; no setup.
           onTap: () => context.push('/onboarding?replay=true'),
         ),
-        if (isDevMode)
-          MoreEntry(
-            icon: Icons.bug_report,
-            label: l10n.menuDevTools,
-            subtitle: l10n.menuDevToolsDesc,
-            onTap: () => context.push('/more/dev-tools'),
-          ),
       ],
     ),
 

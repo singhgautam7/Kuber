@@ -117,7 +117,7 @@ Future<void> main() async {
     await pumpUntil(t, find.byType(TextFormField));
     await t.enterText(find.byType(TextFormField).first, 'Gaurav');
     await settle(t);
-    await tapText(t, en.startJourney);
+    await tapText(t, en.homeV33TourNext);
     await pumpUntil(t, find.text(en.obNotifTitle));
     await tapText(t, en.obNotifLater);
     await pumpUntil(t, find.text(en.obTermsTitle));

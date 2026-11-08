@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../utils/prefs_keys.dart';
 import '../../features/notifications/data/app_notification.dart';
+import '../../features/notifications/data/notification_repository.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -150,6 +151,21 @@ class NotificationService {
     void Function(String actionId, String payload)? onAction,
   }) async {
     if (_isInitialized) return;
+    // Recurring, EMI and SIP rows only reach the inbox on their own; this
+    // shows them on the phone too, unless their switch is off. Budgets and
+    // reminders post their own; a background backup failure has its own
+    // notice (background_tasks.dart).
+    NotificationRepository.onAdded = (n) async {
+      if (!_mirrored.contains(n.type)) return;
+      await showAppNotification(
+        type: n.type,
+        id: _mirrorIdBase + n.id % 100000000,
+        title: n.title,
+        body: n.body,
+        payload: n.payload,
+        ask: false,
+      );
+    };
 
     try {
       const AndroidInitializationSettings initializationSettingsAndroid =
@@ -259,7 +275,14 @@ class NotificationService {
     await prefs.setBool(PrefsKeys.notificationPermissionAsked, true);
   }
 
-  Future<bool> _kindOn(NotificationKind? kind) async {
+  static const _mirrored = {
+    NotificationType.recurringTransaction,
+    NotificationType.loanEmi,
+  };
+  static const _mirrorIdBase = 700000000;
+
+  /// Whether [kind]'s switch on the Notifications page is on.
+  Future<bool> kindOn(NotificationKind? kind) async {
     if (kind == null) return true;
     final prefs = await SharedPreferences.getInstance();
     // A background run shares the file, not this isolate's cache.
@@ -277,9 +300,11 @@ class NotificationService {
     required String title,
     required String body,
     String? payload,
+    // False from background work, which can't show the permission prompt.
+    bool ask = true,
   }) async {
-    if (!await _kindOn(NotificationKind.of(type))) return;
-    await maybeRequestPermissionOnce();
+    if (!await kindOn(NotificationKind.of(type))) return;
+    if (ask) await maybeRequestPermissionOnce();
 
     final channel = _typeChannels[type]!;
     final androidDetails = AndroidNotificationDetails(
@@ -447,7 +472,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    if (!await _kindOn(NotificationKind.budgets)) return;
+    if (!await kindOn(NotificationKind.budgets)) return;
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'budget_alerts',

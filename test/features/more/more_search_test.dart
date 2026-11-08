@@ -149,16 +149,16 @@ void main() {
   });
 
   group('recent searches', () {
-    test('newest first, no repeats, at most 10', () {
+    test('newest first, no repeats, at most 5', () {
       var list = <String>[];
       for (var i = 0; i < 12; i++) {
         list = MoreSearchRecents.added(list, 'q$i');
       }
-      expect(list.length, MoreSearchRecents.max);
+      expect(list.length, 5);
       expect(list.first, 'q11');
-      list = MoreSearchRecents.added(list, 'Q5');
-      expect(list.first, 'Q5');
-      expect(list.where((x) => x.toLowerCase() == 'q5').length, 1);
+      list = MoreSearchRecents.added(list, 'Q9');
+      expect(list.first, 'Q9');
+      expect(list.where((x) => x.toLowerCase() == 'q9').length, 1);
       expect(MoreSearchRecents.added(list, '   '), list);
     });
 
@@ -166,6 +166,8 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       await MoreSearchRecents.save(['theme', 'hdfc']);
       expect(await MoreSearchRecents.load(), ['theme', 'hdfc']);
+      await MoreSearchRecents.save([for (var i = 0; i < 10; i++) 'q$i']);
+      expect((await MoreSearchRecents.load()).length, 5);
       await MoreSearchRecents.save(const []);
       expect(await MoreSearchRecents.load(), isEmpty);
     });

@@ -130,7 +130,16 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
             icon: t.icon,
             target: '/more/tools/${t.key}',
           ),
-      for (final s in buildMoreSections(widget.hostContext, ref, isDevMode: isDevMode))
+      // Unlocked from About; its row lives in Settings.
+      if (isDevMode)
+        MoreSearchItem(
+          kind: MoreSearchKind.features,
+          title: l.menuDevTools,
+          subtitle: l.settingsTitle,
+          icon: Icons.bug_report_outlined,
+          target: '/more/dev-tools',
+        ),
+      for (final s in buildMoreSections(widget.hostContext, ref))
         for (final e in s.entries)
           MoreSearchItem(
             kind: MoreSearchKind.features,

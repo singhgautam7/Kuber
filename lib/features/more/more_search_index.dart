@@ -280,11 +280,12 @@ class MoreSearchItems {
 /// Recent searches, on this phone only.
 class MoreSearchRecents {
   MoreSearchRecents._();
-  static const max = 10;
+  static const max = 5;
 
   static Future<List<String>> load() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(PrefsKeys.moreSearchRecent) ?? const [];
+    // Lists saved before the cap went from 10 to 5 are cut on read.
+    return (prefs.getStringList(PrefsKeys.moreSearchRecent) ?? const []).take(max).toList();
   }
 
   /// Newest first, no repeats, at most [max].

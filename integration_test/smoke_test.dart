@@ -39,7 +39,7 @@ void main() {
     await pumpUntil(t, find.byType(TextFormField));
     await t.enterText(find.byType(TextFormField).first, 'Gaurav');
     await settle(t);
-    await tapText(t, en.startJourney);
+    await tapText(t, en.homeV33TourNext);
     await tapText(t, en.obNotifLater);
     await tapText(t, en.obTermsCheck1);
     await tapText(t, en.obTermsCheck2);

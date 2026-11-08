@@ -8,6 +8,11 @@ class NotificationRepository {
   final Isar isar;
   NotificationRepository(this.isar);
 
+  /// Set by `NotificationService.init`: also shows a new row on the phone
+  /// (the service decides which types, and checks the Notifications
+  /// switches). Null in tests.
+  static Future<void> Function(AppNotification n)? onAdded;
+
   /// Insert a notification.
   ///
   /// Dedup rule: skip if an entry already exists with the same
@@ -52,6 +57,11 @@ class NotificationRepository {
     await isar.writeTxn(() async {
       await isar.appNotifications.put(n);
     });
+    try {
+      await onAdded?.call(n);
+    } catch (_) {
+      // The inbox row is what counts; the phone notification is best effort.
+    }
     return true;
   }
 

@@ -168,9 +168,9 @@ class PrefsKeys {
   // SMS import.
   static const introQuickAddDone = 'intro_quick_add_done';
   static const introSmsDone = 'intro_sms_done';
-  // What do you want to track? (Welcome, Edit widgets › What you track).
+  // Picks from the old "What do you want to track?" welcome page (removed
+  // 2026-11); still read so earlier picks keep their cards first.
   static const trackingChoices = 'home_v3_tracking_choices';
-  static const trackingAnswer = 'home_v3_tracking_answer';
   // Upcoming events: 'list' | 'calendar' (upcoming-calendar-v1).
   static const upcomingEventsView = 'upcoming_events_view';
   // Theme surfaces (theme-surfaces-v1). Pure black keeps `themeAmoled`.

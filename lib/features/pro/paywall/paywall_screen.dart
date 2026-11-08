@@ -6,7 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/models/overflow_config.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
+import '../../onboarding/pages/onboarding_data_terms_page.dart' show kPrivacyPolicyUrl;
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_app_bar.dart';
 import '../../../../shared/widgets/kuber_comparison_table.dart';
@@ -79,7 +81,11 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
           icon: Icons.open_in_new_rounded,
           label: 'Manage on Play Store',
           onTap: _openPlaySubscriptions,
-        ),
+        ),      KuberOverflowItem(
+        icon: Icons.privacy_tip_outlined,
+        label: context.l10n.obTermsPrivacy,
+        onTap: () => launchUrl(Uri.parse(kPrivacyPolicyUrl), mode: LaunchMode.externalApplication),
+      ),
     ];
 
     return Scaffold(

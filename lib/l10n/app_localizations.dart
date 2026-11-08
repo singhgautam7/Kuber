@@ -172,12 +172,6 @@ abstract class AppLocalizations {
   /// **'Starting...'**
   String get starting;
 
-  /// No description provided for @startJourney.
-  ///
-  /// In en, this message translates to:
-  /// **'Start my journey'**
-  String get startJourney;
-
   /// No description provided for @yourMoneyYourRules.
   ///
   /// In en, this message translates to:
@@ -9962,48 +9956,6 @@ abstract class AppLocalizations {
   /// **'Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.'**
   String get homeV33P5A11y;
 
-  /// No description provided for @homeV3TrkTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'What do you want to track?'**
-  String get homeV3TrkTitle;
-
-  /// No description provided for @homeV3TrkBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.'**
-  String get homeV3TrkBody;
-
-  /// No description provided for @homeV31TrkBudgets.
-  ///
-  /// In en, this message translates to:
-  /// **'Budgets'**
-  String get homeV31TrkBudgets;
-
-  /// No description provided for @homeV3TrkLoans.
-  ///
-  /// In en, this message translates to:
-  /// **'Loans and EMIs'**
-  String get homeV3TrkLoans;
-
-  /// No description provided for @homeV3TrkInvest.
-  ///
-  /// In en, this message translates to:
-  /// **'Investments and SIPs'**
-  String get homeV3TrkInvest;
-
-  /// No description provided for @homeV3TrkLedger.
-  ///
-  /// In en, this message translates to:
-  /// **'Money lent or borrowed'**
-  String get homeV3TrkLedger;
-
-  /// No description provided for @homeV3TrkSubs.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscriptions'**
-  String get homeV3TrkSubs;
-
   /// No description provided for @homeV33EdNeedsTxn.
   ///
   /// In en, this message translates to:
@@ -15528,6 +15480,12 @@ abstract class AppLocalizations {
   /// **'Allow notifications'**
   String get obNotifAllow;
 
+  /// No description provided for @obNotifAllowShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get obNotifAllowShort;
+
   /// No description provided for @obNotifLater.
   ///
   /// In en, this message translates to:
@@ -16107,8 +16065,8 @@ abstract class AppLocalizations {
   /// No description provided for @setShowCodeSub.
   ///
   /// In en, this message translates to:
-  /// **'INR 500 instead of ₹500'**
-  String get setShowCodeSub;
+  /// **'{withCode} instead of {withSymbol}'**
+  String setShowCodeSub(String withCode, String withSymbol);
 
   /// No description provided for @setDefaultAccount.
   ///

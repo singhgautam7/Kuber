@@ -20,8 +20,6 @@
   "@getStarted": {},
   "starting": "Starting...",
   "@starting": {},
-  "startJourney": "Start my journey",
-  "@startJourney": {},
   "yourMoneyYourRules": "Your money.\nYour rules.",
   "@yourMoneyYourRules": {},
   "onboardingPage1Description": "An expense manager that lives on your device. No cloud, no signup, no compromises.",
@@ -3247,13 +3245,6 @@
     }
   },
   "homeV33P5A11y": "Ask Kuber answers a question, a card turns over, a note adds up and becomes a transaction, a calculator shows a result, and a bill reminder arrives.",
-  "homeV3TrkTitle": "What do you want to track?",
-  "homeV3TrkBody": "Pick as many as you like. Kuber adds the matching widgets to your Home. You can change this later.",
-  "homeV31TrkBudgets": "Budgets",
-  "homeV3TrkLoans": "Loans and EMIs",
-  "homeV3TrkInvest": "Investments and SIPs",
-  "homeV3TrkLedger": "Money lent or borrowed",
-  "homeV3TrkSubs": "Subscriptions",
   "homeV33EdNeedsTxn": "Appears after your first transaction",
   "homeV33SgQuickTitle": "Add in one line with Quick Add",
   "homeV33SgQuickBody": "Type something like \"250 lunch\" or tap the mic and say it. Kuber turns it into a transaction.",
@@ -6260,6 +6251,7 @@
   "obNotifBackup": "Automatic backup problems",
   "obNotifPromise": "Kuber never sends promotional notifications. Only reminders and alerts that matter to you.",
   "obNotifAllow": "Allow notifications",
+  "obNotifAllowShort": "Allow",
   "obNotifLater": "Not now",
   "obTermsTitle": "Your data lives on this phone",
   "obTermsBody": "Kuber has no servers and no account. What you add never leaves your phone, so nobody else can recover it for you. Back up often to keep it safe.",
@@ -6430,7 +6422,19 @@
   "setNumLakh": "Lakh",
   "setNumMillion": "Million",
   "setShowCode": "Show currency code",
-  "setShowCodeSub": "INR 500 instead of ₹500",
+  "setShowCodeSub": "{withCode} instead of {withSymbol}",
+  "@setShowCodeSub": {
+    "placeholders": {
+      "withCode": {
+        "type": "String",
+        "example": "USD 500"
+      },
+      "withSymbol": {
+        "type": "String",
+        "example": "$500"
+      }
+    }
+  },
   "setDefaultAccount": "Default account",
   "setDefaultAccountSub": "Picked first in Quick Add",
   "setSecGestures": "Gestures",

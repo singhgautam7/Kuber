@@ -14,7 +14,6 @@ import '../../../shared/widgets/kuber_list.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../dev/providers/dev_mode_provider.dart';
 import '../../investments/providers/investment_provider.dart';
 import '../../ledger/providers/ledger_provider.dart';
 import '../../loans/providers/loan_provider.dart';
@@ -55,8 +54,7 @@ class MoreScreenModern extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
-    final sections = buildMoreSections(context, ref, isDevMode: isDevMode);
+    final sections = buildMoreSections(context, ref);
     MoreSection byId(MoreSectionId id) =>
         sections.firstWhere((s) => s.id == id);
     final manage = byId(MoreSectionId.manage);

@@ -112,10 +112,14 @@ class BackgroundTasks {
           : null,
     );
     if (notify && run != null) {
-      if (run.status == 'done') {
+      final backupFailed = run.backupStatus == 'failed';
+      // Only the backup failed and its switch is off: nothing to show.
+      final quiet = backupFailed &&
+          run.failedOccurrences == 0 &&
+          !await notifications.kindOn(NotificationKind.backups);
+      if (run.status == 'done' || quiet) {
         await notifications.clearBackground();
       } else {
-        final backupFailed = run.backupStatus == 'failed';
         await notifications.showBackgroundFailure(
           channelName: l10n.bgChannelName,
           channelDescription: l10n.bgChannelDesc,

@@ -26,9 +26,13 @@ class OnboardingNavBar extends StatelessWidget {
   /// False hides the dots (the first page, before the flow begins).
   final bool showDots;
 
-  /// A plain second action under the button ("Not now").
+  /// A second action in the outlined slot instead of Back ("Not now").
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
+
+  /// A centred line above the buttons naming what they decide
+  /// ("Allow notifications"), so the buttons themselves can stay short.
+  final String? caption;
 
   /// False drops the arrow after the label (the pages whose design has none,
   /// and until the last page's button is enabled).
@@ -49,12 +53,19 @@ class OnboardingNavBar extends StatelessWidget {
     this.secondaryLabel,
     this.onSecondary,
     this.showArrow = true,
+    this.caption,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final backWidth = showBack ? (compactBack ? 56.0 : 112.0) : 0.0;
+    final second = secondaryLabel;
+    final outlined = showBack || second != null;
+    final backWidth = second != null
+        ? 128.0
+        : showBack
+        ? (compactBack ? 56.0 : 112.0)
+        : 0.0;
 
     return SafeArea(
       top: false,
@@ -68,6 +79,20 @@ class OnboardingNavBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              child: caption == null
+                  ? const SizedBox(width: double.infinity)
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpace.md),
+                      child: Text(
+                        caption!,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(color: cs.onSurface),
+                      ),
+                    ),
+            ),
             if (showDots) ...[
               OnboardingDotsIndicator(
                 currentPage: currentPage,
@@ -87,14 +112,14 @@ class OnboardingNavBar extends StatelessWidget {
                     height: 56,
                     width: backWidth,
                     margin: EdgeInsets.only(
-                      right: showBack ? KuberSpace.md : 0,
+                      right: outlined ? KuberSpace.md : 0,
                     ),
                     child: ClipRect(
                       child: AnimatedOpacity(
                         duration: const Duration(milliseconds: 180),
-                        opacity: showBack ? 1 : 0,
+                        opacity: outlined ? 1 : 0,
                         child: OutlinedButton(
-                          onPressed: onBack,
+                          onPressed: second != null ? onSecondary : onBack,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: cs.onSurface,
                             side: BorderSide(color: cs.outlineVariant),
@@ -102,7 +127,25 @@ class OnboardingNavBar extends StatelessWidget {
                             minimumSize: const Size(56, 56),
                             shape: const StadiumBorder(),
                           ),
-                          child: compactBack
+                          child: second != null
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: KuberSpace.md,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      second,
+                                      softWrap: false,
+                                      style: localeFont(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.1,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : compactBack
                               ? const Icon(Icons.arrow_back_rounded, size: 24)
                               // Natural width while the slot animates open;
                               // the ClipRect above hides the rest.
@@ -208,10 +251,6 @@ class OnboardingNavBar extends StatelessWidget {
                 ],
               ),
             ),
-            if (secondaryLabel != null) ...[
-              const SizedBox(height: KuberSpace.xs),
-              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
-            ],
           ],
         ),
       ),

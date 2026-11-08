@@ -7,7 +7,8 @@ import '../../core/theme/app_theme.dart';
 /// (specs/design/kuber-m3-round-1-design-system/project/icon/icon.md), drawn
 /// as a vector so it follows the active theme family. The tones are the
 /// board's HCT recipe (ground T90, bars + bowl T27, leg T50) applied to the
-/// family's primary, so with Signature it is the launcher icon exactly.
+/// family's primary, so with Signature it is the launcher icon exactly. In
+/// dark mode it takes the dark splash recipe (ground T10, bars T80, leg T60).
 class BrandIcon extends StatelessWidget {
   final double size;
   final double? radius;
@@ -20,17 +21,19 @@ class BrandIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hct = Hct.fromInt(Theme.of(context).colorScheme.primary.toARGB32());
+    final theme = Theme.of(context);
+    final hct = Hct.fromInt(theme.colorScheme.primary.toARGB32());
     Color tone(double t) =>
         Color(Hct.from(hct.hue, hct.chroma, t).toInt());
+    final dark = theme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius ?? KuberShape.largeIncreased),
       child: CustomPaint(
         size: Size.square(size),
         painter: KuberBrandMarkPainter(
-          background: tone(90),
-          dark: tone(27),
-          mid: tone(50),
+          background: tone(dark ? 10 : 90),
+          dark: tone(dark ? 80 : 27),
+          mid: tone(dark ? 60 : 50),
         ),
       ),
     );

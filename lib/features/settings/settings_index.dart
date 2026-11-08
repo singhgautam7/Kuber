@@ -51,6 +51,7 @@ final List<SettingsEntry> kSettingsIndex = [
   SettingsEntry('pro', SettingsArea.main, Icons.workspace_premium_rounded, (_) => 'Kuber Pro', (l) => l.setKwPro),
   SettingsEntry('name', SettingsArea.main, Icons.person_outline_rounded, (l) => l.yourNameLabel, (l) => l.setKwName),
   SettingsEntry('about', SettingsArea.main, Icons.info_outline_rounded, (l) => l.aboutKuberLabel, (l) => l.setKwAbout),
+  SettingsEntry('permissions', SettingsArea.main, Icons.security_outlined, (l) => l.menuPermissions, (l) => l.menuPermissionsDesc),
   SettingsEntry('redeem', SettingsArea.pro, Icons.redeem_rounded, (_) => 'Redeem promo code', (l) => l.setKwPro),
   SettingsEntry('restore', SettingsArea.pro, Icons.restore_rounded, (_) => 'Restore purchases', (l) => l.setKwPro),
   SettingsEntry('theme', SettingsArea.look, Icons.contrast_rounded, (l) => l.themeLabel, (l) => l.setKwTheme),
