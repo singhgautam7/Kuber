@@ -20,6 +20,10 @@
 - New themes: Saffron, Sky and Ruby. Meadow and Coral are gone.
 - The app lock and the Kuber Cards biometric are now separate settings.
 - Fixed a crash when Horizontal swipe was set to row actions.
+- Every row in More and Settings has the same tinted icon.
+- Ask Kuber can explain Accounts and Kuber Cards, what's free, what's in Pro
+  and each limit, and answers the questions on the Pro page.
+- Opening a card from search always asks for your Cards PIN or fingerprint.
 
 - Upcoming events has a Calendar. See every bill, EMI, SIP, FD maturity,
   reminder, card due date and money you lent or borrowed on a month grid,

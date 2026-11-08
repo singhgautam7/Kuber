@@ -62,11 +62,14 @@ class OnboardingStartPage extends ConsumerWidget {
 
     return _LocaleFade(
       locale: locale,
-      child: CustomScrollView(
-        slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
+      // Fills the page, and scrolls when the largest font makes it taller
+      // (no intrinsic sizing: the cards' AnimatedSize can't report one).
+      child: LayoutBuilder(
+        builder: (context, box) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: box.maxHeight),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
@@ -87,8 +90,7 @@ class OnboardingStartPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Padding(
+                Padding(
                     padding: const EdgeInsets.all(KuberSpace.screenMargin),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +123,6 @@ class OnboardingStartPage extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
@@ -195,7 +196,7 @@ class OnboardingStartPage extends ConsumerWidget {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

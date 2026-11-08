@@ -627,9 +627,11 @@ class _TrustFooter extends StatelessWidget {
           ),
         ),
         const SizedBox(height: KuberSpace.sm),
+        // Wraps onto two lines at the largest font sizes.
         Consumer(
-          builder: (context, ref, _) => Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          builder: (context, ref, _) => Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               TextButton(
                 onPressed: () => restorePurchases(context, ref),

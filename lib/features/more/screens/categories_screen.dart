@@ -1115,10 +1115,12 @@ class _BudgetStatusSection extends ConsumerWidget {
                         color: cs.onSecondaryContainer,
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        context.l10n.setBudgetForCategory,
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                          color: cs.onSecondaryContainer,
+                      Expanded(
+                        child: Text(
+                          context.l10n.setBudgetForCategory,
+                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: cs.onSecondaryContainer,
+                          ),
                         ),
                       ),
                     ],
