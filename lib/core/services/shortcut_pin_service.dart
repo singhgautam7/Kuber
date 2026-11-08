@@ -171,3 +171,16 @@ Future<void> toggleAppDrawerEntry(
     isError: !ok,
   );
 }
+
+/// The phone's page for one notification category ([channel]), or for all of
+/// Kuber's notifications.
+Future<void> openNotificationSettings([String? channel]) async {
+  try {
+    await const MethodChannel('com.grs.kuber/shortcuts')
+        .invokeMethod<bool>('openNotificationSettings', {'channel': channel});
+  } on PlatformException {
+    // Nothing to open on this platform.
+  } on MissingPluginException {
+    // Nothing to open on this platform.
+  }
+}

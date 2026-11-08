@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/services/notification_service.dart';
+
 import '../../../core/services/widget_sync_service.dart';
 import '../../../core/theme/kuber_tokens.dart';
 import '../../../core/theme/theme_families.dart' show resolveVariant;
@@ -384,6 +386,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(PrefsKeys.language, locale.languageCode);
     AppLocale.current = locale;
+    // The phone lists Kuber's notification categories in this language too.
+    NotificationService().registerChannels(locale).ignore();
     state = AsyncData(state.requireValue.copyWith(locale: locale));
   }
 

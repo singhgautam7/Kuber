@@ -7,7 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/services/biometric_service.dart';
 import '../../../core/services/shortcut_pin_service.dart';
-import '../../../core/services/notification_service.dart' show NotificationKind, notificationKindsProvider;
+import '../../../core/services/notification_service.dart' show KuberChannel, NotificationService;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/formatters.dart';
@@ -43,7 +43,7 @@ import '../widgets/text_size_sheet.dart';
 // The pages Settings opens. Rows, stored keys and behaviour are the ones the
 // long Settings page had; each row carries its search id (settings_index.dart).
 
-Widget _trailing(BuildContext context, {String? text}) {
+Widget _trailing(BuildContext context, {String? text, IconData icon = Icons.chevron_right_rounded}) {
   final cs = Theme.of(context).colorScheme;
   return Row(
     mainAxisSize: MainAxisSize.min,
@@ -61,7 +61,7 @@ Widget _trailing(BuildContext context, {String? text}) {
         ),
         const SizedBox(width: KuberSpace.lg),
       ],
-      Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 20),
+      Icon(icon, color: cs.onSurfaceVariant, size: 20),
     ],
   );
 }
@@ -903,14 +903,21 @@ class AppDrawerScreen extends ConsumerWidget {
 final notificationsAllowedProvider =
     FutureProvider<bool>((ref) async => (await Permission.notification.status).isGranted);
 
+/// Which of Kuber's notification categories are on in the phone's settings.
+/// Read with [notificationsAllowedProvider]: on opening and on coming back.
+final notificationChannelsProvider =
+    FutureProvider<Map<KuberChannel, bool>>((ref) => NotificationService().channelStates());
+
 /// Asks the system, or opens system settings once it has been refused.
 Future<bool> requestNotifications() async {
   final status = await Permission.notification.request();
-  if (status.isPermanentlyDenied) await openAppSettings();
+  if (status.isPermanentlyDenied) await openNotificationSettings();
   return status.isGranted;
 }
 
-/// Notifications: the current state, what Kuber sends, and the inbox.
+/// Notifications: the current state, what Kuber sends, and the inbox. Each
+/// category's on or off lives in the phone's settings only; a row shows it
+/// and opens it there.
 class NotificationsSettingsScreen extends ConsumerWidget {
   final String? highlight;
   const NotificationsSettingsScreen({super.key, this.highlight});
@@ -920,9 +927,11 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final allowed = ref.watch(notificationsAllowedProvider).valueOrNull ?? true;
-    final kinds = ref.watch(notificationKindsProvider);
+    final channels = ref.watch(notificationChannelsProvider).valueOrNull ?? const {};
     return SettingsOnResume(
-      onResume: () => ref.invalidate(notificationsAllowedProvider),
+      onResume: () => ref
+        ..invalidate(notificationsAllowedProvider)
+        ..invalidate(notificationChannelsProvider),
       child: SettingsPageFrame(
         title: l.menuNotifications,
         highlight: highlight,
@@ -934,7 +943,7 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                       icon: Icons.notifications_active_outlined,
                       label: l.setNotifAllowed,
                       subtitle: l.setNotifAllowedShort,
-                      onTap: openAppSettings,
+                      onTap: openNotificationSettings,
                       trailing: Icon(Icons.open_in_new_rounded, size: 20, color: cs.onSurfaceVariant),
                     ),
                   ],
@@ -946,32 +955,35 @@ class NotificationsSettingsScreen extends ConsumerWidget {
                     title: l.setNotifBlocked,
                     body: l.setNotifOffBody,
                     actionLabel: l.setTurnOn,
-                    onAction: openAppSettings,
+                    onAction: openNotificationSettings,
                   ),
                 )),
           SettingsBlock(
             title: l.setSecSends,
             children: [
-              for (final (kind, id, icon, label, sub) in [
-                (NotificationKind.payments, 'notifEmi', Icons.event_repeat_rounded, l.obNotifEmi, l.setNotifEmiSub),
-                (NotificationKind.budgets, 'notifBudget', Icons.donut_large_rounded, l.obNotifBudget, l.setNotifBudgetSub),
-                (NotificationKind.backups, 'notifBackup', Icons.backup_outlined, l.obNotifBackupRow, l.setNotifBackupSub),
+              for (final (channel, id, icon) in const [
+                (KuberChannel.payments, 'notifEmi', Icons.event_repeat_rounded),
+                (KuberChannel.budgets, 'notifBudget', Icons.donut_large_rounded),
+                (KuberChannel.reminders, 'notifReminders', Icons.alarm_rounded),
+                (KuberChannel.ledger, 'notifLedger', Icons.handshake_outlined),
+                (KuberChannel.backups, 'notifBackup', Icons.backup_outlined),
               ])
-                SettingsAnchor(id, child: SettingsTile(
-                  icon: icon,
-                  label: label,
-                  subtitle: sub,
-                  disabled: !allowed,
-                  trailing: Switch(
-                    value: allowed && kinds.contains(kind),
-                    onChanged: allowed
-                        ? (v) => ref.read(notificationKindsProvider.notifier).set(kind, v)
-                        : null,
-                    activeTrackColor: cs.primary,
-                  ),
-                )),
+                SettingsAnchor(id, child: Builder(builder: (context) {
+                  final (label, sub) = channel.text(l);
+                  final on = allowed && (channels[channel] ?? true);
+                  return SettingsTile(
+                    icon: icon,
+                    label: label,
+                    subtitle: sub,
+                    disabled: !allowed,
+                    onTap: () => openNotificationSettings(channel.id),
+                    trailing: _trailing(context, text: on ? l.setOn : l.setOff, icon: Icons.open_in_new_rounded),
+                  );
+                })),
             ],
           ),
+          KuberInfoLine(text: l.setNotifPhoneHint),
+          const SizedBox(height: KuberSpace.sectionGap),
           SettingsBlock(
             children: [
               SettingsAnchor('notifInbox', child: SettingsTile(

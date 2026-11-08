@@ -31,9 +31,9 @@ class OnboardingNotificationsPage extends StatelessWidget {
                 KuberGroup(
                   children: [
                     for (final (icon, title, sub) in [
-                      (Icons.event_repeat_rounded, l.obNotifEmi, l.obNotifEmiSub),
+                      (Icons.event_repeat_rounded, l.obNotifEmi, l.setNotifEmiSub),
                       (Icons.donut_large_rounded, l.obNotifBudget, l.obNotifBudgetSub),
-                      (Icons.backup_outlined, l.obNotifBackupRow, l.obNotifBackupSub),
+                      (Icons.alarm_rounded, l.appDrawerReminders, l.obNotifRemindersSub),
                     ])
                       KuberListRow(
                         dense: true,

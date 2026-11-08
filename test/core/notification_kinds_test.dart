@@ -1,36 +1,41 @@
-// The Notifications page switches: what each covers, on until switched off.
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Notification categories: each notification type lands in the category the
+// Notifications page shows, with its name in every language and no old ids.
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kuber/core/services/notification_service.dart';
 import 'package:kuber/features/notifications/data/app_notification.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kuber/l10n/app_localizations.dart';
 
 void main() {
-  test('each switch covers its notifications; reminders stay always on', () {
-    expect(NotificationKind.of(NotificationType.recurringTransaction), NotificationKind.payments);
-    expect(NotificationKind.of(NotificationType.loanEmi), NotificationKind.payments);
-    expect(NotificationKind.of(NotificationType.budgetAlert), NotificationKind.budgets);
-    expect(NotificationKind.of(NotificationType.backup), NotificationKind.backups);
-    expect(NotificationKind.of(NotificationType.reminderTrigger), isNull);
-    expect(NotificationKind.of(NotificationType.ledgerReminder), isNull);
-    expect(NotificationKind.of(NotificationType.general), isNull);
+  test('each type has its category', () {
+    expect(KuberChannel.of(NotificationType.recurringTransaction), KuberChannel.payments);
+    expect(KuberChannel.of(NotificationType.loanEmi), KuberChannel.payments);
+    expect(KuberChannel.of(NotificationType.budgetAlert), KuberChannel.budgets);
+    expect(KuberChannel.of(NotificationType.reminderTrigger), KuberChannel.reminders);
+    expect(KuberChannel.of(NotificationType.ledgerReminder), KuberChannel.ledger);
+    expect(KuberChannel.of(NotificationType.backup), KuberChannel.backups);
+    expect(KuberChannel.of(NotificationType.general), isNull);
   });
 
-  test('on by default, and a change is stored', () async {
-    SharedPreferences.setMockInitialValues({});
-    final c = ProviderContainer();
-    addTearDown(c.dispose);
-    expect(c.read(notificationKindsProvider), NotificationKind.values.toSet());
-    await c.read(notificationKindsProvider.notifier).set(NotificationKind.budgets, false);
-    expect(c.read(notificationKindsProvider).contains(NotificationKind.budgets), isFalse);
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool(NotificationKind.budgets.key), isFalse);
+  test('ids are unique and the merged ones are gone', () {
+    final ids = KuberChannel.values.map((c) => c.id).toList();
+    expect(ids.toSet().length, ids.length);
+    expect(ids, isNot(contains('kuber_recurring')));
+    expect(ids, isNot(contains('kuber_loan_emi')));
+  });
 
-    final fresh = ProviderContainer();
-    addTearDown(fresh.dispose);
-    fresh.read(notificationKindsProvider);
-    await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(Duration.zero);
-    expect(fresh.read(notificationKindsProvider).contains(NotificationKind.budgets), isFalse);
+  test('every category has a name and a description in all 9 languages', () {
+    for (final locale in AppLocalizations.supportedLocales) {
+      final l = lookupAppLocalizations(Locale(locale.languageCode));
+      for (final c in KuberChannel.values) {
+        final (name, description) = c.text(l);
+        expect(name.trim(), isNotEmpty, reason: '${locale.languageCode} ${c.name}');
+        expect(description.trim(), isNotEmpty, reason: '${locale.languageCode} ${c.name}');
+        expect('$name$description'.contains('—') || '$name$description'.contains('–'), isFalse);
+      }
+    }
+    final en = lookupAppLocalizations(const Locale('en'));
+    expect(KuberChannel.payments.text(en).$1, 'EMI, SIP or Subscriptions');
+    expect(KuberChannel.reminders.text(en).$2, 'A heads-up before any payment');
   });
 }

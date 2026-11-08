@@ -15771,14 +15771,32 @@ abstract class AppLocalizations {
   /// No description provided for @obNotifEmi.
   ///
   /// In en, this message translates to:
-  /// **'EMI and recurring reminders'**
+  /// **'EMI, SIP or Subscriptions'**
   String get obNotifEmi;
 
-  /// No description provided for @obNotifEmiSub.
+  /// No description provided for @obNotifRemindersSub.
   ///
   /// In en, this message translates to:
-  /// **'A heads-up before each payment'**
-  String get obNotifEmiSub;
+  /// **'A heads-up before any payment'**
+  String get obNotifRemindersSub;
+
+  /// No description provided for @setNotifLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Lend and borrow reminders'**
+  String get setNotifLedger;
+
+  /// No description provided for @setNotifLedgerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On the due dates you set'**
+  String get setNotifLedgerSub;
+
+  /// No description provided for @setNotifPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These follow your phone\'s settings. Tap one to change it there.'**
+  String get setNotifPhoneHint;
 
   /// No description provided for @obNotifBudget.
   ///
@@ -15795,14 +15813,8 @@ abstract class AppLocalizations {
   /// No description provided for @obNotifBackupRow.
   ///
   /// In en, this message translates to:
-  /// **'Backup reminders'**
+  /// **'Backup problems'**
   String get obNotifBackupRow;
-
-  /// No description provided for @obNotifBackupSub.
-  ///
-  /// In en, this message translates to:
-  /// **'So your data stays safe'**
-  String get obNotifBackupSub;
 
   /// No description provided for @obNotifSampleTitle.
   ///

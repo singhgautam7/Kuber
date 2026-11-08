@@ -27,8 +27,10 @@
 - Welcome is one page shorter: the "What do you want to track?" question is
   gone.
 - EMI, recurring and SIP payments now show a phone notification when they're
-  recorded, and the Notifications switches turn them, budget alerts and
-  backup problems on or off.
+  recorded.
+- Notifications in Settings now match your phone's notification categories
+  exactly: each shows whether it's on, and a tap opens it in phone settings.
+  The categories have clear names in your language.
 - Dev Tools (once unlocked) and Permissions are now in Settings, under About.
 - Fixed: Settings could say notifications were Off after you allowed them.
 

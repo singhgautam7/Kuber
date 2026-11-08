@@ -9016,10 +9016,20 @@ class AppLocalizationsPa extends AppLocalizations {
       'Kuber ਇਹ CSV ਨਹੀਂ ਪੜ੍ਹ ਸਕਦਾ ਜਾਂ ਇਹ ਖ਼ਰਾਬ ਹੈ। ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਕੁਝ ਨਹੀਂ ਬਦਲਿਆ।';
 
   @override
-  String get obNotifEmi => 'EMI ਅਤੇ ਦੁਹਰਾਉਣ ਵਾਲੇ ਰਿਮਾਈਂਡਰ';
+  String get obNotifEmi => 'EMI, SIP ਜਾਂ ਸਬਸਕ੍ਰਿਪਸ਼ਨ';
 
   @override
-  String get obNotifEmiSub => 'ਹਰ ਭੁਗਤਾਨ ਤੋਂ ਪਹਿਲਾਂ ਸੂਚਨਾ';
+  String get obNotifRemindersSub => 'ਕਿਸੇ ਵੀ ਭੁਗਤਾਨ ਤੋਂ ਪਹਿਲਾਂ ਯਾਦ';
+
+  @override
+  String get setNotifLedger => 'ਉਧਾਰ ਦਿੱਤੇ ਅਤੇ ਲਏ ਪੈਸਿਆਂ ਦੀ ਯਾਦ';
+
+  @override
+  String get setNotifLedgerSub => 'ਤੁਹਾਡੀ ਤੈਅ ਕੀਤੀ ਤਾਰੀਖ਼ \'ਤੇ';
+
+  @override
+  String get setNotifPhoneHint =>
+      'ਇਹ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਮੁਤਾਬਕ ਚੱਲਦੇ ਹਨ। ਬਦਲਣ ਲਈ ਕਿਸੇ \'ਤੇ ਟੈਪ ਕਰੋ।';
 
   @override
   String get obNotifBudget => 'ਬਜਟ ਅਲਰਟ';
@@ -9028,10 +9038,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get obNotifBudgetSub => 'ਜਦੋਂ ਤੁਸੀਂ ਸੀਮਾ ਦੇ ਨੇੜੇ ਹੋਵੋ';
 
   @override
-  String get obNotifBackupRow => 'ਬੈਕਅੱਪ ਰਿਮਾਈਂਡਰ';
-
-  @override
-  String get obNotifBackupSub => 'ਤਾਂ ਜੋ ਤੁਹਾਡਾ ਡੇਟਾ ਸੁਰੱਖਿਅਤ ਰਹੇ';
+  String get obNotifBackupRow => 'ਬੈਕਅੱਪ ਵਿੱਚ ਸਮੱਸਿਆ';
 
   @override
   String get obNotifSampleTitle => 'EMI ਕੱਲ੍ਹ ਦੇਣੀ ਹੈ';

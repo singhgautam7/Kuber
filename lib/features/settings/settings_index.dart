@@ -83,6 +83,8 @@ final List<SettingsEntry> kSettingsIndex = [
   SettingsEntry('notifInbox', SettingsArea.notifications, Icons.inbox_outlined, (l) => l.setNotifInbox, (l) => l.setKwNotifications),
   SettingsEntry('notifEmi', SettingsArea.notifications, Icons.event_repeat_rounded, (l) => l.obNotifEmi, (l) => l.setKwNotifications),
   SettingsEntry('notifBudget', SettingsArea.notifications, Icons.donut_large_rounded, (l) => l.obNotifBudget, (l) => l.setKwNotifications),
+  SettingsEntry('notifReminders', SettingsArea.notifications, Icons.alarm_rounded, (l) => l.appDrawerReminders, (l) => l.setKwNotifications),
+  SettingsEntry('notifLedger', SettingsArea.notifications, Icons.handshake_outlined, (l) => l.setNotifLedger, (l) => l.setKwNotifications),
   SettingsEntry('notifBackup', SettingsArea.notifications, Icons.backup_outlined, (l) => l.obNotifBackupRow, (l) => l.setKwNotifications),
   SettingsEntry('tutorial', SettingsArea.help, Icons.school_rounded, (l) => l.setAppTutorial, (l) => l.setKwTutorial),
   SettingsEntry('feedback', SettingsArea.help, Icons.rate_review_outlined, (l) => l.setSendFeedback, (l) => l.setKwFeedback),

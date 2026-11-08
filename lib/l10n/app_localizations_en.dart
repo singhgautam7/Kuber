@@ -9020,10 +9020,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Kuber can\'t read this CSV, or it\'s damaged. Nothing on your phone was changed.';
 
   @override
-  String get obNotifEmi => 'EMI and recurring reminders';
+  String get obNotifEmi => 'EMI, SIP or Subscriptions';
 
   @override
-  String get obNotifEmiSub => 'A heads-up before each payment';
+  String get obNotifRemindersSub => 'A heads-up before any payment';
+
+  @override
+  String get setNotifLedger => 'Lend and borrow reminders';
+
+  @override
+  String get setNotifLedgerSub => 'On the due dates you set';
+
+  @override
+  String get setNotifPhoneHint =>
+      'These follow your phone\'s settings. Tap one to change it there.';
 
   @override
   String get obNotifBudget => 'Budget alerts';
@@ -9032,10 +9042,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obNotifBudgetSub => 'When you get close to a limit';
 
   @override
-  String get obNotifBackupRow => 'Backup reminders';
-
-  @override
-  String get obNotifBackupSub => 'So your data stays safe';
+  String get obNotifBackupRow => 'Backup problems';
 
   @override
   String get obNotifSampleTitle => 'EMI due tomorrow';

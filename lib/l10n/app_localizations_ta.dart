@@ -9123,10 +9123,21 @@ class AppLocalizationsTa extends AppLocalizations {
       'Kuber இந்த CSV ஐ படிக்க முடியவில்லை அல்லது அது சேதமடைந்துள்ளது. உங்கள் போனில் எதுவும் மாறவில்லை.';
 
   @override
-  String get obNotifEmi => 'EMI மற்றும் தொடர் நினைவூட்டல்கள்';
+  String get obNotifEmi => 'EMI, SIP அல்லது சந்தாக்கள்';
 
   @override
-  String get obNotifEmiSub => 'ஒவ்வொரு கட்டணத்திற்கும் முன் அறிவிப்பு';
+  String get obNotifRemindersSub =>
+      'எந்தப் பணம் செலுத்துவதற்கும் முன் நினைவூட்டல்';
+
+  @override
+  String get setNotifLedger => 'கடன் கொடுத்தது, வாங்கியது நினைவூட்டல்கள்';
+
+  @override
+  String get setNotifLedgerSub => 'நீங்கள் அமைத்த தேதியில்';
+
+  @override
+  String get setNotifPhoneHint =>
+      'இவை உங்கள் ஃபோன் அமைப்புகளைப் பின்பற்றும். மாற்ற ஒன்றைத் தட்டவும்.';
 
   @override
   String get obNotifBudget => 'பட்ஜெட் எச்சரிக்கைகள்';
@@ -9135,10 +9146,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get obNotifBudgetSub => 'வரம்பை நெருங்கும்போது';
 
   @override
-  String get obNotifBackupRow => 'காப்புப்பிரதி நினைவூட்டல்கள்';
-
-  @override
-  String get obNotifBackupSub => 'உங்கள் தரவு பாதுகாப்பாக இருக்க';
+  String get obNotifBackupRow => 'காப்புப்பிரதி சிக்கல்கள்';
 
   @override
   String get obNotifSampleTitle => 'EMI நாளை செலுத்த வேண்டும்';

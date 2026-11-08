@@ -9071,10 +9071,20 @@ class AppLocalizationsKn extends AppLocalizations {
       'Kuber ಈ CSV ಓದಲಾಗುತ್ತಿಲ್ಲ ಅಥವಾ ಅದು ಹಾಳಾಗಿದೆ. ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಏನೂ ಬದಲಾಗಿಲ್ಲ.';
 
   @override
-  String get obNotifEmi => 'EMI ಮತ್ತು ಪುನರಾವರ್ತಿತ ಜ್ಞಾಪನೆಗಳು';
+  String get obNotifEmi => 'EMI, SIP ಅಥವಾ ಚಂದಾದಾರಿಕೆಗಳು';
 
   @override
-  String get obNotifEmiSub => 'ಪ್ರತಿ ಪಾವತಿಗೆ ಮೊದಲು ಸೂಚನೆ';
+  String get obNotifRemindersSub => 'ಯಾವುದೇ ಪಾವತಿಗೆ ಮೊದಲು ನೆನಪು';
+
+  @override
+  String get setNotifLedger => 'ಸಾಲ ಕೊಟ್ಟ ಮತ್ತು ಪಡೆದ ಹಣದ ನೆನಪು';
+
+  @override
+  String get setNotifLedgerSub => 'ನೀವು ಹೊಂದಿಸಿದ ದಿನಾಂಕದಂದು';
+
+  @override
+  String get setNotifPhoneHint =>
+      'ಇವು ನಿಮ್ಮ ಫೋನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಅನುಸರಿಸುತ್ತವೆ. ಬದಲಿಸಲು ಒಂದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ.';
 
   @override
   String get obNotifBudget => 'ಬಜೆಟ್ ಎಚ್ಚರಿಕೆಗಳು';
@@ -9083,10 +9093,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get obNotifBudgetSub => 'ಮಿತಿಯ ಹತ್ತಿರ ಬಂದಾಗ';
 
   @override
-  String get obNotifBackupRow => 'ಬ್ಯಾಕಪ್ ಜ್ಞಾಪನೆಗಳು';
-
-  @override
-  String get obNotifBackupSub => 'ನಿಮ್ಮ ಡೇಟಾ ಸುರಕ್ಷಿತವಾಗಿರಲು';
+  String get obNotifBackupRow => 'ಬ್ಯಾಕಪ್ ಸಮಸ್ಯೆಗಳು';
 
   @override
   String get obNotifSampleTitle => 'EMI ನಾಳೆ ಪಾವತಿಸಬೇಕು';

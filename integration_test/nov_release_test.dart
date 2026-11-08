@@ -26,7 +26,7 @@ import 'package:kuber/features/loans/providers/loan_provider.dart';
 import 'package:kuber/features/loans/widgets/loan_add_sheet.dart';
 import 'package:kuber/features/loans/widgets/loan_sheet.dart';
 import 'package:kuber/core/database/isar_service.dart';
-import 'package:kuber/core/services/notification_service.dart' show NotificationKind, notificationKindsProvider;
+import 'package:kuber/core/services/notification_service.dart' show KuberChannel;
 import 'package:kuber/features/dev/providers/dev_mode_provider.dart';
 import 'package:kuber/features/notifications/data/app_notification.dart';
 import 'package:kuber/features/notifications/data/notification_repository.dart';
@@ -323,12 +323,20 @@ void main() {
     await go(t, '/more');
     await push(t, '/more/settings/notifications');
     await settle(t);
-    // Works only with notifications allowed: this run has them.
-    final kinds = c.read(notificationKindsProvider);
-    await tapFinder(t, find.byType(Switch).first);
-    expect(c.read(notificationKindsProvider), isNot(kinds));
-    await tapFinder(t, find.byType(Switch).first);
-    expect(c.read(notificationKindsProvider), kinds);
+    // The rows show the phone's categories, no switches of Kuber's own.
+    expect(find.byType(Switch), findsNothing);
+    expect(find.text(en.obNotifEmi), findsOneWidget);
+    expect(find.text(en.setNotifLedger), findsOneWidget);
+    await shot(t, 'settings/notifications-categories');
+    final android = FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!;
+    final channels = {for (final ch in (await android.getNotificationChannels())!) ch.id: ch.name};
+    debugPrint('KUBER_NUM channels $channels');
+    for (final ch in KuberChannel.values) {
+      expect(channels[ch.id], ch.text(en).$1);
+    }
+    expect(channels.containsKey('kuber_recurring'), isFalse);
+    expect(channels.containsKey('kuber_loan_emi'), isFalse);
     expectNoErrors(t);
   });
 
@@ -624,22 +632,30 @@ void main() {
     await shot(t, 'r2/currency-code-usd');
     await settings.setCurrency('INR');
     await go(t, '/more');
-    // Phone notifications: an EMI row shows with the switch on, not off.
+    // Phone notifications: a new EMI row shows on the phone, in its category.
     final repo = NotificationRepository(c.read(isarProvider));
-    final kinds = c.read(notificationKindsProvider.notifier);
-    await kinds.set(NotificationKind.payments, true);
     await repo.add(type: NotificationType.loanEmi, title: 'R2 on EMI', body: 'R2 check', payload: 'loan:r2on');
-    await kinds.set(NotificationKind.payments, false);
-    await repo.add(type: NotificationType.loanEmi, title: 'R2 off EMI', body: 'R2 check', payload: 'loan:r2off');
-    await kinds.set(NotificationKind.payments, true);
     await settle(t, const Duration(seconds: 2));
     final active = await FlutterLocalNotificationsPlugin()
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
         .getActiveNotifications();
-    final titles = active.map((n) => n.title).toList();
-    debugPrint('KUBER_NUM R2 on phone: $titles');
-    expect(titles, contains('R2 on EMI'));
-    expect(titles, isNot(contains('R2 off EMI')));
+    final emi = active.where((n) => n.title == 'R2 on EMI').toList();
+    debugPrint('KUBER_NUM R2 on phone: ${emi.map((n) => n.channelId)}');
+    expect(emi.single.channelId, KuberChannel.payments.id);
     expectNoErrors(t);
+    // Last, as it leaves the app: a row opens that category on the phone.
+    await push(t, '/more/settings/notifications');
+    await settle(t);
+    await tapText(t, en.obNotifEmi);
+    await Future<void>.delayed(const Duration(seconds: 2));
+    debugPrint('KUBER_SHOT r2/android-category-page');
+    await Future<void>.delayed(const Duration(seconds: 3));
+    // The host turns the category off on that page and comes back.
+    debugPrint('KUBER_TAP_OFF');
+    await Future<void>.delayed(const Duration(seconds: 6));
+    await settle(t, const Duration(seconds: 2));
+    final emiRow = find.ancestor(of: find.text(en.obNotifEmi), matching: find.byType(SettingsAnchor));
+    expect(find.descendant(of: emiRow, matching: find.text(en.setOff)), findsOneWidget);
+    await shot(t, 'r2/category-off-in-app');
   });
 }
