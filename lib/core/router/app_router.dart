@@ -116,6 +116,8 @@ import '../../features/tools/lumpsum_vs_sip/lumpsum_vs_sip_screen.dart';
 import '../../features/tools/goal_planner/goal_planner_screen.dart';
 import '../../features/tools/retirement_corpus/retirement_corpus_screen.dart';
 import '../../features/tools/saved/saved_calculations_screen.dart';
+import '../../features/advanced_history/screens/advanced_history_screen.dart';
+import '../../features/advanced_history/screens/ah_filter_page.dart';
 
 /// Parses the optional `?savedId=` query param used to open a calculator
 /// pre-filled from a SavedCalculation.
@@ -162,6 +164,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation == '/notes') return '/more/notes';
       if (state.matchedLocation == '/reminders') return '/more/reminders';
       if (state.matchedLocation == '/advanced-analytics') return null;
+      if (state.matchedLocation.startsWith('/advanced-history')) return null;
       if (state.matchedLocation == '/home') return '/';
       if (state.matchedLocation == '/sms-import') return '/more/sms-import';
       if (state.matchedLocation == '/upcoming-events') {
@@ -259,6 +262,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/history/filter',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AdvancedFilterScreen(),
+      ),
+      GoRoute(
+        path: '/advanced-history',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AdvancedHistoryScreen(),
+        routes: [
+          GoRoute(
+            path: 'filter',
+            parentNavigatorKey: rootNavigatorKey,
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: AhFilterPage(),
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: '/advanced-analytics',

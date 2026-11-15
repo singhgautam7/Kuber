@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/advanced_history/data/saved_filter.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -73,6 +74,7 @@ const kIsarSchemas = [
   RecentSearchSchema,
   ProcessedOccurrenceSchema,
   BackgroundTaskRunSchema,
+  SavedFilterSchema,
 ];
 
 class IsarService {

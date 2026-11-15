@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:kuber/features/advanced_history/data/saved_filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/features/transactions/data/transaction_repository.dart';
@@ -66,6 +67,7 @@ const _allSchemas = [
   RecentSearchSchema,
   ProcessedOccurrenceSchema,
   BackgroundTaskRunSchema,
+  SavedFilterSchema,
 ];
 
 bool _isarInitialized = false;
