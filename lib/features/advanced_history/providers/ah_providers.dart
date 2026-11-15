@@ -19,6 +19,43 @@ final ahViewProvider =
 class AhViewNotifier extends Notifier<AhView> {
   @override
   AhView build() => const AhView();
+
+  /// Parses [queryText]; keeps the last valid node when it doesn't parse.
+  void setFilter(String queryText) => throw UnimplementedError();
+  void setGroup(AhGroupBy g) => throw UnimplementedError();
+  void setSort(AhSort s) => throw UnimplementedError();
+  void addChart(AhChartSpec c) => throw UnimplementedError();
+  void updateChart(int index, AhChartSpec c) => throw UnimplementedError();
+  void insertChart(int index, AhChartSpec c) => throw UnimplementedError();
+  AhChartSpec removeChart(int index) => throw UnimplementedError();
+  void moveChart(int from, int to) => throw UnimplementedError();
+  void setKpis(List<AhKpi> kpis) => throw UnimplementedError();
+
+  /// Applies a whole view (example chips, undo).
+  void applyView(AhView v) => throw UnimplementedError();
+  void applySaved(SavedFilter f) => throw UnimplementedError();
+
+  /// Clears filter, group, sort and charts; keeps the KPI choice.
+  void clearAll() => throw UnimplementedError();
+}
+
+/// What changed since the open saved view (empty = nothing / no saved view).
+enum AhChange { filter, group, sort, kpis, chartAdded, chartRemoved, chartMoved, chartEdited }
+
+final ahChangesProvider =
+    Provider.autoDispose<List<AhChange>>((ref) => throw UnimplementedError());
+
+/// Saved views CRUD. Names: required, 40 max, unique ignoring case.
+final savedFilterRepositoryProvider =
+    Provider<SavedFilterRepository>((ref) => throw UnimplementedError());
+
+abstract class SavedFilterRepository {
+  Future<bool> nameTaken(String name, {int? exceptId});
+  Future<SavedFilter> saveNew(String name, AhView view);
+  Future<void> saveChanges(int id, AhView view);
+  Future<void> rename(int id, String name);
+  Future<void> delete(int id);
+  Future<void> markUsed(int id);
 }
 
 /// KPIs for the current view; null for the start state.
