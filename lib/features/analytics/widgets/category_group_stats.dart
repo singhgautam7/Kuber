@@ -219,7 +219,7 @@ class _CategoryGroupStatsWidgetState
         height: 250,
         margin: const EdgeInsets.all(KuberSpace.lg),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(KuberShape.medium),
         ),
       ),

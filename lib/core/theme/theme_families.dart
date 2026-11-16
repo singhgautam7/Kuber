@@ -70,8 +70,8 @@ class KuberPalette {
 ///
 /// [expressive]: background roles take a light tint of the theme; off = one
 /// neutral grey ramp for every theme. [pureBlack]: in dark only, the page
-/// (surface, surfaceDim, surfaceContainerLowest) becomes #000000; containers
-/// keep their value.
+/// (surface, surfaceDim, surfaceContainerLowest) becomes #000000 and the
+/// containers drop to a near-black ramp at the family's hue (pure-black.md).
 KuberPalette kuberPalette(
   ThemeVariant variant,
   Brightness brightness, {
@@ -89,7 +89,16 @@ KuberPalette kuberPalette(
         ? _signature(dark)
         : MullFamily.of(variant).palette(dark: dark);
   }
-  return applySurfaceRule(base, dark: dark, expressive: expressive, pureBlack: pureBlack);
+  final MullFamily? fam = seed != null
+      ? MullFamily.fromSeed(seed)
+      : (variant == ThemeVariant.signature ? null : MullFamily.of(variant));
+  return applySurfaceRule(base,
+      dark: dark,
+      expressive: expressive,
+      pureBlack: pureBlack,
+      neutralHue: fam?.neutralHue ?? _sigHue,
+      primaryHue: fam?.primaryHue ?? _sigHue,
+      signature: fam == null);
 }
 
 /// The one background rule (theme-surfaces.md §3): build the family scheme,
@@ -101,6 +110,9 @@ KuberPalette applySurfaceRule(
   required bool dark,
   required bool expressive,
   required bool pureBlack,
+  double neutralHue = _sigHue,
+  double primaryHue = _sigHue,
+  bool signature = false,
 }) {
   var cs = p.scheme;
   if (!expressive) {
@@ -122,11 +134,36 @@ KuberPalette applySurfaceRule(
       surfaceBright: dark ? n.high : n.surface,
     );
   }
+  var money = p.money;
   if (dark && pureBlack) {
-    const black = Color(0xFF000000);
-    cs = cs.copyWith(surface: black, surfaceDim: black, surfaceContainerLowest: black);
+    // pure-black.md: ramp at the neutral hue (chroma 0 when not expressive),
+    // containers at the primary hue, money containers at their own hues.
+    Color n(double l, double c) => _q(Oklch(l, expressive ? c : 0, neutralHue));
+    Color a(double l, double c, [double? h]) => _q(Oklch(l, c, h ?? primaryHue));
+    final black = n(0, 0);
+    cs = cs.copyWith(
+      surface: black,
+      surfaceDim: black,
+      surfaceContainerLowest: black,
+      surfaceContainerLow: n(.145, .006),
+      surfaceContainer: n(.18, .008),
+      surfaceContainerHigh: n(.215, .010),
+      surfaceContainerHighest: n(.25, .012),
+      surfaceBright: n(.285, .012),
+      outlineVariant: n(.33, .014),
+      secondaryContainer: a(.30, signature ? .07 : .045),
+      primaryContainer: signature ? a(.40, .13) : a(.27, .05),
+      onPrimaryContainer: signature ? const Color(0xFFD8E2FF) : null,
+      tertiaryContainer: signature ? a(.30, .07, 55) : a(.27, .05),
+      onTertiaryContainer: signature ? const Color(0xFFFFDCC5) : null,
+      errorContainer: a(.28, .08, 25),
+    );
+    money = [...money];
+    money[2] = a(.27, .055, 145);
+    money[6] = a(.27, .07, 25);
+    money[10] = a(.28, .055, 70);
   }
-  return KuberPalette(cs, p.money, p.ramp);
+  return KuberPalette(cs, money, p.ramp);
 }
 
 /// A neutral grey ramp (Expressive colours off): OKLCh chroma 0, shared by

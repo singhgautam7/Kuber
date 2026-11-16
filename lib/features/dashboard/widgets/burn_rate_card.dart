@@ -157,7 +157,7 @@ class BurnRateCard extends ConsumerWidget {
           child: Container(
             height: 140,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cs.surface,
               borderRadius: BorderRadius.circular(KuberShape.medium),
             ),
           ),

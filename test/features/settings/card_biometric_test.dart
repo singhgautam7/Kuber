@@ -138,4 +138,37 @@ void main() {
       expect(await cardsOn(), isFalse);
     }, unlocked: false);
   });
+
+  testWidgets('locked vault: the inline unlock opens it, the switch turns on, the vault locks again',
+      (t) async {
+    await run(t, (ref) async {
+      final r = await setCardBiometric(ref, true,
+          biometric: FakeBiometric(),
+          unlock: () async {
+            ref.read(cardSessionProvider.notifier).unlock(utf8.encode('k' * 32));
+            return true;
+          });
+      expect(r, CardBiometricResult.enabled);
+      expect(await cardsOn(), isTrue);
+      expect(ref.read(cardSessionProvider).isUnlocked, isFalse);
+    }, unlocked: false);
+  });
+
+  testWidgets('locked vault: dismissing the inline unlock changes nothing', (t) async {
+    await run(t, (ref) async {
+      final r = await setCardBiometric(ref, true,
+          biometric: FakeBiometric(), unlock: () async => false);
+      expect(r, CardBiometricResult.needsUnlock);
+      expect(await cardsOn(), isFalse);
+    }, unlocked: false);
+  });
+
+  testWidgets('turning off with a failed check keeps it on', (t) async {
+    await run(t, (ref) async {
+      await ref.read(cardVaultServiceProvider).setBiometricEnabled(true);
+      final r = await setCardBiometric(ref, false, biometric: FakeBiometric(passes: false));
+      expect(r, CardBiometricResult.cancelled);
+      expect(await cardsOn(), isTrue);
+    }, unlocked: false);
+  });
 }

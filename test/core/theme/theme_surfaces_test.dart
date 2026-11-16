@@ -120,6 +120,7 @@ void main() {
     final bad = <String>[];
     for (final e in pageCard.entries) {
       for (var r = 0; r < 6; r++) {
+        if (rows[r].$3) continue; // Pure black rows: pure_black_test.dart
         final s = scheme(e.key, r);
         final got = '${hex(s.surface)}/${hex(s.surfaceContainer)}';
         if (got != e.value[r]) bad.add('${e.key.name} row ${r + 1}: $got, want ${e.value[r]}');
@@ -133,6 +134,7 @@ void main() {
     for (final t in showcase.entries) {
       for (final rolePair in t.value.entries) {
         for (var r = 0; r < 6; r++) {
+          if (rows[r].$3) continue; // Pure black rows: pure_black_test.dart
           final got = hex(role(scheme(t.key, r), rolePair.key));
           if (got != rolePair.value[r]) bad.add('${t.key.name} ${rolePair.key} row ${r + 1}: $got, want ${rolePair.value[r]}');
         }
@@ -152,14 +154,13 @@ void main() {
         '#171717 #0F0F0F #1D1D1D #232323 #2E2E2E #353535 #3D3D3D #808080 #ABABAB #F2F2F2 #E8E8E8 #161616');
   });
 
-  test('pure black: only the page goes black; light ignores it', () {
+  test('pure black: ramp + containers change (see pure_black_test.dart); light ignores it', () {
     for (final v in kSelectableVariants) {
       final on = kuberPalette(v, Brightness.dark, pureBlack: true).scheme;
       final off = kuberPalette(v, Brightness.dark).scheme;
       expect((on.surface, on.surfaceDim, on.surfaceContainerLowest),
           (const Color(0xFF000000), const Color(0xFF000000), const Color(0xFF000000)));
-      expect(on.surfaceContainer, off.surfaceContainer, reason: '${v.name} cards keep their colour');
-      expect(on.surfaceContainerLow, off.surfaceContainerLow);
+      expect(on.surfaceContainer, isNot(off.surfaceContainer), reason: '${v.name} cards drop');
       expect(on.primary, off.primary);
       expect(kuberPalette(v, Brightness.light, pureBlack: true).scheme,
           kuberPalette(v, Brightness.light).scheme);
@@ -172,12 +173,17 @@ void main() {
         final base = kuberPalette(v, b);
         for (final (e, p) in [(false, false), (true, true), (false, true)]) {
           final x = kuberPalette(v, b, expressive: e, pureBlack: p);
-          expect(x.money, base.money);
+          final black = p && b == Brightness.dark;
+          if (!black) expect(x.money, base.money);
           expect(x.ramp, base.ramp);
           final s = x.scheme, t = base.scheme;
-          expect([s.primary, s.onPrimary, s.primaryContainer, s.secondary, s.secondaryContainer, s.tertiary, s.error, s.errorContainer],
-              [t.primary, t.onPrimary, t.primaryContainer, t.secondary, t.secondaryContainer, t.tertiary, t.error, t.errorContainer],
+          expect([s.primary, s.onPrimary, s.secondary, s.tertiary, s.error],
+              [t.primary, t.onPrimary, t.secondary, t.tertiary, t.error],
               reason: '${v.name} $b');
+          if (!black) {
+            expect([s.primaryContainer, s.secondaryContainer, s.errorContainer],
+                [t.primaryContainer, t.secondaryContainer, t.errorContainer]);
+          }
         }
       }
     }
@@ -189,7 +195,7 @@ void main() {
     expect(hex(light.surface), '#FFFFFF');
     final dark = kuberPalette(ThemeVariant.signature, Brightness.dark, seed: seed, pureBlack: true).scheme;
     expect(hex(dark.surface), '#000000');
-    expect(dark.surfaceContainer, kuberPalette(ThemeVariant.signature, Brightness.dark, seed: seed).scheme.surfaceContainer);
+    expect(dark.surfaceContainer, isNot(kuberPalette(ThemeVariant.signature, Brightness.dark, seed: seed).scheme.surfaceContainer));
   });
 
   test('contrast guard: eight light primaries step down (§3c)', () {

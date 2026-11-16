@@ -11,6 +11,7 @@ import 'package:isar_community/isar.dart';
 import 'package:kuber/core/database/isar_service.dart';
 import 'package:kuber/core/database/seed_service.dart';
 import 'package:kuber/core/theme/app_theme.dart';
+import 'package:kuber/features/pro/paywall/billing_ui_state.dart';
 import 'package:kuber/features/more/screens/more_screen.dart';
 import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
@@ -39,7 +40,11 @@ Future<void> _pump(WidgetTester t, Widget screen, ThemeData theme) async {
   t.view.physicalSize = const Size(412, 892);
   t.view.devicePixelRatio = 1;
   addTearDown(t.view.reset);
-  final c = _container = ProviderContainer(overrides: [isarProvider.overrideWithValue(_isar)]);
+  final c = _container = ProviderContainer(overrides: [
+    isarProvider.overrideWithValue(_isar),
+    // The Pro card shows a skeleton until the billing bootstrap finishes.
+    proBootstrapLoadingProvider.overrideWith((ref) => false),
+  ]);
   await t.runAsync(() async {
     // Create the prefs instance in the real zone (awaiting one first made
     // under fake async never completes).

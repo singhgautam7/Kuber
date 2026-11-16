@@ -89,7 +89,7 @@ class BudgetVsActualCard extends ConsumerWidget {
         height: 200,
         margin: const EdgeInsets.all(KuberSpace.lg),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(KuberShape.medium),
         ),
       ),
@@ -127,10 +127,10 @@ class _BudgetVsActualRow extends ConsumerWidget {
       badgeColor = cs.error;
       statusLabel = context.l10n.budgetHighUsage;
     } else if (progress.percentage >= 50) {
-      badgeColor = Colors.orange.shade600;
+      badgeColor = context.kuberMoney.warning;
       statusLabel = context.l10n.budgetNearLimit;
     } else {
-      badgeColor = Colors.green.shade600;
+      badgeColor = context.kuberMoney.income;
       statusLabel = context.l10n.budgetOnTrack;
     }
 

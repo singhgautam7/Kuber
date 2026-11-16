@@ -15,20 +15,14 @@ const _allowed = <String, int>{
   'lib/core/utils/card_palette.dart': 2,
   'lib/shared/widgets/card_color_gradient_picker.dart': 3,
   'lib/features/kuber_cards/widgets/stored_card_visual.dart': 6,
-  // Shimmer masks (shape only) and labels on category colours.
-  'lib/features/analytics/widgets/budget_vs_actual.dart': 3,
-  'lib/features/analytics/widgets/category_group_stats.dart': 3,
-  'lib/features/dashboard/widgets/burn_rate_card.dart': 1,
+  // Labels on category colours.
+  'lib/features/analytics/widgets/category_group_stats.dart': 2,
   // Dev tools (true / false chips).
   'lib/features/dev/widgets/record_detail_sheet.dart': 6,
-  // About footer heart.
-  'lib/features/more/screens/about_screen.dart': 1,
   // Welcome coin art.
   'lib/features/onboarding/pages/onboarding_page_1.dart': 7,
   // Pure black swatch on the Theme screen (it shows #000000 by design).
   'lib/features/settings/screens/theme_screen.dart': 1,
-  // Import overlay scrim.
-  'lib/features/settings/widgets/data_action_widgets.dart': 1,
   // Money Stories: full-screen story art.
   'lib/features/stories/models/story_models.dart': 18,
   'lib/features/stories/widgets/story_slide_view.dart': 15,

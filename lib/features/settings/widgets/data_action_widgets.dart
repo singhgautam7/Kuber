@@ -267,7 +267,7 @@ class _DataLoadingOverlayState extends State<DataLoadingOverlay>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      color: Colors.black54,
+      color: cs.scrim.withValues(alpha: 0.54),
       width: double.infinity,
       height: double.infinity,
       child: Center(
