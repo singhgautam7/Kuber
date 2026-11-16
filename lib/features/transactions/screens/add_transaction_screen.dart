@@ -21,7 +21,7 @@ import '../../../core/utils/formatters.dart';
 import '../data/transaction.dart';
 import '../../loans/domain/loan_engine.dart' show isEditableEmi;
 import '../../loans/domain/loan_service.dart';
-import '../../../shared/widgets/kuber_form_widgets.dart' show KuberAmountField, KuberCallout, KuberCalloutTone;
+import '../../../shared/widgets/kuber_form_widgets.dart' show KuberAmountField, KuberCallout, KuberCalloutTone, KuberFormScaffold;
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../services/suggestion_service.dart';
@@ -308,8 +308,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: cs.surface,
+    return KuberFormScaffold(
       // Full-screen form header (board 3.4): close, title, overflow with
       // "Add to home screen" in add mode only.
       appBar: KuberAppBar(
@@ -323,97 +322,68 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             : context.l10n.addTransaction,
         pinShortcut: _isEditing ? null : _kAddTxnPinSpec,
       ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.opaque,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: EdgeInsets.fromLTRB(
-                  KuberSpace.screenMargin,
-                  KuberSpace.xs,
-                  KuberSpace.screenMargin,
-                  // Clears the floating save button and its fade.
-                  56 + 32 + _saveBottom(context),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Type segmented button
-                    TransactionTypeSelector(
-                      key: TutorialStepKeys.transactionTypeToggle,
-                      selected: _type,
-                      onSelected: _onTypeChanged,
-                      enabled: !_isEditing,
-                    ),
-                    const SizedBox(height: KuberSpace.lg),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Type segmented button
+          TransactionTypeSelector(
+            key: TutorialStepKeys.transactionTypeToggle,
+            selected: _type,
+            onSelected: _onTypeChanged,
+            enabled: !_isEditing,
+          ),
+          const SizedBox(height: KuberSpace.lg),
 
-                    if (_type == 'transfer')
-                      _buildTransferForm(cs, textTheme, accounts)
-                    else ...[
-                      // Name field with autocomplete
-                      _buildAutocompleteField(cs, textTheme),
-                      const SizedBox(height: KuberSpace.sm),
+          if (_type == 'transfer')
+            _buildTransferForm(cs, textTheme, accounts)
+          else ...[
+            // Name field with autocomplete
+            _buildAutocompleteField(cs, textTheme),
+            const SizedBox(height: KuberSpace.sm),
 
-                      // Amount input
-                      AmountInput(
-                        key: TutorialStepKeys.amountField,
-                        controller: _amountController,
-                        amountColor: _typeColor,
-                      ),
-                      const SizedBox(height: KuberSpace.lg),
-                      if (_isEmi) ...[
-                        _buildEmiSplitFields(),
-                        const SizedBox(height: KuberSpace.lg),
-                      ],
-
-                      // Category + Account selector tiles
-                      _buildCategoryAccountRow(cs, categoryMap, accounts),
-                      if (_type == 'expense')
-                        _overLimitWarning(accounts.valueOrNull ?? const [], _selectedAccountId),
-                      if (_selectedCategoryId != null) ...[
-                        const SizedBox(height: KuberSpace.md),
-                        BudgetProgressIndicator(
-                          categoryId: _selectedCategoryId!.toString(),
-                        ),
-                      ],
-                      const SizedBox(height: KuberSpace.lg),
-
-                      // Shared form fields
-                      ..._buildSharedFormFields(showNotesPrefixIcon: false),
-                    ],
-
-                    // Save & Add Another — only for new (non-edit) entries.
-                    // Sits in the scrolling form area, NOT in the sticky
-                    // bottom bar. Preserves type/account/category/date and
-                    // clears amount/name/notes after a successful save.
-                    if (!_isEditing) ...[
-                      AppButton(
-                        label: context.l10n.saveAndAddAnother,
-                        type: AppButtonType.outline,
-                        fullWidth: true,
-                        onPressed: () => _save(keepOpen: true),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+            // Amount input
+            AmountInput(
+              key: TutorialStepKeys.amountField,
+              controller: _amountController,
+              amountColor: _typeColor,
             ),
+            const SizedBox(height: KuberSpace.lg),
+            if (_isEmi) ...[
+              _buildEmiSplitFields(),
+              const SizedBox(height: KuberSpace.lg),
+            ],
 
-            // Floating save button over the nav bar's surface fade (like
-            // the Add account FAB): always visible, no bar behind it.
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _buildSaveButton(cs),
+            // Category + Account selector tiles
+            _buildCategoryAccountRow(cs, categoryMap, accounts),
+            if (_type == 'expense')
+              _overLimitWarning(accounts.valueOrNull ?? const [], _selectedAccountId),
+            if (_selectedCategoryId != null) ...[
+              const SizedBox(height: KuberSpace.md),
+              BudgetProgressIndicator(
+                categoryId: _selectedCategoryId!.toString(),
+              ),
+            ],
+            const SizedBox(height: KuberSpace.lg),
+
+            // Shared form fields
+            ..._buildSharedFormFields(showNotesPrefixIcon: false),
+          ],
+
+          // Save & Add Another — only for new (non-edit) entries.
+          // Sits in the scrolling form area, NOT in the sticky
+          // bottom bar. Preserves type/account/category/date and
+          // clears amount/name/notes after a successful save.
+          if (!_isEditing) ...[
+            AppButton(
+              label: context.l10n.saveAndAddAnother,
+              type: AppButtonType.outline,
+              fullWidth: true,
+              onPressed: () => _save(keepOpen: true),
             ),
           ],
-        ),
+        ],
       ),
+      bottomAction: _buildSaveButton(cs),
     );
   }
 
@@ -775,61 +745,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   // ── Save Button ──────────────────────────────────────────────────────────
 
-  /// The main nav bar's bottom offset: the system inset, at least 22.
-  static double _saveBottom(BuildContext context) {
-    final inset = MediaQuery.paddingOf(context).bottom;
-    return inset > 22 ? inset : 22.0;
-  }
-
   Widget _buildSaveButton(ColorScheme cs) {
-    final bottom = _saveBottom(context);
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        // Same scrim as the nav bar / extended FAB: content fades out under
-        // the button. Taps pass through it.
-        IgnorePointer(
-          child: Container(
-            height: bottom + 56 + 32,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  cs.surface.withValues(alpha: 0),
-                  cs.surface.withValues(alpha: 0.92),
-                  cs.surface,
-                ],
-                stops: const [0.0, 0.55, 1.0],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            KuberSpace.screenMargin,
-            0,
-            KuberSpace.screenMargin,
-            bottom,
-          ),
-          child: AppButton(
-            label: _isEditing
-                ? (_type == 'expense'
-                      ? context.l10n.updateExpense
-                      : _type == 'income'
-                      ? context.l10n.updateIncome
-                      : context.l10n.updateTransferBtn)
-                : (_type == 'expense'
-                      ? context.l10n.saveExpense
-                      : _type == 'income'
-                      ? context.l10n.saveIncome
-                      : context.l10n.saveTransferBtn),
-            type: AppButtonType.primary,
-            fullWidth: true,
-            onPressed: _save,
-          ),
-        ),
-      ],
+    return AppButton(
+      label: _isEditing
+          ? (_type == 'expense'
+                ? context.l10n.updateExpense
+                : _type == 'income'
+                ? context.l10n.updateIncome
+                : context.l10n.updateTransferBtn)
+          : (_type == 'expense'
+                ? context.l10n.saveExpense
+                : _type == 'income'
+                ? context.l10n.saveIncome
+                : context.l10n.saveTransferBtn),
+      type: AppButtonType.primary,
+      fullWidth: true,
+      onPressed: _save,
     );
   }
 

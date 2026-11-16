@@ -1,13 +1,17 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/save_file_service.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
 import 'settings_widgets.dart';
 
@@ -406,7 +410,17 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
   Future<void> _downloadTemplate() async {
     setState(() => _isDownloadingTemplate = true);
     try {
-      await ref.read(dataControllerProvider.notifier).downloadTemplate();
+      final csv = ref.read(dataServiceProvider).templateCsv();
+      final result = await saveUserFile(
+        context,
+        bytes: Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv)]),
+        fileName: 'kuber_template.csv',
+        extensions: const ['csv'],
+        dialogTitle: context.l10n.downloadTemplate,
+      );
+      if (mounted && result == SaveFileResult.saved) {
+        showKuberSnackBar(context, context.l10n.fileSaved);
+      }
     } finally {
       if (mounted) setState(() => _isDownloadingTemplate = false);
     }

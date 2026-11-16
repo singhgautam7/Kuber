@@ -1440,3 +1440,100 @@ extension FocusDismissibleFuture<T> on Future<T> {
     });
   }
 }
+
+/// Form screen with a pinned bottom action that never covers the form.
+/// The action sits in the layout (not over the scroll area), so the scroll
+/// viewport always ends where the button starts. The scaffold shrinks for the
+/// keyboard, so a focused field scrolls to just above the button, and the
+/// button rides on top of the keyboard. A short fade at the bottom of the
+/// viewport keeps the floating look; it ignores taps.
+class KuberFormScaffold extends StatelessWidget {
+  final PreferredSizeWidget? appBar;
+  final Widget body;
+  final Widget bottomAction;
+  final EdgeInsets padding;
+  final bool dismissKeyboardOnTap;
+
+  const KuberFormScaffold({
+    super.key,
+    this.appBar,
+    required this.body,
+    required this.bottomAction,
+    this.padding = const EdgeInsets.fromLTRB(
+      KuberSpace.screenMargin,
+      KuberSpace.xs,
+      KuberSpace.screenMargin,
+      0,
+    ),
+    this.dismissKeyboardOnTap = true,
+  });
+
+  static const double _fade = 24;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final keyboardUp = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final inset = MediaQuery.paddingOf(context).bottom;
+    // The system inset only matters when the keyboard is closed.
+    final bottom = keyboardUp ? KuberSpace.sm : (inset > 22 ? inset : 22.0);
+
+    Widget content = Column(
+      children: [
+        Expanded(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: padding + const EdgeInsets.only(bottom: _fade),
+                  child: body,
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: _fade,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [cs.surface.withValues(alpha: 0), cs.surface],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            KuberSpace.screenMargin,
+            0,
+            KuberSpace.screenMargin,
+            bottom,
+          ),
+          child: bottomAction,
+        ),
+      ],
+    );
+    if (dismissKeyboardOnTap) {
+      content = GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: content,
+      );
+    }
+    return Scaffold(
+      backgroundColor: cs.surface,
+      appBar: appBar,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(top: false, bottom: false, child: content),
+    );
+  }
+}

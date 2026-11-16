@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -13,6 +12,7 @@ import '../../../core/models/export_data.dart';
 import '../../../core/services/export_service.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../analytics/providers/analytics_provider.dart';
+import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../investments/data/investment.dart';
@@ -76,14 +76,6 @@ TransactionExportData buildTransactionExportData(
   // Sort by date descending
   transactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  // Pre-compute transfer lookup map for O(1) matching later
-  final transferLegsMap = <String, List<Transaction>>{};
-  for (final t in allTransactions) {
-    if (t.isTransfer && t.transferId != null) {
-      transferLegsMap.putIfAbsent(t.transferId!, () => []).add(t);
-    }
-  }
-
   // vNext source link: "Recurring: Rent", "Loan: Home loan", "Investment: Nifty SIP".
   final ruleNames = {
     for (final r in ref.read(recurringListProvider).valueOrNull ?? const <RecurringRule>[]) '${r.id}': r.name
@@ -103,6 +95,86 @@ TransactionExportData buildTransactionExportData(
       'investment' => 'Investment: ${invNames[id] ?? 'deleted'}',
       _ => null,
     };
+  }
+
+  final rows = buildTransactionRows(
+    transactions,
+    allTransactions: allTransactions,
+    accountNames: accountNames,
+    categoryMap: categoryMap,
+    sourceOf: sourceOf,
+  );
+
+  // Build period label
+  String periodLabel;
+  if (applyFilters && filter.from != null && filter.to != null) {
+    periodLabel =
+        '${DateFormat('dd MMM yyyy').format(filter.from!)} - ${DateFormat('dd MMM yyyy').format(filter.to!)}';
+  } else if (transactions.isNotEmpty) {
+    final earliest = transactions.last.createdAt;
+    final latest = transactions.first.createdAt;
+    periodLabel =
+        '${DateFormat('dd MMM yyyy').format(earliest)} - ${DateFormat('dd MMM yyyy').format(latest)}';
+  } else {
+    periodLabel = 'All Time';
+  }
+
+  // Filter labels
+  String? accountFilter;
+  if (applyFilters && filter.accountIds.isNotEmpty) {
+    final names = filter.accountIds
+        .map((id) => accountNames[id] ?? 'Unknown')
+        .toList();
+    accountFilter = names.join(', ');
+  }
+
+  String? categoryFilter;
+  if (applyFilters && filter.categoryIds.isNotEmpty) {
+    final names = filter.categoryIds
+        .map((id) {
+          final catId = int.tryParse(id);
+          return catId != null ? (categoryMap[catId]?.name ?? 'Unknown') : 'Unknown';
+        })
+        .toList();
+    categoryFilter = names.join(', ');
+  }
+
+  String? searchFilter;
+  if (applyFilters &&
+      filter.searchQuery != null &&
+      filter.searchQuery!.isNotEmpty) {
+    searchFilter = filter.searchQuery;
+  }
+
+  return TransactionExportData(
+    rows: rows,
+    userName: userName,
+    currencyCode: currency.code,
+    currencySymbol: currency.symbol,
+    periodLabel: periodLabel,
+    totalCount: rows.length,
+    accountFilter: accountFilter,
+    categoryFilter: categoryFilter,
+    searchFilter: searchFilter,
+  );
+}
+
+/// Pure: turns transactions into export rows (both legs of a transfer).
+/// [allTransactions] is where transfer legs are looked up (defaults to
+/// [transactions]).
+List<TransactionRow> buildTransactionRows(
+  List<Transaction> transactions, {
+  List<Transaction>? allTransactions,
+  required Map<String, String> accountNames,
+  required Map<int, Category> categoryMap,
+  String? Function(Transaction t)? sourceOf,
+}) {
+  // Pre-compute transfer lookup map for O(1) matching later
+  final transferLegsMap = <String, List<Transaction>>{};
+  for (final t in (allTransactions ?? transactions)) {
+    if (t.isTransfer && t.transferId != null) {
+      transferLegsMap.putIfAbsent(t.transferId!, () => []).add(t);
+    }
   }
 
   // Build rows — include both legs of transfers
@@ -173,7 +245,7 @@ TransactionExportData buildTransactionExportData(
       accountName: accountNames[tx.accountId] ?? 'Unknown',
       notes: tx.notes,
       subType: tx.subType?.value,
-      source: sourceOf(tx),
+      source: sourceOf?.call(tx),
       principalPart: tx.principalPart,
       interestPart: tx.interestPart,
       splitEdited: tx.splitEdited,
@@ -181,58 +253,43 @@ TransactionExportData buildTransactionExportData(
     ));
   }
 
-  // Build period label
-  String periodLabel;
-  if (applyFilters && filter.from != null && filter.to != null) {
-    periodLabel =
-        '${DateFormat('dd MMM yyyy').format(filter.from!)} - ${DateFormat('dd MMM yyyy').format(filter.to!)}';
-  } else if (transactions.isNotEmpty) {
-    final earliest = transactions.last.createdAt;
-    final latest = transactions.first.createdAt;
-    periodLabel =
-        '${DateFormat('dd MMM yyyy').format(earliest)} - ${DateFormat('dd MMM yyyy').format(latest)}';
-  } else {
-    periodLabel = 'All Time';
-  }
+  return rows;
+}
 
-  // Filter labels
-  String? accountFilter;
-  if (applyFilters && filter.accountIds.isNotEmpty) {
-    final names = filter.accountIds
-        .map((id) => accountNames[id] ?? 'Unknown')
-        .toList();
-    accountFilter = names.join(', ');
-  }
-
-  String? categoryFilter;
-  if (applyFilters && filter.categoryIds.isNotEmpty) {
-    final names = filter.categoryIds
-        .map((id) {
-          final catId = int.tryParse(id);
-          return catId != null ? (categoryMap[catId]?.name ?? 'Unknown') : 'Unknown';
-        })
-        .toList();
-    categoryFilter = names.join(', ');
-  }
-
-  String? searchFilter;
-  if (applyFilters &&
-      filter.searchQuery != null &&
-      filter.searchQuery!.isNotEmpty) {
-    searchFilter = filter.searchQuery;
-  }
-
-  return TransactionExportData(
-    rows: rows,
-    userName: userName,
-    currencyCode: currency.code,
-    currencySymbol: currency.symbol,
-    periodLabel: periodLabel,
-    totalCount: rows.length,
-    accountFilter: accountFilter,
-    categoryFilter: categoryFilter,
-    searchFilter: searchFilter,
+/// Pure: the History CSV (same columns as the report export, UTF-8 BOM so
+/// Sheets and Excel detect the encoding) for [txns]. Balance adjustments are
+/// skipped and rows are newest first. Import:
+/// `package:kuber/features/export/providers/export_provider.dart`.
+Future<Uint8List> buildTransactionsCsvBytes(
+  List<Transaction> txns, {
+  required Map<String, String> accountNames,
+  required Map<int, Category> categoryMap,
+  required String currencyCode,
+  required String currencySymbol,
+  List<Transaction>? allTransactions,
+  String? Function(Transaction t)? sourceOf,
+}) async {
+  final list = txns.where((t) => !t.isBalanceAdjustment).toList()
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  final rows = buildTransactionRows(
+    list,
+    allTransactions: allTransactions ?? txns,
+    accountNames: accountNames,
+    categoryMap: categoryMap,
+    sourceOf: sourceOf,
   );
+  final csv = await compute(
+    ExportService.exportTransactionsCsv,
+    TransactionExportData(
+      rows: rows,
+      userName: '',
+      currencyCode: currencyCode,
+      currencySymbol: currencySymbol,
+      periodLabel: '',
+      totalCount: rows.length,
+    ),
+  );
+  return Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv)]);
 }
 
 // ---------------------------------------------------------------------------
@@ -419,24 +476,6 @@ Future<ExportResult> performExport({
   await tempFile.writeAsBytes(bytes, flush: true);
 
   return ExportResult(tempFile: tempFile, bytes: bytes);
-}
-
-/// Opens the system file-picker (SAF) so the user can choose where to save
-/// a permanent copy. Does NOT return a usable path (SAF limitation on Android).
-/// Returns true if the user confirmed, false if they cancelled.
-Future<bool> saveToFolder({
-  required ExportResult result,
-  required ExportFormat format,
-}) async {
-  final fileName = result.tempFile.path.split('/').last;
-  final savedPath = await FilePicker.saveFile(
-    dialogTitle: 'Save a copy',
-    fileName: fileName,
-    bytes: result.bytes,
-    type: format == ExportFormat.csv ? FileType.custom : FileType.any,
-    allowedExtensions: format == ExportFormat.csv ? ['csv'] : ['pdf'],
-  );
-  return savedPath != null;
 }
 
 /// Deletes the temp export file. Called when the export sheet is dismissed.

@@ -11,8 +11,6 @@ import '../../../core/services/notification_service.dart';
 import '../../../features/transactions/services/suggestion_service.dart';
 import '../../kuber_cards/data/card_keystore.dart';
 import '../../kuber_cards/providers/kuber_cards_provider.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -101,138 +99,16 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 final dataControllerProvider = StateNotifierProvider<DataController, DataState>(
   (ref) {
     final service = ref.watch(dataServiceProvider);
-    final notificationService = ref.watch(notificationServiceProvider);
-    return DataController(service, notificationService, ref);
+    return DataController(service, ref);
   },
 );
 
 class DataController extends StateNotifier<DataState> {
   final DataService _service;
-  final NotificationService _notificationService;
   final Ref _ref;
 
-  static const notificationId = 1001;
-  DataController(this._service, this._notificationService, this._ref)
+  DataController(this._service, this._ref)
     : super(DataState());
-
-  Future<void> exportData() async {
-    state = state.copyWith(status: DataOpStatus.loading, filePath: null);
-
-    try {
-      await _notificationService.init();
-      await _notificationService.requestPermission();
-
-      // Non-awaited to avoid blocking the main flow
-      final l = lookupAppLocalizations(AppLocale.current);
-      _notificationService.showExportNotification(
-        id: notificationId,
-        title: l.exportingData,
-        body: l.preparingFile,
-        isProgress: true,
-      );
-
-      final exports = await _service.exportData();
-      final entry = exports.entries.first;
-      final timestamp = DateFormat('yyyy_MM_dd_HHmm').format(DateTime.now());
-      final fileName = 'kuber_backup_$timestamp.csv';
-
-      final path = await _saveFile(entry.value, fileName);
-
-      if (path != null) {
-        state = state.copyWith(
-          status: DataOpStatus.success,
-          message: l.dataExportedSuccess,
-          filePath: path,
-          filePaths: [path],
-        );
-
-        _notificationService.showExportNotification(
-          id: notificationId,
-          title: l.exportComplete,
-          body: l.savedToDownloads(fileName),
-          isSuccess: true,
-          payload: path,
-        );
-      }
-    } catch (e) {
-      final l = lookupAppLocalizations(AppLocale.current);
-      state = state.copyWith(
-        status: DataOpStatus.error,
-        message: l.exportFailedMsg(e.toString()),
-      );
-
-      _notificationService.showExportNotification(
-        id: notificationId,
-        title: l.exportFailed,
-        body: e.toString(),
-      );
-    }
-  }
-
-  Future<String?> _saveFile(String content, String fileName) async {
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = Directory('/storage/emulated/0/Download');
-      if (!await directory.exists()) {
-        try {
-          await directory.create(recursive: true);
-        } catch (_) {}
-      }
-    } else {
-      directory = await getDownloadsDirectory();
-    }
-
-    directory ??= await getExternalStorageDirectory();
-    directory ??= await getApplicationDocumentsDirectory();
-
-    final file = File('${directory.path}/$fileName');
-    await file.writeAsString(content);
-    return file.path;
-  }
-
-  Future<void> downloadTemplate() async {
-    state = state.copyWith(status: DataOpStatus.loading, filePath: null);
-
-    await _notificationService.init();
-    await _notificationService.requestPermission();
-
-    const notificationId = 1002;
-    final l = lookupAppLocalizations(AppLocale.current);
-    await _notificationService.showExportNotification(
-      id: notificationId,
-      title: l.downloadingTemplate,
-      body: l.preparingCsvTemplate,
-      isProgress: true,
-    );
-
-    try {
-      final path = await _service.downloadTemplate();
-      state = state.copyWith(
-        status: DataOpStatus.success,
-        message: l.templateDownloadedSuccess,
-        filePath: path,
-      );
-
-      final fileName = path?.split('/').last ?? 'template.csv';
-      await _notificationService.showExportNotification(
-        id: notificationId,
-        title: l.downloadComplete,
-        body: l.savedToDownloads(fileName),
-        isSuccess: true,
-        payload: path,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        status: DataOpStatus.error,
-        message: l.downloadFailedMsg(e.toString()),
-      );
-      await _notificationService.showExportNotification(
-        id: notificationId,
-        title: l.downloadFailedTitle,
-        body: e.toString(),
-      );
-    }
-  }
 
   Future<void> importData() async {
     try {

@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:isar_community/isar.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
@@ -79,40 +77,8 @@ class DataService {
     return {'transactions.csv': csvContent};
   }
 
-  /// Downloads the CSV template and returns the file path.
-  Future<String?> downloadTemplate() async {
-    final template = _csvService.generateTemplate();
-    const fileName = 'kuber_template.csv';
-    return await _saveFile(template, fileName);
-  }
-
-  Future<String?> _saveFile(String content, String fileName) async {
-    // Option A (Preferred): Save to app-specific directory (no permission required)
-    // We'll use the external storage directory if available (visible in Files app on some Androids)
-    // or fallback to application documents.
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = Directory('/storage/emulated/0/Download');
-      // Ensure directory exists
-      if (!await directory.exists()) {
-        try {
-          await directory.create(recursive: true);
-        } catch (e) {
-          debugPrint('DataService: Failed to create Download directory: $e');
-        }
-      }
-    } else {
-      directory = await getDownloadsDirectory();
-    }
-
-    directory ??= await getExternalStorageDirectory();
-    directory ??= await getApplicationDocumentsDirectory();
-
-    final file = File('${directory.path}/$fileName');
-    await file.writeAsString(content);
-    debugPrint('DataService: File saved to ${file.path}');
-    return file.path;
-  }
+  /// The CSV import template. Saved by the UI through `saveUserFile`.
+  String templateCsv() => _csvService.generateTemplate();
 
   /// Parses CSV content into a list of maps.
   List<Map<String, String>> parseCsv(String csvContent) {

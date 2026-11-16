@@ -178,7 +178,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                           KuberSpace.screenMargin,
                           0,
                           KuberSpace.screenMargin,
-                          120,
+                          KuberSpace.lg,
                         ),
                         buildDefaultDragHandles: false,
                         itemCount: _widgets!.length,
@@ -220,7 +220,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                 )
               : const Center(child: CircularProgressIndicator()),
         ),
-        bottomSheet: loaded
+        bottomNavigationBar: loaded
             ? Container(
                 padding: EdgeInsets.fromLTRB(
                   KuberSpace.screenMargin,

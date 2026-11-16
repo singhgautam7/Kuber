@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/models/export_data.dart';
 export '../../../core/models/export_data.dart' show ExportType;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/save_file_service.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_list.dart';
@@ -378,13 +379,17 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     if (result == null) return;
     setState(() => _isSaving = true);
     try {
-      final saved = await saveToFolder(result: result, format: _format);
-      if (!mounted) return;
-      if (saved) {
+      final fileName = result.tempFile.path.split('/').last;
+      final saved = await saveUserFile(
+        context,
+        bytes: result.bytes,
+        fileName: fileName,
+        extensions: [_format == ExportFormat.csv ? 'csv' : 'pdf'],
+        dialogTitle: context.l10n.saveACopy,
+      );
+      if (mounted && saved == SaveFileResult.saved) {
         showKuberSnackBar(context, context.l10n.fileSaved);
       }
-    } catch (_) {
-      if (mounted) showKuberSnackBar(context, context.l10n.failedToSaveFile);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -407,11 +412,9 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
       );
     } catch (e) {
+      debugPrint('Share failed: $e');
       if (mounted) {
-        showKuberSnackBar(
-          context,
-          context.l10n.couldNotShareFile(e.toString()),
-        );
+        showKuberSnackBar(context, context.l10n.saveFileShareFailed, isError: true);
       }
     }
   }

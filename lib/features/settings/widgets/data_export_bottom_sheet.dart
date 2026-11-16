@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/save_file_service.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
@@ -204,15 +204,31 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
               Icon(Icons.info_outline_rounded, size: 18, color: cs.primary),
               const SizedBox(width: KuberSpace.md),
               Expanded(
-                child: Text(
-                  isCsv
-                      ? context.l10n.exportCsvDesc
-                      : context.l10n.exportJsonDesc,
-                  style: localeFont(
-                    fontSize: 12,
-                    color: cs.onSurfaceVariant,
-                    height: 1.45,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isCsv
+                          ? context.l10n.exportCsvDesc
+                          : context.l10n.exportJsonDesc,
+                      style: localeFont(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                        height: 1.45,
+                      ),
+                    ),
+                    if (isCsv) ...[
+                      const SizedBox(height: KuberSpace.sm),
+                      Text(
+                        context.l10n.saveFileCsvNoViews,
+                        style: localeFont(
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -496,17 +512,16 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
     try {
       final fileName = file.path.split('/').last;
       final isJson = fileName.toLowerCase().endsWith('.json');
-      final saved = await FilePicker.saveFile(
-        dialogTitle: context.l10n.saveACopy,
-        fileName: fileName,
+      final result = await saveUserFile(
+        context,
         bytes: bytes,
-        type: isJson ? FileType.any : FileType.custom,
-        allowedExtensions: isJson ? null : ['csv'],
+        fileName: fileName,
+        extensions: [isJson ? 'json' : 'csv'],
+        dialogTitle: context.l10n.saveACopy,
       );
-      if (!mounted) return;
-      if (saved != null) showKuberSnackBar(context, context.l10n.fileSaved);
-    } catch (_) {
-      if (mounted) showKuberSnackBar(context, context.l10n.failedToSaveFile);
+      if (mounted && result == SaveFileResult.saved) {
+        showKuberSnackBar(context, context.l10n.fileSaved);
+      }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -526,7 +541,10 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
       );
     } catch (e) {
-      if (mounted) showKuberSnackBar(context, 'Could not share file: $e');
+      debugPrint('Share failed: $e');
+      if (mounted) {
+        showKuberSnackBar(context, context.l10n.saveFileShareFailed, isError: true);
+      }
     }
   }
 }
