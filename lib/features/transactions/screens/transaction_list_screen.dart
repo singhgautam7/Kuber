@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../advanced_history/advanced_history_entry.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
@@ -130,6 +131,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                             context: context,
                             exportType: ExportType.transactions,
                           ),
+                        ),
+                        KuberOverflowItem(
+                          icon: Icons.manage_search_rounded,
+                          label: context.l10n.historyMenuAdvanced,
+                          subtitle: context.l10n.historyMenuAdvancedSub,
+                          onTap: () => openAdvancedHistory(context, ref),
                         ),
                       ],
                     ),

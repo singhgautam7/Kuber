@@ -8,7 +8,9 @@ import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
+import '../../advanced_history/advanced_history_entry.dart';
 import '../providers/history_filter_provider.dart';
 import '../models/history_filter.dart';
 import '../../../core/theme/app_theme.dart';
@@ -37,6 +39,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
   late TextEditingController _searchCtrl;
   late TextEditingController _minAmountCtrl;
   late TextEditingController _maxAmountCtrl;
+  final _catSearchCtrl = TextEditingController();
+  final _tagSearchCtrl = TextEditingController();
+  _Sec? _open;
 
   @override
   void initState() {
@@ -62,6 +67,8 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
     _searchCtrl.dispose();
     _minAmountCtrl.dispose();
     _maxAmountCtrl.dispose();
+    _catSearchCtrl.dispose();
+    _tagSearchCtrl.dispose();
     super.dispose();
   }
 
@@ -287,96 +294,15 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 ),
               ),
               const SizedBox(height: KuberSpace.sectionGap),
-              // 5. ACCOUNTS
-              _Section(
-                title: context.l10n.accountsLabel,
-                child: accountsAsync.when(
-                  data: (accounts) {
-                    final sorted = [...accounts]
-                      ..sort((a, b) {
-                        int typePriority(account) {
-                          if (account.isCreditCard) return 2;
-                          if (account.isOverdraft) return 3;
-                          if (account.type == 'cash') return 0;
-                          return 1;
-                        }
-
-                        final tp = typePriority(a).compareTo(typePriority(b));
-                        if (tp != 0) return tp;
-                        return a.name.compareTo(b.name);
-                      });
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: sorted
-                          .map(
-                            (a) => _AccountPill(
-                              account: a,
-                              isSelected: _localFilter.accountIds.contains(
-                                a.id.toString(),
-                              ),
-                              onTap: () => _toggleAccount(a.id.toString()),
-                            ),
-                          )
-                          .toList(),
-                    );
-                  },
-                  loading: () => _SkeletonGrid(itemCount: 3),
-                  error: (_, __) => Text(context.l10n.errorLoadingAccounts),
-                ),
-              ),
+              // 5-7. ACCOUNTS, CATEGORIES, TAGS: collapsible, one open at a time.
+              _buildAccounts(accountsAsync),
               const SizedBox(height: KuberSpace.sectionGap),
-              // 6. CATEGORIES
-              _Section(
-                title: context.l10n.categoriesLabel,
-                child: categoriesAsync.when(
-                  data: (categories) {
-                    final sorted = [...categories]
-                      ..sort((a, b) => a.name.compareTo(b.name));
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: sorted
-                          .map(
-                            (c) => _CategoryPill(
-                              category: c,
-                              isSelected: _localFilter.categoryIds.contains(
-                                c.id.toString(),
-                              ),
-                              onTap: () => _toggleCategory(c.id.toString()),
-                            ),
-                          )
-                          .toList(),
-                    );
-                  },
-                  loading: () => _SkeletonGrid(itemCount: 6),
-                  error: (_, __) => Text(context.l10n.errorLoadingCategories),
-                ),
-              ),
+              _buildCategories(categoriesAsync),
               const SizedBox(height: KuberSpace.sectionGap),
-              // 7. TAGS
-              _Section(
-                title: context.l10n.tagsUpper,
-                child: tagsAsync.when(
-                  data: (tags) {
-                    final sorted = [...tags]
-                      ..sort((a, b) => a.name.compareTo(b.name));
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: sorted.map((t) {
-                        final isSelected = _localFilter.tagIds.contains(t.id);
-                        return KuberChip(
-                          label: '#${t.name}',
-                          selected: isSelected,
-                          onTap: () => _toggleTag(t.id),
-                        );
-                      }).toList(),
-                    );
-                  },
-                  loading: () => _SkeletonGrid(itemCount: 5, height: 32),
-                  error: (_, __) => Text(context.l10n.errorLoadingTags),
-                ),
+              _buildTags(tagsAsync),
+              const SizedBox(height: KuberSpace.sectionGap),
+              _AdvancedHistoryLink(
+                onTap: () => openAdvancedHistory(context, ref),
               ),
               const SizedBox(height: 120),
             ],
@@ -410,6 +336,138 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _toggleSection(_Sec sec) =>
+      setState(() => _open = _open == sec ? null : sec);
+
+  Widget _buildAccounts(AsyncValue<List<Account>> async) {
+    final l10n = context.l10n;
+    final selected = _localFilter.accountIds;
+    final sorted = [...?async.valueOrNull]
+      ..sort((a, b) {
+        int typePriority(Account account) {
+          if (account.isCreditCard) return 2;
+          if (account.isOverdraft) return 3;
+          if (account.type == 'cash') return 0;
+          return 1;
+        }
+
+        final tp = typePriority(a).compareTo(typePriority(b));
+        if (tp != 0) return tp;
+        return a.name.compareTo(b.name);
+      });
+    return _FilterCard(
+      title: sentenceCase(l10n.accountsLabel),
+      selectedCount: selected.length,
+      open: _open == _Sec.accounts,
+      onToggle: () => _toggleSection(_Sec.accounts),
+      chips: [
+        for (final a in sorted)
+          if (selected.contains(a.id.toString()))
+            KuberChip(
+              label: a.name,
+              selected: true,
+              onDeleted: () => _toggleAccount(a.id.toString()),
+            ),
+      ],
+      body: async.when(
+        data: (_) => Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final a in sorted)
+              _AccountPill(
+                account: a,
+                isSelected: selected.contains(a.id.toString()),
+                onTap: () => _toggleAccount(a.id.toString()),
+              ),
+          ],
+        ),
+        loading: () => _SkeletonGrid(itemCount: 3),
+        error: (_, __) => Text(l10n.errorLoadingAccounts),
+      ),
+    );
+  }
+
+  Widget _buildCategories(AsyncValue<List<Category>> async) {
+    final l10n = context.l10n;
+    final selected = _localFilter.categoryIds;
+    final sorted = [...?async.valueOrNull]
+      ..sort((a, b) => a.name.compareTo(b.name));
+    return _FilterCard(
+      title: sentenceCase(l10n.categoriesLabel),
+      selectedCount: selected.length,
+      open: _open == _Sec.categories,
+      onToggle: () => _toggleSection(_Sec.categories),
+      chips: [
+        for (final c in sorted)
+          if (selected.contains(c.id.toString()))
+            KuberChip(
+              label: c.name,
+              selected: true,
+              onDeleted: () => _toggleCategory(c.id.toString()),
+            ),
+      ],
+      body: async.when(
+        data: (_) => _SearchableList(
+          controller: _catSearchCtrl,
+          hint: l10n.filterSearchCategories,
+          sectionName: l10n.categoriesLabel.toLowerCase(),
+          names: [for (final c in sorted) c.name],
+          build: (i) {
+            final c = sorted[i];
+            return _CategoryPill(
+              category: c,
+              isSelected: selected.contains(c.id.toString()),
+              onTap: () => _toggleCategory(c.id.toString()),
+            );
+          },
+        ),
+        loading: () => _SkeletonGrid(itemCount: 6),
+        error: (_, __) => Text(l10n.errorLoadingCategories),
+      ),
+    );
+  }
+
+  Widget _buildTags(AsyncValue<List<Tag>> async) {
+    final l10n = context.l10n;
+    final selected = _localFilter.tagIds;
+    final sorted = [...?async.valueOrNull]
+      ..sort((a, b) => a.name.compareTo(b.name));
+    return _FilterCard(
+      title: sentenceCase(l10n.tagsUpper),
+      selectedCount: selected.length,
+      open: _open == _Sec.tags,
+      onToggle: () => _toggleSection(_Sec.tags),
+      chips: [
+        for (final t in sorted)
+          if (selected.contains(t.id))
+            KuberChip(
+              label: '#${t.name}',
+              selected: true,
+              onDeleted: () => _toggleTag(t.id),
+            ),
+      ],
+      body: async.when(
+        data: (_) => _SearchableList(
+          controller: _tagSearchCtrl,
+          hint: l10n.filterSearchTags,
+          sectionName: l10n.tagsUpper.toLowerCase(),
+          names: [for (final t in sorted) t.name],
+          build: (i) {
+            final t = sorted[i];
+            return KuberChip(
+              label: '#${t.name}',
+              selected: selected.contains(t.id),
+              onTap: () => _toggleTag(t.id),
+            );
+          },
+        ),
+        loading: () => _SkeletonGrid(itemCount: 5, height: 32),
+        error: (_, __) => Text(l10n.errorLoadingTags),
       ),
     );
   }
@@ -452,6 +510,253 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
       ids.add(id);
     }
     setState(() => _localFilter = _localFilter.copyWith(tagIds: ids));
+  }
+}
+
+enum _Sec { accounts, categories, tags }
+
+/// Collapsible card (AH.H): header with "· N selected" / "· All" and a
+/// chevron; collapsed with selections it shows removable chips. Height
+/// animates 250 ms emphasized, chips and list cross-fade 150 ms.
+class _FilterCard extends StatelessWidget {
+  final String title;
+  final int selectedCount;
+  final bool open;
+  final VoidCallback onToggle;
+  final List<Widget> chips;
+  final Widget body;
+
+  const _FilterCard({
+    required this.title,
+    required this.selectedCount,
+    required this.open,
+    required this.onToggle,
+    required this.chips,
+    required this.body,
+  });
+
+  static const _emphasized = Cubic(0.2, 0, 0, 1);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final l10n = context.l10n;
+    final reduced = KuberMotion.reduced(context);
+    final sizeDur = reduced ? Duration.zero : const Duration(milliseconds: 250);
+    final fadeDur = reduced ? Duration.zero : KuberMotion.fast;
+    final hasSelection = selectedCount > 0;
+    final Widget content = open
+        ? Padding(
+            key: const ValueKey('open'),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: body,
+          )
+        : hasSelection
+        ? Padding(
+            key: const ValueKey('chips'),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Wrap(spacing: 8, runSpacing: 8, children: chips),
+            ),
+          )
+        : const SizedBox(key: ValueKey('none'), width: double.infinity);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            expanded: open,
+            child: InkWell(
+              onTap: onToggle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          text: title,
+                          style: theme.textTheme.titleMedium!.copyWith(
+                            color: cs.onSurface,
+                          ),
+                          children: [
+                            TextSpan(
+                              text:
+                                  ' ${hasSelection ? l10n.filterSelectedN(selectedCount) : l10n.filterAll}',
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                color: hasSelection
+                                    ? cs.primary
+                                    : cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AnimatedRotation(
+                      turns: open ? 0.5 : 0,
+                      duration: sizeDur,
+                      curve: _emphasized,
+                      child: Icon(
+                        Icons.expand_more_rounded,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: sizeDur,
+            curve: _emphasized,
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: fadeDur,
+              layoutBuilder: (current, previous) => Stack(
+                alignment: Alignment.topCenter,
+                children: [...previous, ?current],
+              ),
+              child: content,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Search field plus the matching items (anywhere in the name, ignoring case).
+class _SearchableList extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final String sectionName;
+  final List<String> names;
+  final Widget Function(int index) build;
+
+  const _SearchableList({
+    required this.controller,
+    required this.hint,
+    required this.sectionName,
+    required this.names,
+    required this.build,
+  });
+
+  @override
+  State<_SearchableList> createState() => _SearchableListState();
+}
+
+class _SearchableListState extends State<_SearchableList> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onText);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onText);
+    super.dispose();
+  }
+
+  void _onText() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final text = widget.controller.text.trim();
+    final q = text.toLowerCase();
+    final hits = [
+      for (var i = 0; i < widget.names.length; i++)
+        if (q.isEmpty || widget.names[i].toLowerCase().contains(q)) i,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: widget.controller,
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            prefixIcon: const Icon(Icons.search_rounded),
+          ),
+        ),
+        const SizedBox(height: 12),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 100),
+          child: hits.isEmpty
+              ? Text(
+                  context.l10n.filterNoMatch(widget.sectionName, text),
+                  key: const ValueKey('empty'),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                )
+              : Wrap(
+                  key: const ValueKey('list'),
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [for (final i in hits) widget.build(i)],
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+/// "Need AND / OR filters? Try Advanced History" (link part in primary).
+class _AdvancedHistoryLink extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AdvancedHistoryLink({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final l10n = context.l10n;
+    final link = l10n.historyMenuAdvanced;
+    final full = l10n.filterTryAdvanced(link);
+    final at = full.indexOf(link);
+    final style = theme.textTheme.bodyMedium!;
+    final spans = at < 0
+        ? [TextSpan(text: full, style: style.copyWith(color: cs.primary))]
+        : [
+            TextSpan(
+              text: full.substring(0, at),
+              style: style.copyWith(color: cs.onSurfaceVariant),
+            ),
+            TextSpan(
+              text: link,
+              style: style.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TextSpan(
+              text: full.substring(at + link.length),
+              style: style.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ];
+    return InkWell(
+      onTap: onTap,
+      borderRadius: KuberShape.smallR,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text.rich(TextSpan(children: spans), textAlign: TextAlign.center),
+      ),
+    );
   }
 }
 

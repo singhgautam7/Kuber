@@ -34,6 +34,8 @@ import '../../features/tools/saved/data/saved_calculation.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
 import '../../features/kuber_cards/data/stored_card.dart';
 import '../../features/kuber_cards/data/card_vault_meta.dart';
+import '../../features/advanced_history/data/saved_filter.dart';
+import '../../features/advanced_history/models/ah_view.dart';
 import 'data_service.dart';
 import '../schedule/processed_occurrence.dart';
 import '../schedule/schedule.dart';
@@ -50,9 +52,10 @@ class JsonBackupService {
   /// 2 = vNext (schedules, loan / investment fields, sub types, processed
   /// ledger). 3 = loan accuracy (edited EMI splits, past EMIs, outstanding
   /// adjustments, Overdraft accounts). 4 = November release (loan releases,
-  /// pre-EMI interest, loan_disbursement sub type). Older backups still
-  /// restore: version 1 through the vNext migration, the new fields default.
-  static const version = 4;
+  /// pre-EMI interest, loan_disbursement sub type). 5 = Advanced History saved
+  /// views (`savedFilters`). Older backups still restore: version 1 through
+  /// the vNext migration, the new fields default.
+  static const version = 5;
 
   Future<String> writeScheduledBackup({
     required Isar isar,
@@ -133,6 +136,7 @@ class JsonBackupService {
     final storedCards = await isar.storedCards.where().findAll();
     final cardVaultMeta = await isar.cardVaultMetas.get(0);
     final processed = await isar.processedOccurrences.where().findAll();
+    final savedFilters = await isar.savedFilters.where().findAll();
     // Name and currency, so a first-run restore can skip those steps. Only
     // the welcome flow reads this. Best-effort: never fails a backup.
     Map<String, dynamic>? profile;
@@ -176,6 +180,7 @@ class JsonBackupService {
       'storedCards': storedCards.map((c) => c.toMap()).toList(),
       'cardVaultMeta': cardVaultMeta?.toMap(),
       'processedOccurrences': processed.map((p) => p.toMap()).toList(),
+      'savedFilters': savedFilters.map(_savedFilterToMap).toList(),
     };
   }
 
@@ -249,6 +254,10 @@ class JsonBackupService {
       // vNext processed ledger (absent in v1 backups; the migration seeds it).
       await restore('processedOccurrences', 'schedule history',
           isar.processedOccurrences, ProcessedOccurrence.fromMap);
+      // Advanced History saved views (absent before version 5). The database
+      // was cleared above, so names cannot clash.
+      await restore('savedFilters', 'saved views', isar.savedFilters,
+          _mapToSavedFilter);
 
       // Kuber Cards: the encrypted card rows persist as-is. The vault metadata
       // is restored with biometric + lockout reset for THIS device, and flagged
@@ -305,6 +314,66 @@ class JsonBackupService {
   // ---------------------------------------------------------------------------
   // Serializers
   // ---------------------------------------------------------------------------
+
+  Map<String, dynamic> _savedFilterToMap(SavedFilter f) => {
+    'id': f.id,
+    'name': f.name,
+    'queryText': f.queryText,
+    'astJson': f.astJson,
+    'groupBy': f.groupBy.name,
+    'sortField': f.sortField.name,
+    'sortDescending': f.sortDescending,
+    'charts': [
+      for (final c in f.charts)
+        {
+          'order': c.order,
+          'type': c.type.name,
+          'split': c.split.name,
+          'measure': c.measure.name,
+        },
+    ],
+    'kpiSelection': f.kpiSelection,
+    'createdAt': f.createdAt.toIso8601String(),
+    'updatedAt': f.updatedAt.toIso8601String(),
+    'lastUsedAt': f.lastUsedAt?.toIso8601String(),
+  };
+
+  /// Unknown enum names (a newer app's backup) fall back to the default.
+  T _enumByName<T extends Enum>(List<T> values, Object? name, T fallback) {
+    for (final v in values) {
+      if (v.name == name) return v;
+    }
+    return fallback;
+  }
+
+  SavedFilter _mapToSavedFilter(Map<String, dynamic> m) {
+    final created = DateTime.tryParse('${m['createdAt']}') ?? DateTime.now();
+    return SavedFilter()
+      ..id = m['id'] as int
+      ..name = m['name'] as String
+      ..queryText = (m['queryText'] as String?) ?? ''
+      ..astJson = m['astJson'] as String?
+      ..groupBy = _enumByName(AhGroupBy.values, m['groupBy'], AhGroupBy.none)
+      ..sortField =
+          _enumByName(AhSortField.values, m['sortField'], AhSortField.date)
+      ..sortDescending = (m['sortDescending'] as bool?) ?? true
+      ..charts = [
+        for (final c in (m['charts'] as List? ?? const []))
+          SavedChart()
+            ..order = ((c as Map)['order'] as int?) ?? 0
+            ..type = _enumByName(AhChartType.values, c['type'], AhChartType.donut)
+            ..split =
+                _enumByName(AhChartSplit.values, c['split'], AhChartSplit.category)
+            ..measure = _enumByName(
+                AhChartMeasure.values, c['measure'], AhChartMeasure.total),
+      ]
+      ..kpiSelection = [
+        for (final k in (m['kpiSelection'] as List? ?? const [])) k as String,
+      ]
+      ..createdAt = created
+      ..updatedAt = DateTime.tryParse('${m['updatedAt']}') ?? created
+      ..lastUsedAt = DateTime.tryParse('${m['lastUsedAt']}');
+  }
 
   Map<String, dynamic> _txToMap(Transaction t) => {
     'id': t.id,

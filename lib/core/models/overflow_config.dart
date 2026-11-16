@@ -11,6 +11,9 @@ class KuberOverflowConfig {
 class KuberOverflowItem {
   final IconData icon;
   final String label;
+
+  /// Optional helper line under the label.
+  final String? subtitle;
   final VoidCallback onTap;
   final bool isDestructive;
 
@@ -23,6 +26,7 @@ class KuberOverflowItem {
   const KuberOverflowItem({
     required this.icon,
     required this.label,
+    this.subtitle,
     required this.onTap,
     this.isDestructive = false,
     this.selected = false,

@@ -423,6 +423,7 @@ class _OverflowButtonState extends State<_OverflowButton> {
           KuberMenuEntry(
             value: widget.items[i],
             label: widget.items[i].label,
+            subtitle: widget.items[i].subtitle,
             icon: widget.items[i].icon,
             destructive: widget.items[i].isDestructive,
             selected: widget.items[i].selected,
