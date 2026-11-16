@@ -197,11 +197,9 @@ class AhPage extends ConsumerWidget {
         switchInCurve: AhMotion.decelerate,
         transitionBuilder: (child, anim) => FadeTransition(
           opacity: anim,
-          child: reduced
-              ? child
-              : SlideTransition(
+          child: SlideTransition(
                   position: Tween<Offset>(
-                          begin: const Offset(0, 0.012), end: Offset.zero)
+                          begin: reduced ? Offset.zero : const Offset(0, 0.012), end: Offset.zero)
                       .animate(anim),
                   child: child,
                 ),

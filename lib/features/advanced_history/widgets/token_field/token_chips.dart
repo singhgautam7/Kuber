@@ -173,7 +173,7 @@ class TokenChip extends StatelessWidget {
         ? l.ahfTokenInvalidSemantics(item.text)
         : l.ahfTokenSemantics(d!.field.isEmpty
             ? d.value
-            : '${d.field.replaceAll(':', '')} is ${d.value}');
+            : '${d.field.replaceAll(':', '')} is ${negated ? 'not ' : ''}${d.value}');
     return Semantics(
       button: true,
       label: semantic,
@@ -187,13 +187,16 @@ class TokenChip extends StatelessWidget {
           curve: AhMotion.decelerate,
           constraints: const BoxConstraints(minHeight: 32),
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(KuberShape.small),
             border: Border.all(color: edge, width: width),
           ),
-          child: Row(
+          // Center with widthFactor 1 keeps the chip as wide as its content
+          // inside the Wrap (an aligned container would fill the row).
+          child: Center(
+            widthFactor: 1,
+            child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (negated) ...[
@@ -223,6 +226,7 @@ class TokenChip extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
@@ -291,12 +295,13 @@ class JoinerChip extends StatelessWidget {
           duration: AhMotion.fast,
           constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
           padding: const EdgeInsets.symmetric(horizontal: 6),
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? cs.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(KuberShape.small),
           ),
-          child: AnimatedSwitcher(
+          child: Center(
+            widthFactor: 1,
+            child: AnimatedSwitcher(
             duration: AhMotion.instant,
             child: Text(
               word,
@@ -307,6 +312,7 @@ class JoinerChip extends StatelessWidget {
                 color: selected ? cs.onPrimary : cs.onSurfaceVariant,
               ),
             ),
+          ),
           ),
         ),
       ),
@@ -342,7 +348,6 @@ class BracketToken extends StatelessWidget {
       height: 24,
       constraints: const BoxConstraints(minWidth: 18),
       padding: const EdgeInsets.symmetric(horizontal: 5),
-      alignment: Alignment.center,
       decoration: ghost
           ? null
           : BoxDecoration(
@@ -354,7 +359,7 @@ class BracketToken extends StatelessWidget {
               borderRadius: BorderRadius.circular(KuberShape.extraSmall + 2),
               border: error ? Border.all(color: cs.error, width: 1.5) : null,
             ),
-      child: text,
+      child: Center(widthFactor: 1, child: text),
     );
     return Semantics(
       label: ghost

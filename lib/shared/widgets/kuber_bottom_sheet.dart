@@ -35,6 +35,9 @@ class KuberBottomSheet extends StatefulWidget {
   /// actions include Cancel turn it off.
   final bool showClose;
 
+  /// Small action in the header before the close button, e.g. an "i".
+  final Widget? headerAction;
+
   /// Body padding, for bodies that run closer to the edge than 20.
   final EdgeInsetsGeometry bodyPadding;
 
@@ -47,6 +50,7 @@ class KuberBottomSheet extends StatefulWidget {
     required this.child,
     this.actions,
     this.showClose = true,
+    this.headerAction,
     this.bodyPadding = const EdgeInsets.fromLTRB(20, 4, 20, 16),
   });
 
@@ -138,6 +142,7 @@ class _KuberBottomSheetState extends State<KuberBottomSheet> {
                       ],
                     ),
                   ),
+                  if (widget.headerAction != null) widget.headerAction!,
                   if (widget.showClose) ...[
                     const SizedBox(width: KuberSpace.sm),
                     AppIconButton(

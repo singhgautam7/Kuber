@@ -68,10 +68,8 @@ class _LiveCountButtonState extends ConsumerState<LiveCountButton> {
       duration: reduced ? AhMotion.instant : AhMotion.fast,
       transitionBuilder: (child, anim) => FadeTransition(
         opacity: anim,
-        child: reduced
-            ? child
-            : SlideTransition(
-                position: Tween(begin: const Offset(0, 0.1), end: Offset.zero)
+        child: SlideTransition(
+                position: Tween(begin: reduced ? Offset.zero : const Offset(0, 0.1), end: Offset.zero)
                     .animate(anim),
                 child: child),
       ),

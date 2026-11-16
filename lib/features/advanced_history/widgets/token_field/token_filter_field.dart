@@ -305,7 +305,13 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
           onTap: ok ? () => c.flip(i) : null,
         );
       case NotItem _:
-        w = NotLabel(highlight: selected);
+        // A not before a token is drawn inside that token (design: one
+        // "not" label); it shows on its own only before a bracket or when
+        // backspace has selected it.
+        final ownsToken = i + 1 < c.items.length && c.items[i + 1] is TokenItem;
+        w = ownsToken && !selected
+            ? const SizedBox.shrink()
+            : NotLabel(highlight: selected);
       case OpenItem _:
         w = BracketToken(
             open: true,
@@ -624,10 +630,8 @@ class _ErrorLine extends StatelessWidget {
       switchInCurve: AhMotion.decelerate,
       transitionBuilder: (child, a) => FadeTransition(
         opacity: a,
-        child: reduced
-            ? child
-            : SlideTransition(
-                position: Tween(begin: const Offset(0, -0.3), end: Offset.zero)
+        child: SlideTransition(
+                position: Tween(begin: reduced ? Offset.zero : const Offset(0, -0.3), end: Offset.zero)
                     .animate(a),
                 child: child,
               ),

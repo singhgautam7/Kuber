@@ -94,6 +94,8 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
     final splits = AhChartSplit.values.where((s) => ahSplitAllowed(_type, s));
 
     return KuberBottomSheet(
+      headerAction: AhInfoButton(ahInfoConfig(
+                l.ahdBuilderAdd, [l.ahdInfoChart1, l.ahdInfoChart2])),
       title: editing ? l.ahdBuilderEdit : l.ahdBuilderAdd,
       actions: Column(
         mainAxisSize: MainAxisSize.min,
@@ -121,10 +123,6 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AhSheetIntro(
-            info: ahInfoConfig(
-                l.ahdBuilderAdd, [l.ahdInfoChart1, l.ahdInfoChart2]),
-          ),
           _Caps(l.ahdChartType),
           Row(
             children: [

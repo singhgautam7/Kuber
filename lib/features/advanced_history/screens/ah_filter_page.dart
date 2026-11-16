@@ -297,11 +297,9 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
                                     transitionBuilder: (child, a) =>
                                         FadeTransition(
                                       opacity: a,
-                                      child: reduced
-                                          ? child
-                                          : SlideTransition(
+                                      child: SlideTransition(
                                               position: Tween(
-                                                      begin: const Offset(0, 0.6),
+                                                      begin: reduced ? Offset.zero : const Offset(0, 0.6),
                                                       end: Offset.zero)
                                                   .animate(a),
                                               child: child),

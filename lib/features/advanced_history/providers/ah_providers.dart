@@ -132,7 +132,7 @@ class AhViewNotifier extends Notifier<AhView> {
   }
 
   /// Applies a whole view (example chips, undo).
-  void applyView(AhView v) => state = v;
+  void applyView(AhView v) => state = v.copyWith(sort: v.sort.fitFor(v.groupBy));
 
   void applySaved(SavedFilter f) {
     state = viewFromSaved(f);
@@ -174,7 +174,7 @@ AhView viewFromSaved(SavedFilter f) {
     queryText: node == null ? '' : f.queryText,
     node: node,
     groupBy: f.groupBy,
-    sort: AhSort(f.sortField, descending: f.sortDescending),
+    sort: AhSort(f.sortField, descending: f.sortDescending).fitFor(f.groupBy),
     charts: [for (final c in charts) AhChartSpec(c.type, c.split, c.measure)],
     kpis: kpisFromNames(f.kpiSelection),
     savedId: f.id,

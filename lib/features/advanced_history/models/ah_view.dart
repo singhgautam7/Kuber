@@ -16,6 +16,14 @@ class AhSort {
   static const ungroupedDefault = AhSort(AhSortField.date);
   static const groupedDefault = AhSort(AhSortField.total);
 
+  /// This sort if its field fits [g] (grouped: total / count / name;
+  /// ungrouped: the rest), else [g]'s default. Guards restored views.
+  AhSort fitFor(AhGroupBy g) {
+    const grouped = {AhSortField.total, AhSortField.count, AhSortField.name};
+    if ((g != AhGroupBy.none) == grouped.contains(field)) return this;
+    return g == AhGroupBy.none ? ungroupedDefault : groupedDefault;
+  }
+
   bool isDefaultFor(AhGroupBy g) =>
       this == (g == AhGroupBy.none ? ungroupedDefault : groupedDefault);
 

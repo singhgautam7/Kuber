@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kuber/features/advanced_history/widgets/charts/ah_charts_area.dart';
 import 'package:kuber/features/advanced_history/models/ah_view.dart';
 import 'package:kuber/features/advanced_history/providers/ah_providers.dart';
 import 'package:kuber/features/advanced_history/query/query_ast.dart';
@@ -119,6 +120,22 @@ void main() {
         findsOneWidget);
   });
 
+  testWidgets('an accessibility change keeps the dashboard state', (t) async {
+    // TalkBack or UiAutomator flips accessibleNavigation (reduced motion).
+    // The page must not rebuild its tree: that reset the scroll and killed the
+    // charts area while a card menu was open (Move up / down did nothing).
+    await pumpAh(t, const AdvancedHistoryScreen(),
+        ahOverrides(view: _filtered(charts: [_donut, _bars])));
+    final before = t.state(find.byType(AhChartsArea));
+    t.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(accessibleNavigation: true);
+    await settleAh(t);
+    expect(identical(t.state(find.byType(AhChartsArea)), before), isTrue);
+    t.platformDispatcher.clearAccessibilityFeaturesTestValue();
+    await settleAh(t);
+    expect(identical(t.state(find.byType(AhChartsArea)), before), isTrue);
+  });
+
   testWidgets('charts: add, move, remove with undo', (t) async {
     final c = await pumpAh(t, const AdvancedHistoryScreen(),
         ahOverrides(view: _filtered(charts: [_donut, _bars])));
@@ -141,6 +158,18 @@ void main() {
     await t.tap(find.text('Move down'));
     await settleAh(t);
     expect(c.read(ahViewProvider).charts.first, _bars);
+    // Cards are drawn in the new order.
+    double top(String s) => t.getTopLeft(find.text(s).first).dy;
+    expect(top('Count by account') < top('Total by category'), isTrue);
+
+    // Move the last one up
+    await t.tap(_cardMenu(2));
+    await settleAh(t);
+    await t.tap(find.text('Move up'));
+    await settleAh(t);
+    final after = c.read(ahViewProvider).charts;
+    expect(after.length, 3);
+    expect(after[2], _donut);
 
     // Remove the first, then undo
     await t.tap(_cardMenu(0));

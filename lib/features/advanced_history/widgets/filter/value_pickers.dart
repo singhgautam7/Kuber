@@ -10,6 +10,7 @@ import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../shared/widgets/kuber_chips.dart';
+import '../../../../shared/widgets/kuber_list.dart';
 import '../../../accounts/providers/account_provider.dart';
 import '../../../categories/providers/category_provider.dart';
 import '../../../tags/providers/tag_providers.dart';
@@ -166,15 +167,7 @@ class _FieldPickerSheetState extends ConsumerState<FieldPickerSheet> {
     return KuberBottomSheet(
       subtitle: l.ahfFilterBy,
       title: fieldLabel(widget.field, l),
-      leadingIcon: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: cs.tertiaryContainer,
-          borderRadius: BorderRadius.circular(KuberShape.large),
-        ),
-        child: Icon(fieldIcon(widget.field), color: cs.onTertiaryContainer),
-      ),
+      leadingIcon: KuberIconTile(icon: fieldIcon(widget.field), size: 48, glyph: 24),
       actions: AppButton(
         key: const ValueKey('ahf-picker-cta'),
         label: cta,

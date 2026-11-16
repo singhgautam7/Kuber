@@ -43,14 +43,12 @@ class AhSavedSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: l.ahdSavedTitle,
+      headerAction: AhInfoButton(ahInfoConfig(l.ahdSavedTitle,
+                [l.ahdInfoSaved1, l.ahdInfoSaved2])),
       subtitle: list.isEmpty ? null : l.ahdSavedN(list.length),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AhSheetIntro(
-            info: ahInfoConfig(l.ahdSavedTitle,
-                [l.ahdInfoSaved1, l.ahdInfoSaved2]),
-          ),
           if (list.isEmpty)
             KuberEmptyState(
               icon: Icons.bookmarks_outlined,

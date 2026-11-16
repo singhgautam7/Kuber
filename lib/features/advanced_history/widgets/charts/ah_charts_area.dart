@@ -25,6 +25,7 @@ class AhChartsArea extends ConsumerStatefulWidget {
 
 class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
   var _ids = <int>[];
+
   var _next = 0;
   List<AhChartSpec> _last = const [];
 

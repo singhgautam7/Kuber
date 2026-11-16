@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
+import '../../../../shared/widgets/kuber_list.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../query/query_ast.dart';
 import '../../query/query_labels.dart';
@@ -70,16 +71,7 @@ class FieldList extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: cs.tertiaryContainer,
-                        borderRadius: BorderRadius.circular(KuberShape.medium),
-                      ),
-                      child: Icon(fieldIcon(f),
-                          size: 20, color: cs.onTertiaryContainer),
-                    ),
+                    KuberIconTile(icon: fieldIcon(f), size: 36, glyph: 20),
                     const SizedBox(width: KuberSpace.md),
                     Expanded(
                       child: Column(

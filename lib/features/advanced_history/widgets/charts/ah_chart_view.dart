@@ -315,7 +315,10 @@ class _DonutPainter extends CustomPainter {
 }
 
 void _text(Canvas c, String s, TextStyle st, Offset at,
-    {double maxW = 80, TextAlign align = TextAlign.center, double alpha = 1}) {
+    {double maxW = 80,
+    TextAlign align = TextAlign.center,
+    double alpha = 1,
+    double? within}) {
   final tp = TextPainter(
     text: TextSpan(
         text: s,
@@ -325,7 +328,10 @@ void _text(Canvas c, String s, TextStyle st, Offset at,
     ellipsis: '…',
     textAlign: align,
   )..layout(maxWidth: maxW);
-  tp.paint(c, Offset(at.dx - tp.width / 2, at.dy));
+  var x = at.dx - tp.width / 2;
+  // Keep edge labels inside the chart instead of running off the card.
+  if (within != null) x = x.clamp(0.0, math.max(0.0, within - tp.width));
+  tp.paint(c, Offset(x, at.dy));
 }
 
 class _BarsPainter extends CustomPainter {
@@ -422,7 +428,8 @@ class _LinePainter extends CustomPainter {
           ..strokeWidth = 3
           ..strokeCap = StrokeCap.round
           ..strokeJoin = StrokeJoin.round);
-    final step = math.max(1, (pts.length / (size.width / 46)).ceil());
+    // Month labels ("Oct 2026") need about 64 dp each.
+    final step = math.max(1, (pts.length / (size.width / 64)).ceil());
     for (var i = 0; i < pts.length; i++) {
       final appear = pts.length <= 1 ? 1.0 : (t * (pts.length - 1) - i + 1).clamp(0.0, 1.0);
       final isSel = sel == i;
@@ -432,7 +439,8 @@ class _LinePainter extends CustomPainter {
           Paint()..color = color.withValues(alpha: a));
       if (i % step == 0 || isSel) {
         _text(canvas, pts[i].label, label, Offset(at(i).dx, top + plotH + 4),
-            maxW: slot * step, alpha: dim ? 1 - 0.62 * s : 1);
+            maxW: math.max(slot * step, 56), alpha: dim ? 1 - 0.62 * s : 1,
+            within: size.width);
       }
       if (isSel) {
         _text(canvas, fmt(pts[i].value),

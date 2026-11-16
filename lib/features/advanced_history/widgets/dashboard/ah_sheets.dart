@@ -151,6 +151,7 @@ class AhSortSheet extends ConsumerWidget {
     final orders = text ? const [false, true] : const [true, false];
     return KuberBottomSheet(
       title: l.ahdSort,
+      headerAction: AhInfoButton(ahInfoConfig(l.ahdSort, [l.ahdInfoSort1, l.ahdInfoSort2])),
       subtitle: grouped ? l.ahdSortGroups : l.ahdSortTxns,
       actions: AppButton(
         label: l.doneLabel,
@@ -161,9 +162,6 @@ class AhSortSheet extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AhSheetIntro(
-            info: ahInfoConfig(l.ahdSort, [l.ahdInfoSort1, l.ahdInfoSort2]),
-          ),
           for (final f in fields)
             AhOptionRow(
               label: ahSortFieldLabel(l, f),
