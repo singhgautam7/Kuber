@@ -760,7 +760,7 @@ class _MadeInIndiaFooter extends ConsumerWidget {
             alignment: PlaceholderAlignment.middle,
             child: Icon(
               Icons.favorite_rounded,
-              color: Colors.redAccent,
+              color: cs.error,
               size: 13,
             ),
           ),

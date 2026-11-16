@@ -38,6 +38,7 @@ import '../../home_v2/data/home_v2_widgets.dart' show needsTransactions;
 import '../../home_v2/providers/has_transactions_provider.dart';
 import '../../home_v2/providers/home_v2_gates_provider.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
+import '../../rate/rate_prompt.dart';
 import '../../home_v2/widgets/home_v2_top_slot.dart';
 import '../../sms_import/widgets/sms_import_home_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
@@ -104,6 +105,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     // Home v2: Data-gated widgets turn on by their triggers. The controller
     // does nothing for v1 or once no widget is waiting.
     if (ref.read(isHomeV2Provider)) ref.read(homeV2GatesProvider);
+    // Rate sheet: decided after the on-open batch plus 600 ms (launches 2, 4, 8, 16).
+    scheduleRatePrompt(ref, () => context);
 
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.

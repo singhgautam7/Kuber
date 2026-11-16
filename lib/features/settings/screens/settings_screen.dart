@@ -88,6 +88,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SettingsAnchor('pro', child: KuberProSettingsSection()),
         const SizedBox(height: KuberSpace.md),
         SettingsBlock(
+          title: l.setSecProfile,
           children: [
             SettingsAnchor('name', child: SettingsTile(
               icon: Icons.person_outline_rounded,
@@ -178,6 +179,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
         ),
         SettingsBlock(
+          title: l.setSecAbout,
           children: [
             SettingsAnchor('about', child: Consumer(
               builder: (_, ref, _) {
@@ -191,13 +193,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             )),
-            SettingsAnchor('permissions', child: SettingsTile(
-              icon: Icons.security_outlined,
-              label: l.menuPermissions,
-              subtitle: l.menuPermissionsDesc,
-              onTap: () => context.pushNamed('permissions'),
-              trailing: const KuberChevron(),
-            )),
             // Unlocked by tapping the version in About.
             Consumer(
               builder: (_, ref, _) => ref.watch(devModeProvider).valueOrNull ?? false
@@ -210,6 +205,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     )
                   : const SizedBox.shrink(),
             ),
+          ],
+        ),
+        SettingsBlock(
+          title: l.setSecPermissions,
+          children: [
+            SettingsAnchor('permissions', child: SettingsTile(
+              icon: Icons.security_outlined,
+              label: l.menuPermissions,
+              subtitle: l.menuPermissionsDesc,
+              onTap: () => context.pushNamed('permissions'),
+              trailing: const KuberChevron(),
+            )),
           ],
         ),
       ],

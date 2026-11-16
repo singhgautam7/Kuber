@@ -753,8 +753,7 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
                     value: meta.biometricEnabled,
                     onChanged: cardsOff
                         ? null
-                        : (v) => toggleCardBiometric(context, ref, v,
-                            onNeedsUnlock: () => context.push('/cards')),
+                        : (v) => toggleCardBiometric(context, ref, v),
                     activeTrackColor: cs.primary,
                   ),
                 )),
@@ -784,8 +783,10 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
                   onChanged: !appLock
                       ? null
                       : (val) async {
-                          await ref.read(notesBiometricRequiredProvider.notifier).set(val);
-                          if (!val) {
+                          final ok = await ref
+                              .read(notesBiometricRequiredProvider.notifier)
+                              .setChecked(val);
+                          if (ok && !val) {
                             ref.read(notesUnlockedThisSessionProvider.notifier).state = false;
                           }
                         },

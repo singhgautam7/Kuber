@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/services/biometric_service.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../data/kuber_note.dart';
 import '../data/notes_repository.dart';
@@ -166,6 +167,16 @@ class NotesBiometricRequiredNotifier extends StateNotifier<bool> {
     state = enabled;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PrefsKeys.notesBiometricRequired, enabled);
+  }
+
+  /// Turning the Notes lock off needs the phone's own check first; returns
+  /// whether the value changed.
+  Future<bool> setChecked(bool enabled, {BiometricService? biometric}) async {
+    if (!enabled && !await (biometric ?? BiometricService()).authenticate()) {
+      return false;
+    }
+    await set(enabled);
+    return true;
   }
 }
 

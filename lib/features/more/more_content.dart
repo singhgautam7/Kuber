@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/utils/l10n_ext.dart';
+import '../advanced_history/advanced_history_entry.dart';
 import '../ask_kuber/screen/kuber_mark.dart';
+import '../rate/rate_prompt.dart' show rateOnPlayStore;
 import '../notifications/providers/notification_provider.dart';
 import '../notifications/utils/deep_link_handler.dart';
 import '../notifications/widgets/notifications_sheet.dart';
@@ -177,6 +178,13 @@ List<MoreSection> buildMoreSections(
           },
         ),
         MoreEntry(
+          icon: Icons.manage_search_rounded,
+          label: l10n.menuAdvancedHistory,
+          subtitle: l10n.menuAdvancedHistoryDesc,
+          proPill: true,
+          onTap: () => openAdvancedHistory(context, ref),
+        ),
+        MoreEntry(
           icon: Icons.calculate_rounded,
           label: l10n.menuCalculators,
           subtitle: l10n.menuCalculatorsDesc,
@@ -247,12 +255,7 @@ List<MoreSection> buildMoreSections(
           icon: Icons.star_rate_rounded,
           label: l10n.menuRateKuber,
           subtitle: l10n.menuRateUsDesc,
-          onTap: () => launchUrl(
-            Uri.parse(
-              'https://play.google.com/store/apps/details?id=com.grs.kuber',
-            ),
-            mode: LaunchMode.externalApplication,
-          ),
+          onTap: rateOnPlayStore,
         ),
         MoreEntry(
           icon: Icons.share_rounded,

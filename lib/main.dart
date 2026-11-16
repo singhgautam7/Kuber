@@ -30,6 +30,7 @@ import 'features/home_v2/providers/home_v2_provider.dart';
 import 'core/theme/theme_families.dart' show resolveVariant;
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/reminders/data/reminder_action_handler.dart';
+import 'features/rate/rate_prompt.dart' show RateBoot, rateBootProvider;
 import 'features/stories/services/welcome_story.dart';
 import 'features/pro/paywall/pro_state.dart';
 
@@ -131,6 +132,7 @@ Future<void> _bootstrap() async {
   var bootTextSizeLevel = 3;
   var bootNumberFormat = ('INR', NumberSystem.automatic);
   var bootShowCurrencyCode = false;
+  var rateLaunch = 0;
   try {
     final prefs = await SharedPreferences.getInstance();
     // Once, before the first frame: Expressive colours / Pure black defaults
@@ -155,6 +157,8 @@ Future<void> _bootstrap() async {
           .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)]),
     );
     bootTextSizeLevel = prefs.getInt(PrefsKeys.textSizeLevel) ?? 3;
+    // This cold start's number; written after the first frame (rate sheet).
+    rateLaunch = (prefs.getInt(PrefsKeys.ratePromptLaunchCount) ?? 0) + 1;
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
     final systemIndex =
         prefs.getInt(PrefsKeys.numberSystem) ?? NumberSystem.automatic.index;
@@ -268,6 +272,13 @@ Future<void> _bootstrap() async {
           homeV2BootProvider.overrideWithValue(homeV2),
           hasTransactionsBootProvider.overrideWithValue(hasTransactions),
           initialLocationProvider.overrideWithValue(initialLocation),
+          // Opened from a notification, or a kuber:// link (widget, shortcut,
+          // launcher entry): the rate sheet stays away.
+          rateBootProvider.overrideWithValue(RateBoot(
+            launch: rateLaunch,
+            openedExternally: coldStartPayload != null ||
+                PlatformDispatcher.instance.defaultRouteName != '/',
+          )),
           if (coldStartPayload != null)
             pendingDeeplinkProvider.overrideWith((ref) => coldStartPayload),
         ],

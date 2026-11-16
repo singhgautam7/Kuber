@@ -24,6 +24,12 @@ class PrefsKeys {
   static const quickActionShortcuts = 'quick_action_shortcuts';
   static const addMenuActions = 'add_menu_actions';
 
+  // Rate the app sheet: cold starts so far, "never again" and "tapped Rate".
+  // Not part of any backup.
+  static const ratePromptLaunchCount = 'kuber_rate_prompt_launch_count';
+  static const ratePromptDone = 'kuber_rate_prompt_done';
+  static const rateTapped = 'kuber_rate_tapped';
+
   // Migration Keys
   static const migratedTxnLinkedRuleV1 = 'kuber_migrated_txn_linked_rule_v1';
   static const migratedSeedLedgerCategoryV1 =

@@ -7,7 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
-import '../../pro/more/more_premium_card.dart';
+import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../pro/paywall/pro_state.dart';
 import '../providers/advanced_analytics_provider.dart';
 import '../widgets/about_analytics_info_sheet.dart';
@@ -810,7 +810,7 @@ class _LockedUpgradeView extends StatelessWidget {
         KuberSpace.xxl,
       ),
       children: [
-        const MorePremiumHeroCard(),
+        const KuberProSettingsSection(),
         const SizedBox(height: KuberSpace.lg),
         Text(
           "What's inside",

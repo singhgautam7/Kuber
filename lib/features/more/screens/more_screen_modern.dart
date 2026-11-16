@@ -17,7 +17,7 @@ import '../../categories/providers/category_provider.dart';
 import '../../investments/providers/investment_provider.dart';
 import '../../ledger/providers/ledger_provider.dart';
 import '../../loans/providers/loan_provider.dart';
-import '../../pro/more/more_premium_card.dart';
+import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../recurring/providers/recurring_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../more_content.dart';
@@ -96,7 +96,7 @@ class MoreScreenModern extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const MorePremiumHeroCard(),
+                const KuberProSettingsSection(),
                 const SizedBox(height: KuberSpace.sectionGap),
                 KuberSectionHeader(title: manage.title),
                 _Grid(

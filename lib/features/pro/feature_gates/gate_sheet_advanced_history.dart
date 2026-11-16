@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/l10n_ext.dart';
 import 'gate_sheet_base.dart';
 
-// Owned by H-UI (localise; copy from advanced-history-v1/copy.md › Pro gate).
 void showAdvancedHistoryGateSheet(BuildContext context) {
+  final l = context.l10n;
   showFeatureGateSheet(
     context,
     icon: Icons.manage_search_rounded,
-    featureName: 'Advanced History',
-    headline: 'Advanced History is a Kuber Pro feature',
-    body:
-        'Type or build any filter over all your transactions, group and chart '
-        'the results, save filters and export them as CSV with Kuber Pro.',
+    featureName: l.ahdTitle,
+    headline: l.ahdGateSheetHeadline,
+    body: l.ahdGateSheetBody,
   );
 }

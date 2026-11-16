@@ -10,7 +10,7 @@ import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/providers/tutorial_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
-import '../../pro/more/more_premium_card.dart';
+import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import '../more_content.dart';
 import '../widgets/more_header.dart';
@@ -93,7 +93,7 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const MorePremiumHeroCard(),
+                const KuberProSettingsSection(),
                 const SizedBox(height: KuberSpace.sectionGap),
                 for (final section in sections) ...[
                   if (section.id == MoreSectionId.helpUs)

@@ -12,6 +12,7 @@ import 'package:kuber/l10n/app_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart'
     show FlutterQuillLocalizations;
 
+import 'features/rate/rate_prompt.dart' show rateBootProvider, recordRateLaunch;
 import 'main.dart' show onOpenBatchReadyProvider;
 import 'features/settings/providers/theme_options_provider.dart';
 import 'features/kuber_cards/providers/kuber_cards_provider.dart';
@@ -101,8 +102,11 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // On-open processing deferred to after the first frame so it never delays
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => Future.delayed(_onOpenSettleDelay, _onSplashFinished));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Rate sheet: the cold-start count is written once, after the first frame.
+      recordRateLaunch(ref.read(rateBootProvider).launch);
+      Future.delayed(_onOpenSettleDelay, _onSplashFinished);
+    });
   }
 
   bool _splashFinished = false;
