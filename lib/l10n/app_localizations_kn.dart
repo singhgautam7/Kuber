@@ -1356,7 +1356,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get filterInc => 'ಆದಾಯ';
 
   @override
-  String get advancedFiltersTooltip => 'ಸುಧಾರಿತ ಫಿಲ್ಟರ್‌ಗಳು';
+  String get advancedFiltersTooltip => 'ಫಿಲ್ಟರ್';
 
   @override
   String get clearFiltersTooltip => 'ಫಿಲ್ಟರ್‌ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ';
@@ -1374,7 +1374,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get selectRange => 'ವ್ಯಾಪ್ತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿ';
 
   @override
-  String get advancedFiltersTitle => 'ಸುಧಾರಿತ ಫಿಲ್ಟರ್‌ಗಳು';
+  String get advancedFiltersTitle => 'ಫಿಲ್ಟರ್';
 
   @override
   String get clearAll => 'ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ';
@@ -2308,7 +2308,7 @@ class AppLocalizationsKn extends AppLocalizations {
       'ವಿಶ್ಲೇಷಣೆ ವಿಜೆಟ್‌ಗಳನ್ನು ಆರಿಸಿ ಮತ್ತು ಮರುಕ್ರಮಗೊಳಿಸಿ';
 
   @override
-  String get filterAll => 'ಎಲ್ಲಾ';
+  String get filterAll => '· ಎಲ್ಲಾ';
 
   @override
   String get filterToday => 'ಇಂದು';
@@ -2519,7 +2519,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get menuRateKuber => 'ಕುಬೇರ್ ರೇಟ್ ಮಾಡಿ';
 
   @override
-  String get menuShare => 'ಹಂಚಿಕೊಳ್ಳಿ';
+  String get menuShare => 'ರೆಫರ್ ಮಾಡಿ';
 
   @override
   String get menuFeedbackShort => 'ಪ್ರತಿಕ್ರಿಯೆ';
@@ -4361,7 +4361,7 @@ class AppLocalizationsKn extends AppLocalizations {
       'ಈ ಚಿಪ್‌ಗಳನ್ನು ಬಳಸಿ ಆದಾಯ, ವೆಚ್ಚ ಅಥವಾ ವರ್ಗಾವಣೆಯ ಪ್ರಕಾರ ತ್ವರಿತವಾಗಿ ಫಿಲ್ಟರ್ ಮಾಡಿ.';
 
   @override
-  String get tutCh2St2Title => 'ಸುಧಾರಿತ ಫಿಲ್ಟರ್‌ಗಳು';
+  String get tutCh2St2Title => 'ಫಿಲ್ಟರ್';
 
   @override
   String get tutCh2St2Desc =>
@@ -9651,4 +9651,1409 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get deleteLoanAction => 'ಸಾಲ ಅಳಿಸಿ';
+
+  @override
+  String get saveFileFailed => 'ಫೈಲ್ ಉಳಿಸಲು ಆಗಲಿಲ್ಲ. ಬೇರೆ ಫೋಲ್ಡರ್ ಆಯ್ಕೆಮಾಡಿ.';
+
+  @override
+  String get saveFileShareFailed => 'ಫೈಲ್ ಹಂಚಲು ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.';
+
+  @override
+  String get saveFileCsvNoViews =>
+      'CSV ಬ್ಯಾಕಪ್‌ನಲ್ಲಿ ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು ಇರುವುದಿಲ್ಲ. ಅವನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು JSON ಬ್ಯಾಕಪ್ ಬಳಸಿ.';
+
+  @override
+  String get historyMenuAdvanced => 'ಅಡ್ವಾನ್ಸ್ಡ್ ಹಿಸ್ಟರಿ';
+
+  @override
+  String filterSelectedN(int n) {
+    return '· $n ಆಯ್ಕೆ';
+  }
+
+  @override
+  String get filterSearchCategories => 'ವರ್ಗಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String get filterSearchTags => 'ಟ್ಯಾಗ್‌ಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String filterNoMatch(String section, String text) {
+    return '“$text” ಗೆ ಹೊಂದುವ $section ಇಲ್ಲ';
+  }
+
+  @override
+  String filterTryAdvanced(String link) {
+    return 'AND / OR ಫಿಲ್ಟರ್‌ಗಳು ಬೇಕೇ? $link ಪ್ರಯತ್ನಿಸಿ';
+  }
+
+  @override
+  String get setSecProfile => 'ಪ್ರೊಫೈಲ್';
+
+  @override
+  String get setSecAbout => 'ಕುರಿತು';
+
+  @override
+  String get setSecPermissions => 'ಅನುಮತಿಗಳು';
+
+  @override
+  String get menuAdvancedHistory => 'ಅಡ್ವಾನ್ಸ್ಡ್ ಹಿಸ್ಟರಿ';
+
+  @override
+  String get menuAdvancedHistoryDesc =>
+      'ಪ್ರತಿ ವಹಿವಾಟನ್ನು ಫಿಲ್ಟರ್, ಗುಂಪು ಮತ್ತು ಚಾರ್ಟ್ ಮಾಡಿ';
+
+  @override
+  String get rateTitle => 'ಕುಬೇರ್ ಇಷ್ಟವಾಗುತ್ತಿದೆಯೇ?';
+
+  @override
+  String get rateBody =>
+      'ಕುಬೇರ್ ಅನ್ನು ಒಬ್ಬರೇ ವ್ಯಕ್ತಿ ನಿರ್ಮಿಸಿ ನಡೆಸುತ್ತಾರೆ. Play Store ನಲ್ಲಿ ಒಂದು ಚಿಕ್ಕ ರೇಟಿಂಗ್ ಇತರರಿಗೆ ಈ ಆ್ಯಪ್ ಕಂಡುಹಿಡಿಯಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ, ನೀವು ಕೇಳಿದ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನಾನು ಮುಂದುವರಿಸಿ ನಿರ್ಮಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ. ಇದಕ್ಕೆ ಒಂದು ನಿಮಿಷಕ್ಕಿಂತ ಕಡಿಮೆ ಸಾಕು.';
+
+  @override
+  String get rateCta => 'Play Store ನಲ್ಲಿ ರೇಟ್ ಮಾಡಿ';
+
+  @override
+  String get rateRefer => 'ಸ್ನೇಹಿತರಿಗೆ ರೆಫರ್ ಮಾಡಿ';
+
+  @override
+  String get rateLater => 'ನಂತರ';
+
+  @override
+  String get rateNever => 'ಇದನ್ನು ಮತ್ತೆ ತೋರಿಸಬೇಡಿ';
+
+  @override
+  String get ahdGateHeadline =>
+      'ಪ್ರತಿ ವಹಿವಾಟನ್ನು ಫಿಲ್ಟರ್ ಮಾಡಿ, ಗುಂಪು ಮಾಡಿ ಮತ್ತು ಚಾರ್ಟ್‌ನಲ್ಲಿ ನೋಡಿ';
+
+  @override
+  String get ahdGatePill => 'Kuber Pro';
+
+  @override
+  String get ahdGateB1 => 'ಮತ್ತು, ಅಥವಾ ಮತ್ತು ಅಲ್ಲ ಬಳಸಿ ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಸೇರಿಸಿ';
+
+  @override
+  String get ahdGateB2 =>
+      'ವರ್ಗ, ಖಾತೆ, ಟ್ಯಾಗ್, ತಿಂಗಳು ಮತ್ತು ಇನ್ನಷ್ಟರ ಪ್ರಕಾರ ಗುಂಪು ಮಾಡಿ';
+
+  @override
+  String get ahdGateB3 =>
+      'ನಿಮ್ಮ ಫಿಲ್ಟರ್ ಅನ್ನು ಅನುಸರಿಸುವ ಒಟ್ಟು ಮೊತ್ತಗಳು ಮತ್ತು ಚಾರ್ಟ್‌ಗಳು';
+
+  @override
+  String get ahdGateB4 =>
+      'ವೀಕ್ಷಣೆಗಳನ್ನು ಉಳಿಸಿ ಮತ್ತು ಫಲಿತಾಂಶಗಳನ್ನು CSV ಆಗಿ ರಫ್ತು ಮಾಡಿ';
+
+  @override
+  String get ahdGateCta => 'Kuber Pro ನೋಡಿ';
+
+  @override
+  String get ahdGateSample => 'ಮಾದರಿ ಡೇಟಾ';
+
+  @override
+  String get ahdGateSheetHeadline =>
+      'Advanced History ಒಂದು Kuber Pro ವೈಶಿಷ್ಟ್ಯ';
+
+  @override
+  String get ahdGateSheetBody =>
+      'Kuber Pro ಜೊತೆ ನಿಮ್ಮ ಎಲ್ಲಾ ವಹಿವಾಟುಗಳ ಮೇಲೆ ಯಾವುದೇ ಫಿಲ್ಟರ್ ರಚಿಸಿ, ಫಲಿತಾಂಶಗಳನ್ನು ಗುಂಪು ಮಾಡಿ ಚಾರ್ಟ್‌ನಲ್ಲಿ ನೋಡಿ, ವೀಕ್ಷಣೆಗಳನ್ನು ಉಳಿಸಿ ಮತ್ತು CSV ಆಗಿ ರಫ್ತು ಮಾಡಿ.';
+
+  @override
+  String get ahdTitle => 'Advanced History';
+
+  @override
+  String get ahdMenuSaved => 'ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು';
+
+  @override
+  String ahdSavedN(int n) {
+    return '$n ಉಳಿಸಿದ್ದು';
+  }
+
+  @override
+  String get ahdMenuSave => 'ಈ ವೀಕ್ಷಣೆ ಉಳಿಸಿ';
+
+  @override
+  String get ahdMenuExport => 'ಫಲಿತಾಂಶ ರಫ್ತು ಮಾಡಿ (CSV)';
+
+  @override
+  String ahdTxnN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ವಹಿವಾಟುಗಳು',
+      one: '$n ವಹಿವಾಟು',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdMenuClear => 'ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ';
+
+  @override
+  String get ahdMenuHelp => 'ಈ ಪುಟ ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ';
+
+  @override
+  String get ahdFilter => 'ಫಿಲ್ಟರ್';
+
+  @override
+  String get ahdGroup => 'ಗುಂಪು';
+
+  @override
+  String get ahdSort => 'ಕ್ರಮ';
+
+  @override
+  String get ahdSaved => 'ಉಳಿಸಿದವು';
+
+  @override
+  String get ahdSavedEdited => 'ಉಳಿಸಿದ್ದು · ಬದಲಾಗಿದೆ';
+
+  @override
+  String get ahdNone => 'ಯಾವುದೂ ಇಲ್ಲ';
+
+  @override
+  String get ahdClearAll => 'ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ';
+
+  @override
+  String get ahdClearTitle =>
+      'ಫಿಲ್ಟರ್, ಗುಂಪು, ಕ್ರಮ ಮತ್ತು ಚಾರ್ಟ್‌ಗಳನ್ನು ತೆರವುಗೊಳಿಸಬೇಕೇ?';
+
+  @override
+  String get ahdClearBody => 'ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು ಬದಲಾಗುವುದಿಲ್ಲ.';
+
+  @override
+  String get ahdStartLine =>
+      'ಪ್ರಾರಂಭಿಸಲು ಫಿಲ್ಟರ್ ಅಥವಾ ಗುಂಪನ್ನು ಆರಿಸಿ, ಅಥವಾ ಉಳಿಸಿದ ವೀಕ್ಷಣೆ ತೆರೆಯಿರಿ.';
+
+  @override
+  String get ahdAddFilter => 'ಫಿಲ್ಟರ್ ಸೇರಿಸಿ';
+
+  @override
+  String get ahdAddFilterSub => 'ವರ್ಗ, ಮೊತ್ತ, ದಿನಾಂಕ ಮತ್ತು ಇನ್ನಷ್ಟು';
+
+  @override
+  String get ahdGroupBy => 'ಗುಂಪು ಮಾಡಿ';
+
+  @override
+  String get ahdGroupBySub => 'ವರ್ಗ, ಖಾತೆ, ತಿಂಗಳು ಮತ್ತು ಇನ್ನಷ್ಟು';
+
+  @override
+  String get ahdOpenSaved => 'ಉಳಿಸಿದವನ್ನು ತೆರೆಯಿರಿ';
+
+  @override
+  String ahdSavedViewsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು',
+      one: '$n ಉಳಿಸಿದ ವೀಕ್ಷಣೆ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdNothingSaved => 'ಇನ್ನೂ ಏನೂ ಉಳಿಸಿಲ್ಲ';
+
+  @override
+  String get ahdTryOne => 'ಒಂದನ್ನು ಪ್ರಯತ್ನಿಸಿ';
+
+  @override
+  String get ahdEx1 => 'ಈ ವರ್ಷ ₹500ಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಆಹಾರ';
+
+  @override
+  String get ahdEx2 => 'ಟ್ಯಾಗ್ ಇಲ್ಲದ ಖರ್ಚುಗಳು';
+
+  @override
+  String get ahdEx3 => '2026ರಲ್ಲಿ ಪ್ರಯಾಣ, ತಿಂಗಳ ಪ್ರಕಾರ';
+
+  @override
+  String get ahdYourSaved => 'ನೀವು ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು';
+
+  @override
+  String get ahdCategory => 'ವರ್ಗ';
+
+  @override
+  String get ahdAccount => 'ಖಾತೆ';
+
+  @override
+  String get ahdTag => 'ಟ್ಯಾಗ್';
+
+  @override
+  String get ahdType => 'ಬಗೆ';
+
+  @override
+  String get ahdSource => 'ಮೂಲ';
+
+  @override
+  String get ahdMonth => 'ತಿಂಗಳು';
+
+  @override
+  String get ahdYear => 'ವರ್ಷ';
+
+  @override
+  String get ahdDate => 'ದಿನಾಂಕ';
+
+  @override
+  String get ahdAmount => 'ಮೊತ್ತ';
+
+  @override
+  String get ahdTotal => 'ಒಟ್ಟು';
+
+  @override
+  String get ahdCount => 'ಎಣಿಕೆ';
+
+  @override
+  String get ahdName => 'ಹೆಸರು';
+
+  @override
+  String get ahdAverage => 'ಸರಾಸರಿ';
+
+  @override
+  String get ahdSortTxns => 'ವಹಿವಾಟುಗಳು';
+
+  @override
+  String get ahdSortGroups => 'ಗುಂಪುಗಳು';
+
+  @override
+  String get ahdNewest => 'ಹೊಸದು ಮೊದಲು';
+
+  @override
+  String get ahdOldest => 'ಹಳೆಯದು ಮೊದಲು';
+
+  @override
+  String get ahdHighest => 'ಹೆಚ್ಚು ಮೊದಲು';
+
+  @override
+  String get ahdLowest => 'ಕಡಿಮೆ ಮೊದಲು';
+
+  @override
+  String get ahdAtoZ => 'ಅ ಯಿಂದ ಳ';
+
+  @override
+  String get ahdZtoA => 'ಳ ಯಿಂದ ಅ';
+
+  @override
+  String get ahdGroupHelp =>
+      'ಪ್ರವೃತ್ತಿ ನೋಡಲು ತಿಂಗಳು ಅಥವಾ ವರ್ಷದ ಪ್ರಕಾರ ಗುಂಪು ಮಾಡಿ. ದಿನದ ಪ್ರಕಾರ ಗುಂಪು ಇಲ್ಲ; ಬದಲಿಗೆ ದಿನಾಂಕದ ಪ್ರಕಾರ ಕ್ರಮಗೊಳಿಸಿ.';
+
+  @override
+  String get ahdInfoGroup1 =>
+      'ಹೊಂದುವ ವಹಿವಾಟುಗಳನ್ನು ಗುಂಪುಗಳಲ್ಲಿ ಇಡುತ್ತದೆ ಮತ್ತು ಪ್ರತಿ ಗುಂಪಿಗೆ ಎಣಿಕೆ, ಒಟ್ಟು ಮತ್ತು ಪಾಲು ಇರುವ ಒಂದು ಸಾಲನ್ನು ತೋರಿಸುತ್ತದೆ. ಗುಂಪನ್ನು ಒತ್ತಿ ಅದರ ವಹಿವಾಟುಗಳನ್ನು ನೋಡಿ.';
+
+  @override
+  String get ahdInfoGroup2 =>
+      'ತಿಂಗಳು ಮತ್ತು ವರ್ಷ ಕಾಲಕ್ರಮೇಣ ಪ್ರವೃತ್ತಿಯನ್ನು ತೋರಿಸುತ್ತವೆ. 2 ಟ್ಯಾಗ್‌ಗಳಿರುವ ವಹಿವಾಟು ಎರಡೂ ಟ್ಯಾಗ್ ಗುಂಪುಗಳಲ್ಲಿ ಎಣಿಕೆಯಾಗುತ್ತದೆ.';
+
+  @override
+  String get ahdInfoSort1 =>
+      'ಗುಂಪು ಇಲ್ಲದಿದ್ದರೆ ವಹಿವಾಟುಗಳನ್ನು ದಿನಾಂಕ, ಮೊತ್ತ, ವರ್ಗ ಅಥವಾ ಖಾತೆಯ ಪ್ರಕಾರ ಕ್ರಮಗೊಳಿಸಿ. ಗುಂಪಿನೊಂದಿಗೆ, ಗುಂಪುಗಳನ್ನು ಒಟ್ಟು, ಎಣಿಕೆ ಅಥವಾ ಹೆಸರಿನ ಪ್ರಕಾರ ಕ್ರಮಗೊಳಿಸಿ.';
+
+  @override
+  String get ahdInfoSort2 =>
+      'ಗುಂಪಿನ ಶೀಟ್‌ನೊಳಗೆ ವಹಿವಾಟುಗಳು ಯಾವಾಗಲೂ ಹೊಸದು ಮೊದಲು ಇರುತ್ತವೆ.';
+
+  @override
+  String get ahdInfoChart1 =>
+      '4 ಚಾರ್ಟ್‌ಗಳವರೆಗೆ ಸೇರಿಸಿ. ಪ್ರತಿಯೊಂದೂ ನಿಮ್ಮ ಫಿಲ್ಟರ್ ಅನ್ನು ಅನುಸರಿಸಿ ಫಲಿತಾಂಶಗಳನ್ನು ತನ್ನದೇ ರೀತಿಯಲ್ಲಿ ವಿಭಜಿಸುತ್ತದೆ.';
+
+  @override
+  String get ahdInfoChart2 =>
+      'ವರ್ಗ, ಖಾತೆ, ಟ್ಯಾಗ್, ಬಗೆ ಅಥವಾ ಮೂಲಗಳನ್ನು ಹೋಲಿಸಲು ಡೋನಟ್ ಅಥವಾ ಬಾರ್ ಆರಿಸಿ. ತಿಂಗಳು ಅಥವಾ ವರ್ಷದ ಪ್ರವೃತ್ತಿಗೆ ಲೈನ್ ಆರಿಸಿ. ಒಂದು ಭಾಗವನ್ನು ಒತ್ತಿ ತೆರೆಯಿರಿ.';
+
+  @override
+  String get ahdInfoSaved1 =>
+      'ಉಳಿಸಿದ ವೀಕ್ಷಣೆ ಇಡೀ ಪುಟವನ್ನು ನೆನಪಿಡುತ್ತದೆ: ಫಿಲ್ಟರ್, ಗುಂಪು, ಕ್ರಮ, ಪ್ರತಿ ಚಾರ್ಟ್ ಅದರ ಬಗೆ, ವಿಭಜನೆ, ಅಳತೆ ಮತ್ತು ಸ್ಥಾನದೊಂದಿಗೆ, ಹಾಗೂ KPI ಕಾರ್ಡ್‌ಗಳು.';
+
+  @override
+  String get ahdInfoSaved2 =>
+      'ಉಳಿಸಿದ ವೀಕ್ಷಣೆಯನ್ನು ಬದಲಿಸಿದರೆ, ಅದನ್ನು ನವೀಕರಿಸಲು ಬದಲಾವಣೆ ಉಳಿಸಿ ಅಥವಾ ಎರಡನ್ನೂ ಇಡಲು ಹೊಸದಾಗಿ ಉಳಿಸಿ ಆರಿಸಿ. ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು ನಿಮ್ಮ JSON ಬ್ಯಾಕಪ್‌ನಲ್ಲಿ ಸೇರಿವೆ.';
+
+  @override
+  String get ahdInfoKpi =>
+      'ಮೇಲೆ ಯಾವ ಸಂಖ್ಯೆಗಳು ಕಾಣಬೇಕು ಎಂದು ಆರಿಸಿ ಮತ್ತು ಎಳೆದು ಕ್ರಮ ಬದಲಿಸಿ. ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು ಈ ಆಯ್ಕೆಯನ್ನು ನೆನಪಿಡುತ್ತವೆ.';
+
+  @override
+  String get ahdKpiTransactions => 'ವಹಿವಾಟುಗಳು';
+
+  @override
+  String get ahdKpiIncome => 'ಆದಾಯ';
+
+  @override
+  String get ahdKpiExpense => 'ಖರ್ಚು';
+
+  @override
+  String get ahdKpiNet => 'ನಿವ್ವಳ';
+
+  @override
+  String get ahdKpiAverage => 'ಸರಾಸರಿ';
+
+  @override
+  String get ahdKpiAttachments => 'ಲಗತ್ತುಗಳು';
+
+  @override
+  String get ahdKpiLargest => 'ಅತಿ ದೊಡ್ಡದು';
+
+  @override
+  String get ahdKpiEdit => 'ಬದಲಿಸಿ';
+
+  @override
+  String get ahdKpiSheetTitle => 'KPI ಕಾರ್ಡ್‌ಗಳು';
+
+  @override
+  String get ahdKpiSheetDesc =>
+      'ಮೇಲೆ ಏನು ಕಾಣಬೇಕು ಎಂದು ಆರಿಸಿ. ಕ್ರಮಕ್ಕಾಗಿ ಎಳೆಯಿರಿ.';
+
+  @override
+  String get ahdKpiSheetNote => 'ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು ಈ ಆಯ್ಕೆಯನ್ನು ನೆನಪಿಡುತ್ತವೆ.';
+
+  @override
+  String get ahdReset => 'ಮರುಹೊಂದಿಸಿ';
+
+  @override
+  String get ahdAddChartEmpty => 'ಚಾರ್ಟ್ ಸೇರಿಸಿ';
+
+  @override
+  String get ahdAddChartHint => 'ಡೋನಟ್, ಬಾರ್ ಅಥವಾ ಲೈನ್';
+
+  @override
+  String ahdAddChartN(int n) {
+    return 'ಚಾರ್ಟ್ ಸೇರಿಸಿ · 4ರಲ್ಲಿ $n';
+  }
+
+  @override
+  String get ahdChartsFull =>
+      '4ರಲ್ಲಿ 4 ಚಾರ್ಟ್‌ಗಳು. ಹೊಸದನ್ನು ಸೇರಿಸಲು ಒಂದನ್ನು ತೆಗೆಯಿರಿ.';
+
+  @override
+  String get ahdMoveUp => 'ಮೇಲೆ ಸರಿಸಿ';
+
+  @override
+  String get ahdMoveDown => 'ಕೆಳಗೆ ಸರಿಸಿ';
+
+  @override
+  String get ahdRemove => 'ತೆಗೆಯಿರಿ';
+
+  @override
+  String get ahdChartRemoved => 'ಚಾರ್ಟ್ ತೆಗೆಯಲಾಗಿದೆ';
+
+  @override
+  String get ahdUndo => 'ರದ್ದುಮಾಡಿ';
+
+  @override
+  String get ahdDonut => 'ಡೋನಟ್';
+
+  @override
+  String get ahdBars => 'ಬಾರ್';
+
+  @override
+  String get ahdLine => 'ಲೈನ್';
+
+  @override
+  String ahdCardTitle(String measure, String split) {
+    return '$split ಪ್ರಕಾರ $measure';
+  }
+
+  @override
+  String ahdCardSub(String type, String count) {
+    return '$type · $count';
+  }
+
+  @override
+  String get ahdStLine => 'ಲೈನ್‌ಗೆ ಕನಿಷ್ಠ 2 ತಿಂಗಳ ಡೇಟಾ ಬೇಕು.';
+
+  @override
+  String get ahdStNoTags => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಟ್ಯಾಗ್‌ಗಳಿಲ್ಲ.';
+
+  @override
+  String get ahdStNoAccounts => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಖಾತೆಗಳಿಲ್ಲ.';
+
+  @override
+  String get ahdStNoCategories => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ವರ್ಗಗಳಿಲ್ಲ.';
+
+  @override
+  String get ahdStNothing => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ವಿಭಜಿಸಲು ಏನೂ ಇಲ್ಲ.';
+
+  @override
+  String get ahdStWrongCombo =>
+      'ಲೈನ್ ಚಾರ್ಟ್‌ಗಳು ತಿಂಗಳು ಅಥವಾ ವರ್ಷದ ಪ್ರಕಾರ ಕೆಲಸ ಮಾಡುತ್ತವೆ. ವಿಭಜನೆ ಅಥವಾ ಚಾರ್ಟ್ ಬಗೆಯನ್ನು ಬದಲಿಸಿ.';
+
+  @override
+  String get ahdSplitByMonth => 'ತಿಂಗಳ ಪ್ರಕಾರ ವಿಭಜಿಸಿ';
+
+  @override
+  String get ahdChangeChart => 'ಚಾರ್ಟ್ ಬದಲಿಸಿ';
+
+  @override
+  String get ahdStNoResults => 'ಈ ಫಿಲ್ಟರ್‌ಗೆ ಹೊಂದುವ ವಹಿವಾಟುಗಳಿಲ್ಲ.';
+
+  @override
+  String get ahdBuilderAdd => 'ಚಾರ್ಟ್ ಸೇರಿಸಿ';
+
+  @override
+  String get ahdBuilderEdit => 'ಚಾರ್ಟ್ ಬದಲಿಸಿ';
+
+  @override
+  String get ahdChartType => 'ಚಾರ್ಟ್ ಬಗೆ';
+
+  @override
+  String get ahdSplitBy => 'ಇದರ ಪ್ರಕಾರ ವಿಭಜಿಸಿ';
+
+  @override
+  String get ahdShow => 'ತೋರಿಸಿ';
+
+  @override
+  String get ahdCurrentGroup => 'ಪ್ರಸ್ತುತ ಗುಂಪು';
+
+  @override
+  String get ahdUpdateChart => 'ಚಾರ್ಟ್ ನವೀಕರಿಸಿ';
+
+  @override
+  String get ahdRemoveChart => 'ಚಾರ್ಟ್ ತೆಗೆಯಿರಿ';
+
+  @override
+  String get ahdBlkNoTags => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಟ್ಯಾಗ್‌ಗಳಿಲ್ಲ';
+
+  @override
+  String get ahdBlkOneAccount => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಒಂದೇ ಖಾತೆ';
+
+  @override
+  String get ahdBlkOneType => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಒಂದೇ ಬಗೆ';
+
+  @override
+  String get ahdBlkOneSource => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಒಂದೇ ಮೂಲ';
+
+  @override
+  String get ahdBlkOneCategory => 'ಈ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಒಂದೇ ವರ್ಗ';
+
+  @override
+  String get ahdBlkOneMonth => 'ಎಲ್ಲಾ ಫಲಿತಾಂಶಗಳು ಒಂದೇ ತಿಂಗಳಲ್ಲಿವೆ';
+
+  @override
+  String get ahdBlkOneYear => 'ಎಲ್ಲಾ ಫಲಿತಾಂಶಗಳು ಒಂದೇ ವರ್ಷದಲ್ಲಿವೆ';
+
+  @override
+  String get ahdTagNote =>
+      'ಒಂದಕ್ಕಿಂತ ಹೆಚ್ಚು ಟ್ಯಾಗ್ ಇರುವ ವಹಿವಾಟುಗಳು ಪ್ರತಿ ಟ್ಯಾಗ್ ಗುಂಪಿನಲ್ಲಿ ಕಾಣುತ್ತವೆ, ಹಾಗಾಗಿ ಒಟ್ಟು ಮೊತ್ತಗಳು ನಿಜವಾದ ಒಟ್ಟಿಗಿಂತ ಹೆಚ್ಚಾಗಬಹುದು.';
+
+  @override
+  String get ahdLoadMore => 'ಇನ್ನಷ್ಟು ಲೋಡ್ ಮಾಡಿ';
+
+  @override
+  String get ahdEmptyTitle => 'ಹೊಂದುವ ವಹಿವಾಟುಗಳಿಲ್ಲ';
+
+  @override
+  String get ahdEmptyBody =>
+      'ಈ ಫೋನ್‌ನಲ್ಲಿ ಇವೆಲ್ಲವುಗಳಿಗೂ ಹೊಂದುವುದು ಏನೂ ಇಲ್ಲ. ಕಡಿಮೆ ಮೊತ್ತ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಒಂದು ಫಿಲ್ಟರ್ ತೆಗೆಯಿರಿ.';
+
+  @override
+  String get ahdErrorTitle => 'ಫಲಿತಾಂಶ ಲೋಡ್ ಆಗಲಿಲ್ಲ';
+
+  @override
+  String get ahdErrorBody =>
+      'ನಿಮ್ಮ ವಹಿವಾಟುಗಳನ್ನು ಓದುವಾಗ ಏನೋ ತಪ್ಪಾಯಿತು. ನಿಮ್ಮ ಡೇಟಾ ಸುರಕ್ಷಿತವಾಗಿದೆ ಮತ್ತು ಏನೂ ಬದಲಾಗಿಲ್ಲ.';
+
+  @override
+  String get ahdTryAgain => 'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ';
+
+  @override
+  String get ahdGsTotal => 'ಒಟ್ಟು';
+
+  @override
+  String get ahdGsLargest => 'ಅತಿ ದೊಡ್ಡದು';
+
+  @override
+  String ahdChanged(String name) {
+    return 'ನೀವು $name ಬದಲಿಸಿದಿರಿ';
+  }
+
+  @override
+  String get ahdChFilter => 'ಫಿಲ್ಟರ್ ಬದಲಾಗಿದೆ';
+
+  @override
+  String get ahdChGroup => 'ಗುಂಪು ಬದಲಾಗಿದೆ';
+
+  @override
+  String get ahdChSort => 'ಕ್ರಮ ಬದಲಾಗಿದೆ';
+
+  @override
+  String get ahdChKpis => 'KPI ಕಾರ್ಡ್‌ಗಳು ಬದಲಾಗಿವೆ';
+
+  @override
+  String get ahdChAdded => 'ಚಾರ್ಟ್ ಸೇರಿಸಲಾಗಿದೆ';
+
+  @override
+  String get ahdChRemoved => 'ಚಾರ್ಟ್ ತೆಗೆಯಲಾಗಿದೆ';
+
+  @override
+  String get ahdChMoved => 'ಚಾರ್ಟ್ ಸರಿಸಲಾಗಿದೆ';
+
+  @override
+  String get ahdChEdited => 'ಚಾರ್ಟ್ ಬದಲಾಗಿದೆ';
+
+  @override
+  String get ahdSaveAsNew => 'ಹೊಸದಾಗಿ ಉಳಿಸಿ';
+
+  @override
+  String get ahdSaveChanges => 'ಬದಲಾವಣೆ ಉಳಿಸಿ';
+
+  @override
+  String ahdUpdated(String name) {
+    return '$name ನವೀಕರಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String get ahdSaveTitle => 'ಈ ವೀಕ್ಷಣೆ ಉಳಿಸಿ';
+
+  @override
+  String get ahdNameHint => 'ಈ ವೀಕ್ಷಣೆಗೆ ಹೆಸರು ನೀಡಿ';
+
+  @override
+  String ahdNameTaken(String name) {
+    return '$name ಹೆಸರಿನ ವೀಕ್ಷಣೆ ಈಗಾಗಲೇ ಇದೆ';
+  }
+
+  @override
+  String ahdSumFilters(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ಫಿಲ್ಟರ್‌ಗಳು',
+      one: '$n ಫಿಲ್ಟರ್',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahdSumGrouped(String group) {
+    return '$group ಪ್ರಕಾರ ಗುಂಪು ಮಾಡಲಾಗಿದೆ';
+  }
+
+  @override
+  String ahdSumSorted(String field) {
+    return '$field ಪ್ರಕಾರ ಕ್ರಮಗೊಳಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String ahdSumCharts(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ಚಾರ್ಟ್‌ಗಳು',
+      one: '$n ಚಾರ್ಟ್',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdSumEmpty => 'ಇನ್ನೂ ಏನೂ ಹೊಂದಿಸಿಲ್ಲ';
+
+  @override
+  String get ahdWhatSaved => 'ಏನು ಉಳಿಸಲಾಗುತ್ತದೆ';
+
+  @override
+  String get ahdWsFilter => 'ಫಿಲ್ಟರ್';
+
+  @override
+  String get ahdWsGroup => 'ಗುಂಪು';
+
+  @override
+  String get ahdWsSort => 'ಕ್ರಮ';
+
+  @override
+  String get ahdWsCharts => 'ಚಾರ್ಟ್‌ಗಳು';
+
+  @override
+  String get ahdWsKpis => 'KPI ಕಾರ್ಡ್‌ಗಳು';
+
+  @override
+  String get ahdNotSet => 'ಹೊಂದಿಸಿಲ್ಲ';
+
+  @override
+  String ahdKpisShown(int n) {
+    return '$n ಕಾಣುತ್ತವೆ';
+  }
+
+  @override
+  String get ahdBackupNote => 'ನಿಮ್ಮ JSON ಬ್ಯಾಕಪ್‌ನಲ್ಲಿ ಸೇರಿದೆ.';
+
+  @override
+  String ahdSavedSnack(String name) {
+    return '$name ಆಗಿ ಉಳಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String get ahdSavedTitle => 'ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳು';
+
+  @override
+  String get ahdSavedEmptyTitle => 'ಇನ್ನೂ ಉಳಿಸಿದ ವೀಕ್ಷಣೆಗಳಿಲ್ಲ';
+
+  @override
+  String get ahdSavedEmptyBody =>
+      'ಫಿಲ್ಟರ್, ಗುಂಪು ಅಥವಾ ಚಾರ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಿ, ನಂತರ ಮೆನುವಿನಲ್ಲಿ ಈ ವೀಕ್ಷಣೆ ಉಳಿಸಿ ಆರಿಸಿ.';
+
+  @override
+  String get ahdRename => 'ಹೆಸರು ಬದಲಿಸಿ';
+
+  @override
+  String get ahdRenameTitle => 'ವೀಕ್ಷಣೆಯ ಹೆಸರು ಬದಲಿಸಿ';
+
+  @override
+  String ahdDeleteTitle(String name) {
+    return '$name ಅಳಿಸಬೇಕೇ?';
+  }
+
+  @override
+  String get ahdDeleteBody =>
+      'ಇದು ಉಳಿಸಿದ ವೀಕ್ಷಣೆಯನ್ನು ಮಾತ್ರ ತೆಗೆಯುತ್ತದೆ. ನಿಮ್ಮ ವಹಿವಾಟುಗಳು ಹಾಗೆಯೇ ಇರುತ್ತವೆ.';
+
+  @override
+  String get ahdExportTitle => 'ಫಲಿತಾಂಶ ರಫ್ತು ಮಾಡಿ';
+
+  @override
+  String get ahdExportFilter => 'ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಫಿಲ್ಟರ್';
+
+  @override
+  String get ahdExportNoFilter => 'ಫಿಲ್ಟರ್ ಇಲ್ಲ';
+
+  @override
+  String ahdExportNote(String n) {
+    return 'ಸರಿಯಾಗಿ ಈ $n ವಹಿವಾಟುಗಳು, History CSV ರಫ್ತಿನ ಅದೇ ಕಾಲಂಗಳಲ್ಲಿ. ಗುಂಪು ಮತ್ತು ಚಾರ್ಟ್‌ಗಳು ರಫ್ತಾಗುವುದಿಲ್ಲ.';
+  }
+
+  @override
+  String get ahdExportSave => 'ಫೋಲ್ಡರ್‌ಗೆ ಉಳಿಸಿ';
+
+  @override
+  String get ahdExportShare => 'ಹಂಚಿಕೊಳ್ಳಿ';
+
+  @override
+  String get ahdExportSaved => 'ಫೈಲ್ ಉಳಿಸಲಾಗಿದೆ';
+
+  @override
+  String get ahdExportFailed => 'ಫೈಲ್ ರಚಿಸಲು ಆಗಲಿಲ್ಲ. ಏನೂ ಬದಲಾಗಿಲ್ಲ.';
+
+  @override
+  String get ahdHelpTitle => 'ಈ ಪುಟ ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ';
+
+  @override
+  String get ahdHelpFilter =>
+      'ಏನು ನೋಡಬೇಕು ಎಂದು ಆರಿಸಲು ಫಿಲ್ಟರ್ ಒತ್ತಿ: ವರ್ಗ, ಮೊತ್ತ, ದಿನಾಂಕಗಳು ಮತ್ತು ಇನ್ನಷ್ಟು.';
+
+  @override
+  String get ahdHelpGroup =>
+      'ಫಲಿತಾಂಶಗಳನ್ನು ವರ್ಗ, ಖಾತೆ, ಟ್ಯಾಗ್, ತಿಂಗಳು ಮತ್ತು ಇನ್ನಷ್ಟರ ಪ್ರಕಾರ ಸಾಲುಗಳಲ್ಲಿ ಇಡುತ್ತದೆ.';
+
+  @override
+  String get ahdHelpSort => 'ವಹಿವಾಟುಗಳು ಅಥವಾ ಗುಂಪುಗಳ ಕ್ರಮ ಬದಲಿಸುತ್ತದೆ.';
+
+  @override
+  String get ahdHelpCharts =>
+      '4 ಚಾರ್ಟ್‌ಗಳವರೆಗೆ ಸೇರಿಸಿ. ಪ್ರತಿಯೊಂದೂ ನಿಮ್ಮ ಫಿಲ್ಟರ್ ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ. ಒಂದು ಭಾಗವನ್ನು ಒತ್ತಿ ತೆರೆಯಿರಿ.';
+
+  @override
+  String get ahdHelpSaved =>
+      'ಇಡೀ ಪುಟವನ್ನು ಉಳಿಸುತ್ತದೆ, ಒಂದೇ ಒತ್ತಿನಲ್ಲಿ ಮತ್ತೆ ತೆರೆಯಬಹುದು.';
+
+  @override
+  String get ahdCharts => 'ಚಾರ್ಟ್‌ಗಳು';
+
+  @override
+  String get ahdInfoOpen => 'ಇದರ ಬಗ್ಗೆ';
+
+  @override
+  String loanSplitNotice(int n) {
+    return '$n EMI ನಿಮ್ಮ ಸಾಲದ ವೇಳಾಪಟ್ಟಿಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.';
+  }
+
+  @override
+  String get loanSplitNoticeSub =>
+      'ಇವುಗಳ ಬಡ್ಡಿ ಮತ್ತು ಅಸಲಿನ ಹಂಚಿಕೆ ತಪ್ಪಾಗಿದೆ. ಪಾವತಿಸಿದ ಮೊತ್ತಗಳು ಸರಿಯಾಗಿವೆ.';
+
+  @override
+  String get loanSplitFix => 'ಸರಿಪಡಿಸಿ';
+
+  @override
+  String get loanFixTitle => 'EMI ಹಂಚಿಕೆ ಸರಿಪಡಿಸಿ';
+
+  @override
+  String loanFixCount(int n) {
+    return '$n EMI';
+  }
+
+  @override
+  String loanFixRange(String from, String to) {
+    return '$from ರಿಂದ $to ವರೆಗೆ';
+  }
+
+  @override
+  String get loanFixNow => 'ಈಗ';
+
+  @override
+  String get loanFixAfter => 'ಸರಿಪಡಿಸಿದ ನಂತರ';
+
+  @override
+  String get loanFixInterest => 'ಬಡ್ಡಿ';
+
+  @override
+  String get loanFixPrincipal => 'ಅಸಲು';
+
+  @override
+  String get loanFixTotalPaid => 'ಒಟ್ಟು ಪಾವತಿ';
+
+  @override
+  String get loanFixSame => 'ಅದೇ';
+
+  @override
+  String loanFixKept(int n) {
+    return 'ನೀವು ಬದಲಿಸಿದ EMI ಹಾಗೆಯೇ ಇರುತ್ತವೆ ($n ಉಳಿಸಲಾಗಿದೆ)';
+  }
+
+  @override
+  String loanFixInfo(String amount) {
+    return 'ಬಡ್ಡಿ ಮತ್ತು ಅಸಲಿನ ಹಂಚಿಕೆ ಮಾತ್ರ ಬದಲಾಗುತ್ತದೆ. ಮೊತ್ತಗಳು, ದಿನಾಂಕಗಳು ಮತ್ತು ಖಾತೆಗಳು ಹಾಗೆಯೇ ಇರುತ್ತವೆ. ಬಾಕಿ $amount ಆಗುತ್ತದೆ.';
+  }
+
+  @override
+  String get loanFixing => 'ಸರಿಪಡಿಸಲಾಗುತ್ತಿದೆ';
+
+  @override
+  String loanFixedSnack(int n, String amount) {
+    return '$n EMI ಸರಿಪಡಿಸಲಾಗಿದೆ. ಬಾಕಿ ಈಗ $amount.';
+  }
+
+  @override
+  String get loanFixUndo => 'ರದ್ದುಮಾಡಿ';
+
+  @override
+  String get loanRecheck => 'EMI ಹಂಚಿಕೆ ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ';
+
+  @override
+  String loanAllMatch(int n) {
+    return 'ಎಲ್ಲವೂ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ. ಎಲ್ಲಾ $n EMI ನಿಮ್ಮ ಸಾಲದ ವೇಳಾಪಟ್ಟಿಯನ್ನು ಅನುಸರಿಸುತ್ತವೆ.';
+  }
+
+  @override
+  String get loanFixLonger =>
+      'ನಂತರದ ಭಾಗಗಳನ್ನು ಸೇರಿಸಿ ಅದೇ EMI ಇಟ್ಟಿದ್ದರಿಂದ ನಿಮ್ಮ ಸಾಲದ ಅವಧಿ ಹೆಚ್ಚಾಗಿದೆ.';
+
+  @override
+  String get historyMenuAdvancedSub =>
+      'AND / OR ಫಿಲ್ಟರ್‌ಗಳು, ಗುಂಪುಗಳು, ಚಾರ್ಟ್‌ಗಳು';
+
+  @override
+  String get ahqFieldType => 'ವಿಧ';
+
+  @override
+  String get ahqFieldAmount => 'ಮೊತ್ತ';
+
+  @override
+  String get ahqFieldCategory => 'ವರ್ಗ';
+
+  @override
+  String get ahqFieldAccount => 'ಖಾತೆ';
+
+  @override
+  String get ahqFieldTag => 'ಟ್ಯಾಗ್';
+
+  @override
+  String get ahqFieldDate => 'ದಿನಾಂಕ';
+
+  @override
+  String get ahqFieldWords => 'ಪದಗಳು';
+
+  @override
+  String get ahqFieldHas => 'ಹೊಂದಿದೆ';
+
+  @override
+  String get ahqFieldSource => 'ಮೂಲ';
+
+  @override
+  String get ahqFieldSubType => 'ರೀತಿಯದು';
+
+  @override
+  String get ahqTypeExpense => 'ಖರ್ಚು';
+
+  @override
+  String get ahqTypeIncome => 'ಆದಾಯ';
+
+  @override
+  String get ahqTypeTransfer => 'ವರ್ಗಾವಣೆ';
+
+  @override
+  String get ahqSourceManual => 'ನೀವೇ ನಮೂದಿಸಿದ್ದು';
+
+  @override
+  String get ahqSourceSms => 'SMS';
+
+  @override
+  String get ahqSourceQuickAdd => 'Quick Add';
+
+  @override
+  String get ahqSourceRecurring => 'ಪುನರಾವರ್ತಿತ';
+
+  @override
+  String get ahqSourceImport => 'ಆಮದು';
+
+  @override
+  String get ahqHasAttachment => 'ಲಗತ್ತು';
+
+  @override
+  String get ahqHasNote => 'ಟಿಪ್ಪಣಿ';
+
+  @override
+  String get ahqSubLoanRepayment => 'ಸಾಲ ಮರುಪಾವತಿ';
+
+  @override
+  String get ahqSubInvestment => 'ಹೂಡಿಕೆ';
+
+  @override
+  String get ahqSubSavings => 'ಉಳಿತಾಯ';
+
+  @override
+  String get ahqSubLent => 'ಸಾಲ ಕೊಟ್ಟಿದ್ದು';
+
+  @override
+  String get ahqSubBorrowed => 'ಸಾಲ ಪಡೆದಿದ್ದು';
+
+  @override
+  String get ahqSubInvestmentReturn => 'ಹೂಡಿಕೆ ಲಾಭ';
+
+  @override
+  String get ahqSubLoanReceived => 'ಸಾಲ ಬಂದಿದ್ದು';
+
+  @override
+  String get ahqSubLoanDisbursement => 'ಸಾಲ ವಿತರಣೆ';
+
+  @override
+  String get ahqOr => 'ಅಥವಾ';
+
+  @override
+  String get ahqNone => 'ಯಾವುದೂ ಇಲ್ಲ';
+
+  @override
+  String ahqRange(String from, String to) {
+    return '$from ರಿಂದ $to';
+  }
+
+  @override
+  String ahqAmountOver(String amount) {
+    return '$amount ಕ್ಕಿಂತ ಹೆಚ್ಚು';
+  }
+
+  @override
+  String ahqAmountUnder(String amount) {
+    return '$amount ಕ್ಕಿಂತ ಕಡಿಮೆ';
+  }
+
+  @override
+  String ahqAmountOrMore(String amount) {
+    return '$amount ಅಥವಾ ಹೆಚ್ಚು';
+  }
+
+  @override
+  String ahqAmountOrLess(String amount) {
+    return '$amount ಅಥವಾ ಕಡಿಮೆ';
+  }
+
+  @override
+  String get ahqDateThisMonth => 'ಈ ತಿಂಗಳು';
+
+  @override
+  String get ahqDateLastMonth => 'ಕಳೆದ ತಿಂಗಳು';
+
+  @override
+  String get ahqDateThisYear => 'ಈ ವರ್ಷ';
+
+  @override
+  String get ahqDateLastYear => 'ಕಳೆದ ವರ್ಷ';
+
+  @override
+  String ahqDateLastDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'ಕಳೆದ $n ದಿನಗಳು',
+      one: 'ಕಳೆದ ದಿನ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahqDateAfter(String date) {
+    return '$date ನಂತರ';
+  }
+
+  @override
+  String ahqDateBefore(String date) {
+    return '$date ಮೊದಲು';
+  }
+
+  @override
+  String ahqDateFrom(String date) {
+    return '$date ರಿಂದ';
+  }
+
+  @override
+  String ahqDateUntil(String date) {
+    return '$date ವರೆಗೆ';
+  }
+
+  @override
+  String get ahqRbTransactions => 'ವಹಿವಾಟುಗಳು';
+
+  @override
+  String get ahqRbExpenses => 'ಖರ್ಚುಗಳು';
+
+  @override
+  String get ahqRbIncome => 'ಆದಾಯ';
+
+  @override
+  String get ahqRbTransfers => 'ವರ್ಗಾವಣೆಗಳು';
+
+  @override
+  String ahqRbAmountIs(String amount) {
+    return '$amount ಮೊತ್ತದ';
+  }
+
+  @override
+  String ahqRbIn(String names) {
+    return '$names ನಲ್ಲಿ';
+  }
+
+  @override
+  String ahqRbNotIn(String names) {
+    return '$names ನಲ್ಲಿ ಅಲ್ಲ';
+  }
+
+  @override
+  String ahqRbFrom(String names) {
+    return '$names ನಿಂದ';
+  }
+
+  @override
+  String ahqRbNotFrom(String names) {
+    return '$names ನಿಂದ ಅಲ್ಲ';
+  }
+
+  @override
+  String ahqRbTagged(String tags) {
+    return '$tags ಟ್ಯಾಗ್ ಇರುವವು';
+  }
+
+  @override
+  String ahqRbNotTagged(String tags) {
+    return '$tags ಟ್ಯಾಗ್ ಇಲ್ಲದವು';
+  }
+
+  @override
+  String get ahqRbNoTags => 'ಟ್ಯಾಗ್ ಇಲ್ಲದೆ';
+
+  @override
+  String get ahqRbHasTags => 'ಟ್ಯಾಗ್‌ನೊಂದಿಗೆ';
+
+  @override
+  String get ahqRbWithAttachment => 'ಲಗತ್ತಿನೊಂದಿಗೆ';
+
+  @override
+  String get ahqRbWithoutAttachment => 'ಲಗತ್ತು ಇಲ್ಲದೆ';
+
+  @override
+  String get ahqRbWithNote => 'ಟಿಪ್ಪಣಿಯೊಂದಿಗೆ';
+
+  @override
+  String get ahqRbWithoutNote => 'ಟಿಪ್ಪಣಿ ಇಲ್ಲದೆ';
+
+  @override
+  String get ahqRbSms => 'SMS ನಿಂದ';
+
+  @override
+  String get ahqRbManual => 'ನೀವೇ ನಮೂದಿಸಿದವು';
+
+  @override
+  String get ahqRbQuickAdd => 'Quick Add ನಿಂದ';
+
+  @override
+  String get ahqRbRecurring => 'ಪುನರಾವರ್ತಿತದಿಂದ';
+
+  @override
+  String get ahqRbImported => 'ಆಮದು ಮಾಡಿದವು';
+
+  @override
+  String ahqRbNot(String text) {
+    return '$text ಅಲ್ಲ';
+  }
+
+  @override
+  String ahqRbWords(String text) {
+    return 'ಶೀರ್ಷಿಕೆ ಅಥವಾ ಟಿಪ್ಪಣಿಯಲ್ಲಿ “$text” ಇರುವವು';
+  }
+
+  @override
+  String ahqRbNoWords(String text) {
+    return 'ಶೀರ್ಷಿಕೆ ಅಥವಾ ಟಿಪ್ಪಣಿಯಲ್ಲಿ “$text” ಇಲ್ಲದವು';
+  }
+
+  @override
+  String ahqRbKind(String kind) {
+    return '$kind ಆಗಿರುವವು';
+  }
+
+  @override
+  String ahqRbDateIn(String date) {
+    return '$date ರಂದು';
+  }
+
+  @override
+  String ahqRbDateOn(String date) {
+    return '$date ರಂದು';
+  }
+
+  @override
+  String ahqRbDateRange(String date) {
+    return '$date ರಿಂದ';
+  }
+
+  @override
+  String ahqRbNotGroup(String text) {
+    return 'ಅಲ್ಲ ($text)';
+  }
+
+  @override
+  String get ahqErrCloseBracket => 'ಮುಚ್ಚುವ ಬ್ರಾಕೆಟ್ ಇಲ್ಲ';
+
+  @override
+  String ahqErrCloseBracketAfter(String token) {
+    return 'ಮುಚ್ಚುವ ಬ್ರಾಕೆಟ್ ಇಲ್ಲ. $token ನಂತರ ) ಸೇರಿಸಿ.';
+  }
+
+  @override
+  String get ahqErrOpenBracket => 'ತೆರೆಯುವ ಬ್ರಾಕೆಟ್ ಇಲ್ಲ';
+
+  @override
+  String ahqErrField(String name, String suggestion) {
+    return 'ಅಪರಿಚಿತ ಫೀಲ್ಡ್ “$name”. ನೀವು $suggestion ಎಂದು ಹೇಳಿದ್ದೀರಾ?';
+  }
+
+  @override
+  String ahqErrFieldPlain(String name) {
+    return 'ಅಪರಿಚಿತ ಫೀಲ್ಡ್ “$name”.';
+  }
+
+  @override
+  String get ahqErrAmount => 'ಮೊತ್ತಕ್ಕೆ ಸಂಖ್ಯೆ ಬೇಕು, ಉದಾ. amount:>500';
+
+  @override
+  String get ahqErrDate =>
+      'ದಿನಾಂಕಕ್ಕೆ ವರ್ಷ, ತಿಂಗಳು ಅಥವಾ ದಿನ ಬೇಕು, ಉದಾ. date:2026-03';
+
+  @override
+  String ahqErrValue(String field, String name) {
+    return '“$name” ಹೆಸರಿನ $field ಇಲ್ಲ';
+  }
+
+  @override
+  String ahqErrValueDid(String field, String name, String suggestion) {
+    return '“$name” ಹೆಸರಿನ $field ಇಲ್ಲ. ನೀವು $suggestion ಎಂದು ಹೇಳಿದ್ದೀರಾ?';
+  }
+
+  @override
+  String get ahqErrOr => 'OR ನ ಎರಡೂ ಬದಿ ಏನಾದರೂ ಇರಬೇಕು.';
+
+  @override
+  String get ahqErrEmptyGroup => 'ಬ್ರಾಕೆಟ್‌ಗಳ ನಡುವೆ ಒಂದು ಫಿಲ್ಟರ್ ಸೇರಿಸಿ.';
+
+  @override
+  String ahqErrBadToken(String text) {
+    return '“$text” ಓದಲಾಗಲಿಲ್ಲ.';
+  }
+
+  @override
+  String get ahqUntagged => 'ಟ್ಯಾಗ್ ಇಲ್ಲದವು';
+
+  @override
+  String get ahqNoCategory => 'ವರ್ಗ ಇಲ್ಲ';
+
+  @override
+  String get ahqOther => 'ಇತರೆ';
+
+  @override
+  String get ahqUnknown => 'ಅಪರಿಚಿತ';
+
+  @override
+  String get ahfTitle => 'ಫಿಲ್ಟರ್';
+
+  @override
+  String get ahfNoFilters => 'ಇನ್ನೂ ಫಿಲ್ಟರ್‌ಗಳಿಲ್ಲ';
+
+  @override
+  String get ahfFilterOne => 'ಫಿಲ್ಟರ್';
+
+  @override
+  String get ahfFilterMany => 'ಫಿಲ್ಟರ್‌ಗಳು';
+
+  @override
+  String get ahfClearAll => 'ಎಲ್ಲಾ ತೆರವುಗೊಳಿಸಿ';
+
+  @override
+  String get ahfCleared => 'ಫಿಲ್ಟರ್‌ಗಳನ್ನು ತೆರವುಗೊಳಿಸಲಾಗಿದೆ';
+
+  @override
+  String get ahfUndo => 'ರದ್ದುಮಾಡಿ';
+
+  @override
+  String get ahfPlaceholder => 'ಫಿಲ್ಟರ್ ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಕ್ಷೇತ್ರ ಆಯ್ಕೆಮಾಡಿ';
+
+  @override
+  String get ahfPlaceholderFocused => 'ಕ್ಷೇತ್ರ ಟೈಪ್ ಮಾಡಿ, category ಹಾಗೆ';
+
+  @override
+  String get ahfImplicitNote =>
+      '\"and\" ಅನ್ನು \"or\" ಗಿಂತ ಮೊದಲು ಓದಲಾಗುತ್ತದೆ. ಚುಕ್ಕಿ ಗೆರೆಯ ಪೆಟ್ಟಿಗೆ ಆ್ಯಪ್ ಇದನ್ನು ಹೇಗೆ ಗುಂಪು ಮಾಡುತ್ತದೆ ಎಂದು ತೋರಿಸುತ್ತದೆ. ಬದಲಿಸಲು ಬ್ರಾಕೆಟ್ ಸೇರಿಸಿ.';
+
+  @override
+  String get ahfAddFilter => 'ಫಿಲ್ಟರ್ ಸೇರಿಸಿ';
+
+  @override
+  String get ahfPlainWords => 'ಸರಳ ಮಾತುಗಳಲ್ಲಿ';
+
+  @override
+  String get ahfTryOne => 'ಒಂದನ್ನು ಪ್ರಯತ್ನಿಸಿ';
+
+  @override
+  String get ahfExFood => 'ಈ ವರ್ಷ ₹500ಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಆಹಾರ';
+
+  @override
+  String get ahfExAttachment => 'ಲಗತ್ತು ಇರುವವು';
+
+  @override
+  String get ahfExUntagged => 'ಟ್ಯಾಗ್ ಇಲ್ಲದ ಖರ್ಚುಗಳು';
+
+  @override
+  String get ahfExCard => 'ಕಳೆದ ತಿಂಗಳ ಕಾರ್ಡ್ ಖರ್ಚುಗಳು';
+
+  @override
+  String ahfShowN(int n) {
+    return '$n ವಹಿವಾಟುಗಳನ್ನು ತೋರಿಸಿ';
+  }
+
+  @override
+  String get ahfShowCounting => 'ವಹಿವಾಟುಗಳನ್ನು ತೋರಿಸಿ';
+
+  @override
+  String get ahfNoMatch => 'ಹೊಂದುವ ವಹಿವಾಟುಗಳಿಲ್ಲ';
+
+  @override
+  String get ahfDone => 'ಮುಗಿಯಿತು';
+
+  @override
+  String get ahfHintType => 'ಖರ್ಚು, ಆದಾಯ ಅಥವಾ ವರ್ಗಾವಣೆ';
+
+  @override
+  String get ahfHintAmount => 'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚು, ಕಡಿಮೆ ಅಥವಾ ನಡುವಿನ ಮೊತ್ತ';
+
+  @override
+  String get ahfHintCategory => 'ನಿಮ್ಮ ವರ್ಗಗಳು';
+
+  @override
+  String get ahfHintAccount => 'ಹಣ ಎಲ್ಲಿಗೆ ಹೋಯಿತು';
+
+  @override
+  String get ahfHintTag => 'ನಿಮ್ಮ ಟ್ಯಾಗ್‌ಗಳು, ಅಥವಾ ಟ್ಯಾಗ್ ಇಲ್ಲದವು';
+
+  @override
+  String get ahfHintDate => 'ಈ ತಿಂಗಳು, ಒಂದು ವರ್ಷ ಅಥವಾ ಯಾವುದೇ ಅವಧಿ';
+
+  @override
+  String get ahfHintHas => 'ಲಗತ್ತು ಅಥವಾ ಟಿಪ್ಪಣಿ';
+
+  @override
+  String get ahfHintSource => 'ಕೈಯಿಂದ, SMS, Quick Add ಮತ್ತು ಇನ್ನಷ್ಟು';
+
+  @override
+  String get ahfHintWords => 'ಶೀರ್ಷಿಕೆ ಅಥವಾ ಟಿಪ್ಪಣಿಯ ಪದಗಳು';
+
+  @override
+  String get ahfFilterBy => 'ಇದರ ಪ್ರಕಾರ ಫಿಲ್ಟರ್';
+
+  @override
+  String get ahfIs => 'ಆಗಿದೆ';
+
+  @override
+  String get ahfIsNot => 'ಅಲ್ಲ';
+
+  @override
+  String get ahfAddFilterBtn => 'ಫಿಲ್ಟರ್ ಸೇರಿಸಿ';
+
+  @override
+  String ahfAddFilterN(int n) {
+    return 'ಫಿಲ್ಟರ್ ಸೇರಿಸಿ · $n ಆಯ್ಕೆ';
+  }
+
+  @override
+  String get ahfPickMany =>
+      'ಯಾವುದಾದರೂ ಒಂದಕ್ಕೆ ಹೊಂದಲು ಒಂದಕ್ಕಿಂತ ಹೆಚ್ಚು ಆಯ್ಕೆಮಾಡಿ.';
+
+  @override
+  String get ahfOver => 'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚು';
+
+  @override
+  String get ahfUnder => 'ಇದಕ್ಕಿಂತ ಕಡಿಮೆ';
+
+  @override
+  String get ahfBetween => 'ನಡುವೆ';
+
+  @override
+  String get ahfAmountIs => 'ಸಮ';
+
+  @override
+  String get ahfAmountNote => 'ಪ್ಲಸ್ ಅಥವಾ ಮೈನಸ್ ಚಿಹ್ನೆ ಇಲ್ಲದ ಮೊತ್ತ.';
+
+  @override
+  String get ahfFrom => 'ಇಂದ';
+
+  @override
+  String get ahfTo => 'ವರೆಗೆ';
+
+  @override
+  String get ahfSearchCategories => 'ವರ್ಗಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String get ahfSearchAccounts => 'ಖಾತೆಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String get ahfSearchTags => 'ಟ್ಯಾಗ್‌ಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String get ahfHasNoTags => 'ಟ್ಯಾಗ್ ಇಲ್ಲ';
+
+  @override
+  String get ahfNothingFound => 'ಏನೂ ಸಿಗಲಿಲ್ಲ';
+
+  @override
+  String get ahfDateQuick => 'ತ್ವರಿತ';
+
+  @override
+  String get ahfDateLast30 => 'ಕಳೆದ 30 ದಿನ';
+
+  @override
+  String get ahfDateMonthYear => 'ಒಂದು ತಿಂಗಳು ಅಥವಾ ವರ್ಷ';
+
+  @override
+  String ahfAllOfYear(String year) {
+    return '$year ಪೂರ್ತಿ';
+  }
+
+  @override
+  String get ahfDateCustom => 'ಕಸ್ಟಮ್ ಅವಧಿ';
+
+  @override
+  String get ahfDateCustomHint => 'ಆರಂಭ ಮತ್ತು ಅಂತ್ಯ ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ';
+
+  @override
+  String get ahfSrcNote =>
+      'ಪುನರಾವರ್ತಿತದಲ್ಲಿ ಸಾಲದ EMI ಸೇರಿದೆ. ಆಮದು ಎಂದರೆ CSV ಅಥವಾ Kuber ಫೈಲ್.';
+
+  @override
+  String get ahfWordsNote =>
+      'ಶೀರ್ಷಿಕೆ ಮತ್ತು ಟಿಪ್ಪಣಿಯಲ್ಲಿ ಹುಡುಕುತ್ತದೆ. ದೊಡ್ಡ ಚಿಕ್ಕ ಅಕ್ಷರದ ವ್ಯತ್ಯಾಸವಿಲ್ಲ.';
+
+  @override
+  String get ahfWordsHint => 'swiggy ಹಾಗೆ';
+
+  @override
+  String get ahfTypeItLike => 'ಹೀಗೆ ಟೈಪ್ ಮಾಡಿ';
+
+  @override
+  String get ahfInfo1 =>
+      'ಪೆಟ್ಟಿಗೆಯಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ, ಅಥವಾ ಅದರ ಕೆಳಗಿನ ಕ್ಷೇತ್ರ ಆಯ್ಕೆಮಾಡಿ. ಎರಡೂ ಕರ್ಸರ್ ಇರುವಲ್ಲಿ ಅದೇ ಪೆಟ್ಟಿಗೆಗೆ ಸೇರುತ್ತವೆ.';
+
+  @override
+  String get ahfInfo2 =>
+      'ಎರಡು ಫಿಲ್ಟರ್‌ಗಳ ನಡುವಿನ and ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ or ಮಾಡಿ. ನೆರಳಿನ ಪೆಟ್ಟಿಗೆ ಯಾವುದು ಜೊತೆಗಿದೆ ಎಂದು ತೋರಿಸುತ್ತದೆ.';
+
+  @override
+  String get ahfInfo3 =>
+      'ಬಾರ್‌ನಲ್ಲಿ ( ), and, or ಮತ್ತು not ಇವೆ. ಬ್ರಾಕೆಟ್‌ಗಳು ಪೆಟ್ಟಿಗೆಯೊಳಗೆ ಪೆಟ್ಟಿಗೆಯಂತೆ ಕಾಣುತ್ತವೆ.';
+
+  @override
+  String get ahfHowTitle => 'ಫಿಲ್ಟರ್ ಹೇಗೆ ಟೈಪ್ ಮಾಡುವುದು';
+
+  @override
+  String get ahfSyn1 => 'ಒಂದು ಕ್ಷೇತ್ರ ಮತ್ತು ಒಂದು ಮೌಲ್ಯ';
+
+  @override
+  String get ahfSyn2 => 'ಎರಡರಲ್ಲಿ ಒಂದು: food ಅಥವಾ travel';
+
+  @override
+  String get ahfSyn3 =>
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚು. ಕಡಿಮೆಗೆ < ಮತ್ತು ನಡುವಿಗೆ 500..2000 ಬರೆಯಿರಿ';
+
+  @override
+  String get ahfSyn4 => 'ಒಂದು ವರ್ಷ, ತಿಂಗಳು ಅಥವಾ ದಿನ';
+
+  @override
+  String get ahfSyn5 => 'ಶೀರ್ಷಿಕೆ ಅಥವಾ ಟಿಪ್ಪಣಿಯ ಪದಗಳು';
+
+  @override
+  String get ahfSyn6 =>
+      'ಎರಡೂ, ಅಥವಾ ಯಾವುದಾದರೂ ಒಂದು. \"and\" ಅನ್ನು \"or\" ಗಿಂತ ಮೊದಲು ಓದಲಾಗುತ್ತದೆ';
+
+  @override
+  String get ahfSyn7 => 'ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಒಟ್ಟಿಗೆ ಗುಂಪು ಮಾಡಿ';
+
+  @override
+  String get ahfSyn8 => 'ಇವನ್ನು ಬಿಡಿ. -tag:trip ಎಂದೂ ಟೈಪ್ ಮಾಡಬಹುದು';
+
+  @override
+  String get ahfDiscardTitle => 'ಬದಲಾವಣೆಗಳನ್ನು ತ್ಯಜಿಸಬೇಕೇ?';
+
+  @override
+  String get ahfDiscardBody => 'ಫಿಲ್ಟರ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಬದಲಾವಣೆಗಳನ್ನು ಅನ್ವಯಿಸಿಲ್ಲ.';
+
+  @override
+  String get ahfKeepEditing => 'ಸಂಪಾದನೆ ಮುಂದುವರಿಸಿ';
+
+  @override
+  String get ahfDiscard => 'ತ್ಯಜಿಸಿ';
+
+  @override
+  String ahfTokenSemantics(String text) {
+    return '$text, ಬದಲಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ';
+  }
+
+  @override
+  String ahfTokenInvalidSemantics(String text) {
+    return '$text, ಮಾನ್ಯವಲ್ಲ, ಬದಲಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ';
+  }
+
+  @override
+  String ahfJoinerSemantics(String word, String other) {
+    return '$word, $other ಗೆ ಬದಲಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ';
+  }
+
+  @override
+  String ahfBoxSemantics(int n) {
+    return '$n ಫಿಲ್ಟರ್‌ಗಳ ಗುಂಪು';
+  }
+
+  @override
+  String get ahfBracketOpenSemantics => 'ತೆರೆಯುವ ಬ್ರಾಕೆಟ್';
+
+  @override
+  String get ahfBracketCloseSemantics => 'ಮುಚ್ಚುವ ಬ್ರಾಕೆಟ್';
+
+  @override
+  String get ahfGhostBracketSemantics => 'ಮುಚ್ಚುವ ಬ್ರಾಕೆಟ್ ಇಲ್ಲಿ ಬರುತ್ತದೆ';
+
+  @override
+  String get ahfOpOpenSemantics => 'ಬ್ರಾಕೆಟ್ ತೆರೆಯಿರಿ';
+
+  @override
+  String get ahfOpCloseSemantics => 'ಬ್ರಾಕೆಟ್ ಮುಚ್ಚಿರಿ';
+
+  @override
+  String get ahfHideKeyboard => 'ಕೀಬೋರ್ಡ್ ಮರೆಮಾಡಿ';
+
+  @override
+  String ahfCountSemantics(int n) {
+    return '$n ಫಿಲ್ಟರ್‌ಗಳು';
+  }
 }

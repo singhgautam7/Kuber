@@ -1359,7 +1359,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get filterInc => 'വരുമാനം';
 
   @override
-  String get advancedFiltersTooltip => 'വിപുലമായ ഫിൽട്ടറുകൾ';
+  String get advancedFiltersTooltip => 'ഫിൽട്ടർ';
 
   @override
   String get clearFiltersTooltip => 'ഫിൽട്ടറുകൾ ഒഴിവാക്കുക';
@@ -1377,7 +1377,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get selectRange => 'പരിധി തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get advancedFiltersTitle => 'വിപുലമായ ഫിൽട്ടറുകൾ';
+  String get advancedFiltersTitle => 'ഫിൽട്ടർ';
 
   @override
   String get clearAll => 'എല്ലാം ഒഴിവാക്കുക';
@@ -2310,7 +2310,7 @@ class AppLocalizationsMl extends AppLocalizations {
       'വിശകലന വിഡ്ജറ്റുകൾ തിരഞ്ഞെടുത്ത് ക്രമീകരിക്കുക';
 
   @override
-  String get filterAll => 'എല്ലാം';
+  String get filterAll => '· എല്ലാം';
 
   @override
   String get filterToday => 'ഇന്ന്';
@@ -2523,7 +2523,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get menuRateKuber => 'കുബേർ റേറ്റുചെയ്യുക';
 
   @override
-  String get menuShare => 'ഷെയർ ചെയ്യുക';
+  String get menuShare => 'റഫർ ചെയ്യുക';
 
   @override
   String get menuFeedbackShort => 'അഭിപ്രായം';
@@ -4373,7 +4373,7 @@ class AppLocalizationsMl extends AppLocalizations {
       'ഈ ചിപ്പുകൾ ഉപയോഗിച്ച് വരുമാനം, ചെലവ് അല്ലെങ്കിൽ ട്രാൻസ്ഫർ എന്നിവ വേഗത്തിൽ ഫിൽട്ടർ ചെയ്യുക.';
 
   @override
-  String get tutCh2St2Title => 'വിപുലമായ ഫിൽറ്ററുകൾ';
+  String get tutCh2St2Title => 'ഫിൽട്ടർ';
 
   @override
   String get tutCh2St2Desc =>
@@ -9680,4 +9680,1411 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get deleteLoanAction => 'ലോൺ ഇല്ലാതാക്കുക';
+
+  @override
+  String get saveFileFailed =>
+      'ഫയൽ സേവ് ചെയ്യാനായില്ല. മറ്റൊരു ഫോൾഡർ തിരഞ്ഞെടുക്കൂ.';
+
+  @override
+  String get saveFileShareFailed => 'ഫയൽ പങ്കിടാനായില്ല. വീണ്ടും ശ്രമിക്കൂ.';
+
+  @override
+  String get saveFileCsvNoViews =>
+      'CSV ബാക്കപ്പിൽ സേവ് ചെയ്ത വ്യൂകൾ ഉൾപ്പെടില്ല. അവ സൂക്ഷിക്കാൻ JSON ബാക്കപ്പ് ഉപയോഗിക്കൂ.';
+
+  @override
+  String get historyMenuAdvanced => 'അഡ്വാൻസ്ഡ് ഹിസ്റ്ററി';
+
+  @override
+  String filterSelectedN(int n) {
+    return '· $n തിരഞ്ഞെടുത്തു';
+  }
+
+  @override
+  String get filterSearchCategories => 'വിഭാഗങ്ങൾ തിരയുക';
+
+  @override
+  String get filterSearchTags => 'ടാഗുകൾ തിരയുക';
+
+  @override
+  String filterNoMatch(String section, String text) {
+    return '“$text” യുമായി പൊരുത്തപ്പെടുന്ന $section ഇല്ല';
+  }
+
+  @override
+  String filterTryAdvanced(String link) {
+    return 'AND / OR ഫിൽട്ടറുകൾ വേണോ? $link പരീക്ഷിക്കുക';
+  }
+
+  @override
+  String get setSecProfile => 'പ്രൊഫൈൽ';
+
+  @override
+  String get setSecAbout => 'വിവരങ്ങൾ';
+
+  @override
+  String get setSecPermissions => 'അനുമതികൾ';
+
+  @override
+  String get menuAdvancedHistory => 'അഡ്വാൻസ്ഡ് ഹിസ്റ്ററി';
+
+  @override
+  String get menuAdvancedHistoryDesc =>
+      'ഓരോ ഇടപാടും ഫിൽട്ടർ ചെയ്യുക, ഗ്രൂപ്പ് ചെയ്യുക, ചാർട്ട് ചെയ്യുക';
+
+  @override
+  String get rateTitle => 'കുബേർ ഇഷ്ടമാകുന്നുണ്ടോ?';
+
+  @override
+  String get rateBody =>
+      'കുബേർ ഒരാൾ തന്നെയാണ് നിർമ്മിക്കുകയും നടത്തുകയും ചെയ്യുന്നത്. Play Store-ൽ ഒരു ചെറിയ റേറ്റിംഗ് മറ്റുള്ളവർക്ക് ഈ ആപ്പ് കണ്ടെത്താൻ സഹായിക്കും, നിങ്ങൾ ആവശ്യപ്പെട്ട ഫീച്ചറുകൾ തുടർന്നും നിർമ്മിക്കാനും അത് എന്നെ സഹായിക്കും. ഇതിന് ഒരു മിനിറ്റിൽ താഴെ മതി.';
+
+  @override
+  String get rateCta => 'Play Store-ൽ റേറ്റ് ചെയ്യുക';
+
+  @override
+  String get rateRefer => 'സുഹൃത്തിന് റഫർ ചെയ്യുക';
+
+  @override
+  String get rateLater => 'പിന്നീട്';
+
+  @override
+  String get rateNever => 'ഇത് വീണ്ടും കാണിക്കരുത്';
+
+  @override
+  String get ahdGateHeadline =>
+      'ഓരോ ഇടപാടും ഫിൽട്ടർ ചെയ്യുക, ഗ്രൂപ്പ് ചെയ്യുക, ചാർട്ടായി കാണുക';
+
+  @override
+  String get ahdGatePill => 'Kuber Pro';
+
+  @override
+  String get ahdGateB1 =>
+      'ഉം, അല്ലെങ്കിൽ, അല്ല എന്നിവ ഉപയോഗിച്ച് ഫിൽട്ടറുകൾ ചേർക്കുക';
+
+  @override
+  String get ahdGateB2 =>
+      'വിഭാഗം, അക്കൗണ്ട്, ടാഗ്, മാസം തുടങ്ങിയവ പ്രകാരം ഗ്രൂപ്പ് ചെയ്യുക';
+
+  @override
+  String get ahdGateB3 =>
+      'നിങ്ങളുടെ ഫിൽട്ടറിനെ പിന്തുടരുന്ന ആകെത്തുകകളും ചാർട്ടുകളും';
+
+  @override
+  String get ahdGateB4 =>
+      'വ്യൂകൾ സേവ് ചെയ്ത് ഫലങ്ങൾ CSV ആയി എക്സ്പോർട്ട് ചെയ്യുക';
+
+  @override
+  String get ahdGateCta => 'Kuber Pro കാണുക';
+
+  @override
+  String get ahdGateSample => 'സാമ്പിൾ ഡാറ്റ';
+
+  @override
+  String get ahdGateSheetHeadline => 'Advanced History ഒരു Kuber Pro ഫീച്ചറാണ്';
+
+  @override
+  String get ahdGateSheetBody =>
+      'Kuber Pro ഉപയോഗിച്ച് നിങ്ങളുടെ എല്ലാ ഇടപാടുകളിലും ഏത് ഫിൽട്ടറും ഉണ്ടാക്കാം, ഫലങ്ങൾ ഗ്രൂപ്പ് ചെയ്ത് ചാർട്ടിൽ കാണാം, വ്യൂകൾ സേവ് ചെയ്ത് CSV ആയി എക്സ്പോർട്ട് ചെയ്യാം.';
+
+  @override
+  String get ahdTitle => 'Advanced History';
+
+  @override
+  String get ahdMenuSaved => 'സേവ് ചെയ്ത വ്യൂകൾ';
+
+  @override
+  String ahdSavedN(int n) {
+    return '$n സേവ് ചെയ്തു';
+  }
+
+  @override
+  String get ahdMenuSave => 'ഈ വ്യൂ സേവ് ചെയ്യുക';
+
+  @override
+  String get ahdMenuExport => 'ഫലങ്ങൾ എക്സ്പോർട്ട് ചെയ്യുക (CSV)';
+
+  @override
+  String ahdTxnN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ഇടപാടുകൾ',
+      one: '$n ഇടപാട്',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdMenuClear => 'എല്ലാം മായ്ക്കുക';
+
+  @override
+  String get ahdMenuHelp => 'ഈ പേജ് എങ്ങനെ പ്രവർത്തിക്കുന്നു';
+
+  @override
+  String get ahdFilter => 'ഫിൽട്ടർ';
+
+  @override
+  String get ahdGroup => 'ഗ്രൂപ്പ്';
+
+  @override
+  String get ahdSort => 'ക്രമം';
+
+  @override
+  String get ahdSaved => 'സേവ് ചെയ്തവ';
+
+  @override
+  String get ahdSavedEdited => 'സേവ് ചെയ്തത് · മാറ്റി';
+
+  @override
+  String get ahdNone => 'ഒന്നുമില്ല';
+
+  @override
+  String get ahdClearAll => 'എല്ലാം മായ്ക്കുക';
+
+  @override
+  String get ahdClearTitle =>
+      'ഫിൽട്ടറുകൾ, ഗ്രൂപ്പ്, ക്രമം, ചാർട്ടുകൾ എന്നിവ മായ്ക്കണോ?';
+
+  @override
+  String get ahdClearBody => 'സേവ് ചെയ്ത വ്യൂകൾ മാറില്ല.';
+
+  @override
+  String get ahdStartLine =>
+      'തുടങ്ങാൻ ഒരു ഫിൽട്ടറോ ഗ്രൂപ്പോ തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ സേവ് ചെയ്ത വ്യൂ തുറക്കുക.';
+
+  @override
+  String get ahdAddFilter => 'ഫിൽട്ടർ ചേർക്കുക';
+
+  @override
+  String get ahdAddFilterSub => 'വിഭാഗം, തുക, തീയതി തുടങ്ങിയവ';
+
+  @override
+  String get ahdGroupBy => 'ഗ്രൂപ്പ് ചെയ്യുക';
+
+  @override
+  String get ahdGroupBySub => 'വിഭാഗം, അക്കൗണ്ട്, മാസം തുടങ്ങിയവ';
+
+  @override
+  String get ahdOpenSaved => 'സേവ് ചെയ്തവ തുറക്കുക';
+
+  @override
+  String ahdSavedViewsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n സേവ് ചെയ്ത വ്യൂകൾ',
+      one: '$n സേവ് ചെയ്ത വ്യൂ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdNothingSaved => 'ഇതുവരെ ഒന്നും സേവ് ചെയ്തിട്ടില്ല';
+
+  @override
+  String get ahdTryOne => 'ഒന്ന് പരീക്ഷിക്കുക';
+
+  @override
+  String get ahdEx1 => 'ഈ വർഷം ₹500-ൽ കൂടുതലുള്ള ഭക്ഷണം';
+
+  @override
+  String get ahdEx2 => 'ടാഗ് ഇല്ലാത്ത ചെലവുകൾ';
+
+  @override
+  String get ahdEx3 => '2026-ലെ യാത്ര, മാസം അനുസരിച്ച്';
+
+  @override
+  String get ahdYourSaved => 'നിങ്ങൾ സേവ് ചെയ്ത വ്യൂകൾ';
+
+  @override
+  String get ahdCategory => 'വിഭാഗം';
+
+  @override
+  String get ahdAccount => 'അക്കൗണ്ട്';
+
+  @override
+  String get ahdTag => 'ടാഗ്';
+
+  @override
+  String get ahdType => 'തരം';
+
+  @override
+  String get ahdSource => 'ഉറവിടം';
+
+  @override
+  String get ahdMonth => 'മാസം';
+
+  @override
+  String get ahdYear => 'വർഷം';
+
+  @override
+  String get ahdDate => 'തീയതി';
+
+  @override
+  String get ahdAmount => 'തുക';
+
+  @override
+  String get ahdTotal => 'ആകെ';
+
+  @override
+  String get ahdCount => 'എണ്ണം';
+
+  @override
+  String get ahdName => 'പേര്';
+
+  @override
+  String get ahdAverage => 'ശരാശരി';
+
+  @override
+  String get ahdSortTxns => 'ഇടപാടുകൾ';
+
+  @override
+  String get ahdSortGroups => 'ഗ്രൂപ്പുകൾ';
+
+  @override
+  String get ahdNewest => 'പുതിയവ ആദ്യം';
+
+  @override
+  String get ahdOldest => 'പഴയവ ആദ്യം';
+
+  @override
+  String get ahdHighest => 'കൂടുതൽ ആദ്യം';
+
+  @override
+  String get ahdLowest => 'കുറവ് ആദ്യം';
+
+  @override
+  String get ahdAtoZ => 'അ മുതൽ റ്റ';
+
+  @override
+  String get ahdZtoA => 'റ്റ മുതൽ അ';
+
+  @override
+  String get ahdGroupHelp =>
+      'പ്രവണത കാണാൻ മാസം അല്ലെങ്കിൽ വർഷം പ്രകാരം ഗ്രൂപ്പ് ചെയ്യുക. ദിവസം പ്രകാരം ഗ്രൂപ്പ് ഇല്ല; പകരം തീയതി പ്രകാരം ക്രമീകരിക്കുക.';
+
+  @override
+  String get ahdInfoGroup1 =>
+      'യോജിക്കുന്ന ഇടപാടുകളെ ഗ്രൂപ്പുകളാക്കി, ഓരോ ഗ്രൂപ്പിനും എണ്ണം, ആകെ, പങ്ക് എന്നിവയുള്ള ഒരു വരി കാണിക്കുന്നു. ഗ്രൂപ്പിൽ തൊട്ട് അതിലെ ഇടപാടുകൾ കാണുക.';
+
+  @override
+  String get ahdInfoGroup2 =>
+      'മാസവും വർഷവും കാലക്രമത്തിലെ പ്രവണത കാണിക്കുന്നു. 2 ടാഗുള്ള ഇടപാട് രണ്ട് ടാഗ് ഗ്രൂപ്പുകളിലും എണ്ണപ്പെടും.';
+
+  @override
+  String get ahdInfoSort1 =>
+      'ഗ്രൂപ്പ് ഇല്ലെങ്കിൽ ഇടപാടുകൾ തീയതി, തുക, വിഭാഗം, അക്കൗണ്ട് എന്നിവ പ്രകാരം ക്രമീകരിക്കുക. ഗ്രൂപ്പ് ഉണ്ടെങ്കിൽ ഗ്രൂപ്പുകളെ ആകെ, എണ്ണം, പേര് എന്നിവ പ്രകാരം ക്രമീകരിക്കുക.';
+
+  @override
+  String get ahdInfoSort2 =>
+      'ഗ്രൂപ്പിന്റെ ഷീറ്റിനുള്ളിൽ ഇടപാടുകൾ എപ്പോഴും പുതിയവ ആദ്യം ആയിരിക്കും.';
+
+  @override
+  String get ahdInfoChart1 =>
+      '4 ചാർട്ടുകൾ വരെ ചേർക്കാം. ഓരോന്നും നിങ്ങളുടെ ഫിൽട്ടറിനെ പിന്തുടരുകയും ഫലങ്ങളെ സ്വന്തം രീതിയിൽ വിഭജിക്കുകയും ചെയ്യും.';
+
+  @override
+  String get ahdInfoChart2 =>
+      'വിഭാഗങ്ങൾ, അക്കൗണ്ടുകൾ, ടാഗുകൾ, തരങ്ങൾ, ഉറവിടങ്ങൾ എന്നിവ താരതമ്യം ചെയ്യാൻ ഡോണട്ട് അല്ലെങ്കിൽ ബാർ തിരഞ്ഞെടുക്കുക. മാസം അല്ലെങ്കിൽ വർഷം പ്രകാരമുള്ള പ്രവണതയ്ക്ക് ലൈൻ തിരഞ്ഞെടുക്കുക. ഒരു ഭാഗത്ത് തൊട്ട് തുറക്കുക.';
+
+  @override
+  String get ahdInfoSaved1 =>
+      'സേവ് ചെയ്ത വ്യൂ മുഴുവൻ പേജും ഓർക്കുന്നു: ഫിൽട്ടർ, ഗ്രൂപ്പ്, ക്രമം, ഓരോ ചാർട്ടും അതിന്റെ തരം, വിഭജനം, അളവ്, സ്ഥാനം എന്നിവയോടെ, കൂടാതെ KPI കാർഡുകളും.';
+
+  @override
+  String get ahdInfoSaved2 =>
+      'സേവ് ചെയ്ത വ്യൂ മാറ്റിയാൽ, അപ്ഡേറ്റ് ചെയ്യാൻ മാറ്റങ്ങൾ സേവ് ചെയ്യുക അല്ലെങ്കിൽ രണ്ടും നിലനിർത്താൻ പുതിയതായി സേവ് ചെയ്യുക തിരഞ്ഞെടുക്കുക. സേവ് ചെയ്ത വ്യൂകൾ നിങ്ങളുടെ JSON ബാക്കപ്പിൽ ഉൾപ്പെടും.';
+
+  @override
+  String get ahdInfoKpi =>
+      'മുകളിൽ ഏതൊക്കെ സംഖ്യകൾ കാണിക്കണമെന്ന് തിരഞ്ഞെടുത്ത് വലിച്ച് ക്രമം മാറ്റുക. സേവ് ചെയ്ത വ്യൂകൾ ഈ തിരഞ്ഞെടുപ്പ് ഓർക്കും.';
+
+  @override
+  String get ahdKpiTransactions => 'ഇടപാടുകൾ';
+
+  @override
+  String get ahdKpiIncome => 'വരുമാനം';
+
+  @override
+  String get ahdKpiExpense => 'ചെലവ്';
+
+  @override
+  String get ahdKpiNet => 'അറ്റം';
+
+  @override
+  String get ahdKpiAverage => 'ശരാശരി';
+
+  @override
+  String get ahdKpiAttachments => 'അറ്റാച്ച്മെന്റുകൾ';
+
+  @override
+  String get ahdKpiLargest => 'ഏറ്റവും വലുത്';
+
+  @override
+  String get ahdKpiEdit => 'മാറ്റുക';
+
+  @override
+  String get ahdKpiSheetTitle => 'KPI കാർഡുകൾ';
+
+  @override
+  String get ahdKpiSheetDesc =>
+      'മുകളിൽ എന്ത് കാണിക്കണമെന്ന് തിരഞ്ഞെടുക്കുക. ക്രമത്തിനായി വലിക്കുക.';
+
+  @override
+  String get ahdKpiSheetNote => 'സേവ് ചെയ്ത വ്യൂകൾ ഈ തിരഞ്ഞെടുപ്പ് ഓർക്കും.';
+
+  @override
+  String get ahdReset => 'റീസെറ്റ്';
+
+  @override
+  String get ahdAddChartEmpty => 'ചാർട്ട് ചേർക്കുക';
+
+  @override
+  String get ahdAddChartHint => 'ഡോണട്ട്, ബാർ അല്ലെങ്കിൽ ലൈൻ';
+
+  @override
+  String ahdAddChartN(int n) {
+    return 'ചാർട്ട് ചേർക്കുക · 4-ൽ $n';
+  }
+
+  @override
+  String get ahdChartsFull =>
+      '4-ൽ 4 ചാർട്ടുകൾ. പുതിയത് ചേർക്കാൻ ഒന്ന് നീക്കം ചെയ്യുക.';
+
+  @override
+  String get ahdMoveUp => 'മുകളിലേക്ക് നീക്കുക';
+
+  @override
+  String get ahdMoveDown => 'താഴേക്ക് നീക്കുക';
+
+  @override
+  String get ahdRemove => 'നീക്കം ചെയ്യുക';
+
+  @override
+  String get ahdChartRemoved => 'ചാർട്ട് നീക്കം ചെയ്തു';
+
+  @override
+  String get ahdUndo => 'പഴയപടിയാക്കുക';
+
+  @override
+  String get ahdDonut => 'ഡോണട്ട്';
+
+  @override
+  String get ahdBars => 'ബാർ';
+
+  @override
+  String get ahdLine => 'ലൈൻ';
+
+  @override
+  String ahdCardTitle(String measure, String split) {
+    return '$split പ്രകാരം $measure';
+  }
+
+  @override
+  String ahdCardSub(String type, String count) {
+    return '$type · $count';
+  }
+
+  @override
+  String get ahdStLine => 'ലൈനിന് കുറഞ്ഞത് 2 മാസത്തെ ഡാറ്റ വേണം.';
+
+  @override
+  String get ahdStNoTags => 'ഈ ഫലങ്ങളിൽ ടാഗുകൾ ഇല്ല.';
+
+  @override
+  String get ahdStNoAccounts => 'ഈ ഫലങ്ങളിൽ അക്കൗണ്ടുകൾ ഇല്ല.';
+
+  @override
+  String get ahdStNoCategories => 'ഈ ഫലങ്ങളിൽ വിഭാഗങ്ങൾ ഇല്ല.';
+
+  @override
+  String get ahdStNothing => 'ഈ ഫലങ്ങളിൽ വിഭജിക്കാൻ ഒന്നുമില്ല.';
+
+  @override
+  String get ahdStWrongCombo =>
+      'ലൈൻ ചാർട്ടുകൾ മാസം അല്ലെങ്കിൽ വർഷം പ്രകാരം പ്രവർത്തിക്കുന്നു. വിഭജനമോ ചാർട്ട് തരമോ മാറ്റുക.';
+
+  @override
+  String get ahdSplitByMonth => 'മാസം പ്രകാരം വിഭജിക്കുക';
+
+  @override
+  String get ahdChangeChart => 'ചാർട്ട് മാറ്റുക';
+
+  @override
+  String get ahdStNoResults => 'ഈ ഫിൽട്ടറിന് യോജിക്കുന്ന ഇടപാടുകൾ ഇല്ല.';
+
+  @override
+  String get ahdBuilderAdd => 'ചാർട്ട് ചേർക്കുക';
+
+  @override
+  String get ahdBuilderEdit => 'ചാർട്ട് മാറ്റുക';
+
+  @override
+  String get ahdChartType => 'ചാർട്ട് തരം';
+
+  @override
+  String get ahdSplitBy => 'ഇതനുസരിച്ച് വിഭജിക്കുക';
+
+  @override
+  String get ahdShow => 'കാണിക്കുക';
+
+  @override
+  String get ahdCurrentGroup => 'നിലവിലെ ഗ്രൂപ്പ്';
+
+  @override
+  String get ahdUpdateChart => 'ചാർട്ട് അപ്ഡേറ്റ് ചെയ്യുക';
+
+  @override
+  String get ahdRemoveChart => 'ചാർട്ട് നീക്കം ചെയ്യുക';
+
+  @override
+  String get ahdBlkNoTags => 'ഈ ഫലങ്ങളിൽ ടാഗുകൾ ഇല്ല';
+
+  @override
+  String get ahdBlkOneAccount => 'ഈ ഫലങ്ങളിൽ ഒരു അക്കൗണ്ട് മാത്രം';
+
+  @override
+  String get ahdBlkOneType => 'ഈ ഫലങ്ങളിൽ ഒരു തരം മാത്രം';
+
+  @override
+  String get ahdBlkOneSource => 'ഈ ഫലങ്ങളിൽ ഒരു ഉറവിടം മാത്രം';
+
+  @override
+  String get ahdBlkOneCategory => 'ഈ ഫലങ്ങളിൽ ഒരു വിഭാഗം മാത്രം';
+
+  @override
+  String get ahdBlkOneMonth => 'എല്ലാ ഫലങ്ങളും ഒരേ മാസത്തിലാണ്';
+
+  @override
+  String get ahdBlkOneYear => 'എല്ലാ ഫലങ്ങളും ഒരേ വർഷത്തിലാണ്';
+
+  @override
+  String get ahdTagNote =>
+      'ഒന്നിലധികം ടാഗുള്ള ഇടപാടുകൾ ഓരോ ടാഗ് ഗ്രൂപ്പിലും കാണും, അതിനാൽ ആകെത്തുക യഥാർത്ഥ ആകെയേക്കാൾ കൂടാം.';
+
+  @override
+  String get ahdLoadMore => 'കൂടുതൽ ലോഡ് ചെയ്യുക';
+
+  @override
+  String get ahdEmptyTitle => 'യോജിക്കുന്ന ഇടപാടുകൾ ഇല്ല';
+
+  @override
+  String get ahdEmptyBody =>
+      'ഈ ഫോണിൽ ഇവയെല്ലാത്തിനും യോജിക്കുന്നത് ഒന്നുമില്ല. കുറഞ്ഞ തുക പരീക്ഷിക്കുക അല്ലെങ്കിൽ ഒരു ഫിൽട്ടർ നീക്കം ചെയ്യുക.';
+
+  @override
+  String get ahdErrorTitle => 'ഫലങ്ങൾ ലോഡ് ചെയ്യാനായില്ല';
+
+  @override
+  String get ahdErrorBody =>
+      'നിങ്ങളുടെ ഇടപാടുകൾ വായിക്കുമ്പോൾ എന്തോ തെറ്റി. നിങ്ങളുടെ ഡാറ്റ സുരക്ഷിതമാണ്, ഒന്നും മാറിയിട്ടില്ല.';
+
+  @override
+  String get ahdTryAgain => 'വീണ്ടും ശ്രമിക്കുക';
+
+  @override
+  String get ahdGsTotal => 'ആകെ';
+
+  @override
+  String get ahdGsLargest => 'ഏറ്റവും വലുത്';
+
+  @override
+  String ahdChanged(String name) {
+    return 'നിങ്ങൾ $name മാറ്റി';
+  }
+
+  @override
+  String get ahdChFilter => 'ഫിൽട്ടർ മാറ്റി';
+
+  @override
+  String get ahdChGroup => 'ഗ്രൂപ്പ് മാറ്റി';
+
+  @override
+  String get ahdChSort => 'ക്രമം മാറ്റി';
+
+  @override
+  String get ahdChKpis => 'KPI കാർഡുകൾ മാറ്റി';
+
+  @override
+  String get ahdChAdded => 'ചാർട്ട് ചേർത്തു';
+
+  @override
+  String get ahdChRemoved => 'ചാർട്ട് നീക്കം ചെയ്തു';
+
+  @override
+  String get ahdChMoved => 'ചാർട്ട് നീക്കി';
+
+  @override
+  String get ahdChEdited => 'ചാർട്ട് മാറ്റി';
+
+  @override
+  String get ahdSaveAsNew => 'പുതിയതായി സേവ് ചെയ്യുക';
+
+  @override
+  String get ahdSaveChanges => 'മാറ്റങ്ങൾ സേവ് ചെയ്യുക';
+
+  @override
+  String ahdUpdated(String name) {
+    return '$name അപ്ഡേറ്റ് ചെയ്തു';
+  }
+
+  @override
+  String get ahdSaveTitle => 'ഈ വ്യൂ സേവ് ചെയ്യുക';
+
+  @override
+  String get ahdNameHint => 'ഈ വ്യൂവിന് ഒരു പേര് നൽകുക';
+
+  @override
+  String ahdNameTaken(String name) {
+    return '$name എന്ന പേരിൽ ഒരു വ്യൂ ഇതിനകം ഉണ്ട്';
+  }
+
+  @override
+  String ahdSumFilters(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ഫിൽട്ടറുകൾ',
+      one: '$n ഫിൽട്ടർ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahdSumGrouped(String group) {
+    return '$group പ്രകാരം ഗ്രൂപ്പ് ചെയ്തു';
+  }
+
+  @override
+  String ahdSumSorted(String field) {
+    return '$field പ്രകാരം ക്രമീകരിച്ചു';
+  }
+
+  @override
+  String ahdSumCharts(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ചാർട്ടുകൾ',
+      one: '$n ചാർട്ട്',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdSumEmpty => 'ഇതുവരെ ഒന്നും ക്രമീകരിച്ചിട്ടില്ല';
+
+  @override
+  String get ahdWhatSaved => 'എന്താണ് സേവ് ചെയ്യുക';
+
+  @override
+  String get ahdWsFilter => 'ഫിൽട്ടർ';
+
+  @override
+  String get ahdWsGroup => 'ഗ്രൂപ്പ്';
+
+  @override
+  String get ahdWsSort => 'ക്രമം';
+
+  @override
+  String get ahdWsCharts => 'ചാർട്ടുകൾ';
+
+  @override
+  String get ahdWsKpis => 'KPI കാർഡുകൾ';
+
+  @override
+  String get ahdNotSet => 'ക്രമീകരിച്ചിട്ടില്ല';
+
+  @override
+  String ahdKpisShown(int n) {
+    return '$n കാണിക്കും';
+  }
+
+  @override
+  String get ahdBackupNote => 'നിങ്ങളുടെ JSON ബാക്കപ്പിൽ ഉൾപ്പെടുന്നു.';
+
+  @override
+  String ahdSavedSnack(String name) {
+    return '$name ആയി സേവ് ചെയ്തു';
+  }
+
+  @override
+  String get ahdSavedTitle => 'സേവ് ചെയ്ത വ്യൂകൾ';
+
+  @override
+  String get ahdSavedEmptyTitle => 'ഇതുവരെ സേവ് ചെയ്ത വ്യൂകൾ ഇല്ല';
+
+  @override
+  String get ahdSavedEmptyBody =>
+      'ഫിൽട്ടർ, ഗ്രൂപ്പ് അല്ലെങ്കിൽ ചാർട്ടുകൾ സജ്ജമാക്കി, മെനുവിൽ ഈ വ്യൂ സേവ് ചെയ്യുക തിരഞ്ഞെടുക്കുക.';
+
+  @override
+  String get ahdRename => 'പേര് മാറ്റുക';
+
+  @override
+  String get ahdRenameTitle => 'വ്യൂവിന്റെ പേര് മാറ്റുക';
+
+  @override
+  String ahdDeleteTitle(String name) {
+    return '$name ഇല്ലാതാക്കണോ?';
+  }
+
+  @override
+  String get ahdDeleteBody =>
+      'ഇത് സേവ് ചെയ്ത വ്യൂ മാത്രമേ നീക്കൂ. നിങ്ങളുടെ ഇടപാടുകൾ അതുപോലെ തുടരും.';
+
+  @override
+  String get ahdExportTitle => 'ഫലങ്ങൾ എക്സ്പോർട്ട് ചെയ്യുക';
+
+  @override
+  String get ahdExportFilter => 'നിങ്ങളുടെ നിലവിലെ ഫിൽട്ടർ';
+
+  @override
+  String get ahdExportNoFilter => 'ഫിൽട്ടർ ഇല്ല';
+
+  @override
+  String ahdExportNote(String n) {
+    return 'കൃത്യമായി ഈ $n ഇടപാടുകൾ, History CSV എക്സ്പോർട്ടിലെ അതേ കോളങ്ങളിൽ. ഗ്രൂപ്പും ചാർട്ടുകളും എക്സ്പോർട്ട് ചെയ്യില്ല.';
+  }
+
+  @override
+  String get ahdExportSave => 'ഫോൾഡറിൽ സേവ് ചെയ്യുക';
+
+  @override
+  String get ahdExportShare => 'പങ്കിടുക';
+
+  @override
+  String get ahdExportSaved => 'ഫയൽ സേവ് ചെയ്തു';
+
+  @override
+  String get ahdExportFailed => 'ഫയൽ ഉണ്ടാക്കാനായില്ല. ഒന്നും മാറിയിട്ടില്ല.';
+
+  @override
+  String get ahdHelpTitle => 'ഈ പേജ് എങ്ങനെ പ്രവർത്തിക്കുന്നു';
+
+  @override
+  String get ahdHelpFilter =>
+      'എന്ത് കാണണമെന്ന് തിരഞ്ഞെടുക്കാൻ ഫിൽട്ടറിൽ തൊടുക: വിഭാഗം, തുക, തീയതികൾ തുടങ്ങിയവ.';
+
+  @override
+  String get ahdHelpGroup =>
+      'ഫലങ്ങളെ വിഭാഗം, അക്കൗണ്ട്, ടാഗ്, മാസം തുടങ്ങിയവ പ്രകാരം വരികളായി വയ്ക്കുന്നു.';
+
+  @override
+  String get ahdHelpSort => 'ഇടപാടുകളുടെയോ ഗ്രൂപ്പുകളുടെയോ ക്രമം മാറ്റുന്നു.';
+
+  @override
+  String get ahdHelpCharts =>
+      '4 ചാർട്ടുകൾ വരെ ചേർക്കാം. ഓരോന്നും നിങ്ങളുടെ ഫിൽട്ടറിനെ പിന്തുടരും. ഒരു ഭാഗത്ത് തൊട്ട് തുറക്കുക.';
+
+  @override
+  String get ahdHelpSaved =>
+      'മുഴുവൻ പേജും സേവ് ചെയ്യുന്നു, ഒരു തൊടലിൽ വീണ്ടും തുറക്കാം.';
+
+  @override
+  String get ahdCharts => 'ചാർട്ടുകൾ';
+
+  @override
+  String get ahdInfoOpen => 'ഇതിനെക്കുറിച്ച്';
+
+  @override
+  String loanSplitNotice(int n) {
+    return '$n EMI നിങ്ങളുടെ ലോൺ ഷെഡ്യൂളുമായി പൊരുത്തപ്പെടുന്നില്ല.';
+  }
+
+  @override
+  String get loanSplitNoticeSub =>
+      'ഇവയിലെ പലിശയുടെയും മുതലിന്റെയും വിഭജനം തെറ്റാണ്. അടച്ച തുകകൾ ശരിയാണ്.';
+
+  @override
+  String get loanSplitFix => 'ശരിയാക്കുക';
+
+  @override
+  String get loanFixTitle => 'EMI വിഭജനം ശരിയാക്കുക';
+
+  @override
+  String loanFixCount(int n) {
+    return '$n EMI';
+  }
+
+  @override
+  String loanFixRange(String from, String to) {
+    return '$from മുതൽ $to വരെ';
+  }
+
+  @override
+  String get loanFixNow => 'ഇപ്പോൾ';
+
+  @override
+  String get loanFixAfter => 'ശരിയാക്കിയ ശേഷം';
+
+  @override
+  String get loanFixInterest => 'പലിശ';
+
+  @override
+  String get loanFixPrincipal => 'മുതൽ';
+
+  @override
+  String get loanFixTotalPaid => 'ആകെ അടച്ചത്';
+
+  @override
+  String get loanFixSame => 'അതേ';
+
+  @override
+  String loanFixKept(int n) {
+    return 'നിങ്ങൾ തിരുത്തിയ EMI അതേപടി തുടരും ($n നിലനിർത്തി)';
+  }
+
+  @override
+  String loanFixInfo(String amount) {
+    return 'പലിശയുടെയും മുതലിന്റെയും വിഭജനം മാത്രമേ മാറൂ. തുകകളും തീയതികളും അക്കൗണ്ടുകളും അതേപടി തുടരും. കുടിശ്ശിക $amount ആകും.';
+  }
+
+  @override
+  String get loanFixing => 'ശരിയാക്കുന്നു';
+
+  @override
+  String loanFixedSnack(int n, String amount) {
+    return '$n EMI ശരിയാക്കി. കുടിശ്ശിക ഇപ്പോൾ $amount.';
+  }
+
+  @override
+  String get loanFixUndo => 'പഴയപടിയാക്കുക';
+
+  @override
+  String get loanRecheck => 'EMI വിഭജനം വീണ്ടും പരിശോധിക്കുക';
+
+  @override
+  String loanAllMatch(int n) {
+    return 'എല്ലാം പൊരുത്തപ്പെടുന്നു. എല്ലാ $n EMI-യും നിങ്ങളുടെ ലോൺ ഷെഡ്യൂൾ പിന്തുടരുന്നു.';
+  }
+
+  @override
+  String get loanFixLonger =>
+      'പിന്നീടുള്ള ഭാഗങ്ങൾ ചേർക്കുകയും EMI അതേപടി നിലനിർത്തുകയും ചെയ്തതിനാൽ നിങ്ങളുടെ ലോണിന്റെ കാലാവധി കൂടി.';
+
+  @override
+  String get historyMenuAdvancedSub =>
+      'AND / OR ഫിൽട്ടറുകൾ, ഗ്രൂപ്പുകൾ, ചാർട്ടുകൾ';
+
+  @override
+  String get ahqFieldType => 'തരം';
+
+  @override
+  String get ahqFieldAmount => 'തുക';
+
+  @override
+  String get ahqFieldCategory => 'വിഭാഗം';
+
+  @override
+  String get ahqFieldAccount => 'അക്കൗണ്ട്';
+
+  @override
+  String get ahqFieldTag => 'ടാഗ്';
+
+  @override
+  String get ahqFieldDate => 'തീയതി';
+
+  @override
+  String get ahqFieldWords => 'വാക്കുകൾ';
+
+  @override
+  String get ahqFieldHas => 'ഉണ്ട്';
+
+  @override
+  String get ahqFieldSource => 'ഉറവിടം';
+
+  @override
+  String get ahqFieldSubType => 'തരത്തിലുള്ളത്';
+
+  @override
+  String get ahqTypeExpense => 'ചെലവ്';
+
+  @override
+  String get ahqTypeIncome => 'വരുമാനം';
+
+  @override
+  String get ahqTypeTransfer => 'ട്രാൻസ്ഫർ';
+
+  @override
+  String get ahqSourceManual => 'നിങ്ങൾ നൽകിയത്';
+
+  @override
+  String get ahqSourceSms => 'SMS';
+
+  @override
+  String get ahqSourceQuickAdd => 'Quick Add';
+
+  @override
+  String get ahqSourceRecurring => 'ആവർത്തിക്കുന്നത്';
+
+  @override
+  String get ahqSourceImport => 'ഇറക്കുമതി';
+
+  @override
+  String get ahqHasAttachment => 'അറ്റാച്ച്‌മെന്റ്';
+
+  @override
+  String get ahqHasNote => 'കുറിപ്പ്';
+
+  @override
+  String get ahqSubLoanRepayment => 'വായ്പ തിരിച്ചടവ്';
+
+  @override
+  String get ahqSubInvestment => 'നിക്ഷേപം';
+
+  @override
+  String get ahqSubSavings => 'സമ്പാദ്യം';
+
+  @override
+  String get ahqSubLent => 'കടം കൊടുത്തത്';
+
+  @override
+  String get ahqSubBorrowed => 'കടം വാങ്ങിയത്';
+
+  @override
+  String get ahqSubInvestmentReturn => 'നിക്ഷേപ വരുമാനം';
+
+  @override
+  String get ahqSubLoanReceived => 'വായ്പ ലഭിച്ചത്';
+
+  @override
+  String get ahqSubLoanDisbursement => 'വായ്പ വിതരണം';
+
+  @override
+  String get ahqOr => 'അല്ലെങ്കിൽ';
+
+  @override
+  String get ahqNone => 'ഒന്നുമില്ല';
+
+  @override
+  String ahqRange(String from, String to) {
+    return '$from മുതൽ $to വരെ';
+  }
+
+  @override
+  String ahqAmountOver(String amount) {
+    return '$amountൽ കൂടുതൽ';
+  }
+
+  @override
+  String ahqAmountUnder(String amount) {
+    return '$amountൽ കുറവ്';
+  }
+
+  @override
+  String ahqAmountOrMore(String amount) {
+    return '$amount അല്ലെങ്കിൽ കൂടുതൽ';
+  }
+
+  @override
+  String ahqAmountOrLess(String amount) {
+    return '$amount അല്ലെങ്കിൽ കുറവ്';
+  }
+
+  @override
+  String get ahqDateThisMonth => 'ഈ മാസം';
+
+  @override
+  String get ahqDateLastMonth => 'കഴിഞ്ഞ മാസം';
+
+  @override
+  String get ahqDateThisYear => 'ഈ വർഷം';
+
+  @override
+  String get ahqDateLastYear => 'കഴിഞ്ഞ വർഷം';
+
+  @override
+  String ahqDateLastDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'കഴിഞ്ഞ $n ദിവസം',
+      one: 'കഴിഞ്ഞ ദിവസം',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahqDateAfter(String date) {
+    return '$dateക്ക് ശേഷം';
+  }
+
+  @override
+  String ahqDateBefore(String date) {
+    return '$dateക്ക് മുമ്പ്';
+  }
+
+  @override
+  String ahqDateFrom(String date) {
+    return '$date മുതൽ';
+  }
+
+  @override
+  String ahqDateUntil(String date) {
+    return '$date വരെ';
+  }
+
+  @override
+  String get ahqRbTransactions => 'ഇടപാടുകൾ';
+
+  @override
+  String get ahqRbExpenses => 'ചെലവുകൾ';
+
+  @override
+  String get ahqRbIncome => 'വരുമാനം';
+
+  @override
+  String get ahqRbTransfers => 'ട്രാൻസ്ഫറുകൾ';
+
+  @override
+  String ahqRbAmountIs(String amount) {
+    return '$amount തുകയുടെ';
+  }
+
+  @override
+  String ahqRbIn(String names) {
+    return '$names ൽ';
+  }
+
+  @override
+  String ahqRbNotIn(String names) {
+    return '$names ൽ അല്ല';
+  }
+
+  @override
+  String ahqRbFrom(String names) {
+    return '$names ൽ നിന്ന്';
+  }
+
+  @override
+  String ahqRbNotFrom(String names) {
+    return '$names ൽ നിന്നല്ല';
+  }
+
+  @override
+  String ahqRbTagged(String tags) {
+    return '$tags ടാഗ് ഉള്ളവ';
+  }
+
+  @override
+  String ahqRbNotTagged(String tags) {
+    return '$tags ടാഗ് ഇല്ലാത്തവ';
+  }
+
+  @override
+  String get ahqRbNoTags => 'ടാഗ് ഇല്ലാതെ';
+
+  @override
+  String get ahqRbHasTags => 'ടാഗോടെ';
+
+  @override
+  String get ahqRbWithAttachment => 'അറ്റാച്ച്‌മെന്റോടെ';
+
+  @override
+  String get ahqRbWithoutAttachment => 'അറ്റാച്ച്‌മെന്റ് ഇല്ലാതെ';
+
+  @override
+  String get ahqRbWithNote => 'കുറിപ്പോടെ';
+
+  @override
+  String get ahqRbWithoutNote => 'കുറിപ്പ് ഇല്ലാതെ';
+
+  @override
+  String get ahqRbSms => 'SMS ൽ നിന്ന്';
+
+  @override
+  String get ahqRbManual => 'നിങ്ങൾ നൽകിയവ';
+
+  @override
+  String get ahqRbQuickAdd => 'Quick Add ൽ നിന്ന്';
+
+  @override
+  String get ahqRbRecurring => 'ആവർത്തിക്കുന്നവയിൽ നിന്ന്';
+
+  @override
+  String get ahqRbImported => 'ഇറക്കുമതി ചെയ്തവ';
+
+  @override
+  String ahqRbNot(String text) {
+    return '$text അല്ല';
+  }
+
+  @override
+  String ahqRbWords(String text) {
+    return 'തലക്കെട്ടിലോ കുറിപ്പിലോ “$text” ഉള്ളവ';
+  }
+
+  @override
+  String ahqRbNoWords(String text) {
+    return 'തലക്കെട്ടിലോ കുറിപ്പിലോ “$text” ഇല്ലാത്തവ';
+  }
+
+  @override
+  String ahqRbKind(String kind) {
+    return '$kind ആയവ';
+  }
+
+  @override
+  String ahqRbDateIn(String date) {
+    return '$date ൽ';
+  }
+
+  @override
+  String ahqRbDateOn(String date) {
+    return '$date ന്';
+  }
+
+  @override
+  String ahqRbDateRange(String date) {
+    return '$date മുതൽ';
+  }
+
+  @override
+  String ahqRbNotGroup(String text) {
+    return 'അല്ല ($text)';
+  }
+
+  @override
+  String get ahqErrCloseBracket => 'അടയ്ക്കുന്ന ബ്രാക്കറ്റ് ഇല്ല';
+
+  @override
+  String ahqErrCloseBracketAfter(String token) {
+    return 'അടയ്ക്കുന്ന ബ്രാക്കറ്റ് ഇല്ല. $token ന് ശേഷം ) ചേർക്കുക.';
+  }
+
+  @override
+  String get ahqErrOpenBracket => 'തുറക്കുന്ന ബ്രാക്കറ്റ് ഇല്ല';
+
+  @override
+  String ahqErrField(String name, String suggestion) {
+    return 'അറിയാത്ത ഫീൽഡ് “$name”. നിങ്ങൾ ഉദ്ദേശിച്ചത് $suggestion ആണോ?';
+  }
+
+  @override
+  String ahqErrFieldPlain(String name) {
+    return 'അറിയാത്ത ഫീൽഡ് “$name”.';
+  }
+
+  @override
+  String get ahqErrAmount => 'തുകയ്ക്ക് ഒരു സംഖ്യ വേണം, ഉദാ. amount:>500';
+
+  @override
+  String get ahqErrDate =>
+      'തീയതിക്ക് വർഷം, മാസം അല്ലെങ്കിൽ ദിവസം വേണം, ഉദാ. date:2026-03';
+
+  @override
+  String ahqErrValue(String field, String name) {
+    return '“$name” എന്ന $field ഇല്ല';
+  }
+
+  @override
+  String ahqErrValueDid(String field, String name, String suggestion) {
+    return '“$name” എന്ന $field ഇല്ല. നിങ്ങൾ ഉദ്ദേശിച്ചത് $suggestion ആണോ?';
+  }
+
+  @override
+  String get ahqErrOr => 'OR ന്റെ ഇരുവശത്തും എന്തെങ്കിലും വേണം.';
+
+  @override
+  String get ahqErrEmptyGroup => 'ബ്രാക്കറ്റുകൾക്കിടയിൽ ഒരു ഫിൽട്ടർ ചേർക്കുക.';
+
+  @override
+  String ahqErrBadToken(String text) {
+    return '“$text” വായിക്കാനായില്ല.';
+  }
+
+  @override
+  String get ahqUntagged => 'ടാഗ് ഇല്ലാത്തവ';
+
+  @override
+  String get ahqNoCategory => 'വിഭാഗം ഇല്ല';
+
+  @override
+  String get ahqOther => 'മറ്റുള്ളവ';
+
+  @override
+  String get ahqUnknown => 'അറിയാത്തത്';
+
+  @override
+  String get ahfTitle => 'ഫിൽട്ടർ';
+
+  @override
+  String get ahfNoFilters => 'ഇതുവരെ ഫിൽട്ടറുകളില്ല';
+
+  @override
+  String get ahfFilterOne => 'ഫിൽട്ടർ';
+
+  @override
+  String get ahfFilterMany => 'ഫിൽട്ടറുകൾ';
+
+  @override
+  String get ahfClearAll => 'എല്ലാം നീക്കുക';
+
+  @override
+  String get ahfCleared => 'ഫിൽട്ടറുകൾ നീക്കി';
+
+  @override
+  String get ahfUndo => 'പഴയപടിയാക്കുക';
+
+  @override
+  String get ahfPlaceholder =>
+      'ഫിൽട്ടർ ടൈപ്പ് ചെയ്യൂ അല്ലെങ്കിൽ ഫീൽഡ് തിരഞ്ഞെടുക്കൂ';
+
+  @override
+  String get ahfPlaceholderFocused => 'ഫീൽഡ് ടൈപ്പ് ചെയ്യൂ, category പോലെ';
+
+  @override
+  String get ahfImplicitNote =>
+      '\"and\" \"or\" ന് മുമ്പ് വായിക്കപ്പെടുന്നു. കുത്തുവരയുള്ള ബോക്സ് ആപ്പ് ഇത് എങ്ങനെ ഗ്രൂപ്പ് ചെയ്യുന്നു എന്ന് കാണിക്കുന്നു. മാറ്റാൻ ബ്രാക്കറ്റുകൾ ചേർക്കൂ.';
+
+  @override
+  String get ahfAddFilter => 'ഫിൽട്ടർ ചേർക്കുക';
+
+  @override
+  String get ahfPlainWords => 'ലളിതമായ വാക്കുകളിൽ';
+
+  @override
+  String get ahfTryOne => 'ഒന്ന് പരീക്ഷിക്കൂ';
+
+  @override
+  String get ahfExFood => 'ഈ വർഷം ₹500ൽ കൂടുതലുള്ള ഭക്ഷണം';
+
+  @override
+  String get ahfExAttachment => 'അറ്റാച്ച്മെന്റ് ഉള്ളവ';
+
+  @override
+  String get ahfExUntagged => 'ടാഗ് ഇല്ലാത്ത ചെലവുകൾ';
+
+  @override
+  String get ahfExCard => 'കഴിഞ്ഞ മാസത്തെ കാർഡ് ചെലവുകൾ';
+
+  @override
+  String ahfShowN(int n) {
+    return '$n ഇടപാടുകൾ കാണിക്കുക';
+  }
+
+  @override
+  String get ahfShowCounting => 'ഇടപാടുകൾ കാണിക്കുക';
+
+  @override
+  String get ahfNoMatch => 'പൊരുത്തപ്പെടുന്ന ഇടപാടുകളില്ല';
+
+  @override
+  String get ahfDone => 'കഴിഞ്ഞു';
+
+  @override
+  String get ahfHintType => 'ചെലവ്, വരുമാനം അല്ലെങ്കിൽ കൈമാറ്റം';
+
+  @override
+  String get ahfHintAmount => 'ഇതിൽ കൂടുതൽ, കുറവ് അല്ലെങ്കിൽ ഇടയിലുള്ള തുക';
+
+  @override
+  String get ahfHintCategory => 'നിങ്ങളുടെ വിഭാഗങ്ങൾ';
+
+  @override
+  String get ahfHintAccount => 'പണം എവിടേക്ക് പോയി';
+
+  @override
+  String get ahfHintTag => 'നിങ്ങളുടെ ടാഗുകൾ, അല്ലെങ്കിൽ ടാഗ് ഇല്ലാത്തവ';
+
+  @override
+  String get ahfHintDate => 'ഈ മാസം, ഒരു വർഷം അല്ലെങ്കിൽ ഏത് കാലയളവും';
+
+  @override
+  String get ahfHintHas => 'അറ്റാച്ച്മെന്റ് അല്ലെങ്കിൽ കുറിപ്പ്';
+
+  @override
+  String get ahfHintSource => 'കൈകൊണ്ട്, SMS, Quick Add എന്നിവയും മറ്റും';
+
+  @override
+  String get ahfHintWords => 'തലക്കെട്ടിലോ കുറിപ്പിലോ ഉള്ള വാക്കുകൾ';
+
+  @override
+  String get ahfFilterBy => 'ഇതനുസരിച്ച് ഫിൽട്ടർ';
+
+  @override
+  String get ahfIs => 'ആണ്';
+
+  @override
+  String get ahfIsNot => 'അല്ല';
+
+  @override
+  String get ahfAddFilterBtn => 'ഫിൽട്ടർ ചേർക്കുക';
+
+  @override
+  String ahfAddFilterN(int n) {
+    return 'ഫിൽട്ടർ ചേർക്കുക · $n തിരഞ്ഞെടുത്തു';
+  }
+
+  @override
+  String get ahfPickMany =>
+      'ഏതെങ്കിലും ഒന്നിനോട് പൊരുത്തപ്പെടാൻ ഒന്നിലധികം തിരഞ്ഞെടുക്കൂ.';
+
+  @override
+  String get ahfOver => 'ഇതിൽ കൂടുതൽ';
+
+  @override
+  String get ahfUnder => 'ഇതിൽ കുറവ്';
+
+  @override
+  String get ahfBetween => 'ഇടയിൽ';
+
+  @override
+  String get ahfAmountIs => 'തുല്യം';
+
+  @override
+  String get ahfAmountNote => 'പ്ലസ് അല്ലെങ്കിൽ മൈനസ് ചിഹ്നമില്ലാത്ത തുക.';
+
+  @override
+  String get ahfFrom => 'മുതൽ';
+
+  @override
+  String get ahfTo => 'വരെ';
+
+  @override
+  String get ahfSearchCategories => 'വിഭാഗങ്ങൾ തിരയുക';
+
+  @override
+  String get ahfSearchAccounts => 'അക്കൗണ്ടുകൾ തിരയുക';
+
+  @override
+  String get ahfSearchTags => 'ടാഗുകൾ തിരയുക';
+
+  @override
+  String get ahfHasNoTags => 'ടാഗ് ഇല്ല';
+
+  @override
+  String get ahfNothingFound => 'ഒന്നും കണ്ടെത്തിയില്ല';
+
+  @override
+  String get ahfDateQuick => 'പെട്ടെന്ന്';
+
+  @override
+  String get ahfDateLast30 => 'കഴിഞ്ഞ 30 ദിവസം';
+
+  @override
+  String get ahfDateMonthYear => 'ഒരു മാസം അല്ലെങ്കിൽ വർഷം';
+
+  @override
+  String ahfAllOfYear(String year) {
+    return '$year മുഴുവൻ';
+  }
+
+  @override
+  String get ahfDateCustom => 'ഇഷ്ടമുള്ള കാലയളവ്';
+
+  @override
+  String get ahfDateCustomHint => 'തുടക്ക, അവസാന തീയതി തിരഞ്ഞെടുക്കൂ';
+
+  @override
+  String get ahfSrcNote =>
+      'ആവർത്തനത്തിൽ വായ്പ EMI ഉൾപ്പെടുന്നു. ഇംപോർട്ട് എന്നാൽ CSV അല്ലെങ്കിൽ Kuber ഫയൽ.';
+
+  @override
+  String get ahfWordsNote =>
+      'തലക്കെട്ടിലും കുറിപ്പിലും തിരയുന്നു. വലിയ ചെറിയ അക്ഷര വ്യത്യാസമില്ല.';
+
+  @override
+  String get ahfWordsHint => 'swiggy പോലെ';
+
+  @override
+  String get ahfTypeItLike => 'ഇങ്ങനെ ടൈപ്പ് ചെയ്യൂ';
+
+  @override
+  String get ahfInfo1 =>
+      'ബോക്സിൽ ടൈപ്പ് ചെയ്യൂ, അല്ലെങ്കിൽ അതിന് താഴെ ഫീൽഡ് തിരഞ്ഞെടുക്കൂ. രണ്ടും കഴ്സർ ഉള്ളിടത്ത് അതേ ബോക്സിൽ ചേരും.';
+
+  @override
+  String get ahfInfo2 =>
+      'രണ്ട് ഫിൽട്ടറുകൾക്കിടയിലെ and ൽ തൊട്ട് അത് or ആക്കൂ. നിഴൽ ബോക്സ് എന്തൊക്കെ ഒന്നിച്ചാണെന്ന് കാണിക്കും.';
+
+  @override
+  String get ahfInfo3 =>
+      'ബാറിൽ ( ), and, or, not എന്നിവയുണ്ട്. ബ്രാക്കറ്റുകൾ ബോക്സിനുള്ളിൽ ബോക്സായി കാണിക്കും.';
+
+  @override
+  String get ahfHowTitle => 'ഫിൽട്ടർ എങ്ങനെ ടൈപ്പ് ചെയ്യാം';
+
+  @override
+  String get ahfSyn1 => 'ഒരു ഫീൽഡും ഒരു മൂല്യവും';
+
+  @override
+  String get ahfSyn2 => 'രണ്ടിൽ ഒന്ന്: food അല്ലെങ്കിൽ travel';
+
+  @override
+  String get ahfSyn3 => 'ഇതിൽ കൂടുതൽ. കുറവിന് < ഇടയിലുള്ളതിന് 500..2000 എഴുതൂ';
+
+  @override
+  String get ahfSyn4 => 'ഒരു വർഷം, മാസം അല്ലെങ്കിൽ ദിവസം';
+
+  @override
+  String get ahfSyn5 => 'തലക്കെട്ടിലോ കുറിപ്പിലോ ഉള്ള വാക്കുകൾ';
+
+  @override
+  String get ahfSyn6 =>
+      'രണ്ടും, അല്ലെങ്കിൽ ഏതെങ്കിലും ഒന്ന്. \"and\" \"or\" ന് മുമ്പ് വായിക്കപ്പെടുന്നു';
+
+  @override
+  String get ahfSyn7 => 'ഫിൽട്ടറുകൾ ഒന്നിച്ച് ഗ്രൂപ്പ് ചെയ്യുക';
+
+  @override
+  String get ahfSyn8 => 'ഇവ ഒഴിവാക്കുക. -tag:trip എന്നും ടൈപ്പ് ചെയ്യാം';
+
+  @override
+  String get ahfDiscardTitle => 'മാറ്റങ്ങൾ ഉപേക്ഷിക്കണോ?';
+
+  @override
+  String get ahfDiscardBody =>
+      'ഫിൽട്ടറിലെ നിങ്ങളുടെ മാറ്റങ്ങൾ പ്രയോഗിച്ചിട്ടില്ല.';
+
+  @override
+  String get ahfKeepEditing => 'എഡിറ്റ് തുടരുക';
+
+  @override
+  String get ahfDiscard => 'ഉപേക്ഷിക്കുക';
+
+  @override
+  String ahfTokenSemantics(String text) {
+    return '$text, മാറ്റാൻ രണ്ടുതവണ തൊടുക';
+  }
+
+  @override
+  String ahfTokenInvalidSemantics(String text) {
+    return '$text, സാധുവല്ല, മാറ്റാൻ രണ്ടുതവണ തൊടുക';
+  }
+
+  @override
+  String ahfJoinerSemantics(String word, String other) {
+    return '$word, $other ആക്കാൻ രണ്ടുതവണ തൊടുക';
+  }
+
+  @override
+  String ahfBoxSemantics(int n) {
+    return '$n ഫിൽട്ടറുകളുടെ ഗ്രൂപ്പ്';
+  }
+
+  @override
+  String get ahfBracketOpenSemantics => 'തുറക്കുന്ന ബ്രാക്കറ്റ്';
+
+  @override
+  String get ahfBracketCloseSemantics => 'അടയ്ക്കുന്ന ബ്രാക്കറ്റ്';
+
+  @override
+  String get ahfGhostBracketSemantics => 'അടയ്ക്കുന്ന ബ്രാക്കറ്റ് ഇവിടെ വരും';
+
+  @override
+  String get ahfOpOpenSemantics => 'ബ്രാക്കറ്റ് തുറക്കുക';
+
+  @override
+  String get ahfOpCloseSemantics => 'ബ്രാക്കറ്റ് അടയ്ക്കുക';
+
+  @override
+  String get ahfHideKeyboard => 'കീബോർഡ് മറയ്ക്കുക';
+
+  @override
+  String ahfCountSemantics(int n) {
+    return '$n ഫിൽട്ടറുകൾ';
+  }
 }

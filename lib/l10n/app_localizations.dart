@@ -2483,7 +2483,7 @@ abstract class AppLocalizations {
   /// No description provided for @advancedFiltersTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Advanced filters'**
+  /// **'Filter'**
   String get advancedFiltersTooltip;
 
   /// No description provided for @clearFiltersTooltip.
@@ -2519,7 +2519,7 @@ abstract class AppLocalizations {
   /// No description provided for @advancedFiltersTitle.
   ///
   /// In en, this message translates to:
-  /// **'Advanced Filters'**
+  /// **'Filter'**
   String get advancedFiltersTitle;
 
   /// No description provided for @clearAll.
@@ -4223,7 +4223,7 @@ abstract class AppLocalizations {
   /// No description provided for @filterAll.
   ///
   /// In en, this message translates to:
-  /// **'ALL'**
+  /// **'· All'**
   String get filterAll;
 
   /// No description provided for @filterToday.
@@ -4619,7 +4619,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuShare.
   ///
   /// In en, this message translates to:
-  /// **'Share'**
+  /// **'Refer'**
   String get menuShare;
 
   /// No description provided for @menuFeedbackShort.
@@ -7877,7 +7877,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutCh2St2Title.
   ///
   /// In en, this message translates to:
-  /// **'Advanced filters'**
+  /// **'Filter'**
   String get tutCh2St2Title;
 
   /// No description provided for @tutCh2St2Desc.
@@ -16799,6 +16799,2400 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete loan'**
   String get deleteLoanAction;
+
+  /// No description provided for @saveFileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the file. Pick another folder.'**
+  String get saveFileFailed;
+
+  /// No description provided for @saveFileShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t share the file. Try again.'**
+  String get saveFileShareFailed;
+
+  /// No description provided for @saveFileCsvNoViews.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV backups don\'t include saved views. Use a JSON backup to keep them.'**
+  String get saveFileCsvNoViews;
+
+  /// No description provided for @historyMenuAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced History'**
+  String get historyMenuAdvanced;
+
+  /// No description provided for @filterSelectedN.
+  ///
+  /// In en, this message translates to:
+  /// **'· {n} selected'**
+  String filterSelectedN(int n);
+
+  /// No description provided for @filterSearchCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories'**
+  String get filterSearchCategories;
+
+  /// No description provided for @filterSearchTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags'**
+  String get filterSearchTags;
+
+  /// No description provided for @filterNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No {section} match “{text}”'**
+  String filterNoMatch(String section, String text);
+
+  /// No description provided for @filterTryAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Need AND / OR filters? Try {link}'**
+  String filterTryAdvanced(String link);
+
+  /// No description provided for @setSecProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get setSecProfile;
+
+  /// No description provided for @setSecAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get setSecAbout;
+
+  /// No description provided for @setSecPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions'**
+  String get setSecPermissions;
+
+  /// No description provided for @menuAdvancedHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced History'**
+  String get menuAdvancedHistory;
+
+  /// No description provided for @menuAdvancedHistoryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter, group and chart every transaction'**
+  String get menuAdvancedHistoryDesc;
+
+  /// No description provided for @rateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoying Kuber?'**
+  String get rateTitle;
+
+  /// No description provided for @rateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber is built and run by one person. A quick rating on the Play Store helps other people find it, and it lets me keep building features you asked for. It takes less than a minute.'**
+  String get rateBody;
+
+  /// No description provided for @rateCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate on Play Store'**
+  String get rateCta;
+
+  /// No description provided for @rateRefer.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer a friend'**
+  String get rateRefer;
+
+  /// No description provided for @rateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get rateLater;
+
+  /// No description provided for @rateNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t show this again'**
+  String get rateNever;
+
+  /// No description provided for @ahdGateHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter, group and chart every transaction'**
+  String get ahdGateHeadline;
+
+  /// No description provided for @ahdGatePill.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Pro'**
+  String get ahdGatePill;
+
+  /// No description provided for @ahdGateB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine filters with and, or and not'**
+  String get ahdGateB1;
+
+  /// No description provided for @ahdGateB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by category, account, tag, month and more'**
+  String get ahdGateB2;
+
+  /// No description provided for @ahdGateB3.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals and charts that follow your filter'**
+  String get ahdGateB3;
+
+  /// No description provided for @ahdGateB4.
+  ///
+  /// In en, this message translates to:
+  /// **'Save views and export the results as CSV'**
+  String get ahdGateB4;
+
+  /// No description provided for @ahdGateCta.
+  ///
+  /// In en, this message translates to:
+  /// **'See Kuber Pro'**
+  String get ahdGateCta;
+
+  /// No description provided for @ahdGateSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample data'**
+  String get ahdGateSample;
+
+  /// No description provided for @ahdGateSheetHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced History is a Kuber Pro feature'**
+  String get ahdGateSheetHeadline;
+
+  /// No description provided for @ahdGateSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type or build any filter over all your transactions, group and chart the results, save views and export them as CSV with Kuber Pro.'**
+  String get ahdGateSheetBody;
+
+  /// No description provided for @ahdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced History'**
+  String get ahdTitle;
+
+  /// No description provided for @ahdMenuSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved views'**
+  String get ahdMenuSaved;
+
+  /// No description provided for @ahdSavedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} saved'**
+  String ahdSavedN(int n);
+
+  /// No description provided for @ahdMenuSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this view'**
+  String get ahdMenuSave;
+
+  /// No description provided for @ahdMenuExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export results (CSV)'**
+  String get ahdMenuExport;
+
+  /// No description provided for @ahdTxnN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} transaction} other{{n} transactions}}'**
+  String ahdTxnN(int n);
+
+  /// No description provided for @ahdMenuClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get ahdMenuClear;
+
+  /// No description provided for @ahdMenuHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How this page works'**
+  String get ahdMenuHelp;
+
+  /// No description provided for @ahdFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get ahdFilter;
+
+  /// No description provided for @ahdGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get ahdGroup;
+
+  /// No description provided for @ahdSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get ahdSort;
+
+  /// No description provided for @ahdSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get ahdSaved;
+
+  /// No description provided for @ahdSavedEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved · edited'**
+  String get ahdSavedEdited;
+
+  /// No description provided for @ahdNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get ahdNone;
+
+  /// No description provided for @ahdClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get ahdClearAll;
+
+  /// No description provided for @ahdClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters, grouping, sorting and charts?'**
+  String get ahdClearTitle;
+
+  /// No description provided for @ahdClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved views are not changed.'**
+  String get ahdClearBody;
+
+  /// No description provided for @ahdStartLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a filter or a grouping to start, or open a saved view.'**
+  String get ahdStartLine;
+
+  /// No description provided for @ahdAddFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add filter'**
+  String get ahdAddFilter;
+
+  /// No description provided for @ahdAddFilterSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Category, amount, date and more'**
+  String get ahdAddFilterSub;
+
+  /// No description provided for @ahdGroupBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by'**
+  String get ahdGroupBy;
+
+  /// No description provided for @ahdGroupBySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Category, account, month and more'**
+  String get ahdGroupBySub;
+
+  /// No description provided for @ahdOpenSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Open saved'**
+  String get ahdOpenSaved;
+
+  /// No description provided for @ahdSavedViewsN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} saved view} other{{n} saved views}}'**
+  String ahdSavedViewsN(int n);
+
+  /// No description provided for @ahdNothingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing saved yet'**
+  String get ahdNothingSaved;
+
+  /// No description provided for @ahdTryOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Try one'**
+  String get ahdTryOne;
+
+  /// No description provided for @ahdEx1.
+  ///
+  /// In en, this message translates to:
+  /// **'Food over ₹500 this year'**
+  String get ahdEx1;
+
+  /// No description provided for @ahdEx2.
+  ///
+  /// In en, this message translates to:
+  /// **'Untagged expenses'**
+  String get ahdEx2;
+
+  /// No description provided for @ahdEx3.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel in 2026 by month'**
+  String get ahdEx3;
+
+  /// No description provided for @ahdYourSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved views'**
+  String get ahdYourSaved;
+
+  /// No description provided for @ahdCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get ahdCategory;
+
+  /// No description provided for @ahdAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get ahdAccount;
+
+  /// No description provided for @ahdTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get ahdTag;
+
+  /// No description provided for @ahdType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get ahdType;
+
+  /// No description provided for @ahdSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get ahdSource;
+
+  /// No description provided for @ahdMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get ahdMonth;
+
+  /// No description provided for @ahdYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get ahdYear;
+
+  /// No description provided for @ahdDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get ahdDate;
+
+  /// No description provided for @ahdAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get ahdAmount;
+
+  /// No description provided for @ahdTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get ahdTotal;
+
+  /// No description provided for @ahdCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get ahdCount;
+
+  /// No description provided for @ahdName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get ahdName;
+
+  /// No description provided for @ahdAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get ahdAverage;
+
+  /// No description provided for @ahdSortTxns.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get ahdSortTxns;
+
+  /// No description provided for @ahdSortGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get ahdSortGroups;
+
+  /// No description provided for @ahdNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get ahdNewest;
+
+  /// No description provided for @ahdOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get ahdOldest;
+
+  /// No description provided for @ahdHighest.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest first'**
+  String get ahdHighest;
+
+  /// No description provided for @ahdLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest first'**
+  String get ahdLowest;
+
+  /// No description provided for @ahdAtoZ.
+  ///
+  /// In en, this message translates to:
+  /// **'A to Z'**
+  String get ahdAtoZ;
+
+  /// No description provided for @ahdZtoA.
+  ///
+  /// In en, this message translates to:
+  /// **'Z to A'**
+  String get ahdZtoA;
+
+  /// No description provided for @ahdGroupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by Month or Year to see a trend. There is no day grouping; use Sort by date instead.'**
+  String get ahdGroupHelp;
+
+  /// No description provided for @ahdInfoGroup1.
+  ///
+  /// In en, this message translates to:
+  /// **'Puts matching transactions into groups and shows one row per group with its count, total and share. Tap a group to see its transactions.'**
+  String get ahdInfoGroup1;
+
+  /// No description provided for @ahdInfoGroup2.
+  ///
+  /// In en, this message translates to:
+  /// **'Month and Year show a trend over time. A transaction with 2 tags is counted in both tag groups.'**
+  String get ahdInfoGroup2;
+
+  /// No description provided for @ahdInfoSort1.
+  ///
+  /// In en, this message translates to:
+  /// **'Without groups, sort transactions by date, amount, category or account. With groups, sort the groups by total, count or name.'**
+  String get ahdInfoSort1;
+
+  /// No description provided for @ahdInfoSort2.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside a group\'s sheet, transactions are always newest first.'**
+  String get ahdInfoSort2;
+
+  /// No description provided for @ahdInfoChart1.
+  ///
+  /// In en, this message translates to:
+  /// **'Add up to 4 charts. Each one follows your filter and splits the results its own way.'**
+  String get ahdInfoChart1;
+
+  /// No description provided for @ahdInfoChart2.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to open it.'**
+  String get ahdInfoChart2;
+
+  /// No description provided for @ahdInfoSaved1.
+  ///
+  /// In en, this message translates to:
+  /// **'A saved view keeps the whole page: the filter, group, sort, every chart with its type, split, measure and position, and the KPI cards.'**
+  String get ahdInfoSaved1;
+
+  /// No description provided for @ahdInfoSaved2.
+  ///
+  /// In en, this message translates to:
+  /// **'If you change a saved view, choose Save changes to update it or Save as new to keep both. Saved views are included in your JSON backup.'**
+  String get ahdInfoSaved2;
+
+  /// No description provided for @ahdInfoKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick which numbers show at the top and drag to reorder them. Saved views remember this choice.'**
+  String get ahdInfoKpi;
+
+  /// No description provided for @ahdKpiTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get ahdKpiTransactions;
+
+  /// No description provided for @ahdKpiIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get ahdKpiIncome;
+
+  /// No description provided for @ahdKpiExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get ahdKpiExpense;
+
+  /// No description provided for @ahdKpiNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get ahdKpiNet;
+
+  /// No description provided for @ahdKpiAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get ahdKpiAverage;
+
+  /// No description provided for @ahdKpiAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get ahdKpiAttachments;
+
+  /// No description provided for @ahdKpiLargest.
+  ///
+  /// In en, this message translates to:
+  /// **'Largest'**
+  String get ahdKpiLargest;
+
+  /// No description provided for @ahdKpiEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get ahdKpiEdit;
+
+  /// No description provided for @ahdKpiSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'KPI cards'**
+  String get ahdKpiSheetTitle;
+
+  /// No description provided for @ahdKpiSheetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick what shows at the top. Drag to reorder.'**
+  String get ahdKpiSheetDesc;
+
+  /// No description provided for @ahdKpiSheetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved views remember this choice.'**
+  String get ahdKpiSheetNote;
+
+  /// No description provided for @ahdReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get ahdReset;
+
+  /// No description provided for @ahdAddChartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a chart'**
+  String get ahdAddChartEmpty;
+
+  /// No description provided for @ahdAddChartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Donut, bars or line'**
+  String get ahdAddChartHint;
+
+  /// No description provided for @ahdAddChartN.
+  ///
+  /// In en, this message translates to:
+  /// **'Add chart · {n} of 4'**
+  String ahdAddChartN(int n);
+
+  /// No description provided for @ahdChartsFull.
+  ///
+  /// In en, this message translates to:
+  /// **'4 of 4 charts. Remove one to add another.'**
+  String get ahdChartsFull;
+
+  /// No description provided for @ahdMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get ahdMoveUp;
+
+  /// No description provided for @ahdMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get ahdMoveDown;
+
+  /// No description provided for @ahdRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get ahdRemove;
+
+  /// No description provided for @ahdChartRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart removed'**
+  String get ahdChartRemoved;
+
+  /// No description provided for @ahdUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get ahdUndo;
+
+  /// No description provided for @ahdDonut.
+  ///
+  /// In en, this message translates to:
+  /// **'Donut'**
+  String get ahdDonut;
+
+  /// No description provided for @ahdBars.
+  ///
+  /// In en, this message translates to:
+  /// **'Bars'**
+  String get ahdBars;
+
+  /// No description provided for @ahdLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get ahdLine;
+
+  /// No description provided for @ahdCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{measure} by {split}'**
+  String ahdCardTitle(String measure, String split);
+
+  /// No description provided for @ahdCardSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} · {count}'**
+  String ahdCardSub(String type, String count);
+
+  /// No description provided for @ahdStLine.
+  ///
+  /// In en, this message translates to:
+  /// **'A line needs at least 2 months of data.'**
+  String get ahdStLine;
+
+  /// No description provided for @ahdStNoTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags in these results.'**
+  String get ahdStNoTags;
+
+  /// No description provided for @ahdStNoAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts in these results.'**
+  String get ahdStNoAccounts;
+
+  /// No description provided for @ahdStNoCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories in these results.'**
+  String get ahdStNoCategories;
+
+  /// No description provided for @ahdStNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to split in these results.'**
+  String get ahdStNothing;
+
+  /// No description provided for @ahdStWrongCombo.
+  ///
+  /// In en, this message translates to:
+  /// **'Line charts work by month or year. Change the split or the chart type.'**
+  String get ahdStWrongCombo;
+
+  /// No description provided for @ahdSplitByMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Split by month'**
+  String get ahdSplitByMonth;
+
+  /// No description provided for @ahdChangeChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Change chart'**
+  String get ahdChangeChart;
+
+  /// No description provided for @ahdStNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions match this filter.'**
+  String get ahdStNoResults;
+
+  /// No description provided for @ahdBuilderAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add chart'**
+  String get ahdBuilderAdd;
+
+  /// No description provided for @ahdBuilderEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit chart'**
+  String get ahdBuilderEdit;
+
+  /// No description provided for @ahdChartType.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart type'**
+  String get ahdChartType;
+
+  /// No description provided for @ahdSplitBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Split by'**
+  String get ahdSplitBy;
+
+  /// No description provided for @ahdShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get ahdShow;
+
+  /// No description provided for @ahdCurrentGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Current group'**
+  String get ahdCurrentGroup;
+
+  /// No description provided for @ahdUpdateChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Update chart'**
+  String get ahdUpdateChart;
+
+  /// No description provided for @ahdRemoveChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove chart'**
+  String get ahdRemoveChart;
+
+  /// No description provided for @ahdBlkNoTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags in these results'**
+  String get ahdBlkNoTags;
+
+  /// No description provided for @ahdBlkOneAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one account in these results'**
+  String get ahdBlkOneAccount;
+
+  /// No description provided for @ahdBlkOneType.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one type in these results'**
+  String get ahdBlkOneType;
+
+  /// No description provided for @ahdBlkOneSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one source in these results'**
+  String get ahdBlkOneSource;
+
+  /// No description provided for @ahdBlkOneCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one category in these results'**
+  String get ahdBlkOneCategory;
+
+  /// No description provided for @ahdBlkOneMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'All results are in one month'**
+  String get ahdBlkOneMonth;
+
+  /// No description provided for @ahdBlkOneYear.
+  ///
+  /// In en, this message translates to:
+  /// **'All results are in one year'**
+  String get ahdBlkOneYear;
+
+  /// No description provided for @ahdTagNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions with more than one tag appear in each tag group, so totals can add up to more than the overall total.'**
+  String get ahdTagNote;
+
+  /// No description provided for @ahdLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get ahdLoadMore;
+
+  /// No description provided for @ahdEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions match'**
+  String get ahdEmptyTitle;
+
+  /// No description provided for @ahdEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this phone matches all of these. Try a lower amount or remove a filter.'**
+  String get ahdEmptyBody;
+
+  /// No description provided for @ahdErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load results'**
+  String get ahdErrorTitle;
+
+  /// No description provided for @ahdErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while reading your transactions. Your data is safe and nothing was changed.'**
+  String get ahdErrorBody;
+
+  /// No description provided for @ahdTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get ahdTryAgain;
+
+  /// No description provided for @ahdGsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get ahdGsTotal;
+
+  /// No description provided for @ahdGsLargest.
+  ///
+  /// In en, this message translates to:
+  /// **'Largest'**
+  String get ahdGsLargest;
+
+  /// No description provided for @ahdChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed {name}'**
+  String ahdChanged(String name);
+
+  /// No description provided for @ahdChFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed the filter'**
+  String get ahdChFilter;
+
+  /// No description provided for @ahdChGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed the grouping'**
+  String get ahdChGroup;
+
+  /// No description provided for @ahdChSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed the sort'**
+  String get ahdChSort;
+
+  /// No description provided for @ahdChKpis.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed the KPI cards'**
+  String get ahdChKpis;
+
+  /// No description provided for @ahdChAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added a chart'**
+  String get ahdChAdded;
+
+  /// No description provided for @ahdChRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed a chart'**
+  String get ahdChRemoved;
+
+  /// No description provided for @ahdChMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved a chart'**
+  String get ahdChMoved;
+
+  /// No description provided for @ahdChEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited a chart'**
+  String get ahdChEdited;
+
+  /// No description provided for @ahdSaveAsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as new'**
+  String get ahdSaveAsNew;
+
+  /// No description provided for @ahdSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get ahdSaveChanges;
+
+  /// No description provided for @ahdUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} updated'**
+  String ahdUpdated(String name);
+
+  /// No description provided for @ahdSaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this view'**
+  String get ahdSaveTitle;
+
+  /// No description provided for @ahdNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this view a name'**
+  String get ahdNameHint;
+
+  /// No description provided for @ahdNameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a view called {name}'**
+  String ahdNameTaken(String name);
+
+  /// No description provided for @ahdSumFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} filter} other{{n} filters}}'**
+  String ahdSumFilters(int n);
+
+  /// No description provided for @ahdSumGrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'grouped by {group}'**
+  String ahdSumGrouped(String group);
+
+  /// No description provided for @ahdSumSorted.
+  ///
+  /// In en, this message translates to:
+  /// **'sorted by {field}'**
+  String ahdSumSorted(String field);
+
+  /// No description provided for @ahdSumCharts.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} chart} other{{n} charts}}'**
+  String ahdSumCharts(int n);
+
+  /// No description provided for @ahdSumEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing set yet'**
+  String get ahdSumEmpty;
+
+  /// No description provided for @ahdWhatSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'What will be saved'**
+  String get ahdWhatSaved;
+
+  /// No description provided for @ahdWsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get ahdWsFilter;
+
+  /// No description provided for @ahdWsGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by'**
+  String get ahdWsGroup;
+
+  /// No description provided for @ahdWsSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get ahdWsSort;
+
+  /// No description provided for @ahdWsCharts.
+  ///
+  /// In en, this message translates to:
+  /// **'Charts'**
+  String get ahdWsCharts;
+
+  /// No description provided for @ahdWsKpis.
+  ///
+  /// In en, this message translates to:
+  /// **'KPI cards'**
+  String get ahdWsKpis;
+
+  /// No description provided for @ahdNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get ahdNotSet;
+
+  /// No description provided for @ahdKpisShown.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} shown'**
+  String ahdKpisShown(int n);
+
+  /// No description provided for @ahdBackupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in your JSON backup.'**
+  String get ahdBackupNote;
+
+  /// No description provided for @ahdSavedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as {name}'**
+  String ahdSavedSnack(String name);
+
+  /// No description provided for @ahdSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved views'**
+  String get ahdSavedTitle;
+
+  /// No description provided for @ahdSavedEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved views yet'**
+  String get ahdSavedEmptyTitle;
+
+  /// No description provided for @ahdSavedEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up a filter, grouping or charts, then choose Save this view in the menu.'**
+  String get ahdSavedEmptyBody;
+
+  /// No description provided for @ahdRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get ahdRename;
+
+  /// No description provided for @ahdRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename view'**
+  String get ahdRenameTitle;
+
+  /// No description provided for @ahdDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String ahdDeleteTitle(String name);
+
+  /// No description provided for @ahdDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the saved view only. Your transactions stay as they are.'**
+  String get ahdDeleteBody;
+
+  /// No description provided for @ahdExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export results'**
+  String get ahdExportTitle;
+
+  /// No description provided for @ahdExportFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current filter'**
+  String get ahdExportFilter;
+
+  /// No description provided for @ahdExportNoFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No filter'**
+  String get ahdExportNoFilter;
+
+  /// No description provided for @ahdExportNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Exactly these {n} transactions, in the same columns as the History CSV export. Grouping and charts are not exported.'**
+  String ahdExportNote(String n);
+
+  /// No description provided for @ahdExportSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to folder'**
+  String get ahdExportSave;
+
+  /// No description provided for @ahdExportShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get ahdExportShare;
+
+  /// No description provided for @ahdExportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'File saved'**
+  String get ahdExportSaved;
+
+  /// No description provided for @ahdExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t build the file. Nothing was changed.'**
+  String get ahdExportFailed;
+
+  /// No description provided for @ahdHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this page works'**
+  String get ahdHelpTitle;
+
+  /// No description provided for @ahdHelpFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Filter to pick what to see: a category, an amount, dates and more.'**
+  String get ahdHelpFilter;
+
+  /// No description provided for @ahdHelpGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Puts results into rows by category, account, tag, month and more.'**
+  String get ahdHelpGroup;
+
+  /// No description provided for @ahdHelpSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the order of transactions or groups.'**
+  String get ahdHelpSort;
+
+  /// No description provided for @ahdHelpCharts.
+  ///
+  /// In en, this message translates to:
+  /// **'Add up to 4 charts. Each one follows your filter. Tap a part to open it.'**
+  String get ahdHelpCharts;
+
+  /// No description provided for @ahdHelpSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves the whole page so you can open it again with one tap.'**
+  String get ahdHelpSaved;
+
+  /// No description provided for @ahdCharts.
+  ///
+  /// In en, this message translates to:
+  /// **'Charts'**
+  String get ahdCharts;
+
+  /// No description provided for @ahdInfoOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'About this'**
+  String get ahdInfoOpen;
+
+  /// No description provided for @loanSplitNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 EMI doesn\'t match your loan schedule.} other{{n} EMIs don\'t match your loan schedule.}}'**
+  String loanSplitNotice(int n);
+
+  /// No description provided for @loanSplitNoticeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Their interest and principal split is off. Amounts paid are fine.'**
+  String get loanSplitNoticeSub;
+
+  /// No description provided for @loanSplitFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix'**
+  String get loanSplitFix;
+
+  /// No description provided for @loanFixTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix EMI splits'**
+  String get loanFixTitle;
+
+  /// No description provided for @loanFixCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 EMI} other{{n} EMIs}}'**
+  String loanFixCount(int n);
+
+  /// No description provided for @loanFixRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} to {to}'**
+  String loanFixRange(String from, String to);
+
+  /// No description provided for @loanFixNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get loanFixNow;
+
+  /// No description provided for @loanFixAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After fix'**
+  String get loanFixAfter;
+
+  /// No description provided for @loanFixInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get loanFixInterest;
+
+  /// No description provided for @loanFixPrincipal.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get loanFixPrincipal;
+
+  /// No description provided for @loanFixTotalPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Total paid'**
+  String get loanFixTotalPaid;
+
+  /// No description provided for @loanFixSame.
+  ///
+  /// In en, this message translates to:
+  /// **'Same'**
+  String get loanFixSame;
+
+  /// No description provided for @loanFixKept.
+  ///
+  /// In en, this message translates to:
+  /// **'EMIs you edited stay as they are ({n} kept)'**
+  String loanFixKept(int n);
+
+  /// No description provided for @loanFixInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the split between interest and principal changes. Amounts, dates and accounts stay the same. Outstanding becomes {amount}.'**
+  String loanFixInfo(String amount);
+
+  /// No description provided for @loanFixing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixing'**
+  String get loanFixing;
+
+  /// No description provided for @loanFixedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 EMI fixed.} other{{n} EMIs fixed.}} Outstanding is now {amount}.'**
+  String loanFixedSnack(int n, String amount);
+
+  /// No description provided for @loanFixUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get loanFixUndo;
+
+  /// No description provided for @loanRecheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck EMI splits'**
+  String get loanRecheck;
+
+  /// No description provided for @loanAllMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything matches. All {n} EMIs follow your loan schedule.'**
+  String loanAllMatch(int n);
+
+  /// No description provided for @loanFixLonger.
+  ///
+  /// In en, this message translates to:
+  /// **'Your loan got longer because later parts were added while keeping the same EMI.'**
+  String get loanFixLonger;
+
+  /// No description provided for @historyMenuAdvancedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'AND / OR filters, groups, charts'**
+  String get historyMenuAdvancedSub;
+
+  /// No description provided for @ahqFieldType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get ahqFieldType;
+
+  /// No description provided for @ahqFieldAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get ahqFieldAmount;
+
+  /// No description provided for @ahqFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get ahqFieldCategory;
+
+  /// No description provided for @ahqFieldAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get ahqFieldAccount;
+
+  /// No description provided for @ahqFieldTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get ahqFieldTag;
+
+  /// No description provided for @ahqFieldDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get ahqFieldDate;
+
+  /// No description provided for @ahqFieldWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get ahqFieldWords;
+
+  /// No description provided for @ahqFieldHas.
+  ///
+  /// In en, this message translates to:
+  /// **'Has'**
+  String get ahqFieldHas;
+
+  /// No description provided for @ahqFieldSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get ahqFieldSource;
+
+  /// No description provided for @ahqFieldSubType.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get ahqFieldSubType;
+
+  /// No description provided for @ahqTypeExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get ahqTypeExpense;
+
+  /// No description provided for @ahqTypeIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get ahqTypeIncome;
+
+  /// No description provided for @ahqTypeTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get ahqTypeTransfer;
+
+  /// No description provided for @ahqSourceManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Typed by you'**
+  String get ahqSourceManual;
+
+  /// No description provided for @ahqSourceSms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS'**
+  String get ahqSourceSms;
+
+  /// No description provided for @ahqSourceQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get ahqSourceQuickAdd;
+
+  /// No description provided for @ahqSourceRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get ahqSourceRecurring;
+
+  /// No description provided for @ahqSourceImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get ahqSourceImport;
+
+  /// No description provided for @ahqHasAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get ahqHasAttachment;
+
+  /// No description provided for @ahqHasNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get ahqHasNote;
+
+  /// No description provided for @ahqSubLoanRepayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan repayment'**
+  String get ahqSubLoanRepayment;
+
+  /// No description provided for @ahqSubInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment'**
+  String get ahqSubInvestment;
+
+  /// No description provided for @ahqSubSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get ahqSubSavings;
+
+  /// No description provided for @ahqSubLent.
+  ///
+  /// In en, this message translates to:
+  /// **'Lent'**
+  String get ahqSubLent;
+
+  /// No description provided for @ahqSubBorrowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Borrowed'**
+  String get ahqSubBorrowed;
+
+  /// No description provided for @ahqSubInvestmentReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment return'**
+  String get ahqSubInvestmentReturn;
+
+  /// No description provided for @ahqSubLoanReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan received'**
+  String get ahqSubLoanReceived;
+
+  /// No description provided for @ahqSubLoanDisbursement.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan disbursement'**
+  String get ahqSubLoanDisbursement;
+
+  /// No description provided for @ahqOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get ahqOr;
+
+  /// No description provided for @ahqNone.
+  ///
+  /// In en, this message translates to:
+  /// **'none'**
+  String get ahqNone;
+
+  /// No description provided for @ahqRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} to {to}'**
+  String ahqRange(String from, String to);
+
+  /// No description provided for @ahqAmountOver.
+  ///
+  /// In en, this message translates to:
+  /// **'over {amount}'**
+  String ahqAmountOver(String amount);
+
+  /// No description provided for @ahqAmountUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'under {amount}'**
+  String ahqAmountUnder(String amount);
+
+  /// No description provided for @ahqAmountOrMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} or more'**
+  String ahqAmountOrMore(String amount);
+
+  /// No description provided for @ahqAmountOrLess.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} or less'**
+  String ahqAmountOrLess(String amount);
+
+  /// No description provided for @ahqDateThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get ahqDateThisMonth;
+
+  /// No description provided for @ahqDateLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get ahqDateLastMonth;
+
+  /// No description provided for @ahqDateThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get ahqDateThisYear;
+
+  /// No description provided for @ahqDateLastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Last year'**
+  String get ahqDateLastYear;
+
+  /// No description provided for @ahqDateLastDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Last day} other{Last {n} days}}'**
+  String ahqDateLastDays(int n);
+
+  /// No description provided for @ahqDateAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After {date}'**
+  String ahqDateAfter(String date);
+
+  /// No description provided for @ahqDateBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before {date}'**
+  String ahqDateBefore(String date);
+
+  /// No description provided for @ahqDateFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {date}'**
+  String ahqDateFrom(String date);
+
+  /// No description provided for @ahqDateUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String ahqDateUntil(String date);
+
+  /// No description provided for @ahqRbTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get ahqRbTransactions;
+
+  /// No description provided for @ahqRbExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get ahqRbExpenses;
+
+  /// No description provided for @ahqRbIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get ahqRbIncome;
+
+  /// No description provided for @ahqRbTransfers.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get ahqRbTransfers;
+
+  /// No description provided for @ahqRbAmountIs.
+  ///
+  /// In en, this message translates to:
+  /// **'of {amount}'**
+  String ahqRbAmountIs(String amount);
+
+  /// No description provided for @ahqRbIn.
+  ///
+  /// In en, this message translates to:
+  /// **'in {names}'**
+  String ahqRbIn(String names);
+
+  /// No description provided for @ahqRbNotIn.
+  ///
+  /// In en, this message translates to:
+  /// **'not in {names}'**
+  String ahqRbNotIn(String names);
+
+  /// No description provided for @ahqRbFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'from {names}'**
+  String ahqRbFrom(String names);
+
+  /// No description provided for @ahqRbNotFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'not from {names}'**
+  String ahqRbNotFrom(String names);
+
+  /// No description provided for @ahqRbTagged.
+  ///
+  /// In en, this message translates to:
+  /// **'tagged {tags}'**
+  String ahqRbTagged(String tags);
+
+  /// No description provided for @ahqRbNotTagged.
+  ///
+  /// In en, this message translates to:
+  /// **'not tagged {tags}'**
+  String ahqRbNotTagged(String tags);
+
+  /// No description provided for @ahqRbNoTags.
+  ///
+  /// In en, this message translates to:
+  /// **'with no tags'**
+  String get ahqRbNoTags;
+
+  /// No description provided for @ahqRbHasTags.
+  ///
+  /// In en, this message translates to:
+  /// **'with tags'**
+  String get ahqRbHasTags;
+
+  /// No description provided for @ahqRbWithAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'with an attachment'**
+  String get ahqRbWithAttachment;
+
+  /// No description provided for @ahqRbWithoutAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'without an attachment'**
+  String get ahqRbWithoutAttachment;
+
+  /// No description provided for @ahqRbWithNote.
+  ///
+  /// In en, this message translates to:
+  /// **'with a note'**
+  String get ahqRbWithNote;
+
+  /// No description provided for @ahqRbWithoutNote.
+  ///
+  /// In en, this message translates to:
+  /// **'without a note'**
+  String get ahqRbWithoutNote;
+
+  /// No description provided for @ahqRbSms.
+  ///
+  /// In en, this message translates to:
+  /// **'from SMS'**
+  String get ahqRbSms;
+
+  /// No description provided for @ahqRbManual.
+  ///
+  /// In en, this message translates to:
+  /// **'typed by you'**
+  String get ahqRbManual;
+
+  /// No description provided for @ahqRbQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'from Quick Add'**
+  String get ahqRbQuickAdd;
+
+  /// No description provided for @ahqRbRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'from recurring'**
+  String get ahqRbRecurring;
+
+  /// No description provided for @ahqRbImported.
+  ///
+  /// In en, this message translates to:
+  /// **'imported'**
+  String get ahqRbImported;
+
+  /// No description provided for @ahqRbNot.
+  ///
+  /// In en, this message translates to:
+  /// **'not {text}'**
+  String ahqRbNot(String text);
+
+  /// No description provided for @ahqRbWords.
+  ///
+  /// In en, this message translates to:
+  /// **'with “{text}” in the title or note'**
+  String ahqRbWords(String text);
+
+  /// No description provided for @ahqRbNoWords.
+  ///
+  /// In en, this message translates to:
+  /// **'without “{text}” in the title or note'**
+  String ahqRbNoWords(String text);
+
+  /// No description provided for @ahqRbKind.
+  ///
+  /// In en, this message translates to:
+  /// **'that are {kind}'**
+  String ahqRbKind(String kind);
+
+  /// No description provided for @ahqRbDateIn.
+  ///
+  /// In en, this message translates to:
+  /// **'in {date}'**
+  String ahqRbDateIn(String date);
+
+  /// No description provided for @ahqRbDateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String ahqRbDateOn(String date);
+
+  /// No description provided for @ahqRbDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'from {date}'**
+  String ahqRbDateRange(String date);
+
+  /// No description provided for @ahqRbNotGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'not ({text})'**
+  String ahqRbNotGroup(String text);
+
+  /// No description provided for @ahqErrCloseBracket.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing closing bracket'**
+  String get ahqErrCloseBracket;
+
+  /// No description provided for @ahqErrCloseBracketAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing closing bracket. Add ) after {token}.'**
+  String ahqErrCloseBracketAfter(String token);
+
+  /// No description provided for @ahqErrOpenBracket.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing opening bracket'**
+  String get ahqErrOpenBracket;
+
+  /// No description provided for @ahqErrField.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown field “{name}”. Did you mean {suggestion}?'**
+  String ahqErrField(String name, String suggestion);
+
+  /// No description provided for @ahqErrFieldPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown field “{name}”.'**
+  String ahqErrFieldPlain(String name);
+
+  /// No description provided for @ahqErrAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount needs a number, like amount:>500'**
+  String get ahqErrAmount;
+
+  /// No description provided for @ahqErrDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date needs a year, month or day, like date:2026-03'**
+  String get ahqErrDate;
+
+  /// No description provided for @ahqErrValue.
+  ///
+  /// In en, this message translates to:
+  /// **'No {field} called “{name}”'**
+  String ahqErrValue(String field, String name);
+
+  /// No description provided for @ahqErrValueDid.
+  ///
+  /// In en, this message translates to:
+  /// **'No {field} called “{name}”. Did you mean {suggestion}?'**
+  String ahqErrValueDid(String field, String name, String suggestion);
+
+  /// No description provided for @ahqErrOr.
+  ///
+  /// In en, this message translates to:
+  /// **'OR needs something on both sides.'**
+  String get ahqErrOr;
+
+  /// No description provided for @ahqErrEmptyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a filter between the brackets.'**
+  String get ahqErrEmptyGroup;
+
+  /// No description provided for @ahqErrBadToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t read “{text}”.'**
+  String ahqErrBadToken(String text);
+
+  /// No description provided for @ahqUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Untagged'**
+  String get ahqUntagged;
+
+  /// No description provided for @ahqNoCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No category'**
+  String get ahqNoCategory;
+
+  /// No description provided for @ahqOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get ahqOther;
+
+  /// No description provided for @ahqUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get ahqUnknown;
+
+  /// No description provided for @ahfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get ahfTitle;
+
+  /// No description provided for @ahfNoFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No filters yet'**
+  String get ahfNoFilters;
+
+  /// No description provided for @ahfFilterOne.
+  ///
+  /// In en, this message translates to:
+  /// **'filter'**
+  String get ahfFilterOne;
+
+  /// No description provided for @ahfFilterMany.
+  ///
+  /// In en, this message translates to:
+  /// **'filters'**
+  String get ahfFilterMany;
+
+  /// No description provided for @ahfClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get ahfClearAll;
+
+  /// No description provided for @ahfCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters cleared'**
+  String get ahfCleared;
+
+  /// No description provided for @ahfUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get ahfUndo;
+
+  /// No description provided for @ahfPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a filter or pick a field'**
+  String get ahfPlaceholder;
+
+  /// No description provided for @ahfPlaceholderFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a field, like category'**
+  String get ahfPlaceholderFocused;
+
+  /// No description provided for @ahfImplicitNote.
+  ///
+  /// In en, this message translates to:
+  /// **'\"and\" is read before \"or\". The dashed box shows how the app groups this. Add brackets to change it.'**
+  String get ahfImplicitNote;
+
+  /// No description provided for @ahfAddFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a filter'**
+  String get ahfAddFilter;
+
+  /// No description provided for @ahfPlainWords.
+  ///
+  /// In en, this message translates to:
+  /// **'In plain words'**
+  String get ahfPlainWords;
+
+  /// No description provided for @ahfTryOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Try one'**
+  String get ahfTryOne;
+
+  /// No description provided for @ahfExFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food over ₹500 this year'**
+  String get ahfExFood;
+
+  /// No description provided for @ahfExAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Has attachment'**
+  String get ahfExAttachment;
+
+  /// No description provided for @ahfExUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Untagged expenses'**
+  String get ahfExUntagged;
+
+  /// No description provided for @ahfExCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card spends last month'**
+  String get ahfExCard;
+
+  /// No description provided for @ahfShowN.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {n} transactions'**
+  String ahfShowN(int n);
+
+  /// No description provided for @ahfShowCounting.
+  ///
+  /// In en, this message translates to:
+  /// **'Show transactions'**
+  String get ahfShowCounting;
+
+  /// No description provided for @ahfNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions match'**
+  String get ahfNoMatch;
+
+  /// No description provided for @ahfDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get ahfDone;
+
+  /// No description provided for @ahfHintType.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense, income or transfer'**
+  String get ahfHintType;
+
+  /// No description provided for @ahfHintAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Over, under or between amounts'**
+  String get ahfHintAmount;
+
+  /// No description provided for @ahfHintCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Your categories'**
+  String get ahfHintCategory;
+
+  /// No description provided for @ahfHintAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the money moved'**
+  String get ahfHintAccount;
+
+  /// No description provided for @ahfHintTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tags, or no tags'**
+  String get ahfHintTag;
+
+  /// No description provided for @ahfHintDate.
+  ///
+  /// In en, this message translates to:
+  /// **'This month, a year or any range'**
+  String get ahfHintDate;
+
+  /// No description provided for @ahfHintHas.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment or note'**
+  String get ahfHintHas;
+
+  /// No description provided for @ahfHintSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Typed, SMS, Quick Add and more'**
+  String get ahfHintSource;
+
+  /// No description provided for @ahfHintWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Words in the title or note'**
+  String get ahfHintWords;
+
+  /// No description provided for @ahfFilterBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by'**
+  String get ahfFilterBy;
+
+  /// No description provided for @ahfIs.
+  ///
+  /// In en, this message translates to:
+  /// **'is'**
+  String get ahfIs;
+
+  /// No description provided for @ahfIsNot.
+  ///
+  /// In en, this message translates to:
+  /// **'is not'**
+  String get ahfIsNot;
+
+  /// No description provided for @ahfAddFilterBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add filter'**
+  String get ahfAddFilterBtn;
+
+  /// No description provided for @ahfAddFilterN.
+  ///
+  /// In en, this message translates to:
+  /// **'Add filter · {n} selected'**
+  String ahfAddFilterN(int n);
+
+  /// No description provided for @ahfPickMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick more than one to match any of them.'**
+  String get ahfPickMany;
+
+  /// No description provided for @ahfOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Over'**
+  String get ahfOver;
+
+  /// No description provided for @ahfUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'Under'**
+  String get ahfUnder;
+
+  /// No description provided for @ahfBetween.
+  ///
+  /// In en, this message translates to:
+  /// **'Between'**
+  String get ahfBetween;
+
+  /// No description provided for @ahfAmountIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Is'**
+  String get ahfAmountIs;
+
+  /// No description provided for @ahfAmountNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount without the plus or minus sign.'**
+  String get ahfAmountNote;
+
+  /// No description provided for @ahfFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get ahfFrom;
+
+  /// No description provided for @ahfTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get ahfTo;
+
+  /// No description provided for @ahfSearchCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories'**
+  String get ahfSearchCategories;
+
+  /// No description provided for @ahfSearchAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Search accounts'**
+  String get ahfSearchAccounts;
+
+  /// No description provided for @ahfSearchTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags'**
+  String get ahfSearchTags;
+
+  /// No description provided for @ahfHasNoTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Has no tags'**
+  String get ahfHasNoTags;
+
+  /// No description provided for @ahfNothingFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found'**
+  String get ahfNothingFound;
+
+  /// No description provided for @ahfDateQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick'**
+  String get ahfDateQuick;
+
+  /// No description provided for @ahfDateLast30.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get ahfDateLast30;
+
+  /// No description provided for @ahfDateMonthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'A month or a year'**
+  String get ahfDateMonthYear;
+
+  /// No description provided for @ahfAllOfYear.
+  ///
+  /// In en, this message translates to:
+  /// **'All of {year}'**
+  String ahfAllOfYear(String year);
+
+  /// No description provided for @ahfDateCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range'**
+  String get ahfDateCustom;
+
+  /// No description provided for @ahfDateCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a start and end date'**
+  String get ahfDateCustomHint;
+
+  /// No description provided for @ahfSrcNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring includes loan EMIs. Import is CSV or a Kuber file.'**
+  String get ahfSrcNote;
+
+  /// No description provided for @ahfWordsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Searches the title and the note. Not case sensitive.'**
+  String get ahfWordsNote;
+
+  /// No description provided for @ahfWordsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Like swiggy'**
+  String get ahfWordsHint;
+
+  /// No description provided for @ahfTypeItLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Type it like'**
+  String get ahfTypeItLike;
+
+  /// No description provided for @ahfInfo1.
+  ///
+  /// In en, this message translates to:
+  /// **'Type in the box, or pick a field under it. Both add to the same box, where the cursor is.'**
+  String get ahfInfo1;
+
+  /// No description provided for @ahfInfo2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap and between two filters to make it or. A shaded box shows what goes together.'**
+  String get ahfInfo2;
+
+  /// No description provided for @ahfInfo3.
+  ///
+  /// In en, this message translates to:
+  /// **'The bar has ( ), and, or and not. Brackets show as a box inside a box.'**
+  String get ahfInfo3;
+
+  /// No description provided for @ahfHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to type a filter'**
+  String get ahfHowTitle;
+
+  /// No description provided for @ahfSyn1.
+  ///
+  /// In en, this message translates to:
+  /// **'A field and a value'**
+  String get ahfSyn1;
+
+  /// No description provided for @ahfSyn2.
+  ///
+  /// In en, this message translates to:
+  /// **'Either value: food or travel'**
+  String get ahfSyn2;
+
+  /// No description provided for @ahfSyn3.
+  ///
+  /// In en, this message translates to:
+  /// **'Over an amount. Use < for under, or 500..2000 for between'**
+  String get ahfSyn3;
+
+  /// No description provided for @ahfSyn4.
+  ///
+  /// In en, this message translates to:
+  /// **'A year, a month or a day'**
+  String get ahfSyn4;
+
+  /// No description provided for @ahfSyn5.
+  ///
+  /// In en, this message translates to:
+  /// **'Words in the title or note'**
+  String get ahfSyn5;
+
+  /// No description provided for @ahfSyn6.
+  ///
+  /// In en, this message translates to:
+  /// **'Both, or either. \"and\" is read before \"or\"'**
+  String get ahfSyn6;
+
+  /// No description provided for @ahfSyn7.
+  ///
+  /// In en, this message translates to:
+  /// **'Group filters together'**
+  String get ahfSyn7;
+
+  /// No description provided for @ahfSyn8.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave these out. You can also type -tag:trip'**
+  String get ahfSyn8;
+
+  /// No description provided for @ahfDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get ahfDiscardTitle;
+
+  /// No description provided for @ahfDiscardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes to the filter have not been applied.'**
+  String get ahfDiscardBody;
+
+  /// No description provided for @ahfKeepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get ahfKeepEditing;
+
+  /// No description provided for @ahfDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get ahfDiscard;
+
+  /// No description provided for @ahfTokenSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{text}, double tap to edit'**
+  String ahfTokenSemantics(String text);
+
+  /// No description provided for @ahfTokenInvalidSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{text}, not valid, double tap to edit'**
+  String ahfTokenInvalidSemantics(String text);
+
+  /// No description provided for @ahfJoinerSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{word}, double tap to change to {other}'**
+  String ahfJoinerSemantics(String word, String other);
+
+  /// No description provided for @ahfBoxSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Group of {n} filters'**
+  String ahfBoxSemantics(int n);
+
+  /// No description provided for @ahfBracketOpenSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening bracket'**
+  String get ahfBracketOpenSemantics;
+
+  /// No description provided for @ahfBracketCloseSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing bracket'**
+  String get ahfBracketCloseSemantics;
+
+  /// No description provided for @ahfGhostBracketSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing bracket goes here'**
+  String get ahfGhostBracketSemantics;
+
+  /// No description provided for @ahfOpOpenSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Open bracket'**
+  String get ahfOpOpenSemantics;
+
+  /// No description provided for @ahfOpCloseSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Close bracket'**
+  String get ahfOpCloseSemantics;
+
+  /// No description provided for @ahfHideKeyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide keyboard'**
+  String get ahfHideKeyboard;
+
+  /// No description provided for @ahfCountSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} filters'**
+  String ahfCountSemantics(int n);
 }
 
 class _AppLocalizationsDelegate

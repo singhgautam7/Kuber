@@ -1344,7 +1344,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get filterInc => 'ਆਮਦਨ';
 
   @override
-  String get advancedFiltersTooltip => 'ਉੱਨਤ ਫਿਲਟਰ';
+  String get advancedFiltersTooltip => 'ਫਿਲਟਰ';
 
   @override
   String get clearFiltersTooltip => 'ਫਿਲਟਰ ਸਾਫ਼ ਕਰੋ';
@@ -1362,7 +1362,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get selectRange => 'ਰੇਂਜ ਚੁਣੋ';
 
   @override
-  String get advancedFiltersTitle => 'ਉੱਨਤ ਫਿਲਟਰ';
+  String get advancedFiltersTitle => 'ਫਿਲਟਰ';
 
   @override
   String get clearAll => 'ਸਾਰੇ ਸਾਫ਼ ਕਰੋ';
@@ -2289,7 +2289,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get editAnalyticsWidgetsDesc => 'ਵਿਸ਼ਲੇਸ਼ਣ ਵਿਜੇਟਸ ਚੁਣੋ ਅਤੇ ਕ੍ਰਮ ਬਦਲੋ';
 
   @override
-  String get filterAll => 'ਸਭ';
+  String get filterAll => '· ਸਭ';
 
   @override
   String get filterToday => 'ਅੱਜ';
@@ -2495,7 +2495,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get menuRateKuber => 'ਕੁਬੇਰ ਨੂੰ ਰੇਟ ਕਰੋ';
 
   @override
-  String get menuShare => 'ਸਾਂਝਾ ਕਰੋ';
+  String get menuShare => 'ਰੈਫ਼ਰ ਕਰੋ';
 
   @override
   String get menuFeedbackShort => 'ਫੀਡਬੈਕ';
@@ -4323,7 +4323,7 @@ class AppLocalizationsPa extends AppLocalizations {
       'ਇਹਨਾਂ ਚਿਪਸ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਤੁਰੰਤ ਆਮਦਨ, ਖਰਚੇ, ਜਾਂ ਟਰਾਂਸਫਰ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ।';
 
   @override
-  String get tutCh2St2Title => 'ਐਡਵਾਂਸਡ ਫਿਲਟਰ';
+  String get tutCh2St2Title => 'ਫਿਲਟਰ';
 
   @override
   String get tutCh2St2Desc =>
@@ -9594,4 +9594,1400 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get deleteLoanAction => 'ਕਰਜ਼ਾ ਮਿਟਾਓ';
+
+  @override
+  String get saveFileFailed => 'ਫ਼ਾਈਲ ਸੇਵ ਨਹੀਂ ਹੋ ਸਕੀ। ਕੋਈ ਹੋਰ ਫ਼ੋਲਡਰ ਚੁਣੋ।';
+
+  @override
+  String get saveFileShareFailed =>
+      'ਫ਼ਾਈਲ ਸਾਂਝੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।';
+
+  @override
+  String get saveFileCsvNoViews =>
+      'CSV ਬੈਕਅੱਪ ਵਿੱਚ ਸੇਵ ਕੀਤੇ ਵਿਊ ਸ਼ਾਮਲ ਨਹੀਂ ਹੁੰਦੇ। ਉਹਨਾਂ ਨੂੰ ਰੱਖਣ ਲਈ JSON ਬੈਕਅੱਪ ਵਰਤੋ।';
+
+  @override
+  String get historyMenuAdvanced => 'ਐਡਵਾਂਸਡ ਹਿਸਟਰੀ';
+
+  @override
+  String filterSelectedN(int n) {
+    return '· $n ਚੁਣੇ';
+  }
+
+  @override
+  String get filterSearchCategories => 'ਸ਼੍ਰੇਣੀਆਂ ਖੋਜੋ';
+
+  @override
+  String get filterSearchTags => 'ਟੈਗ ਖੋਜੋ';
+
+  @override
+  String filterNoMatch(String section, String text) {
+    return '“$text” ਨਾਲ ਕੋਈ $section ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ';
+  }
+
+  @override
+  String filterTryAdvanced(String link) {
+    return 'AND / OR ਫਿਲਟਰ ਚਾਹੀਦੇ ਹਨ? $link ਅਜ਼ਮਾਓ';
+  }
+
+  @override
+  String get setSecProfile => 'ਪ੍ਰੋਫ਼ਾਈਲ';
+
+  @override
+  String get setSecAbout => 'ਬਾਰੇ';
+
+  @override
+  String get setSecPermissions => 'ਇਜਾਜ਼ਤਾਂ';
+
+  @override
+  String get menuAdvancedHistory => 'ਐਡਵਾਂਸਡ ਹਿਸਟਰੀ';
+
+  @override
+  String get menuAdvancedHistoryDesc =>
+      'ਹਰ ਲੈਣ-ਦੇਣ ਨੂੰ ਫਿਲਟਰ, ਗਰੁੱਪ ਅਤੇ ਚਾਰਟ ਕਰੋ';
+
+  @override
+  String get rateTitle => 'ਕੁਬੇਰ ਪਸੰਦ ਆ ਰਿਹਾ ਹੈ?';
+
+  @override
+  String get rateBody =>
+      'ਕੁਬੇਰ ਇੱਕ ਇਕੱਲਾ ਵਿਅਕਤੀ ਬਣਾਉਂਦਾ ਅਤੇ ਚਲਾਉਂਦਾ ਹੈ। Play Store ਉੱਤੇ ਇੱਕ ਛੋਟੀ ਰੇਟਿੰਗ ਨਾਲ ਹੋਰ ਲੋਕਾਂ ਨੂੰ ਇਹ ਐਪ ਮਿਲਦੀ ਹੈ, ਅਤੇ ਮੈਂ ਤੁਹਾਡੇ ਮੰਗੇ ਫੀਚਰ ਬਣਾਉਂਦਾ ਰਹਿ ਸਕਦਾ ਹਾਂ। ਇਸ ਵਿੱਚ ਇੱਕ ਮਿੰਟ ਤੋਂ ਵੀ ਘੱਟ ਲੱਗਦਾ ਹੈ।';
+
+  @override
+  String get rateCta => 'Play Store ਉੱਤੇ ਰੇਟ ਕਰੋ';
+
+  @override
+  String get rateRefer => 'ਦੋਸਤ ਨੂੰ ਰੈਫ਼ਰ ਕਰੋ';
+
+  @override
+  String get rateLater => 'ਬਾਅਦ ਵਿੱਚ';
+
+  @override
+  String get rateNever => 'ਇਹ ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ';
+
+  @override
+  String get ahdGateHeadline =>
+      'ਹਰ ਲੈਣ-ਦੇਣ ਨੂੰ ਫਿਲਟਰ ਕਰੋ, ਗਰੁੱਪ ਕਰੋ ਅਤੇ ਚਾਰਟ ਬਣਾਓ';
+
+  @override
+  String get ahdGatePill => 'Kuber Pro';
+
+  @override
+  String get ahdGateB1 => 'ਅਤੇ, ਜਾਂ ਅਤੇ ਨਹੀਂ ਨਾਲ ਫਿਲਟਰ ਜੋੜੋ';
+
+  @override
+  String get ahdGateB2 => 'ਸ਼੍ਰੇਣੀ, ਖਾਤਾ, ਟੈਗ, ਮਹੀਨੇ ਅਤੇ ਹੋਰ ਅਨੁਸਾਰ ਗਰੁੱਪ ਕਰੋ';
+
+  @override
+  String get ahdGateB3 => 'ਤੁਹਾਡੇ ਫਿਲਟਰ ਨਾਲ ਚੱਲਣ ਵਾਲੇ ਕੁੱਲ ਅਤੇ ਚਾਰਟ';
+
+  @override
+  String get ahdGateB4 => 'ਵਿਊ ਸੇਵ ਕਰੋ ਅਤੇ ਨਤੀਜੇ CSV ਵਿੱਚ ਐਕਸਪੋਰਟ ਕਰੋ';
+
+  @override
+  String get ahdGateCta => 'Kuber Pro ਵੇਖੋ';
+
+  @override
+  String get ahdGateSample => 'ਨਮੂਨਾ ਡੇਟਾ';
+
+  @override
+  String get ahdGateSheetHeadline => 'Advanced History ਇੱਕ Kuber Pro ਫੀਚਰ ਹੈ';
+
+  @override
+  String get ahdGateSheetBody =>
+      'Kuber Pro ਨਾਲ ਆਪਣੇ ਸਾਰੇ ਲੈਣ-ਦੇਣ ਉੱਤੇ ਕੋਈ ਵੀ ਫਿਲਟਰ ਬਣਾਓ, ਨਤੀਜਿਆਂ ਨੂੰ ਗਰੁੱਪ ਕਰੋ ਅਤੇ ਚਾਰਟ ਵਿੱਚ ਵੇਖੋ, ਵਿਊ ਸੇਵ ਕਰੋ ਅਤੇ CSV ਵਿੱਚ ਐਕਸਪੋਰਟ ਕਰੋ।';
+
+  @override
+  String get ahdTitle => 'Advanced History';
+
+  @override
+  String get ahdMenuSaved => 'ਸੇਵ ਕੀਤੇ ਵਿਊ';
+
+  @override
+  String ahdSavedN(int n) {
+    return '$n ਸੇਵ';
+  }
+
+  @override
+  String get ahdMenuSave => 'ਇਹ ਵਿਊ ਸੇਵ ਕਰੋ';
+
+  @override
+  String get ahdMenuExport => 'ਨਤੀਜੇ ਐਕਸਪੋਰਟ ਕਰੋ (CSV)';
+
+  @override
+  String ahdTxnN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ਲੈਣ-ਦੇਣ',
+      one: '$n ਲੈਣ-ਦੇਣ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdMenuClear => 'ਸਭ ਹਟਾਓ';
+
+  @override
+  String get ahdMenuHelp => 'ਇਹ ਪੰਨਾ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ';
+
+  @override
+  String get ahdFilter => 'ਫਿਲਟਰ';
+
+  @override
+  String get ahdGroup => 'ਗਰੁੱਪ';
+
+  @override
+  String get ahdSort => 'ਕ੍ਰਮ';
+
+  @override
+  String get ahdSaved => 'ਸੇਵ ਕੀਤੇ';
+
+  @override
+  String get ahdSavedEdited => 'ਸੇਵ ਕੀਤਾ · ਬਦਲਿਆ';
+
+  @override
+  String get ahdNone => 'ਕੋਈ ਨਹੀਂ';
+
+  @override
+  String get ahdClearAll => 'ਸਭ ਹਟਾਓ';
+
+  @override
+  String get ahdClearTitle => 'ਫਿਲਟਰ, ਗਰੁੱਪ, ਕ੍ਰਮ ਅਤੇ ਚਾਰਟ ਹਟਾਉਣੇ ਹਨ?';
+
+  @override
+  String get ahdClearBody => 'ਸੇਵ ਕੀਤੇ ਵਿਊ ਨਹੀਂ ਬਦਲਣਗੇ।';
+
+  @override
+  String get ahdStartLine =>
+      'ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਫਿਲਟਰ ਜਾਂ ਗਰੁੱਪ ਚੁਣੋ, ਜਾਂ ਸੇਵ ਕੀਤਾ ਵਿਊ ਖੋਲ੍ਹੋ।';
+
+  @override
+  String get ahdAddFilter => 'ਫਿਲਟਰ ਜੋੜੋ';
+
+  @override
+  String get ahdAddFilterSub => 'ਸ਼੍ਰੇਣੀ, ਰਕਮ, ਤਾਰੀਖ਼ ਅਤੇ ਹੋਰ';
+
+  @override
+  String get ahdGroupBy => 'ਗਰੁੱਪ ਕਰੋ';
+
+  @override
+  String get ahdGroupBySub => 'ਸ਼੍ਰੇਣੀ, ਖਾਤਾ, ਮਹੀਨਾ ਅਤੇ ਹੋਰ';
+
+  @override
+  String get ahdOpenSaved => 'ਸੇਵ ਕੀਤੇ ਖੋਲ੍ਹੋ';
+
+  @override
+  String ahdSavedViewsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ਸੇਵ ਕੀਤੇ ਵਿਊ',
+      one: '$n ਸੇਵ ਕੀਤਾ ਵਿਊ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdNothingSaved => 'ਹਾਲੇ ਕੁਝ ਸੇਵ ਨਹੀਂ';
+
+  @override
+  String get ahdTryOne => 'ਇੱਕ ਅਜ਼ਮਾਓ';
+
+  @override
+  String get ahdEx1 => 'ਇਸ ਸਾਲ ₹500 ਤੋਂ ਵੱਧ ਖਾਣਾ';
+
+  @override
+  String get ahdEx2 => 'ਬਿਨਾਂ ਟੈਗ ਦੇ ਖਰਚੇ';
+
+  @override
+  String get ahdEx3 => '2026 ਵਿੱਚ ਯਾਤਰਾ, ਮਹੀਨੇ ਅਨੁਸਾਰ';
+
+  @override
+  String get ahdYourSaved => 'ਤੁਹਾਡੇ ਸੇਵ ਕੀਤੇ ਵਿਊ';
+
+  @override
+  String get ahdCategory => 'ਸ਼੍ਰੇਣੀ';
+
+  @override
+  String get ahdAccount => 'ਖਾਤਾ';
+
+  @override
+  String get ahdTag => 'ਟੈਗ';
+
+  @override
+  String get ahdType => 'ਕਿਸਮ';
+
+  @override
+  String get ahdSource => 'ਸਰੋਤ';
+
+  @override
+  String get ahdMonth => 'ਮਹੀਨਾ';
+
+  @override
+  String get ahdYear => 'ਸਾਲ';
+
+  @override
+  String get ahdDate => 'ਤਾਰੀਖ਼';
+
+  @override
+  String get ahdAmount => 'ਰਕਮ';
+
+  @override
+  String get ahdTotal => 'ਕੁੱਲ';
+
+  @override
+  String get ahdCount => 'ਗਿਣਤੀ';
+
+  @override
+  String get ahdName => 'ਨਾਮ';
+
+  @override
+  String get ahdAverage => 'ਔਸਤ';
+
+  @override
+  String get ahdSortTxns => 'ਲੈਣ-ਦੇਣ';
+
+  @override
+  String get ahdSortGroups => 'ਗਰੁੱਪ';
+
+  @override
+  String get ahdNewest => 'ਨਵੇਂ ਪਹਿਲਾਂ';
+
+  @override
+  String get ahdOldest => 'ਪੁਰਾਣੇ ਪਹਿਲਾਂ';
+
+  @override
+  String get ahdHighest => 'ਵੱਧ ਪਹਿਲਾਂ';
+
+  @override
+  String get ahdLowest => 'ਘੱਟ ਪਹਿਲਾਂ';
+
+  @override
+  String get ahdAtoZ => 'ੳ ਤੋਂ ੜ';
+
+  @override
+  String get ahdZtoA => 'ੜ ਤੋਂ ੳ';
+
+  @override
+  String get ahdGroupHelp =>
+      'ਰੁਝਾਨ ਵੇਖਣ ਲਈ ਮਹੀਨੇ ਜਾਂ ਸਾਲ ਅਨੁਸਾਰ ਗਰੁੱਪ ਕਰੋ। ਦਿਨ ਅਨੁਸਾਰ ਗਰੁੱਪ ਨਹੀਂ ਹੁੰਦਾ; ਇਸ ਲਈ ਤਾਰੀਖ਼ ਅਨੁਸਾਰ ਕ੍ਰਮ ਲਗਾਓ।';
+
+  @override
+  String get ahdInfoGroup1 =>
+      'ਮੇਲ ਖਾਂਦੇ ਲੈਣ-ਦੇਣ ਨੂੰ ਗਰੁੱਪਾਂ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਅਤੇ ਹਰ ਗਰੁੱਪ ਦੀ ਇੱਕ ਕਤਾਰ ਵਿੱਚ ਗਿਣਤੀ, ਕੁੱਲ ਅਤੇ ਹਿੱਸਾ ਦਿਖਾਉਂਦਾ ਹੈ। ਗਰੁੱਪ ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਉਸ ਦੇ ਲੈਣ-ਦੇਣ ਵੇਖੋ।';
+
+  @override
+  String get ahdInfoGroup2 =>
+      'ਮਹੀਨਾ ਅਤੇ ਸਾਲ ਸਮੇਂ ਨਾਲ ਰੁਝਾਨ ਦਿਖਾਉਂਦੇ ਹਨ। 2 ਟੈਗ ਵਾਲਾ ਲੈਣ-ਦੇਣ ਦੋਵਾਂ ਟੈਗ ਗਰੁੱਪਾਂ ਵਿੱਚ ਗਿਣਿਆ ਜਾਂਦਾ ਹੈ।';
+
+  @override
+  String get ahdInfoSort1 =>
+      'ਗਰੁੱਪ ਤੋਂ ਬਿਨਾਂ, ਲੈਣ-ਦੇਣ ਨੂੰ ਤਾਰੀਖ਼, ਰਕਮ, ਸ਼੍ਰੇਣੀ ਜਾਂ ਖਾਤੇ ਅਨੁਸਾਰ ਲਗਾਓ। ਗਰੁੱਪ ਨਾਲ, ਗਰੁੱਪਾਂ ਨੂੰ ਕੁੱਲ, ਗਿਣਤੀ ਜਾਂ ਨਾਮ ਅਨੁਸਾਰ ਲਗਾਓ।';
+
+  @override
+  String get ahdInfoSort2 =>
+      'ਗਰੁੱਪ ਦੀ ਸ਼ੀਟ ਦੇ ਅੰਦਰ ਲੈਣ-ਦੇਣ ਹਮੇਸ਼ਾ ਨਵੇਂ ਪਹਿਲਾਂ ਹੁੰਦੇ ਹਨ।';
+
+  @override
+  String get ahdInfoChart1 =>
+      '4 ਚਾਰਟ ਤੱਕ ਜੋੜੋ। ਹਰ ਚਾਰਟ ਤੁਹਾਡੇ ਫਿਲਟਰ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ ਅਤੇ ਨਤੀਜਿਆਂ ਨੂੰ ਆਪਣੇ ਤਰੀਕੇ ਨਾਲ ਵੰਡਦਾ ਹੈ।';
+
+  @override
+  String get ahdInfoChart2 =>
+      'ਸ਼੍ਰੇਣੀਆਂ, ਖਾਤਿਆਂ, ਟੈਗਾਂ, ਕਿਸਮਾਂ ਜਾਂ ਸਰੋਤਾਂ ਦੀ ਤੁਲਨਾ ਲਈ ਡੋਨਟ ਜਾਂ ਬਾਰ ਚੁਣੋ। ਮਹੀਨੇ ਜਾਂ ਸਾਲ ਦੇ ਰੁਝਾਨ ਲਈ ਲਾਈਨ ਚੁਣੋ। ਕਿਸੇ ਹਿੱਸੇ ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਖੋਲ੍ਹੋ।';
+
+  @override
+  String get ahdInfoSaved1 =>
+      'ਸੇਵ ਕੀਤਾ ਵਿਊ ਪੂਰਾ ਪੰਨਾ ਯਾਦ ਰੱਖਦਾ ਹੈ: ਫਿਲਟਰ, ਗਰੁੱਪ, ਕ੍ਰਮ, ਹਰ ਚਾਰਟ ਆਪਣੀ ਕਿਸਮ, ਵੰਡ, ਮਾਪ ਅਤੇ ਥਾਂ ਸਮੇਤ, ਅਤੇ KPI ਕਾਰਡ।';
+
+  @override
+  String get ahdInfoSaved2 =>
+      'ਸੇਵ ਕੀਤੇ ਵਿਊ ਨੂੰ ਬਦਲੋ ਤਾਂ ਉਸ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਬਦਲਾਅ ਸੇਵ ਕਰੋ ਚੁਣੋ, ਜਾਂ ਦੋਵੇਂ ਰੱਖਣ ਲਈ ਨਵੇਂ ਵਜੋਂ ਸੇਵ ਕਰੋ। ਸੇਵ ਕੀਤੇ ਵਿਊ ਤੁਹਾਡੇ JSON ਬੈਕਅੱਪ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ।';
+
+  @override
+  String get ahdInfoKpi =>
+      'ਚੁਣੋ ਕਿ ਉੱਪਰ ਕਿਹੜੇ ਅੰਕੜੇ ਦਿਸਣ ਅਤੇ ਖਿੱਚ ਕੇ ਕ੍ਰਮ ਬਦਲੋ। ਸੇਵ ਕੀਤੇ ਵਿਊ ਇਹ ਚੋਣ ਯਾਦ ਰੱਖਦੇ ਹਨ।';
+
+  @override
+  String get ahdKpiTransactions => 'ਲੈਣ-ਦੇਣ';
+
+  @override
+  String get ahdKpiIncome => 'ਆਮਦਨ';
+
+  @override
+  String get ahdKpiExpense => 'ਖਰਚਾ';
+
+  @override
+  String get ahdKpiNet => 'ਸ਼ੁੱਧ';
+
+  @override
+  String get ahdKpiAverage => 'ਔਸਤ';
+
+  @override
+  String get ahdKpiAttachments => 'ਅਟੈਚਮੈਂਟ';
+
+  @override
+  String get ahdKpiLargest => 'ਸਭ ਤੋਂ ਵੱਡਾ';
+
+  @override
+  String get ahdKpiEdit => 'ਬਦਲੋ';
+
+  @override
+  String get ahdKpiSheetTitle => 'KPI ਕਾਰਡ';
+
+  @override
+  String get ahdKpiSheetDesc => 'ਚੁਣੋ ਕਿ ਉੱਪਰ ਕੀ ਦਿਸੇ। ਕ੍ਰਮ ਬਦਲਣ ਲਈ ਖਿੱਚੋ।';
+
+  @override
+  String get ahdKpiSheetNote => 'ਸੇਵ ਕੀਤੇ ਵਿਊ ਇਹ ਚੋਣ ਯਾਦ ਰੱਖਦੇ ਹਨ।';
+
+  @override
+  String get ahdReset => 'ਰੀਸੈੱਟ';
+
+  @override
+  String get ahdAddChartEmpty => 'ਚਾਰਟ ਜੋੜੋ';
+
+  @override
+  String get ahdAddChartHint => 'ਡੋਨਟ, ਬਾਰ ਜਾਂ ਲਾਈਨ';
+
+  @override
+  String ahdAddChartN(int n) {
+    return 'ਚਾਰਟ ਜੋੜੋ · 4 ਵਿੱਚੋਂ $n';
+  }
+
+  @override
+  String get ahdChartsFull => '4 ਵਿੱਚੋਂ 4 ਚਾਰਟ। ਨਵਾਂ ਜੋੜਨ ਲਈ ਇੱਕ ਹਟਾਓ।';
+
+  @override
+  String get ahdMoveUp => 'ਉੱਪਰ ਲਿਜਾਓ';
+
+  @override
+  String get ahdMoveDown => 'ਹੇਠਾਂ ਲਿਜਾਓ';
+
+  @override
+  String get ahdRemove => 'ਹਟਾਓ';
+
+  @override
+  String get ahdChartRemoved => 'ਚਾਰਟ ਹਟਾਇਆ ਗਿਆ';
+
+  @override
+  String get ahdUndo => 'ਵਾਪਸ';
+
+  @override
+  String get ahdDonut => 'ਡੋਨਟ';
+
+  @override
+  String get ahdBars => 'ਬਾਰ';
+
+  @override
+  String get ahdLine => 'ਲਾਈਨ';
+
+  @override
+  String ahdCardTitle(String measure, String split) {
+    return '$split ਅਨੁਸਾਰ $measure';
+  }
+
+  @override
+  String ahdCardSub(String type, String count) {
+    return '$type · $count';
+  }
+
+  @override
+  String get ahdStLine => 'ਲਾਈਨ ਲਈ ਘੱਟੋ-ਘੱਟ 2 ਮਹੀਨਿਆਂ ਦਾ ਡੇਟਾ ਚਾਹੀਦਾ ਹੈ।';
+
+  @override
+  String get ahdStNoTags => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਕੋਈ ਟੈਗ ਨਹੀਂ।';
+
+  @override
+  String get ahdStNoAccounts => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਕੋਈ ਖਾਤਾ ਨਹੀਂ।';
+
+  @override
+  String get ahdStNoCategories => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਕੋਈ ਸ਼੍ਰੇਣੀ ਨਹੀਂ।';
+
+  @override
+  String get ahdStNothing => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਵੰਡਣ ਲਈ ਕੁਝ ਨਹੀਂ।';
+
+  @override
+  String get ahdStWrongCombo =>
+      'ਲਾਈਨ ਚਾਰਟ ਮਹੀਨੇ ਜਾਂ ਸਾਲ ਅਨੁਸਾਰ ਕੰਮ ਕਰਦੇ ਹਨ। ਵੰਡ ਜਾਂ ਚਾਰਟ ਦੀ ਕਿਸਮ ਬਦਲੋ।';
+
+  @override
+  String get ahdSplitByMonth => 'ਮਹੀਨੇ ਅਨੁਸਾਰ ਵੰਡੋ';
+
+  @override
+  String get ahdChangeChart => 'ਚਾਰਟ ਬਦਲੋ';
+
+  @override
+  String get ahdStNoResults => 'ਇਸ ਫਿਲਟਰ ਨਾਲ ਕੋਈ ਲੈਣ-ਦੇਣ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।';
+
+  @override
+  String get ahdBuilderAdd => 'ਚਾਰਟ ਜੋੜੋ';
+
+  @override
+  String get ahdBuilderEdit => 'ਚਾਰਟ ਬਦਲੋ';
+
+  @override
+  String get ahdChartType => 'ਚਾਰਟ ਦੀ ਕਿਸਮ';
+
+  @override
+  String get ahdSplitBy => 'ਇਸ ਅਨੁਸਾਰ ਵੰਡੋ';
+
+  @override
+  String get ahdShow => 'ਵਿਖਾਓ';
+
+  @override
+  String get ahdCurrentGroup => 'ਮੌਜੂਦਾ ਗਰੁੱਪ';
+
+  @override
+  String get ahdUpdateChart => 'ਚਾਰਟ ਅੱਪਡੇਟ ਕਰੋ';
+
+  @override
+  String get ahdRemoveChart => 'ਚਾਰਟ ਹਟਾਓ';
+
+  @override
+  String get ahdBlkNoTags => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਕੋਈ ਟੈਗ ਨਹੀਂ';
+
+  @override
+  String get ahdBlkOneAccount => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਸਿਰਫ਼ ਇੱਕ ਖਾਤਾ';
+
+  @override
+  String get ahdBlkOneType => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਸਿਰਫ਼ ਇੱਕ ਕਿਸਮ';
+
+  @override
+  String get ahdBlkOneSource => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਸਿਰਫ਼ ਇੱਕ ਸਰੋਤ';
+
+  @override
+  String get ahdBlkOneCategory => 'ਇਨ੍ਹਾਂ ਨਤੀਜਿਆਂ ਵਿੱਚ ਸਿਰਫ਼ ਇੱਕ ਸ਼੍ਰੇਣੀ';
+
+  @override
+  String get ahdBlkOneMonth => 'ਸਾਰੇ ਨਤੀਜੇ ਇੱਕੋ ਮਹੀਨੇ ਦੇ ਹਨ';
+
+  @override
+  String get ahdBlkOneYear => 'ਸਾਰੇ ਨਤੀਜੇ ਇੱਕੋ ਸਾਲ ਦੇ ਹਨ';
+
+  @override
+  String get ahdTagNote =>
+      'ਇੱਕ ਤੋਂ ਵੱਧ ਟੈਗ ਵਾਲੇ ਲੈਣ-ਦੇਣ ਹਰ ਟੈਗ ਗਰੁੱਪ ਵਿੱਚ ਦਿਸਦੇ ਹਨ, ਇਸ ਲਈ ਕੁੱਲ ਅਸਲ ਕੁੱਲ ਤੋਂ ਵੱਧ ਹੋ ਸਕਦਾ ਹੈ।';
+
+  @override
+  String get ahdLoadMore => 'ਹੋਰ ਲੋਡ ਕਰੋ';
+
+  @override
+  String get ahdEmptyTitle => 'ਕੋਈ ਲੈਣ-ਦੇਣ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ';
+
+  @override
+  String get ahdEmptyBody =>
+      'ਇਸ ਫ਼ੋਨ ਉੱਤੇ ਇਨ੍ਹਾਂ ਸਭ ਨਾਲ ਕੁਝ ਵੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ। ਘੱਟ ਰਕਮ ਅਜ਼ਮਾਓ ਜਾਂ ਕੋਈ ਫਿਲਟਰ ਹਟਾਓ।';
+
+  @override
+  String get ahdErrorTitle => 'ਨਤੀਜੇ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ';
+
+  @override
+  String get ahdErrorBody =>
+      'ਤੁਹਾਡੇ ਲੈਣ-ਦੇਣ ਪੜ੍ਹਦੇ ਸਮੇਂ ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ। ਤੁਹਾਡਾ ਡੇਟਾ ਸੁਰੱਖਿਅਤ ਹੈ ਅਤੇ ਕੁਝ ਨਹੀਂ ਬਦਲਿਆ।';
+
+  @override
+  String get ahdTryAgain => 'ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ';
+
+  @override
+  String get ahdGsTotal => 'ਕੁੱਲ';
+
+  @override
+  String get ahdGsLargest => 'ਸਭ ਤੋਂ ਵੱਡਾ';
+
+  @override
+  String ahdChanged(String name) {
+    return 'ਤੁਸੀਂ $name ਬਦਲਿਆ';
+  }
+
+  @override
+  String get ahdChFilter => 'ਫਿਲਟਰ ਬਦਲਿਆ';
+
+  @override
+  String get ahdChGroup => 'ਗਰੁੱਪ ਬਦਲਿਆ';
+
+  @override
+  String get ahdChSort => 'ਕ੍ਰਮ ਬਦਲਿਆ';
+
+  @override
+  String get ahdChKpis => 'KPI ਕਾਰਡ ਬਦਲੇ';
+
+  @override
+  String get ahdChAdded => 'ਚਾਰਟ ਜੋੜਿਆ';
+
+  @override
+  String get ahdChRemoved => 'ਚਾਰਟ ਹਟਾਇਆ';
+
+  @override
+  String get ahdChMoved => 'ਚਾਰਟ ਹਿਲਾਇਆ';
+
+  @override
+  String get ahdChEdited => 'ਚਾਰਟ ਬਦਲਿਆ';
+
+  @override
+  String get ahdSaveAsNew => 'ਨਵੇਂ ਵਜੋਂ ਸੇਵ ਕਰੋ';
+
+  @override
+  String get ahdSaveChanges => 'ਬਦਲਾਅ ਸੇਵ ਕਰੋ';
+
+  @override
+  String ahdUpdated(String name) {
+    return '$name ਅੱਪਡੇਟ ਹੋਇਆ';
+  }
+
+  @override
+  String get ahdSaveTitle => 'ਇਹ ਵਿਊ ਸੇਵ ਕਰੋ';
+
+  @override
+  String get ahdNameHint => 'ਇਸ ਵਿਊ ਨੂੰ ਇੱਕ ਨਾਮ ਦਿਓ';
+
+  @override
+  String ahdNameTaken(String name) {
+    return '$name ਨਾਮ ਦਾ ਵਿਊ ਪਹਿਲਾਂ ਹੀ ਹੈ';
+  }
+
+  @override
+  String ahdSumFilters(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ਫਿਲਟਰ',
+      one: '$n ਫਿਲਟਰ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahdSumGrouped(String group) {
+    return '$group ਅਨੁਸਾਰ ਗਰੁੱਪ ਕੀਤਾ';
+  }
+
+  @override
+  String ahdSumSorted(String field) {
+    return '$field ਅਨੁਸਾਰ ਕ੍ਰਮ ਵਿੱਚ';
+  }
+
+  @override
+  String ahdSumCharts(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ਚਾਰਟ',
+      one: '$n ਚਾਰਟ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdSumEmpty => 'ਹਾਲੇ ਕੁਝ ਤੈਅ ਨਹੀਂ';
+
+  @override
+  String get ahdWhatSaved => 'ਕੀ ਸੇਵ ਹੋਵੇਗਾ';
+
+  @override
+  String get ahdWsFilter => 'ਫਿਲਟਰ';
+
+  @override
+  String get ahdWsGroup => 'ਗਰੁੱਪ';
+
+  @override
+  String get ahdWsSort => 'ਕ੍ਰਮ';
+
+  @override
+  String get ahdWsCharts => 'ਚਾਰਟ';
+
+  @override
+  String get ahdWsKpis => 'KPI ਕਾਰਡ';
+
+  @override
+  String get ahdNotSet => 'ਤੈਅ ਨਹੀਂ';
+
+  @override
+  String ahdKpisShown(int n) {
+    return '$n ਦਿਸਣਗੇ';
+  }
+
+  @override
+  String get ahdBackupNote => 'ਤੁਹਾਡੇ JSON ਬੈਕਅੱਪ ਵਿੱਚ ਸ਼ਾਮਲ।';
+
+  @override
+  String ahdSavedSnack(String name) {
+    return '$name ਵਜੋਂ ਸੇਵ ਹੋਇਆ';
+  }
+
+  @override
+  String get ahdSavedTitle => 'ਸੇਵ ਕੀਤੇ ਵਿਊ';
+
+  @override
+  String get ahdSavedEmptyTitle => 'ਹਾਲੇ ਕੋਈ ਵਿਊ ਸੇਵ ਨਹੀਂ';
+
+  @override
+  String get ahdSavedEmptyBody =>
+      'ਫਿਲਟਰ, ਗਰੁੱਪ ਜਾਂ ਚਾਰਟ ਸੈੱਟ ਕਰੋ, ਫਿਰ ਮੀਨੂ ਵਿੱਚ ਇਹ ਵਿਊ ਸੇਵ ਕਰੋ ਚੁਣੋ।';
+
+  @override
+  String get ahdRename => 'ਨਾਮ ਬਦਲੋ';
+
+  @override
+  String get ahdRenameTitle => 'ਵਿਊ ਦਾ ਨਾਮ ਬਦਲੋ';
+
+  @override
+  String ahdDeleteTitle(String name) {
+    return '$name ਹਟਾਉਣਾ ਹੈ?';
+  }
+
+  @override
+  String get ahdDeleteBody =>
+      'ਇਸ ਨਾਲ ਸਿਰਫ਼ ਸੇਵ ਕੀਤਾ ਵਿਊ ਹਟੇਗਾ। ਤੁਹਾਡੇ ਲੈਣ-ਦੇਣ ਜਿਵੇਂ ਹਨ ਤਿਵੇਂ ਰਹਿਣਗੇ।';
+
+  @override
+  String get ahdExportTitle => 'ਨਤੀਜੇ ਐਕਸਪੋਰਟ ਕਰੋ';
+
+  @override
+  String get ahdExportFilter => 'ਤੁਹਾਡਾ ਮੌਜੂਦਾ ਫਿਲਟਰ';
+
+  @override
+  String get ahdExportNoFilter => 'ਕੋਈ ਫਿਲਟਰ ਨਹੀਂ';
+
+  @override
+  String ahdExportNote(String n) {
+    return 'ਬਿਲਕੁਲ ਇਹੀ $n ਲੈਣ-ਦੇਣ, History CSV ਐਕਸਪੋਰਟ ਵਾਲੇ ਕਾਲਮਾਂ ਵਿੱਚ। ਗਰੁੱਪ ਅਤੇ ਚਾਰਟ ਐਕਸਪੋਰਟ ਨਹੀਂ ਹੁੰਦੇ।';
+  }
+
+  @override
+  String get ahdExportSave => 'ਫੋਲਡਰ ਵਿੱਚ ਸੇਵ ਕਰੋ';
+
+  @override
+  String get ahdExportShare => 'ਸ਼ੇਅਰ ਕਰੋ';
+
+  @override
+  String get ahdExportSaved => 'ਫ਼ਾਈਲ ਸੇਵ ਹੋਈ';
+
+  @override
+  String get ahdExportFailed => 'ਫ਼ਾਈਲ ਨਹੀਂ ਬਣ ਸਕੀ। ਕੁਝ ਨਹੀਂ ਬਦਲਿਆ।';
+
+  @override
+  String get ahdHelpTitle => 'ਇਹ ਪੰਨਾ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ';
+
+  @override
+  String get ahdHelpFilter =>
+      'ਕੀ ਵੇਖਣਾ ਹੈ ਇਹ ਚੁਣਨ ਲਈ ਫਿਲਟਰ ਉੱਤੇ ਟੈਪ ਕਰੋ: ਸ਼੍ਰੇਣੀ, ਰਕਮ, ਤਾਰੀਖ਼ਾਂ ਅਤੇ ਹੋਰ।';
+
+  @override
+  String get ahdHelpGroup =>
+      'ਨਤੀਜਿਆਂ ਨੂੰ ਸ਼੍ਰੇਣੀ, ਖਾਤੇ, ਟੈਗ, ਮਹੀਨੇ ਅਤੇ ਹੋਰ ਅਨੁਸਾਰ ਕਤਾਰਾਂ ਵਿੱਚ ਰੱਖਦਾ ਹੈ।';
+
+  @override
+  String get ahdHelpSort => 'ਲੈਣ-ਦੇਣ ਜਾਂ ਗਰੁੱਪਾਂ ਦਾ ਕ੍ਰਮ ਬਦਲਦਾ ਹੈ।';
+
+  @override
+  String get ahdHelpCharts =>
+      '4 ਚਾਰਟ ਤੱਕ ਜੋੜੋ। ਹਰ ਚਾਰਟ ਤੁਹਾਡੇ ਫਿਲਟਰ ਨਾਲ ਚੱਲਦਾ ਹੈ। ਕਿਸੇ ਹਿੱਸੇ ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਖੋਲ੍ਹੋ।';
+
+  @override
+  String get ahdHelpSaved =>
+      'ਪੂਰਾ ਪੰਨਾ ਸੇਵ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਤੁਸੀਂ ਇੱਕ ਟੈਪ ਵਿੱਚ ਦੁਬਾਰਾ ਖੋਲ੍ਹ ਸਕੋ।';
+
+  @override
+  String get ahdCharts => 'ਚਾਰਟ';
+
+  @override
+  String get ahdInfoOpen => 'ਇਸ ਬਾਰੇ';
+
+  @override
+  String loanSplitNotice(int n) {
+    return '$n EMI ਤੁਹਾਡੇ ਲੋਨ ਦੇ ਸ਼ਡਿਊਲ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀਆਂ।';
+  }
+
+  @override
+  String get loanSplitNoticeSub =>
+      'ਇਨ੍ਹਾਂ ਵਿੱਚ ਵਿਆਜ ਅਤੇ ਮੂਲ ਦੀ ਵੰਡ ਗਲਤ ਹੈ। ਭਰੀ ਗਈ ਰਕਮ ਠੀਕ ਹੈ।';
+
+  @override
+  String get loanSplitFix => 'ਠੀਕ ਕਰੋ';
+
+  @override
+  String get loanFixTitle => 'EMI ਵੰਡ ਠੀਕ ਕਰੋ';
+
+  @override
+  String loanFixCount(int n) {
+    return '$n EMI';
+  }
+
+  @override
+  String loanFixRange(String from, String to) {
+    return '$from ਤੋਂ $to';
+  }
+
+  @override
+  String get loanFixNow => 'ਹੁਣ';
+
+  @override
+  String get loanFixAfter => 'ਠੀਕ ਕਰਨ ਤੋਂ ਬਾਅਦ';
+
+  @override
+  String get loanFixInterest => 'ਵਿਆਜ';
+
+  @override
+  String get loanFixPrincipal => 'ਮੂਲ';
+
+  @override
+  String get loanFixTotalPaid => 'ਕੁੱਲ ਭੁਗਤਾਨ';
+
+  @override
+  String get loanFixSame => 'ਉਹੀ';
+
+  @override
+  String loanFixKept(int n) {
+    return 'ਤੁਹਾਡੀਆਂ ਬਦਲੀਆਂ EMI ਜਿਵੇਂ ਹਨ ਉਵੇਂ ਰਹਿਣਗੀਆਂ ($n ਰੱਖੀਆਂ)';
+  }
+
+  @override
+  String loanFixInfo(String amount) {
+    return 'ਸਿਰਫ਼ ਵਿਆਜ ਅਤੇ ਮੂਲ ਦੀ ਵੰਡ ਬਦਲਦੀ ਹੈ। ਰਕਮਾਂ, ਤਾਰੀਖਾਂ ਅਤੇ ਖਾਤੇ ਉਹੀ ਰਹਿੰਦੇ ਹਨ। ਬਕਾਇਆ $amount ਹੋ ਜਾਵੇਗਾ।';
+  }
+
+  @override
+  String get loanFixing => 'ਠੀਕ ਹੋ ਰਿਹਾ ਹੈ';
+
+  @override
+  String loanFixedSnack(int n, String amount) {
+    return '$n EMI ਠੀਕ ਕੀਤੀਆਂ ਗਈਆਂ। ਬਕਾਇਆ ਹੁਣ $amount ਹੈ।';
+  }
+
+  @override
+  String get loanFixUndo => 'ਵਾਪਸ ਕਰੋ';
+
+  @override
+  String get loanRecheck => 'EMI ਵੰਡ ਦੁਬਾਰਾ ਜਾਂਚੋ';
+
+  @override
+  String loanAllMatch(int n) {
+    return 'ਸਭ ਕੁਝ ਮੇਲ ਖਾਂਦਾ ਹੈ। ਸਾਰੀਆਂ $n EMI ਤੁਹਾਡੇ ਲੋਨ ਦੇ ਸ਼ਡਿਊਲ ਮੁਤਾਬਕ ਹਨ।';
+  }
+
+  @override
+  String get loanFixLonger =>
+      'ਬਾਅਦ ਦੇ ਹਿੱਸੇ ਜੋੜੇ ਗਏ ਅਤੇ EMI ਉਹੀ ਰੱਖੀ ਗਈ, ਇਸ ਲਈ ਤੁਹਾਡਾ ਲੋਨ ਲੰਮਾ ਹੋ ਗਿਆ।';
+
+  @override
+  String get historyMenuAdvancedSub => 'AND / OR ਫਿਲਟਰ, ਗਰੁੱਪ, ਚਾਰਟ';
+
+  @override
+  String get ahqFieldType => 'ਕਿਸਮ';
+
+  @override
+  String get ahqFieldAmount => 'ਰਕਮ';
+
+  @override
+  String get ahqFieldCategory => 'ਸ਼੍ਰੇਣੀ';
+
+  @override
+  String get ahqFieldAccount => 'ਖਾਤਾ';
+
+  @override
+  String get ahqFieldTag => 'ਟੈਗ';
+
+  @override
+  String get ahqFieldDate => 'ਤਾਰੀਖ਼';
+
+  @override
+  String get ahqFieldWords => 'ਸ਼ਬਦ';
+
+  @override
+  String get ahqFieldHas => 'ਸ਼ਾਮਲ';
+
+  @override
+  String get ahqFieldSource => 'ਸਰੋਤ';
+
+  @override
+  String get ahqFieldSubType => 'ਕਿਸਮ ਦਾ';
+
+  @override
+  String get ahqTypeExpense => 'ਖਰਚ';
+
+  @override
+  String get ahqTypeIncome => 'ਆਮਦਨ';
+
+  @override
+  String get ahqTypeTransfer => 'ਟ੍ਰਾਂਸਫਰ';
+
+  @override
+  String get ahqSourceManual => 'ਤੁਸੀਂ ਆਪ ਪਾਇਆ';
+
+  @override
+  String get ahqSourceSms => 'SMS';
+
+  @override
+  String get ahqSourceQuickAdd => 'Quick Add';
+
+  @override
+  String get ahqSourceRecurring => 'ਆਵਰਤੀ';
+
+  @override
+  String get ahqSourceImport => 'ਇੰਪੋਰਟ';
+
+  @override
+  String get ahqHasAttachment => 'ਅਟੈਚਮੈਂਟ';
+
+  @override
+  String get ahqHasNote => 'ਨੋਟ';
+
+  @override
+  String get ahqSubLoanRepayment => 'ਕਰਜ਼ਾ ਵਾਪਸੀ';
+
+  @override
+  String get ahqSubInvestment => 'ਨਿਵੇਸ਼';
+
+  @override
+  String get ahqSubSavings => 'ਬੱਚਤ';
+
+  @override
+  String get ahqSubLent => 'ਉਧਾਰ ਦਿੱਤਾ';
+
+  @override
+  String get ahqSubBorrowed => 'ਉਧਾਰ ਲਿਆ';
+
+  @override
+  String get ahqSubInvestmentReturn => 'ਨਿਵੇਸ਼ ਤੋਂ ਰਿਟਰਨ';
+
+  @override
+  String get ahqSubLoanReceived => 'ਕਰਜ਼ਾ ਮਿਲਿਆ';
+
+  @override
+  String get ahqSubLoanDisbursement => 'ਕਰਜ਼ਾ ਵੰਡ';
+
+  @override
+  String get ahqOr => 'ਜਾਂ';
+
+  @override
+  String get ahqNone => 'ਕੋਈ ਨਹੀਂ';
+
+  @override
+  String ahqRange(String from, String to) {
+    return '$from ਤੋਂ $to';
+  }
+
+  @override
+  String ahqAmountOver(String amount) {
+    return '$amount ਤੋਂ ਵੱਧ';
+  }
+
+  @override
+  String ahqAmountUnder(String amount) {
+    return '$amount ਤੋਂ ਘੱਟ';
+  }
+
+  @override
+  String ahqAmountOrMore(String amount) {
+    return '$amount ਜਾਂ ਵੱਧ';
+  }
+
+  @override
+  String ahqAmountOrLess(String amount) {
+    return '$amount ਜਾਂ ਘੱਟ';
+  }
+
+  @override
+  String get ahqDateThisMonth => 'ਇਸ ਮਹੀਨੇ';
+
+  @override
+  String get ahqDateLastMonth => 'ਪਿਛਲੇ ਮਹੀਨੇ';
+
+  @override
+  String get ahqDateThisYear => 'ਇਸ ਸਾਲ';
+
+  @override
+  String get ahqDateLastYear => 'ਪਿਛਲੇ ਸਾਲ';
+
+  @override
+  String ahqDateLastDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'ਪਿਛਲੇ $n ਦਿਨ',
+      one: 'ਪਿਛਲਾ ਦਿਨ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahqDateAfter(String date) {
+    return '$date ਤੋਂ ਬਾਅਦ';
+  }
+
+  @override
+  String ahqDateBefore(String date) {
+    return '$date ਤੋਂ ਪਹਿਲਾਂ';
+  }
+
+  @override
+  String ahqDateFrom(String date) {
+    return '$date ਤੋਂ';
+  }
+
+  @override
+  String ahqDateUntil(String date) {
+    return '$date ਤੱਕ';
+  }
+
+  @override
+  String get ahqRbTransactions => 'ਲੈਣ-ਦੇਣ';
+
+  @override
+  String get ahqRbExpenses => 'ਖਰਚ';
+
+  @override
+  String get ahqRbIncome => 'ਆਮਦਨ';
+
+  @override
+  String get ahqRbTransfers => 'ਟ੍ਰਾਂਸਫਰ';
+
+  @override
+  String ahqRbAmountIs(String amount) {
+    return '$amount ਦੇ';
+  }
+
+  @override
+  String ahqRbIn(String names) {
+    return '$names ਵਿੱਚ';
+  }
+
+  @override
+  String ahqRbNotIn(String names) {
+    return '$names ਵਿੱਚ ਨਹੀਂ';
+  }
+
+  @override
+  String ahqRbFrom(String names) {
+    return '$names ਤੋਂ';
+  }
+
+  @override
+  String ahqRbNotFrom(String names) {
+    return '$names ਤੋਂ ਨਹੀਂ';
+  }
+
+  @override
+  String ahqRbTagged(String tags) {
+    return '$tags ਟੈਗ ਵਾਲੇ';
+  }
+
+  @override
+  String ahqRbNotTagged(String tags) {
+    return '$tags ਟੈਗ ਵਾਲੇ ਨਹੀਂ';
+  }
+
+  @override
+  String get ahqRbNoTags => 'ਬਿਨਾਂ ਟੈਗ';
+
+  @override
+  String get ahqRbHasTags => 'ਟੈਗ ਸਮੇਤ';
+
+  @override
+  String get ahqRbWithAttachment => 'ਅਟੈਚਮੈਂਟ ਸਮੇਤ';
+
+  @override
+  String get ahqRbWithoutAttachment => 'ਬਿਨਾਂ ਅਟੈਚਮੈਂਟ';
+
+  @override
+  String get ahqRbWithNote => 'ਨੋਟ ਸਮੇਤ';
+
+  @override
+  String get ahqRbWithoutNote => 'ਬਿਨਾਂ ਨੋਟ';
+
+  @override
+  String get ahqRbSms => 'SMS ਤੋਂ';
+
+  @override
+  String get ahqRbManual => 'ਤੁਸੀਂ ਆਪ ਪਾਏ';
+
+  @override
+  String get ahqRbQuickAdd => 'Quick Add ਤੋਂ';
+
+  @override
+  String get ahqRbRecurring => 'ਆਵਰਤੀ ਤੋਂ';
+
+  @override
+  String get ahqRbImported => 'ਇੰਪੋਰਟ ਕੀਤੇ';
+
+  @override
+  String ahqRbNot(String text) {
+    return '$text ਨਹੀਂ';
+  }
+
+  @override
+  String ahqRbWords(String text) {
+    return 'ਸਿਰਲੇਖ ਜਾਂ ਨੋਟ ਵਿੱਚ “$text” ਵਾਲੇ';
+  }
+
+  @override
+  String ahqRbNoWords(String text) {
+    return 'ਸਿਰਲੇਖ ਜਾਂ ਨੋਟ ਵਿੱਚ “$text” ਤੋਂ ਬਿਨਾਂ';
+  }
+
+  @override
+  String ahqRbKind(String kind) {
+    return 'ਜੋ $kind ਹਨ';
+  }
+
+  @override
+  String ahqRbDateIn(String date) {
+    return '$date ਵਿੱਚ';
+  }
+
+  @override
+  String ahqRbDateOn(String date) {
+    return '$date ਨੂੰ';
+  }
+
+  @override
+  String ahqRbDateRange(String date) {
+    return '$date ਤੋਂ';
+  }
+
+  @override
+  String ahqRbNotGroup(String text) {
+    return 'ਨਹੀਂ ($text)';
+  }
+
+  @override
+  String get ahqErrCloseBracket => 'ਬੰਦ ਕਰਨ ਵਾਲੀ ਬਰੈਕਟ ਨਹੀਂ ਹੈ';
+
+  @override
+  String ahqErrCloseBracketAfter(String token) {
+    return 'ਬੰਦ ਕਰਨ ਵਾਲੀ ਬਰੈਕਟ ਨਹੀਂ ਹੈ। $token ਤੋਂ ਬਾਅਦ ) ਜੋੜੋ।';
+  }
+
+  @override
+  String get ahqErrOpenBracket => 'ਖੋਲ੍ਹਣ ਵਾਲੀ ਬਰੈਕਟ ਨਹੀਂ ਹੈ';
+
+  @override
+  String ahqErrField(String name, String suggestion) {
+    return 'ਅਣਜਾਣ ਖੇਤਰ “$name”। ਕੀ ਤੁਹਾਡਾ ਮਤਲਬ $suggestion ਸੀ?';
+  }
+
+  @override
+  String ahqErrFieldPlain(String name) {
+    return 'ਅਣਜਾਣ ਖੇਤਰ “$name”।';
+  }
+
+  @override
+  String get ahqErrAmount => 'ਰਕਮ ਲਈ ਨੰਬਰ ਚਾਹੀਦਾ ਹੈ, ਜਿਵੇਂ amount:>500';
+
+  @override
+  String get ahqErrDate =>
+      'ਤਾਰੀਖ਼ ਲਈ ਸਾਲ, ਮਹੀਨਾ ਜਾਂ ਦਿਨ ਚਾਹੀਦਾ ਹੈ, ਜਿਵੇਂ date:2026-03';
+
+  @override
+  String ahqErrValue(String field, String name) {
+    return '“$name” ਨਾਂ ਦਾ ਕੋਈ $field ਨਹੀਂ';
+  }
+
+  @override
+  String ahqErrValueDid(String field, String name, String suggestion) {
+    return '“$name” ਨਾਂ ਦਾ ਕੋਈ $field ਨਹੀਂ। ਕੀ ਤੁਹਾਡਾ ਮਤਲਬ $suggestion ਸੀ?';
+  }
+
+  @override
+  String get ahqErrOr => 'OR ਦੇ ਦੋਵੇਂ ਪਾਸੇ ਕੁਝ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।';
+
+  @override
+  String get ahqErrEmptyGroup => 'ਬਰੈਕਟਾਂ ਵਿਚਕਾਰ ਇੱਕ ਫਿਲਟਰ ਜੋੜੋ।';
+
+  @override
+  String ahqErrBadToken(String text) {
+    return '“$text” ਪੜ੍ਹਿਆ ਨਹੀਂ ਗਿਆ।';
+  }
+
+  @override
+  String get ahqUntagged => 'ਬਿਨਾਂ ਟੈਗ';
+
+  @override
+  String get ahqNoCategory => 'ਕੋਈ ਸ਼੍ਰੇਣੀ ਨਹੀਂ';
+
+  @override
+  String get ahqOther => 'ਹੋਰ';
+
+  @override
+  String get ahqUnknown => 'ਅਣਜਾਣ';
+
+  @override
+  String get ahfTitle => 'ਫਿਲਟਰ';
+
+  @override
+  String get ahfNoFilters => 'ਹਾਲੇ ਕੋਈ ਫਿਲਟਰ ਨਹੀਂ';
+
+  @override
+  String get ahfFilterOne => 'ਫਿਲਟਰ';
+
+  @override
+  String get ahfFilterMany => 'ਫਿਲਟਰ';
+
+  @override
+  String get ahfClearAll => 'ਸਭ ਹਟਾਓ';
+
+  @override
+  String get ahfCleared => 'ਫਿਲਟਰ ਹਟਾ ਦਿੱਤੇ ਗਏ';
+
+  @override
+  String get ahfUndo => 'ਵਾਪਸ ਕਰੋ';
+
+  @override
+  String get ahfPlaceholder => 'ਫਿਲਟਰ ਲਿਖੋ ਜਾਂ ਕੋਈ ਖੇਤਰ ਚੁਣੋ';
+
+  @override
+  String get ahfPlaceholderFocused => 'ਖੇਤਰ ਲਿਖੋ, ਜਿਵੇਂ category';
+
+  @override
+  String get ahfImplicitNote =>
+      '\"and\" ਨੂੰ \"or\" ਤੋਂ ਪਹਿਲਾਂ ਪੜ੍ਹਿਆ ਜਾਂਦਾ ਹੈ। ਬਿੰਦੀਆਂ ਵਾਲਾ ਡੱਬਾ ਦਿਖਾਉਂਦਾ ਹੈ ਕਿ ਐਪ ਇਸ ਨੂੰ ਕਿਵੇਂ ਜੋੜਦੀ ਹੈ। ਬਦਲਣ ਲਈ ਬਰੈਕਟ ਲਗਾਓ।';
+
+  @override
+  String get ahfAddFilter => 'ਫਿਲਟਰ ਜੋੜੋ';
+
+  @override
+  String get ahfPlainWords => 'ਸੌਖੇ ਸ਼ਬਦਾਂ ਵਿੱਚ';
+
+  @override
+  String get ahfTryOne => 'ਇੱਕ ਅਜ਼ਮਾਓ';
+
+  @override
+  String get ahfExFood => 'ਇਸ ਸਾਲ ₹500 ਤੋਂ ਵੱਧ ਦਾ ਖਾਣਾ';
+
+  @override
+  String get ahfExAttachment => 'ਅਟੈਚਮੈਂਟ ਵਾਲੇ';
+
+  @override
+  String get ahfExUntagged => 'ਬਿਨਾਂ ਟੈਗ ਦੇ ਖਰਚ';
+
+  @override
+  String get ahfExCard => 'ਪਿਛਲੇ ਮਹੀਨੇ ਦੇ ਕਾਰਡ ਖਰਚ';
+
+  @override
+  String ahfShowN(int n) {
+    return '$n ਲੈਣ-ਦੇਣ ਦਿਖਾਓ';
+  }
+
+  @override
+  String get ahfShowCounting => 'ਲੈਣ-ਦੇਣ ਦਿਖਾਓ';
+
+  @override
+  String get ahfNoMatch => 'ਕੋਈ ਲੈਣ-ਦੇਣ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ';
+
+  @override
+  String get ahfDone => 'ਹੋ ਗਿਆ';
+
+  @override
+  String get ahfHintType => 'ਖਰਚ, ਆਮਦਨ ਜਾਂ ਟ੍ਰਾਂਸਫ਼ਰ';
+
+  @override
+  String get ahfHintAmount => 'ਇਸ ਤੋਂ ਵੱਧ, ਘੱਟ ਜਾਂ ਵਿਚਕਾਰਲੀ ਰਕਮ';
+
+  @override
+  String get ahfHintCategory => 'ਤੁਹਾਡੀਆਂ ਸ਼੍ਰੇਣੀਆਂ';
+
+  @override
+  String get ahfHintAccount => 'ਪੈਸਾ ਕਿੱਥੇ ਗਿਆ';
+
+  @override
+  String get ahfHintTag => 'ਤੁਹਾਡੇ ਟੈਗ, ਜਾਂ ਬਿਨਾਂ ਟੈਗ';
+
+  @override
+  String get ahfHintDate => 'ਇਹ ਮਹੀਨਾ, ਕੋਈ ਸਾਲ ਜਾਂ ਕੋਈ ਵੀ ਮਿਆਦ';
+
+  @override
+  String get ahfHintHas => 'ਅਟੈਚਮੈਂਟ ਜਾਂ ਨੋਟ';
+
+  @override
+  String get ahfHintSource => 'ਹੱਥੀਂ, SMS, Quick Add ਅਤੇ ਹੋਰ';
+
+  @override
+  String get ahfHintWords => 'ਸਿਰਲੇਖ ਜਾਂ ਨੋਟ ਵਿੱਚ ਸ਼ਬਦ';
+
+  @override
+  String get ahfFilterBy => 'ਇਸ ਮੁਤਾਬਕ ਫਿਲਟਰ';
+
+  @override
+  String get ahfIs => 'ਹੈ';
+
+  @override
+  String get ahfIsNot => 'ਨਹੀਂ ਹੈ';
+
+  @override
+  String get ahfAddFilterBtn => 'ਫਿਲਟਰ ਜੋੜੋ';
+
+  @override
+  String ahfAddFilterN(int n) {
+    return 'ਫਿਲਟਰ ਜੋੜੋ · $n ਚੁਣੇ';
+  }
+
+  @override
+  String get ahfPickMany => 'ਕਿਸੇ ਇੱਕ ਨਾਲ ਮੇਲ ਖਾਣ ਲਈ ਇੱਕ ਤੋਂ ਵੱਧ ਚੁਣੋ।';
+
+  @override
+  String get ahfOver => 'ਤੋਂ ਵੱਧ';
+
+  @override
+  String get ahfUnder => 'ਤੋਂ ਘੱਟ';
+
+  @override
+  String get ahfBetween => 'ਵਿਚਕਾਰ';
+
+  @override
+  String get ahfAmountIs => 'ਬਰਾਬਰ';
+
+  @override
+  String get ahfAmountNote => 'ਜੋੜ ਜਾਂ ਘਟਾਓ ਦੇ ਨਿਸ਼ਾਨ ਤੋਂ ਬਿਨਾਂ ਰਕਮ।';
+
+  @override
+  String get ahfFrom => 'ਤੋਂ';
+
+  @override
+  String get ahfTo => 'ਤੱਕ';
+
+  @override
+  String get ahfSearchCategories => 'ਸ਼੍ਰੇਣੀਆਂ ਖੋਜੋ';
+
+  @override
+  String get ahfSearchAccounts => 'ਖਾਤੇ ਖੋਜੋ';
+
+  @override
+  String get ahfSearchTags => 'ਟੈਗ ਖੋਜੋ';
+
+  @override
+  String get ahfHasNoTags => 'ਬਿਨਾਂ ਟੈਗ';
+
+  @override
+  String get ahfNothingFound => 'ਕੁਝ ਨਹੀਂ ਮਿਲਿਆ';
+
+  @override
+  String get ahfDateQuick => 'ਤੇਜ਼';
+
+  @override
+  String get ahfDateLast30 => 'ਪਿਛਲੇ 30 ਦਿਨ';
+
+  @override
+  String get ahfDateMonthYear => 'ਕੋਈ ਮਹੀਨਾ ਜਾਂ ਸਾਲ';
+
+  @override
+  String ahfAllOfYear(String year) {
+    return 'ਪੂਰਾ $year';
+  }
+
+  @override
+  String get ahfDateCustom => 'ਆਪਣੀ ਮਿਆਦ';
+
+  @override
+  String get ahfDateCustomHint => 'ਸ਼ੁਰੂ ਅਤੇ ਅੰਤ ਦੀ ਤਾਰੀਖ਼ ਚੁਣੋ';
+
+  @override
+  String get ahfSrcNote =>
+      'ਆਵਰਤੀ ਵਿੱਚ ਲੋਨ ਦੀਆਂ EMI ਸ਼ਾਮਲ ਹਨ। ਇੰਪੋਰਟ ਦਾ ਮਤਲਬ CSV ਜਾਂ Kuber ਫ਼ਾਈਲ ਹੈ।';
+
+  @override
+  String get ahfWordsNote =>
+      'ਸਿਰਲੇਖ ਅਤੇ ਨੋਟ ਵਿੱਚ ਖੋਜਦਾ ਹੈ। ਛੋਟੇ-ਵੱਡੇ ਅੱਖਰ ਦਾ ਫ਼ਰਕ ਨਹੀਂ ਪੈਂਦਾ।';
+
+  @override
+  String get ahfWordsHint => 'ਜਿਵੇਂ swiggy';
+
+  @override
+  String get ahfTypeItLike => 'ਇਸ ਤਰ੍ਹਾਂ ਲਿਖੋ';
+
+  @override
+  String get ahfInfo1 =>
+      'ਡੱਬੇ ਵਿੱਚ ਲਿਖੋ, ਜਾਂ ਉਸ ਦੇ ਹੇਠੋਂ ਕੋਈ ਖੇਤਰ ਚੁਣੋ। ਦੋਵੇਂ ਉਸੇ ਡੱਬੇ ਵਿੱਚ, ਕਰਸਰ ਵਾਲੀ ਥਾਂ ਜੁੜਦੇ ਹਨ।';
+
+  @override
+  String get ahfInfo2 =>
+      'ਦੋ ਫਿਲਟਰਾਂ ਵਿਚਕਾਰ and ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਇਸ ਨੂੰ or ਬਣਾਓ। ਰੰਗਦਾਰ ਡੱਬਾ ਦਿਖਾਉਂਦਾ ਹੈ ਕੀ ਇਕੱਠਾ ਹੈ।';
+
+  @override
+  String get ahfInfo3 =>
+      'ਬਾਰ ਵਿੱਚ ( ), and, or ਅਤੇ not ਹਨ। ਬਰੈਕਟ ਡੱਬੇ ਦੇ ਅੰਦਰ ਡੱਬੇ ਵਾਂਗ ਦਿਸਦੇ ਹਨ।';
+
+  @override
+  String get ahfHowTitle => 'ਫਿਲਟਰ ਕਿਵੇਂ ਲਿਖਣਾ ਹੈ';
+
+  @override
+  String get ahfSyn1 => 'ਇੱਕ ਖੇਤਰ ਅਤੇ ਇੱਕ ਮੁੱਲ';
+
+  @override
+  String get ahfSyn2 => 'ਦੋਵਾਂ ਵਿੱਚੋਂ ਕੋਈ ਇੱਕ: food ਜਾਂ travel';
+
+  @override
+  String get ahfSyn3 => 'ਇਸ ਤੋਂ ਵੱਧ। ਘੱਟ ਲਈ < ਅਤੇ ਵਿਚਕਾਰ ਲਈ 500..2000 ਲਿਖੋ';
+
+  @override
+  String get ahfSyn4 => 'ਇੱਕ ਸਾਲ, ਮਹੀਨਾ ਜਾਂ ਦਿਨ';
+
+  @override
+  String get ahfSyn5 => 'ਸਿਰਲੇਖ ਜਾਂ ਨੋਟ ਵਿੱਚ ਸ਼ਬਦ';
+
+  @override
+  String get ahfSyn6 =>
+      'ਦੋਵੇਂ, ਜਾਂ ਕੋਈ ਇੱਕ। \"and\" ਨੂੰ \"or\" ਤੋਂ ਪਹਿਲਾਂ ਪੜ੍ਹਿਆ ਜਾਂਦਾ ਹੈ';
+
+  @override
+  String get ahfSyn7 => 'ਫਿਲਟਰਾਂ ਨੂੰ ਇਕੱਠੇ ਕਰੋ';
+
+  @override
+  String get ahfSyn8 => 'ਇਹਨਾਂ ਨੂੰ ਛੱਡੋ। ਤੁਸੀਂ -tag:trip ਵੀ ਲਿਖ ਸਕਦੇ ਹੋ';
+
+  @override
+  String get ahfDiscardTitle => 'ਬਦਲਾਅ ਛੱਡਣੇ ਹਨ?';
+
+  @override
+  String get ahfDiscardBody => 'ਫਿਲਟਰ ਵਿੱਚ ਤੁਹਾਡੇ ਬਦਲਾਅ ਲਾਗੂ ਨਹੀਂ ਹੋਏ ਹਨ।';
+
+  @override
+  String get ahfKeepEditing => 'ਸੋਧ ਜਾਰੀ ਰੱਖੋ';
+
+  @override
+  String get ahfDiscard => 'ਛੱਡੋ';
+
+  @override
+  String ahfTokenSemantics(String text) {
+    return '$text, ਬਦਲਣ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ';
+  }
+
+  @override
+  String ahfTokenInvalidSemantics(String text) {
+    return '$text, ਠੀਕ ਨਹੀਂ ਹੈ, ਬਦਲਣ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ';
+  }
+
+  @override
+  String ahfJoinerSemantics(String word, String other) {
+    return '$word, $other ਕਰਨ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ';
+  }
+
+  @override
+  String ahfBoxSemantics(int n) {
+    return '$n ਫਿਲਟਰਾਂ ਦਾ ਸਮੂਹ';
+  }
+
+  @override
+  String get ahfBracketOpenSemantics => 'ਖੁੱਲ੍ਹੀ ਬਰੈਕਟ';
+
+  @override
+  String get ahfBracketCloseSemantics => 'ਬੰਦ ਬਰੈਕਟ';
+
+  @override
+  String get ahfGhostBracketSemantics => 'ਬੰਦ ਬਰੈਕਟ ਇੱਥੇ ਲੱਗੇਗੀ';
+
+  @override
+  String get ahfOpOpenSemantics => 'ਬਰੈਕਟ ਖੋਲ੍ਹੋ';
+
+  @override
+  String get ahfOpCloseSemantics => 'ਬਰੈਕਟ ਬੰਦ ਕਰੋ';
+
+  @override
+  String get ahfHideKeyboard => 'ਕੀਬੋਰਡ ਲੁਕਾਓ';
+
+  @override
+  String ahfCountSemantics(int n) {
+    return '$n ਫਿਲਟਰ';
+  }
 }

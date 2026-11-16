@@ -1341,7 +1341,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get filterInc => 'उत्पन्न';
 
   @override
-  String get advancedFiltersTooltip => 'प्रगत फिल्टर';
+  String get advancedFiltersTooltip => 'फिल्टर';
 
   @override
   String get clearFiltersTooltip => 'फिल्टर साफ करा';
@@ -1359,7 +1359,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get selectRange => 'श्रेणी निवडा';
 
   @override
-  String get advancedFiltersTitle => 'प्रगत फिल्टर';
+  String get advancedFiltersTitle => 'फिल्टर';
 
   @override
   String get clearAll => 'सर्व साफ करा';
@@ -2290,7 +2290,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get editAnalyticsWidgetsDesc => 'विश्लेषण विजेट्स निवडा आणि क्रम बदला';
 
   @override
-  String get filterAll => 'सर्व';
+  String get filterAll => '· सर्व';
 
   @override
   String get filterToday => 'आज';
@@ -2496,7 +2496,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get menuRateKuber => 'कुबेरला रेट करा';
 
   @override
-  String get menuShare => 'शेअर करा';
+  String get menuShare => 'रेफर करा';
 
   @override
   String get menuFeedbackShort => 'प्रतिक्रिया';
@@ -4333,7 +4333,7 @@ class AppLocalizationsMr extends AppLocalizations {
       'या चिप्सचा वापर करून लगेच उत्पन्न, खर्च किंवा ट्रान्सफरनुसार फिल्टर करा.';
 
   @override
-  String get tutCh2St2Title => 'ॲडव्हान्स्ड फिल्टर्स';
+  String get tutCh2St2Title => 'फिल्टर';
 
   @override
   String get tutCh2St2Desc =>
@@ -9606,4 +9606,1401 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get deleteLoanAction => 'कर्ज हटवा';
+
+  @override
+  String get saveFileFailed => 'फाइल सेव्ह करता आली नाही. दुसरा फोल्डर निवडा.';
+
+  @override
+  String get saveFileShareFailed =>
+      'फाइल शेअर करता आली नाही. पुन्हा प्रयत्न करा.';
+
+  @override
+  String get saveFileCsvNoViews =>
+      'CSV बॅकअपमध्ये सेव्ह केलेले व्ह्यू येत नाहीत. ते ठेवण्यासाठी JSON बॅकअप वापरा.';
+
+  @override
+  String get historyMenuAdvanced => 'प्रगत इतिहास';
+
+  @override
+  String filterSelectedN(int n) {
+    return '· $n निवडले';
+  }
+
+  @override
+  String get filterSearchCategories => 'श्रेणी शोधा';
+
+  @override
+  String get filterSearchTags => 'टॅग शोधा';
+
+  @override
+  String filterNoMatch(String section, String text) {
+    return '“$text” शी जुळणारे $section नाहीत';
+  }
+
+  @override
+  String filterTryAdvanced(String link) {
+    return 'AND / OR फिल्टर हवेत? $link वापरून पहा';
+  }
+
+  @override
+  String get setSecProfile => 'प्रोफाइल';
+
+  @override
+  String get setSecAbout => 'माहिती';
+
+  @override
+  String get setSecPermissions => 'परवानग्या';
+
+  @override
+  String get menuAdvancedHistory => 'प्रगत इतिहास';
+
+  @override
+  String get menuAdvancedHistoryDesc =>
+      'प्रत्येक व्यवहार फिल्टर, ग्रुप आणि चार्ट करा';
+
+  @override
+  String get rateTitle => 'कुबेर आवडतोय का?';
+
+  @override
+  String get rateBody =>
+      'कुबेर एकच व्यक्ती बनवतो आणि चालवतो. Play Store वर दिलेल्या छोट्या रेटिंगमुळे इतरांना हे ॲप सापडते आणि तुम्ही मागितलेली फीचर्स मला बनवत राहता येतात. यासाठी एक मिनिटही लागत नाही.';
+
+  @override
+  String get rateCta => 'Play Store वर रेट करा';
+
+  @override
+  String get rateRefer => 'मित्राला रेफर करा';
+
+  @override
+  String get rateLater => 'नंतर';
+
+  @override
+  String get rateNever => 'हे पुन्हा दाखवू नका';
+
+  @override
+  String get ahdGateHeadline =>
+      'प्रत्येक व्यवहार फिल्टर करा, ग्रुप करा आणि चार्ट बनवा';
+
+  @override
+  String get ahdGatePill => 'Kuber Pro';
+
+  @override
+  String get ahdGateB1 => 'आणि, किंवा आणि नाही वापरून फिल्टर जोडा';
+
+  @override
+  String get ahdGateB2 => 'श्रेणी, खाते, टॅग, महिना आणि इतरांनुसार ग्रुप करा';
+
+  @override
+  String get ahdGateB3 => 'तुमच्या फिल्टरनुसार बदलणारी बेरीज आणि चार्ट';
+
+  @override
+  String get ahdGateB4 => 'व्ह्यू सेव्ह करा आणि निकाल CSV मध्ये एक्सपोर्ट करा';
+
+  @override
+  String get ahdGateCta => 'Kuber Pro पहा';
+
+  @override
+  String get ahdGateSample => 'नमुना डेटा';
+
+  @override
+  String get ahdGateSheetHeadline => 'Advanced History हे Kuber Pro फीचर आहे';
+
+  @override
+  String get ahdGateSheetBody =>
+      'Kuber Pro सह तुमच्या सर्व व्यवहारांवर कोणताही फिल्टर बनवा, निकाल ग्रुप करा आणि चार्टमध्ये पहा, व्ह्यू सेव्ह करा आणि CSV मध्ये एक्सपोर्ट करा.';
+
+  @override
+  String get ahdTitle => 'Advanced History';
+
+  @override
+  String get ahdMenuSaved => 'सेव्ह केलेले व्ह्यू';
+
+  @override
+  String ahdSavedN(int n) {
+    return '$n सेव्ह';
+  }
+
+  @override
+  String get ahdMenuSave => 'हा व्ह्यू सेव्ह करा';
+
+  @override
+  String get ahdMenuExport => 'निकाल एक्सपोर्ट करा (CSV)';
+
+  @override
+  String ahdTxnN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n व्यवहार',
+      one: '$n व्यवहार',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdMenuClear => 'सर्व काढा';
+
+  @override
+  String get ahdMenuHelp => 'हे पेज कसे काम करते';
+
+  @override
+  String get ahdFilter => 'फिल्टर';
+
+  @override
+  String get ahdGroup => 'ग्रुप';
+
+  @override
+  String get ahdSort => 'क्रम';
+
+  @override
+  String get ahdSaved => 'सेव्ह केलेले';
+
+  @override
+  String get ahdSavedEdited => 'सेव्ह केलेले · बदललेले';
+
+  @override
+  String get ahdNone => 'काहीही नाही';
+
+  @override
+  String get ahdClearAll => 'सर्व काढा';
+
+  @override
+  String get ahdClearTitle => 'फिल्टर, ग्रुप, क्रम आणि चार्ट काढायचे?';
+
+  @override
+  String get ahdClearBody => 'सेव्ह केलेले व्ह्यू बदलणार नाहीत.';
+
+  @override
+  String get ahdStartLine =>
+      'सुरू करण्यासाठी फिल्टर किंवा ग्रुप निवडा, किंवा सेव्ह केलेला व्ह्यू उघडा.';
+
+  @override
+  String get ahdAddFilter => 'फिल्टर जोडा';
+
+  @override
+  String get ahdAddFilterSub => 'श्रेणी, रक्कम, तारीख आणि इतर';
+
+  @override
+  String get ahdGroupBy => 'ग्रुप करा';
+
+  @override
+  String get ahdGroupBySub => 'श्रेणी, खाते, महिना आणि इतर';
+
+  @override
+  String get ahdOpenSaved => 'सेव्ह केलेले उघडा';
+
+  @override
+  String ahdSavedViewsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n सेव्ह केलेले व्ह्यू',
+      one: '$n सेव्ह केलेला व्ह्यू',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdNothingSaved => 'अजून काही सेव्ह नाही';
+
+  @override
+  String get ahdTryOne => 'यापैकी एक पहा';
+
+  @override
+  String get ahdEx1 => 'या वर्षी ₹500 पेक्षा जास्त जेवण';
+
+  @override
+  String get ahdEx2 => 'टॅग नसलेले खर्च';
+
+  @override
+  String get ahdEx3 => '2026 मधील प्रवास, महिन्यानुसार';
+
+  @override
+  String get ahdYourSaved => 'तुमचे सेव्ह केलेले व्ह्यू';
+
+  @override
+  String get ahdCategory => 'श्रेणी';
+
+  @override
+  String get ahdAccount => 'खाते';
+
+  @override
+  String get ahdTag => 'टॅग';
+
+  @override
+  String get ahdType => 'प्रकार';
+
+  @override
+  String get ahdSource => 'स्रोत';
+
+  @override
+  String get ahdMonth => 'महिना';
+
+  @override
+  String get ahdYear => 'वर्ष';
+
+  @override
+  String get ahdDate => 'तारीख';
+
+  @override
+  String get ahdAmount => 'रक्कम';
+
+  @override
+  String get ahdTotal => 'एकूण';
+
+  @override
+  String get ahdCount => 'संख्या';
+
+  @override
+  String get ahdName => 'नाव';
+
+  @override
+  String get ahdAverage => 'सरासरी';
+
+  @override
+  String get ahdSortTxns => 'व्यवहार';
+
+  @override
+  String get ahdSortGroups => 'ग्रुप';
+
+  @override
+  String get ahdNewest => 'नवीन आधी';
+
+  @override
+  String get ahdOldest => 'जुने आधी';
+
+  @override
+  String get ahdHighest => 'जास्त आधी';
+
+  @override
+  String get ahdLowest => 'कमी आधी';
+
+  @override
+  String get ahdAtoZ => 'अ ते ज्ञ';
+
+  @override
+  String get ahdZtoA => 'ज्ञ ते अ';
+
+  @override
+  String get ahdGroupHelp =>
+      'कल पाहण्यासाठी महिना किंवा वर्षानुसार ग्रुप करा. दिवसानुसार ग्रुप नाही; त्यासाठी तारखेनुसार क्रम लावा.';
+
+  @override
+  String get ahdInfoGroup1 =>
+      'जुळणारे व्यवहार ग्रुपमध्ये ठेवते आणि प्रत्येक ग्रुपची एक ओळ संख्या, एकूण आणि वाटा दाखवते. ग्रुपवर टॅप करून त्याचे व्यवहार पहा.';
+
+  @override
+  String get ahdInfoGroup2 =>
+      'महिना आणि वर्ष काळानुसार कल दाखवतात. 2 टॅग असलेला व्यवहार दोन्ही टॅग ग्रुपमध्ये मोजला जातो.';
+
+  @override
+  String get ahdInfoSort1 =>
+      'ग्रुपशिवाय, व्यवहार तारीख, रक्कम, श्रेणी किंवा खात्यानुसार लावा. ग्रुपसह, ग्रुप एकूण, संख्या किंवा नावानुसार लावा.';
+
+  @override
+  String get ahdInfoSort2 => 'ग्रुपच्या शीटमध्ये व्यवहार नेहमी नवीन आधी असतात.';
+
+  @override
+  String get ahdInfoChart1 =>
+      '4 चार्टपर्यंत जोडा. प्रत्येक चार्ट तुमचा फिल्टर पाळतो आणि निकाल स्वतःच्या पद्धतीने विभागतो.';
+
+  @override
+  String get ahdInfoChart2 =>
+      'श्रेणी, खाती, टॅग, प्रकार किंवा स्रोतांची तुलना करण्यासाठी डोनट किंवा बार निवडा. महिना किंवा वर्षानुसार कलासाठी लाइन निवडा. भागावर टॅप करून उघडा.';
+
+  @override
+  String get ahdInfoSaved1 =>
+      'सेव्ह केलेला व्ह्यू संपूर्ण पेज लक्षात ठेवतो: फिल्टर, ग्रुप, क्रम, प्रत्येक चार्ट त्याचा प्रकार, विभागणी, माप आणि जागेसह, आणि KPI कार्ड.';
+
+  @override
+  String get ahdInfoSaved2 =>
+      'सेव्ह केलेला व्ह्यू बदलल्यास तो अपडेट करण्यासाठी बदल सेव्ह करा निवडा, किंवा दोन्ही ठेवण्यासाठी नवीन म्हणून सेव्ह करा. सेव्ह केलेले व्ह्यू तुमच्या JSON बॅकअपमध्ये येतात.';
+
+  @override
+  String get ahdInfoKpi =>
+      'वर कोणते आकडे दिसावेत ते निवडा आणि ओढून क्रम बदला. सेव्ह केलेले व्ह्यू ही निवड लक्षात ठेवतात.';
+
+  @override
+  String get ahdKpiTransactions => 'व्यवहार';
+
+  @override
+  String get ahdKpiIncome => 'उत्पन्न';
+
+  @override
+  String get ahdKpiExpense => 'खर्च';
+
+  @override
+  String get ahdKpiNet => 'निव्वळ';
+
+  @override
+  String get ahdKpiAverage => 'सरासरी';
+
+  @override
+  String get ahdKpiAttachments => 'अटॅचमेंट';
+
+  @override
+  String get ahdKpiLargest => 'सर्वात मोठा';
+
+  @override
+  String get ahdKpiEdit => 'बदला';
+
+  @override
+  String get ahdKpiSheetTitle => 'KPI कार्ड';
+
+  @override
+  String get ahdKpiSheetDesc => 'वर काय दिसावे ते निवडा. क्रमासाठी ओढा.';
+
+  @override
+  String get ahdKpiSheetNote => 'सेव्ह केलेले व्ह्यू ही निवड लक्षात ठेवतात.';
+
+  @override
+  String get ahdReset => 'रीसेट';
+
+  @override
+  String get ahdAddChartEmpty => 'चार्ट जोडा';
+
+  @override
+  String get ahdAddChartHint => 'डोनट, बार किंवा लाइन';
+
+  @override
+  String ahdAddChartN(int n) {
+    return 'चार्ट जोडा · 4 पैकी $n';
+  }
+
+  @override
+  String get ahdChartsFull => '4 पैकी 4 चार्ट. नवीन जोडण्यासाठी एक काढा.';
+
+  @override
+  String get ahdMoveUp => 'वर न्या';
+
+  @override
+  String get ahdMoveDown => 'खाली न्या';
+
+  @override
+  String get ahdRemove => 'काढा';
+
+  @override
+  String get ahdChartRemoved => 'चार्ट काढला';
+
+  @override
+  String get ahdUndo => 'पूर्ववत';
+
+  @override
+  String get ahdDonut => 'डोनट';
+
+  @override
+  String get ahdBars => 'बार';
+
+  @override
+  String get ahdLine => 'लाइन';
+
+  @override
+  String ahdCardTitle(String measure, String split) {
+    return '$split नुसार $measure';
+  }
+
+  @override
+  String ahdCardSub(String type, String count) {
+    return '$type · $count';
+  }
+
+  @override
+  String get ahdStLine => 'लाइनसाठी किमान 2 महिन्यांचा डेटा हवा.';
+
+  @override
+  String get ahdStNoTags => 'या निकालांत टॅग नाहीत.';
+
+  @override
+  String get ahdStNoAccounts => 'या निकालांत खाती नाहीत.';
+
+  @override
+  String get ahdStNoCategories => 'या निकालांत श्रेणी नाहीत.';
+
+  @override
+  String get ahdStNothing => 'या निकालांत विभागण्यासारखे काही नाही.';
+
+  @override
+  String get ahdStWrongCombo =>
+      'लाइन चार्ट महिना किंवा वर्षानुसार चालतात. विभागणी किंवा चार्टचा प्रकार बदला.';
+
+  @override
+  String get ahdSplitByMonth => 'महिन्यानुसार विभागा';
+
+  @override
+  String get ahdChangeChart => 'चार्ट बदला';
+
+  @override
+  String get ahdStNoResults => 'या फिल्टरशी कोणताही व्यवहार जुळत नाही.';
+
+  @override
+  String get ahdBuilderAdd => 'चार्ट जोडा';
+
+  @override
+  String get ahdBuilderEdit => 'चार्ट बदला';
+
+  @override
+  String get ahdChartType => 'चार्टचा प्रकार';
+
+  @override
+  String get ahdSplitBy => 'यानुसार विभागा';
+
+  @override
+  String get ahdShow => 'दाखवा';
+
+  @override
+  String get ahdCurrentGroup => 'सध्याचा ग्रुप';
+
+  @override
+  String get ahdUpdateChart => 'चार्ट अपडेट करा';
+
+  @override
+  String get ahdRemoveChart => 'चार्ट काढा';
+
+  @override
+  String get ahdBlkNoTags => 'या निकालांत टॅग नाहीत';
+
+  @override
+  String get ahdBlkOneAccount => 'या निकालांत फक्त एक खाते';
+
+  @override
+  String get ahdBlkOneType => 'या निकालांत फक्त एक प्रकार';
+
+  @override
+  String get ahdBlkOneSource => 'या निकालांत फक्त एक स्रोत';
+
+  @override
+  String get ahdBlkOneCategory => 'या निकालांत फक्त एक श्रेणी';
+
+  @override
+  String get ahdBlkOneMonth => 'सर्व निकाल एकाच महिन्यातील आहेत';
+
+  @override
+  String get ahdBlkOneYear => 'सर्व निकाल एकाच वर्षातील आहेत';
+
+  @override
+  String get ahdTagNote =>
+      'एकापेक्षा जास्त टॅग असलेले व्यवहार प्रत्येक टॅग ग्रुपमध्ये दिसतात, त्यामुळे बेरीज एकूण रकमेपेक्षा जास्त होऊ शकते.';
+
+  @override
+  String get ahdLoadMore => 'आणखी लोड करा';
+
+  @override
+  String get ahdEmptyTitle => 'कोणताही व्यवहार जुळत नाही';
+
+  @override
+  String get ahdEmptyBody =>
+      'या फोनवर यांपैकी सर्वांशी काहीही जुळत नाही. कमी रक्कम वापरून पहा किंवा एखादा फिल्टर काढा.';
+
+  @override
+  String get ahdErrorTitle => 'निकाल लोड झाले नाहीत';
+
+  @override
+  String get ahdErrorBody =>
+      'तुमचे व्यवहार वाचताना काहीतरी चुकले. तुमचा डेटा सुरक्षित आहे आणि काहीही बदलले नाही.';
+
+  @override
+  String get ahdTryAgain => 'पुन्हा प्रयत्न करा';
+
+  @override
+  String get ahdGsTotal => 'एकूण';
+
+  @override
+  String get ahdGsLargest => 'सर्वात मोठा';
+
+  @override
+  String ahdChanged(String name) {
+    return 'तुम्ही $name बदलला';
+  }
+
+  @override
+  String get ahdChFilter => 'फिल्टर बदलला';
+
+  @override
+  String get ahdChGroup => 'ग्रुप बदलला';
+
+  @override
+  String get ahdChSort => 'क्रम बदलला';
+
+  @override
+  String get ahdChKpis => 'KPI कार्ड बदलली';
+
+  @override
+  String get ahdChAdded => 'चार्ट जोडला';
+
+  @override
+  String get ahdChRemoved => 'चार्ट काढला';
+
+  @override
+  String get ahdChMoved => 'चार्ट हलवला';
+
+  @override
+  String get ahdChEdited => 'चार्ट बदलला';
+
+  @override
+  String get ahdSaveAsNew => 'नवीन म्हणून सेव्ह करा';
+
+  @override
+  String get ahdSaveChanges => 'बदल सेव्ह करा';
+
+  @override
+  String ahdUpdated(String name) {
+    return '$name अपडेट झाला';
+  }
+
+  @override
+  String get ahdSaveTitle => 'हा व्ह्यू सेव्ह करा';
+
+  @override
+  String get ahdNameHint => 'या व्ह्यूला नाव द्या';
+
+  @override
+  String ahdNameTaken(String name) {
+    return '$name नावाचा व्ह्यू आधीच आहे';
+  }
+
+  @override
+  String ahdSumFilters(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n फिल्टर',
+      one: '$n फिल्टर',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahdSumGrouped(String group) {
+    return '$group नुसार ग्रुप केले';
+  }
+
+  @override
+  String ahdSumSorted(String field) {
+    return '$field नुसार क्रमाने';
+  }
+
+  @override
+  String ahdSumCharts(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n चार्ट',
+      one: '$n चार्ट',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdSumEmpty => 'अजून काही ठरवले नाही';
+
+  @override
+  String get ahdWhatSaved => 'काय सेव्ह होईल';
+
+  @override
+  String get ahdWsFilter => 'फिल्टर';
+
+  @override
+  String get ahdWsGroup => 'ग्रुप';
+
+  @override
+  String get ahdWsSort => 'क्रम';
+
+  @override
+  String get ahdWsCharts => 'चार्ट';
+
+  @override
+  String get ahdWsKpis => 'KPI कार्ड';
+
+  @override
+  String get ahdNotSet => 'ठरवलेले नाही';
+
+  @override
+  String ahdKpisShown(int n) {
+    return '$n दिसतील';
+  }
+
+  @override
+  String get ahdBackupNote => 'तुमच्या JSON बॅकअपमध्ये समाविष्ट.';
+
+  @override
+  String ahdSavedSnack(String name) {
+    return '$name म्हणून सेव्ह केले';
+  }
+
+  @override
+  String get ahdSavedTitle => 'सेव्ह केलेले व्ह्यू';
+
+  @override
+  String get ahdSavedEmptyTitle => 'अजून कोणताही व्ह्यू सेव्ह नाही';
+
+  @override
+  String get ahdSavedEmptyBody =>
+      'फिल्टर, ग्रुप किंवा चार्ट सेट करा, मग मेनूमध्ये हा व्ह्यू सेव्ह करा निवडा.';
+
+  @override
+  String get ahdRename => 'नाव बदला';
+
+  @override
+  String get ahdRenameTitle => 'व्ह्यूचे नाव बदला';
+
+  @override
+  String ahdDeleteTitle(String name) {
+    return '$name हटवायचा?';
+  }
+
+  @override
+  String get ahdDeleteBody =>
+      'यामुळे फक्त सेव्ह केलेला व्ह्यू हटेल. तुमचे व्यवहार जसे आहेत तसे राहतील.';
+
+  @override
+  String get ahdExportTitle => 'निकाल एक्सपोर्ट करा';
+
+  @override
+  String get ahdExportFilter => 'तुमचा सध्याचा फिल्टर';
+
+  @override
+  String get ahdExportNoFilter => 'फिल्टर नाही';
+
+  @override
+  String ahdExportNote(String n) {
+    return 'नेमके हेच $n व्यवहार, History CSV एक्सपोर्टच्या स्तंभांमध्ये. ग्रुप आणि चार्ट एक्सपोर्ट होत नाहीत.';
+  }
+
+  @override
+  String get ahdExportSave => 'फोल्डरमध्ये सेव्ह करा';
+
+  @override
+  String get ahdExportShare => 'शेअर करा';
+
+  @override
+  String get ahdExportSaved => 'फाइल सेव्ह झाली';
+
+  @override
+  String get ahdExportFailed => 'फाइल बनवता आली नाही. काहीही बदलले नाही.';
+
+  @override
+  String get ahdHelpTitle => 'हे पेज कसे काम करते';
+
+  @override
+  String get ahdHelpFilter =>
+      'काय पाहायचे ते निवडण्यासाठी फिल्टरवर टॅप करा: श्रेणी, रक्कम, तारखा आणि इतर.';
+
+  @override
+  String get ahdHelpGroup =>
+      'निकाल श्रेणी, खाते, टॅग, महिना आणि इतरांनुसार ओळींमध्ये ठेवते.';
+
+  @override
+  String get ahdHelpSort => 'व्यवहार किंवा ग्रुपचा क्रम बदलते.';
+
+  @override
+  String get ahdHelpCharts =>
+      '4 चार्टपर्यंत जोडा. प्रत्येक चार्ट तुमच्या फिल्टरनुसार चालतो. भागावर टॅप करून उघडा.';
+
+  @override
+  String get ahdHelpSaved =>
+      'संपूर्ण पेज सेव्ह करते म्हणजे तुम्ही ते एका टॅपमध्ये पुन्हा उघडू शकता.';
+
+  @override
+  String get ahdCharts => 'चार्ट';
+
+  @override
+  String get ahdInfoOpen => 'याबद्दल';
+
+  @override
+  String loanSplitNotice(int n) {
+    return '$n EMI तुमच्या कर्जाच्या वेळापत्रकाशी जुळत नाहीत.';
+  }
+
+  @override
+  String get loanSplitNoticeSub =>
+      'यांतील व्याज आणि मुद्दलाची विभागणी चुकीची आहे. भरलेली रक्कम बरोबर आहे.';
+
+  @override
+  String get loanSplitFix => 'दुरुस्त करा';
+
+  @override
+  String get loanFixTitle => 'EMI विभागणी दुरुस्त करा';
+
+  @override
+  String loanFixCount(int n) {
+    return '$n EMI';
+  }
+
+  @override
+  String loanFixRange(String from, String to) {
+    return '$from ते $to';
+  }
+
+  @override
+  String get loanFixNow => 'आता';
+
+  @override
+  String get loanFixAfter => 'दुरुस्तीनंतर';
+
+  @override
+  String get loanFixInterest => 'व्याज';
+
+  @override
+  String get loanFixPrincipal => 'मुद्दल';
+
+  @override
+  String get loanFixTotalPaid => 'एकूण भरलेले';
+
+  @override
+  String get loanFixSame => 'तेवढेच';
+
+  @override
+  String loanFixKept(int n) {
+    return 'तुम्ही बदललेल्या EMI तशाच राहतात ($n ठेवल्या)';
+  }
+
+  @override
+  String loanFixInfo(String amount) {
+    return 'फक्त व्याज आणि मुद्दलाची विभागणी बदलते. रक्कम, तारखा आणि खाती तीच राहतात. थकबाकी $amount होईल.';
+  }
+
+  @override
+  String get loanFixing => 'दुरुस्त होत आहे';
+
+  @override
+  String loanFixedSnack(int n, String amount) {
+    return '$n EMI दुरुस्त केल्या. थकबाकी आता $amount आहे.';
+  }
+
+  @override
+  String get loanFixUndo => 'पूर्ववत करा';
+
+  @override
+  String get loanRecheck => 'EMI विभागणी पुन्हा तपासा';
+
+  @override
+  String loanAllMatch(int n) {
+    return 'सर्व काही जुळते. सर्व $n EMI तुमच्या कर्जाच्या वेळापत्रकानुसार आहेत.';
+  }
+
+  @override
+  String get loanFixLonger =>
+      'नंतरचे भाग जोडले गेले आणि EMI तीच ठेवली, म्हणून तुमचे कर्ज लांबले.';
+
+  @override
+  String get historyMenuAdvancedSub => 'AND / OR फिल्टर, गट, चार्ट';
+
+  @override
+  String get ahqFieldType => 'प्रकार';
+
+  @override
+  String get ahqFieldAmount => 'रक्कम';
+
+  @override
+  String get ahqFieldCategory => 'श्रेणी';
+
+  @override
+  String get ahqFieldAccount => 'खाते';
+
+  @override
+  String get ahqFieldTag => 'टॅग';
+
+  @override
+  String get ahqFieldDate => 'तारीख';
+
+  @override
+  String get ahqFieldWords => 'शब्द';
+
+  @override
+  String get ahqFieldHas => 'समाविष्ट';
+
+  @override
+  String get ahqFieldSource => 'स्रोत';
+
+  @override
+  String get ahqFieldSubType => 'प्रकारचा';
+
+  @override
+  String get ahqTypeExpense => 'खर्च';
+
+  @override
+  String get ahqTypeIncome => 'उत्पन्न';
+
+  @override
+  String get ahqTypeTransfer => 'ट्रान्सफर';
+
+  @override
+  String get ahqSourceManual => 'तुम्ही टाकलेले';
+
+  @override
+  String get ahqSourceSms => 'SMS';
+
+  @override
+  String get ahqSourceQuickAdd => 'Quick Add';
+
+  @override
+  String get ahqSourceRecurring => 'आवर्ती';
+
+  @override
+  String get ahqSourceImport => 'इम्पोर्ट';
+
+  @override
+  String get ahqHasAttachment => 'अटॅचमेंट';
+
+  @override
+  String get ahqHasNote => 'नोंद';
+
+  @override
+  String get ahqSubLoanRepayment => 'कर्ज परतफेड';
+
+  @override
+  String get ahqSubInvestment => 'गुंतवणूक';
+
+  @override
+  String get ahqSubSavings => 'बचत';
+
+  @override
+  String get ahqSubLent => 'उसने दिले';
+
+  @override
+  String get ahqSubBorrowed => 'उसने घेतले';
+
+  @override
+  String get ahqSubInvestmentReturn => 'गुंतवणुकीवरील परतावा';
+
+  @override
+  String get ahqSubLoanReceived => 'कर्ज मिळाले';
+
+  @override
+  String get ahqSubLoanDisbursement => 'कर्ज वितरण';
+
+  @override
+  String get ahqOr => 'किंवा';
+
+  @override
+  String get ahqNone => 'काहीही नाही';
+
+  @override
+  String ahqRange(String from, String to) {
+    return '$from ते $to';
+  }
+
+  @override
+  String ahqAmountOver(String amount) {
+    return '$amount पेक्षा जास्त';
+  }
+
+  @override
+  String ahqAmountUnder(String amount) {
+    return '$amount पेक्षा कमी';
+  }
+
+  @override
+  String ahqAmountOrMore(String amount) {
+    return '$amount किंवा जास्त';
+  }
+
+  @override
+  String ahqAmountOrLess(String amount) {
+    return '$amount किंवा कमी';
+  }
+
+  @override
+  String get ahqDateThisMonth => 'या महिन्यात';
+
+  @override
+  String get ahqDateLastMonth => 'मागील महिना';
+
+  @override
+  String get ahqDateThisYear => 'या वर्षी';
+
+  @override
+  String get ahqDateLastYear => 'मागील वर्ष';
+
+  @override
+  String ahqDateLastDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'मागील $n दिवस',
+      one: 'मागील दिवस',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahqDateAfter(String date) {
+    return '$date नंतर';
+  }
+
+  @override
+  String ahqDateBefore(String date) {
+    return '$date पूर्वी';
+  }
+
+  @override
+  String ahqDateFrom(String date) {
+    return '$date पासून';
+  }
+
+  @override
+  String ahqDateUntil(String date) {
+    return '$date पर्यंत';
+  }
+
+  @override
+  String get ahqRbTransactions => 'व्यवहार';
+
+  @override
+  String get ahqRbExpenses => 'खर्च';
+
+  @override
+  String get ahqRbIncome => 'उत्पन्न';
+
+  @override
+  String get ahqRbTransfers => 'ट्रान्सफर';
+
+  @override
+  String ahqRbAmountIs(String amount) {
+    return '$amount चे';
+  }
+
+  @override
+  String ahqRbIn(String names) {
+    return '$names मध्ये';
+  }
+
+  @override
+  String ahqRbNotIn(String names) {
+    return '$names मध्ये नाही';
+  }
+
+  @override
+  String ahqRbFrom(String names) {
+    return '$names कडून';
+  }
+
+  @override
+  String ahqRbNotFrom(String names) {
+    return '$names कडून नाही';
+  }
+
+  @override
+  String ahqRbTagged(String tags) {
+    return '$tags टॅग असलेले';
+  }
+
+  @override
+  String ahqRbNotTagged(String tags) {
+    return '$tags टॅग नसलेले';
+  }
+
+  @override
+  String get ahqRbNoTags => 'टॅगशिवाय';
+
+  @override
+  String get ahqRbHasTags => 'टॅगसह';
+
+  @override
+  String get ahqRbWithAttachment => 'अटॅचमेंटसह';
+
+  @override
+  String get ahqRbWithoutAttachment => 'अटॅचमेंटशिवाय';
+
+  @override
+  String get ahqRbWithNote => 'नोंदीसह';
+
+  @override
+  String get ahqRbWithoutNote => 'नोंदीशिवाय';
+
+  @override
+  String get ahqRbSms => 'SMS मधून';
+
+  @override
+  String get ahqRbManual => 'तुम्ही टाकलेले';
+
+  @override
+  String get ahqRbQuickAdd => 'Quick Add मधून';
+
+  @override
+  String get ahqRbRecurring => 'आवर्ती मधून';
+
+  @override
+  String get ahqRbImported => 'इम्पोर्ट केलेले';
+
+  @override
+  String ahqRbNot(String text) {
+    return '$text नाही';
+  }
+
+  @override
+  String ahqRbWords(String text) {
+    return 'शीर्षक किंवा नोंदीत “$text” असलेले';
+  }
+
+  @override
+  String ahqRbNoWords(String text) {
+    return 'शीर्षक किंवा नोंदीत “$text” नसलेले';
+  }
+
+  @override
+  String ahqRbKind(String kind) {
+    return 'जे $kind आहेत';
+  }
+
+  @override
+  String ahqRbDateIn(String date) {
+    return '$date मध्ये';
+  }
+
+  @override
+  String ahqRbDateOn(String date) {
+    return '$date रोजी';
+  }
+
+  @override
+  String ahqRbDateRange(String date) {
+    return '$date पासून';
+  }
+
+  @override
+  String ahqRbNotGroup(String text) {
+    return 'नाही ($text)';
+  }
+
+  @override
+  String get ahqErrCloseBracket => 'बंद करणारा कंस नाही';
+
+  @override
+  String ahqErrCloseBracketAfter(String token) {
+    return 'बंद करणारा कंस नाही. $token नंतर ) जोडा.';
+  }
+
+  @override
+  String get ahqErrOpenBracket => 'उघडणारा कंस नाही';
+
+  @override
+  String ahqErrField(String name, String suggestion) {
+    return 'अज्ञात फील्ड “$name”. तुम्हाला $suggestion म्हणायचे होते का?';
+  }
+
+  @override
+  String ahqErrFieldPlain(String name) {
+    return 'अज्ञात फील्ड “$name”.';
+  }
+
+  @override
+  String get ahqErrAmount => 'रकमेसाठी संख्या हवी, जसे amount:>500';
+
+  @override
+  String get ahqErrDate =>
+      'तारखेसाठी वर्ष, महिना किंवा दिवस हवा, जसे date:2026-03';
+
+  @override
+  String ahqErrValue(String field, String name) {
+    return '“$name” नावाचे $field नाही';
+  }
+
+  @override
+  String ahqErrValueDid(String field, String name, String suggestion) {
+    return '“$name” नावाचे $field नाही. तुम्हाला $suggestion म्हणायचे होते का?';
+  }
+
+  @override
+  String get ahqErrOr => 'OR च्या दोन्ही बाजूंना काहीतरी हवे.';
+
+  @override
+  String get ahqErrEmptyGroup => 'कंसांच्या दरम्यान एक फिल्टर जोडा.';
+
+  @override
+  String ahqErrBadToken(String text) {
+    return '“$text” वाचता आले नाही.';
+  }
+
+  @override
+  String get ahqUntagged => 'टॅगशिवाय';
+
+  @override
+  String get ahqNoCategory => 'श्रेणी नाही';
+
+  @override
+  String get ahqOther => 'इतर';
+
+  @override
+  String get ahqUnknown => 'अज्ञात';
+
+  @override
+  String get ahfTitle => 'फिल्टर';
+
+  @override
+  String get ahfNoFilters => 'अजून फिल्टर नाहीत';
+
+  @override
+  String get ahfFilterOne => 'फिल्टर';
+
+  @override
+  String get ahfFilterMany => 'फिल्टर';
+
+  @override
+  String get ahfClearAll => 'सर्व काढा';
+
+  @override
+  String get ahfCleared => 'फिल्टर काढले';
+
+  @override
+  String get ahfUndo => 'पूर्ववत करा';
+
+  @override
+  String get ahfPlaceholder => 'फिल्टर लिहा किंवा फील्ड निवडा';
+
+  @override
+  String get ahfPlaceholderFocused => 'फील्ड लिहा, जसे category';
+
+  @override
+  String get ahfImplicitNote =>
+      '\"and\" हे \"or\" च्या आधी वाचले जाते. ठिपक्यांचा बॉक्स अ‍ॅप हे कसे जोडते ते दाखवतो. बदलण्यासाठी ब्रॅकेट लावा.';
+
+  @override
+  String get ahfAddFilter => 'फिल्टर जोडा';
+
+  @override
+  String get ahfPlainWords => 'सोप्या शब्दांत';
+
+  @override
+  String get ahfTryOne => 'एक वापरून पहा';
+
+  @override
+  String get ahfExFood => 'या वर्षी ₹500 पेक्षा जास्त जेवण';
+
+  @override
+  String get ahfExAttachment => 'अटॅचमेंट असलेले';
+
+  @override
+  String get ahfExUntagged => 'टॅग नसलेले खर्च';
+
+  @override
+  String get ahfExCard => 'मागील महिन्यातील कार्ड खर्च';
+
+  @override
+  String ahfShowN(int n) {
+    return '$n व्यवहार दाखवा';
+  }
+
+  @override
+  String get ahfShowCounting => 'व्यवहार दाखवा';
+
+  @override
+  String get ahfNoMatch => 'एकही व्यवहार जुळत नाही';
+
+  @override
+  String get ahfDone => 'झाले';
+
+  @override
+  String get ahfHintType => 'खर्च, उत्पन्न किंवा ट्रान्सफर';
+
+  @override
+  String get ahfHintAmount => 'इतक्यापेक्षा जास्त, कमी किंवा दरम्यानची रक्कम';
+
+  @override
+  String get ahfHintCategory => 'तुमच्या श्रेणी';
+
+  @override
+  String get ahfHintAccount => 'पैसे कुठे गेले';
+
+  @override
+  String get ahfHintTag => 'तुमचे टॅग, किंवा टॅग नाहीत';
+
+  @override
+  String get ahfHintDate => 'या महिन्यात, एखादे वर्ष किंवा कोणताही कालावधी';
+
+  @override
+  String get ahfHintHas => 'अटॅचमेंट किंवा नोट';
+
+  @override
+  String get ahfHintSource => 'स्वतः लिहिलेले, SMS, Quick Add आणि बरेच काही';
+
+  @override
+  String get ahfHintWords => 'शीर्षक किंवा नोटमधील शब्द';
+
+  @override
+  String get ahfFilterBy => 'यानुसार फिल्टर';
+
+  @override
+  String get ahfIs => 'आहे';
+
+  @override
+  String get ahfIsNot => 'नाही';
+
+  @override
+  String get ahfAddFilterBtn => 'फिल्टर जोडा';
+
+  @override
+  String ahfAddFilterN(int n) {
+    return 'फिल्टर जोडा · $n निवडले';
+  }
+
+  @override
+  String get ahfPickMany =>
+      'कोणत्याही एकाशी जुळण्यासाठी एकापेक्षा जास्त निवडा.';
+
+  @override
+  String get ahfOver => 'पेक्षा जास्त';
+
+  @override
+  String get ahfUnder => 'पेक्षा कमी';
+
+  @override
+  String get ahfBetween => 'दरम्यान';
+
+  @override
+  String get ahfAmountIs => 'बरोबर';
+
+  @override
+  String get ahfAmountNote => 'अधिक किंवा उणे चिन्हाशिवाय रक्कम.';
+
+  @override
+  String get ahfFrom => 'पासून';
+
+  @override
+  String get ahfTo => 'पर्यंत';
+
+  @override
+  String get ahfSearchCategories => 'श्रेणी शोधा';
+
+  @override
+  String get ahfSearchAccounts => 'खाती शोधा';
+
+  @override
+  String get ahfSearchTags => 'टॅग शोधा';
+
+  @override
+  String get ahfHasNoTags => 'टॅग नाहीत';
+
+  @override
+  String get ahfNothingFound => 'काही सापडले नाही';
+
+  @override
+  String get ahfDateQuick => 'पटकन';
+
+  @override
+  String get ahfDateLast30 => 'गेले 30 दिवस';
+
+  @override
+  String get ahfDateMonthYear => 'एखादा महिना किंवा वर्ष';
+
+  @override
+  String ahfAllOfYear(String year) {
+    return 'संपूर्ण $year';
+  }
+
+  @override
+  String get ahfDateCustom => 'स्वतःचा कालावधी';
+
+  @override
+  String get ahfDateCustomHint => 'सुरू आणि शेवटची तारीख निवडा';
+
+  @override
+  String get ahfSrcNote =>
+      'आवर्ती मध्ये कर्जाचे EMI येतात. इंपोर्ट म्हणजे CSV किंवा Kuber फाइल.';
+
+  @override
+  String get ahfWordsNote =>
+      'शीर्षक आणि नोटमध्ये शोधते. अक्षरांचा लहान-मोठेपणा महत्त्वाचा नाही.';
+
+  @override
+  String get ahfWordsHint => 'जसे swiggy';
+
+  @override
+  String get ahfTypeItLike => 'असे लिहा';
+
+  @override
+  String get ahfInfo1 =>
+      'बॉक्समध्ये लिहा, किंवा त्याखालील फील्ड निवडा. दोन्ही त्याच बॉक्समध्ये, कर्सर आहे तिथे जोडले जातात.';
+
+  @override
+  String get ahfInfo2 =>
+      'दोन फिल्टरमधील and वर टॅप करून ते or करा. रंगीत बॉक्स काय एकत्र आहे ते दाखवतो.';
+
+  @override
+  String get ahfInfo3 =>
+      'बारमध्ये ( ), and, or आणि not आहेत. ब्रॅकेट बॉक्समधील बॉक्ससारखे दिसतात.';
+
+  @override
+  String get ahfHowTitle => 'फिल्टर कसा लिहावा';
+
+  @override
+  String get ahfSyn1 => 'एक फील्ड आणि एक मूल्य';
+
+  @override
+  String get ahfSyn2 => 'दोनपैकी कोणतेही एक: food किंवा travel';
+
+  @override
+  String get ahfSyn3 =>
+      'इतक्यापेक्षा जास्त. कमीसाठी < आणि दरम्यानसाठी 500..2000 लिहा';
+
+  @override
+  String get ahfSyn4 => 'वर्ष, महिना किंवा दिवस';
+
+  @override
+  String get ahfSyn5 => 'शीर्षक किंवा नोटमधील शब्द';
+
+  @override
+  String get ahfSyn6 =>
+      'दोन्ही, किंवा कोणतेही एक. \"and\" हे \"or\" च्या आधी वाचले जाते';
+
+  @override
+  String get ahfSyn7 => 'फिल्टर एकत्र करा';
+
+  @override
+  String get ahfSyn8 => 'हे वगळा. तुम्ही -tag:trip असेही लिहू शकता';
+
+  @override
+  String get ahfDiscardTitle => 'बदल सोडायचे?';
+
+  @override
+  String get ahfDiscardBody => 'फिल्टरमधील तुमचे बदल लागू झालेले नाहीत.';
+
+  @override
+  String get ahfKeepEditing => 'संपादन सुरू ठेवा';
+
+  @override
+  String get ahfDiscard => 'सोडा';
+
+  @override
+  String ahfTokenSemantics(String text) {
+    return '$text, बदलण्यासाठी दोनदा टॅप करा';
+  }
+
+  @override
+  String ahfTokenInvalidSemantics(String text) {
+    return '$text, वैध नाही, बदलण्यासाठी दोनदा टॅप करा';
+  }
+
+  @override
+  String ahfJoinerSemantics(String word, String other) {
+    return '$word, $other करण्यासाठी दोनदा टॅप करा';
+  }
+
+  @override
+  String ahfBoxSemantics(int n) {
+    return '$n फिल्टरचा गट';
+  }
+
+  @override
+  String get ahfBracketOpenSemantics => 'उघडे ब्रॅकेट';
+
+  @override
+  String get ahfBracketCloseSemantics => 'बंद ब्रॅकेट';
+
+  @override
+  String get ahfGhostBracketSemantics => 'बंद ब्रॅकेट इथे येईल';
+
+  @override
+  String get ahfOpOpenSemantics => 'ब्रॅकेट उघडा';
+
+  @override
+  String get ahfOpCloseSemantics => 'ब्रॅकेट बंद करा';
+
+  @override
+  String get ahfHideKeyboard => 'कीबोर्ड लपवा';
+
+  @override
+  String ahfCountSemantics(int n) {
+    return '$n फिल्टर';
+  }
 }

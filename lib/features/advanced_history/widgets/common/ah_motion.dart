@@ -25,6 +25,30 @@ abstract final class AhMotion {
 
   /// Reduced motion: cross-fades only, 90 ms, no springs, no digit roll.
   static bool reduced(BuildContext c) => KuberMotion.reduced(c);
+
+  /// Cached spring curves (one simulation each) for implicit animations.
+  static final fastCurve = AhSpringCurve(expressiveFastSpatial);
+  static final defaultCurve = AhSpringCurve(expressiveDefaultSpatial);
+  static final standardCurve = AhSpringCurve(standardDefaultSpatial);
+
+  /// Same springs, clamped to 0..1 for sizes and width factors that must
+  /// never go negative or overshoot (the overshoot is kept for scale only).
+  static final fastSize = AhClamped(fastCurve);
+  static final defaultSize = AhClamped(defaultCurve);
+  static final standardSize = AhClamped(standardCurve);
+
+  /// Duration for [d] or [instant] when motion is reduced.
+  static Duration dur(BuildContext c, Duration d) =>
+      reduced(c) ? instant : d;
+}
+
+/// [inner] clamped to 0..1.
+class AhClamped extends Curve {
+  const AhClamped(this.inner);
+  final AhSpringCurve inner;
+  Duration get settle => inner.settle;
+  @override
+  double transformInternal(double t) => inner.transform(t).clamp(0.0, 1.0);
 }
 
 /// A [Curve] that follows [spring] from 0 to 1 and settles by t = 1, for use
@@ -35,13 +59,13 @@ class AhSpringCurve extends Curve {
   final SpringSimulation _sim;
 
   /// Time for the spring to settle within 0.1 %.
-  Duration get settle {
+  late final Duration settle = () {
     var t = 0.0;
     while (t < 2 && !(_sim.isDone(t))) {
       t += 0.005;
     }
     return Duration(milliseconds: (t * 1000).round());
-  }
+  }();
 
   @override
   double transformInternal(double t) =>

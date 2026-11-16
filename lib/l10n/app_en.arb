@@ -1011,13 +1011,13 @@
   "filterExp": "Exp",
   "filterIncomeTooltip": "Filter income",
   "filterInc": "Inc",
-  "advancedFiltersTooltip": "Advanced filters",
+  "advancedFiltersTooltip": "Filter",
   "clearFiltersTooltip": "Clear filters",
   "searchTransactionsTooltip": "Search transactions",
   "searchTransactionsHint": "Search transactions...",
   "applySearchTooltip": "Apply search",
   "selectRange": "Select Range",
-  "advancedFiltersTitle": "Advanced Filters",
+  "advancedFiltersTitle": "Filter",
   "clearAll": "CLEAR ALL",
   "dateRangeLabel": "DATE RANGE",
   "selectDateRange": "Select date range",
@@ -1399,7 +1399,7 @@
   "@editAnalyticsWidgets": {},
   "editAnalyticsWidgetsDesc": "Choose and reorder Analytics widgets",
   "@editAnalyticsWidgetsDesc": {},
-  "filterAll": "ALL",
+  "filterAll": "· All",
   "@filterAll": {},
   "filterToday": "TODAY",
   "@filterToday": {},
@@ -1529,7 +1529,7 @@
   "@menuHelpUsHint": {},
   "menuRateKuber": "Rate Kuber",
   "@menuRateKuber": {},
-  "menuShare": "Share",
+  "menuShare": "Refer",
   "@menuShare": {},
   "menuFeedbackShort": "Feedback",
   "@menuFeedbackShort": {},
@@ -2496,7 +2496,7 @@
   "tutCh2St0Desc": "All your transactions, grouped by date. Most recent at the top.",
   "tutCh2St1Title": "Quick filters",
   "tutCh2St1Desc": "Filter by Income, Expense, or Transfer instantly using these chips.",
-  "tutCh2St2Title": "Advanced filters",
+  "tutCh2St2Title": "Filter",
   "tutCh2St2Desc": "Tap the filter icon to search by date range, account, category, or tags simultaneously.",
   "tutCh2St3Title": "Tap to edit",
   "tutCh2St3Desc": "Tap any transaction to view full details, edit fields, or delete it.",
@@ -6668,5 +6668,899 @@
       }
     }
   },
-  "deleteLoanAction": "Delete loan"
+  "deleteLoanAction": "Delete loan",
+  "saveFileFailed": "Couldn't save the file. Pick another folder.",
+  "saveFileShareFailed": "Couldn't share the file. Try again.",
+  "saveFileCsvNoViews": "CSV backups don't include saved views. Use a JSON backup to keep them.",
+  "historyMenuAdvanced": "Advanced History",
+  "filterSelectedN": "· {n} selected",
+  "@filterSelectedN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterSearchCategories": "Search categories",
+  "filterSearchTags": "Search tags",
+  "filterNoMatch": "No {section} match “{text}”",
+  "@filterNoMatch": {
+    "placeholders": {
+      "section": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "filterTryAdvanced": "Need AND / OR filters? Try {link}",
+  "@filterTryAdvanced": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "setSecProfile": "Profile",
+  "setSecAbout": "About",
+  "setSecPermissions": "Permissions",
+  "menuAdvancedHistory": "Advanced History",
+  "menuAdvancedHistoryDesc": "Filter, group and chart every transaction",
+  "rateTitle": "Enjoying Kuber?",
+  "rateBody": "Kuber is built and run by one person. A quick rating on the Play Store helps other people find it, and it lets me keep building features you asked for. It takes less than a minute.",
+  "rateCta": "Rate on Play Store",
+  "rateRefer": "Refer a friend",
+  "rateLater": "Maybe later",
+  "rateNever": "Don't show this again",
+  "ahdGateHeadline": "Filter, group and chart every transaction",
+  "ahdGatePill": "Kuber Pro",
+  "ahdGateB1": "Combine filters with and, or and not",
+  "ahdGateB2": "Group by category, account, tag, month and more",
+  "ahdGateB3": "Totals and charts that follow your filter",
+  "ahdGateB4": "Save views and export the results as CSV",
+  "ahdGateCta": "See Kuber Pro",
+  "ahdGateSample": "Sample data",
+  "ahdGateSheetHeadline": "Advanced History is a Kuber Pro feature",
+  "ahdGateSheetBody": "Type or build any filter over all your transactions, group and chart the results, save views and export them as CSV with Kuber Pro.",
+  "ahdTitle": "Advanced History",
+  "ahdMenuSaved": "Saved views",
+  "ahdSavedN": "{n} saved",
+  "ahdMenuSave": "Save this view",
+  "ahdMenuExport": "Export results (CSV)",
+  "ahdTxnN": "{n, plural, =1{{n} transaction} other{{n} transactions}}",
+  "ahdMenuClear": "Clear all",
+  "ahdMenuHelp": "How this page works",
+  "ahdFilter": "Filter",
+  "ahdGroup": "Group",
+  "ahdSort": "Sort",
+  "ahdSaved": "Saved",
+  "ahdSavedEdited": "Saved · edited",
+  "ahdNone": "None",
+  "ahdClearAll": "Clear all",
+  "ahdClearTitle": "Clear filters, grouping, sorting and charts?",
+  "ahdClearBody": "Saved views are not changed.",
+  "ahdStartLine": "Pick a filter or a grouping to start, or open a saved view.",
+  "ahdAddFilter": "Add filter",
+  "ahdAddFilterSub": "Category, amount, date and more",
+  "ahdGroupBy": "Group by",
+  "ahdGroupBySub": "Category, account, month and more",
+  "ahdOpenSaved": "Open saved",
+  "ahdSavedViewsN": "{n, plural, =1{{n} saved view} other{{n} saved views}}",
+  "ahdNothingSaved": "Nothing saved yet",
+  "ahdTryOne": "Try one",
+  "ahdEx1": "Food over ₹500 this year",
+  "ahdEx2": "Untagged expenses",
+  "ahdEx3": "Travel in 2026 by month",
+  "ahdYourSaved": "Your saved views",
+  "ahdCategory": "Category",
+  "ahdAccount": "Account",
+  "ahdTag": "Tag",
+  "ahdType": "Type",
+  "ahdSource": "Source",
+  "ahdMonth": "Month",
+  "ahdYear": "Year",
+  "ahdDate": "Date",
+  "ahdAmount": "Amount",
+  "ahdTotal": "Total",
+  "ahdCount": "Count",
+  "ahdName": "Name",
+  "ahdAverage": "Average",
+  "ahdSortTxns": "Transactions",
+  "ahdSortGroups": "Groups",
+  "ahdNewest": "Newest first",
+  "ahdOldest": "Oldest first",
+  "ahdHighest": "Highest first",
+  "ahdLowest": "Lowest first",
+  "ahdAtoZ": "A to Z",
+  "ahdZtoA": "Z to A",
+  "ahdGroupHelp": "Group by Month or Year to see a trend. There is no day grouping; use Sort by date instead.",
+  "ahdInfoGroup1": "Puts matching transactions into groups and shows one row per group with its count, total and share. Tap a group to see its transactions.",
+  "ahdInfoGroup2": "Month and Year show a trend over time. A transaction with 2 tags is counted in both tag groups.",
+  "ahdInfoSort1": "Without groups, sort transactions by date, amount, category or account. With groups, sort the groups by total, count or name.",
+  "ahdInfoSort2": "Inside a group's sheet, transactions are always newest first.",
+  "ahdInfoChart1": "Add up to 4 charts. Each one follows your filter and splits the results its own way.",
+  "ahdInfoChart2": "Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to open it.",
+  "ahdInfoSaved1": "A saved view keeps the whole page: the filter, group, sort, every chart with its type, split, measure and position, and the KPI cards.",
+  "ahdInfoSaved2": "If you change a saved view, choose Save changes to update it or Save as new to keep both. Saved views are included in your JSON backup.",
+  "ahdInfoKpi": "Pick which numbers show at the top and drag to reorder them. Saved views remember this choice.",
+  "ahdKpiTransactions": "Transactions",
+  "ahdKpiIncome": "Income",
+  "ahdKpiExpense": "Expense",
+  "ahdKpiNet": "Net",
+  "ahdKpiAverage": "Average",
+  "ahdKpiAttachments": "Attachments",
+  "ahdKpiLargest": "Largest",
+  "ahdKpiEdit": "Edit",
+  "ahdKpiSheetTitle": "KPI cards",
+  "ahdKpiSheetDesc": "Pick what shows at the top. Drag to reorder.",
+  "ahdKpiSheetNote": "Saved views remember this choice.",
+  "ahdReset": "Reset",
+  "ahdAddChartEmpty": "Add a chart",
+  "ahdAddChartHint": "Donut, bars or line",
+  "ahdAddChartN": "Add chart · {n} of 4",
+  "ahdChartsFull": "4 of 4 charts. Remove one to add another.",
+  "ahdMoveUp": "Move up",
+  "ahdMoveDown": "Move down",
+  "ahdRemove": "Remove",
+  "ahdChartRemoved": "Chart removed",
+  "ahdUndo": "Undo",
+  "ahdDonut": "Donut",
+  "ahdBars": "Bars",
+  "ahdLine": "Line",
+  "ahdCardTitle": "{measure} by {split}",
+  "@ahdCardTitle": {
+    "placeholders": {
+      "measure": {
+        "type": "String"
+      },
+      "split": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdCardSub": "{type} · {count}",
+  "@ahdCardSub": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdStLine": "A line needs at least 2 months of data.",
+  "ahdStNoTags": "No tags in these results.",
+  "ahdStNoAccounts": "No accounts in these results.",
+  "ahdStNoCategories": "No categories in these results.",
+  "ahdStNothing": "Nothing to split in these results.",
+  "ahdStWrongCombo": "Line charts work by month or year. Change the split or the chart type.",
+  "ahdSplitByMonth": "Split by month",
+  "ahdChangeChart": "Change chart",
+  "ahdStNoResults": "No transactions match this filter.",
+  "ahdBuilderAdd": "Add chart",
+  "ahdBuilderEdit": "Edit chart",
+  "ahdChartType": "Chart type",
+  "ahdSplitBy": "Split by",
+  "ahdShow": "Show",
+  "ahdCurrentGroup": "Current group",
+  "ahdUpdateChart": "Update chart",
+  "ahdRemoveChart": "Remove chart",
+  "ahdBlkNoTags": "No tags in these results",
+  "ahdBlkOneAccount": "Only one account in these results",
+  "ahdBlkOneType": "Only one type in these results",
+  "ahdBlkOneSource": "Only one source in these results",
+  "ahdBlkOneCategory": "Only one category in these results",
+  "ahdBlkOneMonth": "All results are in one month",
+  "ahdBlkOneYear": "All results are in one year",
+  "ahdTagNote": "Transactions with more than one tag appear in each tag group, so totals can add up to more than the overall total.",
+  "ahdLoadMore": "Load more",
+  "ahdEmptyTitle": "No transactions match",
+  "ahdEmptyBody": "Nothing on this phone matches all of these. Try a lower amount or remove a filter.",
+  "ahdErrorTitle": "Couldn't load results",
+  "ahdErrorBody": "Something went wrong while reading your transactions. Your data is safe and nothing was changed.",
+  "ahdTryAgain": "Try again",
+  "ahdGsTotal": "Total",
+  "ahdGsLargest": "Largest",
+  "ahdChanged": "You changed {name}",
+  "@ahdChanged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdChFilter": "Changed the filter",
+  "ahdChGroup": "Changed the grouping",
+  "ahdChSort": "Changed the sort",
+  "ahdChKpis": "Changed the KPI cards",
+  "ahdChAdded": "Added a chart",
+  "ahdChRemoved": "Removed a chart",
+  "ahdChMoved": "Moved a chart",
+  "ahdChEdited": "Edited a chart",
+  "ahdSaveAsNew": "Save as new",
+  "ahdSaveChanges": "Save changes",
+  "ahdUpdated": "{name} updated",
+  "@ahdUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdSaveTitle": "Save this view",
+  "ahdNameHint": "Give this view a name",
+  "ahdNameTaken": "You already have a view called {name}",
+  "@ahdNameTaken": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdSumFilters": "{n, plural, =1{{n} filter} other{{n} filters}}",
+  "ahdSumGrouped": "grouped by {group}",
+  "@ahdSumGrouped": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdSumSorted": "sorted by {field}",
+  "@ahdSumSorted": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdSumCharts": "{n, plural, =1{{n} chart} other{{n} charts}}",
+  "ahdSumEmpty": "Nothing set yet",
+  "ahdWhatSaved": "What will be saved",
+  "ahdWsFilter": "Filter",
+  "ahdWsGroup": "Group by",
+  "ahdWsSort": "Sort",
+  "ahdWsCharts": "Charts",
+  "ahdWsKpis": "KPI cards",
+  "ahdNotSet": "Not set",
+  "ahdKpisShown": "{n} shown",
+  "ahdBackupNote": "Included in your JSON backup.",
+  "ahdSavedSnack": "Saved as {name}",
+  "@ahdSavedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdSavedTitle": "Saved views",
+  "ahdSavedEmptyTitle": "No saved views yet",
+  "ahdSavedEmptyBody": "Set up a filter, grouping or charts, then choose Save this view in the menu.",
+  "ahdRename": "Rename",
+  "ahdRenameTitle": "Rename view",
+  "ahdDeleteTitle": "Delete {name}?",
+  "@ahdDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdDeleteBody": "This removes the saved view only. Your transactions stay as they are.",
+  "ahdExportTitle": "Export results",
+  "ahdExportFilter": "Your current filter",
+  "ahdExportNoFilter": "No filter",
+  "ahdExportNote": "Exactly these {n} transactions, in the same columns as the History CSV export. Grouping and charts are not exported.",
+  "@ahdExportNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ahdExportSave": "Save to folder",
+  "ahdExportShare": "Share",
+  "ahdExportSaved": "File saved",
+  "ahdExportFailed": "Couldn't build the file. Nothing was changed.",
+  "ahdHelpTitle": "How this page works",
+  "ahdHelpFilter": "Tap Filter to pick what to see: a category, an amount, dates and more.",
+  "ahdHelpGroup": "Puts results into rows by category, account, tag, month and more.",
+  "ahdHelpSort": "Changes the order of transactions or groups.",
+  "ahdHelpCharts": "Add up to 4 charts. Each one follows your filter. Tap a part to open it.",
+  "ahdHelpSaved": "Saves the whole page so you can open it again with one tap.",
+  "ahdCharts": "Charts",
+  "ahdInfoOpen": "About this",
+  "@ahdTxnN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahdSavedViewsN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahdSumFilters": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahdSumCharts": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahdSavedN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahdAddChartN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahdKpisShown": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "loanSplitNotice": "{n, plural, =1{1 EMI doesn't match your loan schedule.} other{{n} EMIs don't match your loan schedule.}}",
+  "loanSplitNoticeSub": "Their interest and principal split is off. Amounts paid are fine.",
+  "loanSplitFix": "Fix",
+  "loanFixTitle": "Fix EMI splits",
+  "loanFixCount": "{n, plural, =1{1 EMI} other{{n} EMIs}}",
+  "loanFixRange": "{from} to {to}",
+  "loanFixNow": "Now",
+  "loanFixAfter": "After fix",
+  "loanFixInterest": "Interest",
+  "loanFixPrincipal": "Principal",
+  "loanFixTotalPaid": "Total paid",
+  "loanFixSame": "Same",
+  "loanFixKept": "EMIs you edited stay as they are ({n} kept)",
+  "loanFixInfo": "Only the split between interest and principal changes. Amounts, dates and accounts stay the same. Outstanding becomes {amount}.",
+  "loanFixing": "Fixing",
+  "loanFixedSnack": "{n, plural, =1{1 EMI fixed.} other{{n} EMIs fixed.}} Outstanding is now {amount}.",
+  "loanFixUndo": "Undo",
+  "loanRecheck": "Recheck EMI splits",
+  "loanAllMatch": "Everything matches. All {n} EMIs follow your loan schedule.",
+  "loanFixLonger": "Your loan got longer because later parts were added while keeping the same EMI.",
+  "@loanSplitNotice": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@loanFixCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@loanFixRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "@loanFixKept": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@loanFixInfo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@loanFixedSnack": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@loanAllMatch": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "historyMenuAdvancedSub": "AND / OR filters, groups, charts",
+  "ahqFieldType": "Type",
+  "ahqFieldAmount": "Amount",
+  "ahqFieldCategory": "Category",
+  "ahqFieldAccount": "Account",
+  "ahqFieldTag": "Tag",
+  "ahqFieldDate": "Date",
+  "ahqFieldWords": "Words",
+  "ahqFieldHas": "Has",
+  "ahqFieldSource": "Source",
+  "ahqFieldSubType": "Kind",
+  "ahqTypeExpense": "Expense",
+  "ahqTypeIncome": "Income",
+  "ahqTypeTransfer": "Transfer",
+  "ahqSourceManual": "Typed by you",
+  "ahqSourceSms": "SMS",
+  "ahqSourceQuickAdd": "Quick Add",
+  "ahqSourceRecurring": "Recurring",
+  "ahqSourceImport": "Import",
+  "ahqHasAttachment": "Attachment",
+  "ahqHasNote": "Note",
+  "ahqSubLoanRepayment": "Loan repayment",
+  "ahqSubInvestment": "Investment",
+  "ahqSubSavings": "Savings",
+  "ahqSubLent": "Lent",
+  "ahqSubBorrowed": "Borrowed",
+  "ahqSubInvestmentReturn": "Investment return",
+  "ahqSubLoanReceived": "Loan received",
+  "ahqSubLoanDisbursement": "Loan disbursement",
+  "ahqOr": "or",
+  "ahqNone": "none",
+  "ahqRange": "{from} to {to}",
+  "@ahqRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqAmountOver": "over {amount}",
+  "@ahqAmountOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqAmountUnder": "under {amount}",
+  "@ahqAmountUnder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqAmountOrMore": "{amount} or more",
+  "@ahqAmountOrMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqAmountOrLess": "{amount} or less",
+  "@ahqAmountOrLess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqDateThisMonth": "This month",
+  "ahqDateLastMonth": "Last month",
+  "ahqDateThisYear": "This year",
+  "ahqDateLastYear": "Last year",
+  "ahqDateLastDays": "{n, plural, =1{Last day} other{Last {n} days}}",
+  "ahqDateAfter": "After {date}",
+  "@ahqDateAfter": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqDateBefore": "Before {date}",
+  "@ahqDateBefore": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqDateFrom": "From {date}",
+  "@ahqDateFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqDateUntil": "Until {date}",
+  "@ahqDateUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbTransactions": "Transactions",
+  "ahqRbExpenses": "Expenses",
+  "ahqRbIncome": "Income",
+  "ahqRbTransfers": "Transfers",
+  "ahqRbAmountIs": "of {amount}",
+  "@ahqRbAmountIs": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbIn": "in {names}",
+  "@ahqRbIn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbNotIn": "not in {names}",
+  "@ahqRbNotIn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbFrom": "from {names}",
+  "@ahqRbFrom": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbNotFrom": "not from {names}",
+  "@ahqRbNotFrom": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbTagged": "tagged {tags}",
+  "@ahqRbTagged": {
+    "placeholders": {
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbNotTagged": "not tagged {tags}",
+  "@ahqRbNotTagged": {
+    "placeholders": {
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbNoTags": "with no tags",
+  "ahqRbHasTags": "with tags",
+  "ahqRbWithAttachment": "with an attachment",
+  "ahqRbWithoutAttachment": "without an attachment",
+  "ahqRbWithNote": "with a note",
+  "ahqRbWithoutNote": "without a note",
+  "ahqRbSms": "from SMS",
+  "ahqRbManual": "typed by you",
+  "ahqRbQuickAdd": "from Quick Add",
+  "ahqRbRecurring": "from recurring",
+  "ahqRbImported": "imported",
+  "ahqRbNot": "not {text}",
+  "@ahqRbNot": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbWords": "with “{text}” in the title or note",
+  "@ahqRbWords": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbNoWords": "without “{text}” in the title or note",
+  "@ahqRbNoWords": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbKind": "that are {kind}",
+  "@ahqRbKind": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbDateIn": "in {date}",
+  "@ahqRbDateIn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbDateOn": "on {date}",
+  "@ahqRbDateOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbDateRange": "from {date}",
+  "@ahqRbDateRange": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqRbNotGroup": "not ({text})",
+  "@ahqRbNotGroup": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqErrCloseBracket": "Missing closing bracket",
+  "ahqErrCloseBracketAfter": "Missing closing bracket. Add ) after {token}.",
+  "@ahqErrCloseBracketAfter": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqErrOpenBracket": "Missing opening bracket",
+  "ahqErrField": "Unknown field “{name}”. Did you mean {suggestion}?",
+  "@ahqErrField": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "suggestion": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqErrFieldPlain": "Unknown field “{name}”.",
+  "@ahqErrFieldPlain": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqErrAmount": "Amount needs a number, like amount:>500",
+  "ahqErrDate": "Date needs a year, month or day, like date:2026-03",
+  "ahqErrValue": "No {field} called “{name}”",
+  "@ahqErrValue": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqErrValueDid": "No {field} called “{name}”. Did you mean {suggestion}?",
+  "@ahqErrValueDid": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "suggestion": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqErrOr": "OR needs something on both sides.",
+  "ahqErrEmptyGroup": "Add a filter between the brackets.",
+  "ahqErrBadToken": "Can't read “{text}”.",
+  "@ahqErrBadToken": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahqUntagged": "Untagged",
+  "ahqNoCategory": "No category",
+  "ahqOther": "Other",
+  "ahqUnknown": "Unknown",
+  "@ahqDateLastDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ahfTitle": "Filter",
+  "ahfNoFilters": "No filters yet",
+  "ahfFilterOne": "filter",
+  "ahfFilterMany": "filters",
+  "ahfClearAll": "Clear all",
+  "ahfCleared": "Filters cleared",
+  "ahfUndo": "Undo",
+  "ahfPlaceholder": "Type a filter or pick a field",
+  "ahfPlaceholderFocused": "Type a field, like category",
+  "ahfImplicitNote": "\"and\" is read before \"or\". The dashed box shows how the app groups this. Add brackets to change it.",
+  "ahfAddFilter": "Add a filter",
+  "ahfPlainWords": "In plain words",
+  "ahfTryOne": "Try one",
+  "ahfExFood": "Food over ₹500 this year",
+  "ahfExAttachment": "Has attachment",
+  "ahfExUntagged": "Untagged expenses",
+  "ahfExCard": "Card spends last month",
+  "ahfShowN": "Show {n} transactions",
+  "ahfShowCounting": "Show transactions",
+  "ahfNoMatch": "No transactions match",
+  "ahfDone": "Done",
+  "ahfHintType": "Expense, income or transfer",
+  "ahfHintAmount": "Over, under or between amounts",
+  "ahfHintCategory": "Your categories",
+  "ahfHintAccount": "Where the money moved",
+  "ahfHintTag": "Your tags, or no tags",
+  "ahfHintDate": "This month, a year or any range",
+  "ahfHintHas": "Attachment or note",
+  "ahfHintSource": "Typed, SMS, Quick Add and more",
+  "ahfHintWords": "Words in the title or note",
+  "ahfFilterBy": "Filter by",
+  "ahfIs": "is",
+  "ahfIsNot": "is not",
+  "ahfAddFilterBtn": "Add filter",
+  "ahfAddFilterN": "Add filter · {n} selected",
+  "ahfPickMany": "Pick more than one to match any of them.",
+  "ahfOver": "Over",
+  "ahfUnder": "Under",
+  "ahfBetween": "Between",
+  "ahfAmountIs": "Is",
+  "ahfAmountNote": "The amount without the plus or minus sign.",
+  "ahfFrom": "From",
+  "ahfTo": "To",
+  "ahfSearchCategories": "Search categories",
+  "ahfSearchAccounts": "Search accounts",
+  "ahfSearchTags": "Search tags",
+  "ahfHasNoTags": "Has no tags",
+  "ahfNothingFound": "Nothing found",
+  "ahfDateQuick": "Quick",
+  "ahfDateLast30": "Last 30 days",
+  "ahfDateMonthYear": "A month or a year",
+  "ahfAllOfYear": "All of {year}",
+  "@ahfAllOfYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "ahfDateCustom": "Custom range",
+  "ahfDateCustomHint": "Pick a start and end date",
+  "ahfSrcNote": "Recurring includes loan EMIs. Import is CSV or a Kuber file.",
+  "ahfWordsNote": "Searches the title and the note. Not case sensitive.",
+  "ahfWordsHint": "Like swiggy",
+  "ahfTypeItLike": "Type it like",
+  "ahfInfo1": "Type in the box, or pick a field under it. Both add to the same box, where the cursor is.",
+  "ahfInfo2": "Tap and between two filters to make it or. A shaded box shows what goes together.",
+  "ahfInfo3": "The bar has ( ), and, or and not. Brackets show as a box inside a box.",
+  "ahfHowTitle": "How to type a filter",
+  "ahfSyn1": "A field and a value",
+  "ahfSyn2": "Either value: food or travel",
+  "ahfSyn3": "Over an amount. Use < for under, or 500..2000 for between",
+  "ahfSyn4": "A year, a month or a day",
+  "ahfSyn5": "Words in the title or note",
+  "ahfSyn6": "Both, or either. \"and\" is read before \"or\"",
+  "ahfSyn7": "Group filters together",
+  "ahfSyn8": "Leave these out. You can also type -tag:trip",
+  "ahfDiscardTitle": "Discard changes?",
+  "ahfDiscardBody": "Your changes to the filter have not been applied.",
+  "ahfKeepEditing": "Keep editing",
+  "ahfDiscard": "Discard",
+  "ahfTokenSemantics": "{text}, double tap to edit",
+  "@ahfTokenSemantics": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahfTokenInvalidSemantics": "{text}, not valid, double tap to edit",
+  "@ahfTokenInvalidSemantics": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ahfJoinerSemantics": "{word}, double tap to change to {other}",
+  "@ahfJoinerSemantics": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
+  },
+  "ahfBoxSemantics": "Group of {n} filters",
+  "ahfBracketOpenSemantics": "Opening bracket",
+  "ahfBracketCloseSemantics": "Closing bracket",
+  "ahfGhostBracketSemantics": "Closing bracket goes here",
+  "ahfOpOpenSemantics": "Open bracket",
+  "ahfOpCloseSemantics": "Close bracket",
+  "ahfHideKeyboard": "Hide keyboard",
+  "ahfCountSemantics": "{n} filters",
+  "@ahfShowN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahfAddFilterN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahfBoxSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ahfCountSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

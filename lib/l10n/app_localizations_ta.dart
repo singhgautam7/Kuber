@@ -1366,7 +1366,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get filterInc => 'வருமானம்';
 
   @override
-  String get advancedFiltersTooltip => 'உন্নত வடிப்பான்கள்';
+  String get advancedFiltersTooltip => 'வடிகட்டி';
 
   @override
   String get clearFiltersTooltip => 'வடிப்பான்களை நீக்கவும்';
@@ -1384,7 +1384,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get selectRange => 'வரம்பைத் தேர்ந்தெடு';
 
   @override
-  String get advancedFiltersTitle => 'உன்னத வடிப்பான்கள்';
+  String get advancedFiltersTitle => 'வடிகட்டி';
 
   @override
   String get clearAll => 'அனைத்தையும் நீக்கு';
@@ -2322,7 +2322,7 @@ class AppLocalizationsTa extends AppLocalizations {
       'பகுப்பாய்வு விட்ஜெட்டுகளைத் தேர்ந்தெடுத்து வரிசைப்படுத்துங்கள்';
 
   @override
-  String get filterAll => 'அனைத்தும்';
+  String get filterAll => '· அனைத்தும்';
 
   @override
   String get filterToday => 'இன்று';
@@ -2535,7 +2535,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get menuRateKuber => 'குபேரை மதிப்பிடுங்கள்';
 
   @override
-  String get menuShare => 'பகிர்';
+  String get menuShare => 'பரிந்துரை';
 
   @override
   String get menuFeedbackShort => 'கருத்து';
@@ -4393,7 +4393,7 @@ class AppLocalizationsTa extends AppLocalizations {
       'இந்த சிப்களைப் பயன்படுத்தி வருமானம், செலவு அல்லது பரிமாற்றத்தின்படி உடனடியாக ஃபில்டர் செய்யவும்.';
 
   @override
-  String get tutCh2St2Title => 'மேம்பட்ட ஃபில்டர்கள்';
+  String get tutCh2St2Title => 'வடிகட்டி';
 
   @override
   String get tutCh2St2Desc =>
@@ -9707,4 +9707,1420 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get deleteLoanAction => 'கடனை நீக்கு';
+
+  @override
+  String get saveFileFailed =>
+      'கோப்பைச் சேமிக்க முடியவில்லை. வேறு கோப்புறையைத் தேர்ந்தெடுக்கவும்.';
+
+  @override
+  String get saveFileShareFailed =>
+      'கோப்பைப் பகிர முடியவில்லை. மீண்டும் முயலவும்.';
+
+  @override
+  String get saveFileCsvNoViews =>
+      'CSV காப்புப்பிரதியில் சேமித்த காட்சிகள் இருக்காது. அவற்றை வைத்திருக்க JSON காப்புப்பிரதியைப் பயன்படுத்தவும்.';
+
+  @override
+  String get historyMenuAdvanced => 'மேம்பட்ட வரலாறு';
+
+  @override
+  String filterSelectedN(int n) {
+    return '· $n தேர்வு';
+  }
+
+  @override
+  String get filterSearchCategories => 'வகைகளைத் தேடுங்கள்';
+
+  @override
+  String get filterSearchTags => 'குறிச்சொற்களைத் தேடுங்கள்';
+
+  @override
+  String filterNoMatch(String section, String text) {
+    return '“$text” உடன் பொருந்தும் $section இல்லை';
+  }
+
+  @override
+  String filterTryAdvanced(String link) {
+    return 'AND / OR வடிகட்டிகள் வேண்டுமா? $link முயற்சிக்கவும்';
+  }
+
+  @override
+  String get setSecProfile => 'சுயவிவரம்';
+
+  @override
+  String get setSecAbout => 'பற்றி';
+
+  @override
+  String get setSecPermissions => 'அனுமதிகள்';
+
+  @override
+  String get menuAdvancedHistory => 'மேம்பட்ட வரலாறு';
+
+  @override
+  String get menuAdvancedHistoryDesc =>
+      'ஒவ்வொரு பரிவர்த்தனையையும் வடிகட்டி, குழுவாக்கி, வரைபடமாக்குங்கள்';
+
+  @override
+  String get rateTitle => 'குபேர் பிடித்திருக்கிறதா?';
+
+  @override
+  String get rateBody =>
+      'குபேரை ஒரே ஒரு நபர் உருவாக்கி நடத்துகிறார். Play Store-இல் ஒரு சிறிய மதிப்பீடு மற்றவர்கள் இந்த ஆப்பைக் கண்டுபிடிக்க உதவுகிறது, நீங்கள் கேட்ட வசதிகளை நான் தொடர்ந்து உருவாக்கவும் முடிகிறது. இதற்கு ஒரு நிமிடத்திற்கும் குறைவே ஆகும்.';
+
+  @override
+  String get rateCta => 'Play Store-இல் மதிப்பிடுங்கள்';
+
+  @override
+  String get rateRefer => 'நண்பருக்குப் பரிந்துரைக்கவும்';
+
+  @override
+  String get rateLater => 'பிறகு';
+
+  @override
+  String get rateNever => 'இதை மீண்டும் காட்ட வேண்டாம்';
+
+  @override
+  String get ahdGateHeadline =>
+      'ஒவ்வொரு பரிவர்த்தனையையும் வடிகட்டவும், குழுவாக்கவும், விளக்கப்படமாகப் பார்க்கவும்';
+
+  @override
+  String get ahdGatePill => 'Kuber Pro';
+
+  @override
+  String get ahdGateB1 =>
+      'மற்றும், அல்லது, இல்லை ஆகியவற்றால் வடிகட்டிகளை இணைக்கவும்';
+
+  @override
+  String get ahdGateB2 =>
+      'வகை, கணக்கு, டேக், மாதம் மற்றும் பலவற்றின்படி குழுவாக்கவும்';
+
+  @override
+  String get ahdGateB3 =>
+      'உங்கள் வடிகட்டியைப் பின்பற்றும் மொத்தங்களும் விளக்கப்படங்களும்';
+
+  @override
+  String get ahdGateB4 =>
+      'காட்சிகளைச் சேமித்து முடிவுகளை CSV ஆக ஏற்றுமதி செய்யவும்';
+
+  @override
+  String get ahdGateCta => 'Kuber Pro பார்க்க';
+
+  @override
+  String get ahdGateSample => 'மாதிரி தரவு';
+
+  @override
+  String get ahdGateSheetHeadline => 'Advanced History ஒரு Kuber Pro வசதி';
+
+  @override
+  String get ahdGateSheetBody =>
+      'Kuber Pro மூலம் உங்கள் எல்லா பரிவர்த்தனைகளிலும் எந்த வடிகட்டியையும் உருவாக்கலாம், முடிவுகளைக் குழுவாக்கி விளக்கப்படமாகப் பார்க்கலாம், காட்சிகளைச் சேமித்து CSV ஆக ஏற்றுமதி செய்யலாம்.';
+
+  @override
+  String get ahdTitle => 'Advanced History';
+
+  @override
+  String get ahdMenuSaved => 'சேமித்த காட்சிகள்';
+
+  @override
+  String ahdSavedN(int n) {
+    return '$n சேமிக்கப்பட்டவை';
+  }
+
+  @override
+  String get ahdMenuSave => 'இந்தக் காட்சியைச் சேமி';
+
+  @override
+  String get ahdMenuExport => 'முடிவுகளை ஏற்றுமதி செய் (CSV)';
+
+  @override
+  String ahdTxnN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n பரிவர்த்தனைகள்',
+      one: '$n பரிவர்த்தனை',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdMenuClear => 'எல்லாவற்றையும் அழி';
+
+  @override
+  String get ahdMenuHelp => 'இந்தப் பக்கம் எப்படி வேலை செய்கிறது';
+
+  @override
+  String get ahdFilter => 'வடிகட்டி';
+
+  @override
+  String get ahdGroup => 'குழு';
+
+  @override
+  String get ahdSort => 'வரிசை';
+
+  @override
+  String get ahdSaved => 'சேமித்தவை';
+
+  @override
+  String get ahdSavedEdited => 'சேமித்தது · மாற்றப்பட்டது';
+
+  @override
+  String get ahdNone => 'எதுவும் இல்லை';
+
+  @override
+  String get ahdClearAll => 'எல்லாவற்றையும் அழி';
+
+  @override
+  String get ahdClearTitle =>
+      'வடிகட்டிகள், குழு, வரிசை, விளக்கப்படங்களை அழிக்கவா?';
+
+  @override
+  String get ahdClearBody => 'சேமித்த காட்சிகள் மாறாது.';
+
+  @override
+  String get ahdStartLine =>
+      'தொடங்க ஒரு வடிகட்டி அல்லது குழுவைத் தேர்ந்தெடுக்கவும், அல்லது சேமித்த காட்சியைத் திறக்கவும்.';
+
+  @override
+  String get ahdAddFilter => 'வடிகட்டி சேர்';
+
+  @override
+  String get ahdAddFilterSub => 'வகை, தொகை, தேதி மற்றும் பல';
+
+  @override
+  String get ahdGroupBy => 'குழுவாக்கு';
+
+  @override
+  String get ahdGroupBySub => 'வகை, கணக்கு, மாதம் மற்றும் பல';
+
+  @override
+  String get ahdOpenSaved => 'சேமித்ததைத் திற';
+
+  @override
+  String ahdSavedViewsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n சேமித்த காட்சிகள்',
+      one: '$n சேமித்த காட்சி',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdNothingSaved => 'இன்னும் எதுவும் சேமிக்கப்படவில்லை';
+
+  @override
+  String get ahdTryOne => 'ஒன்றை முயற்சிக்கவும்';
+
+  @override
+  String get ahdEx1 => 'இந்த ஆண்டு ₹500க்கு மேல் உணவு';
+
+  @override
+  String get ahdEx2 => 'டேக் இல்லாத செலவுகள்';
+
+  @override
+  String get ahdEx3 => '2026இல் பயணம், மாதவாரியாக';
+
+  @override
+  String get ahdYourSaved => 'உங்கள் சேமித்த காட்சிகள்';
+
+  @override
+  String get ahdCategory => 'வகை';
+
+  @override
+  String get ahdAccount => 'கணக்கு';
+
+  @override
+  String get ahdTag => 'டேக்';
+
+  @override
+  String get ahdType => 'வகைமை';
+
+  @override
+  String get ahdSource => 'மூலம்';
+
+  @override
+  String get ahdMonth => 'மாதம்';
+
+  @override
+  String get ahdYear => 'ஆண்டு';
+
+  @override
+  String get ahdDate => 'தேதி';
+
+  @override
+  String get ahdAmount => 'தொகை';
+
+  @override
+  String get ahdTotal => 'மொத்தம்';
+
+  @override
+  String get ahdCount => 'எண்ணிக்கை';
+
+  @override
+  String get ahdName => 'பெயர்';
+
+  @override
+  String get ahdAverage => 'சராசரி';
+
+  @override
+  String get ahdSortTxns => 'பரிவர்த்தனைகள்';
+
+  @override
+  String get ahdSortGroups => 'குழுக்கள்';
+
+  @override
+  String get ahdNewest => 'புதியவை முதலில்';
+
+  @override
+  String get ahdOldest => 'பழையவை முதலில்';
+
+  @override
+  String get ahdHighest => 'அதிகம் முதலில்';
+
+  @override
+  String get ahdLowest => 'குறைவு முதலில்';
+
+  @override
+  String get ahdAtoZ => 'அ முதல் ஔ';
+
+  @override
+  String get ahdZtoA => 'ஔ முதல் அ';
+
+  @override
+  String get ahdGroupHelp =>
+      'போக்கைக் காண மாதம் அல்லது ஆண்டால் குழுவாக்கவும். நாள் வாரியாகக் குழு இல்லை; அதற்குப் பதிலாக தேதியால் வரிசைப்படுத்தவும்.';
+
+  @override
+  String get ahdInfoGroup1 =>
+      'பொருந்தும் பரிவர்த்தனைகளைக் குழுக்களாக்கி, ஒவ்வொரு குழுவுக்கும் எண்ணிக்கை, மொத்தம், பங்கு கொண்ட ஒரு வரியைக் காட்டுகிறது. குழுவைத் தட்டி அதன் பரிவர்த்தனைகளைப் பார்க்கவும்.';
+
+  @override
+  String get ahdInfoGroup2 =>
+      'மாதமும் ஆண்டும் காலப்போக்கை காட்டும். 2 டேக் உள்ள பரிவர்த்தனை இரண்டு டேக் குழுக்களிலும் கணக்கிடப்படும்.';
+
+  @override
+  String get ahdInfoSort1 =>
+      'குழு இல்லாதபோது பரிவர்த்தனைகளை தேதி, தொகை, வகை அல்லது கணக்கால் வரிசைப்படுத்தவும். குழுவுடன் இருந்தால் குழுக்களை மொத்தம், எண்ணிக்கை அல்லது பெயரால் வரிசைப்படுத்தவும்.';
+
+  @override
+  String get ahdInfoSort2 =>
+      'குழுவின் தாளுக்குள் பரிவர்த்தனைகள் எப்போதும் புதியவை முதலில் இருக்கும்.';
+
+  @override
+  String get ahdInfoChart1 =>
+      '4 விளக்கப்படங்கள் வரை சேர்க்கலாம். ஒவ்வொன்றும் உங்கள் வடிகட்டியைப் பின்பற்றி முடிவுகளைத் தன் வழியில் பிரிக்கும்.';
+
+  @override
+  String get ahdInfoChart2 =>
+      'வகை, கணக்கு, டேக், வகைமை அல்லது மூலத்தை ஒப்பிட டோனட் அல்லது பார் தேர்வு செய்யவும். மாதம் அல்லது ஆண்டுப் போக்குக்கு கோடு தேர்வு செய்யவும். ஒரு பகுதியைத் தட்டித் திறக்கவும்.';
+
+  @override
+  String get ahdInfoSaved1 =>
+      'சேமித்த காட்சி முழுப் பக்கத்தையும் நினைவில் வைக்கும்: வடிகட்டி, குழு, வரிசை, ஒவ்வொரு விளக்கப்படமும் அதன் வகை, பிரிவு, அளவீடு, இடத்துடன், மற்றும் KPI அட்டைகள்.';
+
+  @override
+  String get ahdInfoSaved2 =>
+      'சேமித்த காட்சியை மாற்றினால், புதுப்பிக்க மாற்றங்களைச் சேமி அல்லது இரண்டையும் வைக்க புதியதாகச் சேமி என்பதைத் தேர்வு செய்யவும். சேமித்த காட்சிகள் உங்கள் JSON காப்புப்பிரதியில் சேரும்.';
+
+  @override
+  String get ahdInfoKpi =>
+      'மேலே எந்த எண்கள் தெரிய வேண்டும் என்பதைத் தேர்ந்தெடுத்து, இழுத்து வரிசையை மாற்றவும். சேமித்த காட்சிகள் இந்தத் தேர்வை நினைவில் வைக்கும்.';
+
+  @override
+  String get ahdKpiTransactions => 'பரிவர்த்தனைகள்';
+
+  @override
+  String get ahdKpiIncome => 'வருமானம்';
+
+  @override
+  String get ahdKpiExpense => 'செலவு';
+
+  @override
+  String get ahdKpiNet => 'நிகரம்';
+
+  @override
+  String get ahdKpiAverage => 'சராசரி';
+
+  @override
+  String get ahdKpiAttachments => 'இணைப்புகள்';
+
+  @override
+  String get ahdKpiLargest => 'மிகப் பெரியது';
+
+  @override
+  String get ahdKpiEdit => 'மாற்று';
+
+  @override
+  String get ahdKpiSheetTitle => 'KPI அட்டைகள்';
+
+  @override
+  String get ahdKpiSheetDesc =>
+      'மேலே எது தெரிய வேண்டும் எனத் தேர்ந்தெடுக்கவும். வரிசைக்கு இழுக்கவும்.';
+
+  @override
+  String get ahdKpiSheetNote =>
+      'சேமித்த காட்சிகள் இந்தத் தேர்வை நினைவில் வைக்கும்.';
+
+  @override
+  String get ahdReset => 'மீட்டமை';
+
+  @override
+  String get ahdAddChartEmpty => 'விளக்கப்படம் சேர்';
+
+  @override
+  String get ahdAddChartHint => 'டோனட், பார் அல்லது கோடு';
+
+  @override
+  String ahdAddChartN(int n) {
+    return 'விளக்கப்படம் சேர் · 4இல் $n';
+  }
+
+  @override
+  String get ahdChartsFull =>
+      '4இல் 4 விளக்கப்படங்கள். புதியது சேர்க்க ஒன்றை நீக்கவும்.';
+
+  @override
+  String get ahdMoveUp => 'மேலே நகர்த்து';
+
+  @override
+  String get ahdMoveDown => 'கீழே நகர்த்து';
+
+  @override
+  String get ahdRemove => 'நீக்கு';
+
+  @override
+  String get ahdChartRemoved => 'விளக்கப்படம் நீக்கப்பட்டது';
+
+  @override
+  String get ahdUndo => 'செயல்தவிர்';
+
+  @override
+  String get ahdDonut => 'டோனட்';
+
+  @override
+  String get ahdBars => 'பார்';
+
+  @override
+  String get ahdLine => 'கோடு';
+
+  @override
+  String ahdCardTitle(String measure, String split) {
+    return '$split வாரியாக $measure';
+  }
+
+  @override
+  String ahdCardSub(String type, String count) {
+    return '$type · $count';
+  }
+
+  @override
+  String get ahdStLine =>
+      'கோடு விளக்கப்படத்துக்குக் குறைந்தது 2 மாதத் தரவு தேவை.';
+
+  @override
+  String get ahdStNoTags => 'இந்த முடிவுகளில் டேக்குகள் இல்லை.';
+
+  @override
+  String get ahdStNoAccounts => 'இந்த முடிவுகளில் கணக்குகள் இல்லை.';
+
+  @override
+  String get ahdStNoCategories => 'இந்த முடிவுகளில் வகைகள் இல்லை.';
+
+  @override
+  String get ahdStNothing => 'இந்த முடிவுகளில் பிரிக்க எதுவும் இல்லை.';
+
+  @override
+  String get ahdStWrongCombo =>
+      'கோடு விளக்கப்படங்கள் மாதம் அல்லது ஆண்டு வாரியாக வேலை செய்யும். பிரிவையோ விளக்கப்பட வகையையோ மாற்றவும்.';
+
+  @override
+  String get ahdSplitByMonth => 'மாதம் வாரியாகப் பிரி';
+
+  @override
+  String get ahdChangeChart => 'விளக்கப்படத்தை மாற்று';
+
+  @override
+  String get ahdStNoResults =>
+      'இந்த வடிகட்டிக்குப் பொருந்தும் பரிவர்த்தனைகள் இல்லை.';
+
+  @override
+  String get ahdBuilderAdd => 'விளக்கப்படம் சேர்';
+
+  @override
+  String get ahdBuilderEdit => 'விளக்கப்படத்தை மாற்று';
+
+  @override
+  String get ahdChartType => 'விளக்கப்பட வகை';
+
+  @override
+  String get ahdSplitBy => 'இதன்படி பிரி';
+
+  @override
+  String get ahdShow => 'காட்டு';
+
+  @override
+  String get ahdCurrentGroup => 'தற்போதைய குழு';
+
+  @override
+  String get ahdUpdateChart => 'விளக்கப்படத்தைப் புதுப்பி';
+
+  @override
+  String get ahdRemoveChart => 'விளக்கப்படத்தை நீக்கு';
+
+  @override
+  String get ahdBlkNoTags => 'இந்த முடிவுகளில் டேக்குகள் இல்லை';
+
+  @override
+  String get ahdBlkOneAccount => 'இந்த முடிவுகளில் ஒரே ஒரு கணக்கு';
+
+  @override
+  String get ahdBlkOneType => 'இந்த முடிவுகளில் ஒரே ஒரு வகைமை';
+
+  @override
+  String get ahdBlkOneSource => 'இந்த முடிவுகளில் ஒரே ஒரு மூலம்';
+
+  @override
+  String get ahdBlkOneCategory => 'இந்த முடிவுகளில் ஒரே ஒரு வகை';
+
+  @override
+  String get ahdBlkOneMonth => 'எல்லா முடிவுகளும் ஒரே மாதத்தில் உள்ளன';
+
+  @override
+  String get ahdBlkOneYear => 'எல்லா முடிவுகளும் ஒரே ஆண்டில் உள்ளன';
+
+  @override
+  String get ahdTagNote =>
+      'ஒன்றுக்கு மேற்பட்ட டேக் உள்ள பரிவர்த்தனைகள் ஒவ்வொரு டேக் குழுவிலும் தோன்றும், அதனால் மொத்தம் உண்மையான மொத்தத்தை விட அதிகமாகலாம்.';
+
+  @override
+  String get ahdLoadMore => 'மேலும் ஏற்று';
+
+  @override
+  String get ahdEmptyTitle => 'பொருந்தும் பரிவர்த்தனைகள் இல்லை';
+
+  @override
+  String get ahdEmptyBody =>
+      'இந்த ஃபோனில் இவை அனைத்துக்கும் பொருந்துவது எதுவும் இல்லை. குறைந்த தொகையை முயற்சிக்கவும் அல்லது ஒரு வடிகட்டியை நீக்கவும்.';
+
+  @override
+  String get ahdErrorTitle => 'முடிவுகளை ஏற்ற முடியவில்லை';
+
+  @override
+  String get ahdErrorBody =>
+      'உங்கள் பரிவர்த்தனைகளைப் படிக்கும்போது ஏதோ தவறு நடந்தது. உங்கள் தரவு பாதுகாப்பாக உள்ளது, எதுவும் மாறவில்லை.';
+
+  @override
+  String get ahdTryAgain => 'மீண்டும் முயற்சிக்கவும்';
+
+  @override
+  String get ahdGsTotal => 'மொத்தம்';
+
+  @override
+  String get ahdGsLargest => 'மிகப் பெரியது';
+
+  @override
+  String ahdChanged(String name) {
+    return 'நீங்கள் $name ஐ மாற்றினீர்கள்';
+  }
+
+  @override
+  String get ahdChFilter => 'வடிகட்டி மாற்றப்பட்டது';
+
+  @override
+  String get ahdChGroup => 'குழு மாற்றப்பட்டது';
+
+  @override
+  String get ahdChSort => 'வரிசை மாற்றப்பட்டது';
+
+  @override
+  String get ahdChKpis => 'KPI அட்டைகள் மாற்றப்பட்டன';
+
+  @override
+  String get ahdChAdded => 'விளக்கப்படம் சேர்க்கப்பட்டது';
+
+  @override
+  String get ahdChRemoved => 'விளக்கப்படம் நீக்கப்பட்டது';
+
+  @override
+  String get ahdChMoved => 'விளக்கப்படம் நகர்த்தப்பட்டது';
+
+  @override
+  String get ahdChEdited => 'விளக்கப்படம் மாற்றப்பட்டது';
+
+  @override
+  String get ahdSaveAsNew => 'புதியதாகச் சேமி';
+
+  @override
+  String get ahdSaveChanges => 'மாற்றங்களைச் சேமி';
+
+  @override
+  String ahdUpdated(String name) {
+    return '$name புதுப்பிக்கப்பட்டது';
+  }
+
+  @override
+  String get ahdSaveTitle => 'இந்தக் காட்சியைச் சேமி';
+
+  @override
+  String get ahdNameHint => 'இந்தக் காட்சிக்கு ஒரு பெயர் கொடுங்கள்';
+
+  @override
+  String ahdNameTaken(String name) {
+    return '$name என்ற காட்சி ஏற்கெனவே உள்ளது';
+  }
+
+  @override
+  String ahdSumFilters(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n வடிகட்டிகள்',
+      one: '$n வடிகட்டி',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahdSumGrouped(String group) {
+    return '$group வாரியாகக் குழுவாக்கப்பட்டது';
+  }
+
+  @override
+  String ahdSumSorted(String field) {
+    return '$field வாரியாக வரிசைப்படுத்தப்பட்டது';
+  }
+
+  @override
+  String ahdSumCharts(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n விளக்கப்படங்கள்',
+      one: '$n விளக்கப்படம்',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdSumEmpty => 'இன்னும் எதுவும் அமைக்கப்படவில்லை';
+
+  @override
+  String get ahdWhatSaved => 'எது சேமிக்கப்படும்';
+
+  @override
+  String get ahdWsFilter => 'வடிகட்டி';
+
+  @override
+  String get ahdWsGroup => 'குழு';
+
+  @override
+  String get ahdWsSort => 'வரிசை';
+
+  @override
+  String get ahdWsCharts => 'விளக்கப்படங்கள்';
+
+  @override
+  String get ahdWsKpis => 'KPI அட்டைகள்';
+
+  @override
+  String get ahdNotSet => 'அமைக்கப்படவில்லை';
+
+  @override
+  String ahdKpisShown(int n) {
+    return '$n தெரியும்';
+  }
+
+  @override
+  String get ahdBackupNote => 'உங்கள் JSON காப்புப்பிரதியில் சேர்க்கப்படும்.';
+
+  @override
+  String ahdSavedSnack(String name) {
+    return '$name ஆகச் சேமிக்கப்பட்டது';
+  }
+
+  @override
+  String get ahdSavedTitle => 'சேமித்த காட்சிகள்';
+
+  @override
+  String get ahdSavedEmptyTitle => 'இன்னும் சேமித்த காட்சிகள் இல்லை';
+
+  @override
+  String get ahdSavedEmptyBody =>
+      'வடிகட்டி, குழு அல்லது விளக்கப்படங்களை அமைத்து, மெனுவில் இந்தக் காட்சியைச் சேமி என்பதைத் தேர்வு செய்யவும்.';
+
+  @override
+  String get ahdRename => 'மறுபெயரிடு';
+
+  @override
+  String get ahdRenameTitle => 'காட்சியை மறுபெயரிடு';
+
+  @override
+  String ahdDeleteTitle(String name) {
+    return '$name ஐ நீக்கவா?';
+  }
+
+  @override
+  String get ahdDeleteBody =>
+      'இது சேமித்த காட்சியை மட்டும் நீக்கும். உங்கள் பரிவர்த்தனைகள் அப்படியே இருக்கும்.';
+
+  @override
+  String get ahdExportTitle => 'முடிவுகளை ஏற்றுமதி செய்';
+
+  @override
+  String get ahdExportFilter => 'உங்கள் தற்போதைய வடிகட்டி';
+
+  @override
+  String get ahdExportNoFilter => 'வடிகட்டி இல்லை';
+
+  @override
+  String ahdExportNote(String n) {
+    return 'சரியாக இந்த $n பரிவர்த்தனைகள், History CSV ஏற்றுமதியின் அதே நெடுவரிசைகளில். குழுவும் விளக்கப்படங்களும் ஏற்றுமதி ஆகாது.';
+  }
+
+  @override
+  String get ahdExportSave => 'கோப்புறையில் சேமி';
+
+  @override
+  String get ahdExportShare => 'பகிர்';
+
+  @override
+  String get ahdExportSaved => 'கோப்பு சேமிக்கப்பட்டது';
+
+  @override
+  String get ahdExportFailed =>
+      'கோப்பை உருவாக்க முடியவில்லை. எதுவும் மாறவில்லை.';
+
+  @override
+  String get ahdHelpTitle => 'இந்தப் பக்கம் எப்படி வேலை செய்கிறது';
+
+  @override
+  String get ahdHelpFilter =>
+      'எதைப் பார்க்க வேண்டும் எனத் தேர்ந்தெடுக்க வடிகட்டியைத் தட்டவும்: வகை, தொகை, தேதிகள் மற்றும் பல.';
+
+  @override
+  String get ahdHelpGroup =>
+      'முடிவுகளை வகை, கணக்கு, டேக், மாதம் மற்றும் பலவற்றின்படி வரிசைகளில் வைக்கிறது.';
+
+  @override
+  String get ahdHelpSort =>
+      'பரிவர்த்தனைகள் அல்லது குழுக்களின் வரிசையை மாற்றுகிறது.';
+
+  @override
+  String get ahdHelpCharts =>
+      '4 விளக்கப்படங்கள் வரை சேர்க்கவும். ஒவ்வொன்றும் உங்கள் வடிகட்டியைப் பின்பற்றும். ஒரு பகுதியைத் தட்டித் திறக்கவும்.';
+
+  @override
+  String get ahdHelpSaved =>
+      'முழுப் பக்கத்தையும் சேமிக்கிறது, ஒரே தட்டலில் மீண்டும் திறக்கலாம்.';
+
+  @override
+  String get ahdCharts => 'விளக்கப்படங்கள்';
+
+  @override
+  String get ahdInfoOpen => 'இதைப் பற்றி';
+
+  @override
+  String loanSplitNotice(int n) {
+    return '$n EMI உங்கள் கடன் அட்டவணையுடன் பொருந்தவில்லை.';
+  }
+
+  @override
+  String get loanSplitNoticeSub =>
+      'இவற்றின் வட்டி மற்றும் அசல் பிரிப்பு சரியில்லை. செலுத்திய தொகைகள் சரியாக உள்ளன.';
+
+  @override
+  String get loanSplitFix => 'சரிசெய்';
+
+  @override
+  String get loanFixTitle => 'EMI பிரிப்பைச் சரிசெய்';
+
+  @override
+  String loanFixCount(int n) {
+    return '$n EMI';
+  }
+
+  @override
+  String loanFixRange(String from, String to) {
+    return '$from முதல் $to வரை';
+  }
+
+  @override
+  String get loanFixNow => 'இப்போது';
+
+  @override
+  String get loanFixAfter => 'சரிசெய்த பின்';
+
+  @override
+  String get loanFixInterest => 'வட்டி';
+
+  @override
+  String get loanFixPrincipal => 'அசல்';
+
+  @override
+  String get loanFixTotalPaid => 'மொத்தம் செலுத்தியது';
+
+  @override
+  String get loanFixSame => 'அதே';
+
+  @override
+  String loanFixKept(int n) {
+    return 'நீங்கள் திருத்திய EMI அப்படியே இருக்கும் ($n வைக்கப்பட்டது)';
+  }
+
+  @override
+  String loanFixInfo(String amount) {
+    return 'வட்டி மற்றும் அசல் பிரிப்பு மட்டுமே மாறும். தொகைகள், தேதிகள், கணக்குகள் அப்படியே இருக்கும். நிலுவை $amount ஆகும்.';
+  }
+
+  @override
+  String get loanFixing => 'சரிசெய்கிறது';
+
+  @override
+  String loanFixedSnack(int n, String amount) {
+    return '$n EMI சரிசெய்யப்பட்டது. நிலுவை இப்போது $amount.';
+  }
+
+  @override
+  String get loanFixUndo => 'செயல்தவிர்';
+
+  @override
+  String get loanRecheck => 'EMI பிரிப்பை மீண்டும் சரிபார்';
+
+  @override
+  String loanAllMatch(int n) {
+    return 'எல்லாம் பொருந்துகிறது. அனைத்து $n EMI உங்கள் கடன் அட்டவணையைப் பின்பற்றுகின்றன.';
+  }
+
+  @override
+  String get loanFixLonger =>
+      'பிந்தைய பகுதிகள் சேர்க்கப்பட்டு அதே EMI வைக்கப்பட்டதால் உங்கள் கடன் நீண்டது.';
+
+  @override
+  String get historyMenuAdvancedSub =>
+      'AND / OR வடிகட்டிகள், குழுக்கள், விளக்கப்படங்கள்';
+
+  @override
+  String get ahqFieldType => 'வகை';
+
+  @override
+  String get ahqFieldAmount => 'தொகை';
+
+  @override
+  String get ahqFieldCategory => 'வகைப்பாடு';
+
+  @override
+  String get ahqFieldAccount => 'கணக்கு';
+
+  @override
+  String get ahqFieldTag => 'குறிச்சொல்';
+
+  @override
+  String get ahqFieldDate => 'தேதி';
+
+  @override
+  String get ahqFieldWords => 'வார்த்தைகள்';
+
+  @override
+  String get ahqFieldHas => 'உள்ளது';
+
+  @override
+  String get ahqFieldSource => 'மூலம்';
+
+  @override
+  String get ahqFieldSubType => 'வகையானது';
+
+  @override
+  String get ahqTypeExpense => 'செலவு';
+
+  @override
+  String get ahqTypeIncome => 'வருமானம்';
+
+  @override
+  String get ahqTypeTransfer => 'பரிமாற்றம்';
+
+  @override
+  String get ahqSourceManual => 'நீங்களே உள்ளிட்டது';
+
+  @override
+  String get ahqSourceSms => 'SMS';
+
+  @override
+  String get ahqSourceQuickAdd => 'Quick Add';
+
+  @override
+  String get ahqSourceRecurring => 'தொடர்ச்சியானது';
+
+  @override
+  String get ahqSourceImport => 'இறக்குமதி';
+
+  @override
+  String get ahqHasAttachment => 'இணைப்பு';
+
+  @override
+  String get ahqHasNote => 'குறிப்பு';
+
+  @override
+  String get ahqSubLoanRepayment => 'கடன் திருப்பிச் செலுத்தல்';
+
+  @override
+  String get ahqSubInvestment => 'முதலீடு';
+
+  @override
+  String get ahqSubSavings => 'சேமிப்பு';
+
+  @override
+  String get ahqSubLent => 'கடன் கொடுத்தது';
+
+  @override
+  String get ahqSubBorrowed => 'கடன் வாங்கியது';
+
+  @override
+  String get ahqSubInvestmentReturn => 'முதலீட்டு வருமானம்';
+
+  @override
+  String get ahqSubLoanReceived => 'கடன் பெற்றது';
+
+  @override
+  String get ahqSubLoanDisbursement => 'கடன் வழங்கல்';
+
+  @override
+  String get ahqOr => 'அல்லது';
+
+  @override
+  String get ahqNone => 'எதுவுமில்லை';
+
+  @override
+  String ahqRange(String from, String to) {
+    return '$from முதல் $to வரை';
+  }
+
+  @override
+  String ahqAmountOver(String amount) {
+    return '$amountக்கு மேல்';
+  }
+
+  @override
+  String ahqAmountUnder(String amount) {
+    return '$amountக்கு கீழ்';
+  }
+
+  @override
+  String ahqAmountOrMore(String amount) {
+    return '$amount அல்லது அதற்கு மேல்';
+  }
+
+  @override
+  String ahqAmountOrLess(String amount) {
+    return '$amount அல்லது அதற்கு கீழ்';
+  }
+
+  @override
+  String get ahqDateThisMonth => 'இந்த மாதம்';
+
+  @override
+  String get ahqDateLastMonth => 'கடந்த மாதம்';
+
+  @override
+  String get ahqDateThisYear => 'இந்த ஆண்டு';
+
+  @override
+  String get ahqDateLastYear => 'கடந்த ஆண்டு';
+
+  @override
+  String ahqDateLastDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'கடந்த $n நாட்கள்',
+      one: 'கடந்த நாள்',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahqDateAfter(String date) {
+    return '$dateக்குப் பிறகு';
+  }
+
+  @override
+  String ahqDateBefore(String date) {
+    return '$dateக்கு முன்';
+  }
+
+  @override
+  String ahqDateFrom(String date) {
+    return '$date முதல்';
+  }
+
+  @override
+  String ahqDateUntil(String date) {
+    return '$date வரை';
+  }
+
+  @override
+  String get ahqRbTransactions => 'பரிவர்த்தனைகள்';
+
+  @override
+  String get ahqRbExpenses => 'செலவுகள்';
+
+  @override
+  String get ahqRbIncome => 'வருமானம்';
+
+  @override
+  String get ahqRbTransfers => 'பரிமாற்றங்கள்';
+
+  @override
+  String ahqRbAmountIs(String amount) {
+    return '$amount தொகையில்';
+  }
+
+  @override
+  String ahqRbIn(String names) {
+    return '$names இல்';
+  }
+
+  @override
+  String ahqRbNotIn(String names) {
+    return '$names இல் இல்லை';
+  }
+
+  @override
+  String ahqRbFrom(String names) {
+    return '$names இலிருந்து';
+  }
+
+  @override
+  String ahqRbNotFrom(String names) {
+    return '$names இலிருந்து இல்லை';
+  }
+
+  @override
+  String ahqRbTagged(String tags) {
+    return '$tags குறிச்சொல் உள்ளவை';
+  }
+
+  @override
+  String ahqRbNotTagged(String tags) {
+    return '$tags குறிச்சொல் இல்லாதவை';
+  }
+
+  @override
+  String get ahqRbNoTags => 'குறிச்சொல் இல்லாமல்';
+
+  @override
+  String get ahqRbHasTags => 'குறிச்சொல்லுடன்';
+
+  @override
+  String get ahqRbWithAttachment => 'இணைப்புடன்';
+
+  @override
+  String get ahqRbWithoutAttachment => 'இணைப்பு இல்லாமல்';
+
+  @override
+  String get ahqRbWithNote => 'குறிப்புடன்';
+
+  @override
+  String get ahqRbWithoutNote => 'குறிப்பு இல்லாமல்';
+
+  @override
+  String get ahqRbSms => 'SMS இலிருந்து';
+
+  @override
+  String get ahqRbManual => 'நீங்களே உள்ளிட்டவை';
+
+  @override
+  String get ahqRbQuickAdd => 'Quick Add இலிருந்து';
+
+  @override
+  String get ahqRbRecurring => 'தொடர்ச்சியானவற்றிலிருந்து';
+
+  @override
+  String get ahqRbImported => 'இறக்குமதி செய்யப்பட்டவை';
+
+  @override
+  String ahqRbNot(String text) {
+    return '$text அல்ல';
+  }
+
+  @override
+  String ahqRbWords(String text) {
+    return 'தலைப்பு அல்லது குறிப்பில் “$text” உள்ளவை';
+  }
+
+  @override
+  String ahqRbNoWords(String text) {
+    return 'தலைப்பு அல்லது குறிப்பில் “$text” இல்லாதவை';
+  }
+
+  @override
+  String ahqRbKind(String kind) {
+    return '$kind ஆனவை';
+  }
+
+  @override
+  String ahqRbDateIn(String date) {
+    return '$date இல்';
+  }
+
+  @override
+  String ahqRbDateOn(String date) {
+    return '$date அன்று';
+  }
+
+  @override
+  String ahqRbDateRange(String date) {
+    return '$date முதல்';
+  }
+
+  @override
+  String ahqRbNotGroup(String text) {
+    return 'அல்ல ($text)';
+  }
+
+  @override
+  String get ahqErrCloseBracket => 'மூடும் அடைப்புக்குறி இல்லை';
+
+  @override
+  String ahqErrCloseBracketAfter(String token) {
+    return 'மூடும் அடைப்புக்குறி இல்லை. $token க்குப் பிறகு ) சேர்க்கவும்.';
+  }
+
+  @override
+  String get ahqErrOpenBracket => 'திறக்கும் அடைப்புக்குறி இல்லை';
+
+  @override
+  String ahqErrField(String name, String suggestion) {
+    return 'தெரியாத புலம் “$name”. நீங்கள் $suggestion என்று நினைத்தீர்களா?';
+  }
+
+  @override
+  String ahqErrFieldPlain(String name) {
+    return 'தெரியாத புலம் “$name”.';
+  }
+
+  @override
+  String get ahqErrAmount => 'தொகைக்கு ஒரு எண் வேண்டும், எ.கா. amount:>500';
+
+  @override
+  String get ahqErrDate =>
+      'தேதிக்கு ஆண்டு, மாதம் அல்லது நாள் வேண்டும், எ.கா. date:2026-03';
+
+  @override
+  String ahqErrValue(String field, String name) {
+    return '“$name” என்ற $field இல்லை';
+  }
+
+  @override
+  String ahqErrValueDid(String field, String name, String suggestion) {
+    return '“$name” என்ற $field இல்லை. நீங்கள் $suggestion என்று நினைத்தீர்களா?';
+  }
+
+  @override
+  String get ahqErrOr => 'OR இன் இரு பக்கமும் ஏதாவது இருக்க வேண்டும்.';
+
+  @override
+  String get ahqErrEmptyGroup =>
+      'அடைப்புக்குறிகளுக்கு இடையே ஒரு வடிகட்டியைச் சேர்க்கவும்.';
+
+  @override
+  String ahqErrBadToken(String text) {
+    return '“$text” புரியவில்லை.';
+  }
+
+  @override
+  String get ahqUntagged => 'குறிச்சொல் இல்லை';
+
+  @override
+  String get ahqNoCategory => 'வகைப்பாடு இல்லை';
+
+  @override
+  String get ahqOther => 'மற்றவை';
+
+  @override
+  String get ahqUnknown => 'தெரியாதது';
+
+  @override
+  String get ahfTitle => 'வடிகட்டி';
+
+  @override
+  String get ahfNoFilters => 'இன்னும் வடிகட்டிகள் இல்லை';
+
+  @override
+  String get ahfFilterOne => 'வடிகட்டி';
+
+  @override
+  String get ahfFilterMany => 'வடிகட்டிகள்';
+
+  @override
+  String get ahfClearAll => 'அனைத்தையும் அழி';
+
+  @override
+  String get ahfCleared => 'வடிகட்டிகள் அழிக்கப்பட்டன';
+
+  @override
+  String get ahfUndo => 'செயல்தவிர்';
+
+  @override
+  String get ahfPlaceholder =>
+      'வடிகட்டியை எழுதுங்கள் அல்லது ஒரு புலத்தைத் தேர்ந்தெடுங்கள்';
+
+  @override
+  String get ahfPlaceholderFocused => 'புலத்தை எழுதுங்கள், category போல';
+
+  @override
+  String get ahfImplicitNote =>
+      '\"and\" என்பது \"or\" க்கு முன் படிக்கப்படும். புள்ளிக்கோடு பெட்டி ஆப் இதை எப்படி குழுவாக்குகிறது என்பதைக் காட்டும். மாற்ற அடைப்புக்குறிகளைச் சேர்க்கவும்.';
+
+  @override
+  String get ahfAddFilter => 'வடிகட்டியைச் சேர்';
+
+  @override
+  String get ahfPlainWords => 'எளிய வார்த்தைகளில்';
+
+  @override
+  String get ahfTryOne => 'ஒன்றை முயற்சிக்கவும்';
+
+  @override
+  String get ahfExFood => 'இந்த ஆண்டு ₹500க்கு மேல் உணவு';
+
+  @override
+  String get ahfExAttachment => 'இணைப்பு உள்ளவை';
+
+  @override
+  String get ahfExUntagged => 'குறிச்சொல் இல்லாத செலவுகள்';
+
+  @override
+  String get ahfExCard => 'கடந்த மாத கார்டு செலவுகள்';
+
+  @override
+  String ahfShowN(int n) {
+    return '$n பரிவர்த்தனைகளைக் காட்டு';
+  }
+
+  @override
+  String get ahfShowCounting => 'பரிவர்த்தனைகளைக் காட்டு';
+
+  @override
+  String get ahfNoMatch => 'பொருந்தும் பரிவர்த்தனை இல்லை';
+
+  @override
+  String get ahfDone => 'முடிந்தது';
+
+  @override
+  String get ahfHintType => 'செலவு, வருமானம் அல்லது பரிமாற்றம்';
+
+  @override
+  String get ahfHintAmount => 'இதற்கு மேல், கீழ் அல்லது இடைப்பட்ட தொகை';
+
+  @override
+  String get ahfHintCategory => 'உங்கள் வகைகள்';
+
+  @override
+  String get ahfHintAccount => 'பணம் எங்கே சென்றது';
+
+  @override
+  String get ahfHintTag => 'உங்கள் குறிச்சொற்கள், அல்லது இல்லாதவை';
+
+  @override
+  String get ahfHintDate => 'இந்த மாதம், ஒரு ஆண்டு அல்லது எந்த காலமும்';
+
+  @override
+  String get ahfHintHas => 'இணைப்பு அல்லது குறிப்பு';
+
+  @override
+  String get ahfHintSource => 'கைமுறை, SMS, Quick Add மற்றும் பல';
+
+  @override
+  String get ahfHintWords => 'தலைப்பு அல்லது குறிப்பில் உள்ள சொற்கள்';
+
+  @override
+  String get ahfFilterBy => 'இதன் படி வடிகட்டு';
+
+  @override
+  String get ahfIs => 'ஆக உள்ளது';
+
+  @override
+  String get ahfIsNot => 'ஆக இல்லை';
+
+  @override
+  String get ahfAddFilterBtn => 'வடிகட்டியைச் சேர்';
+
+  @override
+  String ahfAddFilterN(int n) {
+    return 'வடிகட்டியைச் சேர் · $n தேர்ந்தது';
+  }
+
+  @override
+  String get ahfPickMany =>
+      'ஏதேனும் ஒன்றுடன் பொருந்த ஒன்றுக்கு மேற்பட்டவற்றைத் தேர்ந்தெடுங்கள்.';
+
+  @override
+  String get ahfOver => 'இதற்கு மேல்';
+
+  @override
+  String get ahfUnder => 'இதற்குக் கீழ்';
+
+  @override
+  String get ahfBetween => 'இடையில்';
+
+  @override
+  String get ahfAmountIs => 'சமமாக';
+
+  @override
+  String get ahfAmountNote => 'கூட்டல் அல்லது கழித்தல் குறி இல்லாத தொகை.';
+
+  @override
+  String get ahfFrom => 'முதல்';
+
+  @override
+  String get ahfTo => 'வரை';
+
+  @override
+  String get ahfSearchCategories => 'வகைகளைத் தேடு';
+
+  @override
+  String get ahfSearchAccounts => 'கணக்குகளைத் தேடு';
+
+  @override
+  String get ahfSearchTags => 'குறிச்சொற்களைத் தேடு';
+
+  @override
+  String get ahfHasNoTags => 'குறிச்சொல் இல்லை';
+
+  @override
+  String get ahfNothingFound => 'எதுவும் கிடைக்கவில்லை';
+
+  @override
+  String get ahfDateQuick => 'விரைவு';
+
+  @override
+  String get ahfDateLast30 => 'கடந்த 30 நாட்கள்';
+
+  @override
+  String get ahfDateMonthYear => 'ஒரு மாதம் அல்லது ஆண்டு';
+
+  @override
+  String ahfAllOfYear(String year) {
+    return '$year முழுவதும்';
+  }
+
+  @override
+  String get ahfDateCustom => 'தனிப்பயன் காலம்';
+
+  @override
+  String get ahfDateCustomHint =>
+      'தொடக்க மற்றும் முடிவு தேதியைத் தேர்ந்தெடுங்கள்';
+
+  @override
+  String get ahfSrcNote =>
+      'மீண்டும் நிகழ்வதில் கடன் EMI அடங்கும். இறக்குமதி என்பது CSV அல்லது Kuber கோப்பு.';
+
+  @override
+  String get ahfWordsNote =>
+      'தலைப்பிலும் குறிப்பிலும் தேடும். பெரிய சிறிய எழுத்து வேறுபாடு இல்லை.';
+
+  @override
+  String get ahfWordsHint => 'swiggy போல';
+
+  @override
+  String get ahfTypeItLike => 'இப்படி எழுதுங்கள்';
+
+  @override
+  String get ahfInfo1 =>
+      'பெட்டியில் எழுதுங்கள், அல்லது அதன் கீழுள்ள புலத்தைத் தேர்ந்தெடுங்கள். இரண்டும் கர்சர் உள்ள இடத்தில் அதே பெட்டியில் சேரும்.';
+
+  @override
+  String get ahfInfo2 =>
+      'இரண்டு வடிகட்டிகளுக்கு இடையிலுள்ள and ஐத் தட்டி or ஆக்குங்கள். நிழல் பெட்டி எவை சேர்ந்தவை என்பதைக் காட்டும்.';
+
+  @override
+  String get ahfInfo3 =>
+      'பட்டியில் ( ), and, or மற்றும் not உள்ளன. அடைப்புக்குறிகள் பெட்டிக்குள் பெட்டியாகத் தெரியும்.';
+
+  @override
+  String get ahfHowTitle => 'வடிகட்டியை எப்படி எழுதுவது';
+
+  @override
+  String get ahfSyn1 => 'ஒரு புலம் மற்றும் ஒரு மதிப்பு';
+
+  @override
+  String get ahfSyn2 => 'இரண்டில் ஒன்று: food அல்லது travel';
+
+  @override
+  String get ahfSyn3 =>
+      'இதற்கு மேல். கீழுக்கு < மற்றும் இடைப்பட்டதற்கு 500..2000 எழுதுங்கள்';
+
+  @override
+  String get ahfSyn4 => 'ஒரு ஆண்டு, மாதம் அல்லது நாள்';
+
+  @override
+  String get ahfSyn5 => 'தலைப்பு அல்லது குறிப்பில் உள்ள சொற்கள்';
+
+  @override
+  String get ahfSyn6 =>
+      'இரண்டும், அல்லது ஏதேனும் ஒன்று. \"and\" என்பது \"or\" க்கு முன் படிக்கப்படும்';
+
+  @override
+  String get ahfSyn7 => 'வடிகட்டிகளை ஒன்றாகக் குழுவாக்கு';
+
+  @override
+  String get ahfSyn8 => 'இவற்றை விலக்கு. -tag:trip என்றும் எழுதலாம்';
+
+  @override
+  String get ahfDiscardTitle => 'மாற்றங்களை நிராகரிக்கவா?';
+
+  @override
+  String get ahfDiscardBody =>
+      'வடிகட்டியில் உங்கள் மாற்றங்கள் பயன்படுத்தப்படவில்லை.';
+
+  @override
+  String get ahfKeepEditing => 'தொடர்ந்து திருத்து';
+
+  @override
+  String get ahfDiscard => 'நிராகரி';
+
+  @override
+  String ahfTokenSemantics(String text) {
+    return '$text, திருத்த இருமுறை தட்டவும்';
+  }
+
+  @override
+  String ahfTokenInvalidSemantics(String text) {
+    return '$text, செல்லாதது, திருத்த இருமுறை தட்டவும்';
+  }
+
+  @override
+  String ahfJoinerSemantics(String word, String other) {
+    return '$word, $other ஆக மாற்ற இருமுறை தட்டவும்';
+  }
+
+  @override
+  String ahfBoxSemantics(int n) {
+    return '$n வடிகட்டிகளின் குழு';
+  }
+
+  @override
+  String get ahfBracketOpenSemantics => 'திறக்கும் அடைப்புக்குறி';
+
+  @override
+  String get ahfBracketCloseSemantics => 'மூடும் அடைப்புக்குறி';
+
+  @override
+  String get ahfGhostBracketSemantics => 'மூடும் அடைப்புக்குறி இங்கே வரும்';
+
+  @override
+  String get ahfOpOpenSemantics => 'அடைப்புக்குறியைத் திற';
+
+  @override
+  String get ahfOpCloseSemantics => 'அடைப்புக்குறியை மூடு';
+
+  @override
+  String get ahfHideKeyboard => 'விசைப்பலகையை மறை';
+
+  @override
+  String ahfCountSemantics(int n) {
+    return '$n வடிகட்டிகள்';
+  }
 }

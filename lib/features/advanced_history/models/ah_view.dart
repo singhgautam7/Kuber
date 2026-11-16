@@ -20,8 +20,8 @@ class AhSort {
       this == (g == AhGroupBy.none ? ungroupedDefault : groupedDefault);
 
   @override
-  bool operator ==(Object o) =>
-      o is AhSort && o.field == field && o.descending == descending;
+  bool operator ==(Object other) =>
+      other is AhSort && other.field == field && other.descending == descending;
   @override
   int get hashCode => Object.hash(field, descending);
 }
@@ -47,11 +47,11 @@ class AhChartSpec {
       AhChartSpec(type ?? this.type, split ?? this.split, measure ?? this.measure);
 
   @override
-  bool operator ==(Object o) =>
-      o is AhChartSpec &&
-      o.type == type &&
-      o.split == split &&
-      o.measure == measure;
+  bool operator ==(Object other) =>
+      other is AhChartSpec &&
+      other.type == type &&
+      other.split == split &&
+      other.measure == measure;
   @override
   int get hashCode => Object.hash(type, split, measure);
 }

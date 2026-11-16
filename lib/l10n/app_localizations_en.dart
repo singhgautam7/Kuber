@@ -1345,7 +1345,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterInc => 'Inc';
 
   @override
-  String get advancedFiltersTooltip => 'Advanced filters';
+  String get advancedFiltersTooltip => 'Filter';
 
   @override
   String get clearFiltersTooltip => 'Clear filters';
@@ -1363,7 +1363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectRange => 'Select Range';
 
   @override
-  String get advancedFiltersTitle => 'Advanced Filters';
+  String get advancedFiltersTitle => 'Filter';
 
   @override
   String get clearAll => 'CLEAR ALL';
@@ -2288,7 +2288,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editAnalyticsWidgetsDesc => 'Choose and reorder Analytics widgets';
 
   @override
-  String get filterAll => 'ALL';
+  String get filterAll => '· All';
 
   @override
   String get filterToday => 'TODAY';
@@ -2491,7 +2491,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuRateKuber => 'Rate Kuber';
 
   @override
-  String get menuShare => 'Share';
+  String get menuShare => 'Refer';
 
   @override
   String get menuFeedbackShort => 'Feedback';
@@ -4314,7 +4314,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Filter by Income, Expense, or Transfer instantly using these chips.';
 
   @override
-  String get tutCh2St2Title => 'Advanced filters';
+  String get tutCh2St2Title => 'Filter';
 
   @override
   String get tutCh2St2Desc =>
@@ -9598,4 +9598,1417 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteLoanAction => 'Delete loan';
+
+  @override
+  String get saveFileFailed => 'Couldn\'t save the file. Pick another folder.';
+
+  @override
+  String get saveFileShareFailed => 'Couldn\'t share the file. Try again.';
+
+  @override
+  String get saveFileCsvNoViews =>
+      'CSV backups don\'t include saved views. Use a JSON backup to keep them.';
+
+  @override
+  String get historyMenuAdvanced => 'Advanced History';
+
+  @override
+  String filterSelectedN(int n) {
+    return '· $n selected';
+  }
+
+  @override
+  String get filterSearchCategories => 'Search categories';
+
+  @override
+  String get filterSearchTags => 'Search tags';
+
+  @override
+  String filterNoMatch(String section, String text) {
+    return 'No $section match “$text”';
+  }
+
+  @override
+  String filterTryAdvanced(String link) {
+    return 'Need AND / OR filters? Try $link';
+  }
+
+  @override
+  String get setSecProfile => 'Profile';
+
+  @override
+  String get setSecAbout => 'About';
+
+  @override
+  String get setSecPermissions => 'Permissions';
+
+  @override
+  String get menuAdvancedHistory => 'Advanced History';
+
+  @override
+  String get menuAdvancedHistoryDesc =>
+      'Filter, group and chart every transaction';
+
+  @override
+  String get rateTitle => 'Enjoying Kuber?';
+
+  @override
+  String get rateBody =>
+      'Kuber is built and run by one person. A quick rating on the Play Store helps other people find it, and it lets me keep building features you asked for. It takes less than a minute.';
+
+  @override
+  String get rateCta => 'Rate on Play Store';
+
+  @override
+  String get rateRefer => 'Refer a friend';
+
+  @override
+  String get rateLater => 'Maybe later';
+
+  @override
+  String get rateNever => 'Don\'t show this again';
+
+  @override
+  String get ahdGateHeadline => 'Filter, group and chart every transaction';
+
+  @override
+  String get ahdGatePill => 'Kuber Pro';
+
+  @override
+  String get ahdGateB1 => 'Combine filters with and, or and not';
+
+  @override
+  String get ahdGateB2 => 'Group by category, account, tag, month and more';
+
+  @override
+  String get ahdGateB3 => 'Totals and charts that follow your filter';
+
+  @override
+  String get ahdGateB4 => 'Save views and export the results as CSV';
+
+  @override
+  String get ahdGateCta => 'See Kuber Pro';
+
+  @override
+  String get ahdGateSample => 'Sample data';
+
+  @override
+  String get ahdGateSheetHeadline => 'Advanced History is a Kuber Pro feature';
+
+  @override
+  String get ahdGateSheetBody =>
+      'Type or build any filter over all your transactions, group and chart the results, save views and export them as CSV with Kuber Pro.';
+
+  @override
+  String get ahdTitle => 'Advanced History';
+
+  @override
+  String get ahdMenuSaved => 'Saved views';
+
+  @override
+  String ahdSavedN(int n) {
+    return '$n saved';
+  }
+
+  @override
+  String get ahdMenuSave => 'Save this view';
+
+  @override
+  String get ahdMenuExport => 'Export results (CSV)';
+
+  @override
+  String ahdTxnN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n transactions',
+      one: '$n transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdMenuClear => 'Clear all';
+
+  @override
+  String get ahdMenuHelp => 'How this page works';
+
+  @override
+  String get ahdFilter => 'Filter';
+
+  @override
+  String get ahdGroup => 'Group';
+
+  @override
+  String get ahdSort => 'Sort';
+
+  @override
+  String get ahdSaved => 'Saved';
+
+  @override
+  String get ahdSavedEdited => 'Saved · edited';
+
+  @override
+  String get ahdNone => 'None';
+
+  @override
+  String get ahdClearAll => 'Clear all';
+
+  @override
+  String get ahdClearTitle => 'Clear filters, grouping, sorting and charts?';
+
+  @override
+  String get ahdClearBody => 'Saved views are not changed.';
+
+  @override
+  String get ahdStartLine =>
+      'Pick a filter or a grouping to start, or open a saved view.';
+
+  @override
+  String get ahdAddFilter => 'Add filter';
+
+  @override
+  String get ahdAddFilterSub => 'Category, amount, date and more';
+
+  @override
+  String get ahdGroupBy => 'Group by';
+
+  @override
+  String get ahdGroupBySub => 'Category, account, month and more';
+
+  @override
+  String get ahdOpenSaved => 'Open saved';
+
+  @override
+  String ahdSavedViewsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n saved views',
+      one: '$n saved view',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdNothingSaved => 'Nothing saved yet';
+
+  @override
+  String get ahdTryOne => 'Try one';
+
+  @override
+  String get ahdEx1 => 'Food over ₹500 this year';
+
+  @override
+  String get ahdEx2 => 'Untagged expenses';
+
+  @override
+  String get ahdEx3 => 'Travel in 2026 by month';
+
+  @override
+  String get ahdYourSaved => 'Your saved views';
+
+  @override
+  String get ahdCategory => 'Category';
+
+  @override
+  String get ahdAccount => 'Account';
+
+  @override
+  String get ahdTag => 'Tag';
+
+  @override
+  String get ahdType => 'Type';
+
+  @override
+  String get ahdSource => 'Source';
+
+  @override
+  String get ahdMonth => 'Month';
+
+  @override
+  String get ahdYear => 'Year';
+
+  @override
+  String get ahdDate => 'Date';
+
+  @override
+  String get ahdAmount => 'Amount';
+
+  @override
+  String get ahdTotal => 'Total';
+
+  @override
+  String get ahdCount => 'Count';
+
+  @override
+  String get ahdName => 'Name';
+
+  @override
+  String get ahdAverage => 'Average';
+
+  @override
+  String get ahdSortTxns => 'Transactions';
+
+  @override
+  String get ahdSortGroups => 'Groups';
+
+  @override
+  String get ahdNewest => 'Newest first';
+
+  @override
+  String get ahdOldest => 'Oldest first';
+
+  @override
+  String get ahdHighest => 'Highest first';
+
+  @override
+  String get ahdLowest => 'Lowest first';
+
+  @override
+  String get ahdAtoZ => 'A to Z';
+
+  @override
+  String get ahdZtoA => 'Z to A';
+
+  @override
+  String get ahdGroupHelp =>
+      'Group by Month or Year to see a trend. There is no day grouping; use Sort by date instead.';
+
+  @override
+  String get ahdInfoGroup1 =>
+      'Puts matching transactions into groups and shows one row per group with its count, total and share. Tap a group to see its transactions.';
+
+  @override
+  String get ahdInfoGroup2 =>
+      'Month and Year show a trend over time. A transaction with 2 tags is counted in both tag groups.';
+
+  @override
+  String get ahdInfoSort1 =>
+      'Without groups, sort transactions by date, amount, category or account. With groups, sort the groups by total, count or name.';
+
+  @override
+  String get ahdInfoSort2 =>
+      'Inside a group\'s sheet, transactions are always newest first.';
+
+  @override
+  String get ahdInfoChart1 =>
+      'Add up to 4 charts. Each one follows your filter and splits the results its own way.';
+
+  @override
+  String get ahdInfoChart2 =>
+      'Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to open it.';
+
+  @override
+  String get ahdInfoSaved1 =>
+      'A saved view keeps the whole page: the filter, group, sort, every chart with its type, split, measure and position, and the KPI cards.';
+
+  @override
+  String get ahdInfoSaved2 =>
+      'If you change a saved view, choose Save changes to update it or Save as new to keep both. Saved views are included in your JSON backup.';
+
+  @override
+  String get ahdInfoKpi =>
+      'Pick which numbers show at the top and drag to reorder them. Saved views remember this choice.';
+
+  @override
+  String get ahdKpiTransactions => 'Transactions';
+
+  @override
+  String get ahdKpiIncome => 'Income';
+
+  @override
+  String get ahdKpiExpense => 'Expense';
+
+  @override
+  String get ahdKpiNet => 'Net';
+
+  @override
+  String get ahdKpiAverage => 'Average';
+
+  @override
+  String get ahdKpiAttachments => 'Attachments';
+
+  @override
+  String get ahdKpiLargest => 'Largest';
+
+  @override
+  String get ahdKpiEdit => 'Edit';
+
+  @override
+  String get ahdKpiSheetTitle => 'KPI cards';
+
+  @override
+  String get ahdKpiSheetDesc => 'Pick what shows at the top. Drag to reorder.';
+
+  @override
+  String get ahdKpiSheetNote => 'Saved views remember this choice.';
+
+  @override
+  String get ahdReset => 'Reset';
+
+  @override
+  String get ahdAddChartEmpty => 'Add a chart';
+
+  @override
+  String get ahdAddChartHint => 'Donut, bars or line';
+
+  @override
+  String ahdAddChartN(int n) {
+    return 'Add chart · $n of 4';
+  }
+
+  @override
+  String get ahdChartsFull => '4 of 4 charts. Remove one to add another.';
+
+  @override
+  String get ahdMoveUp => 'Move up';
+
+  @override
+  String get ahdMoveDown => 'Move down';
+
+  @override
+  String get ahdRemove => 'Remove';
+
+  @override
+  String get ahdChartRemoved => 'Chart removed';
+
+  @override
+  String get ahdUndo => 'Undo';
+
+  @override
+  String get ahdDonut => 'Donut';
+
+  @override
+  String get ahdBars => 'Bars';
+
+  @override
+  String get ahdLine => 'Line';
+
+  @override
+  String ahdCardTitle(String measure, String split) {
+    return '$measure by $split';
+  }
+
+  @override
+  String ahdCardSub(String type, String count) {
+    return '$type · $count';
+  }
+
+  @override
+  String get ahdStLine => 'A line needs at least 2 months of data.';
+
+  @override
+  String get ahdStNoTags => 'No tags in these results.';
+
+  @override
+  String get ahdStNoAccounts => 'No accounts in these results.';
+
+  @override
+  String get ahdStNoCategories => 'No categories in these results.';
+
+  @override
+  String get ahdStNothing => 'Nothing to split in these results.';
+
+  @override
+  String get ahdStWrongCombo =>
+      'Line charts work by month or year. Change the split or the chart type.';
+
+  @override
+  String get ahdSplitByMonth => 'Split by month';
+
+  @override
+  String get ahdChangeChart => 'Change chart';
+
+  @override
+  String get ahdStNoResults => 'No transactions match this filter.';
+
+  @override
+  String get ahdBuilderAdd => 'Add chart';
+
+  @override
+  String get ahdBuilderEdit => 'Edit chart';
+
+  @override
+  String get ahdChartType => 'Chart type';
+
+  @override
+  String get ahdSplitBy => 'Split by';
+
+  @override
+  String get ahdShow => 'Show';
+
+  @override
+  String get ahdCurrentGroup => 'Current group';
+
+  @override
+  String get ahdUpdateChart => 'Update chart';
+
+  @override
+  String get ahdRemoveChart => 'Remove chart';
+
+  @override
+  String get ahdBlkNoTags => 'No tags in these results';
+
+  @override
+  String get ahdBlkOneAccount => 'Only one account in these results';
+
+  @override
+  String get ahdBlkOneType => 'Only one type in these results';
+
+  @override
+  String get ahdBlkOneSource => 'Only one source in these results';
+
+  @override
+  String get ahdBlkOneCategory => 'Only one category in these results';
+
+  @override
+  String get ahdBlkOneMonth => 'All results are in one month';
+
+  @override
+  String get ahdBlkOneYear => 'All results are in one year';
+
+  @override
+  String get ahdTagNote =>
+      'Transactions with more than one tag appear in each tag group, so totals can add up to more than the overall total.';
+
+  @override
+  String get ahdLoadMore => 'Load more';
+
+  @override
+  String get ahdEmptyTitle => 'No transactions match';
+
+  @override
+  String get ahdEmptyBody =>
+      'Nothing on this phone matches all of these. Try a lower amount or remove a filter.';
+
+  @override
+  String get ahdErrorTitle => 'Couldn\'t load results';
+
+  @override
+  String get ahdErrorBody =>
+      'Something went wrong while reading your transactions. Your data is safe and nothing was changed.';
+
+  @override
+  String get ahdTryAgain => 'Try again';
+
+  @override
+  String get ahdGsTotal => 'Total';
+
+  @override
+  String get ahdGsLargest => 'Largest';
+
+  @override
+  String ahdChanged(String name) {
+    return 'You changed $name';
+  }
+
+  @override
+  String get ahdChFilter => 'Changed the filter';
+
+  @override
+  String get ahdChGroup => 'Changed the grouping';
+
+  @override
+  String get ahdChSort => 'Changed the sort';
+
+  @override
+  String get ahdChKpis => 'Changed the KPI cards';
+
+  @override
+  String get ahdChAdded => 'Added a chart';
+
+  @override
+  String get ahdChRemoved => 'Removed a chart';
+
+  @override
+  String get ahdChMoved => 'Moved a chart';
+
+  @override
+  String get ahdChEdited => 'Edited a chart';
+
+  @override
+  String get ahdSaveAsNew => 'Save as new';
+
+  @override
+  String get ahdSaveChanges => 'Save changes';
+
+  @override
+  String ahdUpdated(String name) {
+    return '$name updated';
+  }
+
+  @override
+  String get ahdSaveTitle => 'Save this view';
+
+  @override
+  String get ahdNameHint => 'Give this view a name';
+
+  @override
+  String ahdNameTaken(String name) {
+    return 'You already have a view called $name';
+  }
+
+  @override
+  String ahdSumFilters(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n filters',
+      one: '$n filter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahdSumGrouped(String group) {
+    return 'grouped by $group';
+  }
+
+  @override
+  String ahdSumSorted(String field) {
+    return 'sorted by $field';
+  }
+
+  @override
+  String ahdSumCharts(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n charts',
+      one: '$n chart',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ahdSumEmpty => 'Nothing set yet';
+
+  @override
+  String get ahdWhatSaved => 'What will be saved';
+
+  @override
+  String get ahdWsFilter => 'Filter';
+
+  @override
+  String get ahdWsGroup => 'Group by';
+
+  @override
+  String get ahdWsSort => 'Sort';
+
+  @override
+  String get ahdWsCharts => 'Charts';
+
+  @override
+  String get ahdWsKpis => 'KPI cards';
+
+  @override
+  String get ahdNotSet => 'Not set';
+
+  @override
+  String ahdKpisShown(int n) {
+    return '$n shown';
+  }
+
+  @override
+  String get ahdBackupNote => 'Included in your JSON backup.';
+
+  @override
+  String ahdSavedSnack(String name) {
+    return 'Saved as $name';
+  }
+
+  @override
+  String get ahdSavedTitle => 'Saved views';
+
+  @override
+  String get ahdSavedEmptyTitle => 'No saved views yet';
+
+  @override
+  String get ahdSavedEmptyBody =>
+      'Set up a filter, grouping or charts, then choose Save this view in the menu.';
+
+  @override
+  String get ahdRename => 'Rename';
+
+  @override
+  String get ahdRenameTitle => 'Rename view';
+
+  @override
+  String ahdDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get ahdDeleteBody =>
+      'This removes the saved view only. Your transactions stay as they are.';
+
+  @override
+  String get ahdExportTitle => 'Export results';
+
+  @override
+  String get ahdExportFilter => 'Your current filter';
+
+  @override
+  String get ahdExportNoFilter => 'No filter';
+
+  @override
+  String ahdExportNote(String n) {
+    return 'Exactly these $n transactions, in the same columns as the History CSV export. Grouping and charts are not exported.';
+  }
+
+  @override
+  String get ahdExportSave => 'Save to folder';
+
+  @override
+  String get ahdExportShare => 'Share';
+
+  @override
+  String get ahdExportSaved => 'File saved';
+
+  @override
+  String get ahdExportFailed =>
+      'Couldn\'t build the file. Nothing was changed.';
+
+  @override
+  String get ahdHelpTitle => 'How this page works';
+
+  @override
+  String get ahdHelpFilter =>
+      'Tap Filter to pick what to see: a category, an amount, dates and more.';
+
+  @override
+  String get ahdHelpGroup =>
+      'Puts results into rows by category, account, tag, month and more.';
+
+  @override
+  String get ahdHelpSort => 'Changes the order of transactions or groups.';
+
+  @override
+  String get ahdHelpCharts =>
+      'Add up to 4 charts. Each one follows your filter. Tap a part to open it.';
+
+  @override
+  String get ahdHelpSaved =>
+      'Saves the whole page so you can open it again with one tap.';
+
+  @override
+  String get ahdCharts => 'Charts';
+
+  @override
+  String get ahdInfoOpen => 'About this';
+
+  @override
+  String loanSplitNotice(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n EMIs don\'t match your loan schedule.',
+      one: '1 EMI doesn\'t match your loan schedule.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get loanSplitNoticeSub =>
+      'Their interest and principal split is off. Amounts paid are fine.';
+
+  @override
+  String get loanSplitFix => 'Fix';
+
+  @override
+  String get loanFixTitle => 'Fix EMI splits';
+
+  @override
+  String loanFixCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n EMIs',
+      one: '1 EMI',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String loanFixRange(String from, String to) {
+    return '$from to $to';
+  }
+
+  @override
+  String get loanFixNow => 'Now';
+
+  @override
+  String get loanFixAfter => 'After fix';
+
+  @override
+  String get loanFixInterest => 'Interest';
+
+  @override
+  String get loanFixPrincipal => 'Principal';
+
+  @override
+  String get loanFixTotalPaid => 'Total paid';
+
+  @override
+  String get loanFixSame => 'Same';
+
+  @override
+  String loanFixKept(int n) {
+    return 'EMIs you edited stay as they are ($n kept)';
+  }
+
+  @override
+  String loanFixInfo(String amount) {
+    return 'Only the split between interest and principal changes. Amounts, dates and accounts stay the same. Outstanding becomes $amount.';
+  }
+
+  @override
+  String get loanFixing => 'Fixing';
+
+  @override
+  String loanFixedSnack(int n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n EMIs fixed.',
+      one: '1 EMI fixed.',
+    );
+    return '$_temp0 Outstanding is now $amount.';
+  }
+
+  @override
+  String get loanFixUndo => 'Undo';
+
+  @override
+  String get loanRecheck => 'Recheck EMI splits';
+
+  @override
+  String loanAllMatch(int n) {
+    return 'Everything matches. All $n EMIs follow your loan schedule.';
+  }
+
+  @override
+  String get loanFixLonger =>
+      'Your loan got longer because later parts were added while keeping the same EMI.';
+
+  @override
+  String get historyMenuAdvancedSub => 'AND / OR filters, groups, charts';
+
+  @override
+  String get ahqFieldType => 'Type';
+
+  @override
+  String get ahqFieldAmount => 'Amount';
+
+  @override
+  String get ahqFieldCategory => 'Category';
+
+  @override
+  String get ahqFieldAccount => 'Account';
+
+  @override
+  String get ahqFieldTag => 'Tag';
+
+  @override
+  String get ahqFieldDate => 'Date';
+
+  @override
+  String get ahqFieldWords => 'Words';
+
+  @override
+  String get ahqFieldHas => 'Has';
+
+  @override
+  String get ahqFieldSource => 'Source';
+
+  @override
+  String get ahqFieldSubType => 'Kind';
+
+  @override
+  String get ahqTypeExpense => 'Expense';
+
+  @override
+  String get ahqTypeIncome => 'Income';
+
+  @override
+  String get ahqTypeTransfer => 'Transfer';
+
+  @override
+  String get ahqSourceManual => 'Typed by you';
+
+  @override
+  String get ahqSourceSms => 'SMS';
+
+  @override
+  String get ahqSourceQuickAdd => 'Quick Add';
+
+  @override
+  String get ahqSourceRecurring => 'Recurring';
+
+  @override
+  String get ahqSourceImport => 'Import';
+
+  @override
+  String get ahqHasAttachment => 'Attachment';
+
+  @override
+  String get ahqHasNote => 'Note';
+
+  @override
+  String get ahqSubLoanRepayment => 'Loan repayment';
+
+  @override
+  String get ahqSubInvestment => 'Investment';
+
+  @override
+  String get ahqSubSavings => 'Savings';
+
+  @override
+  String get ahqSubLent => 'Lent';
+
+  @override
+  String get ahqSubBorrowed => 'Borrowed';
+
+  @override
+  String get ahqSubInvestmentReturn => 'Investment return';
+
+  @override
+  String get ahqSubLoanReceived => 'Loan received';
+
+  @override
+  String get ahqSubLoanDisbursement => 'Loan disbursement';
+
+  @override
+  String get ahqOr => 'or';
+
+  @override
+  String get ahqNone => 'none';
+
+  @override
+  String ahqRange(String from, String to) {
+    return '$from to $to';
+  }
+
+  @override
+  String ahqAmountOver(String amount) {
+    return 'over $amount';
+  }
+
+  @override
+  String ahqAmountUnder(String amount) {
+    return 'under $amount';
+  }
+
+  @override
+  String ahqAmountOrMore(String amount) {
+    return '$amount or more';
+  }
+
+  @override
+  String ahqAmountOrLess(String amount) {
+    return '$amount or less';
+  }
+
+  @override
+  String get ahqDateThisMonth => 'This month';
+
+  @override
+  String get ahqDateLastMonth => 'Last month';
+
+  @override
+  String get ahqDateThisYear => 'This year';
+
+  @override
+  String get ahqDateLastYear => 'Last year';
+
+  @override
+  String ahqDateLastDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Last $n days',
+      one: 'Last day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ahqDateAfter(String date) {
+    return 'After $date';
+  }
+
+  @override
+  String ahqDateBefore(String date) {
+    return 'Before $date';
+  }
+
+  @override
+  String ahqDateFrom(String date) {
+    return 'From $date';
+  }
+
+  @override
+  String ahqDateUntil(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String get ahqRbTransactions => 'Transactions';
+
+  @override
+  String get ahqRbExpenses => 'Expenses';
+
+  @override
+  String get ahqRbIncome => 'Income';
+
+  @override
+  String get ahqRbTransfers => 'Transfers';
+
+  @override
+  String ahqRbAmountIs(String amount) {
+    return 'of $amount';
+  }
+
+  @override
+  String ahqRbIn(String names) {
+    return 'in $names';
+  }
+
+  @override
+  String ahqRbNotIn(String names) {
+    return 'not in $names';
+  }
+
+  @override
+  String ahqRbFrom(String names) {
+    return 'from $names';
+  }
+
+  @override
+  String ahqRbNotFrom(String names) {
+    return 'not from $names';
+  }
+
+  @override
+  String ahqRbTagged(String tags) {
+    return 'tagged $tags';
+  }
+
+  @override
+  String ahqRbNotTagged(String tags) {
+    return 'not tagged $tags';
+  }
+
+  @override
+  String get ahqRbNoTags => 'with no tags';
+
+  @override
+  String get ahqRbHasTags => 'with tags';
+
+  @override
+  String get ahqRbWithAttachment => 'with an attachment';
+
+  @override
+  String get ahqRbWithoutAttachment => 'without an attachment';
+
+  @override
+  String get ahqRbWithNote => 'with a note';
+
+  @override
+  String get ahqRbWithoutNote => 'without a note';
+
+  @override
+  String get ahqRbSms => 'from SMS';
+
+  @override
+  String get ahqRbManual => 'typed by you';
+
+  @override
+  String get ahqRbQuickAdd => 'from Quick Add';
+
+  @override
+  String get ahqRbRecurring => 'from recurring';
+
+  @override
+  String get ahqRbImported => 'imported';
+
+  @override
+  String ahqRbNot(String text) {
+    return 'not $text';
+  }
+
+  @override
+  String ahqRbWords(String text) {
+    return 'with “$text” in the title or note';
+  }
+
+  @override
+  String ahqRbNoWords(String text) {
+    return 'without “$text” in the title or note';
+  }
+
+  @override
+  String ahqRbKind(String kind) {
+    return 'that are $kind';
+  }
+
+  @override
+  String ahqRbDateIn(String date) {
+    return 'in $date';
+  }
+
+  @override
+  String ahqRbDateOn(String date) {
+    return 'on $date';
+  }
+
+  @override
+  String ahqRbDateRange(String date) {
+    return 'from $date';
+  }
+
+  @override
+  String ahqRbNotGroup(String text) {
+    return 'not ($text)';
+  }
+
+  @override
+  String get ahqErrCloseBracket => 'Missing closing bracket';
+
+  @override
+  String ahqErrCloseBracketAfter(String token) {
+    return 'Missing closing bracket. Add ) after $token.';
+  }
+
+  @override
+  String get ahqErrOpenBracket => 'Missing opening bracket';
+
+  @override
+  String ahqErrField(String name, String suggestion) {
+    return 'Unknown field “$name”. Did you mean $suggestion?';
+  }
+
+  @override
+  String ahqErrFieldPlain(String name) {
+    return 'Unknown field “$name”.';
+  }
+
+  @override
+  String get ahqErrAmount => 'Amount needs a number, like amount:>500';
+
+  @override
+  String get ahqErrDate => 'Date needs a year, month or day, like date:2026-03';
+
+  @override
+  String ahqErrValue(String field, String name) {
+    return 'No $field called “$name”';
+  }
+
+  @override
+  String ahqErrValueDid(String field, String name, String suggestion) {
+    return 'No $field called “$name”. Did you mean $suggestion?';
+  }
+
+  @override
+  String get ahqErrOr => 'OR needs something on both sides.';
+
+  @override
+  String get ahqErrEmptyGroup => 'Add a filter between the brackets.';
+
+  @override
+  String ahqErrBadToken(String text) {
+    return 'Can\'t read “$text”.';
+  }
+
+  @override
+  String get ahqUntagged => 'Untagged';
+
+  @override
+  String get ahqNoCategory => 'No category';
+
+  @override
+  String get ahqOther => 'Other';
+
+  @override
+  String get ahqUnknown => 'Unknown';
+
+  @override
+  String get ahfTitle => 'Filter';
+
+  @override
+  String get ahfNoFilters => 'No filters yet';
+
+  @override
+  String get ahfFilterOne => 'filter';
+
+  @override
+  String get ahfFilterMany => 'filters';
+
+  @override
+  String get ahfClearAll => 'Clear all';
+
+  @override
+  String get ahfCleared => 'Filters cleared';
+
+  @override
+  String get ahfUndo => 'Undo';
+
+  @override
+  String get ahfPlaceholder => 'Type a filter or pick a field';
+
+  @override
+  String get ahfPlaceholderFocused => 'Type a field, like category';
+
+  @override
+  String get ahfImplicitNote =>
+      '\"and\" is read before \"or\". The dashed box shows how the app groups this. Add brackets to change it.';
+
+  @override
+  String get ahfAddFilter => 'Add a filter';
+
+  @override
+  String get ahfPlainWords => 'In plain words';
+
+  @override
+  String get ahfTryOne => 'Try one';
+
+  @override
+  String get ahfExFood => 'Food over ₹500 this year';
+
+  @override
+  String get ahfExAttachment => 'Has attachment';
+
+  @override
+  String get ahfExUntagged => 'Untagged expenses';
+
+  @override
+  String get ahfExCard => 'Card spends last month';
+
+  @override
+  String ahfShowN(int n) {
+    return 'Show $n transactions';
+  }
+
+  @override
+  String get ahfShowCounting => 'Show transactions';
+
+  @override
+  String get ahfNoMatch => 'No transactions match';
+
+  @override
+  String get ahfDone => 'Done';
+
+  @override
+  String get ahfHintType => 'Expense, income or transfer';
+
+  @override
+  String get ahfHintAmount => 'Over, under or between amounts';
+
+  @override
+  String get ahfHintCategory => 'Your categories';
+
+  @override
+  String get ahfHintAccount => 'Where the money moved';
+
+  @override
+  String get ahfHintTag => 'Your tags, or no tags';
+
+  @override
+  String get ahfHintDate => 'This month, a year or any range';
+
+  @override
+  String get ahfHintHas => 'Attachment or note';
+
+  @override
+  String get ahfHintSource => 'Typed, SMS, Quick Add and more';
+
+  @override
+  String get ahfHintWords => 'Words in the title or note';
+
+  @override
+  String get ahfFilterBy => 'Filter by';
+
+  @override
+  String get ahfIs => 'is';
+
+  @override
+  String get ahfIsNot => 'is not';
+
+  @override
+  String get ahfAddFilterBtn => 'Add filter';
+
+  @override
+  String ahfAddFilterN(int n) {
+    return 'Add filter · $n selected';
+  }
+
+  @override
+  String get ahfPickMany => 'Pick more than one to match any of them.';
+
+  @override
+  String get ahfOver => 'Over';
+
+  @override
+  String get ahfUnder => 'Under';
+
+  @override
+  String get ahfBetween => 'Between';
+
+  @override
+  String get ahfAmountIs => 'Is';
+
+  @override
+  String get ahfAmountNote => 'The amount without the plus or minus sign.';
+
+  @override
+  String get ahfFrom => 'From';
+
+  @override
+  String get ahfTo => 'To';
+
+  @override
+  String get ahfSearchCategories => 'Search categories';
+
+  @override
+  String get ahfSearchAccounts => 'Search accounts';
+
+  @override
+  String get ahfSearchTags => 'Search tags';
+
+  @override
+  String get ahfHasNoTags => 'Has no tags';
+
+  @override
+  String get ahfNothingFound => 'Nothing found';
+
+  @override
+  String get ahfDateQuick => 'Quick';
+
+  @override
+  String get ahfDateLast30 => 'Last 30 days';
+
+  @override
+  String get ahfDateMonthYear => 'A month or a year';
+
+  @override
+  String ahfAllOfYear(String year) {
+    return 'All of $year';
+  }
+
+  @override
+  String get ahfDateCustom => 'Custom range';
+
+  @override
+  String get ahfDateCustomHint => 'Pick a start and end date';
+
+  @override
+  String get ahfSrcNote =>
+      'Recurring includes loan EMIs. Import is CSV or a Kuber file.';
+
+  @override
+  String get ahfWordsNote =>
+      'Searches the title and the note. Not case sensitive.';
+
+  @override
+  String get ahfWordsHint => 'Like swiggy';
+
+  @override
+  String get ahfTypeItLike => 'Type it like';
+
+  @override
+  String get ahfInfo1 =>
+      'Type in the box, or pick a field under it. Both add to the same box, where the cursor is.';
+
+  @override
+  String get ahfInfo2 =>
+      'Tap and between two filters to make it or. A shaded box shows what goes together.';
+
+  @override
+  String get ahfInfo3 =>
+      'The bar has ( ), and, or and not. Brackets show as a box inside a box.';
+
+  @override
+  String get ahfHowTitle => 'How to type a filter';
+
+  @override
+  String get ahfSyn1 => 'A field and a value';
+
+  @override
+  String get ahfSyn2 => 'Either value: food or travel';
+
+  @override
+  String get ahfSyn3 =>
+      'Over an amount. Use < for under, or 500..2000 for between';
+
+  @override
+  String get ahfSyn4 => 'A year, a month or a day';
+
+  @override
+  String get ahfSyn5 => 'Words in the title or note';
+
+  @override
+  String get ahfSyn6 => 'Both, or either. \"and\" is read before \"or\"';
+
+  @override
+  String get ahfSyn7 => 'Group filters together';
+
+  @override
+  String get ahfSyn8 => 'Leave these out. You can also type -tag:trip';
+
+  @override
+  String get ahfDiscardTitle => 'Discard changes?';
+
+  @override
+  String get ahfDiscardBody =>
+      'Your changes to the filter have not been applied.';
+
+  @override
+  String get ahfKeepEditing => 'Keep editing';
+
+  @override
+  String get ahfDiscard => 'Discard';
+
+  @override
+  String ahfTokenSemantics(String text) {
+    return '$text, double tap to edit';
+  }
+
+  @override
+  String ahfTokenInvalidSemantics(String text) {
+    return '$text, not valid, double tap to edit';
+  }
+
+  @override
+  String ahfJoinerSemantics(String word, String other) {
+    return '$word, double tap to change to $other';
+  }
+
+  @override
+  String ahfBoxSemantics(int n) {
+    return 'Group of $n filters';
+  }
+
+  @override
+  String get ahfBracketOpenSemantics => 'Opening bracket';
+
+  @override
+  String get ahfBracketCloseSemantics => 'Closing bracket';
+
+  @override
+  String get ahfGhostBracketSemantics => 'Closing bracket goes here';
+
+  @override
+  String get ahfOpOpenSemantics => 'Open bracket';
+
+  @override
+  String get ahfOpCloseSemantics => 'Close bracket';
+
+  @override
+  String get ahfHideKeyboard => 'Hide keyboard';
+
+  @override
+  String ahfCountSemantics(int n) {
+    return '$n filters';
+  }
 }

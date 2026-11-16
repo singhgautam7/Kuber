@@ -183,3 +183,20 @@ extension TransactionAggregateX on Iterable<Transaction> {
     );
   }
 }
+
+/// Income and expense totals exactly as Analytics computes them
+/// (`analyticsComputedProvider`): transfers and balance adjustments are
+/// dropped, anything not income counts as expense, both by `spendAmount`.
+/// Advanced History's KPIs call this so the two screens always agree.
+({double income, double expense}) analyticsIncomeExpense(
+    Iterable<Transaction> txns) {
+  double income = 0, expense = 0;
+  for (final t in txns.validForCalculations) {
+    if (t.type == 'income') {
+      income += t.spendAmount;
+    } else {
+      expense += t.spendAmount;
+    }
+  }
+  return (income: income, expense: expense);
+}
