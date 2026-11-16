@@ -2,7 +2,7 @@
 // Isar models (no Flutter), shared by the EMI processor, the loan sheet /
 // full screen, Upcoming events and Ask Kuber.
 
-import 'dart:math' show min;
+import 'dart:math' show max, min;
 
 import '../../../core/money_math/loan_math.dart';
 import '../../../core/schedule/schedule.dart';
@@ -181,15 +181,24 @@ Amortization? loanAmortization(Loan l,
 }
 
 /// Recorded EMIs with a split, by schedule day.
-Map<int, RecordedEmi> recordedEmis(List<Transaction> linked, {int? recalculateFrom}) => {
-      for (final t in linked)
-        if (t.occurrenceDate != null && t.principalPart != null && t.interestPart != null)
+///
+/// An EMI with no split is not a record (the schedule's own row stands for
+/// it), except when it is being recalculated: then its paid amount is kept
+/// and the split comes from the schedule (the split fix).
+Map<int, RecordedEmi> recordedEmis(List<Transaction> linked, {int? recalculateFrom}) {
+  bool again(Transaction t) => recalculateFrom != null && t.occurrenceDate! >= recalculateFrom;
+  return {
+    for (final t in linked)
+      if (t.occurrenceDate != null)
+        if (t.principalPart != null && t.interestPart != null)
           t.occurrenceDate!: RecordedEmi(t.amount, t.principalPart!, t.interestPart!,
               edited: t.splitEdited,
-              use: recalculateFrom != null && t.occurrenceDate! >= recalculateFrom
-                  ? RecordedUse.recalculate
-                  : RecordedUse.auto),
-    };
+              use: again(t) ? RecordedUse.recalculate : RecordedUse.auto)
+        else if (again(t) && !t.splitEdited && isEmiTransaction(t))
+          t.occurrenceDate!:
+              RecordedEmi(t.amount, 0, 0, edited: false, use: RecordedUse.recalculate),
+  };
+}
 
 /// A loan's transactions and deleted EMI days, for [loanStatus] /
 /// [loanAmortization].
@@ -224,6 +233,16 @@ OutstandingCheck outstandingError(double v) => v < 0
 /// True when the EMI no longer covers the interest, so the schedule runs out
 /// with money still owed (keep EMI on a big addition).
 bool loanNeverEnds(Amortization a) => a.rows.isNotEmpty && a.rows.last.balance > 1;
+
+/// True when the schedule runs past the loan's tenure because parts were
+/// added with the EMI kept (keep EMI, change end date), the explanation the
+/// progress line gets.
+bool loanGotLonger(Loan l, LoanStatus st) =>
+    l.releasedInParts &&
+    l.releases.length > 1 &&
+    l.emiAmount > 0 &&
+    l.startingPoint != LoanStartingPoint.outstandingToday &&
+    (st.totalEmis ?? 0) > (l.tenureMonths ?? 0);
 
 const preEmiTxnPrefix = 'Pre-EMI interest - ';
 
@@ -368,10 +387,16 @@ int? _totalEmis(Loan l, Schedule s) {
     {List<Transaction> linked = const [], Set<int> deletedDays = const {}}) {
   final a = loanAmortization(l,
       linked: linked, deletedDays: deletedDays, decimals: decimals);
+  return emiSplit(a, day, l.emiAmount, decimals);
+}
+
+/// THE split of an EMI on [day]: from the loan's schedule row (past EMIs,
+/// auto and catch-up EMIs, recalculation all come here). No row (nothing
+/// owed that day, or a loan without numbers): [fallback] amount, no split.
+({double amount, double? principal, double? interest}) emiSplit(
+    Amortization? a, int day, double fallback, int decimals) {
   final row = a?.rowOn(day);
-  if (row == null) {
-    return (amount: l.emiAmount, principal: null, interest: null);
-  }
+  if (row == null) return (amount: fallback, principal: null, interest: null);
   final s = roundedSplit(row.payment, row.interest, decimals);
   return (amount: s.payment, principal: s.principal, interest: s.interest);
 }
@@ -386,4 +411,95 @@ bool paidOffAfter(Loan l, int day) {
   }
   final s = l.schedule;
   return s != null && s.endType != ScheduleEnd.never && isEnded(s);
+}
+
+// ── Split check and fix (advanced history v1.2, A3) ─────────────────────
+
+/// One EMI whose stored split differs from the loan schedule.
+class SplitFixItem {
+  final int id;
+  final int day;
+  final double amount;
+
+  /// Stored split; null parts count as 0 (missing).
+  final double oldPrincipal, oldInterest;
+  final bool missing;
+  final double newPrincipal, newInterest;
+  const SplitFixItem(this.id, this.day, this.amount, this.oldPrincipal, this.oldInterest,
+      this.missing, this.newPrincipal, this.newInterest);
+}
+
+/// What re-splitting the loan's unedited EMIs from its schedule would change.
+class SplitCheck {
+  /// EMIs with a schedule row (what "all N EMIs follow" counts).
+  final int checked;
+  final List<SplitFixItem> items;
+
+  /// Edited EMIs; they are never changed.
+  final int kept;
+
+  /// Outstanding today after the fix (null for a loan without numbers).
+  final double? outstandingAfter;
+  const SplitCheck(this.checked, this.items, this.kept, this.outstandingAfter);
+
+  static const none = SplitCheck(0, [], 0, null);
+
+  int get count => items.length;
+  int? get firstDay => items.isEmpty ? null : items.map((i) => i.day).reduce(min);
+  int? get lastDay => items.isEmpty ? null : items.map((i) => i.day).reduce(max);
+  double get nowInterest => items.fold(0.0, (s, i) => s + i.oldInterest);
+  double get nowPrincipal => items.fold(0.0, (s, i) => s + i.oldPrincipal);
+  double get afterInterest => items.fold(0.0, (s, i) => s + i.newInterest);
+  double get afterPrincipal => items.fold(0.0, (s, i) => s + i.newPrincipal);
+  double get totalPaid => items.fold(0.0, (s, i) => s + i.amount);
+}
+
+/// Amounts differing by more than this are a mismatch.
+const splitTolerance = 1.0;
+
+/// Compares every linked, unedited EMI's split with the schedule that splits
+/// them all again from the outstanding (one amortization, pure Dart: safe
+/// for `compute`). Missing (null) splits always count; EMIs past the
+/// schedule's end have no row and are left alone.
+SplitCheck loanSplitCheck(Loan l, LoanRecords r, {int decimals = 2, DateTime? now}) {
+  if (!hasLoanNumbers(l)) return SplitCheck.none;
+  final a = loanAmortizationWith(l, r, recalculateFrom: 0);
+  if (a == null) return SplitCheck.none;
+  final byDay = {for (final row in a.rows) row.day: row};
+  final items = <SplitFixItem>[];
+  final after = <Transaction>[];
+  var checked = 0, kept = 0;
+  for (final t in r.linked) {
+    final d = t.occurrenceDate;
+    if (d == null || t.subType != TxnSubType.loanRepayment || isPreEmiTransaction(t)) continue;
+    final row = byDay[d];
+    if (row == null) {
+      after.add(t);
+      continue;
+    }
+    checked++;
+    if (t.splitEdited) {
+      kept++;
+      after.add(t);
+      continue;
+    }
+    final sp = roundedSplit(t.amount, row.interest, decimals);
+    final missing = t.principalPart == null || t.interestPart == null;
+    final op = t.principalPart ?? 0, oi = t.interestPart ?? 0;
+    if (missing ||
+        (sp.principal - op).abs() > splitTolerance ||
+        (sp.interest - oi).abs() > splitTolerance) {
+      items.add(SplitFixItem(t.id, d, t.amount, op, oi, missing, sp.principal, sp.interest));
+    }
+    after.add(Transaction()
+      ..occurrenceDate = d
+      ..amount = t.amount
+      ..principalPart = sp.principal
+      ..interestPart = sp.interest);
+  }
+  items.sort((x, y) => x.day.compareTo(y.day));
+  final out = items.isEmpty
+      ? null
+      : loanStatus(l, after, now: now, deletedDays: r.deleted).outstanding;
+  return SplitCheck(checked, items, kept, out);
 }

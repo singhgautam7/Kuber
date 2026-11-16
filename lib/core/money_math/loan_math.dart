@@ -609,14 +609,28 @@ Amortization amortize({
     }
   }
 
-  for (var i = 0; i < emiDays.length && bal > 1e-6; i++) {
+  // A later release restarts a loan that was paid off in between, so the
+  // schedule goes on to that release instead of stopping at the payoff.
+  bool releaseAhead() {
+    for (var k = ev; k < sorted.length; k++) {
+      if (sorted[k].kind == AmortEventKind.release) return true;
+    }
+    return false;
+  }
+
+  var gaps = 0; // EMI dates skipped while nothing was owed
+  for (var i = 0; i < emiDays.length && (bal > 1e-6 || releaseAhead()); i++) {
     final day = emiDays[i];
     final remaining = max(1, months - i);
     while (ev < sorted.length &&
         (sorted[ev].day < day || (sorted[ev].day == day && !sorted[ev].afterEmi))) {
       apply(sorted[ev++], i, remaining);
     }
-    if (bal <= 1e-6) break;
+    if (bal <= 1e-6) {
+      if (!releaseAhead()) break;
+      gaps++;
+      continue;
+    }
     if (unpaid.contains(day)) {
       // Deleted by the user: no payment this month (and, as with monthly
       // interest, none charged for it).
@@ -680,7 +694,7 @@ Amortization amortize({
     }
     bal -= princ;
     rows.add(AmortRow(
-      index: i + 1,
+      index: i + 1 - gaps,
       day: day,
       payment: payment,
       principal: princ,

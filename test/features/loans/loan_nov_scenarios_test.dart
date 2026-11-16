@@ -437,7 +437,7 @@ void main() {
       await service.saveAddition(l,
           interest: false, date: monthsAgo(3), amount: 1500, adjust: LoanAdjust.emi, note: 'Insurance');
       final json = await JsonBackupService().exportJson(isar);
-      expect(jsonDecode(json)['version'], 4);
+      expect(jsonDecode(json)['version'], JsonBackupService.version);
       await isar.writeTxn(() => isar.clear());
       await JsonBackupService().importJson(isar, json);
       final r = await reload(l);

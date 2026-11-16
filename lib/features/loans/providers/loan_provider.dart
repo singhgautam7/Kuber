@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../../../core/schedule/processed_occurrence.dart';
 import '../../../core/services/attachment_service.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/loan.dart';
@@ -239,3 +242,49 @@ final loanSummaryProvider =
       }
       return (outstanding: outstanding, totalPaid: paid);
     });
+
+// ── EMI split check (advanced history v1.2, A3) ─────────────────────────
+
+SplitCheck _splitCheckJob((Loan, LoanRecords, int) a) =>
+    loanSplitCheck(a.$1, a.$2, decimals: a.$3);
+
+/// How the loan's recorded EMI splits compare with its schedule. One
+/// amortization on a background isolate with plain data, kept until the loan
+/// or its EMIs change (it watches both).
+final loanSplitCheckProvider = FutureProvider.family<SplitCheck, String>((ref, uid) async {
+  final loan = (await ref.watch(loanListProvider.future)).where((l) => l.uid == uid).firstOrNull;
+  if (loan == null || !hasLoanNumbers(loan)) return SplitCheck.none;
+  await ref.watch(loanTransactionsProvider(uid).future);
+  await ref.watch(loanDeletedDaysProvider.future);
+  final rec = ref.watch(loanRecordsProvider(uid));
+  final decimals = ref.watch(formatterProvider).currency.decimals;
+  if (rec.linked.isEmpty) return SplitCheck.none;
+  return compute(_splitCheckJob, (loan, rec, decimals));
+});
+
+/// The mismatch count the user dismissed the notice at (null: never). The
+/// notice comes back when the count changes.
+String loanSplitDismissKey(String uid) => 'loanSplitDismissed.$uid';
+
+final loanSplitDismissedProvider = FutureProvider.family<int?, String>((ref, uid) async {
+  try {
+    return (await SharedPreferences.getInstance()).getInt(loanSplitDismissKey(uid));
+  } catch (_) {
+    return null;
+  }
+});
+
+Future<void> dismissLoanSplitNotice(WidgetRef ref, String uid, int count) async {
+  try {
+    await (await SharedPreferences.getInstance()).setInt(loanSplitDismissKey(uid), count);
+  } catch (_) {}
+  ref.invalidate(loanSplitDismissedProvider(uid));
+}
+
+/// The count the notice shows: 0 while checking, when all match, or when the
+/// user closed the card at this count.
+final loanSplitNoticeCountProvider = Provider.family<int, String>((ref, uid) {
+  final n = ref.watch(loanSplitCheckProvider(uid)).valueOrNull?.count ?? 0;
+  final dismissed = ref.watch(loanSplitDismissedProvider(uid));
+  return n > 0 && dismissed.hasValue && dismissed.value != n ? n : 0;
+});

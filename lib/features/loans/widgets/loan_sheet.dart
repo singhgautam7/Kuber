@@ -43,6 +43,7 @@ import '../domain/loan_service.dart';
 import '../providers/loan_provider.dart';
 import 'loan_add_sheet.dart';
 import 'loan_adjust_sheet.dart';
+import 'loan_split_fix.dart';
 
 void showLoanSheet(BuildContext context, WidgetRef ref, Loan loan) =>
     showMoneySheet<void>(context, LoanSheet(loan: loan));
@@ -226,6 +227,8 @@ class LoanSheet extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall),
         if (LoanService.preEmiNotice(loan) case final calc?)
           PreEmiNotice(loan: loan, amount: m(calc)),
+        if (ref.watch(loanSplitNoticeCountProvider(loan.uid)) case final n when n > 0)
+          LoanSplitNotice(loan: loan, count: n),
         if (st.totalEmis != null)
           Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             KuberLinearProgress(value: st.progress),
@@ -238,6 +241,10 @@ class LoanSheet extends ConsumerWidget {
                 Text(l.msLoansEndsOn(fmtMonthYear(dayOf(st.endDay!))),
                     style: Theme.of(context).textTheme.bodySmall),
             ]),
+            if (loanGotLonger(loan, st)) ...[
+              const SizedBox(height: 4),
+              Text(l.loanFixLonger, style: Theme.of(context).textTheme.bodySmall),
+            ],
           ]),
         if (st.nextDay != null && !st.closed)
           MoneyNextBlock(
@@ -340,6 +347,16 @@ class LoanSheet extends ConsumerWidget {
               onPressed: () {
                 nav.pop();
                 _closeLoan(context, ref, loan);
+              }),
+        if (hasLoanNumbers(loan))
+          SheetAction(
+              label: l.loanRecheck,
+              icon: Icons.fact_check_outlined,
+              overflowOnly: true,
+              onPressed: () {
+                final container = ProviderScope.containerOf(context, listen: false);
+                nav.pop();
+                recheckLoanSplits(nav.context, container, loan);
               }),
         SheetAction(
             label: l.deleteLabel,

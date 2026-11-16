@@ -488,13 +488,12 @@ class LoanService {
       await isar.writeTxn(() async {
         final txns = <Transaction>[];
         for (final d in part) {
-          final row = a?.rowOn(d);
-          final sp = row == null ? null : roundedSplit(row.payment, row.interest, decimals);
+          final sp = emiSplit(a, d, l.emiAmount, decimals);
           final name = 'EMI - ${l.name}';
           txns.add(Transaction()
             ..name = name
             ..nameLower = name.toLowerCase()
-            ..amount = sp?.payment ?? l.emiAmount
+            ..amount = sp.amount
             ..type = 'expense'
             ..categoryId = l.categoryId
             ..accountId = l.accountId
@@ -506,10 +505,10 @@ class LoanService {
             ..linkedRuleType = 'loan'
             ..linkedRuleId = l.uid
             ..subType = TxnSubType.loanRepayment
-            ..principalPart = sp?.principal
-            ..interestPart = sp?.interest
+            ..principalPart = sp.principal
+            ..interestPart = sp.interest
             ..spendInterestOnly = l.countOnlyInterest &&
-                sp != null &&
+                sp.interest != null &&
                 (from == null || d >= dayKey(from))
             ..addedAsPastEmi = true);
         }
@@ -606,11 +605,11 @@ class LoanService {
     var oldI = 0.0, newI = 0.0;
     for (final t in records.linked) {
       final d = t.occurrenceDate;
-      if (d == null || d < fromDay || t.splitEdited || t.interestPart == null) continue;
+      if (d == null || d < fromDay || t.splitEdited || isPreEmiTransaction(t)) continue;
       final row = byDay[d];
       if (row == null) continue;
       count++;
-      oldI += t.interestPart!;
+      oldI += t.interestPart ?? 0;
       newI += row.interest;
     }
     return (count: count, oldInterest: oldI, newInterest: newI);
@@ -627,7 +626,7 @@ class LoanService {
     final changed = <Transaction>[];
     for (final t in rec.linked) {
       final d = t.occurrenceDate;
-      if (d == null || d < fromDay || t.splitEdited || t.principalPart == null) continue;
+      if (d == null || d < fromDay || t.splitEdited || isPreEmiTransaction(t)) continue;
       final row = byDay[d];
       if (row == null) continue;
       final sp = roundedSplit(t.amount, row.interest, decimals);
@@ -639,6 +638,50 @@ class LoanService {
     }
     if (changed.isNotEmpty) await isar.writeTxn(() => isar.transactions.putAll(changed));
     return changed.length;
+  }
+
+  /// Rewrites the splits in [check] in ONE write transaction (amounts, dates
+  /// and accounts stay). Returns what each EMI had before, for [undoSplitFix].
+  Future<List<({int id, double? principal, double? interest, DateTime updatedAt})>> fixSplits(
+      SplitCheck check) async {
+    final ids = [for (final i in check.items) i.id];
+    final undo = <({int id, double? principal, double? interest, DateTime updatedAt})>[];
+    await isar.writeTxn(() async {
+      final txns = await isar.transactions.getAll(ids);
+      final changed = <Transaction>[];
+      for (var k = 0; k < txns.length; k++) {
+        final t = txns[k];
+        if (t == null || t.splitEdited) continue;
+        undo.add((id: t.id, principal: t.principalPart, interest: t.interestPart, updatedAt: t.updatedAt));
+        final i = check.items[k];
+        t
+          ..principalPart = i.newPrincipal
+          ..interestPart = i.newInterest
+          ..updatedAt = DateTime.now();
+        changed.add(t);
+      }
+      await isar.transactions.putAll(changed);
+    });
+    return undo;
+  }
+
+  /// Puts back what [fixSplits] returned.
+  Future<void> undoSplitFix(
+      List<({int id, double? principal, double? interest, DateTime updatedAt})> undo) async {
+    await isar.writeTxn(() async {
+      final txns = await isar.transactions.getAll([for (final u in undo) u.id]);
+      final back = <Transaction>[];
+      for (var k = 0; k < txns.length; k++) {
+        final t = txns[k];
+        if (t == null) continue;
+        t
+          ..principalPart = undo[k].principal
+          ..interestPart = undo[k].interest
+          ..updatedAt = undo[k].updatedAt;
+        back.add(t);
+      }
+      await isar.transactions.putAll(back);
+    });
   }
 
   /// Saves a user-edited EMI split (A2): the parts always add up to [amount].
