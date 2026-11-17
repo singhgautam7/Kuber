@@ -186,12 +186,15 @@ void main() {
     testWidgets('Expressive: overlay during, gone after settle', (tester) async {
       final color = await pumpApp(tester, MotionLevel.expressive);
       await tester.tapAt(const Offset(100, 100));
+      // The reveal starts once the new theme has rendered (two frames).
+      await tester.pump();
+      await tester.pump();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(color.value, const Color(0xFFEEDDCC));
       final during = overlays(tester);
       expect(during, 1);
-      await tester.pump(KuberMotion.slowCurve.settle + const Duration(milliseconds: 50));
+      await tester.pump(KuberMotion.themeReveal + const Duration(milliseconds: 50));
       await tester.pump();
       expect(overlays(tester), 0);
     });
@@ -211,6 +214,8 @@ void main() {
     testWidgets('Off: cross-fade within 90 ms', (tester) async {
       await pumpApp(tester, MotionLevel.off);
       await tester.tapAt(const Offset(100, 100));
+      await tester.pump();
+      await tester.pump();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 45));
       expect(overlays(tester), 1);

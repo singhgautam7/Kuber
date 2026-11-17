@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
 import '../theme/app_theme.dart';
@@ -12,8 +14,9 @@ import 'motion_level.dart';
 ///
 /// run() snapshots the current frame (one GPU image, no await), applies the
 /// change underneath, then draws the snapshot on top with a circular hole
-/// growing from the tap to the farthest corner: springSlow at Expressive,
-/// springSubtle at Subtle, a 90 ms cross-fade of the snapshot at Off. Only a
+/// growing from the tap to the farthest corner: 800 ms ease-in-out at
+/// Expressive, 500 ms at Subtle, a 90 ms cross-fade of
+/// the snapshot at Off (`KuberMotion.themeReveal*`). Only a
 /// clip and one image draw per frame. A second change mid-way snapshots the
 /// frame as it is (ripple included) and replaces the first, so nothing jumps.
 /// The overlay ignores pointers. If the snapshot fails (no layer yet, web),
@@ -35,13 +38,13 @@ class ThemeRipple extends StatefulWidget {
 
 abstract interface class ThemeRippleHandle {
   /// [globalPosition] is where the control was tapped (pointer-down).
-  void run(Offset globalPosition, VoidCallback apply);
+  Future<void> run(Offset globalPosition, FutureOr<void> Function() apply);
 }
 
 class _NoRipple implements ThemeRippleHandle {
   const _NoRipple();
   @override
-  void run(Offset globalPosition, VoidCallback apply) => apply();
+  Future<void> run(Offset globalPosition, FutureOr<void> Function() apply) async => apply();
 }
 
 class _RippleScope extends InheritedWidget {
@@ -70,7 +73,7 @@ class _ThemeRippleState extends State<ThemeRipple>
   int get active => _ripples.length;
 
   @override
-  void run(Offset globalPosition, VoidCallback apply) {
+  Future<void> run(Offset globalPosition, FutureOr<void> Function() apply) async {
     ui.Image? image;
     try {
       final box = _boundary.currentContext?.findRenderObject();
@@ -81,9 +84,9 @@ class _ThemeRippleState extends State<ThemeRipple>
     } catch (e) {
       debugPrint('Kuber: theme snapshot failed, no ripple: $e');
     }
-    apply();
     if (image == null || !mounted) {
       image?.dispose();
+      await apply();
       return;
     }
     // Everything before this is baked into the new snapshot.
@@ -94,16 +97,34 @@ class _ThemeRippleState extends State<ThemeRipple>
     _ripples.clear();
 
     final off = _level == MotionLevel.off;
-    final curve = _level == MotionLevel.subtle
-        ? KuberMotion.subtleCurve
-        : KuberMotion.slowCurve;
     final c = AnimationController(
       vsync: this,
-      duration: off ? KuberMotion.fxInstant : curve.settle,
+      duration: off
+          ? KuberMotion.fxInstant
+          : (_level == MotionLevel.subtle
+              ? KuberMotion.themeRevealSubtle
+              : KuberMotion.themeReveal),
     );
     final box = context.findRenderObject() as RenderBox;
     final ripple = _Ripple(image, box.globalToLocal(globalPosition), c);
+    // The snapshot covers the app at t = 0, so the switch below is hidden.
     setState(() => _ripples.add(ripple));
+
+    // Apply the change and let the app rebuild and render in the new theme
+    // before revealing it. Starting the clock first spent most of the reveal
+    // behind the preference write and the heavy rebuild frame, so the sweep
+    // looked like a flash. Capped so a slow write can't hold the cover.
+    try {
+      final f = apply();
+      if (f is Future) {
+        await Future.any<void>([f, Future<void>.delayed(const Duration(milliseconds: 800))]);
+      }
+    } catch (e) {
+      debugPrint('Kuber: theme change failed: $e');
+    }
+    await SchedulerBinding.instance.endOfFrame;
+    await SchedulerBinding.instance.endOfFrame;
+    if (!mounted || !_ripples.contains(ripple)) return;
     c.forward().whenComplete(() {
       if (!mounted || !_ripples.remove(ripple)) return;
       c.dispose();
@@ -124,10 +145,9 @@ class _ThemeRippleState extends State<ThemeRipple>
   @override
   Widget build(BuildContext context) {
     _level = KuberMotion.levelOf(context);
-    final curve = (_level == MotionLevel.subtle
-            ? KuberMotion.subtleCurve
-            : KuberMotion.slowCurve)
-        .clamped;
+    final curve = _level == MotionLevel.subtle
+        ? KuberMotion.themeRevealSubtleCurve
+        : KuberMotion.themeRevealCurve;
     return _RippleScope(
       handle: this,
       child: RepaintBoundary(

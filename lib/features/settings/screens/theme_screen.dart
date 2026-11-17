@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,7 +55,7 @@ class ThemeScreen extends ConsumerWidget {
     // Every theme change reveals from where the finger last went down (the
     // ripple); the closures below read it when the tap completes.
     var down = Offset.zero;
-    void change(VoidCallback apply) =>
+    void change(FutureOr<void> Function() apply) =>
         ThemeRipple.of(context).run(down, apply);
 
     Widget optionRow({
@@ -231,9 +232,9 @@ class ThemeScreen extends ConsumerWidget {
                         return;
                       }
                       KuberHaptics.tick();
-                      change(() {
+                      change(() async {
                         optionsCtl.setDynamicColor(false);
-                        settings.setThemeVariant(v);
+                        await settings.setThemeVariant(v);
                       });
                     },
                   ),

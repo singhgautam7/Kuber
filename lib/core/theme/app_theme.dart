@@ -156,6 +156,15 @@ abstract final class KuberMotion {
   static const Duration snackExit = Duration(milliseconds: 140);
   static const Duration digitRoll = Duration(milliseconds: 300);
 
+  /// Theme change ripple (decision 15, slowed after device review): a timed
+  /// reveal on an even ease-in-out so the circle visibly sweeps across the
+  /// screen (a spring or the emphasized curve covered most of it in ~100 ms
+  /// and read as a flash). Subtle is shorter.
+  static const Duration themeReveal = Duration(milliseconds: 800);
+  static const Duration themeRevealSubtle = Duration(milliseconds: 500);
+  static const Curve themeRevealCurve = Curves.easeInOutSine;
+  static const Curve themeRevealSubtleCurve = Curves.easeInOutSine;
+
   // ---- Press amounts ----
   static const double pressScaleCard = 0.98; // cards and list rows
   static const double pressScaleSubtle = 0.99;
