@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/motion/motion.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
@@ -553,13 +554,13 @@ class _FilterCard extends StatelessWidget {
     final Widget content = open
         ? Padding(
             key: const ValueKey('open'),
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: body,
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Align(alignment: AlignmentDirectional.topStart, child: body),
           )
         : hasSelection
         ? Padding(
             key: const ValueKey('chips'),
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: Wrap(spacing: 8, runSpacing: 8, children: chips),
@@ -567,13 +568,9 @@ class _FilterCard extends StatelessWidget {
           )
         : const SizedBox(key: ValueKey('none'), width: double.infinity);
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: KuberShape.largeR,
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
+    // No card border: a plain section header with the round header-style
+    // expand button, items left-aligned with the rest of the page.
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(
@@ -581,14 +578,12 @@ class _FilterCard extends StatelessWidget {
             expanded: open,
             child: InkWell(
               onTap: onToggle,
+              borderRadius: KuberShape.mediumR,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   children: [
-                    Flexible(
+                    Expanded(
                       child: Text.rich(
                         TextSpan(
                           text: title,
@@ -610,13 +605,14 @@ class _FilterCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    AnimatedRotation(
-                      turns: open ? 0.5 : 0,
-                      duration: sizeDur,
-                      curve: _emphasized,
-                      child: Icon(
-                        Icons.expand_more_rounded,
-                        color: cs.onSurfaceVariant,
+                    ExcludeSemantics(
+                      child: AppIconButton(
+                        icon: Icons.expand_more_rounded,
+                        semanticLabel: title,
+                        tooltip: false,
+                        onPressed: onToggle,
+                        // The glyph turns with the open state.
+                        iconTurns: open ? 0.5 : 0,
                       ),
                     ),
                   ],
@@ -631,15 +627,14 @@ class _FilterCard extends StatelessWidget {
             child: AnimatedSwitcher(
               duration: fadeDur,
               layoutBuilder: (current, previous) => Stack(
-                alignment: Alignment.topCenter,
+                alignment: AlignmentDirectional.topStart,
                 children: [...previous, ?current],
               ),
               child: content,
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 

@@ -74,8 +74,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
     setState(() => _displayedGroupCount += _groupsPerPage);
   }
 
-  void _showTransactionDetail(Transaction t, Rect? sourceRect) {
-    openTransactionDetail(context, ref, t, sourceRect: sourceRect);
+  void _showTransactionDetail(Transaction t) {
+    showTransactionDetailSheet(context, ref, t);
   }
 
   void _deleteWithUndo(Transaction t) {
@@ -377,8 +377,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                                       animateChanges: !_filtering,
                                       transactions: group.transactions,
                                       onDelete: _deleteWithUndo,
-                                      onTap: (t) => _showTransactionDetail(t, null),
-                                      onOpen: _showTransactionDetail,
+                                      onTap: _showTransactionDetail,
                                       onEdit: (t) => context.push(
                                         '/add-transaction',
                                         extra: t,

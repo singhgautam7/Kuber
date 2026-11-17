@@ -4034,12 +4034,6 @@ abstract class AppLocalizations {
   /// **'MONEY STORIES'**
   String get moneyStoriesTitle;
 
-  /// No description provided for @moneyStoriesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep spending to see your money stories soon.'**
-  String get moneyStoriesEmpty;
-
   /// No description provided for @bubbleWelcome.
   ///
   /// In en, this message translates to:
@@ -16899,7 +16893,7 @@ abstract class AppLocalizations {
   /// No description provided for @rateRefer.
   ///
   /// In en, this message translates to:
-  /// **'Refer a friend'**
+  /// **'Refer'**
   String get rateRefer;
 
   /// No description provided for @rateLater.

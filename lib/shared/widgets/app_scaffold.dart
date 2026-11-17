@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +42,10 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     super.initState();
     _pageController = PageController(
       initialPage: widget.navigationShell?.currentIndex ?? 0,
+      // Never restore an old page from PageStorage on a remount: the shell
+      // branch decides the page (a stale restore showed Home under a
+      // selected More tab).
+      keepPage: false,
     );
     // Pre-warm keepAlive providers so form sheets find data in cache
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,8 +56,52 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
 
   @override
   void dispose() {
+    _staleFlagTimer?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  bool _reconcileQueued = false;
+  Timer? _staleFlagTimer;
+
+  /// The shell branch is the source of truth for the page. Once the pager is
+  /// at rest, a page that differs from the selected tab snaps to it, and a
+  /// programmatic-animation flag left over from an interrupted animation is
+  /// cleared. Cheap: one comparison after a frame, nothing while scrolling.
+  void _queueReconcile() {
+    if (_reconcileQueued) return;
+    _reconcileQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _reconcileQueued = false;
+      if (!mounted || !_pageController.hasClients) return;
+      final pos = _pageController.position;
+      if (pos.isScrollingNotifier.value) {
+        // Check again once this scroll ends.
+        void onEnd() {
+          if (pos.isScrollingNotifier.value) return;
+          pos.isScrollingNotifier.removeListener(onEnd);
+          if (mounted) _queueReconcile();
+        }
+        pos.isScrollingNotifier.addListener(onEnd);
+        return;
+      }
+      if (_isAnimatingProgrammatically) {
+        // A far-tab slide jumps next door, then animates a frame later; give
+        // it time before treating the flag as stale.
+        _staleFlagTimer ??= Timer(const Duration(milliseconds: 600), () {
+          _staleFlagTimer = null;
+          if (!mounted) return;
+          _isAnimatingProgrammatically = false;
+          _queueReconcile();
+        });
+        return;
+      }
+      final idx = widget.navigationShell?.currentIndex;
+      final page = _pageController.page?.round();
+      if (idx != null && page != null && page != idx) {
+        _pageController.jumpToPage(idx);
+      }
+    });
   }
 
   @override
@@ -217,6 +267,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
       return const Scaffold(body: Center(child: KuberShapeLoader()));
     }
     final currentIndex = widget.navigationShell!.currentIndex;
+    _queueReconcile();
     if (ref.read(currentShellTabIndexProvider) != currentIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;

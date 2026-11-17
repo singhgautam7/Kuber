@@ -15,6 +15,7 @@
 
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
+import 'kuber_button_group.dart';
 import 'app_button.dart';
 import 'app_icon_button.dart';
 import '../../core/utils/color_harmonizer.dart';
@@ -551,43 +552,35 @@ class KuberSegmented<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Opacity(
-      opacity: enabled ? 1 : 0.5,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          height: 40,
-          decoration: const BoxDecoration(borderRadius: KuberShape.fullR),
-          foregroundDecoration: BoxDecoration(
-            borderRadius: KuberShape.fullR,
-            border: Border.all(color: cs.outline),
+    // The shared button group (selected squircle, others pills, press motion,
+    // tick). Income / expense tones keep their own containers.
+    final money = context.kuberMoney;
+    return KuberButtonGroup<T>(
+      height: 40,
+      // No check: these sit in tight slots (Years | Months next to a field)
+      // and the check truncated the label; fill + shape show the choice.
+      showCheck: false,
+      enabled: enabled,
+      selected: groupValue,
+      onChanged: onChanged,
+      options: [
+        for (final sgm in segments)
+          KuberButtonOption(
+            value: sgm.value,
+            label: sgm.label,
+            icon: sgm.icon,
+            selectedFill: switch (sgm.tone) {
+              SegmentTone.income => money.incomeContainer,
+              SegmentTone.expense => money.expenseContainer,
+              SegmentTone.neutral => null,
+            },
+            onSelectedFill: switch (sgm.tone) {
+              SegmentTone.income => money.onIncomeContainer,
+              SegmentTone.expense => money.onExpenseContainer,
+              SegmentTone.neutral => null,
+            },
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Row(
-            children: [
-              for (var i = 0; i < segments.length; i++)
-                Expanded(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: i == 0
-                          ? null
-                          : Border(left: BorderSide(color: cs.outline)),
-                    ),
-                    child: _SegmentButton(
-                      segment: segments[i],
-                      selected: segments[i].value == groupValue,
-                      onTap: () {
-                        if (segments[i].value != groupValue) KuberHaptics.tick();
-                        onChanged(segments[i].value);
-                      },
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 }
@@ -606,72 +599,6 @@ class KuberSegment<T> {
 }
 
 enum SegmentTone { neutral, income, expense }
-
-class _SegmentButton extends StatelessWidget {
-  final KuberSegment segment;
-  final bool selected;
-  final VoidCallback onTap;
-  const _SegmentButton({
-    required this.segment,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final (Color bg, Color fg) = switch (segment.tone) {
-      SegmentTone.income => (
-          context.kuberMoney.incomeContainer,
-          context.kuberMoney.onIncomeContainer
-        ),
-      SegmentTone.expense => (
-          context.kuberMoney.expenseContainer,
-          context.kuberMoney.onExpenseContainer
-        ),
-      SegmentTone.neutral => (cs.secondaryContainer, cs.onSecondaryContainer),
-    };
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          color: selected ? bg : Colors.transparent,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (selected || segment.icon != null) ...[
-                Icon(
-                  selected ? Icons.check_rounded : segment.icon,
-                  size: 18,
-                  color: selected ? fg : cs.onSurface,
-                ),
-                const SizedBox(width: 6),
-              ],
-              Flexible(
-                child: Text(
-                  segment.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.1,
-                    color: selected ? fg : cs.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// 2-3 column grid of icon+label chips. Used by Loan type, Investment
 /// type, Recurring frequency.

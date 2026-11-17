@@ -14,6 +14,7 @@ Future<void> showWidgetDetailSheet(
   return showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,

@@ -299,14 +299,9 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       backgroundColor: cs.surface,
       appBar: KuberAppBar(
         showBack: true,
+        // Close always closes the screen (it used to step back to the type
+        // picker once a type was chosen).
         closeIcon: true,
-        onBack: () {
-          if (_type != null && _existing == null && widget.query['type'] == null) {
-            setState(() => _type = null);
-          } else {
-            context.pop();
-          }
-        },
         title: _existing == null ? l.msInvAdd : l.msInvEdit,
       ),
       body: GestureDetector(
@@ -386,15 +381,18 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             onDeleted: () => setState(() => _fromCalc = null),
           ),
         ),
-      KuberListRow(
-        leading: KuberIconTile(icon: investmentIcon(_type!)),
-        title: investmentTypeLabel(context, _type!),
-        subtitle: switch (_behaviour) {
-          InvestmentBehaviour.market => l.msInvPickMarketSub,
-          InvestmentBehaviour.fixedReturn => l.msInvPickFixedSub,
-          InvestmentBehaviour.other => l.msInvPickOtherSub,
-        },
-      ),
+      // In a group card so its edge lines up with the field boxes below.
+      KuberGroup(children: [
+        KuberListRow(
+          leading: KuberIconTile(icon: investmentIcon(_type!)),
+          title: investmentTypeLabel(context, _type!),
+          subtitle: switch (_behaviour) {
+            InvestmentBehaviour.market => l.msInvPickMarketSub,
+            InvestmentBehaviour.fixedReturn => l.msInvPickFixedSub,
+            InvestmentBehaviour.other => l.msInvPickOtherSub,
+          },
+        ),
+      ]),
       KuberTextField(
         label: l.msInvName,
         controller: _name,

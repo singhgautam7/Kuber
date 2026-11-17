@@ -20,6 +20,8 @@ Future<void> showRateSheet(BuildContext context) async {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    // Root navigator: the sheet covers the bottom nav like every other sheet.
+    useRootNavigator: true,
     backgroundColor: Colors.transparent,
     builder: (_) => _RateSheet(onNever: (v) => never = v),
   );
@@ -47,9 +49,55 @@ class _RateSheetState extends State<_RateSheet> {
     final l = context.l10n;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    void close() {
+      widget.onNever(_never);
+      Navigator.of(context).pop();
+    }
+
     return KuberBottomSheet(
       title: l.rateTitle,
-      showClose: false,
+      actions: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppButton(
+            label: l.rateCta,
+            icon: Icons.star_rounded,
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: () {
+              widget.onNever(true);
+              Navigator.of(context).pop();
+              rateOnPlayStore();
+            },
+          ),
+          const SizedBox(height: KuberSpace.md),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: l.rateRefer,
+                  icon: Icons.share_rounded,
+                  fullWidth: true,
+                  onPressed: () {
+                    close();
+                    SharePlus.instance.share(ShareParams(text: l.shareMessage));
+                  },
+                ),
+              ),
+              const SizedBox(width: KuberSpace.md),
+              Expanded(
+                child: AppButton(
+                  label: l.rateLater,
+                  type: AppButtonType.outline,
+                  fullWidth: true,
+                  onPressed: close,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -74,54 +122,20 @@ class _RateSheetState extends State<_RateSheet> {
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: KuberSpace.xl),
-          AppButton(
-            label: l.rateCta,
-            icon: Icons.star_rounded,
-            type: AppButtonType.primary,
-            fullWidth: true,
-            onPressed: () {
-              widget.onNever(true);
-              Navigator.of(context).pop();
-              rateOnPlayStore();
-            },
-          ),
-          const SizedBox(height: KuberSpace.md),
-          AppButton(
-            label: l.rateRefer,
-            icon: Icons.share_rounded,
-            fullWidth: true,
-            onPressed: () {
-              widget.onNever(_never);
-              Navigator.of(context).pop();
-              SharePlus.instance.share(ShareParams(text: l.shareMessage));
-            },
-          ),
-          const SizedBox(height: KuberSpace.sm),
-          Center(
-            child: TextButton(
-              onPressed: () {
-                widget.onNever(_never);
-                Navigator.of(context).pop();
-              },
-              child: Text(l.rateLater),
-            ),
-          ),
-          Center(
-            child: InkWell(
-              borderRadius: KuberShape.fullR,
-              onTap: () => _setNever(!_never),
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(end: KuberSpace.sm),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Checkbox(value: _never, onChanged: (v) => _setNever(v ?? false)),
-                    Text(l.rateNever,
-                        style: theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
-                  ],
+          // Same switch row as Settings, not a loose checkbox.
+          KuberGroup(
+            children: [
+              KuberListRow(
+                leading: const KuberIconTile(icon: Icons.notifications_off_outlined, tone: KuberTone.secondary),
+                title: l.rateNever,
+                onTap: () => _setNever(!_never),
+                trailing: Switch(
+                  value: _never,
+                  onChanged: _setNever,
+                  activeTrackColor: cs.primary,
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),

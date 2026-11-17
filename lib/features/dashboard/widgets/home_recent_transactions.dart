@@ -104,9 +104,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                       transactions: group.transactions,
                       onDelete: (t) =>
                           deleteTransactionWithUndo(context, ref, t),
-                      onTap: (t) => openTransactionDetail(context, ref, t),
-                      onOpen: (t, r) => openTransactionDetail(context, ref, t,
-                          sourceRect: r),
+                      onTap: (t) => showTransactionDetailSheet(context, ref, t),
                       onEdit: (t) => context.push('/add-transaction', extra: t),
                       formatter: fmt,
                       categoryMap: categoryMap,

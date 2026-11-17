@@ -2180,10 +2180,6 @@ class AppLocalizationsKn extends AppLocalizations {
   String get moneyStoriesTitle => 'ಹಣದ ಕಥೆಗಳು';
 
   @override
-  String get moneyStoriesEmpty =>
-      'ನಿಮ್ಮ ಹಣದ ಕಥೆಗಳನ್ನು ಶೀಘ್ರದಲ್ಲೇ ನೋಡಲು ವ್ಯವಹಾರಗಳನ್ನು ದಾಖಲಿಸುತ್ತಿರಿ.';
-
-  @override
   String get bubbleWelcome => 'ಸ್ವಾಗತ';
 
   @override
@@ -9710,7 +9706,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get rateCta => 'Play Store ನಲ್ಲಿ ರೇಟ್ ಮಾಡಿ';
 
   @override
-  String get rateRefer => 'ಸ್ನೇಹಿತರಿಗೆ ರೆಫರ್ ಮಾಡಿ';
+  String get rateRefer => 'ರೆಫರ್ ಮಾಡಿ';
 
   @override
   String get rateLater => 'ನಂತರ';

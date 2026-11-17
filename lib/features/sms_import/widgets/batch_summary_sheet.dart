@@ -28,6 +28,7 @@ void showBatchSummarySheet(
   showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
@@ -196,6 +197,7 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
     showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -214,6 +216,7 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
     showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,

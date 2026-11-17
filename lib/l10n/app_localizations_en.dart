@@ -2162,10 +2162,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyStoriesTitle => 'MONEY STORIES';
 
   @override
-  String get moneyStoriesEmpty =>
-      'Keep spending to see your money stories soon.';
-
-  @override
   String get bubbleWelcome => 'Welcome';
 
   @override
@@ -9657,7 +9653,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateCta => 'Rate on Play Store';
 
   @override
-  String get rateRefer => 'Refer a friend';
+  String get rateRefer => 'Refer';
 
   @override
   String get rateLater => 'Maybe later';

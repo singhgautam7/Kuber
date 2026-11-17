@@ -45,7 +45,7 @@ import '../providers/account_provider.dart';
 // From the pickers-and-setup pass:
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/icon_color_picker_sheet.dart';
-import '../../../shared/widgets/kuber_button_group.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import 'credit_billing_cycle_section.dart';
 import 'overdraft_account_info.dart';
@@ -275,18 +275,22 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               ),
             ),
             // Type selector (disabled while editing, existing rule).
-            KuberButtonGroup<String>(
-              enabled: !_isEditing,
-              showCheck: false,
-              selected: _selectedType,
-              onChanged: (v) => setState(() => _selectedType = v),
-              options: [
-                KuberButtonOption(value: 'bank', label: context.l10n.bankLabel),
-                KuberButtonOption(value: 'cash', label: context.l10n.cashLabel),
-                KuberButtonOption(value: 'credit', label: context.l10n.creditCardLabel),
-                KuberButtonOption(value: 'overdraft', label: context.l10n.accountTypeOverdraft),
-              ],
-            ),
+            // Wraps to more rows instead of truncating (same as the
+            // compounding / payout chips in Add investment).
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final (v, label) in [
+                ('bank', context.l10n.bankLabel),
+                ('cash', context.l10n.cashLabel),
+                ('credit', context.l10n.creditCardLabel),
+                ('overdraft', context.l10n.accountTypeOverdraft),
+              ])
+                KuberChip(
+                  label: label,
+                  selected: _selectedType == v,
+                  dimmed: _isEditing && _selectedType != v,
+                  onTap: _isEditing ? null : () => setState(() => _selectedType = v),
+                ),
+            ]),
             if (_isOverdraft)
               Row(children: [
                 Expanded(

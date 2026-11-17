@@ -39,6 +39,7 @@ Future<bool?> showSmsReviewSheet(
   return showModalBottomSheet<bool>(
       sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
@@ -377,6 +378,7 @@ class _TransactionReviewSheetState
     showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -398,6 +400,7 @@ class _TransactionReviewSheetState
     showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,

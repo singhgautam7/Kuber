@@ -24,7 +24,7 @@ Transaction tx(int id) =>
 final _fmt = AppFormatter();
 
 Widget host(MotionLevel level, List<Transaction> list,
-    {bool animate = true, void Function(Rect?)? onOpen}) {
+    {bool animate = true}) {
   return ProviderScope(
     overrides: [settingsProvider.overrideWith(_LoadingSettings.new)],
     child: MaterialApp(
@@ -40,7 +40,6 @@ Widget host(MotionLevel level, List<Transaction> list,
               animateChanges: animate,
               onDelete: (_) {},
               onTap: (_) {},
-              onOpen: onOpen == null ? null : (_, r) => onOpen(r),
               onEdit: (_) {},
               formatter: _fmt,
               categoryMap: const {},
@@ -110,13 +109,8 @@ void main() {
   });
 
   for (final l in MotionLevel.values) {
-    testWidgets('detail opens and closes via openTransactionDetail at ${l.name}',
+    testWidgets('detail opens and closes as a standard sheet at ${l.name}',
         (t) async {
-      Rect? rect;
-      await t.pumpWidget(host(l, [tx(1)], onOpen: (r) => rect = r));
-      await t.tap(find.text('Txn 1'));
-      expect(rect, isNotNull);
-      final r = rect!;
       late WidgetRef wref;
       await t.pumpWidget(ProviderScope(
         overrides: [settingsProvider.overrideWith(_LoadingSettings.new)],
@@ -131,8 +125,7 @@ void main() {
               return Scaffold(
                 body: Center(
                   child: TextButton(
-                    onPressed: () => openTransactionDetail(c, ref, tx(1),
-                        sourceRect: r),
+                    onPressed: () => showTransactionDetailSheet(c, ref, tx(1)),
                     child: const Text('open'),
                   ),
                 ),

@@ -148,6 +148,7 @@ class _KuberDateRangeSelectorState
     showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => MonthPickerBottomSheet(
@@ -161,6 +162,7 @@ class _KuberDateRangeSelectorState
     showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ManualDateRangeBottomSheet(

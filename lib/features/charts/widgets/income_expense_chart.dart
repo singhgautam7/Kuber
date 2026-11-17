@@ -121,9 +121,8 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
       }),
     );
 
-    // One chart-card header pattern (screens/analytics.md): Home = period
-    // dropdown chip + Bar | Line; Analytics = titleMedium, the bucket dropdown
-    // under it, Bar | Line trailing.
+    // One chart-card header pattern: the period dropdown and the Bar / Line
+    // dropdown side by side, left-aligned (Analytics: under the title).
     final Widget header;
     if (widget.compact) {
       header = Row(
@@ -137,42 +136,38 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
                 widget.onRangeSelected?.call(id);
               },
             ),
-          const Spacer(),
+          const SizedBox(width: KuberSpace.sm),
           toggle,
         ],
       );
     } else {
-      header = Row(
+      header = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (widget.showTitle)
-                  Text(
-                    widget.title,
-                    style: theme.textTheme.titleMedium!.copyWith(
-                      color: cs.onSurface,
-                    ),
-                  ),
-                if (widget.bucket != null &&
-                    widget.onBucketChanged != null) ...[
-                  const SizedBox(height: KuberSpace.sm),
-                  IncomeExpenseChartRangeSwitcher(
-                    selected: widget.bucket!,
-                    available: widget.availableBuckets,
-                    onChanged: (b) {
-                      _clearSelection();
-                      widget.onBucketChanged!(b);
-                    },
-                  ),
-                ],
-              ],
+          if (widget.showTitle)
+            Text(
+              widget.title,
+              style: theme.textTheme.titleMedium!.copyWith(
+                color: cs.onSurface,
+              ),
             ),
+          if (widget.showTitle) const SizedBox(height: KuberSpace.sm),
+          Wrap(
+            spacing: KuberSpace.sm,
+            runSpacing: KuberSpace.sm,
+            children: [
+              if (widget.bucket != null && widget.onBucketChanged != null)
+                IncomeExpenseChartRangeSwitcher(
+                  selected: widget.bucket!,
+                  available: widget.availableBuckets,
+                  onChanged: (b) {
+                    _clearSelection();
+                    widget.onBucketChanged!(b);
+                  },
+                ),
+              toggle,
+            ],
           ),
-          const SizedBox(width: KuberSpace.md),
-          toggle,
         ],
       );
     }

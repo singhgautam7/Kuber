@@ -147,6 +147,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   /// zero height when empty (so no orphan gap remains). The dashboard must NOT
   /// add spacing around these.
   static const _selfSpacedWidgets = {
+    'insight_stories',
     'spending_stats',
     'home_accounts',
     'budget_snapshot',

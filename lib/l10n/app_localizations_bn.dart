@@ -2170,9 +2170,6 @@ class AppLocalizationsBn extends AppLocalizations {
   String get moneyStoriesTitle => 'মানি স্টোরিজ';
 
   @override
-  String get moneyStoriesEmpty => 'আপনার মানি স্টোরিজ দেখতে লেনদেন করতে থাকুন।';
-
-  @override
   String get bubbleWelcome => 'স্বাগতম';
 
   @override
@@ -9663,7 +9660,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get rateCta => 'Play Store-এ রেট করুন';
 
   @override
-  String get rateRefer => 'বন্ধুকে রেফার করুন';
+  String get rateRefer => 'রেফার করুন';
 
   @override
   String get rateLater => 'পরে';

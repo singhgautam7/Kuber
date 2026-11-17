@@ -228,6 +228,7 @@ class BudgetCard extends ConsumerWidget {
               showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
                 context: context,
+                useRootNavigator: true,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) =>

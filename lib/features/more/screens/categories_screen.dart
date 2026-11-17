@@ -3,7 +3,6 @@ import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_progress.dart';
-import '../../../core/models/overflow_config.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -158,10 +157,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
 
     return Scaffold(
-      // Board 3.16: Add Category is the FAB; Add Group is in the overflow.
+      // Add Category is the main FAB; Add Group is the secondary FAB on its
+      // left (user review, v7.0.0; it was in the overflow).
       floatingActionButton: KuberExtendedFab(
         icon: Icons.add_rounded,
         label: context.l10n.addCategory,
+        secondaryIcon: Icons.create_new_folder_outlined,
+        secondaryLabel: context.l10n.addGroup,
+        onSecondary: () => _showAddGroupDialog(context),
         onPressed: () => context.push(
           '/category/add',
           extra: const CategoryRouteArgs(returnToCategoryPicker: false),
@@ -195,15 +198,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       controller: _searchController,
                       hint: context.l10n.searchCategoriesHint,
                       onChanged: (v) => setState(() => _query = v),
-                    ),
-                    overflowConfig: KuberOverflowConfig(
-                      items: [
-                        KuberOverflowItem(
-                          icon: Icons.create_new_folder_outlined,
-                          label: context.l10n.addGroup,
-                          onTap: () => _showAddGroupDialog(context),
-                        ),
-                      ],
                     ),
                   ),
                 ),
@@ -1142,6 +1136,7 @@ class _BudgetStatusSection extends ConsumerWidget {
                   showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
                     context: context,
+                    useRootNavigator: true,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                     builder: (context) => BudgetDetailsSheet(

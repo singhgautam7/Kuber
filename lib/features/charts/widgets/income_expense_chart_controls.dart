@@ -54,7 +54,8 @@ class KuberSegmentedTabs extends StatelessWidget {
   }
 }
 
-/// Bar | Line toggle.
+/// Bar / Line as a dropdown chip, like the period selector next to it, so a
+/// chart card's controls are one consistent left-aligned row.
 class IncomeExpenseChartModeToggle extends StatelessWidget {
   final IncomeExpenseChartMode mode;
   final ValueChanged<IncomeExpenseChartMode> onChanged;
@@ -67,13 +68,14 @@ class IncomeExpenseChartModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KuberSegmentedTabs(
-      labels: const ['Bar', 'Line'],
-      selectedIndex: mode == IncomeExpenseChartMode.bar ? 0 : 1,
-      showCheck: false,
-      onChanged: (i) => onChanged(
-        i == 0 ? IncomeExpenseChartMode.bar : IncomeExpenseChartMode.line,
-      ),
+    return KuberDropdownChip<IncomeExpenseChartMode>(
+      value: mode,
+      icon: mode == IncomeExpenseChartMode.bar ? Icons.bar_chart_rounded : Icons.show_chart_rounded,
+      options: const [
+        KuberDropdownOption(IncomeExpenseChartMode.bar, 'Bar', icon: Icons.bar_chart_rounded),
+        KuberDropdownOption(IncomeExpenseChartMode.line, 'Line', icon: Icons.show_chart_rounded),
+      ],
+      onChanged: onChanged,
     );
   }
 }

@@ -353,7 +353,17 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
                                       : Icons.arrow_back_rounded,
                                   semanticLabel: w.closeIcon ? 'Close' : 'Back',
                                   onPressed:
-                                      w.onBack ?? () => Navigator.pop(context),
+                                      w.onBack ?? () {
+                                        // Opened straight from a link or
+                                        // shortcut: nothing below, go Home
+                                        // instead of a blank screen.
+                                        final nav = Navigator.of(context);
+                                        if (nav.canPop()) {
+                                          nav.pop();
+                                        } else {
+                                          context.go('/');
+                                        }
+                                      },
                                   onLongPress: hasPath
                                       ? () => KuberPath.openFromLongPress(context)
                                       : null,

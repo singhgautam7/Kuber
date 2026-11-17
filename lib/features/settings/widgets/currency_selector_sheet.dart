@@ -22,6 +22,7 @@ void showCurrencyPicker({
   showModalBottomSheet(
       sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: cs.surfaceContainer,

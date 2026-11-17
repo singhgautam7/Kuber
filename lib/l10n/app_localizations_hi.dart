@@ -2164,10 +2164,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get moneyStoriesTitle => 'मनी स्टोरीज़';
 
   @override
-  String get moneyStoriesEmpty =>
-      'अपनी मनी स्टोरीज़ देखने के लिए लेनदेन करते रहें।';
-
-  @override
   String get bubbleWelcome => 'स्वागत';
 
   @override
@@ -9657,7 +9653,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get rateCta => 'Play Store पर रेट करें';
 
   @override
-  String get rateRefer => 'दोस्त को रेफ़र करें';
+  String get rateRefer => 'रेफ़र करें';
 
   @override
   String get rateLater => 'बाद में';

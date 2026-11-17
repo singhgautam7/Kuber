@@ -56,11 +56,21 @@ class KuberExtendedFab extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
 
+  /// Optional secondary create action: a 56 dp round secondaryContainer
+  /// button to the left of the main one (e.g. Add group next to Add
+  /// category). [secondaryLabel] is its tooltip and TalkBack label.
+  final IconData? secondaryIcon;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
   const KuberExtendedFab({
     super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
+    this.secondaryIcon,
+    this.secondaryLabel,
+    this.onSecondary,
   });
 
   /// Bottom padding a list needs so its last item clears the FAB.
@@ -140,7 +150,41 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
                 child: IgnorePointer(ignoring: !visible, child: child),
               ),
             ),
-            child: Pressable(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.secondaryIcon != null) ...[
+                  Tooltip(
+                    message: widget.secondaryLabel ?? '',
+                    triggerMode: TooltipTriggerMode.longPress,
+                    child: Semantics(
+                      button: true,
+                      label: widget.secondaryLabel,
+                      excludeSemantics: true,
+                      child: Pressable(
+                        kind: PressKind.fab,
+                        restRadius: 28,
+                        builder: (context, radius, _) => Material(
+                          color: cs.secondaryContainer,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(radius)),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: widget.onSecondary,
+                            child: SizedBox(
+                              width: 56,
+                              height: 56,
+                              child: Icon(widget.secondaryIcon,
+                                  size: 24, color: cs.onSecondaryContainer),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Pressable(
               kind: PressKind.fab,
               restRadius: 28,
               builder: (context, radius, _) => Material(
@@ -169,6 +213,8 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
                   ),
                 ),
               ),
+            ),
+              ],
             ),
           ),
         ],

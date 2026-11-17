@@ -9,10 +9,21 @@ import 'kuber_list.dart' show kuberPressedLayer;
 
 /// One choice of a [KuberButtonGroup].
 class KuberButtonOption<T> {
-  const KuberButtonOption({required this.value, required this.label, this.icon});
+  const KuberButtonOption({
+    required this.value,
+    required this.label,
+    this.icon,
+    this.selectedFill,
+    this.onSelectedFill,
+  });
   final T value;
   final String label;
   final IconData? icon;
+
+  /// Selected colours for an option with its own intent (income / expense);
+  /// default primary / onPrimary.
+  final Color? selectedFill;
+  final Color? onSelectedFill;
 }
 
 /// Single-choice selector with the v7.0.0 button-group motion; every
@@ -116,9 +127,9 @@ class _KuberButtonGroupState<T> extends State<KuberButtonGroup<T>>
       // apart. Disabled (a locked type on Edit) stays readable: no 38 % dim
       // of the whole group, the others just use the muted label colour.
       // Guarded by test/core/theme/v7_contrast_test.dart.
-      final fill = sel ? cs.primary : cs.surfaceContainerHighest;
+      final fill = sel ? (o.selectedFill ?? cs.primary) : cs.surfaceContainerHighest;
       final fg = sel
-          ? cs.onPrimary
+          ? (o.onSelectedFill ?? cs.onPrimary)
           : (widget.enabled ? cs.onSurface : cs.onSurfaceVariant);
       final restR = sel ? 12.0 : widget.height / 2;
       return Flexible(

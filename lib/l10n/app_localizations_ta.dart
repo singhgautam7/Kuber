@@ -2194,10 +2194,6 @@ class AppLocalizationsTa extends AppLocalizations {
   String get moneyStoriesTitle => 'பணக் கதைகள்';
 
   @override
-  String get moneyStoriesEmpty =>
-      'உங்கள் பணக் கதைகளை விரைவில் பார்க்க பரிவர்த்தனைகளைச் செய்து கொண்டே இருங்கள்.';
-
-  @override
   String get bubbleWelcome => 'வரவேற்பு';
 
   @override
@@ -9768,7 +9764,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get rateCta => 'Play Store-இல் மதிப்பிடுங்கள்';
 
   @override
-  String get rateRefer => 'நண்பருக்குப் பரிந்துரைக்கவும்';
+  String get rateRefer => 'பரிந்துரை';
 
   @override
   String get rateLater => 'பிறகு';

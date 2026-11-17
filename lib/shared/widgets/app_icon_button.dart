@@ -44,6 +44,7 @@ class AppIconButton extends StatelessWidget {
     this.onLongPress,
     this.longPressHint,
     this.tooltip = true,
+    this.iconTurns,
     super.key,
   });
 
@@ -72,6 +73,11 @@ class AppIconButton extends StatelessWidget {
 
   /// Show [semanticLabel] as a plain tooltip on long-press.
   final bool tooltip;
+
+  /// Glyph rotation in turns (0.5 = upside down), animated like a chevron
+  /// (springFast; Subtle springSubtle; Off snaps). For expand / collapse
+  /// buttons; null keeps the plain glyph.
+  final double? iconTurns;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +130,18 @@ class AppIconButton extends StatelessWidget {
                 child: SizedBox(
                   width: size,
                   height: size,
-                  child: _IconSwap(icon: icon, size: glyphSize, color: glyph),
+                  child: iconTurns == null
+                      ? _IconSwap(icon: icon, size: glyphSize, color: glyph)
+                      : Builder(builder: (context) {
+                          final level = KuberMotion.levelOf(context);
+                          final c = KuberMotion.spatialCurve(level, KuberMotion.fastCurve);
+                          return AnimatedRotation(
+                            turns: iconTurns!,
+                            duration: level == MotionLevel.off ? Duration.zero : c.settle,
+                            curve: c.clamped,
+                            child: _IconSwap(icon: icon, size: glyphSize, color: glyph),
+                          );
+                        }),
                 ),
               ),
             ),

@@ -81,10 +81,6 @@ class TransactionDayCard extends StatefulWidget {
   final void Function(Transaction) onTap;
   final void Function(Transaction) onEdit;
 
-  /// Tap that also gets the tapped row's global rect (null when unknown), for
-  /// the container transform into the detail sheet. Wins over [onTap].
-  final void Function(Transaction, Rect?)? onOpen;
-
   /// Rows that appear (new id) or disappear (id gone) while this card stays
   /// mounted grow in / shrink out. Off for the first build, bulk changes
   /// (more than [_maxChange] rows) and while a filter is being applied.
@@ -105,7 +101,6 @@ class TransactionDayCard extends StatefulWidget {
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
-    this.onOpen,
     this.animateChanges = false,
     required this.formatter,
     required this.categoryMap,
@@ -184,7 +179,6 @@ class _TransactionDayCardState extends State<TransactionDayCard> {
         w.onDelete(t);
       },
       onTap: () => w.onTap(t),
-      onTapRect: w.onOpen == null ? null : (r) => w.onOpen!(t, r),
       onEdit: () => w.onEdit(t),
       formatter: w.formatter,
       category: w.categoryMap[int.tryParse(t.categoryId)],
@@ -241,10 +235,6 @@ class TransactionRow extends ConsumerWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
 
-  /// Like [onTap] but with the row's global rect (the container transform's
-  /// source). Read at tap time, so no GlobalKey is allocated per row.
-  final void Function(Rect? rect)? onTapRect;
-
   /// A row that is leaving (kept for its exit motion): no swipe actions.
   final bool ghost;
   final AppFormatter formatter;
@@ -262,7 +252,6 @@ class TransactionRow extends ConsumerWidget {
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
-    this.onTapRect,
     this.ghost = false,
     required this.formatter,
     this.category,
@@ -490,14 +479,6 @@ class TransactionRow extends ConsumerWidget {
                   ref
                       .read(transactionSelectionProvider.notifier)
                       .toggle(transaction.id);
-                } else if (onTapRect != null) {
-                  final box = context.findRenderObject();
-                  onTapRect!(
-                    box is RenderBox && box.attached && box.hasSize
-                        ? (box.localToGlobal(Offset.zero) & box.size)
-                            .deflate(_kRowInset)
-                        : null,
-                  );
                 } else {
                   onTap();
                 }

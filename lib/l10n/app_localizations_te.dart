@@ -2173,10 +2173,6 @@ class AppLocalizationsTe extends AppLocalizations {
   String get moneyStoriesTitle => 'మనీ స్టోరీస్';
 
   @override
-  String get moneyStoriesEmpty =>
-      'మీ మనీ స్టోరీస్‌ను త్వరలో చూడటానికి లావాదేవీలు చేస్తూ ఉండండి.';
-
-  @override
   String get bubbleWelcome => 'స్వాగతం';
 
   @override
@@ -9702,7 +9698,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get rateCta => 'Play Storeలో రేట్ చేయండి';
 
   @override
-  String get rateRefer => 'స్నేహితుడికి రెఫర్ చేయండి';
+  String get rateRefer => 'రిఫర్ చేయండి';
 
   @override
   String get rateLater => 'తర్వాత';

@@ -22,8 +22,17 @@ class KuberChip extends StatelessWidget {
   /// Let the label ellipsize inside a flexible row.
   final bool shrink;
 
-  /// Stadium corners, like the app's other pill buttons (History Exp / Inc).
-  final bool pill;
+  /// Tighter side padding (12 instead of 16) for small quick filters
+  /// (History Exp / Inc, amount presets).
+  final bool compact;
+
+  /// Selected on primary / onPrimary instead of secondaryContainer (tag
+  /// picker, where selection is the whole point of the sheet).
+  final bool emphasis;
+
+  /// Label at 38 % for an option that can't be picked (a disabled tag); the
+  /// tap still fires so the caller can explain why.
+  final bool dimmed;
 
   const KuberChip({
     super.key,
@@ -37,27 +46,31 @@ class KuberChip extends StatelessWidget {
     this.onTap,
     this.onDeleted,
     this.shrink = false,
-    this.pill = false,
+    this.compact = false,
+    this.emphasis = false,
+    this.dimmed = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final fg = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+    final onSel = emphasis ? cs.onPrimary : cs.onSecondaryContainer;
+    final base = selected ? onSel : cs.onSurfaceVariant;
+    final fg = dimmed ? base.withValues(alpha: 0.38) : base;
     final level = KuberMotion.levelOf(context);
     final checkable = showCheck && onDeleted == null && !dropdown;
     // No own icon: the check grows 0 to 18 dp (springStandard) and the chip
     // widens. With an icon the check replaces it as before.
     final animCheck = checkable && icon == null;
     final lead = selected && checkable && icon != null
-        ? Icon(Icons.check_rounded, size: 18, color: cs.onSecondaryContainer)
+        ? Icon(Icons.check_rounded, size: 18, color: onSel)
         : (icon == null
             ? null
             : Icon(icon,
                 size: 18,
                 color: iconColor ??
-                    (selected ? cs.onSecondaryContainer : cs.primary)));
+                    (selected ? onSel : cs.primary)));
     final hasTrail = dropdown || onDeleted != null;
 
     final style = theme.textTheme.labelLarge!.copyWith(color: fg);
@@ -71,13 +84,13 @@ class KuberChip extends StatelessWidget {
     final curve = KuberMotion.spatialCurve(level, KuberMotion.standardCurve);
     final off = level == MotionLevel.off;
     final fade = off ? KuberMotion.fxInstant : KuberMotion.fxFast;
-    final restRadius = pill ? 16.0 : KuberShape.small;
+    final pad = compact ? 12.0 : 16.0;
 
     Widget body(double k) => Container(
           constraints: const BoxConstraints(minHeight: 32),
           padding: EdgeInsets.only(
-            left: animCheck ? 16 - 8 * k : (lead != null ? 8 : 16),
-            right: hasTrail ? 8 : 16,
+            left: animCheck ? pad - 8 * k : (lead != null ? 8 : pad),
+            right: hasTrail ? 8 : pad,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -92,7 +105,7 @@ class KuberChip extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: Icon(Icons.check_rounded,
-                            size: 18, color: cs.onSecondaryContainer),
+                            size: 18, color: onSel),
                       ),
                     ),
                   ),
@@ -110,7 +123,7 @@ class KuberChip extends StatelessWidget {
                   child: Text(
                     badge!,
                     style: theme.textTheme.labelSmall!
-                        .copyWith(color: cs.onSecondaryContainer),
+                        .copyWith(color: onSel),
                   ),
                 ),
               ],
@@ -136,21 +149,25 @@ class KuberChip extends StatelessWidget {
       child: Pressable(
         kind: PressKind.chip,
         enabled: onTap != null,
-        restRadius: restRadius,
-        builder: (context, radius, _) => TweenAnimationBuilder<Color?>(
+        // The shape follows selection, not the press: unselected chips are
+        // full pills, the selected one is a 12 dp squircle (the same rule as
+        // the button groups). Press keeps the scale only.
+        morphCorners: false,
+        builder: (context, _, _) => TweenAnimationBuilder<double>(
+          tween: Tween(end: selected ? 1 : 0),
+          duration: off ? Duration.zero : KuberMotion.spatialCurve(level, KuberMotion.fastCurve).settle,
+          curve: KuberMotion.spatialCurve(level, KuberMotion.fastCurve).clamped,
+          builder: (context, sq, child) => TweenAnimationBuilder<Color?>(
           tween: ColorTween(
-              end: selected ? cs.secondaryContainer : Colors.transparent),
+              end: selected
+                  ? (emphasis ? cs.primary : cs.secondaryContainer)
+                  : Colors.transparent),
           duration: fade,
           curve: KuberMotion.curveEffects,
           builder: (context, fill, child) => Material(
             color: fill,
             animationDuration: Duration.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(radius),
-              side: selected
-                  ? BorderSide.none
-                  : BorderSide(color: cs.outlineVariant),
-            ),
+            shape: _chipShape(sq, cs.outlineVariant, selected),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: onTap == null
@@ -161,6 +178,8 @@ class KuberChip extends StatelessWidget {
                     },
               child: child,
             ),
+          ),
+          child: child,
           ),
           child: animCheck
               ? TweenAnimationBuilder<double>(
@@ -251,4 +270,17 @@ class _KuberDropdownChipState<T> extends State<KuberDropdownChip<T>> {
       ),
     );
   }
+}
+
+/// Unselected: a full pill; selected: a 12 dp squircle; in between the two
+/// morph (only while the selection animates).
+OutlinedBorder _chipShape(double t, Color outline, bool selected) {
+  final pill = StadiumBorder(side: BorderSide(color: outline));
+  final squircle = RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    side: BorderSide(color: selected ? Colors.transparent : outline),
+  );
+  if (t <= 0) return pill;
+  if (t >= 1) return squircle;
+  return ShapeBorder.lerp(pill, squircle, t)! as OutlinedBorder;
 }
