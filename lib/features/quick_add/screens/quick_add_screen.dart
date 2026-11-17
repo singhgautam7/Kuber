@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:kuber/shared/widgets/kuber_list.dart';
@@ -119,6 +120,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   void _showMicDeniedDialog() {
     final cs = Theme.of(context).colorScheme;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -170,6 +172,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     final cs = Theme.of(context).colorScheme;
     _focusNode.unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

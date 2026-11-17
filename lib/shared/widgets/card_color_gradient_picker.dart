@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/card_palette.dart';
@@ -18,6 +19,7 @@ Future<void> showCardColorPicker({
 }) {
   final cs = Theme.of(context).colorScheme;
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

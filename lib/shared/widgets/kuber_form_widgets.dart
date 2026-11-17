@@ -21,6 +21,7 @@ import '../../core/utils/color_harmonizer.dart';
 import 'package:flutter/services.dart';
 import '../../core/utils/formatters.dart' show CurrencyInputFormatter;
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 
 /// One labelled section of a form. Renders an uppercase muted heading
@@ -376,7 +377,9 @@ class KuberPickerRow extends StatelessWidget {
     // Navigation row (screens/add-transaction.md "grouped navigation rows"):
     // a 72 row on a surfaceContainer card, 40 leading, value as titleMedium
     // with the label under it.
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: cs.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: KuberShape.cardR,
@@ -434,7 +437,7 @@ class KuberPickerRow extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -470,6 +473,11 @@ class KuberSwitchRow extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     // Board 3.15: a card row with title + supporting text and the switch;
     // no leading icon. [icon] is kept for API compatibility.
+    void toggle(bool v) {
+      KuberHaptics.tick();
+      onChanged(v);
+    }
+
     final rowBody = Ink(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       decoration: BoxDecoration(
@@ -502,17 +510,22 @@ class KuberSwitchRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: KuberSpace.md),
-          Switch(value: value, onChanged: enabled ? onChanged : null),
+          Switch(value: value, onChanged: enabled ? toggle : null),
         ],
       ),
     );
 
-    return Opacity(
+    return AnimatedOpacity(
       opacity: enabled ? 1.0 : 0.38,
-      child: InkWell(
-        onTap: enabled ? () => onChanged(!value) : null,
-        borderRadius: KuberShape.cardR,
-        child: rowBody,
+      duration: KuberMotion.fxFast,
+      child: Pressable(
+        kind: PressKind.card,
+        enabled: enabled,
+        child: InkWell(
+          onTap: enabled ? () => toggle(!value) : null,
+          borderRadius: KuberShape.cardR,
+          child: rowBody,
+        ),
       ),
     );
   }
@@ -564,7 +577,10 @@ class KuberSegmented<T> extends StatelessWidget {
                     child: _SegmentButton(
                       segment: segments[i],
                       selected: segments[i].value == groupValue,
-                      onTap: () => onChanged(segments[i].value),
+                      onTap: () {
+                        if (segments[i].value != groupValue) KuberHaptics.tick();
+                        onChanged(segments[i].value);
+                      },
                     ),
                   ),
                 ),
@@ -689,10 +705,15 @@ class KuberChipGrid<T> extends StatelessWidget {
       itemBuilder: (_, i) {
         final opt = options[i];
         final isSelected = opt.value == selected;
-        return Material(
+        return Pressable(
+          kind: PressKind.card,
+          child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => onChanged(opt.value),
+            onTap: () {
+              if (!isSelected) KuberHaptics.tick();
+              onChanged(opt.value);
+            },
             borderRadius: BorderRadius.circular(KuberShape.medium),
             child: Ink(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
@@ -729,7 +750,7 @@ class KuberChipGrid<T> extends StatelessWidget {
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -769,10 +790,15 @@ class KuberDayGrid extends StatelessWidget {
       itemBuilder: (_, i) {
         final day = i + 1;
         final isSelected = selected == day;
-        return Material(
+        return Pressable(
+          kind: PressKind.card,
+          child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => onChanged(day),
+            onTap: () {
+              if (!isSelected) KuberHaptics.tick();
+              onChanged(day);
+            },
             customBorder: const CircleBorder(),
             child: Ink(
               decoration: BoxDecoration(
@@ -789,7 +815,7 @@ class KuberDayGrid extends StatelessWidget {
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -1375,7 +1401,9 @@ class KuberSelectCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final fg = selected ? cs.onSecondaryContainer : cs.onSurface;
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: selected ? cs.secondaryContainer : cs.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: KuberShape.largeR,
@@ -1385,7 +1413,10 @@ class KuberSelectCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          if (!selected) KuberHaptics.tick();
+          onTap();
+        },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
           child: Row(
@@ -1424,7 +1455,7 @@ class KuberSelectCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

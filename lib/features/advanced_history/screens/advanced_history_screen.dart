@@ -189,12 +189,12 @@ class _AhPageState extends ConsumerState<AhPage> {
   @override
   void initState() {
     super.initState();
-    AhViewNotifier.openPages++;
+    AhViewNotifier.pageOpened(this);
   }
 
   @override
   void dispose() {
-    AhViewNotifier.openPages--;
+    AhViewNotifier.pageClosed(this);
     super.dispose();
   }
 

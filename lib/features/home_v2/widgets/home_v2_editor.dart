@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -15,6 +16,7 @@ import '../data/home_v2_state.dart';
 import '../data/home_v2_widgets.dart' show needsTransactions;
 import '../providers/has_transactions_provider.dart';
 import '../providers/home_v2_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Edit Home Widgets for v2 installs (board HV2.7): a pinned Suggestions
 /// row (after Get started graduates), then On your Home / Turns on with your
@@ -146,6 +148,7 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
     if (!_dirty) return true;
     final cs = Theme.of(context).colorScheme;
     final keep = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
@@ -224,6 +227,7 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
         physics: const NeverScrollableScrollPhysics(),
         buildDefaultDragHandles: false,
         itemCount: members.length,
+        onReorderStart: (_) => KuberHaptics.longPress(),
         onReorderItem: (o, n) => _reorder(vis, o, n),
         itemBuilder: (_, i) {
           final r = members[i];
@@ -270,7 +274,7 @@ class _HomeV2EditorState extends ConsumerState<HomeV2EditorScreen> {
             },
           ),
           body: rows == null
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: KuberShapeLoader(size: 40))
               : ListView(
                   // Clears the pinned Save bar (12 + button + 24 + nav inset)
                   // with room to spare under the last card.
@@ -450,10 +454,22 @@ class _Appear extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!animate || MediaQuery.disableAnimationsOf(context)) return child;
+    if (!animate) return child;
+    final level = KuberMotion.levelOf(context);
+    if (level == MotionLevel.off) {
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: KuberMotion.fxInstant,
+        curve: KuberMotion.curveEffects,
+        builder: (context, v, child) => Opacity(opacity: v, child: child),
+        child: child,
+      );
+    }
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 230),
+      duration: level == MotionLevel.subtle
+          ? KuberMotion.fxDefault
+          : const Duration(milliseconds: 230),
       curve: Curves.easeOutCubic,
       builder: (context, v, child) => ClipRect(
         child: Align(

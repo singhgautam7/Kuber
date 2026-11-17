@@ -90,6 +90,9 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: groups.map((group) {
                 return Column(
+                  key: ValueKey(group.date.year * 10000 +
+                      group.date.month * 100 +
+                      group.date.day),
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DateGroupHeader(
@@ -97,10 +100,13 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                       dayTotal: group.dayTotal,
                     ),
                     TransactionDayCard(
+                      animateChanges: true,
                       transactions: group.transactions,
                       onDelete: (t) =>
                           deleteTransactionWithUndo(context, ref, t),
-                      onTap: (t) => showTransactionDetailSheet(context, ref, t),
+                      onTap: (t) => openTransactionDetail(context, ref, t),
+                      onOpen: (t, r) => openTransactionDetail(context, ref, t,
+                          sourceRect: r),
                       onEdit: (t) => context.push('/add-transaction', extra: t),
                       formatter: fmt,
                       categoryMap: categoryMap,

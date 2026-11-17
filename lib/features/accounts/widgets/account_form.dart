@@ -45,7 +45,7 @@ import '../providers/account_provider.dart';
 // From the pickers-and-setup pass:
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/icon_color_picker_sheet.dart';
-import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_button_group.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import 'credit_billing_cycle_section.dart';
 import 'overdraft_account_info.dart';
@@ -274,27 +274,17 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     : context.l10n.bankName,
               ),
             ),
-            // Type as filter chips (disabled while editing, existing rule).
-            Wrap(
-              spacing: KuberSpace.sm,
-              runSpacing: KuberSpace.sm,
-              children: [
-                for (final (value, label) in [
-                  ('bank', context.l10n.bankLabel),
-                  ('cash', context.l10n.cashLabel),
-                  ('credit', context.l10n.creditCardLabel),
-                  ('overdraft', context.l10n.accountTypeOverdraft),
-                ])
-                  Opacity(
-                    opacity: _isEditing && _selectedType != value ? 0.38 : 1,
-                    child: KuberChip(
-                      label: label,
-                      selected: _selectedType == value,
-                      onTap: _isEditing
-                          ? null
-                          : () => setState(() => _selectedType = value),
-                    ),
-                  ),
+            // Type selector (disabled while editing, existing rule).
+            KuberButtonGroup<String>(
+              enabled: !_isEditing,
+              showCheck: false,
+              selected: _selectedType,
+              onChanged: (v) => setState(() => _selectedType = v),
+              options: [
+                KuberButtonOption(value: 'bank', label: context.l10n.bankLabel),
+                KuberButtonOption(value: 'cash', label: context.l10n.cashLabel),
+                KuberButtonOption(value: 'credit', label: context.l10n.creditCardLabel),
+                KuberButtonOption(value: 'overdraft', label: context.l10n.accountTypeOverdraft),
               ],
             ),
             if (_isOverdraft)

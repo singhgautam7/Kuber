@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../motion/motion_level.dart';
+import '../motion/spring_curve.dart';
 import '../utils/locale_font.dart';
 import 'theme_families.dart';
 
@@ -82,28 +84,119 @@ abstract final class KuberShape {
 /// Motion tokens (tokens.md §8, from Perch `Motion`). Only new components use
 /// these; existing animations keep their own timings.
 abstract final class KuberMotion {
+  // ---- Effects (opacity, colour: never springs). v7.0.0 motion.md. ----
   static const Duration instant = Duration(milliseconds: 90);
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration navIndicator = Duration(milliseconds: 220);
   static const Duration navHide = Duration(milliseconds: 160);
   static const Duration reducedFade = Duration(milliseconds: 90);
+  static const Duration fxInstant = instant;
+  static const Duration fxFast = fast;
+  static const Duration fxDefault = Duration(milliseconds: 200);
+
+  /// Every opacity and colour change.
+  static const Curve curveEffects = Cubic(0.33, 1, 0.68, 1);
 
   /// Anything the finger caused.
   static const Curve spring = Curves.easeOutBack;
 
   /// Anything the system caused.
-  static const Curve decelerate = Curves.easeOutCubic;
+  static const Curve decelerate = curveEffects;
 
-  static bool reduced(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    return mq.disableAnimations || mq.accessibleNavigation;
+  // ---- Springs (mass 1). Interruptible: retarget with [SpringTo]. ----
+  /// Small things: press, chips, radios, switch thumb, chevrons, menus.
+  static final SpringDescription springFast =
+      SpringDescription.withDampingRatio(mass: 1, stiffness: 800, ratio: 0.6);
+
+  /// Medium things: enter, expand, list insert, dialogs, release of cards.
+  static final SpringDescription springDefault =
+      SpringDescription.withDampingRatio(mass: 1, stiffness: 380, ratio: 0.8);
+
+  /// Large surfaces: sheets opening, container transform.
+  static final SpringDescription springSlow =
+      SpringDescription.withDampingRatio(mass: 1, stiffness: 200, ratio: 0.8);
+
+  /// Reflow with no visible bounce: heights, widths, closing.
+  static final SpringDescription springStandard =
+      SpringDescription.withDampingRatio(mass: 1, stiffness: 700, ratio: 0.9);
+
+  /// Every spatial motion at the Subtle level (critically damped).
+  static final SpringDescription springSubtle =
+      SpringDescription.withDampingRatio(mass: 1, stiffness: 600, ratio: 1.0);
+
+  /// Cached spring curves for implicit animations (use `.settle` as duration,
+  /// `.clamped` for sizes).
+  static final SpringCurve fastCurve = SpringCurve(springFast);
+  static final SpringCurve defaultCurve = SpringCurve(springDefault);
+  static final SpringCurve slowCurve = SpringCurve(springSlow);
+  static final SpringCurve standardCurve = SpringCurve(springStandard);
+  static final SpringCurve subtleCurve = SpringCurve(springSubtle);
+
+  /// [expressive] at Expressive, [springSubtle] at Subtle. (Off: callers skip.)
+  static SpringDescription spatial(MotionLevel l, SpringDescription expressive) =>
+      l == MotionLevel.subtle ? springSubtle : expressive;
+
+  /// Curve counterpart of [spatial].
+  static SpringCurve spatialCurve(MotionLevel l, SpringCurve expressive) =>
+      l == MotionLevel.subtle ? subtleCurve : expressive;
+
+  // ---- Stagger ----
+  static const Duration staggerStep = Duration(milliseconds: 30);
+  static const int staggerLimit = 6;
+
+  /// Delay of item [index]: 30 ms steps, items past the 6th share the 6th's.
+  static Duration staggerDelay(int index) =>
+      staggerStep * (index < 0 ? 0 : (index < staggerLimit ? index : staggerLimit - 1));
+
+  // ---- Caps ----
+  static const Duration reflow = Duration(milliseconds: 230);
+  static const Duration containerTransform = Duration(milliseconds: 240);
+  static const Duration sheet = Duration(milliseconds: 260);
+  static const Duration snackEnter = Duration(milliseconds: 180);
+  static const Duration snackExit = Duration(milliseconds: 140);
+  static const Duration digitRoll = Duration(milliseconds: 300);
+
+  // ---- Press amounts ----
+  static const double pressScaleCard = 0.98; // cards and list rows
+  static const double pressScaleSubtle = 0.99;
+  static const double pressScaleFab = 0.96;
+  static const double pressScaleChip = 0.96;
+  static const double buttonGroupWiden = 0.15;
+
+  /// Android's animator duration scale reaches Flutter only as
+  /// disableAnimations (scale 0); 0.5x / 2x are not exposed by the engine, so
+  /// this stays 1.0. Multiply durations by it where one is built by hand.
+  static const double durationScale = 1.0;
+
+  /// Effective level here: preference + device, and the phone's Remove
+  /// animations wins (Off). Cheap: reads one InheritedWidget. Without a
+  /// [MotionScope] (tests, startup error app) it is Expressive unless the
+  /// phone asks for no animations.
+  static MotionLevel levelOf(BuildContext context) {
+    final s = MotionScope.maybeOf(context);
+    if (s != null) return s.level;
+    return (MediaQuery.maybeDisableAnimationsOf(context) ?? false)
+        ? MotionLevel.off
+        : MotionLevel.expressive;
   }
+
+  /// Not Expressive: callers that only know "reduced" keep working.
+  static bool reduced(BuildContext context) =>
+      levelOf(context) != MotionLevel.expressive;
 
   static Duration of(BuildContext context, Duration full) =>
       reduced(context) ? reducedFade : full;
 
   static Curve curveOf(BuildContext context, Curve full) =>
       reduced(context) ? Curves.linear : full;
+
+  /// [base] at variable weight [wght] (FontVariation 'wght'; harmless on a
+  /// static font, which then snaps to the nearest [FontWeight]).
+  static TextStyle weightStyle(TextStyle base, double wght) => base.copyWith(
+        fontWeight: FontWeight.lerp(FontWeight.w100, FontWeight.w900,
+            ((wght - 100) / 800).clamp(0.0, 1.0)),
+        fontVariations: [FontVariation('wght', wght)],
+      );
 }
 
 /// Income / expense / warning colours (tokens.md §4). Money never uses the

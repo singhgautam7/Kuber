@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 
 /// One row of [showKuberMenu], or a divider.
@@ -93,8 +94,20 @@ Future<T?> showKuberMenu<T>({
       ? topLeft.dy - KuberSpace.xs - menuHeight
       : bottomRight.dy + KuberSpace.xs;
 
+  // Flutter's popup grows from the anchor corner on its own; we set the
+  // spring (fast) and the exit (fx.instant fade). Subtle: springSubtle.
+  final level = KuberMotion.levelOf(context);
+  final inC = KuberMotion.spatialCurve(level, KuberMotion.fastCurve);
   return showMenu<T>(
     context: context,
+    popUpAnimationStyle: level == MotionLevel.off
+        ? AnimationStyle(
+            duration: KuberMotion.fxInstant,
+            reverseDuration: KuberMotion.fxInstant)
+        : AnimationStyle(
+            curve: inC.clamped,
+            duration: inC.settle,
+            reverseDuration: KuberMotion.fxInstant),
     useRootNavigator: true,
     position: RelativeRect.fromLTRB(
       topLeft.dx,

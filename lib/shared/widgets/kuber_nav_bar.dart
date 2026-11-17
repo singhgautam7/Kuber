@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/l10n_ext.dart';
 
@@ -185,24 +186,47 @@ class KuberNavPill extends StatelessWidget {
   static double widthFor(BuildContext context, {required bool withLabel}) {
     var w = 2.0 + 16 + kuberNavItems.length * 40 + (kuberNavItems.length - 1) * 2;
     if (!withLabel) return w;
-    final style = Theme.of(context).textTheme.labelLarge!;
     var label = 0.0;
     for (final item in kuberNavItems) {
-      final tp = TextPainter(
-        text: TextSpan(text: localNavLabel(context, item.label), style: style),
-        maxLines: 1,
-        textDirection: Directionality.of(context),
-        textScaler: MediaQuery.textScalerOf(context),
-      )..layout();
-      if (tp.width > label) label = tp.width;
-      tp.dispose();
+      final lw = _labelWidth(context, localNavLabel(context, item.label));
+      if (lw > label) label = lw;
     }
     return w + 17 + label;
+  }
+
+  /// Width of [label] at the heavier (selected) weight, which is what the
+  /// label slot reserves.
+  static double _labelWidth(BuildContext context, String label) {
+    final style = KuberMotion.weightStyle(
+        Theme.of(context).textTheme.labelLarge!, 700);
+    final tp = TextPainter(
+      text: TextSpan(text: label, style: style),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final w = tp.width;
+    tp.dispose();
+    return w;
+  }
+
+  /// Left / right edge of the indicator around item [i] at rest, in the
+  /// coordinates of the row inside the pill (border 1 + padding 8 are outside).
+  static (double, double) _indicatorEdges(
+      int i, bool withLabel, double labelW) {
+    final left = i * 42.0;
+    return (left, left + 40 + (withLabel ? 17 + labelW : 0));
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final labels = [
+      for (final item in kuberNavItems) localNavLabel(context, item.label),
+    ];
+    final labelOk = showLabels && MediaQuery.textScalerOf(context).scale(14) <= 20;
+    final (left, right) = _indicatorEdges(
+        index, labelOk, labelOk ? _labelWidth(context, labels[index]) : 0);
     return RepaintBoundary(
       child: Container(
         height: 56,
@@ -212,19 +236,36 @@ class KuberNavPill extends StatelessWidget {
           borderRadius: KuberShape.fullR,
           border: Border.all(color: cs.outlineVariant),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 2,
+        child: Stack(
           children: [
-            for (int i = 0; i < kuberNavItems.length; i++)
-              _PillItem(
-                index: i,
-                label: localNavLabel(context, kuberNavItems[i].label),
-                selected: i == index,
-                showLabel: showLabels,
-                onTap: () => onSelect(i),
-                onLongPress: onLongPress,
+            // The indicator is one painter driven by two spring values; the
+            // items on top never repaint it.
+            Positioned.fill(
+              child: NavIndicator(
+                left: left,
+                right: right,
+                color: cs.secondaryContainer,
+                destination: index,
               ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 2,
+              children: [
+                for (int i = 0; i < kuberNavItems.length; i++)
+                  _PillItem(
+                    index: i,
+                    label: labels[i],
+                    selected: i == index,
+                    showLabel: labelOk,
+                    onTap: () {
+                      if (i != index) KuberHaptics.tick();
+                      onSelect(i);
+                    },
+                    onLongPress: onLongPress,
+                  ),
+              ],
+            ),
           ],
         ),
       ),
@@ -232,7 +273,107 @@ class KuberNavPill extends StatelessWidget {
   }
 }
 
-class _PillItem extends StatelessWidget {
+/// The selection pill behind the nav items. Moving: the edge on the side it
+/// moves toward (leading) follows springFast, the other (trailing) follows
+/// springDefault, so it stretches mid-way (up to about 1.3x). Subtle: both
+/// edges on springSubtle. Off: the old pill cross-fades into the new one.
+class NavIndicator extends StatefulWidget {
+  const NavIndicator({
+    super.key,
+    required this.left,
+    required this.right,
+    required this.color,
+    required this.destination,
+  });
+
+  final double left;
+  final double right;
+  final Color color;
+
+  /// Which destination it sits on (keys the Off cross-fade).
+  final int destination;
+
+  @override
+  State<NavIndicator> createState() => _NavIndicatorState();
+}
+
+class _NavIndicatorState extends State<NavIndicator>
+    with TickerProviderStateMixin {
+  late final AnimationController _l =
+      AnimationController.unbounded(vsync: this, value: widget.left);
+  late final AnimationController _r =
+      AnimationController.unbounded(vsync: this, value: widget.right);
+
+  @override
+  void didUpdateWidget(NavIndicator old) {
+    super.didUpdateWidget(old);
+    if (old.left == widget.left && old.right == widget.right) return;
+    final level = KuberMotion.levelOf(context);
+    if (level == MotionLevel.off) {
+      _l.value = widget.left;
+      _r.value = widget.right;
+      return;
+    }
+    final movingRight = widget.left > old.left;
+    final fast = KuberMotion.spatial(level, KuberMotion.springFast);
+    final slow = KuberMotion.spatial(level, KuberMotion.springDefault);
+    _l.springTo(widget.left, movingRight ? slow : fast);
+    _r.springTo(widget.right, movingRight ? fast : slow);
+  }
+
+  @override
+  void dispose() {
+    _l.dispose();
+    _r.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (KuberMotion.levelOf(context) == MotionLevel.off) {
+      return AnimatedSwitcher(
+        duration: KuberMotion.fxInstant,
+        child: SizedBox.expand(
+          key: ValueKey(widget.destination),
+          child: CustomPaint(
+            painter: _IndicatorPainter(
+                ValueNotifier(widget.left), ValueNotifier(widget.right),
+                widget.color),
+          ),
+        ),
+      );
+    }
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: _IndicatorPainter(_l, _r, widget.color),
+      ),
+    );
+  }
+}
+
+class _IndicatorPainter extends CustomPainter {
+  _IndicatorPainter(this.l, this.r, this.color)
+      : super(repaint: Listenable.merge([l, r]));
+  final ValueListenable<double> l;
+  final ValueListenable<double> r;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final left = l.value, right = r.value;
+    if (right <= left) return;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTRB(left, 0, right, size.height),
+          Radius.circular(size.height / 2)),
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_IndicatorPainter o) => o.color != color || o.l != l || o.r != r;
+}
+
+class _PillItem extends StatefulWidget {
   const _PillItem({
     required this.index,
     required this.label,
@@ -250,57 +391,81 @@ class _PillItem extends StatelessWidget {
   final VoidCallback? onLongPress;
 
   @override
+  State<_PillItem> createState() => _PillItemState();
+}
+
+class _PillItemState extends State<_PillItem> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final fg = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+    final level = KuberMotion.levelOf(context);
+    final fg = widget.selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
     // Under a large OS text scale the label drops first; the glyph and the
     // indicator still say where you are.
-    final showLabel = this.showLabel &&
-        selected &&
-        MediaQuery.textScalerOf(context).scale(14) <= 20;
+    final wantLabel = widget.showLabel && widget.selected;
+    final curve = KuberMotion.spatialCurve(level, KuberMotion.defaultCurve);
 
     return Semantics(
       button: true,
-      selected: selected,
-      label: label,
+      selected: widget.selected,
+      label: widget.label,
       child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        onHighlightChanged: (v) => setState(() => _pressed = v),
         customBorder: const StadiumBorder(),
-        child: AnimatedContainer(
-          duration: KuberMotion.of(context, KuberMotion.navIndicator),
-          curve: KuberMotion.curveOf(context, KuberMotion.spring),
+        child: SizedBox(
           height: 40,
-          padding: EdgeInsets.only(
-            left: showLabel ? 11 : 8,
-            right: showLabel ? 14 : 8,
-          ),
-          decoration: BoxDecoration(
-            color: selected ? cs.secondaryContainer : Colors.transparent,
-            borderRadius: KuberShape.fullR,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: showLabel ? KuberSpace.sm : 0,
-            children: [
-              KuberNavGlyph(
-                index: index,
-                color: fg,
+          // Label width 0 -> auto on springDefault (clamped: it never goes
+          // negative); the glyph and padding grow with it.
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(end: wantLabel ? 1.0 : 0.0),
+            duration: level == MotionLevel.off
+                ? Duration.zero
+                : curve.clamped.settle,
+            curve: curve.clamped,
+            builder: (context, t, _) => TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: fg),
+              duration: level == MotionLevel.off
+                  ? Duration.zero
+                  : KuberMotion.fxFast,
+              curve: KuberMotion.curveEffects,
+              builder: (context, color, _) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 8 + 3 * t),
+                  AnimatedScale(
+                    scale: _pressed && level != MotionLevel.off ? 0.9 : 1,
+                    duration: KuberMotion.fastCurve.settle,
+                    curve: KuberMotion.fastCurve,
+                    child: KuberNavGlyph(index: widget.index, color: color!),
+                  ),
+                  if (t > 0.001)
+                    ClipRect(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        widthFactor: t,
+                        child: Opacity(
+                          opacity: t,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: KuberSpace.sm),
+                            child: AnimatedWeight(
+                              widget.label,
+                              isActive: widget.selected,
+                              style: theme.textTheme.labelLarge!
+                                  .copyWith(color: color),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(width: 8 + 6 * t),
+                ],
               ),
-              AnimatedSize(
-                duration: KuberMotion.of(context, KuberMotion.navIndicator),
-                curve: KuberMotion.curveOf(context, KuberMotion.spring),
-                child: showLabel
-                    ? Text(
-                        label,
-                        maxLines: 1,
-                        softWrap: false,
-                        style: theme.textTheme.labelLarge!.copyWith(color: fg),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -309,8 +474,8 @@ class _PillItem extends StatelessWidget {
 }
 
 /// The circular Add button beside the pill (Perch `PerchFab`): 56, the
-/// primaryContainer fill, a 0.94 squash under the finger.
-class KuberNavFab extends StatefulWidget {
+/// primaryContainer fill, scale 0.96 and corners 28 -> 12 under the finger.
+class KuberNavFab extends StatelessWidget {
   const KuberNavFab({
     super.key,
     required this.onTap,
@@ -323,40 +488,27 @@ class KuberNavFab extends StatefulWidget {
   final String semanticLabel;
 
   @override
-  State<KuberNavFab> createState() => _KuberNavFabState();
-}
-
-class _KuberNavFabState extends State<KuberNavFab> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
-      label: widget.semanticLabel,
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapUp: (_) => setState(() => _pressed = false),
-        onTapCancel: () => setState(() => _pressed = false),
-        onTap: widget.onTap,
-        onLongPress: widget.onLongPress,
-        child: AnimatedScale(
-          scale: _pressed ? 0.94 : 1,
-          duration: const Duration(milliseconds: 40),
-          child: Container(
-            height: 56,
-            width: 56,
-            decoration: BoxDecoration(
-              color: _pressed
-                  ? Color.alphaBlend(
-                      cs.onPrimaryContainer.withValues(alpha: 0.1),
-                      cs.primaryContainer)
-                  : cs.primaryContainer,
-              borderRadius: KuberShape.fullR,
-            ),
-            child: Icon(Icons.add_rounded, color: cs.onPrimaryContainer, size: 26),
+      label: semanticLabel,
+      child: Pressable(
+        kind: PressKind.fab,
+        restRadius: 28,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        builder: (context, radius, pressed) => Container(
+          height: 56,
+          width: 56,
+          decoration: BoxDecoration(
+            color: Color.alphaBlend(
+                cs.onPrimaryContainer
+                    .withValues(alpha: 0.1 * pressed.clamp(0.0, 1.0)),
+                cs.primaryContainer),
+            borderRadius: BorderRadius.circular(radius),
           ),
+          child: Icon(Icons.add_rounded, color: cs.onPrimaryContainer, size: 26),
         ),
       ),
     );
@@ -407,7 +559,10 @@ class KuberNavRail extends StatelessWidget {
                 index: i,
                 label: localNavLabel(context, kuberNavItems[i].label),
                 isActive: i == currentIndex,
-                onTap: () => onTabTapped(i),
+                onTap: () {
+                  if (i != currentIndex) KuberHaptics.tick();
+                  onTabTapped(i);
+                },
               ),
             const Spacer(),
             // Add button: hidden on More tab
@@ -420,7 +575,7 @@ class KuberNavRail extends StatelessWidget {
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                     onTap: () {
-                      HapticFeedback.mediumImpact();
+                      KuberHaptics.tick();
                       onAddTapped();
                     },
                     child: SizedBox(
@@ -472,6 +627,7 @@ class _RailItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
         color: isActive ? cs.secondaryContainer : Colors.transparent,
+        animationDuration: KuberMotion.of(context, KuberMotion.fxFast),
         shape: const StadiumBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -485,7 +641,8 @@ class _RailItem extends StatelessWidget {
                   color: fg,
                 ),
                 const SizedBox(width: 12),
-                Text(label,
+                AnimatedWeight(label,
+                    isActive: isActive,
                     style: theme.textTheme.labelLarge!.copyWith(color: fg)),
               ],
             ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
-import '../common/ah_motion.dart';
 
 /// Expanded state is remembered for the session (not across launches).
 bool _readbackExpanded = false;
@@ -21,7 +20,7 @@ class _ReadbackCardState extends State<ReadbackCard> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l = context.l10n;
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -47,7 +46,7 @@ class _ReadbackCardState extends State<ReadbackCard> {
                 const SizedBox(width: 2),
                 AnimatedRotation(
                   turns: _readbackExpanded ? 0.5 : 0,
-                  duration: reduced ? AhMotion.instant : AhMotion.fast,
+                  duration: reduced ? KuberMotion.fxInstant : KuberMotion.fxFast,
                   child: Icon(Icons.expand_more_rounded,
                       size: 18, color: cs.onSurfaceVariant),
                 ),
@@ -56,8 +55,8 @@ class _ReadbackCardState extends State<ReadbackCard> {
           ),
         ),
         AnimatedSize(
-          duration: reduced ? AhMotion.instant : AhMotion.defaultCurve.settle,
-          curve: reduced ? Curves.linear : AhMotion.defaultSize,
+          duration: reduced ? KuberMotion.fxInstant : KuberMotion.defaultCurve.settle,
+          curve: reduced ? Curves.linear : KuberMotion.defaultCurve.clamped,
           alignment: Alignment.topCenter,
           child: _readbackExpanded
               ? Container(

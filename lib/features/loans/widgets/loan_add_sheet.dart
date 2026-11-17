@@ -3,6 +3,7 @@
 // Also edits and deletes them from their marker in the schedule.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
@@ -39,6 +40,7 @@ Future<bool?> confirmDeletePart(BuildContext context, {required bool hasTransact
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.msLoansDeletePartTitle, style: localeFont(fontWeight: FontWeight.w600)),
@@ -261,6 +263,7 @@ class _AddToLoanSheetState extends ConsumerState<_AddToLoanSheet> {
       if (total > loan.principalAmount + 0.005 &&
           loan.startingPoint != LoanStartingPoint.outstandingToday) {
         final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
           context: context,
           builder: (ctx) => AlertDialog(
             content: Text(l.msLoansAboveSanctioned(fmt.formatCurrency(loan.principalAmount.round())),

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
@@ -39,6 +40,7 @@ import '../../pro/data/user_entitlement.dart';
 import '../../search/data/recent_search.dart';
 
 import '../widgets/record_detail_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class DbCollectionScreen extends ConsumerStatefulWidget {
   final String collectionName;
@@ -313,6 +315,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
 
   void _showRecordDetails(Map<String, dynamic> record) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -396,7 +399,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           // Table Content
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator(color: cs.primary))
+                ? Center(child: KuberShapeLoader(size: 40, color: cs.primary))
                 : _allRecords.isEmpty
                 ? Center(
                     child: Column(

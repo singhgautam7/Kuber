@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
+import '../../core/theme/app_theme.dart';
+import 'kuber_shape_loader.dart';
+
 
 enum AppButtonType {
   primary, // filled (primary / onPrimary)
@@ -96,10 +100,7 @@ class AppButton extends StatelessWidget {
           SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(fg),
-            ),
+            child: KuberShapeLoader(size: 20, color: fg),
           )
         else if (icon != null && !iconAfterLabel) ...[
           iconWidget,
@@ -121,34 +122,58 @@ class AppButton extends StatelessWidget {
       ],
     );
 
-    Widget button = ConstrainedBox(
-      constraints: BoxConstraints(minHeight: h),
-      child: Material(
-        color: bg,
-        shape: StadiumBorder(side: side),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: disabled ? null : onPressed,
-          child: Padding(
-            // 24 side padding for 56 buttons, unless a caller fixed a narrow
-            // width (Quick Add Cancel is 100, Ask Kuber preview 96).
-            padding: EdgeInsets.symmetric(
-              horizontal:
-                  horizontalPadding ??
-                  (large && (width == null || width! >= 120) ? 24 : 16),
+    final level = KuberMotion.levelOf(context);
+    final fade = level == MotionLevel.off ? KuberMotion.fxInstant : KuberMotion.fxFast;
+    final hPad = horizontalPadding ??
+        (large && (width == null || width! >= 120) ? 24 : 16);
+
+    // Pill today: Pressable morphs the corners pill -> 8 dp (h40) / 12 dp
+    // (h56) on springFast; Material's own shape tween is off so the spring
+    // drives it frame by frame.
+    Widget button = Pressable(
+      kind: PressKind.button,
+      enabled: !disabled,
+      restRadius: h / 2,
+      pressedRadius: large ? 12 : 8,
+      builder: (context, radius, _) {
+        final shape = RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+          side: side,
+        );
+        Widget b = ConstrainedBox(
+          constraints: BoxConstraints(minHeight: h),
+          child: TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: bg),
+            duration: fade,
+            curve: KuberMotion.curveEffects,
+            builder: (context, color, child) => Material(
+              color: color,
+              animationDuration: Duration.zero,
+              shape: shape,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: disabled ? null : onPressed,
+                // 24 side padding for 56 buttons, unless a caller fixed a
+                // narrow width (Quick Add Cancel is 100, Ask Kuber preview 96).
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: hPad),
+                  child: child,
+                ),
+              ),
             ),
             child: Center(widthFactor: 1, heightFactor: 1, child: content),
           ),
-        ),
-      ),
+        );
+        if (type == AppButtonType.dotted) {
+          b = CustomPaint(
+            foregroundPainter:
+                _DashedBorderPainter(color: cs.outline, radius: radius),
+            child: b,
+          );
+        }
+        return b;
+      },
     );
-
-    if (type == AppButtonType.dotted) {
-      button = CustomPaint(
-        foregroundPainter: _DashedBorderPainter(color: cs.outline),
-        child: button,
-      );
-    }
 
     return Semantics(
       button: true,
@@ -165,7 +190,8 @@ class AppButton extends StatelessWidget {
 /// Paints a dashed stadium border, used by [AppButtonType.dotted].
 class _DashedBorderPainter extends CustomPainter {
   final Color color;
-  _DashedBorderPainter({required this.color});
+  final double radius;
+  _DashedBorderPainter({required this.color, required this.radius});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -175,7 +201,7 @@ class _DashedBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
-      Radius.circular(size.height / 2),
+      Radius.circular(radius.clamp(0.0, size.height / 2)),
     );
     final path = Path()..addRRect(rrect);
     const dashWidth = 4.0;
@@ -191,5 +217,5 @@ class _DashedBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DashedBorderPainter old) => old.color != color;
+  bool shouldRepaint(covariant _DashedBorderPainter old) => old.color != color || old.radius != radius;
 }

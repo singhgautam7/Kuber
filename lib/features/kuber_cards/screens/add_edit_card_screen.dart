@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +24,7 @@ import '../widgets/card_icon.dart';
 import '../widgets/cards_secure_scaffold.dart';
 import '../widgets/stored_card_visual.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 const _cardTypeChoices = <SettingsChoice<String>>[
   SettingsChoice(
@@ -206,7 +208,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
           title: _isEditing ? 'Edit card' : 'Add card',
         ),
         body: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: KuberShapeLoader(size: 40))
             : GestureDetector(
                 onTap: () => FocusScope.of(context).unfocus(),
                 behavior: HitTestBehavior.opaque,
@@ -583,6 +585,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   Future<bool?> _showRiskyDialog() {
     final cs = Theme.of(context).colorScheme;
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(

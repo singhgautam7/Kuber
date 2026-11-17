@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -113,6 +114,7 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
 
   void _pickCategory() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -172,6 +174,7 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
     if (e == null) return;
     final cs = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete reminder?'),

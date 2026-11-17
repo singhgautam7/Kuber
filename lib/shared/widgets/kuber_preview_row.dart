@@ -1,6 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 
 class KuberPreviewRow extends StatelessWidget {
@@ -23,7 +24,9 @@ class KuberPreviewRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -74,6 +77,6 @@ class KuberPreviewRow extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }

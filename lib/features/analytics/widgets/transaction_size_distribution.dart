@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,6 +128,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
 
   void _openThresholdSheet(BuildContext context) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,

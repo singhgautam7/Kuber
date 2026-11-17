@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../shared/widgets/sheet_button_section.dart';
@@ -14,6 +15,7 @@ void showProPurchaseSuccessSheet(
   VoidCallback? onGetStarted,
 }) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

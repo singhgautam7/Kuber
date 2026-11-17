@@ -2,7 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/chart_motion.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_list.dart';
@@ -124,7 +126,9 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      PieChart(
+                      ChartDrawIn(
+                        kind: ChartKind.donut,
+                        builder: (context, p) => PieChart(
                         PieChartData(
                           startDegreeOffset: -90,
                           sectionsSpace: 3,
@@ -147,7 +151,7 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
                               });
                             },
                           ),
-                          sections: [
+                          sections: sweepSections([
                             for (var i = 0; i < slices.length; i++)
                               PieChartSectionData(
                                 value: slices[i].percentage.clamp(0.1, 100),
@@ -159,10 +163,11 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
                                       ),
                                 radius: selected == i ? 26 : 20,
                               ),
-                          ],
+                          ], p),
                         ),
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.easeOut,
+                        duration: chartSwapDuration(context, drawing: isDrawing(p)),
+                        curve: chartSwapCurve(context),
+                      ),
                       ),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 150),

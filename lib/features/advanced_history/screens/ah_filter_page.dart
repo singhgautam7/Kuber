@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 
 
 import 'package:flutter/material.dart';
@@ -23,7 +24,6 @@ import '../query/query_ast.dart';
 import '../query/query_labels.dart';
 import '../query/query_parser.dart';
 import '../widgets/common/ah_common.dart';
-import '../widgets/common/ah_motion.dart';
 import '../widgets/filter/field_list.dart';
 import '../widgets/filter/live_count_button.dart';
 import '../widgets/filter/readback_card.dart';
@@ -94,6 +94,7 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
     final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l.ahfDiscardTitle,
@@ -334,7 +335,7 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
                         const Spacer(),
                         AnimatedOpacity(
                           opacity: _c.items.isEmpty ? 0 : 1,
-                          duration: AhMotion.fast,
+                          duration: KuberMotion.fxFast,
                           child: IgnorePointer(
                             ignoring: _c.items.isEmpty,
                             child: TextButton(
@@ -410,7 +411,7 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
                 if (kbOpen) {
                   return TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0, end: 1),
-                    duration: AhMotion.fast,
+                    duration: KuberMotion.fxFast,
                     builder: (context, v, child) =>
                         Opacity(opacity: v, child: child),
                     child: OperatorBar(

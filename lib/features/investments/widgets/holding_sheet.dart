@@ -2,7 +2,9 @@
 // add money, past value, withdraw / close (I.5), FD early withdrawal.
 
 import '../../categories/providers/category_provider.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -110,6 +112,7 @@ Future<bool> confirmDeleteInvestment(BuildContext context, WidgetRef ref, Invest
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.deleteInvestmentConfirm, style: localeFont(fontWeight: FontWeight.w600)),
@@ -174,6 +177,7 @@ class HoldingSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    KuberPath.pushVirtual(context, title: investment.name, icon: investmentIcon(investment.investmentType));
     final l = context.l10n;
     final fmt = ref.watch(formatterProvider);
     final money = context.kuberMoney;

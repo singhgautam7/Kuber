@@ -6259,10 +6259,9 @@
   "obTermsCheck2": "I understand the developer can't recover lost data, and that backups and restores are my responsibility.",
   "obTermsAgree": "Agree and continue",
   "obTermsPrivacy": "Privacy policy",
-  "pathSheetTitle": "How you got here",
+  "pathSheetTitle": "Quick navigation",
   "pathSheetCurrent": "You are here",
-  "pathSheetHint": "Shows the path to this page",
-  "pathSheetLongPress": "Show path",
+  "pathSheetHint": "Opens quick navigation",
   "setPathTip": "Tap a page title, or long-press back, to jump to any earlier page.",
   "proFaqTitle": "Frequently asked questions",
   "proFaqLifetimeQ": "Is Lifetime a one-time payment?",
@@ -6339,7 +6338,7 @@
   "obNotifBackupRow": "Backup problems",
   "obNotifSampleTitle": "EMI due tomorrow",
   "obNotifSampleBody": "SBI Home Loan · ₹24,350",
-  "pathSheetSub": "Tap any page to go back to it",
+  "pathSheetSub": "Tap any page to open it",
   "pathSheetFromNotification": "Opened from a notification",
   "setSecYours": "Make it yours",
   "setSecSafe": "Keep it safe",
@@ -7639,5 +7638,44 @@
   "ahdCompareHint": "Pick up to 3. Bars stack them by month, the line draws one line each.",
   "ahdHeatmapNote": "One square per day. Darker means more.",
   "ahdLess": "Less",
-  "ahdMore": "More"
+  "ahdMore": "More",
+  "pathSheetShowRemaining": "Show remaining {n} pages",
+  "@pathSheetShowRemaining": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "pathSheetShowFewer": "Show fewer pages",
+  "pathSheetExpand": "Expand",
+  "pathSheetCollapse": "Collapse",
+  "motionTitle": "Motion",
+  "motionSubtitle": "How much Kuber moves when you tap, swipe or open things",
+  "motionPreviewHint": "Tap the card to feel this level",
+  "motionAuto": "Auto",
+  "motionExpressive": "Expressive",
+  "motionSubtle": "Subtle",
+  "motionOff": "Off",
+  "motionAutoExpressive": "Using Expressive on this phone",
+  "motionAutoSubtle": "Using Subtle: this phone has under 4 GB of RAM",
+  "motionAutoOff": "Using Off: Remove animations is on",
+  "motionExpressiveDesc": "Springy and fluid. The full experience.",
+  "motionSubtleDesc": "Short fades and small moves. No bounce.",
+  "motionOffDesc": "No movement. Things change with a quick fade.",
+  "motionPhoneNote": "Remove animations is on in your phone settings, so Kuber uses Off.",
+  "motionOpenPhoneSettings": "Open phone settings",
+  "motionValueAuto": "Auto ({level})",
+  "@motionValueAuto": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "motionValuePhone": "Off (phone setting)",
+  "hapticsTitle": "Haptics",
+  "hapticsSub": "Vibrate on toggles and long presses",
+  "setKwMotion": "animation animations motion movement bounce fade reduce animations",
+  "setKwHaptics": "haptics vibration vibrate feedback touch"
 }

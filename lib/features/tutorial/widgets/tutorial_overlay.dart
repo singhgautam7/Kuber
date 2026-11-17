@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
@@ -276,6 +277,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
 
     final proceed = await _withModal(
       () => showModalBottomSheet<bool>(
+      sheetAnimationStyle: kuberSheetStyle(_sheetCtx),
         context: _sheetCtx,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -345,6 +347,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
     final l = context.l10n;
     final confirmed = await _withModal(
       () => showModalBottomSheet<bool>(
+      sheetAnimationStyle: kuberSheetStyle(_sheetCtx),
         context: _sheetCtx,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -399,6 +402,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
     final sandbox = ref.read(tutorialSandboxIsarProvider);
     final dialogCtx = _sheetCtx;
     showDialog<void>(
+      animationStyle: kuberDialogStyle(dialogCtx),
       context: dialogCtx,
       barrierDismissible: false,
       builder: (_) => const KuberLoader(label: 'Closing tutorial...'),

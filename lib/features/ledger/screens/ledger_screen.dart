@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_chips.dart';
@@ -21,6 +22,7 @@ import '../providers/ledger_provider.dart';
 import '../utils/ledger_calculations.dart' as calc;
 import '../widgets/ledger_detail_sheet.dart';
 import '../widgets/ledger_widgets.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class LedgerScreen extends ConsumerStatefulWidget {
   const LedgerScreen({super.key});
@@ -69,7 +71,7 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
       ),
       floatingActionButtonLocation: kuberFabLocation,
       body: ledgersAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (e, _) => Center(
           child: Text(
             context.l10n.errorWithDetails(e.toString()),
@@ -247,6 +249,7 @@ class _LedgerRow extends StatelessWidget {
       settledAt: ledger.isSettled ? ledger.updatedAt : null,
       onTap: () {
         showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
           context: context,
           useRootNavigator: true,
           isScrollControlled: true,

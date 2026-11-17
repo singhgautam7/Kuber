@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import 'app_button.dart';
 import 'kuber_list.dart';
@@ -73,7 +74,7 @@ class KuberOptionCard extends StatelessWidget {
             ? (cs.primary, cs.onPrimary)
             : (cs.secondaryContainer, cs.onSecondaryContainer);
     final motion = KuberMotion.reduced(context);
-    final grow = motion ? KuberMotion.reducedFade : const Duration(milliseconds: 250);
+    final grow = motion ? KuberMotion.reducedFade : KuberMotion.standardCurve.settle;
     final tint = motion ? KuberMotion.reducedFade : const Duration(milliseconds: 200);
 
     return AnimatedOpacity(
@@ -81,7 +82,10 @@ class KuberOptionCard extends StatelessWidget {
       duration: KuberMotion.fast,
       child: IgnorePointer(
         ignoring: state == KuberOptionState.disabled,
-        child: AnimatedContainer(
+        child: Pressable(
+          kind: PressKind.card,
+          enabled: idle,
+          child: AnimatedContainer(
           duration: tint,
           decoration: BoxDecoration(
             color: bg,
@@ -96,7 +100,7 @@ class KuberOptionCard extends StatelessWidget {
               overlayColor: kuberPressedLayer(cs),
               child: AnimatedSize(
                 duration: grow,
-                curve: Curves.easeInOutCubicEmphasized,
+                curve: motion ? Curves.linear : KuberMotion.standardCurve.clamped,
                 alignment: Alignment.topCenter,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -204,6 +208,7 @@ class KuberOptionCard extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

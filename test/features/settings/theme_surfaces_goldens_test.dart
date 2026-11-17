@@ -5,6 +5,7 @@
 //   flutter test --update-goldens test/features/settings/theme_surfaces_goldens_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kuber/core/motion/shimmer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
@@ -62,7 +63,9 @@ Future<void> _pump(WidgetTester t, Widget screen, ThemeData theme) async {
       supportedLocales: AppLocalizations.supportedLocales,
     ),
   ));
-  for (var i = 0; i < 8; i++) {
+  // Wait for real data, not a fixed time: under full-suite load the Isar
+  // reads can outlast a fixed wait and the golden catches the skeleton.
+  for (var i = 0; i < 8 || (i < 60 && find.byType(ShimmerBox).evaluate().isNotEmpty); i++) {
     await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 30)));
     await t.pump(const Duration(milliseconds: 200));
   }

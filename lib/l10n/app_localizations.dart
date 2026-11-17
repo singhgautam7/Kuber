@@ -15531,7 +15531,7 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetTitle.
   ///
   /// In en, this message translates to:
-  /// **'How you got here'**
+  /// **'Quick navigation'**
   String get pathSheetTitle;
 
   /// No description provided for @pathSheetCurrent.
@@ -15543,14 +15543,8 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetHint.
   ///
   /// In en, this message translates to:
-  /// **'Shows the path to this page'**
+  /// **'Opens quick navigation'**
   String get pathSheetHint;
-
-  /// No description provided for @pathSheetLongPress.
-  ///
-  /// In en, this message translates to:
-  /// **'Show path'**
-  String get pathSheetLongPress;
 
   /// No description provided for @setPathTip.
   ///
@@ -15831,7 +15825,7 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetSub.
   ///
   /// In en, this message translates to:
-  /// **'Tap any page to go back to it'**
+  /// **'Tap any page to open it'**
   String get pathSheetSub;
 
   /// No description provided for @pathSheetFromNotification.
@@ -19451,6 +19445,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get ahdMore;
+
+  /// No description provided for @pathSheetShowRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Show remaining {n} pages'**
+  String pathSheetShowRemaining(String n);
+
+  /// No description provided for @pathSheetShowFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer pages'**
+  String get pathSheetShowFewer;
+
+  /// No description provided for @pathSheetExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get pathSheetExpand;
+
+  /// No description provided for @pathSheetCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get pathSheetCollapse;
+
+  /// No description provided for @motionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion'**
+  String get motionTitle;
+
+  /// No description provided for @motionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much Kuber moves when you tap, swipe or open things'**
+  String get motionSubtitle;
+
+  /// No description provided for @motionPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the card to feel this level'**
+  String get motionPreviewHint;
+
+  /// No description provided for @motionAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get motionAuto;
+
+  /// No description provided for @motionExpressive.
+  ///
+  /// In en, this message translates to:
+  /// **'Expressive'**
+  String get motionExpressive;
+
+  /// No description provided for @motionSubtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtle'**
+  String get motionSubtle;
+
+  /// No description provided for @motionOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get motionOff;
+
+  /// No description provided for @motionAutoExpressive.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Expressive on this phone'**
+  String get motionAutoExpressive;
+
+  /// No description provided for @motionAutoSubtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Subtle: this phone has under 4 GB of RAM'**
+  String get motionAutoSubtle;
+
+  /// No description provided for @motionAutoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Off: Remove animations is on'**
+  String get motionAutoOff;
+
+  /// No description provided for @motionExpressiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Springy and fluid. The full experience.'**
+  String get motionExpressiveDesc;
+
+  /// No description provided for @motionSubtleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Short fades and small moves. No bounce.'**
+  String get motionSubtleDesc;
+
+  /// No description provided for @motionOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement. Things change with a quick fade.'**
+  String get motionOffDesc;
+
+  /// No description provided for @motionPhoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove animations is on in your phone settings, so Kuber uses Off.'**
+  String get motionPhoneNote;
+
+  /// No description provided for @motionOpenPhoneSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings'**
+  String get motionOpenPhoneSettings;
+
+  /// No description provided for @motionValueAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto ({level})'**
+  String motionValueAuto(String level);
+
+  /// No description provided for @motionValuePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Off (phone setting)'**
+  String get motionValuePhone;
+
+  /// No description provided for @hapticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptics'**
+  String get hapticsTitle;
+
+  /// No description provided for @hapticsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate on toggles and long presses'**
+  String get hapticsSub;
+
+  /// No description provided for @setKwMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'animation animations motion movement bounce fade reduce animations'**
+  String get setKwMotion;
+
+  /// No description provided for @setKwHaptics.
+  ///
+  /// In en, this message translates to:
+  /// **'haptics vibration vibrate feedback touch'**
+  String get setKwHaptics;
 }
 
 class _AppLocalizationsDelegate

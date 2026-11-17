@@ -8888,16 +8888,13 @@ class AppLocalizationsMr extends AppLocalizations {
   String get obTermsPrivacy => 'गोपनीयता धोरण';
 
   @override
-  String get pathSheetTitle => 'तुम्ही इथे कसे आलात';
+  String get pathSheetTitle => 'जलद नेव्हिगेशन';
 
   @override
   String get pathSheetCurrent => 'तुम्ही इथे आहात';
 
   @override
-  String get pathSheetHint => 'या पेजचा मार्ग दाखवते';
-
-  @override
-  String get pathSheetLongPress => 'मार्ग दाखवा';
+  String get pathSheetHint => 'जलद नेव्हिगेशन उघडते';
 
   @override
   String get setPathTip =>
@@ -9059,7 +9056,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get obNotifSampleBody => 'SBI गृहकर्ज · ₹24,350';
 
   @override
-  String get pathSheetSub => 'कोणत्याही पेजवर परत जाण्यासाठी टॅप करा';
+  String get pathSheetSub => 'कोणतेही पेज उघडण्यासाठी टॅप करा';
 
   @override
   String get pathSheetFromNotification => 'सूचनेवरून उघडले';
@@ -11142,4 +11139,86 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get ahdMore => 'जास्त';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'उर्वरित $n पेज दाखवा';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'कमी पेज दाखवा';
+
+  @override
+  String get pathSheetExpand => 'विस्तृत करा';
+
+  @override
+  String get pathSheetCollapse => 'संक्षिप्त करा';
+
+  @override
+  String get motionTitle => 'ॲनिमेशन';
+
+  @override
+  String get motionSubtitle => 'टॅप, स्वाइप किंवा काही उघडताना कुबेर किती हलतो';
+
+  @override
+  String get motionPreviewHint => 'हा स्तर अनुभवण्यासाठी कार्डवर टॅप करा';
+
+  @override
+  String get motionAuto => 'ऑटो';
+
+  @override
+  String get motionExpressive => 'जिवंत';
+
+  @override
+  String get motionSubtle => 'हलका';
+
+  @override
+  String get motionOff => 'बंद';
+
+  @override
+  String get motionAutoExpressive => 'या फोनवर जिवंत स्तर वापरला जात आहे';
+
+  @override
+  String get motionAutoSubtle =>
+      'हलका स्तर वापरला जात आहे: या फोनमध्ये 4 GB पेक्षा कमी RAM आहे';
+
+  @override
+  String get motionAutoOff => 'बंद स्तर वापरला जात आहे: ॲनिमेशन काढा चालू आहे';
+
+  @override
+  String get motionExpressiveDesc => 'लवचिक आणि सहज. संपूर्ण अनुभव.';
+
+  @override
+  String get motionSubtleDesc => 'छोटे फेड आणि हलक्या हालचाली. उसळी नाही.';
+
+  @override
+  String get motionOffDesc => 'कोणतीही हालचाल नाही. गोष्टी झटपट फेडने बदलतात.';
+
+  @override
+  String get motionPhoneNote =>
+      'तुमच्या फोन सेटिंग्जमध्ये ॲनिमेशन काढा चालू आहे, म्हणून कुबेर बंद स्तर वापरतो.';
+
+  @override
+  String get motionOpenPhoneSettings => 'फोन सेटिंग्ज उघडा';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'ऑटो ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'बंद (फोन सेटिंग)';
+
+  @override
+  String get hapticsTitle => 'हॅप्टिक';
+
+  @override
+  String get hapticsSub => 'टॉगल आणि दीर्घ दाबावर कंपन करा';
+
+  @override
+  String get setKwMotion => 'ॲनिमेशन हालचाल उसळी फेड animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'हॅप्टिक कंपन व्हायब्रेशन फीडबॅक स्पर्श haptics vibration';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/biometric_service.dart';
@@ -93,6 +94,7 @@ Future<void> toggleCardBiometric(
   final r = await setCardBiometric(ref, enable,
       unlock: () async =>
           await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
             context: context,
             useRootNavigator: true,
             builder: (ctx) => Dialog.fullscreen(

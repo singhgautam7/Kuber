@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -13,6 +14,7 @@ import '../common/ah_common.dart';
 
 Future<T?> ahShowSheet<T>(BuildContext context, WidgetBuilder builder) =>
     showModalBottomSheet<T>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

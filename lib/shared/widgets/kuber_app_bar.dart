@@ -341,19 +341,23 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
                           key: const ValueKey('bar'),
                           children: [
                             if (showBack)
-                              AppIconButton(
-                                icon: w.closeIcon
-                                    ? Icons.close_rounded
-                                    : Icons.arrow_back_rounded,
-                                semanticLabel: w.closeIcon ? 'Close' : 'Back',
-                                onPressed:
-                                    w.onBack ?? () => Navigator.pop(context),
-                                onLongPress: hasPath
-                                    ? () => KuberPath.open(context)
+                              // No tooltip on long press (Quick navigation opens
+                              // at once); TalkBack still hears what it does.
+                              Semantics(
+                                onLongPressHint: hasPath
+                                    ? AppLocalizations.of(context)!.pathSheetTitle
                                     : null,
-                                longPressHint: hasPath
-                                    ? AppLocalizations.of(context)!.pathSheetLongPress
-                                    : null,
+                                child: AppIconButton(
+                                  icon: w.closeIcon
+                                      ? Icons.close_rounded
+                                      : Icons.arrow_back_rounded,
+                                  semanticLabel: w.closeIcon ? 'Close' : 'Back',
+                                  onPressed:
+                                      w.onBack ?? () => Navigator.pop(context),
+                                  onLongPress: hasPath
+                                      ? () => KuberPath.openFromLongPress(context)
+                                      : null,
+                                ),
                               ),
                             if (showHome)
                               AppIconButton(

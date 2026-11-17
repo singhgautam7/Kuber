@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/biometric_service.dart';
@@ -14,6 +14,7 @@ import '../data/card_keystore.dart';
 import '../data/card_vault_service.dart';
 import '../providers/kuber_cards_provider.dart';
 import '../widgets/kuber_pin_pad.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Full-screen PIN unlock, shown on cold start of Kuber Cards and after the
 /// section has been backgrounded > 60s (via the secure scaffold overlay). On
@@ -163,18 +164,19 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
     if (!mounted) return;
     switch (outcome.status) {
       case UnlockStatus.success:
+        KuberHaptics.confirm();
         ref.read(cardSessionProvider.notifier).unlock(outcome.key!);
         ref.invalidate(cardVaultMetaProvider);
         widget.onUnlocked?.call();
       case UnlockStatus.wrongPin:
-        HapticFeedback.mediumImpact();
+        KuberHaptics.reject();
         _pin.value = '';
         setState(() {
           _error = true;
           _attemptsLeft = outcome.attemptsLeft;
         });
       case UnlockStatus.cooldown:
-        HapticFeedback.mediumImpact();
+        KuberHaptics.reject();
         _pin.value = '';
         _startLock(outcome.until!, dayLock: false);
       case UnlockStatus.dayLocked:
@@ -196,7 +198,7 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
     if (!_ready) {
       return Scaffold(
         backgroundColor: cs.surface,
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: KuberShapeLoader(size: 40)),
       );
     }
 

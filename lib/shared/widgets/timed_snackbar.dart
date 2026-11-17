@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
+import 'kuber_shape_loader.dart';
 
 // ---------------------------------------------------------------------------
 // OverlayEntry-based snackbar.
@@ -14,6 +17,7 @@ import '../../core/theme/app_theme.dart';
 // ---------------------------------------------------------------------------
 
 const Duration _kSnackDuration = Duration(seconds: 7);
+// Upper bound on an exit (the real ones are 140 ms or less).
 const Duration _kAnimDuration = Duration(milliseconds: 220);
 
 OverlayEntry? _currentEntry;
@@ -25,7 +29,7 @@ Timer? _currentTimer;
 _ProgressSnack? _progress;
 bool _progressShowing = false;
 
-void _dismissCurrent({bool restoreProgress = true}) {
+void _dismissCurrent({bool restoreProgress = true, bool replacing = false}) {
   _currentTimer?.cancel();
   _currentTimer = null;
 
@@ -40,7 +44,7 @@ void _dismissCurrent({bool restoreProgress = true}) {
     // Bounded: with the app in the background no frames run, so the slide
     // out may never finish and the entry would be left on screen for good.
     controller
-        .animateOut()
+        .animateOut(replacing: replacing)
         .timeout(_kAnimDuration * 2, onTimeout: () {})
         .then((_) {
       if (entry.mounted) entry.remove();
@@ -185,7 +189,7 @@ void showKuberSnackBar(
 }) {
   // Clear any currently showing snackbar first (a progress snackbar is
   // parked and comes back when this one leaves).
-  _dismissCurrent(restoreProgress: false);
+  _dismissCurrent(restoreProgress: false, replacing: true);
 
   // Callers that only hold a root-navigator context (e.g. a global service)
   // can pass [overlay] directly, because `Overlay.of` cannot resolve an
@@ -222,10 +226,10 @@ class _KuberSnackBarController {
 
   void _attach(_KuberSnackBarWidgetState state) => _state = state;
 
-  Future<void> animateOut() async {
+  Future<void> animateOut({bool replacing = false}) async {
     final state = _state;
     if (state == null) return;
-    await state._animateOut();
+    await state._animateOut(replacing: replacing);
   }
 }
 
@@ -266,49 +270,96 @@ class _KuberSnackBarWidget extends StatefulWidget {
 
 class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
     with TickerProviderStateMixin {
-  late final AnimationController _slideCtrl;
-  late final Animation<double> _slideAnim;
+  // Enter / exit position: 0 hidden, 1 shown (unbounded: the spring may pass 1).
+  late final AnimationController _pos =
+      AnimationController.unbounded(vsync: this);
+  late final AnimationController _fade = AnimationController(vsync: this);
+  // The finger's offset (dx > 0 = right, dy < 0 = up), springs back on release.
+  late final AnimationController _dx =
+      AnimationController.unbounded(vsync: this, value: 0);
+  late final AnimationController _dy =
+      AnimationController.unbounded(vsync: this, value: 0);
   late final AnimationController _progressCtrl;
   bool _actionFired = false;
+  bool _started = false;
+  bool _crossed = false;
+  MotionLevel _level = MotionLevel.expressive;
 
-  // Drag-to-dismiss state (in logical pixels). dx > 0 = right, dy < 0 = up.
-  // Reset to (0, 0) on a non-dismiss drag end.
-  Offset _dragOffset = Offset.zero;
-
-  // Above either threshold a dismiss is committed even if velocity is low.
-  static const double _kSwipeDistanceThreshold = 80.0;
-  // Above either velocity (px/s) a fling commits even with low distance.
-  static const double _kSwipeVelocityThreshold = 600.0;
+  // Past this share of the snackbar's own size a release dismisses.
+  static const double _kSwipeShare = 0.4;
+  // Above this fling speed (dp/s) a release dismisses whatever the distance.
+  static const double _kSwipeVelocityThreshold = 800.0;
 
   @override
   void initState() {
     super.initState();
-    _slideCtrl = AnimationController(vsync: this, duration: _kAnimDuration);
-    _slideAnim = CurvedAnimation(
-      parent: _slideCtrl,
-      curve: Curves.easeOutCubic,
-    );
     _progressCtrl = AnimationController(
       vsync: this,
       duration: widget.duration ?? _kSnackDuration,
     );
     widget.controller._attach(this);
-    _slideCtrl.forward();
     if (widget.progress == null) _progressCtrl.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _level = KuberMotion.levelOf(context);
+    if (_started) return;
+    _started = true;
+    // Enter: y -100 % -> 0 on springDefault + fade fx.fast. Subtle:
+    // springSubtle over 4 dp. Off: a 90 ms fade.
+    _fade.animateTo(1,
+        duration: _level == MotionLevel.off
+            ? KuberMotion.fxInstant
+            : KuberMotion.fxFast);
+    if (_level == MotionLevel.off) {
+      _pos.value = 1;
+    } else {
+      _pos.springTo(1, KuberMotion.spatial(_level, KuberMotion.springDefault));
+    }
   }
 
   bool get _locked =>
       widget.progress != null && !widget.progress!.value.dismissible;
 
-  Future<void> _animateOut() async {
+  /// Leaves: up + fade over snackExit (140 ms); a swipe leaves the way it
+  /// was thrown; a message being replaced only fades (the new one fades in).
+  Future<void> _animateOut({bool replacing = false}) async {
     if (!mounted) return;
     _progressCtrl.stop();
-    await _slideCtrl.reverse();
+    final off = _level == MotionLevel.off;
+    final d = off ? KuberMotion.fxInstant : KuberMotion.snackExit;
+    final fade = _fade.animateTo(0, duration: d, curve: Curves.easeIn);
+    if (off || replacing) return fade;
+    final w = context.size?.width ?? 320;
+    final v = _lastFling;
+    if (_leaveHorizontal && v.dx != 0) {
+      final target = (v.dx > 0 ? 1 : -1) * (w + 40.0);
+      final ms = ((target - _dx.value).abs() / v.dx.abs() * 1000)
+          .clamp(80, 140)
+          .round();
+      await Future.wait([
+        _dx.animateTo(target, duration: Duration(milliseconds: ms), curve: Curves.easeIn),
+        fade,
+      ]);
+    } else {
+      await Future.wait([
+        _pos.animateTo(0, duration: d, curve: Curves.easeIn),
+        fade,
+      ]);
+    }
   }
+
+  Offset _lastFling = Offset.zero;
+  bool _leaveHorizontal = false;
 
   @override
   void dispose() {
-    _slideCtrl.dispose();
+    _pos.dispose();
+    _fade.dispose();
+    _dx.dispose();
+    _dy.dispose();
     _progressCtrl.dispose();
     super.dispose();
   }
@@ -325,37 +376,49 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
     // Pause the auto-dismiss timer once a drag begins — without this the
     // snackbar can disappear mid-swipe and leave a janky frame.
     _progressCtrl.stop();
+    _dx.stop();
+    _dy.stop();
+  }
+
+  double _share() {
+    final size = context.size;
+    if (size == null) return 0;
+    return math.max(_dx.value.abs() / size.width, -_dy.value / size.height);
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
     if (_locked) return;
-    setState(() {
-      // Allow horizontal movement freely; vertical only upward (dy ≤ 0)
-      // since the snackbar lives at the top of the screen.
-      final dx = _dragOffset.dx + details.delta.dx;
-      final dy = (_dragOffset.dy + details.delta.dy).clamp(-200.0, 0.0);
-      _dragOffset = Offset(dx, dy);
-    });
+    // Horizontal moves freely; vertical only upward (dy <= 0) since the
+    // snackbar lives at the top of the screen.
+    _dx.value += details.delta.dx;
+    _dy.value = (_dy.value + details.delta.dy).clamp(-200.0, 0.0);
+    final past = _share() >= _kSwipeShare;
+    if (past && !_crossed) KuberHaptics.threshold();
+    _crossed = past;
   }
 
   void _onDragEnd(DragEndDetails details) {
     if (_locked) return;
     final v = details.velocity.pixelsPerSecond;
-    final distanceMet =
-        _dragOffset.dx.abs() >= _kSwipeDistanceThreshold ||
-        _dragOffset.dy <= -_kSwipeDistanceThreshold;
-    final velocityMet =
+    if (_share() >= _kSwipeShare ||
         v.dx.abs() >= _kSwipeVelocityThreshold ||
-        v.dy <= -_kSwipeVelocityThreshold;
-
-    if (distanceMet || velocityMet) {
+        v.dy <= -_kSwipeVelocityThreshold) {
+      _lastFling = v;
+      _leaveHorizontal = _dx.value.abs() >= -_dy.value;
       widget.onRequestClose();
       return;
     }
 
-    // Not dismissed — settle the snackbar back to its resting position
-    // and resume the auto-dismiss countdown.
-    setState(() => _dragOffset = Offset.zero);
+    // Not dismissed: back on springFast, and the countdown resumes.
+    _crossed = false;
+    final spring = KuberMotion.spatial(_level, KuberMotion.springFast);
+    if (_level == MotionLevel.off) {
+      _dx.value = 0;
+      _dy.value = 0;
+    } else {
+      _dx.springTo(0, spring);
+      _dy.springTo(0, spring);
+    }
     if (widget.progress == null) _progressCtrl.forward();
   }
 
@@ -376,24 +439,23 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
       left: 20,
       right: 20,
       child: AnimatedBuilder(
-        animation: _slideAnim,
+        animation: Listenable.merge([_pos, _fade, _dx, _dy]),
         builder: (context, child) {
-          final t = _slideAnim.value;
-          // Compose the entry-animation slide with the user's drag offset
-          // and fade the snackbar as it travels off screen so the dismiss
-          // reads as intentional.
-          final entryOffset = Offset(0, (1 - t) * -80);
-          final totalOffset = entryOffset + _dragOffset;
-          final dragDistance = _dragOffset.distance;
-          // Cap the fade at ~50% drag-progress; full fade kicks in only
-          // when the user actually flings the snackbar away.
-          final dragFade = (dragDistance / 200).clamp(0.0, 0.5);
-          return Transform.translate(
-            offset: totalOffset,
-            child: Opacity(
-              opacity: (t * (1 - dragFade)).clamp(0.0, 1.0),
-              child: child,
-            ),
+          // Compose the entry slide with the finger's offset, and fade as it
+          // travels so a dismiss reads as intentional.
+          final p = _pos.value;
+          final drag = Offset(_dx.value, _dy.value);
+          // Cap the drag fade at ~50 %; the full fade comes from the exit.
+          final dragFade = (drag.distance / 200).clamp(0.0, 0.5);
+          Widget w = child!;
+          w = _level == MotionLevel.subtle
+              ? Transform.translate(offset: Offset(0, -4 * (1 - p)), child: w)
+              : FractionalTranslation(
+                  translation: Offset(0, _level == MotionLevel.off ? 0 : p - 1),
+                  child: w);
+          return Opacity(
+            opacity: (_fade.value * (1 - dragFade)).clamp(0.0, 1.0),
+            child: Transform.translate(offset: drag, child: w),
           );
         },
         child: GestureDetector(
@@ -446,12 +508,14 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
                     SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(
-                        value: p.value,
-                        strokeWidth: 2.5,
-                        color: accent,
-                        backgroundColor: fg.withValues(alpha: 0.16),
-                      ),
+                      child: p.value == null
+                          ? KuberShapeLoader(size: 20, color: accent)
+                          : CircularProgressIndicator(
+                              value: p.value,
+                              strokeWidth: 2.5,
+                              color: accent,
+                              backgroundColor: fg.withValues(alpha: 0.16),
+                            ),
                     )
                   else
                     Icon(

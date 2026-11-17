@@ -3,6 +3,8 @@
 // Closed collapsed, Add investment.
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/list_motion.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -33,6 +35,7 @@ import '../domain/investment_engine.dart';
 import '../domain/investment_service.dart';
 import '../providers/investment_provider.dart';
 import '../widgets/holding_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class InvestmentsScreen extends ConsumerStatefulWidget {
   const InvestmentsScreen({super.key});
@@ -42,6 +45,7 @@ class InvestmentsScreen extends ConsumerStatefulWidget {
 }
 
 class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
+  final _listMotion = ListMotion();
   bool _closedOpen = false;
 
   @override
@@ -92,7 +96,7 @@ class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
           child: KuberAppBar(showBack: true, title: l.investmentsTitle, infoConfig: InfoConstants.investments),
         ),
         if (invs == null)
-          const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+          const SliverFillRemaining(child: Center(child: KuberShapeLoader(size: 40)))
         else if (invs.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
@@ -120,7 +124,10 @@ class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
                         ),
                       ),
                     ),
-                    KuberGroup(children: [for (final i in groups[g]!) _HoldingRow(investment: i)]),
+                    KuberGroup(children: [
+                      for (final (n, i) in groups[g]!.indexed)
+                        _listMotion.item(context, 'inv${i.uid}', n, _HoldingRow(investment: i)),
+                    ]),
                   ],
                 if (closed.isNotEmpty) ...[
                   const SizedBox(height: KuberSpace.sectionGap),
@@ -190,7 +197,11 @@ class _PortfolioHero extends ConsumerWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(l.msInvPortfolio.toUpperCase(),
             style: tt.labelMedium!.copyWith(color: cs.onSurfaceVariant, letterSpacing: 0.8)),
-        Text(m(value), style: tt.headlineMedium),
+        AnimatedAmount(
+            value: value,
+            animateIn: false,
+            format: m,
+            style: tt.headlineMedium),
         const SizedBox(height: 12),
         KvGrid(items: [
           KvItem(l.msInvInvested, m(invested)),

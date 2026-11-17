@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../common/ah_motion.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 
 /// Share bar: the M3 Expressive wavy progress (amplitude 3, wavelength 24,
 /// 4 dp stroke) in the group colour, a 4 dp track after a 4 dp gap and a stop
@@ -29,7 +29,7 @@ class AhShareBar extends StatefulWidget {
 class _AhShareBarState extends State<AhShareBar>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-      vsync: this, duration: AhMotion.defaultCurve.settle);
+      vsync: this, duration: KuberMotion.defaultCurve.settle);
   Timer? _t;
   bool _started = false;
 
@@ -38,7 +38,7 @@ class _AhShareBarState extends State<AhShareBar>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    if (AhMotion.reduced(context)) {
+    if (KuberMotion.reduced(context)) {
       _c.value = 1;
     } else if (widget.delay == Duration.zero) {
       _c.forward();
@@ -58,7 +58,7 @@ class _AhShareBarState extends State<AhShareBar>
 
   @override
   Widget build(BuildContext context) {
-    final v = CurvedAnimation(parent: _c, curve: AhMotion.defaultCurve);
+    final v = CurvedAnimation(parent: _c, curve: KuberMotion.defaultCurve);
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: v,

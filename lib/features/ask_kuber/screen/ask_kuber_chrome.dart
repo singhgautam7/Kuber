@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_menu.dart';
 import 'kuber_mark.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Pin spec for the Ask Kuber home-screen shortcut (overflow > Add to home
 /// screen). Mirrors the static `ask_kuber` shortcut in shortcuts.xml.
@@ -232,10 +233,7 @@ class ChatInputBar extends StatelessWidget {
                         ? SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: cs.onSurfaceVariant,
-                            ),
+                            child: KuberShapeLoader(size: 18, color: cs.onSurfaceVariant),
                           )
                         : KuberSendIcon(
                             size: 18,

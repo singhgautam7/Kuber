@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Global reference to track the active app locale so that non-contextual
 /// typography lookups can dynamically resolve to the correct regional font family.
@@ -64,8 +63,8 @@ TextStyle serifFont({
 /// matching Inter's weight scale across all four families. The
 /// `height` value is family-aware.
 ///
-/// Always call this from any text builder. Never call GoogleFonts.inter
-/// (or any other family) directly from a widget.
+/// Always call this from any text builder. Never set a font family
+/// directly from a widget.
 TextStyle localeFont({
   Locale? locale,
   double? fontSize,
@@ -99,99 +98,40 @@ TextStyle localeFont({
     }
   }
 
-  switch (code) {
-    case 'hi':
-    case 'mr':
-      return GoogleFonts.notoSansDevanagari(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'pa':
-      return GoogleFonts.notoSansGurmukhi(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'bn':
-      return GoogleFonts.notoSansBengali(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'te':
-      return GoogleFonts.notoSansTelugu(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'ta':
-      return GoogleFonts.notoSansTamil(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'ml':
-      return GoogleFonts.notoSansMalayalam(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'kn':
-      return GoogleFonts.notoSansKannada(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-    case 'en':
-    default:
-      return GoogleFonts.inter(
-        fontSize: fontSize,
-        fontWeight: w,
-        color: color,
-        letterSpacing: ls,
-        height: h,
-        decoration: decoration,
-        fontStyle: fontStyle,
-        fontFeatures: fontFeatures,
-      );
-  }
+  // Inter is one bundled variable font (assets/fonts/InterVariable.ttf, wght
+  // 400..700). The engine does not map FontWeight to the axis on every
+  // platform, so the axis is set explicitly; w900 clamps to 700 (the subset's
+  // max, same as the old static Bold fallback).
+  final weight = (w ?? FontWeight.w400);
+  final wght = weight.value.clamp(400, 700).toDouble();
+  return TextStyle(
+    fontFamily: 'Inter',
+    // Regional scripts: Inter supplies Latin, digits and the rupee sign; the
+    // system's Noto Sans <script> (Android and web) draws the script itself,
+    // offline, with no runtime font download.
+    fontFamilyFallback: _scriptFallback[code],
+    fontSize: fontSize,
+    fontWeight: weight,
+    fontVariations: [FontVariation('wght', wght)],
+    color: color,
+    letterSpacing: ls,
+    height: h,
+    decoration: decoration,
+    fontStyle: fontStyle,
+    fontFeatures: fontFeatures,
+  );
 }
+
+const _scriptFallback = <String, List<String>>{
+  'hi': ['Noto Sans Devanagari'],
+  'mr': ['Noto Sans Devanagari'],
+  'pa': ['Noto Sans Gurmukhi'],
+  'bn': ['Noto Sans Bengali'],
+  'te': ['Noto Sans Telugu'],
+  'ta': ['Noto Sans Tamil'],
+  'ml': ['Noto Sans Malayalam'],
+  'kn': ['Noto Sans Kannada'],
+};
 
 double _defaultHeight(String code) {
   switch (code) {

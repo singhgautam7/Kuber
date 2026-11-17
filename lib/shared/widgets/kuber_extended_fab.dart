@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
+import '../../core/theme/app_theme.dart';
+
 /// Bottom offset shared with the main nav bar (`app_scaffold.dart`): the
 /// system inset, but never less than 22.
 double _navBottom(BuildContext context) {
@@ -81,6 +84,10 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final bottom = _navBottom(context);
+    final level = KuberMotion.levelOf(context);
+    // Hide on scroll: y 0 -> 88 dp on springStandard (springSubtle at Subtle);
+    // Off only fades.
+    final slide = KuberMotion.spatialCurve(level, KuberMotion.standardCurve);
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: Stack(
@@ -99,7 +106,7 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
                 valueListenable: kuberFabVisible,
                 builder: (context, visible, child) => AnimatedOpacity(
                   opacity: visible ? 1 : 0,
-                  duration: const Duration(milliseconds: 180),
+                  duration: KuberMotion.fxDefault,
                   child: child,
                 ),
                 child: DecoratedBox(
@@ -121,37 +128,44 @@ class _KuberExtendedFabState extends State<KuberExtendedFab> {
           ),
           ValueListenableBuilder<bool>(
             valueListenable: kuberFabVisible,
-            builder: (context, visible, child) => AnimatedSlide(
-              offset: visible ? Offset.zero : const Offset(0, 2),
-              duration: const Duration(milliseconds: 220),
-              curve: visible ? Curves.easeOutCubic : Curves.easeInCubic,
+            builder: (context, visible, child) => TweenAnimationBuilder<double>(
+              tween: Tween(end: visible || level == MotionLevel.off ? 0.0 : 88.0),
+              duration: level == MotionLevel.off ? Duration.zero : slide.settle,
+              curve: slide,
+              builder: (context, dy, child) =>
+                  Transform.translate(offset: Offset(0, dy), child: child),
               child: AnimatedOpacity(
                 opacity: visible ? 1 : 0,
-                duration: const Duration(milliseconds: 180),
+                duration: KuberMotion.fxFast,
                 child: IgnorePointer(ignoring: !visible, child: child),
               ),
             ),
-            child: Material(
-              color: cs.primaryContainer,
-              shape: const StadiumBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: widget.onPressed,
-                child: Container(
-                  height: 56,
-                  padding: const EdgeInsets.only(left: 20, right: 24),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(widget.icon, size: 24, color: cs.onPrimaryContainer),
-                      const SizedBox(width: 10),
-                      Text(
-                        widget.label,
-                        style: theme.textTheme.labelLarge!.copyWith(
-                          color: cs.onPrimaryContainer,
+            child: Pressable(
+              kind: PressKind.fab,
+              restRadius: 28,
+              builder: (context, radius, _) => Material(
+                color: cs.primaryContainer,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(radius)),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: widget.onPressed,
+                  child: Container(
+                    height: 56,
+                    padding: const EdgeInsets.only(left: 20, right: 24),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(widget.icon, size: 24, color: cs.onPrimaryContainer),
+                        const SizedBox(width: 10),
+                        Text(
+                          widget.label,
+                          style: theme.textTheme.labelLarge!.copyWith(
+                            color: cs.onPrimaryContainer,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

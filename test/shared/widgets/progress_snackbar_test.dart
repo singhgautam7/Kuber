@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kuber/core/theme/app_theme.dart';
+import 'package:kuber/shared/widgets/kuber_shape_loader.dart';
 import 'package:kuber/shared/widgets/timed_snackbar.dart';
 
 // Every state of the background-tasks snackbar (plan B: progress, swipe
@@ -31,7 +32,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Adding 2 recurring transactions'), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(KuberShapeLoader), findsOneWidget);
     expect(find.byIcon(Icons.close_rounded), findsNothing);
 
     await tester.fling(find.text('Adding 2 recurring transactions'), const Offset(400, 0), 2000);
@@ -94,7 +95,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('2 recurring added · Backup done'), findsOneWidget);
     expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(KuberShapeLoader), findsNothing);
     await tester.tap(find.text('View'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));

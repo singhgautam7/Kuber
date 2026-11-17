@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
@@ -16,6 +17,7 @@ import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../paywall/pro_state.dart';
 import '../services/purchase_service.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// DEBUG-ONLY read-only Play Billing inspector. Reached from Dev Tools; the
 /// whole feature is compiled out of release builds (the call site is gated on
@@ -28,6 +30,7 @@ import '../services/purchase_service.dart';
 /// visible at a glance. Nothing is written; entitlement is never mutated here.
 void showBillingDiagnosticSheet(BuildContext context) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -213,7 +216,7 @@ class _BillingDiagnosticSheetState
                 child: SizedBox(
                   width: 26,
                   height: 26,
-                  child: CircularProgressIndicator(strokeWidth: 3),
+                  child: KuberShapeLoader(size: 26),
                 ),
               ),
             )

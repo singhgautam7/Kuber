@@ -8887,16 +8887,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String get obTermsPrivacy => 'গোপনীয়তা নীতি';
 
   @override
-  String get pathSheetTitle => 'আপনি এখানে কীভাবে এলেন';
+  String get pathSheetTitle => 'দ্রুত নেভিগেশন';
 
   @override
   String get pathSheetCurrent => 'আপনি এখানে আছেন';
 
   @override
-  String get pathSheetHint => 'এই পাতার পথ দেখায়';
-
-  @override
-  String get pathSheetLongPress => 'পথ দেখান';
+  String get pathSheetHint => 'দ্রুত নেভিগেশন খোলে';
 
   @override
   String get setPathTip =>
@@ -9057,7 +9054,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get obNotifSampleBody => 'SBI হোম লোন · ₹24,350';
 
   @override
-  String get pathSheetSub => 'যেকোনো পেজে ফিরতে ট্যাপ করুন';
+  String get pathSheetSub => 'যেকোনো পেজ খুলতে ট্যাপ করুন';
 
   @override
   String get pathSheetFromNotification => 'নোটিফিকেশন থেকে খোলা হয়েছে';
@@ -11136,4 +11133,88 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get ahdMore => 'বেশি';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'বাকি $nটি পেজ দেখান';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'কম পেজ দেখান';
+
+  @override
+  String get pathSheetExpand => 'প্রসারিত করুন';
+
+  @override
+  String get pathSheetCollapse => 'সংকুচিত করুন';
+
+  @override
+  String get motionTitle => 'অ্যানিমেশন';
+
+  @override
+  String get motionSubtitle =>
+      'ট্যাপ, সোয়াইপ বা কিছু খোলার সময় কুবের কতটা নড়ে';
+
+  @override
+  String get motionPreviewHint => 'এই স্তর অনুভব করতে কার্ডে ট্যাপ করুন';
+
+  @override
+  String get motionAuto => 'অটো';
+
+  @override
+  String get motionExpressive => 'প্রাণবন্ত';
+
+  @override
+  String get motionSubtle => 'মৃদু';
+
+  @override
+  String get motionOff => 'বন্ধ';
+
+  @override
+  String get motionAutoExpressive => 'এই ফোনে প্রাণবন্ত স্তর ব্যবহার হচ্ছে';
+
+  @override
+  String get motionAutoSubtle =>
+      'মৃদু স্তর ব্যবহার হচ্ছে: এই ফোনে 4 GB-এর কম RAM আছে';
+
+  @override
+  String get motionAutoOff =>
+      'বন্ধ স্তর ব্যবহার হচ্ছে: অ্যানিমেশন সরান চালু আছে';
+
+  @override
+  String get motionExpressiveDesc => 'স্প্রিংয়ের মতো মসৃণ। পূর্ণ অভিজ্ঞতা।';
+
+  @override
+  String get motionSubtleDesc => 'ছোট ফেড আর হালকা নড়াচড়া। কোনো বাউন্স নেই।';
+
+  @override
+  String get motionOffDesc => 'কোনো নড়াচড়া নেই। জিনিস দ্রুত ফেডে বদলায়।';
+
+  @override
+  String get motionPhoneNote =>
+      'আপনার ফোনের সেটিংসে অ্যানিমেশন সরান চালু আছে, তাই কুবের বন্ধ স্তর ব্যবহার করে।';
+
+  @override
+  String get motionOpenPhoneSettings => 'ফোনের সেটিংস খুলুন';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'অটো ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'বন্ধ (ফোনের সেটিং)';
+
+  @override
+  String get hapticsTitle => 'হ্যাপটিক';
+
+  @override
+  String get hapticsSub => 'টগল ও দীর্ঘ চাপে ভাইব্রেট করুন';
+
+  @override
+  String get setKwMotion => 'অ্যানিমেশন নড়াচড়া বাউন্স ফেড animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'হ্যাপটিক কম্পন ভাইব্রেশন ফিডব্যাক স্পর্শ haptics vibration';
 }

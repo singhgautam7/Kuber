@@ -5,6 +5,7 @@
 // =============================================================================
 
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -23,6 +24,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 // From the pickers-and-setup pass:
 
@@ -242,6 +244,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
   void _openGroupPicker() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -472,7 +475,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
             child: groupsAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
+                child: KuberShapeLoader(size: 40),
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(32),

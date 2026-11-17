@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
@@ -18,6 +19,7 @@ void showFeatureGateSheet(
   required String body,
 }) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

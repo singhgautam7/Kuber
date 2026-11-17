@@ -1,3 +1,4 @@
+import '../../core/motion/motion.dart';
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,7 @@ Future<void> showColorPicker({
   required ValueChanged<int> onSelected,
 }) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -147,7 +149,9 @@ class _SwatchCell extends StatelessWidget {
     final tickColor = isLight ? darkTick : lightTick;
 
     // Circle swatch; selected = 2dp primary ring outside a 2dp gap + check.
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: Colors.transparent,
       shape: CircleBorder(
         side: BorderSide(
@@ -157,7 +161,10 @@ class _SwatchCell extends StatelessWidget {
       ),
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: () {
+          if (!isSelected) KuberHaptics.tick();
+          onTap();
+        },
         child: Padding(
           padding: const EdgeInsets.all(4),
           child: Ink(
@@ -177,6 +184,6 @@ class _SwatchCell extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }

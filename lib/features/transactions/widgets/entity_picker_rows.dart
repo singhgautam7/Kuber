@@ -3,6 +3,7 @@
 // loans, investments, withdraw / extra payment sheets.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/icon_mapper.dart';
@@ -53,6 +54,7 @@ class AccountPickerRow extends ConsumerWidget {
       value: acc?.name ?? noneLabel ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: () => showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
         context: context,
         isScrollControlled: true,
         useSafeArea: true,
@@ -110,6 +112,7 @@ class CategoryPickerRow extends ConsumerWidget {
       value: cat?.name ?? context.l10n.selectCategoryTitle,
       valueIsPlaceholder: cat == null,
       onTap: () => showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
         context: context,
         isScrollControlled: true,
         useSafeArea: true,

@@ -8931,16 +8931,13 @@ class AppLocalizationsKn extends AppLocalizations {
   String get obTermsPrivacy => 'ಗೌಪ್ಯತಾ ನೀತಿ';
 
   @override
-  String get pathSheetTitle => 'ನೀವು ಇಲ್ಲಿಗೆ ಬಂದ ದಾರಿ';
+  String get pathSheetTitle => 'ತ್ವರಿತ ನ್ಯಾವಿಗೇಷನ್';
 
   @override
   String get pathSheetCurrent => 'ನೀವು ಇಲ್ಲಿದ್ದೀರಿ';
 
   @override
-  String get pathSheetHint => 'ಈ ಪುಟಕ್ಕೆ ದಾರಿ ತೋರಿಸುತ್ತದೆ';
-
-  @override
-  String get pathSheetLongPress => 'ಮಾರ್ಗ ತೋರಿಸಿ';
+  String get pathSheetHint => 'ತ್ವರಿತ ನ್ಯಾವಿಗೇಷನ್ ತೆರೆಯುತ್ತದೆ';
 
   @override
   String get setPathTip =>
@@ -9102,7 +9099,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get obNotifSampleBody => 'SBI ಗೃಹ ಸಾಲ · ₹24,350';
 
   @override
-  String get pathSheetSub => 'ಯಾವುದೇ ಪುಟಕ್ಕೆ ಮರಳಲು ಟ್ಯಾಪ್ ಮಾಡಿ';
+  String get pathSheetSub => 'ಯಾವುದೇ ಪುಟವನ್ನು ತೆರೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ';
 
   @override
   String get pathSheetFromNotification => 'ಅಧಿಸೂಚನೆಯಿಂದ ತೆರೆಯಲಾಗಿದೆ';
@@ -11195,4 +11192,91 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get ahdMore => 'ಹೆಚ್ಚು';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'ಉಳಿದ $n ಪುಟಗಳನ್ನು ತೋರಿಸಿ';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'ಕಡಿಮೆ ಪುಟಗಳನ್ನು ತೋರಿಸಿ';
+
+  @override
+  String get pathSheetExpand => 'ವಿಸ್ತರಿಸಿ';
+
+  @override
+  String get pathSheetCollapse => 'ಸಂಕುಚಿಸಿ';
+
+  @override
+  String get motionTitle => 'ಅನಿಮೇಷನ್';
+
+  @override
+  String get motionSubtitle =>
+      'ನೀವು ಟ್ಯಾಪ್, ಸ್ವೈಪ್ ಮಾಡಿದಾಗ ಅಥವಾ ತೆರೆದಾಗ ಕುಬೇರ್ ಎಷ್ಟು ಚಲಿಸುತ್ತದೆ';
+
+  @override
+  String get motionPreviewHint =>
+      'ಈ ಹಂತವನ್ನು ಅನುಭವಿಸಲು ಕಾರ್ಡ್ ಮೇಲೆ ಟ್ಯಾಪ್ ಮಾಡಿ';
+
+  @override
+  String get motionAuto => 'ಆಟೋ';
+
+  @override
+  String get motionExpressive => 'ಉತ್ಸಾಹಭರಿತ';
+
+  @override
+  String get motionSubtle => 'ಸೂಕ್ಷ್ಮ';
+
+  @override
+  String get motionOff => 'ಆಫ್';
+
+  @override
+  String get motionAutoExpressive =>
+      'ಈ ಫೋನ್‌ನಲ್ಲಿ ಉತ್ಸಾಹಭರಿತ ಹಂತ ಬಳಸಲಾಗುತ್ತಿದೆ';
+
+  @override
+  String get motionAutoSubtle =>
+      'ಸೂಕ್ಷ್ಮ ಹಂತ ಬಳಸಲಾಗುತ್ತಿದೆ: ಈ ಫೋನ್‌ನಲ್ಲಿ 4 GB ಗಿಂತ ಕಡಿಮೆ RAM ಇದೆ';
+
+  @override
+  String get motionAutoOff =>
+      'ಆಫ್ ಹಂತ ಬಳಸಲಾಗುತ್ತಿದೆ: ಅನಿಮೇಷನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಿ ಆನ್ ಆಗಿದೆ';
+
+  @override
+  String get motionExpressiveDesc => 'ಸ್ಪ್ರಿಂಗ್‌ನಂತೆ ಸರಾಗ. ಪೂರ್ಣ ಅನುಭವ.';
+
+  @override
+  String get motionSubtleDesc => 'ಚಿಕ್ಕ ಫೇಡ್‌ಗಳು, ಸಣ್ಣ ಚಲನೆಗಳು. ಬೌನ್ಸ್ ಇಲ್ಲ.';
+
+  @override
+  String get motionOffDesc =>
+      'ಚಲನೆ ಇಲ್ಲ. ವಿಷಯಗಳು ತ್ವರಿತ ಫೇಡ್‌ನೊಂದಿಗೆ ಬದಲಾಗುತ್ತವೆ.';
+
+  @override
+  String get motionPhoneNote =>
+      'ನಿಮ್ಮ ಫೋನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅನಿಮೇಷನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಿ ಆನ್ ಆಗಿದೆ, ಆದ್ದರಿಂದ ಕುಬೇರ್ ಆಫ್ ಹಂತವನ್ನು ಬಳಸುತ್ತದೆ.';
+
+  @override
+  String get motionOpenPhoneSettings => 'ಫೋನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'ಆಟೋ ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'ಆಫ್ (ಫೋನ್ ಸೆಟ್ಟಿಂಗ್)';
+
+  @override
+  String get hapticsTitle => 'ಹ್ಯಾಪ್ಟಿಕ್ಸ್';
+
+  @override
+  String get hapticsSub => 'ಟಾಗಲ್‌ಗಳು ಮತ್ತು ಲಾಂಗ್ ಪ್ರೆಸ್‌ಗಳಲ್ಲಿ ವೈಬ್ರೇಟ್ ಮಾಡಿ';
+
+  @override
+  String get setKwMotion => 'ಅನಿಮೇಷನ್ ಚಲನೆ ಬೌನ್ಸ್ ಫೇಡ್ animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'ಹ್ಯಾಪ್ಟಿಕ್ಸ್ ವೈಬ್ರೇಶನ್ ಕಂಪನ ಫೀಡ್‌ಬ್ಯಾಕ್ ಸ್ಪರ್ಶ haptics vibration';
 }

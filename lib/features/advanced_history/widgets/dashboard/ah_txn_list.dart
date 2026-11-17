@@ -24,6 +24,27 @@ class AhDayEntry {
 
 const _chunk = 20;
 
+/// [ahDayEntries] memoised: regroups only when the list (identity), the
+/// sort mode or [salt] (e.g. the locale, which the day headers depend on)
+/// changes, not on every rebuild.
+class AhDayEntryCache {
+  List<Transaction>? _items;
+  bool? _byDate;
+  Object? _salt;
+  List<AhDayEntry> _out = const [];
+
+  List<AhDayEntry> of(List<Transaction> items,
+      {required bool byDate, Object? salt}) {
+    if (!identical(items, _items) || byDate != _byDate || salt != _salt) {
+      _items = items;
+      _byDate = byDate;
+      _salt = salt;
+      _out = ahDayEntries(items, byDate: byDate);
+    }
+    return _out;
+  }
+}
+
 List<AhDayEntry> ahDayEntries(List<Transaction> items, {required bool byDate}) {
   final out = <AhDayEntry>[];
   if (!byDate) {

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:kuber/core/utils/date_formatter.dart';
 import 'package:flutter/material.dart';
@@ -375,6 +376,7 @@ class NotificationsSheet extends StatelessWidget {
     required void Function(AppNotification) onTapNotification,
   }) {
     return showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -392,6 +394,7 @@ class NotificationsSheet extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final lang = AppLocale.current.languageCode;
     final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -14,6 +15,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
 import 'settings_widgets.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 // ---------------------------------------------------------------------------
 // Show helper
@@ -21,6 +23,7 @@ import 'settings_widgets.dart';
 
 void showDataImportBottomSheet(BuildContext context, {bool json = false}) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
@@ -374,10 +377,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     ? SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: cs.primary,
-                        ),
+                        child: KuberShapeLoader(size: 20, color: cs.primary),
                       )
                     : GestureDetector(
                         onTap: _downloadTemplate,

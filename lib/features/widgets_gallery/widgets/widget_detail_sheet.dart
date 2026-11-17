@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../../core/services/home_widget_bridge.dart';
 import '../../../core/theme/app_theme.dart';
@@ -11,6 +12,7 @@ Future<void> showWidgetDetailSheet(
   WidgetCatalogEntry entry,
 ) {
   return showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -125,6 +127,7 @@ class _WidgetDetailSheet extends StatelessWidget {
 
   void _showFallback(BuildContext context) {
     showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Add from your home screen'),

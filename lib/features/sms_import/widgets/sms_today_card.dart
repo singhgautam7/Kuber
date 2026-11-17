@@ -4,6 +4,7 @@ import 'dart:ui' show PathMetric;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/animated_amount.dart';
@@ -60,7 +61,7 @@ class _SmsTodayCardState extends ConsumerState<SmsTodayCard>
   void _onChange(SmsTodaySummary? prev, SmsTodaySummary? next) {
     if (prev == null || next == null || prev == next) return;
     _hold?.cancel();
-    final reduced = KuberMotion.reduced(context);
+    final reduced = KuberMotion.levelOf(context) == MotionLevel.off;
     setState(() {
       _countUp = prev.count == 0 && next.count > 0;
       _zeroing = null;
@@ -81,7 +82,7 @@ class _SmsTodayCardState extends ConsumerState<SmsTodayCard>
     final live = ref.watch(smsTodaySummaryProvider);
     if (live == null) return const SizedBox.shrink();
 
-    final reduced = KuberMotion.reduced(context);
+    final reduced = KuberMotion.levelOf(context) == MotionLevel.off;
     final cs = Theme.of(context).colorScheme;
     final zeroing = _zeroing;
 
@@ -111,7 +112,9 @@ class _SmsTodayCardState extends ConsumerState<SmsTodayCard>
         child: AnimatedSize(
           duration: reduced
               ? KuberMotion.reducedFade
-              : const Duration(milliseconds: 230),
+              : (KuberMotion.levelOf(context) == MotionLevel.subtle
+                  ? KuberMotion.fxDefault
+                  : const Duration(milliseconds: 230)),
           curve: KuberMotion.decelerate,
           alignment: Alignment.topCenter,
           // Fade through: the old state is gone before the new one appears,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -62,6 +63,7 @@ extension SupportTierX on SupportTier {
 /// Pro features, it is purely a thank-you.
 void showSupportThankYouSheet(BuildContext context, SupportTier tier) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

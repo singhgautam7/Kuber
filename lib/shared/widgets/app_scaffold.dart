@@ -9,9 +9,11 @@ import '../../features/settings/providers/settings_provider.dart'
 import '../../features/history/providers/selection_provider.dart';
 import '../../features/quick_actions/widgets/add_new_sheet.dart';
 import '../../features/quick_actions/widgets/quick_actions_sheet.dart';
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
+import 'kuber_shape_loader.dart';
 
 final currentShellTabIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -212,7 +214,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     if (widget.navigationShell == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: KuberShapeLoader()));
     }
     final currentIndex = widget.navigationShell!.currentIndex;
     if (ref.read(currentShellTabIndexProvider) != currentIndex) {
@@ -282,10 +284,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
         backgroundColor: cs.surface,
         body: animatedContent,
         floatingActionButton: currentIndex != 3
-            ? AnimatedScale(
-                scale: (isSelectionMode || isKeyboardOpen) ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
+            ? _FabVisibility(
+                hidden: isSelectionMode || isKeyboardOpen,
                 child: KuberNavFab(
                   onTap: _onAddTapped,
                   onLongPress: _openAddMenu,
@@ -319,6 +319,33 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
         }
       },
       child: content,
+    );
+  }
+}
+
+/// Shows / hides the classic-layout FAB: scale 0.6 <-> 1 on springDefault plus
+/// a fx.fast fade (springSubtle at Subtle; Off only fades).
+class _FabVisibility extends StatelessWidget {
+  const _FabVisibility({required this.hidden, required this.child});
+  final bool hidden;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final level = KuberMotion.levelOf(context);
+    final curve = KuberMotion.spatialCurve(level, KuberMotion.defaultCurve);
+    return AnimatedOpacity(
+      opacity: hidden ? 0 : 1,
+      duration: KuberMotion.fxFast,
+      child: IgnorePointer(
+        ignoring: hidden,
+        child: AnimatedScale(
+          scale: hidden && level != MotionLevel.off ? 0.6 : 1,
+          duration: level == MotionLevel.off ? Duration.zero : curve.settle,
+          curve: curve,
+          child: child,
+        ),
+      ),
     );
   }
 }
@@ -557,7 +584,10 @@ class _NavBarItemState extends State<_NavBarItem>
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: widget.onTap,
+      onTap: () {
+        if (!widget.isSelected) KuberHaptics.tick();
+        widget.onTap();
+      },
       onLongPress: widget.onLongPress,
       child: AnimatedBuilder(
         animation: _controller,

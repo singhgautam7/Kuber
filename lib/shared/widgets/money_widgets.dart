@@ -5,6 +5,8 @@
 // SheetButtonSection, KuberChip) so they look and move like the rest of Kuber.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
+import 'animated_amount.dart';
 
 import 'kuber_skeleton.dart';
 
@@ -276,8 +278,19 @@ class MoneyHeadline extends StatelessWidget {
   final String value;
   final Widget? labelTrailing;
   final Color? color;
+
+  /// Optional numeric form: when given, [value] is ignored and the amount rolls
+  /// when it changes (see AnimatedAmount).
+  final double? amount;
+  final String Function(double)? format;
   const MoneyHeadline(
-      {super.key, required this.label, required this.value, this.labelTrailing, this.color});
+      {super.key,
+      required this.label,
+      required this.value,
+      this.labelTrailing,
+      this.color,
+      this.amount,
+      this.format});
 
   @override
   Widget build(BuildContext context) {
@@ -291,9 +304,17 @@ class MoneyHeadline extends StatelessWidget {
           Text(label, style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
           ?labelTrailing,
         ]),
-        Text(value,
-            style: tt.headlineMedium!
-                .copyWith(color: color ?? cs.onSurface, fontFeatures: _tabular)),
+        if (amount != null && format != null)
+          AnimatedAmount(
+              value: amount!,
+              animateIn: false,
+              format: format!,
+              style: tt.headlineMedium!
+                  .copyWith(color: color ?? cs.onSurface, fontFeatures: _tabular))
+        else
+          Text(value,
+              style: tt.headlineMedium!
+                  .copyWith(color: color ?? cs.onSurface, fontFeatures: _tabular)),
       ],
     );
   }
@@ -329,6 +350,7 @@ class MoneyNextBlock extends StatelessWidget {
 /// Opens [sheet] (a [MoneySummarySheet]) the standard way.
 Future<T?> showMoneySheet<T>(BuildContext context, Widget sheet) =>
     showModalBottomSheet<T>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

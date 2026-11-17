@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,6 +121,7 @@ class TutorialChapterScreen extends ConsumerWidget {
 
   Future<void> _confirmSkip(BuildContext context, WidgetRef ref) async {
     final skip = await showModalBottomSheet<bool>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

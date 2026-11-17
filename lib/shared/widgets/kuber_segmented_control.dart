@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import 'kuber_button_group.dart';
 
-/// M3 segmented button (components/controls.md): 40 high, stadium, 1dp
-/// outline dividers; the selected segment takes secondaryContainer with a check
-/// (no check for 4+ segments).
+/// Single-choice segmented selector (40 high), now a thin wrapper over
+/// [KuberButtonGroup]; no check for 4+ segments.
 ///
 /// Generalized from `TransactionTypeSelector` so the Quick Actions configure
 /// screen (Arrange | Add shortcuts) and the transaction type picker share one
@@ -38,67 +37,19 @@ class KuberSegmentedControl<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    // The outline is a foreground decoration so the selected segment's fill
-    // sits inside it instead of painting over the stadium edge.
-    return Container(
+    // Internals are the v7.0.0 button group (press widening, squeeze, check,
+    // weight shift, tick haptic); the API above is unchanged.
+    return KuberButtonGroup<T>(
+      options: [
+        for (var i = 0; i < values.length; i++)
+          KuberButtonOption(value: values[i], label: labels[i]),
+      ],
+      selected: selected,
+      onChanged: onSelected,
+      enabled: enabled,
       height: height < 48 ? height : 40,
-      decoration: const BoxDecoration(borderRadius: KuberShape.fullR),
-      foregroundDecoration: BoxDecoration(
-        borderRadius: KuberShape.fullR,
-        border: Border.all(color: cs.outline),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
-        children: List.generate(values.length, (i) {
-          final isSelected = values[i] == selected;
-          final fg = isSelected
-              ? cs.onSecondaryContainer
-              : cs.onSurface.withValues(alpha: enabled ? 1.0 : 0.38);
-          final segment = GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: enabled ? () => onSelected(values[i]) : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (enabled
-                          ? cs.secondaryContainer
-                          : cs.onSurface.withValues(alpha: 0.12))
-                      : Colors.transparent,
-                  border: i == 0
-                      ? null
-                      : Border(left: BorderSide(color: cs.outline)),
-                ),
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isSelected && showCheck && values.length < 4) ...[
-                      Icon(Icons.check_rounded, size: 18, color: fg),
-                      const SizedBox(width: 6),
-                    ],
-                    Flexible(
-                      child: Text(
-                        labels[i],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.labelLarge?.copyWith(color: fg),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          return compact ? segment : Expanded(child: segment);
-        }),
-      ),
+      showCheck: showCheck && values.length < 4,
+      expand: !compact,
     );
   }
 }

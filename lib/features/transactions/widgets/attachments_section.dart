@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Shared attachments section used by both normal and transfer forms.
 /// Manages its own file picking state internally.
@@ -63,10 +65,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
                   height: 40,
                   child: Padding(
                     padding: const EdgeInsets.all(10),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: cs.primary,
-                    ),
+                    child: KuberShapeLoader(size: 40, color: cs.primary),
                   ),
                 )
               : const KuberIconTile(icon: Icons.attach_file_rounded),
@@ -164,6 +163,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
   void _showAttachmentPicker(BuildContext context) {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,

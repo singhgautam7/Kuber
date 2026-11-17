@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -197,6 +198,7 @@ class DataManagementScreen extends ConsumerWidget {
 
     ref.listen(dataControllerProvider, (previous, next) {
       if (next.status == DataOpStatus.success && next.message != null) {
+        KuberHaptics.confirm();
         showKuberSnackBar(context, next.message!);
         final lockedCards = next.lockedCardsFound;
         ref.read(dataControllerProvider.notifier).reset();
@@ -324,6 +326,7 @@ class DataManagementScreen extends ConsumerWidget {
 
   void _confirmClearData(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -352,6 +355,7 @@ class DataManagementScreen extends ConsumerWidget {
     const phrase = 'reset all';
     final controller = TextEditingController();
     showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (dialogCtx) {
         final cs = Theme.of(dialogCtx).colorScheme;
@@ -416,6 +420,7 @@ class DataManagementScreen extends ConsumerWidget {
   void _confirmMockData(BuildContext context, WidgetRef ref) {
     final lang = AppLocale.current.languageCode;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

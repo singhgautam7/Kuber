@@ -2,6 +2,7 @@
 // transaction it created, plus Edit / Pause / Skip next / Delete.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +42,7 @@ Future<void> confirmDeleteRule(BuildContext context, WidgetRef ref, RecurringRul
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.msRecDeleteTitle(rule.name), style: localeFont(fontWeight: FontWeight.w600)),

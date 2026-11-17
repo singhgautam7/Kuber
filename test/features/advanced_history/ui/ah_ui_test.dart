@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kuber/shared/widgets/kuber_shape_loader.dart';
 import 'package:kuber/features/advanced_history/widgets/charts/ah_charts_area.dart';
 import 'package:kuber/features/advanced_history/models/ah_view.dart';
 import 'package:kuber/features/advanced_history/providers/ah_providers.dart';
@@ -491,7 +492,7 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     // Short page, more to come: it asks for the next one without a button.
     expect(pages.calls, 1);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(KuberShapeLoader), findsOneWidget);
     expect(find.text('Load more'), findsNothing);
   });
 

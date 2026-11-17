@@ -8957,16 +8957,13 @@ class AppLocalizationsMl extends AppLocalizations {
   String get obTermsPrivacy => 'സ്വകാര്യതാ നയം';
 
   @override
-  String get pathSheetTitle => 'നിങ്ങൾ ഇവിടെ എത്തിയ വഴി';
+  String get pathSheetTitle => 'ദ്രുത നാവിഗേഷൻ';
 
   @override
   String get pathSheetCurrent => 'നിങ്ങൾ ഇവിടെയാണ്';
 
   @override
-  String get pathSheetHint => 'ഈ പേജിലേക്കുള്ള വഴി കാണിക്കുന്നു';
-
-  @override
-  String get pathSheetLongPress => 'പാത കാണിക്കുക';
+  String get pathSheetHint => 'ദ്രുത നാവിഗേഷൻ തുറക്കുന്നു';
 
   @override
   String get setPathTip =>
@@ -9130,7 +9127,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get obNotifSampleBody => 'SBI ഭവന വായ്പ · ₹24,350';
 
   @override
-  String get pathSheetSub => 'ഏത് പേജിലേക്കും മടങ്ങാൻ ടാപ്പ് ചെയ്യുക';
+  String get pathSheetSub => 'ഏതു പേജും തുറക്കാൻ ടാപ്പ് ചെയ്യുക';
 
   @override
   String get pathSheetFromNotification => 'അറിയിപ്പിൽ നിന്ന് തുറന്നു';
@@ -11228,4 +11225,90 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get ahdMore => 'കൂടുതൽ';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'ശേഷിക്കുന്ന $n പേജുകൾ കാണിക്കുക';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'കുറച്ച് പേജുകൾ കാണിക്കുക';
+
+  @override
+  String get pathSheetExpand => 'വികസിപ്പിക്കുക';
+
+  @override
+  String get pathSheetCollapse => 'ചുരുക്കുക';
+
+  @override
+  String get motionTitle => 'ആനിമേഷൻ';
+
+  @override
+  String get motionSubtitle =>
+      'ടാപ്പ് ചെയ്യുമ്പോഴോ സ്വൈപ്പ് ചെയ്യുമ്പോഴോ തുറക്കുമ്പോഴോ കുബേർ എത്ര അനങ്ങുന്നു';
+
+  @override
+  String get motionPreviewHint => 'ഈ നില അനുഭവിക്കാൻ കാർഡിൽ ടാപ്പ് ചെയ്യുക';
+
+  @override
+  String get motionAuto => 'ഓട്ടോ';
+
+  @override
+  String get motionExpressive => 'ഉജ്ജ്വലം';
+
+  @override
+  String get motionSubtle => 'സൗമ്യം';
+
+  @override
+  String get motionOff => 'ഓഫ്';
+
+  @override
+  String get motionAutoExpressive => 'ഈ ഫോണിൽ ഉജ്ജ്വല നില ഉപയോഗിക്കുന്നു';
+
+  @override
+  String get motionAutoSubtle =>
+      'സൗമ്യ നില ഉപയോഗിക്കുന്നു: ഈ ഫോണിൽ 4 GB-യിൽ കുറവ് RAM ആണ്';
+
+  @override
+  String get motionAutoOff =>
+      'ഓഫ് നില ഉപയോഗിക്കുന്നു: ആനിമേഷനുകൾ നീക്കം ചെയ്യുക ഓണാണ്';
+
+  @override
+  String get motionExpressiveDesc => 'സ്പ്രിങ് പോലെ സുഗമം. പൂർണ്ണ അനുഭവം.';
+
+  @override
+  String get motionSubtleDesc => 'ചെറിയ ഫേഡുകളും ചെറിയ ചലനങ്ങളും. ബൗൺസ് ഇല്ല.';
+
+  @override
+  String get motionOffDesc =>
+      'ചലനമില്ല. കാര്യങ്ങൾ പെട്ടെന്നുള്ള ഫേഡോടെ മാറുന്നു.';
+
+  @override
+  String get motionPhoneNote =>
+      'നിങ്ങളുടെ ഫോൺ ക്രമീകരണത്തിൽ ആനിമേഷനുകൾ നീക്കം ചെയ്യുക ഓണാണ്, അതിനാൽ കുബേർ ഓഫ് നില ഉപയോഗിക്കുന്നു.';
+
+  @override
+  String get motionOpenPhoneSettings => 'ഫോൺ ക്രമീകരണം തുറക്കുക';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'ഓട്ടോ ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'ഓഫ് (ഫോൺ ക്രമീകരണം)';
+
+  @override
+  String get hapticsTitle => 'ഹാപ്റ്റിക്സ്';
+
+  @override
+  String get hapticsSub =>
+      'ടോഗിളുകളിലും ദീർഘനേരം അമർത്തുമ്പോഴും വൈബ്രേറ്റ് ചെയ്യുക';
+
+  @override
+  String get setKwMotion => 'ആനിമേഷൻ ചലനം ബൗൺസ് ഫേഡ് animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'ഹാപ്റ്റിക്സ് വൈബ്രേഷൻ പ്രകമ്പനം ഫീഡ്ബാക്ക് സ്പർശം haptics vibration';
 }

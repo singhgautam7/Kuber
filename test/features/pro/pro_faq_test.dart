@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kuber/features/pro/paywall/pro_faq_section.dart';
+import 'package:kuber/shared/widgets/kuber_expandable_card.dart';
 import 'package:kuber/l10n/app_localizations.dart';
 
 void main() {
@@ -16,7 +17,7 @@ void main() {
     await t.pumpWidget(host());
     await t.pumpAndSettle();
     final l = lookupAppLocalizations(const Locale('en'));
-    expect(find.byType(ExpansionTile), findsNWidgets(10));
+    expect(find.byType(KuberExpandableCard), findsNWidgets(10));
     final answer = find.text(l.proFaqLifetimeA, skipOffstage: true);
     expect(answer.hitTestable(), findsNothing);
     await t.tap(find.text(l.proFaqLifetimeQ));

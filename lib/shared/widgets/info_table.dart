@@ -1,3 +1,4 @@
+import '../../core/motion/motion.dart';
 import 'dart:math' show max, min;
 
 import 'package:flutter/material.dart';
@@ -223,7 +224,12 @@ class _RowWidget extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: r.onTap,
-        onLongPress: r.onLongPress,
+        onLongPress: r.onLongPress == null
+            ? null
+            : () {
+                KuberHaptics.longPress();
+                r.onLongPress!();
+              },
         child: _standard(cs, r),
       ),
     );
@@ -235,7 +241,12 @@ class _RowWidget extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: r.onTap,
-        onLongPress: r.onLongPress,
+        onLongPress: r.onLongPress == null
+            ? null
+            : () {
+                KuberHaptics.longPress();
+                r.onLongPress!();
+              },
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _minRowHeight),
           child: Padding(

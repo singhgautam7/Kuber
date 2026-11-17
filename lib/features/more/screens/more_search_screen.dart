@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/schedule/schedule_engine.dart' show dayOf;
 import '../../../core/schedule/schedule_text.dart' show fmtDayShort;
@@ -53,6 +54,7 @@ import '../../transactions/providers/transaction_provider.dart';
 import '../more_content.dart';
 import '../more_search_index.dart';
 import 'categories_screen.dart' show showCategoryDetails;
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Rows per group before "See all".
 const int _groupRows = 3;
@@ -354,6 +356,7 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
 
   void _sheet(BuildContext host, Widget sheet) {
     showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(host),
       context: host,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -642,7 +645,7 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                     const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: KuberShapeLoader(size: 16),
                     ),
                     const SizedBox(width: KuberSpace.sm),
                     Expanded(
@@ -744,13 +747,20 @@ class _ExpandIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reduced = KuberMotion.reduced(context);
+    final level = KuberMotion.levelOf(context);
+    final reduced = level == MotionLevel.off;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: reduced
           ? KuberMotion.reducedFade
-          : const Duration(milliseconds: 300),
-      curve: reduced ? Curves.linear : Curves.easeInOutCubicEmphasized,
+          : (level == MotionLevel.subtle
+              ? KuberMotion.fxDefault
+              : const Duration(milliseconds: 300)),
+      curve: reduced
+          ? Curves.linear
+          : (level == MotionLevel.subtle
+              ? KuberMotion.curveEffects
+              : Curves.easeInOutCubicEmphasized),
       child: child,
       builder: (_, t, c) => Opacity(
         opacity: t.clamp(0, 1),

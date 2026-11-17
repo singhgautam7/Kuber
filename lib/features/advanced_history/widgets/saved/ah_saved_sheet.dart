@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../../shared/widgets/timed_snackbar.dart';
 import '../../../../shared/widgets/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import '../../../../shared/widgets/app_icon_button.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../shared/widgets/kuber_empty_state.dart';
 import '../../../../shared/widgets/kuber_menu.dart';
+import '../../../../shared/widgets/kuber_skeleton.dart';
 import '../../data/saved_filter.dart';
 import '../../providers/ah_providers.dart';
 import '../common/ah_common.dart';
@@ -23,6 +25,7 @@ void ahApplySaved(WidgetRef ref, SavedFilter f) {
 
 Future<void> showAhSavedSheet(BuildContext context) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -40,7 +43,8 @@ class AhSavedSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
-    final list = ref.watch(savedFiltersProvider).valueOrNull ?? const [];
+    final savedAsync = ref.watch(savedFiltersProvider);
+    final list = savedAsync.valueOrNull ?? const [];
     final openId = ref.watch(ahViewProvider.select((v) => v.savedId));
     final isStart = ref.watch(ahViewProvider.select((v) => v.isStart));
 
@@ -74,7 +78,16 @@ class AhSavedSheet extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (list.isEmpty)
+          if (!savedAsync.hasValue)
+            // Skeleton rows after 150 ms while the views load.
+            const AhDelayed(
+              child: Column(children: [
+                KuberSkeleton(height: 64, borderRadius: 12),
+                SizedBox(height: KuberSpace.sm),
+                KuberSkeleton(height: 64, borderRadius: 12),
+              ]),
+            )
+          else if (list.isEmpty)
             KuberEmptyState(
               icon: Icons.bookmarks_outlined,
               title: l.ahdSavedEmptyTitle,
@@ -161,6 +174,7 @@ class AhSavedSheet extends ConsumerWidget {
           mode: AhNameMode.rename, initialName: f.name, renaming: f);
     } else if (pick == 'delete') {
       final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(sheet),
         context: sheet,
         builder: (ctx) {
           final cs = Theme.of(ctx).colorScheme;

@@ -13,6 +13,7 @@ import '../models/story_icons.dart';
 import '../models/story_models.dart';
 import '../providers/story_providers.dart';
 import '../widgets/story_viewer.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class StoryArchiveScreen extends ConsumerStatefulWidget {
   const StoryArchiveScreen({super.key});
@@ -92,7 +93,7 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       body: archive.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (state) {
           final groups = _grouped(context, state.stories);
@@ -309,7 +310,7 @@ class _LoadingFooter extends StatelessWidget {
         SizedBox(
           width: 14,
           height: 14,
-          child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
+          child: KuberShapeLoader(size: 14, color: cs.primary),
         ),
         const SizedBox(width: 8),
         Text(

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -79,6 +80,7 @@ class TroubleshootScreen extends ConsumerWidget {
 
   void _confirmRebuild(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -96,6 +98,7 @@ class TroubleshootScreen extends ConsumerWidget {
 
   void _confirmResetSms(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

@@ -19,8 +19,10 @@
 // recent transaction" provider; the relevant TODO is marked below.
 
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/list_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -41,6 +43,7 @@ import '../providers/account_provider.dart';
 import '../widgets/account_detail_sheet.dart';
 import '../widgets/net_worth_hero_card.dart';
 import '../widgets/account_card.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -88,7 +91,7 @@ class AccountsScreen extends ConsumerWidget {
       ),
       floatingActionButtonLocation: kuberFabLocation,
       body: accountsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (e, _) => Center(
           child: Text(
             'Error: $e',
@@ -110,6 +113,7 @@ class _AccountsBody extends ConsumerStatefulWidget {
 }
 
 class _AccountsBodyState extends ConsumerState<_AccountsBody> {
+  final _listMotion = ListMotion();
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -237,12 +241,17 @@ class _AccountsBodyState extends ConsumerState<_AccountsBody> {
                   ),
                   KuberGroup(
                     children: [
-                      for (final a in shown)
-                        AccountCard(
-                          account: a,
-                          balance: balances[a.id] ?? a.initialBalance,
-                          isDefault: a.id.toString() == defaultId,
-                          onTap: () => _openDetailSheet(context, a),
+                      for (final (i, a) in shown.indexed)
+                        _listMotion.item(
+                          context,
+                          'acc${a.id}',
+                          i,
+                          AccountCard(
+                            account: a,
+                            balance: balances[a.id] ?? a.initialBalance,
+                            isDefault: a.id.toString() == defaultId,
+                            onTap: () => _openDetailSheet(context, a),
+                          ),
                         ),
                     ],
                   ),
@@ -260,6 +269,7 @@ class _AccountsBodyState extends ConsumerState<_AccountsBody> {
 
   void _openDetailSheet(BuildContext context, Account account) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,

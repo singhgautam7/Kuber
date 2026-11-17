@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import 'app_icon_button.dart';
+
+/// Content size changes inside a sheet (a field appears, a section expands)
+/// ease on springStandard instead of jumping. Idle cost is nil: AnimatedSize
+/// only runs when its child's size changes. Subtle: springSubtle; Off: snaps.
+Widget sheetReflow(BuildContext context, Widget child) {
+  final level = KuberMotion.levelOf(context);
+  final curve = KuberMotion.spatialCurve(level, KuberMotion.standardCurve).clamped;
+  return AnimatedSize(
+    alignment: Alignment.topCenter,
+    clipBehavior: Clip.none,
+    // Off snaps. Not Duration.zero: a zero-length AnimatedSize throws
+    // "mutated in its own performLayout" on a size change, and dropping the
+    // AnimatedSize at Off would lose the child's state when the level flips.
+    duration: level == MotionLevel.off ? const Duration(milliseconds: 1) : curve.settle,
+    curve: curve,
+    child: child,
+  );
+}
 
 /// The shell for every bottom sheet (components/bottom-sheets.md, board 2f).
 ///
@@ -167,14 +186,14 @@ class _KuberBottomSheetState extends State<KuberBottomSheet> {
                 onNotification: _onScroll,
                 child: SingleChildScrollView(
                   padding: widget.bodyPadding,
-                  child: widget.child,
+                  child: sheetReflow(context, widget.child),
                 ),
               ),
             ),
             if (widget.actions != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                child: widget.actions!,
+                child: sheetReflow(context, widget.actions!),
               ),
           ],
         ),

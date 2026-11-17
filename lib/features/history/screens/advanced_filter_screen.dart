@@ -3,7 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
+import '../../../core/motion/motion.dart';
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
@@ -542,9 +542,13 @@ class _FilterCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final l10n = context.l10n;
-    final reduced = KuberMotion.reduced(context);
-    final sizeDur = reduced ? Duration.zero : const Duration(milliseconds: 250);
-    final fadeDur = reduced ? Duration.zero : KuberMotion.fast;
+    final level = KuberMotion.levelOf(context);
+    final sizeDur = switch (level) {
+      MotionLevel.expressive => const Duration(milliseconds: 250),
+      MotionLevel.subtle => KuberMotion.fxDefault,
+      MotionLevel.off => Duration.zero,
+    };
+    final fadeDur = level == MotionLevel.off ? KuberMotion.fxInstant : KuberMotion.fast;
     final hasSelection = selectedCount > 0;
     final Widget content = open
         ? Padding(
@@ -945,22 +949,17 @@ class _SkeletonGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Shimmer.fromColors(
-      baseColor: cs.surfaceContainerHigh,
-      highlightColor: cs.surfaceContainerHighest,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: List.generate(
-          itemCount,
-          (index) => Container(
-            width: (MediaQuery.of(context).size.width - 48) / 2,
-            height: height,
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
-              borderRadius: KuberShape.smallR,
-            ),
-          ),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(
+        itemCount,
+        (index) => ShimmerBox(
+          width: (MediaQuery.of(context).size.width - 48) / 2,
+          height: height,
+          radius: KuberShape.small,
+          base: cs.surfaceContainerHigh,
+          highlight: cs.surfaceContainerHighest,
         ),
       ),
     );

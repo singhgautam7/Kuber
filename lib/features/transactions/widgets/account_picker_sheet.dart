@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -14,6 +15,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_form.dart';
 import '../../settings/providers/settings_provider.dart'
     show currencyProvider, formatterProvider;
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class AccountPickerSheet extends ConsumerStatefulWidget {
   final int? selectedAccountId;
@@ -171,7 +173,7 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
         // Account list
         Flexible(
           child: accounts.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: KuberShapeLoader(size: 40)),
             error: (e, _) =>
                 Center(child: Text('${context.l10n.errorLabel}: $e')),
             data: (allAccs) {
@@ -303,6 +305,7 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
           onTap: () {
             Navigator.pop(context); // Close picker
             showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
@@ -413,10 +416,7 @@ class _AccountTile extends ConsumerWidget {
                 loading: () => SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  child: KuberShapeLoader(size: 16, color: cs.onSurfaceVariant),
                 ),
                 error: (_, _) => const SizedBox.shrink(),
                 data: (bal) {

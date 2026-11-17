@@ -9,55 +9,18 @@
 // become TRUE, negations pushed to the leaves first) and the exact predicate
 // is applied in Dart afterwards.
 
-import 'dart:isolate';
-
-import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:isar_community/isar.dart';
 
-import '../../../core/database/isar_service.dart' show kIsarSchemas;
 import '../../accounts/data/account.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/data/transaction_tag.dart';
 import '../../transactions/data/transaction.dart';
-import '../../transactions/data/transaction_repository.dart';
 import '../../transactions/helpers/transaction_filters.dart';
 import '../models/ah_view.dart';
 import '../query/query_ast.dart';
 import 'ah_results.dart';
-
-// ---------------------------------------------------------------------------
-// Running off the UI isolate
-
-/// Runs [fn] with [isar] on a helper isolate (reopening the app's database
-/// there, like `TransactionRepository.getAll`), or inline when the database
-/// isn't the app's default one (tests) or the isolate fails. [fn] must be a
-/// top-level function and [params] plain data.
-Future<R> runAh<P, R>(
-    Isar isar, P params, Future<R> Function(Isar, P) fn) async {
-  final dir = isar.directory;
-  if (!kIsWeb &&
-      isar.name == Isar.defaultName &&
-      dir != null &&
-      // ignore: invalid_use_of_visible_for_testing_member
-      TransactionRepository.offloadGetAll) {
-    try {
-      return await Isolate.run(() async {
-        final helper =
-            await Isar.open(kIsarSchemas, directory: dir, inspector: false);
-        try {
-          return await fn(helper, params);
-        } finally {
-          await helper.close();
-        }
-      });
-    } catch (e) {
-      debugPrint('Kuber: Advanced History query on a helper isolate failed, running here: $e');
-    }
-  }
-  return fn(isar, params);
-}
 
 // ---------------------------------------------------------------------------
 // Lookups
@@ -70,7 +33,23 @@ class AhLookups {
   final Map<int, Tag> tags;
   final Map<int, List<int>> txnTags;
 
-  static Future<AhLookups> load(Isar isar) async {
+  /// Only the AH worker isolate turns this on ([AhWorker]): lookups are then
+  /// read once and kept until [invalidate]. Every other caller (tests, the
+  /// inline fallback) reads fresh each time. Statics are per isolate.
+  static bool cacheEnabled = false;
+  static Future<AhLookups>? _cached;
+
+  static void invalidate() => _cached = null;
+
+  static Future<AhLookups> load(Isar isar) {
+    if (!cacheEnabled) return _read(isar);
+    return _cached ??= _read(isar).catchError((Object e) {
+      _cached = null;
+      throw e;
+    });
+  }
+
+  static Future<AhLookups> _read(Isar isar) async {
     final cats = await isar.categorys.where().findAll();
     final groups = await isar.categoryGroups.where().findAll();
     final accounts = await isar.accounts.where().findAll();
@@ -790,147 +769,4 @@ Map<AhChartSplit, AhSplitBlock> ahBlocksOf(List<Transaction> txns, AhLookups lk)
   if (distinct(AhGroupBy.month) <= 1) out[AhChartSplit.month] = AhSplitBlock.oneMonth;
   if (distinct(AhGroupBy.year) <= 1) out[AhChartSplit.year] = AhSplitBlock.oneYear;
   return out;
-}
-
-// ---------------------------------------------------------------------------
-// Jobs (top-level, for [runAh])
-
-const kAhPageSize = 50;
-
-class AhBundle {
-  const AhBundle(this.kpis, this.groups, this.page, this.charts, this.blocks);
-  final AhKpis kpis;
-  final AhGroups? groups;
-  final AhTxnPage page;
-  final Map<AhChartSpec, AhChartData> charts;
-  final Map<AhChartSplit, AhSplitBlock> blocks;
-}
-
-class AhBundleParams {
-  const AhBundleParams(this.node, this.groupBy, this.sort, this.charts, this.now);
-  final QueryNode? node;
-  final AhGroupBy groupBy;
-  final AhSort sort;
-  final List<AhChartSpec> charts;
-  final DateTime now;
-}
-
-AhSort _pageSort(AhSort s) =>
-    const [AhSortField.date, AhSortField.amount, AhSortField.category, AhSortField.account]
-            .contains(s.field)
-        ? s
-        : AhSort.ungroupedDefault;
-
-AhTxnPage _page(List<Transaction> sorted, int offset) {
-  final end = (offset + kAhPageSize).clamp(0, sorted.length);
-  return AhTxnPage(
-    offset >= sorted.length ? const [] : sorted.sublist(offset, end),
-    hasMore: end < sorted.length,
-    total: sorted.length,
-  );
-}
-
-Future<AhBundle> ahBundleJob(Isar isar, AhBundleParams p) async {
-  final lk = await AhLookups.load(isar);
-  final txns = await ahMatch(isar, p.node, p.now, lk);
-  return AhBundle(
-    ahKpisOf(txns),
-    p.groupBy == AhGroupBy.none ? null : ahGroupsOf(txns, p.groupBy, p.sort, lk),
-    _page(ahSortTxns(txns, _pageSort(p.sort), lk), 0),
-    {for (final c in p.charts) c: ahChartOf(txns, c, lk)},
-    ahBlocksOf(txns, lk),
-  );
-}
-
-class AhPageParams {
-  const AhPageParams(this.node, this.sort, this.now, this.offset,
-      {this.by, this.key});
-  final QueryNode? node;
-  final AhSort sort;
-  final DateTime now;
-  final int offset;
-  final AhGroupBy? by;
-  final String? key;
-}
-
-Future<List<Transaction>> _matchGroup(
-    Isar isar, QueryNode? node, DateTime now, AhGroupBy? by, String? key,
-    AhLookups lk) async {
-  final txns = await ahMatch(isar, node, now, lk);
-  if (by == null || by == AhGroupBy.none) return txns;
-  return txns.where((t) => ahKeysOf(t, by, lk).contains(key)).toList();
-}
-
-Future<AhTxnPage> ahPageJob(Isar isar, AhPageParams p) async {
-  final lk = await AhLookups.load(isar);
-  final txns = await _matchGroup(isar, p.node, p.now, p.by, p.key, lk);
-  final sort = p.by == null ? _pageSort(p.sort) : AhSort.ungroupedDefault;
-  return _page(ahSortTxns(txns, sort, lk), p.offset);
-}
-
-Future<AhKpis> ahGroupKpisJob(Isar isar, AhPageParams p) async {
-  final lk = await AhLookups.load(isar);
-  return ahKpisOf(await _matchGroup(isar, p.node, p.now, p.by, p.key, lk));
-}
-
-/// A chart spec outside the open view (builder preview): own match.
-class AhChartParams {
-  const AhChartParams(this.node, this.spec, this.now);
-  final QueryNode? node;
-  final AhChartSpec spec;
-  final DateTime now;
-}
-
-Future<AhChartData> ahChartJob(Isar isar, AhChartParams p) async {
-  final lk = await AhLookups.load(isar);
-  return ahChartOf(await ahMatch(isar, p.node, p.now, lk), p.spec, lk);
-}
-
-class AhCountParams {
-  const AhCountParams(this.node, this.now);
-  final QueryNode? node;
-  final DateTime now;
-}
-
-Future<int> ahCountJob(Isar isar, AhCountParams p) async {
-  final lk = await AhLookups.load(isar);
-  return (await ahMatch(isar, p.node, p.now, lk)).length;
-}
-
-/// A value of a field with how many transactions use it.
-class AhValueCount {
-  const AhValueCount(this.name, this.count);
-  final String name;
-  final int count;
-}
-
-/// The user's values for [field] with counts (suggestions).
-Future<List<AhValueCount>> ahFieldValuesJob(Isar isar, QueryField field) async {
-  Map<String, int> tally(Iterable<String> keys) {
-    final m = <String, int>{};
-    for (final k in keys) {
-      m[k] = (m[k] ?? 0) + 1;
-    }
-    return m;
-  }
-
-  switch (field) {
-    case QueryField.category:
-      final counts =
-          tally(await isar.transactions.where().categoryIdProperty().findAll());
-      final cats = await isar.categorys.where().findAll();
-      return [for (final c in cats) AhValueCount(c.name, counts['${c.id}'] ?? 0)];
-    case QueryField.account:
-      final counts =
-          tally(await isar.transactions.where().accountIdProperty().findAll());
-      final accs = await isar.accounts.where().findAll();
-      return [for (final a in accs) AhValueCount(a.name, counts['${a.id}'] ?? 0)];
-    case QueryField.tag:
-      final counts = tally((await isar.transactionTags.where().tagIdProperty().findAll())
-          .map((e) => '$e'));
-      final tags = await isar.tags.where().findAll();
-      return [for (final t in tags) AhValueCount(t.name, counts['${t.id}'] ?? 0)];
-    default:
-      return const [];
-  }
 }

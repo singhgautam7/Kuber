@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import 'kuber_menu.dart';
 
@@ -44,7 +45,12 @@ class KuberChip extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final fg = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
-    final lead = selected && showCheck && onDeleted == null && !dropdown
+    final level = KuberMotion.levelOf(context);
+    final checkable = showCheck && onDeleted == null && !dropdown;
+    // No own icon: the check grows 0 to 18 dp (springStandard) and the chip
+    // widens. With an icon the check replaces it as before.
+    final animCheck = checkable && icon == null;
+    final lead = selected && checkable && icon != null
         ? Icon(Icons.check_rounded, size: 18, color: cs.onSecondaryContainer)
         : (icon == null
             ? null
@@ -54,68 +60,116 @@ class KuberChip extends StatelessWidget {
                     (selected ? cs.onSecondaryContainer : cs.primary)));
     final hasTrail = dropdown || onDeleted != null;
 
-    final text = Text(
+    final style = theme.textTheme.labelLarge!.copyWith(color: fg);
+    final text = AnimatedWeight(
       label,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: theme.textTheme.labelLarge!.copyWith(color: fg),
+      isActive: selected,
+      rest: 500,
+      active: 650,
+      style: style,
     );
+    final curve = KuberMotion.spatialCurve(level, KuberMotion.standardCurve);
+    final off = level == MotionLevel.off;
+    final fade = off ? KuberMotion.fxInstant : KuberMotion.fxFast;
+    final restRadius = pill ? 16.0 : KuberShape.small;
+
+    Widget body(double k) => Container(
+          constraints: const BoxConstraints(minHeight: 32),
+          padding: EdgeInsets.only(
+            left: animCheck ? 16 - 8 * k : (lead != null ? 8 : 16),
+            right: hasTrail ? 8 : 16,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (animCheck)
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: k,
+                    child: Opacity(
+                      opacity: k,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(Icons.check_rounded,
+                            size: 18, color: cs.onSecondaryContainer),
+                      ),
+                    ),
+                  ),
+                ),
+              if (lead != null) ...[lead, const SizedBox(width: 8)],
+              shrink ? Flexible(child: text) : text,
+              if (badge != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: KuberShape.fullR,
+                  ),
+                  child: Text(
+                    badge!,
+                    style: theme.textTheme.labelSmall!
+                        .copyWith(color: cs.onSecondaryContainer),
+                  ),
+                ),
+              ],
+              if (dropdown) ...[
+                const SizedBox(width: 8),
+                Icon(Icons.arrow_drop_down_rounded, size: 18, color: fg),
+              ],
+              if (onDeleted != null) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: onDeleted,
+                  behavior: HitTestBehavior.opaque,
+                  child: Icon(Icons.close_rounded, size: 18, color: fg),
+                ),
+              ],
+            ],
+          ),
+        );
 
     return Semantics(
       button: true,
       selected: selected,
-      child: Material(
-        color: selected ? cs.secondaryContainer : Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: pill ? KuberShape.fullR : KuberShape.smallR,
-          side: selected
-              ? BorderSide.none
-              : BorderSide(color: cs.outlineVariant),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 32),
-            padding: EdgeInsets.only(
-              left: lead != null ? 8 : 16,
-              right: hasTrail ? 8 : 16,
+      child: Pressable(
+        kind: PressKind.chip,
+        enabled: onTap != null,
+        restRadius: restRadius,
+        builder: (context, radius, _) => TweenAnimationBuilder<Color?>(
+          tween: ColorTween(
+              end: selected ? cs.secondaryContainer : Colors.transparent),
+          duration: fade,
+          curve: KuberMotion.curveEffects,
+          builder: (context, fill, child) => Material(
+            color: fill,
+            animationDuration: Duration.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radius),
+              side: selected
+                  ? BorderSide.none
+                  : BorderSide(color: cs.outlineVariant),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (lead != null) ...[lead, const SizedBox(width: 8)],
-                shrink ? Flexible(child: text) : text,
-                if (badge != null) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      color: cs.surface,
-                      borderRadius: KuberShape.fullR,
-                    ),
-                    child: Text(
-                      badge!,
-                      style: theme.textTheme.labelSmall!
-                          .copyWith(color: cs.onSecondaryContainer),
-                    ),
-                  ),
-                ],
-                if (dropdown) ...[
-                  const SizedBox(width: 8),
-                  Icon(Icons.arrow_drop_down_rounded, size: 18, color: fg),
-                ],
-                if (onDeleted != null) ...[
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: onDeleted,
-                    behavior: HitTestBehavior.opaque,
-                    child: Icon(Icons.close_rounded, size: 18, color: fg),
-                  ),
-                ],
-              ],
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap == null
+                  ? null
+                  : () {
+                      if (!dropdown && onDeleted == null) KuberHaptics.tick();
+                      onTap!();
+                    },
+              child: child,
             ),
           ),
+          child: animCheck
+              ? TweenAnimationBuilder<double>(
+                  tween: Tween(end: selected ? 1 : 0),
+                  duration: off ? Duration.zero : curve.settle,
+                  curve: curve.clamped,
+                  builder: (context, k, _) => body(k),
+                )
+              : body(0),
         ),
       ),
     );

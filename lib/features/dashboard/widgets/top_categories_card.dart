@@ -2,7 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/chart_motion.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../categories/providers/category_provider.dart';
 
@@ -47,7 +49,10 @@ class TopCategoriesCard extends ConsumerWidget {
                 return RepaintBoundary(
                   child: SizedBox(
                     height: 200,
-                    child: BarChart(
+                    child: ChartDrawIn(
+                      kind: ChartKind.bars,
+                      count: top.length,
+                      builder: (context, p) => BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
                         maxY: top.isEmpty ? 100 : top.first.value * 1.2,
@@ -89,7 +94,7 @@ class TopCategoriesCard extends ConsumerWidget {
                         ),
                         borderData: FlBorderData(show: false),
                         gridData: const FlGridData(show: false),
-                        barGroups: top.asMap().entries.map((entry) {
+                        barGroups: riseBars(top.asMap().entries.map((entry) {
                           final i = entry.key;
                           final catId = int.tryParse(entry.value.key);
                           final cat = catId != null ? categories[catId] : null;
@@ -113,7 +118,10 @@ class TopCategoriesCard extends ConsumerWidget {
                               ),
                             ],
                           );
-                        }).toList(),
+                        }).toList(), p),
+                      ),
+                      duration: chartSwapDuration(context, drawing: isDrawing(p)),
+                      curve: chartSwapCurve(context),
                       ),
                     ),
                   ),

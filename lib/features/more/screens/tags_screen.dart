@@ -1,6 +1,8 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/list_motion.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,12 +18,14 @@ import '../../../core/constants/info_constants.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../settings/providers/info_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class TagsScreen extends ConsumerWidget {
   const TagsScreen({super.key});
 
   void _openAddTagSheet(BuildContext context) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -66,7 +70,7 @@ class TagsScreen extends ConsumerWidget {
       floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
       body: tagsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (e, _) => Center(
           child: Text(
             context.l10n.errorWithDetails(e.toString()),
@@ -92,6 +96,7 @@ class _TagsBody extends StatefulWidget {
 }
 
 class _TagsBodyState extends State<_TagsBody> {
+  final _listMotion = ListMotion();
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -165,7 +170,10 @@ class _TagsBodyState extends State<_TagsBody> {
                     ),
                   ),
                   KuberGroup(
-                    children: [for (final t in tags) _TagListItem(tag: t)],
+                    children: [
+                      for (final (i, t) in tags.indexed)
+                        _listMotion.item(context, 'tag${t.id}', i, _TagListItem(tag: t)),
+                    ],
                   ),
                 ],
               ),
@@ -185,6 +193,7 @@ class _TagListItem extends ConsumerWidget {
 
   void _openTagDetail(BuildContext context) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,

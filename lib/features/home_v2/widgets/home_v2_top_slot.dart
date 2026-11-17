@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart' show onOpenBatchReadyProvider;
 import '../providers/has_transactions_provider.dart';
@@ -122,16 +123,21 @@ class _HomeV2TopSlotState extends ConsumerState<HomeV2TopSlot> {
     // 0: a zero-length AnimatedSize completes inside its own layout, which
     // asserts when Home relayouts behind another screen (language change).
     final instant = !active;
-    final reduced = MediaQuery.disableAnimationsOf(context);
+    final level = KuberMotion.levelOf(context);
+    final off = level == MotionLevel.off;
+    final subtle = level == MotionLevel.subtle;
+    // Subtle: same collapse / expand, short and critically damped.
     return AnimatedSize(
-      duration: Duration(milliseconds: instant ? 1 : (reduced ? 90 : 240)),
-      reverseDuration: Duration(
-        milliseconds: instant ? 1 : (reduced ? 90 : 230),
+      duration: Duration(
+        milliseconds: instant ? 1 : (off ? 90 : (subtle ? 200 : 240)),
       ),
-      curve: Curves.easeOutCubic,
+      reverseDuration: Duration(
+        milliseconds: instant ? 1 : (off ? 90 : (subtle ? 200 : 230)),
+      ),
+      curve: subtle ? KuberMotion.subtleCurve.clamped : Curves.easeOutCubic,
       alignment: Alignment.topCenter,
       child: AnimatedSwitcher(
-        duration: Duration(milliseconds: instant ? 0 : (reduced ? 90 : 150)),
+        duration: Duration(milliseconds: instant ? 0 : (off ? 90 : 150)),
         layoutBuilder: (current, previous) => Stack(
           alignment: Alignment.topCenter,
           children: [...previous, ?current],

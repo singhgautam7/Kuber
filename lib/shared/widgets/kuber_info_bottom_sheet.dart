@@ -4,6 +4,7 @@ import 'package:kuber/core/constants/info_l10n.dart';
 import 'package:flutter/material.dart';
 import '../../../core/models/info_config.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/motion/motion.dart';
 import 'kuber_bottom_sheet.dart';
 import 'app_button.dart';
 
@@ -121,6 +122,7 @@ class KuberInfoBottomSheet extends StatelessWidget {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
+      sheetAnimationStyle: kuberSheetStyle(context),
       backgroundColor: Colors.transparent,
       builder: (_) => KuberInfoBottomSheet(config: config),
     );

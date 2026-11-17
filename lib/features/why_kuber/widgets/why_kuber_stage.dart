@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/motion/motion.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../settings/providers/settings_provider.dart';
 
@@ -83,7 +85,8 @@ class _WhyKuberStageState extends State<WhyKuberStage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reduced = MediaQuery.disableAnimationsOf(context);
+    // Scripted illustration: plays at Expressive and Subtle, shows the final frame at Off.
+    _reduced = KuberMotion.levelOf(context) == MotionLevel.off;
     if (_reduced) _c.value = 1;
     _sync();
   }

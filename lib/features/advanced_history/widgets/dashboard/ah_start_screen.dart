@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_chips.dart';
+import '../../../../shared/widgets/kuber_skeleton.dart';
 import '../../models/ah_view.dart';
 import '../../providers/ah_providers.dart';
 import '../../query/query_ast.dart';
@@ -39,11 +40,15 @@ class AhStartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cs = Theme.of(context).colorScheme;
-    final saved = ref.watch(savedFiltersProvider).valueOrNull ?? const [];
+    final savedAsync = ref.watch(savedFiltersProvider);
+    final saved = savedAsync.valueOrNull ?? const [];
+    final catsAsync = ref.watch(categoryListProvider);
+    // Skeletons (after 150 ms) only while the data hasn't loaded yet.
+    final savedLoading = !savedAsync.hasValue;
+    final catsLoading = !catsAsync.hasValue;
     final notifier = ref.read(ahViewProvider.notifier);
     // Examples use the user's own categories and currency.
-    final cats = ahExampleCategories(
-        ref.watch(categoryListProvider).valueOrNull ?? const []);
+    final cats = ahExampleCategories(catsAsync.valueOrNull ?? const []);
     final money = ref.watch(formatterProvider).formatCurrency;
     final year = DateTime.now().year;
 
@@ -83,7 +88,9 @@ class AhStartScreen extends ConsumerWidget {
           last: true,
           icon: Icons.bookmarks_outlined,
           title: l.ahdOpenSaved,
-          sub: saved.isEmpty
+          sub: savedLoading
+              ? '\u00A0'
+              : saved.isEmpty
               ? l.ahdNothingSaved
               : l.ahdSavedViewsN(saved.length),
           onTap: () => showAhSavedSheet(context),
@@ -112,6 +119,9 @@ class AhStartScreen extends ConsumerWidget {
             )),
             Icons.label_off_outlined,
           ),
+          if (catsLoading)
+            const AhDelayed(
+                child: KuberSkeleton(width: 150, height: 32, borderRadius: 16)),
           if (cats.isNotEmpty)
             chip(
               l.ahExCatByMonth(cats.last, '$year'),
@@ -126,6 +136,12 @@ class AhStartScreen extends ConsumerWidget {
               Icons.calendar_month_outlined,
             ),
         ]),
+        if (savedLoading)
+          const AhDelayed(
+              child: Padding(
+            padding: EdgeInsets.only(top: KuberSpace.sectionGap),
+            child: KuberSkeleton(height: 32, borderRadius: 16),
+          )),
         if (saved.isNotEmpty) ...[
           const SizedBox(height: KuberSpace.sectionGap),
           _Caps(l.ahdYourSaved),

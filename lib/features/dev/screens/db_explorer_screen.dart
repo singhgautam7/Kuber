@@ -38,6 +38,7 @@ import '../../kuber_cards/data/stored_card.dart';
 import '../../kuber_cards/data/card_vault_meta.dart';
 import '../../pro/data/user_entitlement.dart';
 import '../../search/data/recent_search.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class CollectionMeta {
   final String name;
@@ -253,10 +254,7 @@ class _CollectionCardState extends State<_CollectionCard> {
               SizedBox(
                 height: 14,
                 width: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.onSurfaceVariant,
-                ),
+                child: KuberShapeLoader(size: 14, color: cs.onSurfaceVariant),
               )
             else
               Text(

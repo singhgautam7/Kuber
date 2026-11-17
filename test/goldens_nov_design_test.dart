@@ -28,6 +28,7 @@ import 'package:kuber/features/settings/screens/settings_screen.dart';
 import 'package:kuber/l10n/app_localizations.dart';
 import 'package:kuber/shared/widgets/kuber_option_card.dart';
 import 'package:kuber/shared/widgets/kuber_path.dart';
+import 'package:kuber/shared/widgets/quick_nav/quick_nav_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/golden_fonts.dart';
@@ -111,29 +112,30 @@ Widget _terms(bool a, bool b) => OnboardingDataTermsPage(
       onResponsibility: (_) {},
     );
 
-Widget _path(List<(IconData, String)> pages, {bool notification = false}) => Scaffold(
+Widget _path(List<QuickNavStackEntry> stack, {int tab = 3, bool notification = false}) => Scaffold(
       body: Align(
         alignment: Alignment.bottomCenter,
         child: KuberPathSheet(
-          entries: [for (final (i, t) in pages) KuberPathEntry(i, t, tabLocation: '/')],
+          stack: stack,
+          tab: tab,
           router: GoRouter(routes: [GoRoute(path: '/', builder: (_, _) => const SizedBox())]),
           fromNotification: notification,
         ),
       ),
     );
 
-const _p5 = [
-  (Icons.home_rounded, 'Home'),
-  (Icons.grid_view_rounded, 'More'),
-  (Icons.settings_rounded, 'Settings'),
-  (Icons.palette_outlined, 'Look and feel'),
-  (Icons.contrast_rounded, 'Theme'),
-];
-const _p8 = [
-  ..._p5,
-  (Icons.history_rounded, 'SIP history'),
-  (Icons.event_rounded, 'SIP on 5 Nov 2026'),
-  (Icons.edit_rounded, 'Edit transaction'),
+QuickNavStackEntry _pg(String location) =>
+    QuickNavStackEntry(location: location, title: location, icon: Icons.article_outlined);
+QuickNavStackEntry _virt(String title, IconData icon) => QuickNavStackEntry(title: title, icon: icon);
+
+final _onTheme = [_pg('/more/settings'), _pg('/more/settings/look'), _pg('/more/settings/theme')];
+final _onLoan = [_pg('/more/loans'), _virt('SBI Home Loan', Icons.account_balance_outlined)];
+final _deepFund = [
+  _pg('/more/investments'),
+  _virt('Nifty 50 Index Fund, Direct Growth Plan, Reinvestment option', Icons.pie_chart_rounded),
+  _virt('SIP history', Icons.history_rounded),
+  _virt('SIP on 5 Nov 2026', Icons.event_rounded),
+  _virt('Edit transaction from 5 November 2026', Icons.edit_rounded),
 ];
 
 /// The option card's states side by side (restore progress needs a run).
@@ -188,11 +190,11 @@ final _states = <_State>[
   _State('welcome_data_none', page: (c) => _welcome(_terms(false, false), label: 'Agree and continue', at: 9, arrow: false, enabled: false, back: true)),
   _State('welcome_data_one', page: (c) => _welcome(_terms(true, false), label: 'Agree and continue', at: 9, arrow: false, enabled: false, back: true)),
   _State('welcome_data_both', page: (c) => _welcome(_terms(true, true), label: 'Agree and continue', at: 9, back: true)),
-  _State('path_5', page: (c) => _path(_p5)),
-  _State('path_2', page: (c) => _path(_p5.take(2).toList())),
-  _State('path_long', page: (c) => _path([..._p5.take(3), (Icons.account_balance_rounded, 'HDFC Bank Salary Account, joint with Priya Sharma'), (Icons.receipt_long_rounded, 'Swiggy Instamart order, Tuesday 4 November 2026')])),
-  _State('path_8', page: (c) => _path(_p8)),
-  _State('path_notification', page: (c) => _path(_p5.take(2).toList(), notification: true)),
+  _State('path_5', page: (c) => _path(_onTheme)),
+  _State('path_2', page: (c) => _path([_pg('/more/loans')])),
+  _State('path_long', page: (c) => _path([_pg('/more/accounts'), _virt('HDFC Bank Salary Account, joint with Priya Sharma', Icons.account_balance_rounded)])),
+  _State('path_8', page: (c) => _path(_deepFund)),
+  _State('path_notification', page: (c) => _path(_onLoan, notification: true)),
   _State('settings_main', page: (c) => const SettingsScreen(), overrides: [_notifOn, _version]),
   _State('settings_main_pro', page: (c) => const SettingsScreen(), overrides: [
     _notifOn,

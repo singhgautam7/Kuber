@@ -4,6 +4,7 @@
 // the next 3 dates. Built from KuberChip, KuberGroup / KuberListRow,
 // KuberTextField, KuberDropdownChip and KuberDayGrid.
 
+import '../../core/motion/motion.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/schedule/schedule.dart';
@@ -211,6 +212,7 @@ class _KuberWhenPickerState extends State<KuberWhenPicker> {
 
   Future<void> _pickDay() async {
     final picked = await showModalBottomSheet<int>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -418,12 +420,17 @@ class _WeekdayDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: selected ? cs.primary : Colors.transparent,
       shape: CircleBorder(side: BorderSide(color: selected ? cs.primary : cs.outlineVariant)),
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: () {
+          KuberHaptics.tick();
+          onTap();
+        },
         child: SizedBox(
           width: 40,
           height: 40,
@@ -434,7 +441,7 @@ class _WeekdayDot extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

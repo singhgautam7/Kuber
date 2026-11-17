@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -46,6 +47,7 @@ SubscoreExplanationContent buildSubscoreContent(SubscoreDetail detail) {
 
 void showSubscoreExplanationSheet(BuildContext context, SubscoreDetail detail) {
   showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

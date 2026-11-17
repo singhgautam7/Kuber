@@ -8876,16 +8876,13 @@ class AppLocalizationsPa extends AppLocalizations {
   String get obTermsPrivacy => 'ਪਰਦੇਦਾਰੀ ਨੀਤੀ';
 
   @override
-  String get pathSheetTitle => 'ਤੁਸੀਂ ਇੱਥੇ ਕਿਵੇਂ ਪਹੁੰਚੇ';
+  String get pathSheetTitle => 'ਤੇਜ਼ ਨੈਵੀਗੇਸ਼ਨ';
 
   @override
   String get pathSheetCurrent => 'ਤੁਸੀਂ ਇੱਥੇ ਹੋ';
 
   @override
-  String get pathSheetHint => 'ਇਸ ਪੰਨੇ ਦਾ ਰਸਤਾ ਦਿਖਾਉਂਦਾ ਹੈ';
-
-  @override
-  String get pathSheetLongPress => 'ਰਸਤਾ ਦਿਖਾਓ';
+  String get pathSheetHint => 'ਤੇਜ਼ ਨੈਵੀਗੇਸ਼ਨ ਖੋਲ੍ਹਦਾ ਹੈ';
 
   @override
   String get setPathTip =>
@@ -9047,7 +9044,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get obNotifSampleBody => 'SBI ਹੋਮ ਲੋਨ · ₹24,350';
 
   @override
-  String get pathSheetSub => 'ਕਿਸੇ ਵੀ ਪੰਨੇ \'ਤੇ ਵਾਪਸ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ';
+  String get pathSheetSub => 'ਕੋਈ ਵੀ ਪੰਨਾ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ';
 
   @override
   String get pathSheetFromNotification => 'ਸੂਚਨਾ ਤੋਂ ਖੋਲ੍ਹਿਆ ਗਿਆ';
@@ -11129,4 +11126,88 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get ahdMore => 'ਵੱਧ';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'ਬਾਕੀ $n ਪੰਨੇ ਦਿਖਾਓ';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'ਘੱਟ ਪੰਨੇ ਦਿਖਾਓ';
+
+  @override
+  String get pathSheetExpand => 'ਫੈਲਾਓ';
+
+  @override
+  String get pathSheetCollapse => 'ਸਮੇਟੋ';
+
+  @override
+  String get motionTitle => 'ਐਨੀਮੇਸ਼ਨ';
+
+  @override
+  String get motionSubtitle =>
+      'ਟੈਪ, ਸਵਾਈਪ ਜਾਂ ਕੁਝ ਖੋਲ੍ਹਣ ਵੇਲੇ ਕੁਬੇਰ ਕਿੰਨਾ ਹਿੱਲਦਾ ਹੈ';
+
+  @override
+  String get motionPreviewHint => 'ਇਸ ਪੱਧਰ ਨੂੰ ਮਹਿਸੂਸ ਕਰਨ ਲਈ ਕਾਰਡ ਉੱਤੇ ਟੈਪ ਕਰੋ';
+
+  @override
+  String get motionAuto => 'ਆਟੋ';
+
+  @override
+  String get motionExpressive => 'ਜੀਵੰਤ';
+
+  @override
+  String get motionSubtle => 'ਹਲਕਾ';
+
+  @override
+  String get motionOff => 'ਬੰਦ';
+
+  @override
+  String get motionAutoExpressive => 'ਇਸ ਫ਼ੋਨ ਉੱਤੇ ਜੀਵੰਤ ਪੱਧਰ ਵਰਤਿਆ ਜਾ ਰਿਹਾ ਹੈ';
+
+  @override
+  String get motionAutoSubtle =>
+      'ਹਲਕਾ ਪੱਧਰ ਵਰਤਿਆ ਜਾ ਰਿਹਾ ਹੈ: ਇਸ ਫ਼ੋਨ ਵਿੱਚ 4 GB ਤੋਂ ਘੱਟ RAM ਹੈ';
+
+  @override
+  String get motionAutoOff =>
+      'ਬੰਦ ਪੱਧਰ ਵਰਤਿਆ ਜਾ ਰਿਹਾ ਹੈ: ਐਨੀਮੇਸ਼ਨ ਹਟਾਓ ਚਾਲੂ ਹੈ';
+
+  @override
+  String get motionExpressiveDesc => 'ਲਚਕੀਲਾ ਅਤੇ ਸੁਚਾਰੂ। ਪੂਰਾ ਅਨੁਭਵ।';
+
+  @override
+  String get motionSubtleDesc => 'ਛੋਟੇ ਫੇਡ ਅਤੇ ਹਲਕੀ ਹਰਕਤ। ਕੋਈ ਉਛਾਲ ਨਹੀਂ।';
+
+  @override
+  String get motionOffDesc => 'ਕੋਈ ਹਰਕਤ ਨਹੀਂ। ਚੀਜ਼ਾਂ ਤੇਜ਼ ਫੇਡ ਨਾਲ ਬਦਲਦੀਆਂ ਹਨ।';
+
+  @override
+  String get motionPhoneNote =>
+      'ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਐਨੀਮੇਸ਼ਨ ਹਟਾਓ ਚਾਲੂ ਹੈ, ਇਸ ਲਈ ਕੁਬੇਰ ਬੰਦ ਪੱਧਰ ਵਰਤਦਾ ਹੈ।';
+
+  @override
+  String get motionOpenPhoneSettings => 'ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'ਆਟੋ ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'ਬੰਦ (ਫ਼ੋਨ ਦੀ ਸੈਟਿੰਗ)';
+
+  @override
+  String get hapticsTitle => 'ਹੈਪਟਿਕ';
+
+  @override
+  String get hapticsSub => 'ਟੌਗਲ ਅਤੇ ਲੰਮੇ ਦਬਾਅ ਉੱਤੇ ਵਾਇਬ੍ਰੇਟ ਕਰੋ';
+
+  @override
+  String get setKwMotion => 'ਐਨੀਮੇਸ਼ਨ ਹਰਕਤ ਉਛਾਲ ਫੇਡ animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'ਹੈਪਟਿਕ ਵਾਇਬ੍ਰੇਸ਼ਨ ਕੰਬਣੀ ਫੀਡਬੈਕ ਛੋਹ haptics vibration';
 }

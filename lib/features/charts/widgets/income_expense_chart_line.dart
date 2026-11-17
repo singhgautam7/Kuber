@@ -43,7 +43,11 @@ extension _LineVariant on _IncomeExpenseChartState {
       );
     }
 
-    return LineChart(
+    return ChartDrawIn(
+      kind: ChartKind.line,
+      builder: (context, p) => RevealX(
+        progress: p,
+        child: LineChart(
       LineChartData(
         minY: 0,
         maxY: maxY,
@@ -81,6 +85,10 @@ extension _LineVariant on _IncomeExpenseChartState {
           series(context.kuberMoney.income, (p) => p.income, areaFill: true),
           series(context.kuberMoney.expense, (p) => p.expense),
         ],
+      ),
+      duration: chartSwapDuration(context, drawing: isDrawing(p)),
+      curve: chartSwapCurve(context),
+        ),
       ),
     );
   }

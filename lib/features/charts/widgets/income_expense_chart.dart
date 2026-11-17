@@ -4,7 +4,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/chart_motion.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/utils/chart_bucket.dart';
 import 'income_expense_chart_controls.dart';
@@ -377,7 +379,10 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
 
   Widget _buildBarChart(ColorScheme cs, double maxY) {
     final n = widget.points.length;
-    return BarChart(
+    return ChartDrawIn(
+      kind: ChartKind.bars,
+      count: n,
+      builder: (context, p) => BarChart(
       BarChartData(
         maxY: maxY,
         minY: 0,
@@ -393,7 +398,7 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
             _onTapIndex(response?.spot?.touchedBarGroupIndex);
           },
         ),
-        barGroups: [
+        barGroups: riseBars([
           for (var i = 0; i < n; i++)
             BarChartGroupData(
               x: i,
@@ -418,7 +423,10 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
                 ),
               ],
             ),
-        ],
+        ], p),
+      ),
+      duration: chartSwapDuration(context, drawing: isDrawing(p)),
+      curve: chartSwapCurve(context),
       ),
     );
   }

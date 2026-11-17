@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/overflow_config.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -54,7 +55,9 @@ class UpcomingEventsFullScreen extends ConsumerWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, 4, KuberSpace.screenMargin, 12),
-              child: Row(
+              child: Wrap(
+                spacing: KuberSpace.sm,
+                runSpacing: KuberSpace.sm,
                 children: [
                   KuberDropdownChip<bool>(
                     value: calendar,
@@ -65,7 +68,6 @@ class UpcomingEventsFullScreen extends ConsumerWidget {
                     ],
                     onChanged: (v) => ref.read(upcomingCalendarViewProvider.notifier).setCalendar(v),
                   ),
-                  const SizedBox(width: KuberSpace.sm),
                   Semantics(
                     label: count > 0 ? l.ueA11yFilter(count) : null,
                     child: KuberChip(
@@ -100,9 +102,12 @@ class _FadeThrough extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reduced = KuberMotion.reduced(context);
+    final level = KuberMotion.levelOf(context);
+    final reduced = level != MotionLevel.expressive;
     return AnimatedSwitcher(
-      duration: reduced ? KuberMotion.instant : const Duration(milliseconds: 240),
+      duration: level == MotionLevel.off
+          ? KuberMotion.instant
+          : (reduced ? KuberMotion.fxDefault : const Duration(milliseconds: 240)),
       layoutBuilder: (current, previous) => Stack(
         alignment: Alignment.topCenter,
         children: [...previous, ?current],

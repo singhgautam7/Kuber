@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../tool_catalog.dart';
 import 'data/saved_calculation.dart';
 import 'providers/saved_calculations_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class SavedCalculationsScreen extends ConsumerStatefulWidget {
   final String? initialTool;
@@ -43,6 +45,7 @@ class _SavedCalculationsScreenState
   Future<void> _confirmDelete() async {
     final count = _selected.length;
     final confirmed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) {
         final cs = Theme.of(ctx).colorScheme;
@@ -132,7 +135,7 @@ class _SavedCalculationsScreenState
               ...async.when(
                 loading: () => [
                   const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: KuberShapeLoader(size: 40)),
                   ),
                 ],
                 error: (e, _) => [

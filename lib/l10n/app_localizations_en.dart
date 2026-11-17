@@ -8882,16 +8882,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obTermsPrivacy => 'Privacy policy';
 
   @override
-  String get pathSheetTitle => 'How you got here';
+  String get pathSheetTitle => 'Quick navigation';
 
   @override
   String get pathSheetCurrent => 'You are here';
 
   @override
-  String get pathSheetHint => 'Shows the path to this page';
-
-  @override
-  String get pathSheetLongPress => 'Show path';
+  String get pathSheetHint => 'Opens quick navigation';
 
   @override
   String get setPathTip =>
@@ -9051,7 +9048,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obNotifSampleBody => 'SBI Home Loan · ₹24,350';
 
   @override
-  String get pathSheetSub => 'Tap any page to go back to it';
+  String get pathSheetSub => 'Tap any page to open it';
 
   @override
   String get pathSheetFromNotification => 'Opened from a notification';
@@ -11150,4 +11147,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ahdMore => 'More';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'Show remaining $n pages';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'Show fewer pages';
+
+  @override
+  String get pathSheetExpand => 'Expand';
+
+  @override
+  String get pathSheetCollapse => 'Collapse';
+
+  @override
+  String get motionTitle => 'Motion';
+
+  @override
+  String get motionSubtitle =>
+      'How much Kuber moves when you tap, swipe or open things';
+
+  @override
+  String get motionPreviewHint => 'Tap the card to feel this level';
+
+  @override
+  String get motionAuto => 'Auto';
+
+  @override
+  String get motionExpressive => 'Expressive';
+
+  @override
+  String get motionSubtle => 'Subtle';
+
+  @override
+  String get motionOff => 'Off';
+
+  @override
+  String get motionAutoExpressive => 'Using Expressive on this phone';
+
+  @override
+  String get motionAutoSubtle =>
+      'Using Subtle: this phone has under 4 GB of RAM';
+
+  @override
+  String get motionAutoOff => 'Using Off: Remove animations is on';
+
+  @override
+  String get motionExpressiveDesc => 'Springy and fluid. The full experience.';
+
+  @override
+  String get motionSubtleDesc => 'Short fades and small moves. No bounce.';
+
+  @override
+  String get motionOffDesc => 'No movement. Things change with a quick fade.';
+
+  @override
+  String get motionPhoneNote =>
+      'Remove animations is on in your phone settings, so Kuber uses Off.';
+
+  @override
+  String get motionOpenPhoneSettings => 'Open phone settings';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'Auto ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'Off (phone setting)';
+
+  @override
+  String get hapticsTitle => 'Haptics';
+
+  @override
+  String get hapticsSub => 'Vibrate on toggles and long presses';
+
+  @override
+  String get setKwMotion =>
+      'animation animations motion movement bounce fade reduce animations';
+
+  @override
+  String get setKwHaptics => 'haptics vibration vibrate feedback touch';
 }

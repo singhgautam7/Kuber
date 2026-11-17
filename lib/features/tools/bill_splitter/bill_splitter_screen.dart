@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +18,7 @@ import 'providers/bill_net_provider.dart';
 import 'providers/bills_provider.dart';
 import 'view_bill_sheet.dart';
 import 'widgets/bs_avatar.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class BillSplitterScreen extends ConsumerWidget {
   const BillSplitterScreen({super.key});
@@ -51,7 +53,7 @@ class BillSplitterScreen extends ConsumerWidget {
           // ── SAVED SPLITS section ───────────────────────────────────────
           SliverToBoxAdapter(
             child: billsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: KuberShapeLoader(size: 40)),
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (bills) {
                 final activeBills = bills
@@ -188,6 +190,7 @@ class _RecentBillsSection extends ConsumerWidget {
 
   void _showViewSheet(BuildContext context, Bill bill) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

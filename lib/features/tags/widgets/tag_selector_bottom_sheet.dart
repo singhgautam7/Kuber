@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/tag.dart';
 import '../providers/tag_providers.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class TagSelectorBottomSheet extends ConsumerStatefulWidget {
   final List<Tag> initialSelectedTags;
@@ -142,7 +143,7 @@ class _TagSelectorBottomSheetState
             // Tag list
             Expanded(
               child: tagsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: KuberShapeLoader(size: 40)),
                 error: (e, _) => Center(
                   child: Text(context.l10n.errorWithDetails(e.toString())),
                 ),

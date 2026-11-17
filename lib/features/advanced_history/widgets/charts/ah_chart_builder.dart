@@ -8,6 +8,7 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../shared/widgets/kuber_chips.dart';
 import '../../../../shared/widgets/kuber_segmented_control.dart';
+import '../../../../shared/widgets/kuber_skeleton.dart';
 import '../../models/ah_view.dart';
 import '../../providers/ah_providers.dart';
 import '../../services/ah_results.dart';
@@ -266,10 +267,10 @@ class _CompareSection extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final b = by;
-    final values = b == null
-        ? const <AhChartPoint>[]
-        : ref.watch(ahChartDataProvider(_valuesSpec(b))).valueOrNull?.points ??
-            const <AhChartPoint>[];
+    final valuesAsync =
+        b == null ? null : ref.watch(ahChartDataProvider(_valuesSpec(b)));
+    final values = valuesAsync?.valueOrNull?.points ?? const <AhChartPoint>[];
+    final valuesLoading = valuesAsync != null && !valuesAsync.hasValue;
     final full = picked.length >= kAhMaxSeries;
 
     Future<void> pick(AhChartSplit? d) async {
@@ -306,6 +307,19 @@ class _CompareSection extends ConsumerWidget {
             spacing: KuberSpace.sm,
             runSpacing: KuberSpace.sm,
             children: [
+              // Skeleton chips (after 150 ms) while the values load.
+              if (valuesLoading)
+                const AhDelayed(
+                  child: Wrap(
+                    spacing: KuberSpace.sm,
+                    runSpacing: KuberSpace.sm,
+                    children: [
+                      KuberSkeleton(width: 84, height: 32, borderRadius: 16),
+                      KuberSkeleton(width: 64, height: 32, borderRadius: 16),
+                      KuberSkeleton(width: 96, height: 32, borderRadius: 16),
+                    ],
+                  ),
+                ),
               for (final p in values.take(12))
                 Opacity(
                   opacity: full && !picked.contains(p.key) ? 0.38 : 1,

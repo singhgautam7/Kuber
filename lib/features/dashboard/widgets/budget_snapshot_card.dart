@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/category_icon.dart';
@@ -105,11 +106,12 @@ class _BudgetRow extends ConsumerWidget {
       double.infinity,
     );
 
-    return InkWell(
+    return Pressable(kind: PressKind.card, child: InkWell(
       onTap: category == null
           ? null
           : () {
               showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
                 context: context,
                 isScrollControlled: true,
                 useRootNavigator: true,
@@ -184,6 +186,6 @@ class _BudgetRow extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

@@ -7,8 +7,8 @@ Design language is **Vault** (see below). App size target: under 17 MB APK.
 ## Stack
 
 Flutter · Riverpod 2 (`Notifier` / `AsyncNotifier`; a few legacy `StateNotifier`s remain) ·
-Isar (`isar_community`) · GoRouter · fl_chart · google_fonts (Inter, bundled in
-`assets/google_fonts/`) · in_app_purchase (Play Billing) · flutter_quill ·
+Isar (`isar_community`) · GoRouter · fl_chart · Inter (one variable file,
+`assets/fonts/InterVariable.ttf`, pubspec `fonts:`) · in_app_purchase (Play Billing) · flutter_quill ·
 flutter_local_notifications · shared_preferences.
 
 ## Specs (read before starting a feature)
@@ -29,7 +29,8 @@ flutter_local_notifications · shared_preferences.
 flutter run                          # Android device / emulator
 flutter run -d chrome                # web
 flutter run --dart-define=KUBER_UNLOCK_PRO=true   # QA build with Pro unlocked
-flutter build apk --split-debug-info=build/symbols   # release APK (symbols kept out of the APK: -1.4 MB; keep build/symbols per release for `flutter symbolize`)
+flutter build apk --obfuscate --split-debug-info=build/symbols   # release APK (obfuscated, symbols kept out of the APK; keep build/symbols per release for `flutter symbolize`)
+flutter build appbundle --obfuscate --split-debug-info=build/symbols   # Play AAB, same flags
 flutter test                         # all tests
 flutter analyze                      # must be clean before committing
 dart run build_runner build          # regenerate Isar schemas after model changes
@@ -48,7 +49,7 @@ Profiling recipe (trace-startup, jank logging) lives in `specs/performance.md` �
 3. **No drop shadows**. Depth comes from borders (`colorScheme.outlineVariant`).
 4. **Typography**: `localeFont()` (Inter / regional Noto) for all UI text, `monoFont()`
    for raw SMS text, sender ids and hashes. No other families; see Performance rules
-   for why runtime `GoogleFonts.<family>()` calls are banned.
+   for why runtime font loads are banned.
 5. **Both themes**: every screen must be verified in Obsidian (dark) and Alabaster (light).
    Theming is a fixed Vault palette (7 families × light/dark), not M3 dynamic color.
    `dynamic_color` is used only by `harmonizeCategory(context, rawColor)`, which must be
@@ -151,11 +152,12 @@ they are kept cheap:
   UI isolate per call. Load once per operation and pass the list down (§7 of
   `specs/performance.md`); never re-query per item.
 
-Fonts: only Inter (google_fonts, bundled in `assets/google_fonts/`) and JetBrains Mono
-(pubspec `fonts:`, use `monoFont()` from `core/utils/locale_font.dart`). A runtime
-`GoogleFonts.<family>()` for any other family parses the font on the UI thread on first
-use and then relayouts every route (`fontsChange`), which is a 25 ms stall + a 24 ms
-frame. Add new families to pubspec `fonts:`, never as runtime loads.
+Fonts: only Inter (one variable file, pubspec `fonts:` family `Inter`; `localeFont()` sets the
+`wght` axis from `fontWeight`) and JetBrains Mono (pubspec `fonts:`, use `monoFont()` from
+`core/utils/locale_font.dart`). Regional scripts use the system Noto fonts through
+`fontFamilyFallback`; nothing is downloaded at runtime. A runtime font load parses the font on
+the UI thread on first use and then relayouts every route (`fontsChange`), which is a 25 ms
+stall + a 24 ms frame. Add new families to pubspec `fonts:`, never as runtime loads.
 
 Platform channels (`MainActivity.kt`): handlers run on the Android main thread, which is
 where Flutter's vsync arrives. Any I/O (ContentResolver, files, network) goes on a

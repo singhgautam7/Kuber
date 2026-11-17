@@ -1,5 +1,7 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/list_motion.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/kuber_progress.dart';
 import '../../../shared/widgets/kuber_list.dart';
@@ -21,6 +23,7 @@ import '../../../core/constants/info_constants.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../settings/providers/info_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class BudgetsScreen extends ConsumerStatefulWidget {
   const BudgetsScreen({super.key});
@@ -30,6 +33,7 @@ class BudgetsScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
+  final _listMotion = ListMotion();
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -145,7 +149,8 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                         KuberSectionHeader(title: context.l10n.thisMonth),
                         KuberGroup(
                           children: [
-                            for (final b in active) BudgetCard(budget: b),
+                            for (final (i, b) in active.indexed)
+                              _listMotion.item(context, 'bud${b.id}', i, BudgetCard(budget: b)),
                           ],
                         ),
                       ],
@@ -165,7 +170,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
               );
             },
             loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: KuberShapeLoader(size: 40)),
             ),
             error: (err, stack) =>
                 SliverFillRemaining(child: Center(child: Text('Error: $err'))),
@@ -221,6 +226,7 @@ class BudgetCard extends ConsumerWidget {
           ? null
           : () {
               showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,

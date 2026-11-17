@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'dart:math' as math;
 import '../../home_v2/providers/home_v2_provider.dart';
 
@@ -338,6 +339,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
   Future<bool?> _confirmClear() {
     final cs = Theme.of(context).colorScheme;
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(

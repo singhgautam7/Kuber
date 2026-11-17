@@ -13,7 +13,9 @@ import '../../../core/database/isar_service.dart';
 import '../../../core/money_math/loan_math.dart';
 import '../../../core/schedule/schedule_engine.dart';
 import '../../../core/schedule/schedule_text.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_path.dart';
 import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
@@ -55,6 +57,7 @@ Future<bool> confirmDeleteLoan(BuildContext context, WidgetRef ref, Loan loan) a
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.deleteLoanConfirm, style: localeFont(fontWeight: FontWeight.w600)),
@@ -78,6 +81,7 @@ Future<void> _closeLoan(BuildContext context, WidgetRef ref, Loan loan) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final l = context.l10n;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.msLoansCloseTitle(loan.name), style: localeFont(fontWeight: FontWeight.w600)),
@@ -139,6 +143,7 @@ Future<void> _reopenLoan(BuildContext context, WidgetRef ref, Loan loan) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final l = context.l10n;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.msLoansReopenTitle(loan.name), style: localeFont(fontWeight: FontWeight.w600)),
@@ -197,6 +202,7 @@ class LoanSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    KuberPath.pushVirtual(context, title: loan.name, icon: loanTypeIcon(loan.loanType));
     final l = context.l10n;
     final fmt = ref.watch(formatterProvider);
     final rec = ref.watch(loanRecordsProvider(loan.uid));
@@ -219,7 +225,11 @@ class LoanSheet extends ConsumerWidget {
           ? const [_LoanSheetSkeleton()]
           : [
         if (st.outstanding != null)
-          MoneyHeadline(label: l.msLoansOutstanding, value: m(st.outstanding!))
+          MoneyHeadline(
+              label: l.msLoansOutstanding,
+              value: m(st.outstanding!),
+              amount: st.outstanding!.roundToDouble(),
+              format: (v) => m(v))
         else
           MoneyHeadline(label: l.msLoansEmi, value: m(loan.emiAmount)),
         if (st.partlyReleased != null)
@@ -971,7 +981,11 @@ class _ExtraPaymentSheetState extends ConsumerState<_ExtraPaymentSheet> {
     final preview = !_principal ? null : (_reduce == LoanAdjust.tenure ? tenurePreview : emiPreview);
     final st = loanStatus(loan, rec.linked, deletedDays: rec.deleted);
     final emiNow = st.nextAmount ?? loan.emiAmount;
-    final motion = KuberMotion.reduced(context) ? Duration.zero : const Duration(milliseconds: 250);
+    final motion = switch (KuberMotion.levelOf(context)) {
+      MotionLevel.expressive => const Duration(milliseconds: 250),
+      MotionLevel.subtle => KuberMotion.fxDefault,
+      MotionLevel.off => KuberMotion.fxInstant,
+    };
     return KuberBottomSheet(
       title: l.msLoansExtraTitle,
       description: loan.name,
@@ -1263,6 +1277,7 @@ class _LoanSheetSkeleton extends StatelessWidget {
 /// Interest calculation (loan sheet menu): Monthly or Daily, with what the
 /// switch does to the last EMI and the total interest before it's saved.
 void showInterestMethodSheet(BuildContext context, Loan loan) => showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

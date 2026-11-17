@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../services/quick_add_voice_controller.dart';
 import 'quick_add_waveform.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Full-screen voice overlay (listening / processing / error) per
 /// voice-states.md. Reads the controller's notifiers so the waveform and
@@ -27,7 +29,7 @@ class QuickAddVoiceOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final reducedMotion = MediaQuery.of(context).disableAnimations;
+    final reducedMotion = KuberMotion.levelOf(context) == MotionLevel.off;
 
     return ValueListenableBuilder<VoiceState>(
       valueListenable: controller.state,
@@ -157,7 +159,7 @@ class QuickAddVoiceOverlay extends StatelessWidget {
         SizedBox(
           width: 22,
           height: 22,
-          child: CircularProgressIndicator(strokeWidth: 2.5, color: cs.primary),
+          child: KuberShapeLoader(size: 22, color: cs.primary),
         ),
         const SizedBox(height: KuberSpace.md),
         Text(

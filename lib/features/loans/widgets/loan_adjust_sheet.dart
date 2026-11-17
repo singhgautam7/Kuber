@@ -3,6 +3,7 @@
 // an extra payment from its marker in the schedule.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
@@ -227,6 +228,7 @@ class _UpdateOutstandingSheetState extends ConsumerState<_UpdateOutstandingSheet
     var close = false;
     if (outstandingError(entered) == OutstandingCheck.closes) {
       final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l.msLoansAdjZeroTitle, style: localeFont(fontWeight: FontWeight.w600)),
@@ -323,6 +325,7 @@ Future<bool> confirmDeleteEvent(BuildContext context, LoanEvent e) async {
   final cs = Theme.of(context).colorScheme;
   final extra = e.kind == LoanEventKind.prepayment;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(extra ? l.msLoansDeleteExtraTitle : l.msLoansDeleteAdjTitle,
@@ -369,6 +372,7 @@ Future<void> askRecalculate(
   final fmt = container.read(formatterProvider);
   String m(num v) => fmt.formatCurrency(v.round());
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.msLoansRecalcTitle(p.count), style: localeFont(fontWeight: FontWeight.w600)),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -11,6 +11,7 @@ import '../data/card_keystore.dart';
 import '../data/card_vault_service.dart';
 import '../providers/kuber_cards_provider.dart';
 import 'kuber_pin_pad.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// The post-import "Encrypted cards found" prompt (see `import-flow.md`). Shown
 /// after a JSON restore that carried locked Kuber Cards. The user enters the PIN
@@ -22,6 +23,7 @@ import 'kuber_pin_pad.dart';
 /// decrypt the imported payload.
 Future<void> showImportedCardsPrompt(BuildContext context) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -95,6 +97,7 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
       case UnlockStatus.success:
         // The imported vault is now this device's vault. Open the session and
         // refresh the card providers so the cards render, then confirm.
+        KuberHaptics.confirm();
         ref.read(cardSessionProvider.notifier).unlock(outcome.key!);
         ref.invalidate(cardVaultMetaProvider);
         ref.read(storedCardsProvider.notifier).reload();
@@ -109,7 +112,7 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
           );
         }
       case UnlockStatus.wrongPin:
-        HapticFeedback.mediumImpact();
+        KuberHaptics.reject();
         _pin.value = '';
         setState(() {
           _error = true;
@@ -117,7 +120,7 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
         });
       case UnlockStatus.cooldown:
       case UnlockStatus.dayLocked:
-        HapticFeedback.mediumImpact();
+        KuberHaptics.reject();
         _pin.value = '';
         if (rootContext.mounted) {
           showKuberSnackBar(
@@ -198,7 +201,7 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
       child: !_ready
           ? const Padding(
               padding: EdgeInsets.symmetric(vertical: 40),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: KuberShapeLoader(size: 40)),
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

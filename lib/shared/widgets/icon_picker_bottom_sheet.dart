@@ -1,3 +1,5 @@
+import '../../core/motion/motion.dart';
+import 'kuber_shape_loader.dart';
 import 'dart:io';
 
 import 'package:kuber/core/utils/locale_font.dart';
@@ -55,6 +57,7 @@ Future<void> showIconPicker({
   bool allowGallery = false,
 }) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -250,7 +253,7 @@ class _IconPickerBodyState extends State<IconPickerBody> {
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.52,
           child: !_ready
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: KuberShapeLoader())
               : _filtered.isEmpty
               ? _IconPickerEmpty(query: _searchCtrl.text)
               : CustomScrollView(
@@ -366,7 +369,9 @@ class _IconCell extends StatelessWidget {
     return Tooltip(
       message: label,
       triggerMode: TooltipTriggerMode.longPress,
-      child: Material(
+      child: Pressable(
+        kind: PressKind.card,
+        child: Material(
         color: isSelected ? cs.secondaryContainer : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: KuberShape.mediumR,
@@ -377,7 +382,10 @@ class _IconCell extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            if (!isSelected) KuberHaptics.tick();
+            onTap();
+          },
           child: isBank
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
@@ -401,7 +409,7 @@ class _IconCell extends StatelessWidget {
                 )
               : Center(child: glyph),
         ),
-      ),
+      )),
     );
   }
 }

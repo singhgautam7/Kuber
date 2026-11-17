@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/motion/motion.dart';
 import 'token_chips.dart';
 
 /// A shaded box around matched brackets (levels 1 to 3, tokens.md) or the
@@ -32,8 +32,8 @@ class BracketBox extends StatefulWidget {
 class _BracketBoxState extends State<BracketBox>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this);
-  late final AhSpringCurve _curve =
-      AhSpringCurve(AhMotion.expressiveDefaultSpatial);
+  late final SpringCurve _curve =
+      SpringCurve(KuberMotion.springDefault);
 
   @override
   void initState() {
@@ -46,7 +46,7 @@ class _BracketBoxState extends State<BracketBox>
     super.didChangeDependencies();
     if (widget.animate && _c.value == 1 && !_started) {
       _started = true;
-      if (!AhMotion.reduced(context)) {
+      if (!KuberMotion.reduced(context)) {
         _c.duration = _curve.settle;
         _c.value = 0;
         _c.forward();

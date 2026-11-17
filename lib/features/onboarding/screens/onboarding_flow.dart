@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/database/seed_service.dart';
 import '../../../core/services/data_service.dart' show ImportCancelled;
 import '../../../core/utils/formatters.dart';
@@ -142,7 +143,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Future<void> _saveAndStart() async {
     if (_saving) return;
     final valid = _formKey.currentState?.validate() ?? false;
-    if (!valid) return;
+    if (!valid) {
+      KuberHaptics.reject();
+      return;
+    }
 
     setState(() => _saving = true);
     final notifier = ref.read(settingsProvider.notifier);

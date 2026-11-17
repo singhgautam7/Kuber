@@ -8922,16 +8922,13 @@ class AppLocalizationsTe extends AppLocalizations {
   String get obTermsPrivacy => 'గోప్యతా విధానం';
 
   @override
-  String get pathSheetTitle => 'మీరు ఇక్కడికి ఎలా వచ్చారు';
+  String get pathSheetTitle => 'త్వరిత నావిగేషన్';
 
   @override
   String get pathSheetCurrent => 'మీరు ఇక్కడ ఉన్నారు';
 
   @override
-  String get pathSheetHint => 'ఈ పేజీకి దారి చూపిస్తుంది';
-
-  @override
-  String get pathSheetLongPress => 'మార్గం చూపండి';
+  String get pathSheetHint => 'త్వరిత నావిగేషన్‌ను తెరుస్తుంది';
 
   @override
   String get setPathTip =>
@@ -9092,7 +9089,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get obNotifSampleBody => 'SBI గృహ రుణం · ₹24,350';
 
   @override
-  String get pathSheetSub => 'ఏ పేజీకైనా తిరిగి వెళ్లడానికి నొక్కండి';
+  String get pathSheetSub => 'ఏ పేజీనైనా తెరవడానికి నొక్కండి';
 
   @override
   String get pathSheetFromNotification => 'నోటిఫికేషన్ నుండి తెరవబడింది';
@@ -11184,4 +11181,89 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get ahdMore => 'ఎక్కువ';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'మిగిలిన $n పేజీలను చూపండి';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'తక్కువ పేజీలను చూపండి';
+
+  @override
+  String get pathSheetExpand => 'విస్తరించు';
+
+  @override
+  String get pathSheetCollapse => 'కుదించు';
+
+  @override
+  String get motionTitle => 'యానిమేషన్';
+
+  @override
+  String get motionSubtitle =>
+      'మీరు ట్యాప్, స్వైప్ చేసినప్పుడు లేదా తెరిచినప్పుడు కుబేర్ ఎంత కదులుతుంది';
+
+  @override
+  String get motionPreviewHint =>
+      'ఈ స్థాయిని అనుభవించడానికి కార్డ్‌ను ట్యాప్ చేయండి';
+
+  @override
+  String get motionAuto => 'ఆటో';
+
+  @override
+  String get motionExpressive => 'ఉత్సాహభరితం';
+
+  @override
+  String get motionSubtle => 'సున్నితం';
+
+  @override
+  String get motionOff => 'ఆఫ్';
+
+  @override
+  String get motionAutoExpressive => 'ఈ ఫోన్‌లో ఉత్సాహభరిత స్థాయి వాడుతోంది';
+
+  @override
+  String get motionAutoSubtle =>
+      'సున్నిత స్థాయి వాడుతోంది: ఈ ఫోన్‌లో 4 GB కంటే తక్కువ RAM ఉంది';
+
+  @override
+  String get motionAutoOff =>
+      'ఆఫ్ స్థాయి వాడుతోంది: యానిమేషన్లు తీసివేయి ఆన్‌లో ఉంది';
+
+  @override
+  String get motionExpressiveDesc => 'సాగే గుణంతో సున్నితంగా. పూర్తి అనుభవం.';
+
+  @override
+  String get motionSubtleDesc => 'చిన్న ఫేడ్‌లు, చిన్న కదలికలు. బౌన్స్ లేదు.';
+
+  @override
+  String get motionOffDesc => 'కదలిక లేదు. మార్పులు త్వరిత ఫేడ్‌తో జరుగుతాయి.';
+
+  @override
+  String get motionPhoneNote =>
+      'మీ ఫోన్ సెట్టింగ్‌లలో యానిమేషన్లు తీసివేయి ఆన్‌లో ఉంది, కాబట్టి కుబేర్ ఆఫ్ స్థాయిని వాడుతుంది.';
+
+  @override
+  String get motionOpenPhoneSettings => 'ఫోన్ సెట్టింగ్‌లు తెరవండి';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'ఆటో ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'ఆఫ్ (ఫోన్ సెట్టింగ్)';
+
+  @override
+  String get hapticsTitle => 'హాప్టిక్స్';
+
+  @override
+  String get hapticsSub => 'టోగుల్స్, లాంగ్ ప్రెస్‌లపై వైబ్రేట్ చేయండి';
+
+  @override
+  String get setKwMotion => 'యానిమేషన్ కదలిక బౌన్స్ ఫేడ్ animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'హాప్టిక్స్ వైబ్రేషన్ కంపనం ఫీడ్‌బ్యాక్ స్పర్శ haptics vibration';
 }

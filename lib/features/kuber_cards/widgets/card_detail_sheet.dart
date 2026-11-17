@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,9 +17,11 @@ import '../data/card_vault_service.dart';
 import '../data/stored_card.dart';
 import '../providers/kuber_cards_provider.dart';
 import 'stored_card_visual.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 void showCardDetailSheet(BuildContext context, WidgetRef ref, StoredCard card) {
   showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -104,7 +107,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
       child: dec == null
           ? const Padding(
               padding: EdgeInsets.symmetric(vertical: 40),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: KuberShapeLoader(size: 40)),
             )
           : _content(cs, dec),
     );
@@ -304,6 +307,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
                     context: context,
                     isScrollControlled: true,
                     useSafeArea: true,
@@ -340,6 +344,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
     final rootContext = Navigator.of(context, rootNavigator: true).context;
 
     showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (dialogCtx) {
         return StatefulBuilder(

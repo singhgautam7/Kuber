@@ -11,6 +11,7 @@ import '../../categories/data/category.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../data/budget.dart';
 import '../providers/budget_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class BudgetHistorySheet extends ConsumerWidget {
   final Budget budget;
@@ -32,7 +33,7 @@ class BudgetHistorySheet extends ConsumerWidget {
       child: historyAsync.when(
         loading: () => const Padding(
           padding: EdgeInsets.symmetric(vertical: 48),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: KuberShapeLoader(size: 40)),
         ),
         error: (err, _) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 48),

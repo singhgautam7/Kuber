@@ -5,6 +5,7 @@
 // =============================================================================
 
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
@@ -303,6 +304,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       valueIsPlaceholder: acc == null,
       onTap: () {
         showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
           context: context,
           isScrollControlled: true,
           useSafeArea: true,
@@ -416,6 +418,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   void _openCalculatorFor(TextEditingController controller) {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

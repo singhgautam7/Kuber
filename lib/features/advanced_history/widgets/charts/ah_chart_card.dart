@@ -15,7 +15,7 @@ import '../../providers/ah_providers.dart';
 import '../../query/query_labels.dart';
 import '../../services/ah_results.dart';
 import '../common/ah_common.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/motion/motion.dart';
 import '../dashboard/ah_group_detail_sheet.dart';
 import 'ah_chart_view.dart';
 
@@ -68,11 +68,11 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
     with TickerProviderStateMixin {
   late final AnimationController _grow = AnimationController(
     vsync: this,
-    duration: AhMotion.defaultCurve.settle,
-    reverseDuration: AhMotion.standardCurve.settle,
+    duration: KuberMotion.defaultCurve.settle,
+    reverseDuration: KuberMotion.standardCurve.settle,
   );
   late final AnimationController _fade = AnimationController(
-      vsync: this, duration: AhMotion.instant, value: 1);
+      vsync: this, duration: KuberMotion.fxInstant, value: 1);
   Timer? _t;
   bool _started = false;
 
@@ -81,9 +81,13 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    if (AhMotion.reduced(context)) {
-      _grow.duration = AhMotion.instant;
-      _grow.reverseDuration = AhMotion.instant;
+    final level = KuberMotion.levelOf(context);
+    if (level == MotionLevel.subtle) {
+      _grow.duration = KuberMotion.subtleCurve.settle;
+      _grow.reverseDuration = KuberMotion.subtleCurve.settle;
+    } else if (level == MotionLevel.off) {
+      _grow.duration = KuberMotion.fxInstant;
+      _grow.reverseDuration = KuberMotion.fxInstant;
     }
     if (widget.delay == Duration.zero) {
       _grow.forward();
@@ -239,7 +243,7 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
     }
 
     final card = AnimatedContainer(
-      duration: AhMotion.dur(context, AhMotion.fast),
+      duration: KuberMotion.of(context, KuberMotion.fxFast),
       padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: lifted ? cs.surfaceContainerHigh : cs.surfaceContainer,
@@ -285,10 +289,13 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
             ],
           ),
           const SizedBox(height: KuberSpace.md),
-          // Edit: the chart cross-fades (200 ms).
+          // Edit, and skeleton to chart: cross-fade fx.default.
           AnimatedSwitcher(
-            duration: AhMotion.dur(context, const Duration(milliseconds: 200)),
-            child: KeyedSubtree(key: ValueKey(spec), child: body),
+            duration: KuberMotion.of(context, KuberMotion.fxDefault),
+            switchInCurve: KuberMotion.curveEffects,
+            switchOutCurve: KuberMotion.curveEffects,
+            child: KeyedSubtree(
+                key: ValueKey((spec, d?.state)), child: body),
           ),
         ],
       ),
@@ -299,8 +306,12 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
         alignment: Alignment.topCenter,
         sizeFactor: CurvedAnimation(
           parent: _grow,
-          curve: AhMotion.defaultSize,
-          reverseCurve: AhMotion.standardSize,
+          curve: KuberMotion.spatialCurve(
+                  KuberMotion.levelOf(context), KuberMotion.defaultCurve)
+              .clamped,
+          reverseCurve: KuberMotion.spatialCurve(
+                  KuberMotion.levelOf(context), KuberMotion.standardCurve)
+              .clamped,
         ),
         child: FadeTransition(
           opacity: _fade.drive(CurveTween(curve: Curves.linear)),

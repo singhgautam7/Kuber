@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kuber/core/utils/locale_font.dart';
 
 /// Kuber mark variants. Default is [spark] (rupee + one twinkle).
 enum KuberMarkVariant { spark, plain, flanked }
@@ -43,7 +43,7 @@ class KuberMarkWidget extends StatelessWidget {
           children: [
             Text(
               '₹',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontWeight: FontWeight.w700,
                 fontSize: size * 0.92,
                 height: 1.0,
@@ -90,7 +90,7 @@ class KuberMarkWidget extends StatelessWidget {
             offset: Offset(0, -size * 0.024),
             child: Text(
               '₹',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontWeight: FontWeight.w700,
                 fontSize: size * 0.62,
                 height: 1.0,

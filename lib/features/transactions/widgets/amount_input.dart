@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_chips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -136,6 +137,7 @@ class AmountInput extends ConsumerWidget {
     FocusScope.of(context).unfocus();
     final isIndian = ref.read(formatterProvider).system == NumberSystem.indian;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

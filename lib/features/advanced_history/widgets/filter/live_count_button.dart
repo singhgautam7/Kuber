@@ -5,9 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/kuber_shape_loader.dart';
 import '../../providers/ah_providers.dart';
 import '../../query/query_ast.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 
 /// Bottom button: "Show N transactions". [node] is already debounced by the
 /// page. Loader after 150 ms (label "Show transactions", still tappable),
@@ -50,7 +51,7 @@ class _LiveCountButtonState extends ConsumerState<LiveCountButton> {
       _timer = null;
       _slow = false;
     } else if (a.isLoading && _timer == null && !_slow) {
-      _timer = Timer(AhMotion.fast, () {
+      _timer = Timer(KuberMotion.fxFast, () {
         _timer = null;
         if (mounted) setState(() => _slow = true);
       });
@@ -63,9 +64,9 @@ class _LiveCountButtonState extends ConsumerState<LiveCountButton> {
         : none
             ? l.ahfNoMatch
             : l.ahfShowN(count);
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
     return AnimatedSwitcher(
-      duration: reduced ? AhMotion.instant : AhMotion.fast,
+      duration: reduced ? KuberMotion.fxInstant : KuberMotion.fxFast,
       transitionBuilder: (child, anim) => FadeTransition(
         opacity: anim,
         child: SlideTransition(
@@ -87,14 +88,10 @@ class _LiveCountButtonState extends ConsumerState<LiveCountButton> {
             Padding(
               padding: const EdgeInsets.only(left: 24),
               child: IgnorePointer(
-                child: SizedBox(
+                child: KuberShapeLoader(
                   key: const ValueKey('ahf-count-loader'),
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
+                  size: 24,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),

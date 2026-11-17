@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../shared/widgets/kuber_progress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,6 +74,7 @@ class _SmsFirstLoadScreenState extends ConsumerState<SmsFirstLoadScreen>
   Future<bool> _confirmCancel() async {
     final cs = Theme.of(context).colorScheme;
     final result = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(

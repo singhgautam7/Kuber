@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -264,6 +265,7 @@ class MoreFooter extends StatelessWidget {
 
 Future<void> launchTutorialFromMore(BuildContext context, WidgetRef ref) async {
   showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     barrierDismissible: false,
     builder: (_) => const KuberLoader(label: 'Preparing tutorial...'),

@@ -15,7 +15,6 @@ import '../../providers/ah_providers.dart';
 import '../../query/query_labels.dart';
 import '../../services/ah_results.dart';
 import '../common/ah_common.dart';
-import '../common/ah_motion.dart';
 import 'ah_group_detail_sheet.dart';
 import 'ah_share_bar.dart';
 import 'ah_txn_list.dart';
@@ -32,8 +31,9 @@ class AhResults extends ConsumerWidget {
   }
 }
 
-/// Fades its sliver in (200 ms) whenever [version] changes: the results
-/// cross-fade when the filter, grouping or a saved view changes.
+/// Fades its sliver in (fx.default) when it first shows (skeleton to results)
+/// and whenever [version] changes: the results cross-fade when the filter,
+/// grouping or a saved view changes.
 class _FadeOnChange extends StatefulWidget {
   const _FadeOnChange({required this.version, required this.sliver});
   final Object version;
@@ -45,14 +45,24 @@ class _FadeOnChange extends StatefulWidget {
 
 class _FadeOnChangeState extends State<_FadeOnChange>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 200), value: 1);
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: KuberMotion.fxDefault);
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    _c.duration = KuberMotion.of(context, KuberMotion.fxDefault);
+    _c.forward();
+  }
 
   @override
   void didUpdateWidget(_FadeOnChange old) {
     super.didUpdateWidget(old);
     if (old.version != widget.version) {
-      _c.duration = AhMotion.dur(context, const Duration(milliseconds: 200));
+      _c.duration = KuberMotion.of(context, KuberMotion.fxDefault);
       _c.forward(from: 0);
     }
   }
@@ -65,7 +75,9 @@ class _FadeOnChangeState extends State<_FadeOnChange>
 
   @override
   Widget build(BuildContext context) =>
-      SliverFadeTransition(opacity: _c, sliver: widget.sliver);
+      SliverFadeTransition(
+          opacity: CurvedAnimation(parent: _c, curve: KuberMotion.curveEffects),
+          sliver: widget.sliver);
 }
 
 Widget _skeleton() => const SliverToBoxAdapter(
@@ -240,6 +252,7 @@ class _TxnResults extends ConsumerStatefulWidget {
 
 class _TxnResultsState extends ConsumerState<_TxnResults> {
   bool _loadingMore = false;
+  final _days = AhDayEntryCache();
 
   Future<void> _more() async {
     if (_loadingMore) return;
@@ -260,7 +273,8 @@ class _TxnResultsState extends ConsumerState<_TxnResults> {
     if (page.items.isEmpty) return _empty(context, ref);
     final byDate = ref.watch(
         ahViewProvider.select((v) => v.sort.field == AhSortField.date));
-    final entries = ahDayEntries(page.items, byDate: byDate);
+    final entries = _days.of(page.items,
+        byDate: byDate, salt: Localizations.localeOf(context));
     return _FadeOnChange(
       version: entries.isEmpty ? 0 : entries.first.txns.first.id ^ byDate.hashCode ^ page.total,
       sliver: SliverList.builder(
@@ -270,15 +284,7 @@ class _TxnResultsState extends ConsumerState<_TxnResults> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) _more();
             });
-            return const Padding(
-              padding: EdgeInsets.all(KuberSpace.lg),
-              child: Center(
-                child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-            );
+            return const AhLoadMoreFooter();
           }
           return AhDayBlock(entry: entries[i]);
         },

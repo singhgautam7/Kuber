@@ -25,6 +25,8 @@
 // account.creditLimit). Editing Total Limit never creates an adjustment.
 // =============================================================================
 
+import '../../../shared/widgets/kuber_shape_loader.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:flutter/services.dart';
@@ -285,6 +287,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -336,6 +339,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
     if (hasTxns) {
       showDialog(
+      animationStyle: kuberDialogStyle(context),
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(
@@ -377,6 +381,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
     if (!mounted) return;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -414,6 +419,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     return showDialog<Account>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -530,7 +536,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                 child: balanceAsync.when(
                   loading: () => const Padding(
                     padding: EdgeInsets.only(top: 80),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: KuberShapeLoader()),
                   ),
                   error: (e, _) => Padding(
                     padding: const EdgeInsets.only(top: 80),

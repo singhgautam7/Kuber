@@ -9,7 +9,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -114,7 +114,7 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
   }
 
   void _select(DateTime d) {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     final key = monthKeyOf(d);
     if (key != _keyAt(_monthIndex)) {
       final i = _indexOf(key);
@@ -147,7 +147,7 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
   }
 
   void _quickAdd(DateTime d) {
-    HapticFeedback.mediumImpact();
+    KuberHaptics.longPress();
     context.push('/reminders/add?date=${DateFormat('yyyy-MM-dd').format(d)}');
   }
 
@@ -497,7 +497,8 @@ class _GridArea extends ConsumerWidget {
     final width = MediaQuery.sizeOf(context).width;
     final cellW = (width - 2 * _kGridPad) / 7;
     final collapsed = p >= 0.999;
-    final reduced = KuberMotion.reduced(context);
+    // Subtle keeps the (finger-driven) row slide; only Off flattens it.
+    final reduced = KuberMotion.levelOf(context) == MotionLevel.off;
 
     // Weekday row: short names, narrow where a short one is wider than a cell.
     final names = [

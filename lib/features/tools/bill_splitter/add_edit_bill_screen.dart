@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -913,6 +914,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
 
   void _showPaidByPicker(BuildContext context, ColorScheme cs) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       useSafeArea: true,

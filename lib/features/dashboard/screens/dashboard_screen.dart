@@ -2,6 +2,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -413,11 +414,6 @@ class _BalanceHeroCard extends ConsumerWidget {
     final formatter = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final symbol = ref.watch(currencyProvider).symbol;
-    final isPositive = summary.net >= 0;
-    final prefix = isPositive ? '+' : '-';
-    final formattedNet = formatter
-        .formatCurrency(summary.net.abs(), symbol: symbol)
-        .trim();
     final formattedIncome = isPrivate
         ? maskAmount('', true)
         : '+${formatter.formatCurrency(summary.totalIncome, symbol: symbol).trim()}';
@@ -503,8 +499,13 @@ class _BalanceHeroCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: KuberSpace.xs),
-          Text(
-            isPrivate ? '****' : '$prefix$formattedNet',
+          AnimatedAmount(
+            value: summary.net,
+            animateIn: false,
+            isPrivate: isPrivate,
+            maxLines: 1,
+            format: (v) =>
+                '${v >= 0 ? '+' : '-'}${formatter.formatCurrency(v.abs(), symbol: symbol).trim()}',
             style: theme.textTheme.headlineMedium!.copyWith(
               color: isPrivate
                   ? cs.onSurface

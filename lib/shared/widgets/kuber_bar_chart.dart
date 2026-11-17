@@ -4,6 +4,8 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../core/motion/motion.dart';
+import 'chart_motion.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
@@ -570,7 +572,10 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
     final double dataGap = (_maxY * _segmentGap) / widget.height;
 
     return RepaintBoundary(
-      child: BarChart(
+      child: ChartDrawIn(
+        kind: ChartKind.bars,
+        count: widget.buckets.length,
+        builder: (context, p) => BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
         maxY: _maxY,
@@ -598,9 +603,12 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
           Theme.of(context).textTheme,
           showLeftTitles: showLeftTitles,
         ),
-        barGroups: _buildBarGroups(barWidth, dataGap, cs),
+        barGroups: riseBars(_buildBarGroups(barWidth, dataGap, cs), p),
       ),
+      duration: chartSwapDuration(context, drawing: isDrawing(p)),
+      curve: chartSwapCurve(context),
     ),
+      ),
     );
   }
 
@@ -672,7 +680,11 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
 
   Widget _buildLineChart(ColorScheme cs, {bool showLeftTitles = true}) {
     return RepaintBoundary(
-      child: LineChart(
+      child: ChartDrawIn(
+        kind: ChartKind.line,
+        builder: (context, p) => RevealX(
+          progress: p,
+          child: LineChart(
       LineChartData(
         maxY: _maxY,
         lineTouchData: LineTouchData(
@@ -726,7 +738,11 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
           ),
         ],
       ),
+      duration: chartSwapDuration(context, drawing: isDrawing(p)),
+      curve: chartSwapCurve(context),
     ),
+        ),
+      ),
     );
   }
 

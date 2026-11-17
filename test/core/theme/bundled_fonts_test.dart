@@ -1,39 +1,24 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Guards the pre-bundled Inter weights (#6). google_fonts loads these from
-/// assets before any network fetch, so the primary UI font works offline and
-/// without a runtime download. If the pubspec asset wiring or a filename
-/// regresses, the app silently falls back to fetching/Roboto — this catches it.
+/// Guards the bundled variable Inter (v7.0.0). It is an engine font family
+/// ('Inter' in pubspec `fonts:`), so the UI font works offline. If the pubspec
+/// wiring or the filename regresses, text silently falls back to Roboto.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // Variant names must match google_fonts' `toApiFilenamePart()` mapping so the
-  // bundled-asset lookup (`Inter-<Variant>.ttf`) resolves.
-  // Light / ExtraBold / Black were dropped in the M3 redesign (no M3 type
-  // role uses them; see specs/m3-redesign/performance-review.md).
-  const variants = [
-    'Regular', // w400
-    'Medium', // w500
-    'SemiBold', // w600
-    'Bold', // w700
-  ];
-
-  for (final variant in variants) {
-    test('Inter-$variant.ttf is bundled and is a valid font', () async {
-      final data = await rootBundle.load('assets/google_fonts/Inter-$variant.ttf');
-      expect(
-        data.lengthInBytes,
-        greaterThan(10000),
-        reason: 'Inter-$variant.ttf should be a real subset font, not empty',
-      );
-      // sfnt header: 0x00010000 (TrueType/glyf) or 'OTTO' (CFF).
-      final sig = data.getUint32(0);
-      expect(
-        sig == 0x00010000 || sig == 0x4F54544F,
-        isTrue,
-        reason: 'Inter-$variant.ttf has a valid sfnt header',
-      );
-    });
-  }
+  test('InterVariable.ttf is bundled, valid and has a wght axis', () async {
+    final data = await rootBundle.load('assets/fonts/InterVariable.ttf');
+    expect(data.lengthInBytes, greaterThan(10000));
+    final sig = data.getUint32(0);
+    expect(sig == 0x00010000 || sig == 0x4F54544F, isTrue, reason: 'sfnt header');
+    // Table directory: look for 'fvar' (variable font) and 'wght' in it.
+    final numTables = data.getUint16(4);
+    var hasFvar = false;
+    for (var i = 0; i < numTables; i++) {
+      final tag = String.fromCharCodes(data.buffer.asUint8List(data.offsetInBytes + 12 + i * 16, 4));
+      if (tag == 'fvar') hasFvar = true;
+    }
+    expect(hasFvar, isTrue, reason: 'variable font (fvar table)');
+  });
 }

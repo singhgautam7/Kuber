@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/motion/kuber_haptics.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/services/attachment_service.dart';
@@ -782,6 +784,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -806,6 +809,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -829,6 +833,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -896,6 +901,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   void _showTagSelector() {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -992,23 +998,28 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
 
     if (name.isEmpty) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.enterTransactionName, isError: true);
       return;
     }
     if (amount == null || amount <= 0) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.enterValidAmount, isError: true);
       return;
     }
     if (_selectedCategoryId == null) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.selectCategoryError, isError: true);
       return;
     }
     if (_selectedAccountId == null) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.selectAccountError, isError: true);
       return;
     }
 
     if (_splitInvalid) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.msTxnSplitErr, isError: true);
       return;
     }
@@ -1076,6 +1087,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     if (!mounted) return;
 
+    KuberHaptics.confirm();
     if (keepOpen && !_isEditing) {
       _resetForAnother(l10n.addAnotherPrompt);
       return;
@@ -1123,18 +1135,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _amountController.text.trim().replaceAll(',', ''),
     );
     if (amount == null || amount <= 0) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.enterValidAmount, isError: true);
       return;
     }
     if (_selectedFromAccountId == null) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.selectSourceAccount, isError: true);
       return;
     }
     if (_selectedToAccountId == null) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.selectDestinationAccount, isError: true);
       return;
     }
     if (_selectedFromAccountId == _selectedToAccountId) {
+      KuberHaptics.reject();
       showKuberSnackBar(context, l10n.accountsMustDiffer, isError: true);
       return;
     }
@@ -1175,6 +1191,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     if (!mounted) return;
 
+    KuberHaptics.confirm();
     if (keepOpen && !_isEditing) {
       _resetForAnother(l10n.addAnotherPrompt);
       return;

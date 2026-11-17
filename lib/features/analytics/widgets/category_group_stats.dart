@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import '../../../core/motion/motion.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -212,16 +212,13 @@ class _CategoryGroupStatsWidgetState
 
   Widget _buildLoading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Shimmer.fromColors(
-      baseColor: cs.surfaceContainerHigh,
-      highlightColor: cs.surfaceContainerLowest,
-      child: Container(
+    return Padding(
+      padding: const EdgeInsets.all(KuberSpace.lg),
+      child: ShimmerBox(
         height: 250,
-        margin: const EdgeInsets.all(KuberSpace.lg),
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(KuberShape.medium),
-        ),
+        radius: KuberShape.medium,
+        base: cs.surfaceContainerHigh,
+        highlight: cs.surfaceContainerLowest,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
@@ -178,6 +179,7 @@ List<SgCandidate> forceSamples() => [
 /// caps and cooldowns. Graduates Get started so the slot can show it.
 void showForceSuggestionSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -151,16 +151,11 @@ class BurnRateCard extends ConsumerWidget {
         //   ),
         // ),
         // const SizedBox(height: KuberSpace.sm),
-        Shimmer.fromColors(
-          baseColor: cs.surfaceContainerHigh,
-          highlightColor: cs.surfaceContainerLowest,
-          child: Container(
-            height: 140,
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(KuberShape.medium),
-            ),
-          ),
+        ShimmerBox(
+          height: 140,
+          radius: KuberShape.medium,
+          base: cs.surfaceContainerHigh,
+          highlight: cs.surfaceContainerLowest,
         ),
         const SizedBox(height: KuberSpace.md),
       ],

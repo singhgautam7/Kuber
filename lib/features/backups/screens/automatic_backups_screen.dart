@@ -14,6 +14,7 @@ import '../../pro/feature_gates/gate_sheet_backups.dart';
 import '../../pro/feature_gates/pro_gate.dart';
 import '../providers/backup_provider.dart';
 import '../utils/backup_uri_formatter.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class AutomaticBackupsScreen extends ConsumerWidget {
   const AutomaticBackupsScreen({super.key});
@@ -28,7 +29,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
         // Keep the current content on reload (e.g. after toggling a setting)
         // instead of flashing a full-screen spinner.
         skipLoadingOnReload: true,
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (error, _) => Center(
           child: Text(context.l10n.errorWithDetails(error.toString())),
         ),

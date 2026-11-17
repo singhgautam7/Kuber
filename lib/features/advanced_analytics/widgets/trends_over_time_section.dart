@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -292,6 +293,7 @@ class AaCategorySelector extends StatelessWidget {
     final selectedCat = matches.isEmpty ? null : matches.first;
 
     void open() => showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

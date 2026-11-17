@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -56,6 +57,7 @@ void openUpcomingEventSource(
       showRuleSheet(context, ref, rule);
     case LedgerEvent(:final ledger):
       showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,
@@ -65,6 +67,7 @@ void openUpcomingEventSource(
       );
     case CreditCardEvent(:final account):
       showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,

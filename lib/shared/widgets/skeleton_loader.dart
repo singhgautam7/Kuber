@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/shimmer.dart';
 import '../../core/theme/app_theme.dart';
 
-/// A single skeleton placeholder block with shimmer animation.
-class SkeletonBlock extends StatefulWidget {
+/// A single skeleton placeholder block. Shimmers at Expressive only (see
+/// [ShimmerBox]); static at Subtle and Off.
+class SkeletonBlock extends StatelessWidget {
   final double width;
   final double height;
   final double borderRadius;
@@ -16,50 +18,14 @@ class SkeletonBlock extends StatefulWidget {
   });
 
   @override
-  State<SkeletonBlock> createState() => _SkeletonBlockState();
-}
-
-class _SkeletonBlockState extends State<SkeletonBlock>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.4, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final baseColor = cs.outline;
-
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, _) => Opacity(
-        opacity: _animation.value,
-        child: Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: baseColor,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-          ),
-        ),
-      ),
+    return ShimmerBox(
+      width: width,
+      height: height,
+      radius: borderRadius,
+      base: cs.outline.withValues(alpha: 0.45),
+      highlight: cs.outline.withValues(alpha: 0.8),
     );
   }
 }

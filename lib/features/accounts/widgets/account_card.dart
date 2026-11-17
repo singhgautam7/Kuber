@@ -6,6 +6,8 @@
 
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -46,10 +48,6 @@ class AccountCard extends ConsumerWidget {
     // Credit cards show the outstanding as a negative amount in the expense
     // colour; other accounts show "−" only when genuinely negative.
     final negative = balance < 0;
-    final amount = maskAmount(
-      '${negative ? '−' : ''}${fmt.formatCurrency(balance.abs())}',
-      masked,
-    );
     final typeLine = [
       _typeFor(context, account),
       if (account.last4Digits != null) '**** ${account.last4Digits}',
@@ -113,8 +111,12 @@ class AccountCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                amount,
+              AnimatedAmount(
+                value: balance,
+                animateIn: false,
+                isPrivate: masked,
+                format: (v) =>
+                    '${v < 0 ? '−' : ''}${fmt.formatCurrency(v.abs())}',
                 style: theme.textTheme.titleMedium!.copyWith(
                   color: negative ? context.kuberMoney.expense : cs.onSurface,
                 ),
@@ -136,9 +138,12 @@ class AccountCard extends ConsumerWidget {
       ),
     );
 
-    return InkWell(
-      onTap: onTap,
-      child: account.isDisabled ? Opacity(opacity: 0.38, child: row) : row,
+    return Pressable(
+      kind: PressKind.card,
+      child: InkWell(
+        onTap: onTap,
+        child: account.isDisabled ? Opacity(opacity: 0.38, child: row) : row,
+      ),
     );
   }
 

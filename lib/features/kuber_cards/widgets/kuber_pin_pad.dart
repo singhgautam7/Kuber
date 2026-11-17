@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -70,7 +70,7 @@ class KuberPinPad extends StatelessWidget {
         plain: true,
         onTap: _backspace,
         onLongPress: () {
-          HapticFeedback.selectionClick();
+          KuberHaptics.tick();
           onChanged('');
         },
       ),
@@ -143,7 +143,7 @@ class _PadKeyState extends State<_PadKey> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: () {
-        HapticFeedback.selectionClick();
+        KuberHaptics.tick();
         widget.onTap();
       },
       onLongPress: widget.onLongPress,

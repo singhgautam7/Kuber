@@ -21,6 +21,9 @@ import 'package:go_router/go_router.dart';
 import 'core/background/background_reporter.dart';
 import 'core/background/background_run_controller.dart';
 import 'core/background/background_tasks.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'core/motion/motion.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'core/utils/ui_idle.dart';
 import 'core/utils/locale_font.dart' show AppLocale;
 import 'core/router/app_router.dart';
@@ -133,6 +136,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
   /// _maybeRunOnOpenBatch).
   void _runOnOpenBatch() {
     _runBudgetMaintenance();
+    _checkMotionDevice();
     _runOnOpenLedgerReminders();
     _startBackgroundTasks('coldStart');
     _runSmsCleanup();
@@ -146,6 +150,17 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // Analytics or History hits cached data. Must never overlap the splash
     // fade-out: the warm-up blocks the UI isolate ~25 ms on a 6k-row ledger.
     Future.delayed(const Duration(milliseconds: 1500), _warmTabProviders);
+  }
+
+  /// Motion level, Auto: classifies the phone once (RAM, low-RAM flag) and
+  /// caches it, so later cold starts read it with the other prefs. Off the
+  /// startup path: runs from the on-open batch only.
+  void _checkMotionDevice() {
+    ref.read(motionDeviceProvider.notifier).check(() async {
+      if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return null;
+      final info = await DeviceInfoPlugin().androidInfo;
+      return (info.physicalRamSize, info.isLowRamDevice);
+    });
   }
 
   /// Warms the providers that the Analytics and History tabs consume on first
@@ -595,16 +610,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: themeMode,
-      // Recolour in place (theme-surfaces-v1 motion.md): every role tweens,
-      // nothing moves. Reduced motion: 90 ms linear.
-      themeAnimationDuration: WidgetsBinding
-              .instance.platformDispatcher.accessibilityFeatures.disableAnimations
-          ? KuberMotion.instant
-          : const Duration(milliseconds: 240),
-      themeAnimationCurve: WidgetsBinding
-              .instance.platformDispatcher.accessibilityFeatures.disableAnimations
-          ? Curves.linear
-          : Curves.easeOutCubic,
+      // The theme-change ripple (ThemeRipple, below) reveals the new theme;
+      // no cross-fade underneath it.
+      themeAnimationDuration: Duration.zero,
       routerConfig: router,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -623,7 +631,12 @@ class _KuberAppState extends ConsumerState<KuberApp>
         // Router (child) and calls setFrameworkHandlesBack() directly.
         // This sits between the Router and _WidgetsAppState, ensuring
         // we control when the platform registers Flutter's back callback.
-        return NotificationListener<NavigationNotification>(
+        return MotionScopeHost(
+          child: ThemeRipple(
+          // Haptics stay quiet while any list scrolls or flings.
+          child: NotificationListener<ScrollNotification>(
+          onNotification: _trackScrollForHaptics,
+          child: NotificationListener<NavigationNotification>(
           onNotification: _handleNavigationNotification,
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             // Edge-to-edge: set only icon brightness (applied via the modern
@@ -656,9 +669,21 @@ class _KuberAppState extends ConsumerState<KuberApp>
               ),
             ),
           ),
+        ),
+        ),
+        ),
         );
       },
     );
+  }
+
+  static bool _trackScrollForHaptics(ScrollNotification n) {
+    if (n is ScrollStartNotification || n is ScrollUpdateNotification) {
+      KuberHaptics.scrolling = true;
+    } else if (n is ScrollEndNotification) {
+      KuberHaptics.scrolling = false;
+    }
+    return false;
   }
 }
 

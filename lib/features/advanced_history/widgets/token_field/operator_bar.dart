@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'token_filter_controller.dart';
 
 /// `( ) and or not`: inserts at the cursor. 48 dp (docked 44), 2 dp gap,
@@ -108,7 +108,7 @@ class _OpButtonState extends State<_OpButton> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
     final full = widget.height / 2;
     const inner = Radius.circular(6);
     final outerL = widget.first ? Radius.circular(full) : inner;
@@ -133,8 +133,8 @@ class _OpButtonState extends State<_OpButton> {
           : localeFont(fontSize: 14, fontWeight: FontWeight.w600, color: fg),
     );
     final child = AnimatedContainer(
-      duration: _down ? AhMotion.fast : (reduced ? AhMotion.instant : AhMotion.fast),
-      curve: _down ? AhMotion.decelerate : Curves.easeOutBack,
+      duration: _down ? KuberMotion.fxFast : (reduced ? KuberMotion.fxInstant : KuberMotion.fxFast),
+      curve: _down ? KuberMotion.curveEffects : Curves.easeOutBack,
       height: widget.height,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: bg, borderRadius: radius),

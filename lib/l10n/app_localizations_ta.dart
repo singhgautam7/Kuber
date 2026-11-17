@@ -8981,16 +8981,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get obTermsPrivacy => 'தனியுரிமைக் கொள்கை';
 
   @override
-  String get pathSheetTitle => 'நீங்கள் இங்கே வந்த வழி';
+  String get pathSheetTitle => 'விரைவு வழிசெலுத்தல்';
 
   @override
   String get pathSheetCurrent => 'நீங்கள் இங்கே';
 
   @override
-  String get pathSheetHint => 'இந்தப் பக்கத்திற்கான வழியைக் காட்டும்';
-
-  @override
-  String get pathSheetLongPress => 'பாதையைக் காட்டு';
+  String get pathSheetHint => 'விரைவு வழிசெலுத்தலைத் திறக்கும்';
 
   @override
   String get setPathTip =>
@@ -9155,7 +9152,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get obNotifSampleBody => 'SBI வீட்டுக் கடன் · ₹24,350';
 
   @override
-  String get pathSheetSub => 'எந்தப் பக்கத்திற்கும் திரும்ப தட்டவும்';
+  String get pathSheetSub => 'எந்தப் பக்கத்தையும் திறக்க தட்டவும்';
 
   @override
   String get pathSheetFromNotification => 'அறிவிப்பிலிருந்து திறக்கப்பட்டது';
@@ -11264,4 +11261,90 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get ahdMore => 'அதிகம்';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'மீதமுள்ள $n பக்கங்களைக் காட்டு';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'குறைவான பக்கங்களைக் காட்டு';
+
+  @override
+  String get pathSheetExpand => 'விரிவாக்கு';
+
+  @override
+  String get pathSheetCollapse => 'சுருக்கு';
+
+  @override
+  String get motionTitle => 'அனிமேஷன்';
+
+  @override
+  String get motionSubtitle =>
+      'தட்டும்போது, ஸ்வைப் செய்யும்போது அல்லது திறக்கும்போது குபேர் எவ்வளவு அசைகிறது';
+
+  @override
+  String get motionPreviewHint => 'இந்த நிலையை உணர அட்டையைத் தட்டுங்கள்';
+
+  @override
+  String get motionAuto => 'தானியங்கி';
+
+  @override
+  String get motionExpressive => 'உயிரோட்டம்';
+
+  @override
+  String get motionSubtle => 'மென்மை';
+
+  @override
+  String get motionOff => 'முடக்கம்';
+
+  @override
+  String get motionAutoExpressive =>
+      'இந்த ஃபோனில் உயிரோட்ட நிலை பயன்படுத்தப்படுகிறது';
+
+  @override
+  String get motionAutoSubtle =>
+      'மென்மை நிலை பயன்படுத்தப்படுகிறது: இந்த ஃபோனில் 4 GB-க்கும் குறைவான RAM உள்ளது';
+
+  @override
+  String get motionAutoOff =>
+      'முடக்க நிலை பயன்படுத்தப்படுகிறது: அனிமேஷனை அகற்று இயக்கத்தில் உள்ளது';
+
+  @override
+  String get motionExpressiveDesc => 'துள்ளலும் மென்மையும். முழு அனுபவம்.';
+
+  @override
+  String get motionSubtleDesc =>
+      'சிறு மங்கல்களும் சிறிய அசைவுகளும். துள்ளல் இல்லை.';
+
+  @override
+  String get motionOffDesc => 'அசைவு இல்லை. விரைவான மங்கலுடன் மாறும்.';
+
+  @override
+  String get motionPhoneNote =>
+      'உங்கள் ஃபோன் அமைப்புகளில் அனிமேஷனை அகற்று இயக்கத்தில் உள்ளது, எனவே குபேர் முடக்க நிலையைப் பயன்படுத்துகிறது.';
+
+  @override
+  String get motionOpenPhoneSettings => 'ஃபோன் அமைப்புகளைத் திற';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'தானியங்கி ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'முடக்கம் (ஃபோன் அமைப்பு)';
+
+  @override
+  String get hapticsTitle => 'அதிர்வு';
+
+  @override
+  String get hapticsSub => 'ஸ்விட்சுகள் மற்றும் நீண்ட அழுத்தத்தில் அதிருங்கள்';
+
+  @override
+  String get setKwMotion => 'அனிமேஷன் அசைவு துள்ளல் மங்கல் animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'அதிர்வு அதிருங்கள் பின்னூட்டம் தொடுதல் haptics vibration';
 }

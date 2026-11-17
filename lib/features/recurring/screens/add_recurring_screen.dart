@@ -5,6 +5,7 @@
 // edited.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -151,6 +152,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   Future<bool?> _confirmFuture(RecurringRule r) {
     final l = context.l10n;
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l.msRecFutureTitle, style: localeFont(fontWeight: FontWeight.w600)),

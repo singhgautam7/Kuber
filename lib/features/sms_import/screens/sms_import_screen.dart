@@ -8,6 +8,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../shared/widgets/date_separator.dart';
 
 import '../../../core/constants/info_constants.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/overflow_config.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -32,6 +33,7 @@ import '../widgets/transaction_review_sheet.dart';
 import 'sms_first_load_screen.dart';
 import 'sms_import_widgets.dart';
 import 'sms_permission_screen.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Which tab the import list shows. The home widget can deep-link to a tab.
 enum SmsImportTab { unreviewed, imported, dismissed }
@@ -308,7 +310,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
                 children: [
                   _topAppBar(cs),
                   const Expanded(
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: KuberShapeLoader(size: 40)),
                   ),
                 ],
               )
@@ -346,6 +348,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   Future<void> _confirmReset() async {
     final cs = Theme.of(context).colorScheme;
     final proceed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Reset SMS imports?'),
@@ -402,6 +405,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     final theme = Theme.of(context);
     final n = ids.length;
     final ok = await showModalBottomSheet<bool>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -952,6 +956,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   Future<void> _dismissBatch() async {
     final cs = Theme.of(context).colorScheme;
     final proceed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Dismiss messages?'),
@@ -1080,7 +1085,8 @@ class _FreshRowState extends State<_FreshRow>
 
   @override
   Widget build(BuildContext context) {
-    if (KuberMotion.reduced(context)) return widget.child;
+    // Off: no highlight. Subtle keeps the short height + fade (no overshoot).
+    if (KuberMotion.levelOf(context) == MotionLevel.off) return widget.child;
     final tint = Theme.of(context).colorScheme.primary;
     const enter = 230 / 1430;
     return RepaintBoundary(

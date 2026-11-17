@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import 'app_button.dart';
+import 'kuber_bottom_sheet.dart' show sheetReflow;
 import 'kuber_menu.dart';
 
 /// A single action in a [SheetButtonSection].
@@ -79,7 +80,7 @@ class SheetButtonSection extends StatelessWidget {
 
     return Padding(
       padding: pad,
-      child: Column(
+      child: sheetReflow(context, Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -107,7 +108,7 @@ class SheetButtonSection extends StatelessWidget {
               ],
             ),
         ],
-      ),
+      )),
     );
   }
 }
