@@ -122,8 +122,8 @@ class RecurringService {
   }
 
   /// Skips the next occurrence; returns it (yyyymmdd) for the snackbar / Undo.
-  Future<int?> skip(RecurringRule r) async {
-    final day = skipNext(r.schedule!);
+  Future<int?> skip(RecurringRule r, {DateTime? now}) async {
+    final day = skipNext(r.schedule!, now: now);
     await save(r);
     return day;
   }

@@ -85,7 +85,12 @@ void main() {
     await loadGoldenFonts();
     _isar = await openTestIsar();
     await SeedService().seedInitialData(_isar);
-    final now = DateTime(2026, 10, 20, 9, 30); // fixed: goldens must not move
+    // Home reads the real clock (this month's net, days into the month), so
+    // seed early today: the month cards always hold the same amounts.
+    // ponytail: daily text drift must stay under the 2% budget; a clock seam
+    // in the dashboard (package:clock) would pin it fully if it ever doesn't.
+    final d = DateTime.now();
+    final now = DateTime(d.year, d.month, d.day, 0, 10);
     await _isar.writeTxn(() => _isar.transactions.putAll([
           for (final (i, (name, amount, type)) in [
             ('Salary', 85000.0, 'income'),
@@ -100,7 +105,7 @@ void main() {
               ..type = type
               ..categoryId = '1'
               ..accountId = '1'
-              ..createdAt = now.subtract(Duration(hours: i * 5))
+              ..createdAt = now.subtract(Duration(minutes: i * 2))
               ..updatedAt = now,
         ]));
   });

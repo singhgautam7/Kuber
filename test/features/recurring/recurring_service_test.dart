@@ -63,7 +63,7 @@ void main() {
         rule(), scheduleFrom(start: DateTime(2026, 10, 1), unit: ScheduleUnit.month));
     await run(DateTime(2026, 10, 1, 9));
     var r = await reload(id);
-    final skipped = await service.skip(r);
+    final skipped = await service.skip(r, now: DateTime(2026, 10, 2));
     expect(skipped, 20261101);
     expect(await run(DateTime(2026, 11, 2, 9)), 0);
     r = await reload(id);
@@ -74,7 +74,7 @@ void main() {
         rule()..name = 'Gym', scheduleFrom(start: DateTime(2026, 10, 1), unit: ScheduleUnit.month));
     await run(DateTime(2026, 10, 1, 9));
     var g = await reload(id2);
-    final day = await service.skip(g);
+    final day = await service.skip(g, now: DateTime(2026, 10, 2));
     g = await reload(id2);
     await service.undoSkip(g, day!);
     expect(await run(DateTime(2026, 11, 1, 9)), 1);
