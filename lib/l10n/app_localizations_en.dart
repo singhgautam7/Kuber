@@ -9610,7 +9610,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'CSV backups don\'t include saved views. Use a JSON backup to keep them.';
 
   @override
-  String get historyMenuAdvanced => 'Advanced History';
+  String get historyMenuAdvanced => 'Custom Dashboard';
 
   @override
   String filterSelectedN(int n) {
@@ -9643,7 +9643,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setSecPermissions => 'Permissions';
 
   @override
-  String get menuAdvancedHistory => 'Advanced History';
+  String get menuAdvancedHistory => 'Custom Dashboard';
 
   @override
   String get menuAdvancedHistoryDesc =>
@@ -9693,14 +9693,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ahdGateSample => 'Sample data';
 
   @override
-  String get ahdGateSheetHeadline => 'Advanced History is a Kuber Pro feature';
+  String get ahdGateSheetHeadline => 'Custom Dashboard is a Kuber Pro feature';
 
   @override
   String get ahdGateSheetBody =>
       'Type or build any filter over all your transactions, group and chart the results, save views and export them as CSV with Kuber Pro.';
 
   @override
-  String get ahdTitle => 'Advanced History';
+  String get ahdTitle => 'Custom Dashboard';
 
   @override
   String get ahdMenuSaved => 'Saved views';
@@ -9897,7 +9897,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ahdInfoChart2 =>
-      'Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to open it.';
+      'Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to see its value, then View transactions.';
 
   @override
   String get ahdInfoSaved1 =>
@@ -11011,4 +11011,143 @@ class AppLocalizationsEn extends AppLocalizations {
   String ahfCountSemantics(int n) {
     return '$n filters';
   }
+
+  @override
+  String get ahdViewTxns => 'View transactions';
+
+  @override
+  String ahdOfTotal(String pct) {
+    return '$pct of total';
+  }
+
+  @override
+  String get ahfSugFields => 'Fields';
+
+  @override
+  String get ahfSugValues => 'Values';
+
+  @override
+  String get ahfSugCategories => 'Your categories';
+
+  @override
+  String get ahfSugAccounts => 'Your accounts';
+
+  @override
+  String get ahfSugTags => 'Your tags';
+
+  @override
+  String get ahfKindField => 'Field';
+
+  @override
+  String get ahfKindValue => 'Value';
+
+  @override
+  String ahfSugWords(String q) {
+    return 'Search \"$q\" in titles and notes';
+  }
+
+  @override
+  String get ahfHowUse => 'How to use';
+
+  @override
+  String get ahfSynEq => ': and = both work';
+
+  @override
+  String get ahfHowCompare => 'Compare amounts and dates';
+
+  @override
+  String get ahfSynGt => 'Over 500';
+
+  @override
+  String get ahfSynLt => 'Under 500';
+
+  @override
+  String get ahfSynGte => '500 or more';
+
+  @override
+  String get ahfSynLte => '500 or less';
+
+  @override
+  String get ahfSynExact => 'Exactly 500';
+
+  @override
+  String get ahfSynRange => 'Between 500 and 2,000';
+
+  @override
+  String get ahfSynDateAfter => 'After March 2026';
+
+  @override
+  String get ahfHowCombine => 'Combine filters';
+
+  @override
+  String get ahfSynAnd => 'Both must match. A space also means and';
+
+  @override
+  String get ahfSynOr => 'Either one can match';
+
+  @override
+  String get ahfSynBrackets => 'Brackets are read first';
+
+  @override
+  String get ahfSynOrder =>
+      '\"and\" is read before \"or\": a and b or c means (a and b) or c';
+
+  @override
+  String get ahfHowFields => 'Fields you can use';
+
+  @override
+  String get ahfHowBasics => 'The basics';
+
+  @override
+  String get ahdStartFresh => 'Start fresh';
+
+  @override
+  String get ahdStartedFresh => 'Started a fresh dashboard';
+
+  @override
+  String ahExCatOver(String category, String amount) {
+    return '$category over $amount this year';
+  }
+
+  @override
+  String ahExCatByMonth(String category, String year) {
+    return '$category in $year by month';
+  }
+
+  @override
+  String get acctSecCards => 'Credit cards';
+
+  @override
+  String get acctSecOther => 'Other';
+
+  @override
+  String get ahdDay => 'Day';
+
+  @override
+  String get ahdChartHeatmap => 'Heatmap';
+
+  @override
+  String get ahdChartStacked => 'Stacked bars';
+
+  @override
+  String get ahdChartLines => 'Lines';
+
+  @override
+  String get ahdCompare => 'Compare';
+
+  @override
+  String get ahdCompareNone => 'None';
+
+  @override
+  String get ahdCompareHint =>
+      'Pick up to 3. Bars stack them by month, the line draws one line each.';
+
+  @override
+  String get ahdHeatmapNote => 'One square per day. Darker means more.';
+
+  @override
+  String get ahdLess => 'Less';
+
+  @override
+  String get ahdMore => 'More';
 }

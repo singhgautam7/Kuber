@@ -15,6 +15,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,9 +45,24 @@ final ahViewProvider =
 class AhViewNotifier extends Notifier<AhView> {
   bool _kpiTouched = false;
 
+  /// Advanced History pages on the navigator stack (filter page on top
+  /// still counts: the page under it stays mounted).
+  static int openPages = 0;
+
   @override
   AhView build() {
     _loadKpiPref();
+    // Leaving the app ("closing" it on Android keeps the process) while the
+    // page isn't open starts the next visit on an empty page; the KPI choice
+    // is kept. Switching apps with the page open keeps the dashboard.
+    try {
+      final life = AppLifecycleListener(onHide: () {
+        if (openPages == 0 && !state.isStart) clearAll();
+      });
+      ref.onDispose(life.dispose);
+    } catch (_) {
+      // No widgets binding (pure provider tests).
+    }
     return const AhView();
   }
 
@@ -89,7 +105,8 @@ class AhViewNotifier extends Notifier<AhView> {
 
   void addChart(AhChartSpec c) {
     if (state.charts.length >= kAhMaxCharts) return;
-    state = state.copyWith(charts: [...state.charts, c]);
+    // At the top, just under the Add chart button.
+    state = state.copyWith(charts: [c, ...state.charts]);
   }
 
   void updateChart(int index, AhChartSpec c) {
@@ -175,7 +192,14 @@ AhView viewFromSaved(SavedFilter f) {
     node: node,
     groupBy: f.groupBy,
     sort: AhSort(f.sortField, descending: f.sortDescending).fitFor(f.groupBy),
-    charts: [for (final c in charts) AhChartSpec(c.type, c.split, c.measure)],
+    charts: [
+      for (final c in charts)
+        AhChartSpec(c.type, c.split, c.measure,
+            seriesBy: AhChartSplit.values
+                .where((e) => e.name == c.seriesBy)
+                .firstOrNull,
+            series: List.of(c.series)),
+    ],
     kpis: kpisFromNames(f.kpiSelection),
     savedId: f.id,
   );
@@ -255,7 +279,10 @@ final savedFilterRepositoryProvider = Provider<SavedFilterRepository>((ref) {
 abstract class SavedFilterRepository {
   Future<bool> nameTaken(String name, {int? exceptId});
   Future<SavedFilter> saveNew(String name, AhView view);
-  Future<void> saveChanges(int id, AhView view);
+  /// Writes [view] over the saved view [id] and returns the view it
+  /// replaced (read in the same write, so Undo can put exactly that back),
+  /// or null when [id] is gone.
+  Future<AhView?> saveChanges(int id, AhView view);
   Future<void> rename(int id, String name);
   Future<void> delete(int id);
   Future<void> markUsed(int id);
@@ -300,6 +327,8 @@ class IsarSavedFilterRepository implements SavedFilterRepository {
           ..type = v.charts[i].type
           ..split = v.charts[i].split
           ..measure = v.charts[i].measure
+          ..seriesBy = v.charts[i].seriesBy?.name
+          ..series = List.of(v.charts[i].series)
     ];
     f.kpiSelection = [for (final k in v.kpis) k.name];
   }
@@ -320,14 +349,17 @@ class IsarSavedFilterRepository implements SavedFilterRepository {
   }
 
   @override
-  Future<void> saveChanges(int id, AhView view) async {
+  Future<AhView?> saveChanges(int id, AhView view) async {
+    AhView? before;
     await isar.writeTxn(() async {
       final f = await isar.savedFilters.get(id);
       if (f == null) return;
+      before = viewFromSaved(f);
       _fill(f, view);
       f.updatedAt = DateTime.now();
       await isar.savedFilters.put(f);
     });
+    return before;
   }
 
   @override

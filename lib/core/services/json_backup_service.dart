@@ -330,6 +330,8 @@ class JsonBackupService {
           'type': c.type.name,
           'split': c.split.name,
           'measure': c.measure.name,
+          'seriesBy': c.seriesBy,
+          'series': c.series,
         },
     ],
     'kpiSelection': f.kpiSelection,
@@ -365,7 +367,11 @@ class JsonBackupService {
             ..split =
                 _enumByName(AhChartSplit.values, c['split'], AhChartSplit.category)
             ..measure = _enumByName(
-                AhChartMeasure.values, c['measure'], AhChartMeasure.total),
+                AhChartMeasure.values, c['measure'], AhChartMeasure.total)
+            ..seriesBy = c['seriesBy'] as String?
+            ..series = [
+              for (final k in (c['series'] as List? ?? const [])) '$k',
+            ],
       ]
       ..kpiSelection = [
         for (final k in (m['kpiSelection'] as List? ?? const [])) k as String,

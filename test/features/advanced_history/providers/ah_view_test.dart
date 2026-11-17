@@ -52,9 +52,11 @@ void main() {
     n().setGroup(AhGroupBy.none);
     expect(v().sort, AhSort.ungroupedDefault);
 
-    n().addChart(donut);
-    n().addChart(bars);
+    // A new chart goes on top (under the Add chart button).
     n().addChart(line);
+    n().addChart(bars);
+    n().addChart(donut);
+    expect(v().charts, [donut, bars, line]);
     n().moveChart(0, 2);
     expect(v().charts, [bars, line, donut]);
     n().updateChart(1, donut.copyWith(measure: AhChartMeasure.count));
@@ -98,9 +100,9 @@ void main() {
     n().setFilter('category:food,travel and not tag:x');
     n().setGroup(AhGroupBy.month);
     n().setSort(const AhSort(AhSortField.name, descending: false));
-    n().addChart(donut);
-    n().addChart(line);
     n().addChart(bars);
+    n().addChart(line);
+    n().addChart(donut);
     n().setKpis([AhKpi.expense, AhKpi.transactions]);
     final f = await repo().saveNew('  Trips  ', v());
     expect(f.name, 'Trips');
@@ -139,8 +141,8 @@ void main() {
 
   test('change detection', () async {
     n().setFilter('swiggy');
-    n().addChart(donut);
     n().addChart(bars);
+    n().addChart(donut);
     final f = await repo().saveNew('A', v());
     n().markSaved(f.id);
     c.listen(savedFiltersProvider, (_, __) {});
@@ -165,14 +167,19 @@ void main() {
     n().moveChart(0, 1);
     n().addChart(line);
     expect(ch(), [AhChange.chartAdded]);
-    n().removeChart(2);
+    n().removeChart(0);
     n().removeChart(1);
     expect(ch(), [AhChange.chartRemoved]);
     n().insertChart(1, bars);
     n().updateChart(0, donut.copyWith(split: AhChartSplit.tag));
     expect(ch(), [AhChange.chartEdited]);
 
-    await repo().saveChanges(f.id, v());
+    final before = viewFromSaved((await isar.savedFilters.get(f.id))!);
+    final replaced = await repo().saveChanges(f.id, v());
+    // It hands back exactly the view it replaced, for Undo.
+    expect(replaced!.charts, before.charts);
+    expect(replaced.queryText, before.queryText);
+    expect(await repo().saveChanges(999999, v()), isNull);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(ch(), isEmpty);
   });

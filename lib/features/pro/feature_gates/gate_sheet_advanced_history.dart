@@ -7,7 +7,7 @@ void showAdvancedHistoryGateSheet(BuildContext context) {
   final l = context.l10n;
   showFeatureGateSheet(
     context,
-    icon: Icons.manage_search_rounded,
+    icon: Icons.dashboard_customize_rounded,
     featureName: l.ahdTitle,
     headline: l.ahdGateSheetHeadline,
     body: l.ahdGateSheetBody,

@@ -11,6 +11,8 @@ import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -20,6 +22,7 @@ import '../providers/ah_providers.dart';
 import '../query/query_ast.dart';
 import '../query/query_labels.dart';
 import '../query/query_parser.dart';
+import '../widgets/common/ah_common.dart';
 import '../widgets/common/ah_motion.dart';
 import '../widgets/filter/field_list.dart';
 import '../widgets/filter/live_count_button.dart';
@@ -129,7 +132,7 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
     if (items != null && mounted) _c.insert(items, trailingAnd: true);
   }
 
-  List<(String, List<QueryItem>)> _examples(AppLocalizations l) {
+  List<(String, IconData, List<QueryItem>)> _examples(AppLocalizations l) {
     ConditionNode cond(QueryField f, QueryOp o, List<String> v) =>
         ConditionNode(f, o, v);
     List<QueryItem> all(List<ConditionNode> cs) => [
@@ -142,21 +145,28 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
       for (final a in ref.watch(accountListProvider).valueOrNull ?? const [])
         if (a.isCreditCard as bool) a.name as String
     ];
+    final exCats = ahExampleCategories(
+        ref.watch(categoryListProvider).valueOrNull ?? const []);
+    final money = ref.watch(formatterProvider).formatCurrency;
     return [
-      (
-        l.ahfExFood,
-        all([
-          cond(QueryField.category, QueryOp.eq, ['Food']),
-          cond(QueryField.amount, QueryOp.gt, ['500']),
-          cond(QueryField.date, QueryOp.eq, ['thisyear']),
-        ])
-      ),
+      if (exCats.isNotEmpty)
+        (
+          l.ahExCatOver(exCats.first, money(500)),
+          Icons.payments_outlined,
+          all([
+            cond(QueryField.category, QueryOp.eq, [exCats.first]),
+            cond(QueryField.amount, QueryOp.gt, ['500']),
+            cond(QueryField.date, QueryOp.eq, ['thisyear']),
+          ])
+        ),
       (
         l.ahfExAttachment,
+        Icons.attach_file_rounded,
         all([cond(QueryField.has, QueryOp.eq, ['attachment'])])
       ),
       (
         l.ahfExUntagged,
+        Icons.label_off_outlined,
         all([
           cond(QueryField.type, QueryOp.eq, ['expense']),
           cond(QueryField.tag, QueryOp.eq, ['none']),
@@ -165,6 +175,7 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
       if (cards.isNotEmpty)
         (
           l.ahfExCard,
+          Icons.credit_card_rounded,
           all([
             cond(QueryField.account, QueryOp.eq, cards),
             cond(QueryField.type, QueryOp.eq, ['expense']),
@@ -174,55 +185,70 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
     ];
   }
 
+  /// "How to use": every keyword with an example, shown from the header
+  /// and from "How it works" in the menu.
   KuberInfoConfig _info(AppLocalizations l, ColorScheme cs) {
+    final tt = Theme.of(context).textTheme;
     Widget row(String code, String desc) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 132,
+                width: 156,
                 child: Text(code,
                     style: monoFont(fontSize: 13, color: cs.primary)),
               ),
               Expanded(
                 child: Text(desc,
-                    style: localeFont(
-                        fontSize: 14, height: 1.4, color: cs.onSurface)),
+                    style: tt.bodyMedium!.copyWith(color: cs.onSurface)),
               ),
             ],
           ),
         );
+    Widget section(String title, List<Widget> rows) => Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpace.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [KuberSectionHeader(title: title), ...rows],
+          ),
+        );
     return KuberInfoConfig(
-      title: l.ahfTitle,
+      title: l.ahfHowUse,
       description: l.ahfInfo1,
-      items: [
-        KuberInfoItem(
-            icon: Icons.join_inner_rounded,
-            title: 'and / or',
-            description: l.ahfInfo2),
-        KuberInfoItem(
-            icon: Icons.data_array_rounded,
-            title: '( )  not',
-            description: l.ahfInfo3),
-      ],
       customChild: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.ahfHowTitle,
-              style: localeFont(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface)),
-          const SizedBox(height: 12),
-          row('category:food', l.ahfSyn1),
-          row('category:food,travel', l.ahfSyn2),
-          row('amount:>500', l.ahfSyn3),
-          row('date:2026-03', l.ahfSyn4),
-          row('"swiggy"', l.ahfSyn5),
-          row('a and b / a or b', l.ahfSyn6),
-          row('( )', l.ahfSyn7),
-          row('not tag:trip', l.ahfSyn8),
+          section(l.ahfHowBasics, [
+            row('category:food', l.ahfSyn1),
+            row('category=food', l.ahfSynEq),
+            row('category:food,travel', l.ahfSyn2),
+            row('"swiggy"', l.ahfSyn5),
+          ]),
+          section(l.ahfHowCompare, [
+            row('amount>500', l.ahfSynGt),
+            row('amount<500', l.ahfSynLt),
+            row('amount>=500', l.ahfSynGte),
+            row('amount<=500', l.ahfSynLte),
+            row('amount=500', l.ahfSynExact),
+            row('amount:500..2000', l.ahfSynRange),
+            row('date:2026-03', l.ahfSyn4),
+            row('date>2026-03', l.ahfSynDateAfter),
+          ]),
+          section(l.ahfHowCombine, [
+            row('a and b', l.ahfSynAnd),
+            row('a or b', l.ahfSynOr),
+            row('(a or b) and c', l.ahfSynBrackets),
+            row('not tag:trip', l.ahfSyn8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(l.ahfSynOrder,
+                  style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+            ),
+          ]),
+          section(l.ahfHowFields, [
+            for (final f in kPickableFields) row(fieldExample(f), fieldHint(f, l)),
+          ]),
         ],
       ),
     );
@@ -245,19 +271,26 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
         for (final t in ref.watch(tagListProvider).valueOrNull ?? const [])
           t.name as String
       ],
+      // `category:food` also matches a category group named Food (the
+      // engine does); without these a valid group filter showed an error.
+      categoryGroups: [
+        for (final g
+            in ref.watch(categoryGroupListProvider).valueOrNull ?? const [])
+          g.name,
+      ],
     );
     final money = ref.watch(formatterProvider).formatCurrency;
     String fmt(double v) => money(v);
     final n = _c.filterCount;
     final node = _c.validNode;
-    final reduced = AhMotion.reduced(context);
 
     return PopScope(
       canPop: !_dirty,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _close();
       },
-      child: Scaffold(
+      child: _KbScope(
+          child: Scaffold(
         backgroundColor: cs.surface,
         appBar: KuberAppBar(
           title: l.ahfTitle,
@@ -281,47 +314,22 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
                         Semantics(
                           liveRegion: true,
                           label: n == 0 ? l.ahfNoFilters : l.ahfCountSemantics(n),
-                          excludeSemantics: true,
-                          child: n == 0
-                              ? Text(l.ahfNoFilters,
-                                  style: localeFont(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.onSurfaceVariant))
-                              : Row(children: [
-                                  AnimatedSwitcher(
-                                    duration: reduced
-                                        ? AhMotion.instant
-                                        : AhMotion.digitRoll,
-                                    switchInCurve: AhMotion.decelerate,
-                                    transitionBuilder: (child, a) =>
-                                        FadeTransition(
-                                      opacity: a,
-                                      child: SlideTransition(
-                                              position: Tween(
-                                                      begin: reduced ? Offset.zero : const Offset(0, 0.6),
-                                                      end: Offset.zero)
-                                                  .animate(a),
-                                              child: child),
-                                    ),
-                                    child: Text('$n',
-                                        key: ValueKey(n),
-                                        style: localeFont(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: cs.onSurface,
-                                          fontFeatures: const [
-                                            FontFeature.tabularFigures()
-                                          ],
-                                        )),
-                                  ),
-                                  Text(
-                                      ' ${n == 1 ? l.ahfFilterOne : l.ahfFilterMany}',
-                                      style: localeFont(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: cs.onSurface)),
-                                ]),
+                          child: TextButton.icon(
+                            key: const ValueKey('ahf-how-to-use'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              shape: const StadiumBorder(),
+                            ),
+                            onPressed: () =>
+                                KuberInfoBottomSheet.show(context, _info(l, cs)),
+                            icon: Icon(Icons.help_outline_rounded,
+                                size: 18, color: cs.primary),
+                            label: Text(l.ahfHowUse,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge!
+                                    .copyWith(color: cs.primary)),
+                          ),
                         ),
                         const Spacer(),
                         AnimatedOpacity(
@@ -349,43 +357,51 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
                     focusedPlaceholder: l.ahfPlaceholderFocused,
                     onAction: _canApply ? _apply : null,
                   ),
-                  const SizedBox(height: 8),
+                  // Keyboard down: operator bar, readback, examples and the
+                  // field list. Keyboard up: only the inline suggestions (the
+                  // bar docks above the keyboard).
                   _InsetsBuilder(
-                    builder: (context, kbOpen) => AnimatedOpacity(
-                      opacity: kbOpen ? 0 : 1,
-                      duration: AhMotion.instant,
-                      child: IgnorePointer(
-                        ignoring: kbOpen,
-                        child: OperatorBar(controller: _c),
-                      ),
-                    ),
+                    builder: (context, kbOpen) => kbOpen
+                        ? const SizedBox.shrink()
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 12),
+                              OperatorBar(controller: _c),
+                              if (node != null && !_c.isEmpty && _c.isValid)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: ReadbackCard(
+                                        text: readbackOf(node, l, fmt)),
+                                  ),
+                                ),
+                              if (_c.items.isEmpty) ...[
+                                const SizedBox(height: 16),
+                                KuberSectionHeader(title: l.ahfTryOne),
+                                // One row that scrolls sideways, edge to edge.
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  clipBehavior: Clip.none,
+                                  child: Row(children: [
+                                    for (final e in _examples(l)) ...[
+                                      KuberChip(
+                                        label: e.$1,
+                                        icon: e.$2,
+                                        onTap: () => _c.setItems(e.$3),
+                                      ),
+                                      const SizedBox(width: KuberSpace.sm),
+                                    ],
+                                  ]),
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              KuberSectionHeader(title: l.ahfAddFilter),
+                              FieldList(onPick: _pick),
+                            ],
+                          ),
                   ),
-                  if (node != null && !_c.isEmpty && _c.isValid)
-                    ReadbackCard(text: readbackOf(node, l, fmt)),
-                  if (_c.items.isEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(l.ahfTryOne,
-                        style: localeFont(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurfaceVariant)),
-                    const SizedBox(height: 8),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      for (final e in _examples(l))
-                        KuberChip(
-                          label: e.$1,
-                          onTap: () => _c.setItems(e.$2),
-                        ),
-                    ]),
-                  ],
-                  const SizedBox(height: 20),
-                  Text(l.ahfAddFilter,
-                      style: localeFont(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant)),
-                  const SizedBox(height: 4),
-                  FieldList(onPick: _pick),
                 ],
               ),
             ),
@@ -404,19 +420,26 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
                     ),
                   );
                 }
-                return SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                        KuberSpace.screenMargin, 8, KuberSpace.screenMargin, 16),
-                    child: _bottomButton(l),
+                // CTA bar: hairline on top, 12 / 20 / 24.
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    border: Border(top: BorderSide(color: cs.outlineVariant)),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin,
+                          12, KuberSpace.screenMargin, KuberSpace.xl),
+                      child: _bottomButton(l),
+                    ),
                   ),
                 );
               },
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -446,12 +469,32 @@ class _AhFilterPageState extends ConsumerState<AhFilterPage> {
   }
 }
 
-/// Rebuilds only its subtree as the keyboard animates (no setState per frame).
+/// Reads the keyboard inset ABOVE the Scaffold (the Scaffold strips it from
+/// its body's MediaQuery when it resizes for the keyboard) and hands down only
+/// open / closed, so the page doesn't rebuild on every keyboard frame.
+class _KbScope extends StatelessWidget {
+  const _KbScope({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      _Kb(open: MediaQuery.viewInsetsOf(context).bottom > 0, child: child);
+}
+
+class _Kb extends InheritedWidget {
+  const _Kb({required this.open, required super.child});
+  final bool open;
+
+  @override
+  bool updateShouldNotify(_Kb old) => old.open != open;
+}
+
+/// Rebuilds only its subtree when the keyboard opens or closes.
 class _InsetsBuilder extends StatelessWidget {
   const _InsetsBuilder({required this.builder});
   final Widget Function(BuildContext, bool kbOpen) builder;
 
   @override
-  Widget build(BuildContext context) =>
-      builder(context, MediaQuery.viewInsetsOf(context).bottom > 0);
+  Widget build(BuildContext context) => builder(context,
+      context.dependOnInheritedWidgetOfExactType<_Kb>()?.open ?? false);
 }

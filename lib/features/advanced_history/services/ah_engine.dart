@@ -519,6 +519,10 @@ List<Transaction> ahSortTxns(List<Transaction> src, AhSort s, AhLookups lk) {
 
 AhGroupBy ahGroupByOfSplit(AhChartSplit s) => AhGroupBy.values.byName(s.name);
 
+/// `2026-11-03`: the heatmap's day key (and the `day` group key).
+String ahDayKey(DateTime d) =>
+    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
 /// Group keys of [t] (several for tags, `''` = none).
 List<String> ahKeysOf(Transaction t, AhGroupBy by, AhLookups lk) {
   switch (by) {
@@ -539,6 +543,8 @@ List<String> ahKeysOf(Transaction t, AhGroupBy by, AhLookups lk) {
       return ['${t.createdAt.year}-${t.createdAt.month.toString().padLeft(2, '0')}'];
     case AhGroupBy.year:
       return ['${t.createdAt.year}'];
+    case AhGroupBy.day:
+      return [ahDayKey(t.createdAt)];
   }
 }
 
@@ -627,41 +633,31 @@ AhChartData ahChartOf(List<Transaction> txns, AhChartSpec spec, AhLookups lk) {
     return const AhChartData(AhChartState.wrongCombo);
   }
   if (txns.isEmpty) return const AhChartData(AhChartState.noResults);
-  final by = ahGroupByOfSplit(spec.split);
-  final acc = _accumulate(txns, by, lk);
-  if (acc.length == 1 && acc.containsKey('')) {
-    return AhChartData(AhChartState.nothingToSplit, count: txns.length);
-  }
   double value(double total, int count) => switch (spec.measure) {
         AhChartMeasure.total => total,
         AhChartMeasure.count => count.toDouble(),
         AhChartMeasure.average => count == 0 ? 0 : total / count,
       };
+  if (spec.type == AhChartType.heatmap) {
+    // One point per day that has transactions, oldest first.
+    final days = _accumulate(txns, AhGroupBy.day, lk);
+    final keys = days.keys.toList()..sort();
+    return AhChartData(AhChartState.ok, count: txns.length, points: [
+      for (final k in keys)
+        AhChartPoint(k, k, value(days[k]!.total, days[k]!.count)),
+    ]);
+  }
+  if (spec.isSeries) return _seriesChart(txns, spec, lk, value);
+  final by = ahGroupByOfSplit(spec.split);
+  final acc = _accumulate(txns, by, lk);
+  if (acc.length == 1 && acc.containsKey('')) {
+    return AhChartData(AhChartState.nothingToSplit, count: txns.length);
+  }
   AhChartPoint point(_Acc a) =>
       AhChartPoint(a.key, a.label, value(a.total, a.count), colorValue: a.colorValue);
 
   if (spec.type == AhChartType.line) {
-    final keys = acc.keys.toList()..sort();
-    // Fill the months / years between the first and last with zero.
-    final filled = <String>[];
-    if (by == AhGroupBy.year) {
-      for (var y = int.parse(keys.first); y <= int.parse(keys.last); y++) {
-        filled.add('$y');
-      }
-    } else {
-      var y = int.parse(keys.first.substring(0, 4));
-      var m = int.parse(keys.first.substring(5));
-      final end = keys.last;
-      while (true) {
-        final k = '$y-${m.toString().padLeft(2, '0')}';
-        filled.add(k);
-        if (k == end) break;
-        if (++m > 12) {
-          m = 1;
-          y++;
-        }
-      }
-    }
+    final filled = _fillTime(acc.keys, by);
     if (filled.length < 2) {
       return AhChartData(AhChartState.notEnoughData, count: txns.length);
     }
@@ -687,6 +683,90 @@ AhChartData ahChartOf(List<Transaction> txns, AhChartSpec spec, AhLookups lk) {
   }
   return AhChartData(AhChartState.ok,
       count: txns.length, points: [for (final a in sorted) point(a)]);
+}
+
+/// Every month (`2026-03`) or year between the first and last of [keys].
+List<String> _fillTime(Iterable<String> keys, AhGroupBy by) {
+  final sorted = keys.where((k) => k.isNotEmpty).toList()..sort();
+  if (sorted.isEmpty) return const [];
+  final filled = <String>[];
+  if (by == AhGroupBy.year) {
+    for (var y = int.parse(sorted.first); y <= int.parse(sorted.last); y++) {
+      filled.add('$y');
+    }
+    return filled;
+  }
+  var y = int.parse(sorted.first.substring(0, 4));
+  var m = int.parse(sorted.first.substring(5));
+  final end = sorted.last;
+  while (true) {
+    final k = '$y-${m.toString().padLeft(2, '0')}';
+    filled.add(k);
+    if (k == end) break;
+    if (++m > 12) {
+      m = 1;
+      y++;
+    }
+  }
+  return filled;
+}
+
+/// Stacked bars / lines: [AhChartSpec.series] values of `seriesBy` over the
+/// months or years of the transactions that have one of them.
+AhChartData _seriesChart(List<Transaction> txns, AhChartSpec spec, AhLookups lk,
+    double Function(double, int) value) {
+  if (spec.split != AhChartSplit.month && spec.split != AhChartSplit.year) {
+    return const AhChartData(AhChartState.wrongCombo);
+  }
+  final by = ahGroupByOfSplit(spec.split);
+  final sBy = ahGroupByOfSplit(spec.seriesBy!);
+  final wanted = spec.series.take(kAhMaxSeries).toList();
+  final cells = {for (final k in wanted) k: <String, _Acc>{}};
+  final times = <String>{};
+  var matched = 0;
+  for (final t in txns) {
+    final tk = ahKeysOf(t, by, lk).first;
+    var hit = false;
+    for (final sk in ahKeysOf(t, sBy, lk)) {
+      final m = cells[sk];
+      if (m == null) continue;
+      final a = m[tk] ??= _Acc(tk, tk, null, null);
+      a.count++;
+      a.total += t.amount.abs();
+      hit = true;
+    }
+    if (hit) {
+      times.add(tk);
+      matched++;
+    }
+  }
+  if (matched == 0) return const AhChartData(AhChartState.noResults);
+  final filled = _fillTime(times, by);
+  if (spec.type == AhChartType.line && filled.length < 2) {
+    return AhChartData(AhChartState.notEnoughData, count: matched);
+  }
+  final series = [
+    for (final sk in wanted)
+      () {
+        final head = _newAcc(sk, sBy, lk);
+        return AhChartSeries(
+          sk,
+          head.label,
+          [
+            for (final tk in filled)
+              cells[sk]![tk] == null
+                  ? 0.0
+                  : value(cells[sk]![tk]!.total, cells[sk]![tk]!.count),
+          ],
+          colorValue: head.colorValue,
+        );
+      }(),
+  ];
+  return AhChartData(AhChartState.ok, count: matched, series: series, points: [
+    for (var i = 0; i < filled.length; i++)
+      AhChartPoint(filled[i], filled[i],
+          series.fold<double>(0, (s, x) => s + x.values[i])),
+  ]);
 }
 
 Map<AhChartSplit, AhSplitBlock> ahBlocksOf(List<Transaction> txns, AhLookups lk) {

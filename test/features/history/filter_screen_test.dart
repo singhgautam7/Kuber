@@ -103,9 +103,9 @@ void main() {
     expect(find.text('No categories match “zzz”'), findsOneWidget);
   });
 
-  testWidgets('Advanced History link is present', (t) async {
+  testWidgets('Custom Dashboard link is present', (t) async {
     await pump(t);
-    await t.ensureVisible(find.textContaining('Advanced History'));
+    await t.ensureVisible(find.textContaining('Custom Dashboard'));
     expect(find.textContaining('Need AND / OR filters?'), findsOneWidget);
   });
 }

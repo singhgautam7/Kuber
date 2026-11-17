@@ -115,6 +115,7 @@ const kProUnlockedFeatures = <String>[
   'Reminders',
   'Unlimited Ask Kuber',
   'Advanced Analytics',
+  'Custom Dashboard',
   'Money Stories archive',
   'Unlimited Kuber Notes',
   'Multi-currency accounts',

@@ -16821,7 +16821,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyMenuAdvanced.
   ///
   /// In en, this message translates to:
-  /// **'Advanced History'**
+  /// **'Custom Dashboard'**
   String get historyMenuAdvanced;
 
   /// No description provided for @filterSelectedN.
@@ -16875,7 +16875,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuAdvancedHistory.
   ///
   /// In en, this message translates to:
-  /// **'Advanced History'**
+  /// **'Custom Dashboard'**
   String get menuAdvancedHistory;
 
   /// No description provided for @menuAdvancedHistoryDesc.
@@ -16971,7 +16971,7 @@ abstract class AppLocalizations {
   /// No description provided for @ahdGateSheetHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Advanced History is a Kuber Pro feature'**
+  /// **'Custom Dashboard is a Kuber Pro feature'**
   String get ahdGateSheetHeadline;
 
   /// No description provided for @ahdGateSheetBody.
@@ -16983,7 +16983,7 @@ abstract class AppLocalizations {
   /// No description provided for @ahdTitle.
   ///
   /// In en, this message translates to:
-  /// **'Advanced History'**
+  /// **'Custom Dashboard'**
   String get ahdTitle;
 
   /// No description provided for @ahdMenuSaved.
@@ -17325,7 +17325,7 @@ abstract class AppLocalizations {
   /// No description provided for @ahdInfoChart2.
   ///
   /// In en, this message translates to:
-  /// **'Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to open it.'**
+  /// **'Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to see its value, then View transactions.'**
   String get ahdInfoChart2;
 
   /// No description provided for @ahdInfoSaved1.
@@ -19193,6 +19193,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n} filters'**
   String ahfCountSemantics(int n);
+
+  /// No description provided for @ahdViewTxns.
+  ///
+  /// In en, this message translates to:
+  /// **'View transactions'**
+  String get ahdViewTxns;
+
+  /// No description provided for @ahdOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct} of total'**
+  String ahdOfTotal(String pct);
+
+  /// No description provided for @ahfSugFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Fields'**
+  String get ahfSugFields;
+
+  /// No description provided for @ahfSugValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Values'**
+  String get ahfSugValues;
+
+  /// No description provided for @ahfSugCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Your categories'**
+  String get ahfSugCategories;
+
+  /// No description provided for @ahfSugAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Your accounts'**
+  String get ahfSugAccounts;
+
+  /// No description provided for @ahfSugTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tags'**
+  String get ahfSugTags;
+
+  /// No description provided for @ahfKindField.
+  ///
+  /// In en, this message translates to:
+  /// **'Field'**
+  String get ahfKindField;
+
+  /// No description provided for @ahfKindValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get ahfKindValue;
+
+  /// No description provided for @ahfSugWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Search \"{q}\" in titles and notes'**
+  String ahfSugWords(String q);
+
+  /// No description provided for @ahfHowUse.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use'**
+  String get ahfHowUse;
+
+  /// No description provided for @ahfSynEq.
+  ///
+  /// In en, this message translates to:
+  /// **': and = both work'**
+  String get ahfSynEq;
+
+  /// No description provided for @ahfHowCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare amounts and dates'**
+  String get ahfHowCompare;
+
+  /// No description provided for @ahfSynGt.
+  ///
+  /// In en, this message translates to:
+  /// **'Over 500'**
+  String get ahfSynGt;
+
+  /// No description provided for @ahfSynLt.
+  ///
+  /// In en, this message translates to:
+  /// **'Under 500'**
+  String get ahfSynLt;
+
+  /// No description provided for @ahfSynGte.
+  ///
+  /// In en, this message translates to:
+  /// **'500 or more'**
+  String get ahfSynGte;
+
+  /// No description provided for @ahfSynLte.
+  ///
+  /// In en, this message translates to:
+  /// **'500 or less'**
+  String get ahfSynLte;
+
+  /// No description provided for @ahfSynExact.
+  ///
+  /// In en, this message translates to:
+  /// **'Exactly 500'**
+  String get ahfSynExact;
+
+  /// No description provided for @ahfSynRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Between 500 and 2,000'**
+  String get ahfSynRange;
+
+  /// No description provided for @ahfSynDateAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After March 2026'**
+  String get ahfSynDateAfter;
+
+  /// No description provided for @ahfHowCombine.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine filters'**
+  String get ahfHowCombine;
+
+  /// No description provided for @ahfSynAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Both must match. A space also means and'**
+  String get ahfSynAnd;
+
+  /// No description provided for @ahfSynOr.
+  ///
+  /// In en, this message translates to:
+  /// **'Either one can match'**
+  String get ahfSynOr;
+
+  /// No description provided for @ahfSynBrackets.
+  ///
+  /// In en, this message translates to:
+  /// **'Brackets are read first'**
+  String get ahfSynBrackets;
+
+  /// No description provided for @ahfSynOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'\"and\" is read before \"or\": a and b or c means (a and b) or c'**
+  String get ahfSynOrder;
+
+  /// No description provided for @ahfHowFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Fields you can use'**
+  String get ahfHowFields;
+
+  /// No description provided for @ahfHowBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'The basics'**
+  String get ahfHowBasics;
+
+  /// No description provided for @ahdStartFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Start fresh'**
+  String get ahdStartFresh;
+
+  /// No description provided for @ahdStartedFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Started a fresh dashboard'**
+  String get ahdStartedFresh;
+
+  /// No description provided for @ahExCatOver.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} over {amount} this year'**
+  String ahExCatOver(String category, String amount);
+
+  /// No description provided for @ahExCatByMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} in {year} by month'**
+  String ahExCatByMonth(String category, String year);
+
+  /// No description provided for @acctSecCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit cards'**
+  String get acctSecCards;
+
+  /// No description provided for @acctSecOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get acctSecOther;
+
+  /// No description provided for @ahdDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get ahdDay;
+
+  /// No description provided for @ahdChartHeatmap.
+  ///
+  /// In en, this message translates to:
+  /// **'Heatmap'**
+  String get ahdChartHeatmap;
+
+  /// No description provided for @ahdChartStacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Stacked bars'**
+  String get ahdChartStacked;
+
+  /// No description provided for @ahdChartLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get ahdChartLines;
+
+  /// No description provided for @ahdCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get ahdCompare;
+
+  /// No description provided for @ahdCompareNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get ahdCompareNone;
+
+  /// No description provided for @ahdCompareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up to 3. Bars stack them by month, the line draws one line each.'**
+  String get ahdCompareHint;
+
+  /// No description provided for @ahdHeatmapNote.
+  ///
+  /// In en, this message translates to:
+  /// **'One square per day. Darker means more.'**
+  String get ahdHeatmapNote;
+
+  /// No description provided for @ahdLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get ahdLess;
+
+  /// No description provided for @ahdMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get ahdMore;
 }
 
 class _AppLocalizationsDelegate

@@ -114,14 +114,17 @@ class _Bar extends ConsumerWidget {
   Future<void> _saveChanges(BuildContext context, WidgetRef ref) async {
     final repo = ref.read(savedFilterRepositoryProvider);
     final l = context.l10n;
-    final saved = ref.read(ahOpenSavedProvider);
-    final previous = saved == null ? null : viewFromSaved(saved);
-    await repo.saveChanges(id, ref.read(ahViewProvider));
-    if (!context.mounted) return;
+    // The bar hides itself as soon as the save lands, so the snackbar goes
+    // to the root overlay taken now, not to this (soon unmounted) context.
+    final overlay = Overlay.of(context, rootOverlay: true);
+    // Undo puts back exactly what the write replaced (read inside it).
+    final previous = await repo.saveChanges(id, ref.read(ahViewProvider));
+    if (!overlay.mounted) return;
     showKuberSnackBar(
-      context,
+      overlay.context,
       l.ahdUpdated(name),
-      actionLabel: l.ahdUndo,
+      overlay: overlay,
+      actionLabel: previous == null ? null : l.ahdUndo,
       duration: const Duration(seconds: 7),
       onAction: previous == null ? null : () => repo.saveChanges(id, previous),
     );

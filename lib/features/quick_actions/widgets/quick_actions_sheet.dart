@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../pro/feature_gates/gate_sheet_advanced_history.dart';
 import '../../pro/home/shortcut_catalog.dart';
+import '../../pro/paywall/pro_state.dart';
 import '../../settings/providers/settings_provider.dart';
 
 /// Opens the Quick Actions sheet (nav-bar long-press). Uses the shared
@@ -227,13 +229,13 @@ class _BiometricsControlTile extends ConsumerWidget {
 
 // ── Shortcuts grid ─────────────────────────────────────────────────────────
 
-class _ShortcutsGrid extends StatelessWidget {
+class _ShortcutsGrid extends ConsumerWidget {
   final List<ShortcutMeta> shortcuts;
 
   const _ShortcutsGrid({required this.shortcuts});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // 4 columns, one cell per shortcut. Editing is the section header's
     // Edit action.
     return GridView.count(
@@ -249,8 +251,17 @@ class _ShortcutsGrid extends StatelessWidget {
             icon: s.icon,
             label: s.shortLabel,
             onTap: () {
+              // Custom Dashboard is Pro: free users get its gate sheet, like
+              // every other entry point, instead of the page.
+              final gated = s.id == 'custom_dashboard' &&
+                  !ref.read(kuberProStateProvider).hasProAccess;
+              final host = Navigator.of(context).context;
               Navigator.of(context).pop();
-              context.push(s.route);
+              if (gated) {
+                showAdvancedHistoryGateSheet(host);
+              } else {
+                context.push(s.route);
+              }
             },
           ),
       ],

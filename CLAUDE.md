@@ -98,7 +98,7 @@ the FAB and nav rail live there, not in individual screens.
 - **Signature** (More tab section): Ask Kuber (`ask_kuber/`), Import from SMS
   (`sms_import/`), Kuber Notes (`notes/`), Kuber Cards (`kuber_cards/`), Quick Add
   (`quick_add/`), Calculators & Tools (`tools/`), Money Stories (`stories/`), Reminders.
-- **Kuber Pro**: 8 gated features, limits in `specs/pro-gating-enabled.md`. Single switch
+- **Kuber Pro**: 9 gated features, limits in `specs/pro-gating-enabled.md`. Single switch
   `KuberProState.hasProAccess` (`pro/paywall/pro_state.dart`). Every gate routes through
   `proGate(context, ref, gateSheet)`. Entitlement comes from Play Billing
   (`in_app_purchase`, `queryPurchases` on cold start + throttled on resume in `app.dart`),

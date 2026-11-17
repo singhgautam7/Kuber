@@ -49,4 +49,10 @@ class SavedChart {
 
   @Enumerated(EnumType.name)
   AhChartMeasure measure = AhChartMeasure.total;
+
+  /// [AhChartSplit] name of the compared values, null = none.
+  String? seriesBy;
+
+  /// Compared group keys, at most [kAhMaxSeries].
+  List<String> series = [];
 }

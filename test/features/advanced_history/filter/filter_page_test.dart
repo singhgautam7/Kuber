@@ -12,6 +12,8 @@ import 'package:kuber/features/advanced_history/query/query_ast.dart';
 import 'package:kuber/features/advanced_history/screens/ah_filter_page.dart';
 import 'package:kuber/features/advanced_history/widgets/filter/value_pickers.dart';
 import 'package:kuber/features/advanced_history/widgets/token_field/token_filter_field.dart';
+import 'package:kuber/features/advanced_history/widgets/token_field/operator_bar.dart';
+import 'package:kuber/features/categories/data/category_group.dart';
 import 'package:kuber/features/categories/providers/category_provider.dart';
 import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/features/tags/providers/tag_providers.dart';
@@ -30,6 +32,7 @@ Future<(ProviderContainer, _Counts)> openPage(
   String initial = '',
   int? countValue,
   bool hold = false,
+  List<String> groups = const [],
 }) async {
   await loadGoldenFonts();
   final counts = _Counts();
@@ -37,6 +40,7 @@ Future<(ProviderContainer, _Counts)> openPage(
   final container = ProviderContainer(overrides: [
     formatterProvider.overrideWithValue(AppFormatter()),
     categoryListProvider.overrideWith(() => _EmptyCats()),
+    categoryGroupListProvider.overrideWith(() => _Groups(groups)),
     allAccountsProvider.overrideWith(() => _EmptyAccounts()),
     tagListProvider.overrideWith((ref) => Stream.value(const [])),
     ahCountProvider.overrideWith((ref, node) {
@@ -81,6 +85,14 @@ class _EmptyCats extends CategoryListNotifier {
   Future<List<Category>> build() async => const <Category>[];
 }
 
+class _Groups extends CategoryGroupListNotifier {
+  _Groups(this.names);
+  final List<String> names;
+  @override
+  Future<List<CategoryGroup>> build() async =>
+      [for (final n in names) CategoryGroup()..name = n];
+}
+
 class _EmptyAccounts extends AccountListNotifier {
   @override
   Future<List<Account>> build() async => const <Account>[];
@@ -94,15 +106,45 @@ void add(WidgetTester t, QueryField f, String v) => fieldWidget(t)
     .insert(itemsOf(ConditionNode(f, QueryOp.eq, [v])), trailingAnd: true);
 
 void main() {
-  testWidgets('header count: no filters, then N filters', (t) async {
-    await openPage(t);
-    expect(find.text('No filters yet'), findsOneWidget);
-    expect(find.text('Clear all'), findsOneWidget); // hidden (opacity 0)
-    add(t, QueryField.has, 'attachment');
-    add(t, QueryField.type, 'expense');
+  testWidgets('a category group name is a valid category value', (t) async {
+    await openPage(t, initial: 'category:food', groups: ['Food']);
+    await t.pump(const Duration(milliseconds: 400));
     await t.pumpAndSettle();
-    expect(find.text('2'), findsOneWidget);
-    expect(find.text(' filters'), findsOneWidget);
+    expect(find.textContaining('No category called'), findsNothing);
+    expect(find.text('Show 221 transactions'), findsOneWidget);
+  });
+
+  testWidgets('keyboard open: operator bar docks, bottom button hides', (t) async {
+    await openPage(t, initial: 'type:expense');
+    OperatorBar bar() => t.widget<OperatorBar>(find.byType(OperatorBar).last);
+    expect(bar().docked, isFalse);
+    expect(find.textContaining('Show'), findsOneWidget);
+    // The Scaffold strips the inset from its body: the page must still see it.
+    t.view.viewInsets = const FakeViewPadding(bottom: 800);
+    addTearDown(t.view.resetViewInsets);
+    await t.pumpAndSettle();
+    expect(bar().docked, isTrue);
+    expect(find.textContaining('Show'), findsNothing);
+  });
+
+  testWidgets('header: How to use opens the full guide', (t) async {
+    await openPage(t);
+    expect(find.text('No filters yet'), findsNothing);
+    await t.tap(find.byKey(const ValueKey('ahf-how-to-use')));
+    await t.pumpAndSettle();
+    for (final s in ['THE BASICS', 'COMPARE AMOUNTS AND DATES',
+        'COMBINE FILTERS', 'FIELDS YOU CAN USE']) {
+      expect(find.text(s), findsOneWidget, reason: s);
+    }
+    expect(find.text('amount>500'), findsOneWidget);
+    expect(find.text('category=food'), findsOneWidget);
+  });
+
+  testWidgets('no suggestions until something is typed', (t) async {
+    await openPage(t);
+    await t.showKeyboard(find.byKey(const ValueKey('ahf-input')));
+    await t.pumpAndSettle();
+    expect(find.text('FIELDS'), findsNothing);
   });
 
   testWidgets('Clear all clears with an Undo snackbar, no confirmation',

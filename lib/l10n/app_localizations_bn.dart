@@ -9616,7 +9616,7 @@ class AppLocalizationsBn extends AppLocalizations {
       'CSV ব্যাকআপে সেভ করা ভিউ থাকে না। সেগুলো রাখতে JSON ব্যাকআপ ব্যবহার করুন।';
 
   @override
-  String get historyMenuAdvanced => 'অ্যাডভান্সড হিস্ট্রি';
+  String get historyMenuAdvanced => 'কাস্টম ড্যাশবোর্ড';
 
   @override
   String filterSelectedN(int n) {
@@ -9649,7 +9649,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get setSecPermissions => 'অনুমতি';
 
   @override
-  String get menuAdvancedHistory => 'অ্যাডভান্সড হিস্ট্রি';
+  String get menuAdvancedHistory => 'কাস্টম ড্যাশবোর্ড';
 
   @override
   String get menuAdvancedHistoryDesc =>
@@ -9701,14 +9701,14 @@ class AppLocalizationsBn extends AppLocalizations {
   String get ahdGateSample => 'নমুনা ডেটা';
 
   @override
-  String get ahdGateSheetHeadline => 'Advanced History একটি Kuber Pro ফিচার';
+  String get ahdGateSheetHeadline => 'কাস্টম ড্যাশবোর্ড একটি Kuber Pro ফিচার';
 
   @override
   String get ahdGateSheetBody =>
       'Kuber Pro দিয়ে আপনার সব লেনদেনে যেকোনো ফিল্টার বানান, ফলাফল গ্রুপ করুন ও চার্টে দেখুন, ভিউ সেভ করুন এবং CSV-তে এক্সপোর্ট করুন।';
 
   @override
-  String get ahdTitle => 'Advanced History';
+  String get ahdTitle => 'কাস্টম ড্যাশবোর্ড';
 
   @override
   String get ahdMenuSaved => 'সেভ করা ভিউ';
@@ -9904,7 +9904,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get ahdInfoChart2 =>
-      'ক্যাটাগরি, অ্যাকাউন্ট, ট্যাগ, ধরন বা উৎস তুলনা করতে ডোনাট বা বার বেছে নিন। মাস বা বছরের ধারার জন্য লাইন বেছে নিন। কোনো অংশে ট্যাপ করে খুলুন।';
+      'বিভাগ, অ্যাকাউন্ট, ট্যাগ, ধরন বা উৎস তুলনা করতে ডোনাট বা বার বেছে নিন। মাস বা বছরের প্রবণতার জন্য লাইন বেছে নিন। কোনো অংশে ট্যাপ করলে তার মান দেখাবে, তারপর লেনদেন দেখুন।';
 
   @override
   String get ahdInfoSaved1 =>
@@ -10997,4 +10997,143 @@ class AppLocalizationsBn extends AppLocalizations {
   String ahfCountSemantics(int n) {
     return '$nটি ফিল্টার';
   }
+
+  @override
+  String get ahdViewTxns => 'লেনদেন দেখুন';
+
+  @override
+  String ahdOfTotal(String pct) {
+    return 'মোটের $pct';
+  }
+
+  @override
+  String get ahfSugFields => 'ফিল্ড';
+
+  @override
+  String get ahfSugValues => 'মান';
+
+  @override
+  String get ahfSugCategories => 'আপনার বিভাগ';
+
+  @override
+  String get ahfSugAccounts => 'আপনার অ্যাকাউন্ট';
+
+  @override
+  String get ahfSugTags => 'আপনার ট্যাগ';
+
+  @override
+  String get ahfKindField => 'ফিল্ড';
+
+  @override
+  String get ahfKindValue => 'মান';
+
+  @override
+  String ahfSugWords(String q) {
+    return 'শিরোনাম ও নোটে \"$q\" খুঁজুন';
+  }
+
+  @override
+  String get ahfHowUse => 'কীভাবে ব্যবহার করবেন';
+
+  @override
+  String get ahfSynEq => ': এবং = দুটোই চলে';
+
+  @override
+  String get ahfHowCompare => 'টাকা ও তারিখ তুলনা';
+
+  @override
+  String get ahfSynGt => '500-এর বেশি';
+
+  @override
+  String get ahfSynLt => '500-এর কম';
+
+  @override
+  String get ahfSynGte => '500 বা বেশি';
+
+  @override
+  String get ahfSynLte => '500 বা কম';
+
+  @override
+  String get ahfSynExact => 'ঠিক 500';
+
+  @override
+  String get ahfSynRange => '500 থেকে 2,000-এর মধ্যে';
+
+  @override
+  String get ahfSynDateAfter => 'মার্চ 2026-এর পরে';
+
+  @override
+  String get ahfHowCombine => 'ফিল্টার মেলান';
+
+  @override
+  String get ahfSynAnd => 'দুটোই মিলতে হবে। স্পেস মানেও and';
+
+  @override
+  String get ahfSynOr => 'যেকোনো একটি মিললেই হবে';
+
+  @override
+  String get ahfSynBrackets => 'বন্ধনী আগে পড়া হয়';
+
+  @override
+  String get ahfSynOrder =>
+      '\"and\" আগে পড়া হয় \"or\"-এর: a and b or c মানে (a and b) or c';
+
+  @override
+  String get ahfHowFields => 'যে ফিল্ডগুলো ব্যবহার করা যায়';
+
+  @override
+  String get ahfHowBasics => 'মূল কথা';
+
+  @override
+  String get ahdStartFresh => 'নতুন করে শুরু করুন';
+
+  @override
+  String get ahdStartedFresh => 'নতুন ড্যাশবোর্ড শুরু হয়েছে';
+
+  @override
+  String ahExCatOver(String category, String amount) {
+    return 'এ বছর $amount-এর বেশি $category';
+  }
+
+  @override
+  String ahExCatByMonth(String category, String year) {
+    return '$year-এ $category, মাস অনুযায়ী';
+  }
+
+  @override
+  String get acctSecCards => 'ক্রেডিট কার্ড';
+
+  @override
+  String get acctSecOther => 'অন্যান্য';
+
+  @override
+  String get ahdDay => 'দিন';
+
+  @override
+  String get ahdChartHeatmap => 'হিটম্যাপ';
+
+  @override
+  String get ahdChartStacked => 'স্ট্যাকড বার';
+
+  @override
+  String get ahdChartLines => 'রেখা';
+
+  @override
+  String get ahdCompare => 'তুলনা করুন';
+
+  @override
+  String get ahdCompareNone => 'কোনোটি নয়';
+
+  @override
+  String get ahdCompareHint =>
+      '৩টি পর্যন্ত বেছে নিন। বার এগুলো মাস অনুযায়ী একটির ওপর একটি দেখায়, রেখা প্রতিটির জন্য আলাদা রেখা আঁকে।';
+
+  @override
+  String get ahdHeatmapNote => 'প্রতিদিনের জন্য একটি ঘর। গাঢ় মানে বেশি।';
+
+  @override
+  String get ahdLess => 'কম';
+
+  @override
+  String get ahdMore => 'বেশি';
 }

@@ -248,6 +248,7 @@ const _SavedFiltergroupByEnumValueMap = {
   r'source': r'source',
   r'month': r'month',
   r'year': r'year',
+  r'day': r'day',
 };
 const _SavedFiltergroupByValueEnumMap = {
   r'none': AhGroupBy.none,
@@ -258,6 +259,7 @@ const _SavedFiltergroupByValueEnumMap = {
   r'source': AhGroupBy.source,
   r'month': AhGroupBy.month,
   r'year': AhGroupBy.year,
+  r'day': AhGroupBy.day,
 };
 const _SavedFiltersortFieldEnumValueMap = {
   r'date': r'date',
@@ -2147,14 +2149,24 @@ const SavedChartSchema = Schema(
       enumMap: _SavedChartmeasureEnumValueMap,
     ),
     r'order': PropertySchema(id: 1, name: r'order', type: IsarType.long),
-    r'split': PropertySchema(
+    r'series': PropertySchema(
       id: 2,
+      name: r'series',
+      type: IsarType.stringList,
+    ),
+    r'seriesBy': PropertySchema(
+      id: 3,
+      name: r'seriesBy',
+      type: IsarType.string,
+    ),
+    r'split': PropertySchema(
+      id: 4,
       name: r'split',
       type: IsarType.string,
       enumMap: _SavedChartsplitEnumValueMap,
     ),
     r'type': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'type',
       type: IsarType.string,
       enumMap: _SavedCharttypeEnumValueMap,
@@ -2174,6 +2186,19 @@ int _savedChartEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.measure.name.length * 3;
+  bytesCount += 3 + object.series.length * 3;
+  {
+    for (var i = 0; i < object.series.length; i++) {
+      final value = object.series[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  {
+    final value = object.seriesBy;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.split.name.length * 3;
   bytesCount += 3 + object.type.name.length * 3;
   return bytesCount;
@@ -2187,8 +2212,10 @@ void _savedChartSerialize(
 ) {
   writer.writeString(offsets[0], object.measure.name);
   writer.writeLong(offsets[1], object.order);
-  writer.writeString(offsets[2], object.split.name);
-  writer.writeString(offsets[3], object.type.name);
+  writer.writeStringList(offsets[2], object.series);
+  writer.writeString(offsets[3], object.seriesBy);
+  writer.writeString(offsets[4], object.split.name);
+  writer.writeString(offsets[5], object.type.name);
 }
 
 SavedChart _savedChartDeserialize(
@@ -2202,11 +2229,13 @@ SavedChart _savedChartDeserialize(
       _SavedChartmeasureValueEnumMap[reader.readStringOrNull(offsets[0])] ??
       AhChartMeasure.total;
   object.order = reader.readLong(offsets[1]);
+  object.series = reader.readStringList(offsets[2]) ?? [];
+  object.seriesBy = reader.readStringOrNull(offsets[3]);
   object.split =
-      _SavedChartsplitValueEnumMap[reader.readStringOrNull(offsets[2])] ??
+      _SavedChartsplitValueEnumMap[reader.readStringOrNull(offsets[4])] ??
       AhChartSplit.category;
   object.type =
-      _SavedCharttypeValueEnumMap[reader.readStringOrNull(offsets[3])] ??
+      _SavedCharttypeValueEnumMap[reader.readStringOrNull(offsets[5])] ??
       AhChartType.donut;
   return object;
 }
@@ -2225,10 +2254,14 @@ P _savedChartDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
       return (_SavedChartsplitValueEnumMap[reader.readStringOrNull(offset)] ??
               AhChartSplit.category)
           as P;
-    case 3:
+    case 5:
       return (_SavedCharttypeValueEnumMap[reader.readStringOrNull(offset)] ??
               AhChartType.donut)
           as P;
@@ -2269,11 +2302,13 @@ const _SavedCharttypeEnumValueMap = {
   r'donut': r'donut',
   r'bars': r'bars',
   r'line': r'line',
+  r'heatmap': r'heatmap',
 };
 const _SavedCharttypeValueEnumMap = {
   r'donut': AhChartType.donut,
   r'bars': AhChartType.bars,
   r'line': AhChartType.line,
+  r'heatmap': AhChartType.heatmap,
 };
 
 extension SavedChartQueryFilter
@@ -2481,6 +2516,363 @@ extension SavedChartQueryFilter
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'series',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'series',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'series', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'series', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'series', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'series', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'series', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'series', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'series', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'series',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'seriesBy'),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesByIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'seriesBy'),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'seriesBy',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesByGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'seriesBy',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'seriesBy',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'seriesBy',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesByStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'seriesBy',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'seriesBy',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'seriesBy',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition> seriesByMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'seriesBy',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesByIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'seriesBy', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SavedChart, SavedChart, QAfterFilterCondition>
+  seriesByIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'seriesBy', value: ''),
       );
     });
   }

@@ -133,7 +133,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                           ),
                         ),
                         KuberOverflowItem(
-                          icon: Icons.manage_search_rounded,
+                          icon: Icons.dashboard_customize_rounded,
                           label: context.l10n.historyMenuAdvanced,
                           subtitle: context.l10n.historyMenuAdvancedSub,
                           onTap: () => openAdvancedHistory(context, ref),

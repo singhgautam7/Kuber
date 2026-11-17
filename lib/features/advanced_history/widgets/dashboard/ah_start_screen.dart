@@ -5,9 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
+import '../../../../shared/widgets/kuber_chips.dart';
 import '../../models/ah_view.dart';
 import '../../providers/ah_providers.dart';
 import '../../query/query_ast.dart';
+import '../../query/query_parser.dart' show serializeNode;
+import '../../../categories/providers/category_provider.dart';
+import '../../../settings/providers/settings_provider.dart';
 import '../common/ah_common.dart';
 import '../saved/ah_saved_sheet.dart';
 import 'ah_sheets.dart';
@@ -16,12 +20,13 @@ import 'ah_sheets.dart';
 class AhStartScreen extends ConsumerWidget {
   const AhStartScreen({super.key});
 
-  AhView _example(WidgetRef ref, List<ConditionNode> conds, String text,
+  AhView _example(WidgetRef ref, List<ConditionNode> conds,
       {AhGroupBy group = AhGroupBy.none}) {
     final kpis = ref.read(ahViewProvider).kpis;
+    final node = conds.length == 1 ? conds.first : AndNode(conds);
     return AhView(
-      queryText: text,
-      node: conds.length == 1 ? conds.first : AndNode(conds),
+      queryText: serializeNode(node),
+      node: node,
       groupBy: group,
       sort: group == AhGroupBy.none
           ? AhSort.ungroupedDefault
@@ -36,19 +41,23 @@ class AhStartScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final saved = ref.watch(savedFiltersProvider).valueOrNull ?? const [];
     final notifier = ref.read(ahViewProvider.notifier);
+    // Examples use the user's own categories and currency.
+    final cats = ahExampleCategories(
+        ref.watch(categoryListProvider).valueOrNull ?? const []);
+    final money = ref.watch(formatterProvider).formatCurrency;
+    final year = DateTime.now().year;
 
-    Widget chip(String label, VoidCallback onTap) => ActionChip(
-          label: Text(label, style: localeFont(fontSize: 14, color: cs.onSurface)),
-          backgroundColor: cs.surfaceContainer,
-          side: BorderSide(color: cs.outlineVariant),
-          shape: const StadiumBorder(),
-          onPressed: onTap,
-        );
+    Widget chip(String label, VoidCallback onTap, [IconData? icon]) =>
+        KuberChip(label: label, icon: icon, onTap: onTap);
 
-    return ListView(
-      primary: false,
+    // A sliver: the page's one scroll view also holds the app bar.
+    return SliverToBoxAdapter(
+        child: AhFadeIn(
+            child: Padding(
       padding: const EdgeInsets.fromLTRB(
           KuberSpace.screenMargin, KuberSpace.lg, KuberSpace.screenMargin, 48),
+      child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l.ahdStartLine,
             style: localeFont(
@@ -82,18 +91,16 @@ class AhStartScreen extends ConsumerWidget {
         const SizedBox(height: KuberSpace.sectionGap),
         _Caps(l.ahdTryOne),
         Wrap(spacing: 8, runSpacing: 8, children: [
-          chip(
-            l.ahdEx1,
-            () => notifier.applyView(_example(
-              ref,
-              const [
-                ConditionNode(QueryField.category, QueryOp.eq, ['food']),
-                ConditionNode(QueryField.amount, QueryOp.gt, ['500']),
-                ConditionNode(QueryField.date, QueryOp.eq, ['thisyear']),
-              ],
-              'category:food amount:>500 date:thisyear',
-            )),
-          ),
+          if (cats.isNotEmpty)
+            chip(
+              l.ahExCatOver(cats.first, money(500)),
+              () => notifier.applyView(_example(ref, [
+                ConditionNode(QueryField.category, QueryOp.eq, [cats.first]),
+                const ConditionNode(QueryField.amount, QueryOp.gt, ['500']),
+                const ConditionNode(QueryField.date, QueryOp.eq, ['thisyear']),
+              ])),
+              Icons.payments_outlined,
+            ),
           chip(
             l.ahdEx2,
             () => notifier.applyView(_example(
@@ -102,32 +109,33 @@ class AhStartScreen extends ConsumerWidget {
                 ConditionNode(QueryField.type, QueryOp.eq, ['expense']),
                 ConditionNode(QueryField.tag, QueryOp.eq, ['none']),
               ],
-              'type:expense tag:none',
             )),
+            Icons.label_off_outlined,
           ),
-          chip(
-            l.ahdEx3,
-            () => notifier.applyView(_example(
-              ref,
-              const [
-                ConditionNode(QueryField.category, QueryOp.eq, ['travel']),
-                ConditionNode(QueryField.date, QueryOp.eq, ['2026']),
-              ],
-              'category:travel date:2026',
-              group: AhGroupBy.month,
-            )),
-          ),
+          if (cats.isNotEmpty)
+            chip(
+              l.ahExCatByMonth(cats.last, '$year'),
+              () => notifier.applyView(_example(
+                ref,
+                [
+                  ConditionNode(QueryField.category, QueryOp.eq, [cats.last]),
+                  ConditionNode(QueryField.date, QueryOp.eq, ['$year']),
+                ],
+                group: AhGroupBy.month,
+              )),
+              Icons.calendar_month_outlined,
+            ),
         ]),
         if (saved.isNotEmpty) ...[
           const SizedBox(height: KuberSpace.sectionGap),
           _Caps(l.ahdYourSaved),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final f in saved)
-              chip(f.name, () => ahApplySaved(ref, f)),
+              chip(f.name, () => ahApplySaved(ref, f), Icons.bookmark_outline_rounded),
           ]),
         ],
       ],
-    );
+    ))));
   }
 }
 

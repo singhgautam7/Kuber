@@ -59,8 +59,10 @@ class OperatorBar extends StatelessWidget {
         ],
       ),
     );
-    if (!docked) return bar;
-    return Container(
+    // Part of the field's tap region: pressing a key keeps the keyboard up.
+    if (!docked) return TextFieldTapRegion(child: bar);
+    return TextFieldTapRegion(
+        child: Container(
       color: cs.surfaceContainerHigh,
       padding: const EdgeInsets.fromLTRB(8, 4, 4, 6),
       child: Row(
@@ -75,7 +77,7 @@ class OperatorBar extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 

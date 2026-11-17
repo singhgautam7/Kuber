@@ -6672,7 +6672,7 @@
   "saveFileFailed": "Couldn't save the file. Pick another folder.",
   "saveFileShareFailed": "Couldn't share the file. Try again.",
   "saveFileCsvNoViews": "CSV backups don't include saved views. Use a JSON backup to keep them.",
-  "historyMenuAdvanced": "Advanced History",
+  "historyMenuAdvanced": "Custom Dashboard",
   "filterSelectedN": "· {n} selected",
   "@filterSelectedN": {
     "placeholders": {
@@ -6705,7 +6705,7 @@
   "setSecProfile": "Profile",
   "setSecAbout": "About",
   "setSecPermissions": "Permissions",
-  "menuAdvancedHistory": "Advanced History",
+  "menuAdvancedHistory": "Custom Dashboard",
   "menuAdvancedHistoryDesc": "Filter, group and chart every transaction",
   "rateTitle": "Enjoying Kuber?",
   "rateBody": "Kuber is built and run by one person. A quick rating on the Play Store helps other people find it, and it lets me keep building features you asked for. It takes less than a minute.",
@@ -6721,9 +6721,9 @@
   "ahdGateB4": "Save views and export the results as CSV",
   "ahdGateCta": "See Kuber Pro",
   "ahdGateSample": "Sample data",
-  "ahdGateSheetHeadline": "Advanced History is a Kuber Pro feature",
+  "ahdGateSheetHeadline": "Custom Dashboard is a Kuber Pro feature",
   "ahdGateSheetBody": "Type or build any filter over all your transactions, group and chart the results, save views and export them as CSV with Kuber Pro.",
-  "ahdTitle": "Advanced History",
+  "ahdTitle": "Custom Dashboard",
   "ahdMenuSaved": "Saved views",
   "ahdSavedN": "{n} saved",
   "ahdMenuSave": "Save this view",
@@ -6780,7 +6780,7 @@
   "ahdInfoSort1": "Without groups, sort transactions by date, amount, category or account. With groups, sort the groups by total, count or name.",
   "ahdInfoSort2": "Inside a group's sheet, transactions are always newest first.",
   "ahdInfoChart1": "Add up to 4 charts. Each one follows your filter and splits the results its own way.",
-  "ahdInfoChart2": "Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to open it.",
+  "ahdInfoChart2": "Pick a donut or bars to compare categories, accounts, tags, types or sources. Pick a line for a trend by month or year. Tap a part to see its value, then View transactions.",
   "ahdInfoSaved1": "A saved view keeps the whole page: the filter, group, sort, every chart with its type, split, measure and position, and the KPI cards.",
   "ahdInfoSaved2": "If you change a saved view, choose Save changes to update it or Save as new to keep both. Saved views are included in your JSON backup.",
   "ahdInfoKpi": "Pick which numbers show at the top and drag to reorder them. Saved views remember this choice.",
@@ -7562,5 +7562,82 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ahdViewTxns": "View transactions",
+  "ahdOfTotal": "{pct} of total",
+  "@ahdOfTotal": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "ahfSugFields": "Fields",
+  "ahfSugValues": "Values",
+  "ahfSugCategories": "Your categories",
+  "ahfSugAccounts": "Your accounts",
+  "ahfSugTags": "Your tags",
+  "ahfKindField": "Field",
+  "ahfKindValue": "Value",
+  "ahfSugWords": "Search \"{q}\" in titles and notes",
+  "@ahfSugWords": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "ahfHowUse": "How to use",
+  "ahfSynEq": ": and = both work",
+  "ahfHowCompare": "Compare amounts and dates",
+  "ahfSynGt": "Over 500",
+  "ahfSynLt": "Under 500",
+  "ahfSynGte": "500 or more",
+  "ahfSynLte": "500 or less",
+  "ahfSynExact": "Exactly 500",
+  "ahfSynRange": "Between 500 and 2,000",
+  "ahfSynDateAfter": "After March 2026",
+  "ahfHowCombine": "Combine filters",
+  "ahfSynAnd": "Both must match. A space also means and",
+  "ahfSynOr": "Either one can match",
+  "ahfSynBrackets": "Brackets are read first",
+  "ahfSynOrder": "\"and\" is read before \"or\": a and b or c means (a and b) or c",
+  "ahfHowFields": "Fields you can use",
+  "ahfHowBasics": "The basics",
+  "ahdStartFresh": "Start fresh",
+  "ahdStartedFresh": "Started a fresh dashboard",
+  "ahExCatOver": "{category} over {amount} this year",
+  "@ahExCatOver": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ahExCatByMonth": "{category} in {year} by month",
+  "@ahExCatByMonth": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "acctSecCards": "Credit cards",
+  "acctSecOther": "Other",
+  "ahdDay": "Day",
+  "ahdChartHeatmap": "Heatmap",
+  "ahdChartStacked": "Stacked bars",
+  "ahdChartLines": "Lines",
+  "ahdCompare": "Compare",
+  "ahdCompareNone": "None",
+  "ahdCompareHint": "Pick up to 3. Bars stack them by month, the line draws one line each.",
+  "ahdHeatmapNote": "One square per day. Darker means more.",
+  "ahdLess": "Less",
+  "ahdMore": "More"
 }

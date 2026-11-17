@@ -1,9 +1,12 @@
 // CONTRACT FILE. Owned by H-data. The dashboard state: filter, group, sort,
 // charts and KPI cards. A saved view stores exactly this.
 
+import 'package:flutter/foundation.dart' show listEquals;
+
 import '../query/query_ast.dart';
 
-enum AhGroupBy { none, category, account, tag, type, source, month, year }
+/// `day` is never offered as a grouping: it opens one heatmap day.
+enum AhGroupBy { none, category, account, tag, type, source, month, year, day }
 
 /// Ungrouped: date, amount, category, account. Grouped: total, count, name.
 enum AhSortField { date, amount, category, account, total, count, name }
@@ -34,7 +37,11 @@ class AhSort {
   int get hashCode => Object.hash(field, descending);
 }
 
-enum AhChartType { donut, bars, line }
+/// Stored by name: append only.
+enum AhChartType { donut, bars, line, heatmap }
+
+/// At most this many compared values (stacked in a bar, or lines).
+const kAhMaxSeries = 3;
 
 /// Line allows only month and year.
 enum AhChartSplit { category, account, tag, type, source, month, year }
@@ -42,26 +49,43 @@ enum AhChartSplit { category, account, tag, type, source, month, year }
 enum AhChartMeasure { total, count, average }
 
 class AhChartSpec {
-  const AhChartSpec(this.type, this.split, this.measure);
+  const AhChartSpec(this.type, this.split, this.measure,
+      {this.seriesBy, this.series = const []});
   final AhChartType type;
   final AhChartSplit split;
   final AhChartMeasure measure;
+
+  /// Bars and line only: compare up to [kAhMaxSeries] values of [seriesBy]
+  /// (category, account, tag, type or source) over months or years. Bars
+  /// stack them in one bar, the line draws one line each. [series] holds
+  /// their group keys (category id, account id, tag id, type name...).
+  final AhChartSplit? seriesBy;
+  final List<String> series;
+
+  bool get isSeries =>
+      seriesBy != null &&
+      series.isNotEmpty &&
+      (type == AhChartType.bars || type == AhChartType.line);
 
   AhChartSpec copyWith({
     AhChartType? type,
     AhChartSplit? split,
     AhChartMeasure? measure,
   }) =>
-      AhChartSpec(type ?? this.type, split ?? this.split, measure ?? this.measure);
+      AhChartSpec(type ?? this.type, split ?? this.split, measure ?? this.measure,
+          seriesBy: seriesBy, series: series);
 
   @override
   bool operator ==(Object other) =>
       other is AhChartSpec &&
       other.type == type &&
       other.split == split &&
-      other.measure == measure;
+      other.measure == measure &&
+      other.seriesBy == seriesBy &&
+      listEquals(other.series, series);
   @override
-  int get hashCode => Object.hash(type, split, measure);
+  int get hashCode =>
+      Object.hash(type, split, measure, seriesBy, Object.hashAll(series));
 }
 
 enum AhKpi { transactions, income, expense, net, average, attachments, largest }

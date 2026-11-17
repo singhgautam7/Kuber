@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
-import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../../shared/widgets/kuber_skeleton.dart';
 import '../../../settings/providers/settings_provider.dart';
 import '../../providers/ah_providers.dart';
 import '../common/ah_common.dart';
@@ -90,9 +90,15 @@ class AhGroupDetailSheet extends ConsumerWidget {
           ]),
           const SizedBox(height: KuberSpace.lg),
           page.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(KuberSpace.xl),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            // Skeleton rows (History pattern) after 150 ms.
+            loading: () => const AhDelayed(
+              child: Column(children: [
+                KuberSkeleton(height: 72, borderRadius: 16),
+                SizedBox(height: KuberSpace.sm),
+                KuberSkeleton(height: 72, borderRadius: 16),
+                SizedBox(height: KuberSpace.sm),
+                KuberSkeleton(height: 72, borderRadius: 16),
+              ]),
             ),
             error: (_, __) => Text(l.ahdErrorTitle,
                 style: localeFont(color: cs.error)),
@@ -101,12 +107,12 @@ class AhGroupDetailSheet extends ConsumerWidget {
               children: [
                 for (final e in ahDayEntries(p.items, byDate: true))
                   AhDayBlock(entry: e),
+                // 50 at a time: the next page loads as the sheet scrolls
+                // near the end, with a small loader meanwhile.
                 if (p.hasMore)
-                  AppButton(
-                    label: l.ahdLoadMore,
-                    type: AppButtonType.outline,
-                    fullWidth: true,
-                    onPressed: () => ref
+                  _AutoMore(
+                    key: ValueKey(p.items.length),
+                    onMore: () => ref
                         .read(ahTxnPagesProvider(groupKey).notifier)
                         .loadMore(),
                   ),
@@ -117,4 +123,54 @@ class AhGroupDetailSheet extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Calls [onMore] once the sheet's scroll view is within 400 dp of its end
+/// (or already is, when the page is short). Shows the loader.
+class _AutoMore extends StatefulWidget {
+  const _AutoMore({super.key, required this.onMore});
+  final VoidCallback onMore;
+
+  @override
+  State<_AutoMore> createState() => _AutoMoreState();
+}
+
+class _AutoMoreState extends State<_AutoMore> {
+  ScrollPosition? _pos;
+  bool _fired = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _pos?.removeListener(_check);
+    _pos = Scrollable.maybeOf(context)?.position;
+    _pos?.addListener(_check);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _check());
+  }
+
+  void _check() {
+    final p = _pos;
+    if (_fired || !mounted) return;
+    if (p == null || !p.hasContentDimensions || p.extentAfter < 400) {
+      _fired = true;
+      widget.onMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pos?.removeListener(_check);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.all(KuberSpace.lg),
+        child: Center(
+          child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+      );
 }

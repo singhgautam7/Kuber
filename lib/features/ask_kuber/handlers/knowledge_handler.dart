@@ -259,8 +259,9 @@ const List<_KnowledgeMatch> _topics = [
       'what is paid',
     ],
     response:
-        'Four features are only in Kuber Pro: **Advanced Analytics**, '
-        '**Reminders**, **Automatic Backups** and **custom themes** (Kuber '
+        'Five features are only in Kuber Pro: **Advanced Analytics**, '
+        '**Custom Dashboard**, **Reminders**, **Automatic Backups** and '
+        '**custom themes** (Kuber '
         'Signature, light and dark, is free).\n\n'
         'Four more are free with a limit that Pro removes:\n'
         '- Import from SMS: 5 imports a week\n'
@@ -293,8 +294,8 @@ const List<_KnowledgeMatch> _topics = [
         '- App lock, Privacy mode, every currency and all 9 languages\n\n'
         'Free with a limit: Import from SMS (5 imports a week), Kuber Notes '
         '(2 notes), Ask Kuber (5 messages a week) and Kuber Cards (2 cards).\n\n'
-        'Only in Pro: Advanced Analytics, Reminders, Automatic Backups and '
-        'custom themes.',
+        'Only in Pro: Advanced Analytics, Custom Dashboard, Reminders, '
+        'Automatic Backups and custom themes.',
     followUps: [
       NavChipAction(label: 'See Pro options', route: _rPaywall),
       AskChipAction('What is in Kuber Pro?'),
@@ -426,6 +427,7 @@ const List<_KnowledgeMatch> _topics = [
         '- Kuber Cards: 2 cards\n\n'
         '**Only in Kuber Pro:**\n'
         '- Advanced Analytics\n'
+        '- Custom Dashboard\n'
         '- Reminders\n'
         '- Automatic Backups\n'
         '- Custom themes\n\n'

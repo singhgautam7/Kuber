@@ -1,7 +1,10 @@
 // Advanced History query text <-> items <-> tree. Pure Dart, no data access.
 //
 // Grammar (precedence NOT > AND > OR, a space between operands is AND):
-//   token    := field ':' [op] value | '"' words '"' | bareword
+//   token    := field (':' | '=') [op] value | field op value
+//             | '"' words '"' | bareword
+//   (`amount>500`, `amount=500`, `amount:500` and `amount:>500` all work;
+//   the canonical text is `amount:>500`.)
 //   value    := v | v ',' v ... | '(' v 'OR' v ... ')' | a '..' b (amount, date)
 //   op       := '>' | '<' | '>=' | '<='  (amount and date only)
 //   operand  := ('not' | '-')* (token | '(' expr ')')
@@ -226,7 +229,7 @@ String quoteValue(String v) => _fmtVal(v);
 
 bool _isSpace(String c) => c == ' ' || c == '\t' || c == '\n' || c == '\r';
 
-final _fieldColon = RegExp(r'^[A-Za-z]+:(>=|<=|>|<)?$');
+final _fieldColon = RegExp(r'^[A-Za-z]+[:=](>=|<=|>|<)?$');
 
 /// End (exclusive) of the word starting at [start]: runs to whitespace or a
 /// bracket, except quoted text and a `field:( ... )` group are part of it.
@@ -359,6 +362,7 @@ class _Cond {
 }
 
 final _alpha = RegExp(r'^[A-Za-z]+$');
+final _fieldOp = RegExp(r'^([A-Za-z]+)(>=|<=|>|<|=)(.*)$', dotAll: true);
 final _keywords = [for (final f in QueryField.values) f.keyword];
 
 _Cond _parseTokenText(String raw) {
@@ -370,6 +374,13 @@ _Cond _parseTokenText(String raw) {
   final colon = raw.indexOf(':');
   if (colon > 0 && _alpha.hasMatch(raw.substring(0, colon))) {
     return _parseField(raw.substring(0, colon), raw.substring(colon + 1), raw);
+  }
+  // `amount>500`, `amount=500`: only for a known field name, so other text
+  // with a > or = in it stays a words search.
+  final m = _fieldOp.firstMatch(raw);
+  if (m != null && QueryField.fromKeyword(m.group(1)!) != null) {
+    final op = m.group(2)!;
+    return _parseField(m.group(1)!, op == '=' ? m.group(3)! : op + m.group(3)!, raw);
   }
   return _Cond.ok(ConditionNode(QueryField.words, QueryOp.eq, [raw]));
 }
@@ -385,7 +396,8 @@ _Cond _parseField(String name, String rest, String raw) {
         QueryErrorCode.unknownField, [name, closestName(name, _keywords)]);
   }
   var op = QueryOp.eq;
-  var body = rest;
+  // `amount:=500` and `amount==500` read as `amount:500`.
+  var body = rest.startsWith('=') ? rest.substring(1) : rest;
   for (final p in const ['>=', '<=', '>', '<']) {
     if (body.startsWith(p)) {
       op = switch (p) {

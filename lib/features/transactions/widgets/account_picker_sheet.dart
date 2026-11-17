@@ -5,9 +5,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/add_new_button.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_list.dart';
+import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_form.dart';
 import '../../settings/providers/settings_provider.dart'
@@ -210,44 +212,85 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
                 );
               }
 
+              // Sections by type, like the category picker's groups:
+              // Cash, Bank, Credit cards, Overdraft (empty ones hidden),
+              // each in the account list's own order. Types the account form
+              // doesn't offer (old data) go last, under Other.
+              final l = context.l10n;
+              int rank(Account a) => a.isCreditCard
+                  ? 2
+                  : a.isOverdraft
+                  ? 3
+                  : switch (a.type.toLowerCase()) {
+                      'cash' => 0,
+                      'bank' => 1,
+                      _ => 4,
+                    };
+              final titles = [
+                l.cashLabel,
+                l.bankLabel,
+                l.acctSecCards,
+                l.accountTypeOverdraft,
+                l.acctSecOther,
+              ];
+              final sections = <int, List<Account>>{};
+              for (final a in accs) {
+                sections.putIfAbsent(rank(a), () => []).add(a);
+              }
+
+              final order = sections.keys.toList()..sort();
+              final first = order.first;
+
               return ListView(
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(
                   horizontal: KuberSpace.screenMargin,
                 ),
                 children: [
-                  KuberGroup(
-                    children: [
-                      for (final acc in accs)
-                        () {
-                          final selected = acc.id == widget.selectedAccountId;
-                          final color = resolveAccountColor(acc);
+                  for (final r in order) ...[
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top: r == first ? 0 : KuberSpace.lg,
+                        bottom: KuberSpace.sm,
+                      ),
+                      child: Text(
+                        titles[r].toUpperCase(),
+                        style: sectionHeaderStyle(context),
+                      ),
+                    ),
+                    KuberGroup(
+                      children: [
+                        for (final acc in sections[r]!)
+                          () {
+                            final selected = acc.id == widget.selectedAccountId;
+                            final color = resolveAccountColor(acc);
 
-                          return _AccountTile(
-                            name: acc.name,
-                            type: (acc.isCreditCard
-                                ? context.l10n.creditCardLabel
-                                : acc.isOverdraft
-                                ? context.l10n.accountTypeOverdraft
-                                : switch (acc.type.toLowerCase()) {
-                                    'bank' => context.l10n.bankLabel,
-                                    'wallet' => context.l10n.walletLabel,
-                                    'cash' => context.l10n.cashLabel,
-                                    _ => acc.type,
-                                  }),
-                            icon: resolveAccountIcon(acc),
-                            color: color,
-                            selected: selected,
-                            balance: ref.watch(accountBalanceProvider(acc.id)),
-                            // Balance / limit for cards and loan accounts.
-                            isCreditCard: acc.isLiability,
-                            creditLimit: acc.creditLimit,
-                            currencySymbol: ref.watch(currencyProvider).symbol,
-                            onTap: () => widget.onSelected(acc.id),
-                          );
-                        }(),
-                    ],
-                  ),
+                            return _AccountTile(
+                              name: acc.name,
+                              type: (acc.isCreditCard
+                                  ? context.l10n.creditCardLabel
+                                  : acc.isOverdraft
+                                  ? context.l10n.accountTypeOverdraft
+                                  : switch (acc.type.toLowerCase()) {
+                                      'bank' => context.l10n.bankLabel,
+                                      'wallet' => context.l10n.walletLabel,
+                                      'cash' => context.l10n.cashLabel,
+                                      _ => acc.type,
+                                    }),
+                              icon: resolveAccountIcon(acc),
+                              color: color,
+                              selected: selected,
+                              balance: ref.watch(accountBalanceProvider(acc.id)),
+                              // Balance / limit for cards and loan accounts.
+                              isCreditCard: acc.isLiability,
+                              creditLimit: acc.creditLimit,
+                              currencySymbol: ref.watch(currencyProvider).symbol,
+                              onTap: () => widget.onSelected(acc.id),
+                            );
+                          }(),
+                      ],
+                    ),
+                  ],
                 ],
               );
             },

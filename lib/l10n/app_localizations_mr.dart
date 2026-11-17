@@ -9619,7 +9619,7 @@ class AppLocalizationsMr extends AppLocalizations {
       'CSV बॅकअपमध्ये सेव्ह केलेले व्ह्यू येत नाहीत. ते ठेवण्यासाठी JSON बॅकअप वापरा.';
 
   @override
-  String get historyMenuAdvanced => 'प्रगत इतिहास';
+  String get historyMenuAdvanced => 'कस्टम डॅशबोर्ड';
 
   @override
   String filterSelectedN(int n) {
@@ -9652,7 +9652,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get setSecPermissions => 'परवानग्या';
 
   @override
-  String get menuAdvancedHistory => 'प्रगत इतिहास';
+  String get menuAdvancedHistory => 'कस्टम डॅशबोर्ड';
 
   @override
   String get menuAdvancedHistoryDesc =>
@@ -9703,14 +9703,14 @@ class AppLocalizationsMr extends AppLocalizations {
   String get ahdGateSample => 'नमुना डेटा';
 
   @override
-  String get ahdGateSheetHeadline => 'Advanced History हे Kuber Pro फीचर आहे';
+  String get ahdGateSheetHeadline => 'कस्टम डॅशबोर्ड हे Kuber Pro फीचर आहे';
 
   @override
   String get ahdGateSheetBody =>
       'Kuber Pro सह तुमच्या सर्व व्यवहारांवर कोणताही फिल्टर बनवा, निकाल ग्रुप करा आणि चार्टमध्ये पहा, व्ह्यू सेव्ह करा आणि CSV मध्ये एक्सपोर्ट करा.';
 
   @override
-  String get ahdTitle => 'Advanced History';
+  String get ahdTitle => 'कस्टम डॅशबोर्ड';
 
   @override
   String get ahdMenuSaved => 'सेव्ह केलेले व्ह्यू';
@@ -9906,7 +9906,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get ahdInfoChart2 =>
-      'श्रेणी, खाती, टॅग, प्रकार किंवा स्रोतांची तुलना करण्यासाठी डोनट किंवा बार निवडा. महिना किंवा वर्षानुसार कलासाठी लाइन निवडा. भागावर टॅप करून उघडा.';
+      'श्रेणी, खाती, टॅग, प्रकार किंवा स्रोत यांची तुलना करण्यासाठी डोनट किंवा बार निवडा. महिना किंवा वर्षाच्या कलासाठी लाइन निवडा. एखाद्या भागावर टॅप करा, त्याचे मूल्य दिसेल, मग व्यवहार पहा.';
 
   @override
   String get ahdInfoSaved1 =>
@@ -11003,4 +11003,143 @@ class AppLocalizationsMr extends AppLocalizations {
   String ahfCountSemantics(int n) {
     return '$n फिल्टर';
   }
+
+  @override
+  String get ahdViewTxns => 'व्यवहार पहा';
+
+  @override
+  String ahdOfTotal(String pct) {
+    return 'एकूणच्या $pct';
+  }
+
+  @override
+  String get ahfSugFields => 'फील्ड';
+
+  @override
+  String get ahfSugValues => 'मूल्ये';
+
+  @override
+  String get ahfSugCategories => 'तुमच्या श्रेणी';
+
+  @override
+  String get ahfSugAccounts => 'तुमची खाती';
+
+  @override
+  String get ahfSugTags => 'तुमचे टॅग';
+
+  @override
+  String get ahfKindField => 'फील्ड';
+
+  @override
+  String get ahfKindValue => 'मूल्य';
+
+  @override
+  String ahfSugWords(String q) {
+    return 'शीर्षक आणि नोटमध्ये \"$q\" शोधा';
+  }
+
+  @override
+  String get ahfHowUse => 'कसे वापरावे';
+
+  @override
+  String get ahfSynEq => ': आणि = दोन्ही चालतात';
+
+  @override
+  String get ahfHowCompare => 'रक्कम आणि तारखांची तुलना';
+
+  @override
+  String get ahfSynGt => '500 पेक्षा जास्त';
+
+  @override
+  String get ahfSynLt => '500 पेक्षा कमी';
+
+  @override
+  String get ahfSynGte => '500 किंवा जास्त';
+
+  @override
+  String get ahfSynLte => '500 किंवा कमी';
+
+  @override
+  String get ahfSynExact => 'नेमके 500';
+
+  @override
+  String get ahfSynRange => '500 ते 2,000 दरम्यान';
+
+  @override
+  String get ahfSynDateAfter => 'मार्च 2026 नंतर';
+
+  @override
+  String get ahfHowCombine => 'फिल्टर एकत्र करा';
+
+  @override
+  String get ahfSynAnd => 'दोन्ही जुळले पाहिजेत. स्पेसचा अर्थही and आहे';
+
+  @override
+  String get ahfSynOr => 'कोणतेही एक जुळले तरी चालेल';
+
+  @override
+  String get ahfSynBrackets => 'कंस आधी वाचले जातात';
+
+  @override
+  String get ahfSynOrder =>
+      '\"and\" हे \"or\" च्या आधी वाचले जाते: a and b or c म्हणजे (a and b) or c';
+
+  @override
+  String get ahfHowFields => 'वापरता येणारे फील्ड';
+
+  @override
+  String get ahfHowBasics => 'मूलभूत गोष्टी';
+
+  @override
+  String get ahdStartFresh => 'नव्याने सुरू करा';
+
+  @override
+  String get ahdStartedFresh => 'नवा डॅशबोर्ड सुरू झाला';
+
+  @override
+  String ahExCatOver(String category, String amount) {
+    return 'या वर्षी $amount पेक्षा जास्त $category';
+  }
+
+  @override
+  String ahExCatByMonth(String category, String year) {
+    return '$year मधील $category, महिन्यानुसार';
+  }
+
+  @override
+  String get acctSecCards => 'क्रेडिट कार्ड';
+
+  @override
+  String get acctSecOther => 'इतर';
+
+  @override
+  String get ahdDay => 'दिवस';
+
+  @override
+  String get ahdChartHeatmap => 'हीटमॅप';
+
+  @override
+  String get ahdChartStacked => 'स्टॅक्ड बार';
+
+  @override
+  String get ahdChartLines => 'रेषा';
+
+  @override
+  String get ahdCompare => 'तुलना करा';
+
+  @override
+  String get ahdCompareNone => 'काहीही नाही';
+
+  @override
+  String get ahdCompareHint =>
+      '3 पर्यंत निवडा. बार त्यांना महिन्यानुसार एकावर एक दाखवतात, रेषा प्रत्येकासाठी वेगळी रेषा काढते.';
+
+  @override
+  String get ahdHeatmapNote => 'प्रत्येक दिवसासाठी एक चौकोन. गडद म्हणजे जास्त.';
+
+  @override
+  String get ahdLess => 'कमी';
+
+  @override
+  String get ahdMore => 'जास्त';
 }

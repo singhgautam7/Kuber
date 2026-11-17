@@ -272,19 +272,21 @@ class MockDataService {
         ..colorValue = 0xFF1E88E5
         ..initialBalance = 125000
         ..last4Digits = '8890';
-      final wallet = Account()
-        ..name = 'Paytm Wallet'
-        ..type = 'wallet'
-        ..icon = 'account_balance_wallet_outlined'
+      // Only types the account form offers (cash, bank, credit card,
+      // overdraft): an overdraft fills the picker's last section.
+      final overdraft = Account()
+        ..name = 'HDFC Overdraft'
+        ..type = 'overdraft'
+        ..icon = 'account_balance_outlined'
         ..colorValue = 0xFF00ACC1
-        ..initialBalance = 1500;
+        ..creditLimit = 50000;
       final oldCard = Account()
         ..name = 'Old Debit Card'
         ..type = 'bank'
         ..icon = 'credit_card_outlined'
         ..colorValue = 0xFF757575
         ..isDisabled = true;
-      await isar.accounts.putAll([savings, wallet, oldCard]);
+      await isar.accounts.putAll([savings, overdraft, oldCard]);
 
       String uid(String tag) => '${tag}_${now.microsecondsSinceEpoch}';
       final catLoan = categories.firstWhere((c) => c.name == 'Loan EMI');

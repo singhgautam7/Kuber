@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
-import '../../../../core/utils/locale_font.dart';
 import '../common/ah_motion.dart';
 
 /// Expanded state is remembered for the session (not across launches).
@@ -26,40 +25,56 @@ class _ReadbackCardState extends State<ReadbackCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // "In plain words" toggle (design rbT): notes icon, labelLarge,
+        // chevron, all onSurfaceVariant.
         InkWell(
           key: const ValueKey('ahf-readback-toggle'),
-          borderRadius: BorderRadius.circular(KuberShape.small),
+          borderRadius: KuberShape.fullR,
           onTap: () => setState(() => _readbackExpanded = !_readbackExpanded),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 36),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Icon(Icons.notes_rounded, size: 18, color: cs.onSurfaceVariant),
+                const SizedBox(width: 6),
                 Text(l.ahfPlainWords,
-                    style: localeFont(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: cs.primary)),
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge!
+                        .copyWith(color: cs.onSurfaceVariant)),
+                const SizedBox(width: 2),
                 AnimatedRotation(
                   turns: _readbackExpanded ? 0.5 : 0,
                   duration: reduced ? AhMotion.instant : AhMotion.fast,
-                  child: Icon(Icons.expand_more_rounded, color: cs.primary),
+                  child: Icon(Icons.expand_more_rounded,
+                      size: 18, color: cs.onSurfaceVariant),
                 ),
               ],
             ),
           ),
         ),
         AnimatedSize(
-          duration: reduced ? AhMotion.instant : AhMotion.reflow,
-          curve: Curves.easeOutCubic,
+          duration: reduced ? AhMotion.instant : AhMotion.defaultCurve.settle,
+          curve: reduced ? Curves.linear : AhMotion.defaultSize,
           alignment: Alignment.topCenter,
           child: _readbackExpanded
-              ? Padding(
+              ? Container(
                   key: const ValueKey('ahf-readback-text'),
-                  padding: const EdgeInsets.only(bottom: 8),
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(top: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   child: Text(widget.text,
-                      style: localeFont(
-                          fontSize: 15, height: 1.45, color: cs.onSurface)),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(color: cs.onSurface)),
                 )
               : const SizedBox(width: double.infinity),
         ),

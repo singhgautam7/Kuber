@@ -13,7 +13,6 @@ import '../../pro/paywall/pro_state.dart';
 import '../providers/ah_providers.dart';
 import '../widgets/charts/ah_charts_area.dart';
 import '../widgets/common/ah_common.dart';
-import '../widgets/common/ah_motion.dart';
 import '../widgets/dashboard/ah_action_row.dart';
 import '../widgets/dashboard/ah_export_sheet.dart';
 import '../widgets/dashboard/ah_kpi_row.dart';
@@ -176,81 +175,163 @@ class AhGatePage extends StatelessWidget {
   }
 }
 
-/// The real page (Pro): app bar, then the start screen or the dashboard.
-class AhPage extends ConsumerWidget {
+/// The real page (Pro): one scroll view with the app bar (scrolls away), then
+/// the start screen or the dashboard. On the dashboard the action row pins
+/// under the status bar and folds into one compact row as the page scrolls.
+class AhPage extends ConsumerStatefulWidget {
   const AhPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AhPage> createState() => _AhPageState();
+}
+
+class _AhPageState extends ConsumerState<AhPage> {
+  @override
+  void initState() {
+    super.initState();
+    AhViewNotifier.openPages++;
+  }
+
+  @override
+  void dispose() {
+    AhViewNotifier.openPages--;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final isStart = ref.watch(ahViewProvider.select((v) => v.isStart));
-    final reduced = AhMotion.reduced(context);
     return Scaffold(
-      appBar: KuberAppBar(
-        title: l.ahdTitle,
-        showBack: true,
-        actions: const [_Overflow()],
-      ),
-      body: AnimatedSwitcher(
-        duration: reduced ? AhMotion.instant : AhMotion.fast,
-        reverseDuration: AhMotion.instant,
-        switchInCurve: AhMotion.decelerate,
-        transitionBuilder: (child, anim) => FadeTransition(
-          opacity: anim,
-          child: SlideTransition(
-                  position: Tween<Offset>(
-                          begin: reduced ? Offset.zero : const Offset(0, 0.012), end: Offset.zero)
-                      .animate(anim),
-                  child: child,
-                ),
+      body: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
+          primary: false,
+          slivers: [
+            SliverToBoxAdapter(
+              child: KuberAppBar(
+                title: l.ahdTitle,
+                showBack: true,
+                actions: const [_Overflow()],
+              ),
+            ),
+            if (isStart)
+              const AhStartScreen(key: ValueKey('start'))
+            else
+              ..._dashboard,
+          ],
         ),
-        child: isStart
-            ? const AhStartScreen(key: ValueKey('start'))
-            : const _Dashboard(key: ValueKey('dash')),
       ),
     );
   }
 }
 
-class _Dashboard extends StatelessWidget {
-  const _Dashboard({super.key});
+const _gutter = EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin);
+
+const _dashboard = <Widget>[
+  SliverPersistentHeader(
+    key: ValueKey('ah-action-header'),
+    pinned: true,
+    delegate: _ActionHeader(),
+  ),
+  SliverToBoxAdapter(
+    child: Padding(padding: _gutter, child: AhChangeBar()),
+  ),
+  SliverToBoxAdapter(
+    child: AhFadeIn(
+      delay: Duration(milliseconds: 30),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: KuberSpace.md),
+        child: AhKpiRow(),
+      ),
+    ),
+  ),
+  AhChartsArea(),
+  SliverPadding(
+    padding: EdgeInsets.fromLTRB(
+      KuberSpace.screenMargin,
+      0,
+      KuberSpace.screenMargin,
+      KuberSpace.xxxl,
+    ),
+    sliver: AhResults(),
+  ),
+];
+
+/// Action row 3a (two 56 dp rows) that folds into the compact 44 dp row when
+/// pinned. The full row rides up with the scroll and fades out; the compact
+/// row fades in over the second half; a hairline shows once pinned.
+class _ActionHeader extends SliverPersistentHeaderDelegate {
+  const _ActionHeader();
+
+  static const _top = KuberSpace.sm, _bottom = KuberSpace.md;
 
   @override
-  Widget build(BuildContext context) {
-    const gutter = EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin);
-    return CustomScrollView(
-      primary: false,
-      slivers: [
-        const SliverToBoxAdapter(
-          child: AhFadeIn(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(KuberSpace.screenMargin,
-                  KuberSpace.sm, KuberSpace.screenMargin, KuberSpace.md),
-              child: AhActionRow(),
+  double get maxExtent => _top + 56 + KuberSpace.sm + 56 + _bottom;
+
+  @override
+  double get minExtent => KuberSpace.sm + 44 + KuberSpace.sm;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
+    final cs = Theme.of(context).colorScheme;
+    final t = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
+    final full = (1 - t * 1.8).clamp(0.0, 1.0);
+    final compact = ((t - 0.45) / 0.55).clamp(0.0, 1.0);
+    return ColoredBox(
+      color: cs.surface,
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          // Both rows stay mounted (Opacity 0 paints nothing) so scrolling
+          // back never replays the full row's fade-in.
+          Positioned(
+            left: KuberSpace.screenMargin,
+            right: KuberSpace.screenMargin,
+            top: _top - shrinkOffset,
+            child: Opacity(
+              opacity: full,
+              child: IgnorePointer(
+                ignoring: t > 0.5,
+                child: const AhFadeIn(child: AhActionRow()),
+              ),
             ),
           ),
-        ),
-        const SliverToBoxAdapter(
-          child: Padding(padding: gutter, child: AhChangeBar()),
-        ),
-        const SliverToBoxAdapter(
-          child: AhFadeIn(
-            delay: Duration(milliseconds: 30),
-            child: Padding(
-              padding: EdgeInsets.only(bottom: KuberSpace.md),
-              child: AhKpiRow(),
+          Positioned(
+            left: KuberSpace.screenMargin,
+            right: KuberSpace.screenMargin,
+            bottom: KuberSpace.sm,
+            child: Opacity(
+              opacity: compact,
+              child: Transform.translate(
+                offset: Offset(0, 6 * (1 - compact)),
+                child: IgnorePointer(
+                  ignoring: t <= 0.5,
+                  child: const AhActionRow(
+                    key: ValueKey('ah-action-compact'),
+                    compact: true,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-        const AhChartsArea(),
-        const SliverPadding(
-          padding: EdgeInsets.fromLTRB(KuberSpace.screenMargin, 0,
-              KuberSpace.screenMargin, KuberSpace.xxxl),
-          sliver: AhResults(),
-        ),
-      ],
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 1,
+            child: Opacity(
+              opacity: compact,
+              child: ColoredBox(color: cs.outlineVariant),
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  @override
+  bool shouldRebuild(_ActionHeader oldDelegate) => false;
 }
 
 class _Overflow extends ConsumerWidget {
@@ -259,13 +340,16 @@ class _Overflow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
+    // Watched so the count is loaded before the menu opens (a read of an
+    // unwatched autoDispose stream gave "0 saved").
+    final saved = ref.watch(
+        savedFiltersProvider.select((a) => a.valueOrNull?.length ?? 0));
     return Builder(
       builder: (anchor) => AppIconButton(
         icon: Icons.more_vert_rounded,
         semanticLabel: l.ahdTitle,
         onPressed: () async {
           final v = ref.read(ahViewProvider);
-          final saved = ref.read(savedFiltersProvider).valueOrNull?.length ?? 0;
           final n = v.isStart
               ? 0
               : (ref.read(ahKpisProvider).valueOrNull?.transactions ?? 0);

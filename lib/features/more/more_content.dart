@@ -178,7 +178,7 @@ List<MoreSection> buildMoreSections(
           },
         ),
         MoreEntry(
-          icon: Icons.manage_search_rounded,
+          icon: Icons.dashboard_customize_rounded,
           label: l10n.menuAdvancedHistory,
           subtitle: l10n.menuAdvancedHistoryDesc,
           proPill: true,

@@ -98,7 +98,6 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
                 SliverToBoxAdapter(
                   child: KuberAppBar(
                     title: 'Kuber Pro',
-                    subtitle: _headerSubtitle(proState),
                     showBack: true,
                     infoConfig: kAboutProInfoConfig,
                     overflowConfig: KuberOverflowConfig(items: overflowItems),
@@ -130,11 +129,6 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
           : null,
     );
   }
-
-  // Pro users get no subtitle: the "You're on Kuber Pro" card right below
-  // already says it.
-  String? _headerSubtitle(KuberProState s) =>
-      s.isPro ? null : 'Unlock everything Kuber offers';
 
   // ── Sell mode (free / lapsed) ───────────────────────────────────────────
   List<Widget> _sellBody(KuberProState proState, SubscriptionOfferInfo? offer) {

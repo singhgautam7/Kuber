@@ -63,7 +63,11 @@ Future<void> ahConfirmClearAll(BuildContext context, WidgetRef ref) {
 
 /// Action row 3a: Filter + Clear all, then the connected Group | Sort | Saved.
 class AhActionRow extends ConsumerWidget {
-  const AhActionRow({super.key});
+  const AhActionRow({super.key, this.compact = false});
+
+  /// The pinned bar once the page scrolls: one 44 dp row, Filter shows its
+  /// icon and count only and the segments show their value only.
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,48 +81,76 @@ class AhActionRow extends ConsumerWidget {
     final saved = ref.watch(ahOpenSavedProvider);
     final edited = ref.watch(ahChangesProvider.select((c) => c.isNotEmpty));
     final l = context.l10n;
-    final cs = Theme.of(context).colorScheme;
-    final reduced = AhMotion.reduced(context);
-    final stdDur = reduced ? AhMotion.instant : AhMotion.standardCurve.settle;
-    final stdCurve = reduced ? Curves.linear : AhMotion.standardSize;
+
+    if (compact) {
+      const h = 44.0, r = Radius.circular(h / 2);
+      return Row(
+        children: [
+          _FilterButton(count: count, compact: true),
+          const SizedBox(width: KuberSpace.sm),
+          _Segment(
+            compact: true,
+            radius: const BorderRadius.horizontal(
+                left: r, right: Radius.circular(_innerR)),
+            set: group != AhGroupBy.none,
+            icon: Icons.category_outlined,
+            filledIcon: Icons.category_rounded,
+            label: l.ahdGroup,
+            value: group == AhGroupBy.none ? null : ahGroupName(l, group),
+            onTap: () => ahShowSheet<void>(context, (_) => const AhGroupSheet()),
+          ),
+          const SizedBox(width: 2),
+          _Segment(
+            compact: true,
+            radius: BorderRadius.circular(_innerR),
+            set: false,
+            icon: Icons.sort_rounded,
+            filledIcon: Icons.sort_rounded,
+            label: l.ahdSort,
+            value: ahSortFieldLabel(l, sort.field),
+            trailingIcon: sort.descending
+                ? Icons.arrow_downward_rounded
+                : Icons.arrow_upward_rounded,
+            onTap: () => ahShowSheet<void>(context, (_) => const AhSortSheet()),
+          ),
+          const SizedBox(width: 2),
+          Expanded(
+            child: _Segment(
+              compact: true,
+              radius: const BorderRadius.horizontal(
+                  left: Radius.circular(_innerR), right: r),
+              set: saved != null,
+              icon: Icons.bookmarks_outlined,
+              filledIcon: Icons.bookmarks_rounded,
+              label: l.ahdSaved,
+              value: saved?.name,
+              expand: true,
+              onTap: () => showAhSavedSheet(context),
+            ),
+          ),
+        ],
+      );
+    }
 
     return Column(
       children: [
+        // Row 1 is a connected pair like row 2: Filter (round left) and
+        // Clear all (round right), which looks disabled until something is set.
         Row(
           children: [
             Expanded(child: _FilterButton(count: count)),
-            ClipRect(
-              child: AnimatedAlign(
-                alignment: Alignment.centerLeft,
-                widthFactor: any ? 1 : 0,
-                duration: stdDur,
-                curve: stdCurve,
-                child: AnimatedOpacity(
-                  opacity: any ? 1 : 0,
-                  duration: AhMotion.dur(context, AhMotion.fast),
-                  child: AnimatedScale(
-                    scale: any ? 1 : 0.8,
-                    duration: AhMotion.dur(context, AhMotion.fast),
-                    child: IgnorePointer(
-                      ignoring: !any,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                              shape: const StadiumBorder(),
-                              minimumSize: const Size(0, 56)),
-                          onPressed: () => ahConfirmClearAll(context, ref),
-                          child: Text(l.ahdClearAll,
-                              style: localeFont(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.primary)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            const SizedBox(width: 2),
+            _Segment(
+              key: const ValueKey('ahd-clear-all'),
+              radius: const BorderRadius.horizontal(
+                  left: Radius.circular(_innerR),
+                  right: Radius.circular(_outerR)),
+              set: false,
+              disabled: !any,
+              icon: Icons.close_rounded,
+              filledIcon: Icons.close_rounded,
+              label: l.ahdClearAll,
+              onTap: () => ahConfirmClearAll(context, ref),
             ),
           ],
         ),
@@ -172,8 +204,9 @@ class AhActionRow extends ConsumerWidget {
 }
 
 class _FilterButton extends StatefulWidget {
-  const _FilterButton({required this.count});
+  const _FilterButton({required this.count, this.compact = false});
   final int count;
+  final bool compact;
 
   @override
   State<_FilterButton> createState() => _FilterButtonState();
@@ -190,20 +223,29 @@ class _FilterButtonState extends State<_FilterButton> {
     if (set) _last = widget.count;
     final reduced = AhMotion.reduced(context);
     final fg = set ? cs.onSecondaryContainer : cs.onSurface;
+    final compact = widget.compact;
     return AhPill(
       color: set ? cs.secondaryContainer : cs.surfaceContainer,
-      radius: BorderRadius.circular(_outerR),
+      radius: compact
+          ? BorderRadius.circular(22)
+          : const BorderRadius.horizontal(
+              left: Radius.circular(_outerR), right: Radius.circular(_innerR)),
+      height: compact ? 44 : 56,
+      padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 16),
       semanticLabel: l.ahdFilter,
       onTap: () => context.push('/advanced-history/filter'),
       child: Row(
+        mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.filter_list_rounded,
-              size: 24, color: set ? fg : cs.onSurfaceVariant),
-          const SizedBox(width: 10),
-          Text(l.ahdFilter,
-              style: localeFont(
-                  fontSize: 16, fontWeight: FontWeight.w600, color: fg)),
+              size: compact ? 20 : 24, color: set ? fg : cs.onSurfaceVariant),
+          if (!compact) ...[
+            const SizedBox(width: 10),
+            Text(l.ahdFilter,
+                style: localeFont(
+                    fontSize: 16, fontWeight: FontWeight.w600, color: fg)),
+          ],
           ClipRect(
             child: AnimatedAlign(
               alignment: Alignment.centerLeft,
@@ -220,7 +262,7 @@ class _FilterButtonState extends State<_FilterButton> {
                   opacity: set ? 1 : 0,
                   duration: AhMotion.dur(context, AhMotion.fast),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 10),
+                    padding: EdgeInsets.only(left: compact ? 6 : 10),
                     child: Container(
                       constraints: const BoxConstraints(minWidth: 24),
                       height: 24,
@@ -257,7 +299,14 @@ class _Segment extends StatelessWidget {
     this.value,
     this.trailingIcon,
     this.expand = false,
+    this.compact = false,
+    this.disabled = false,
+    super.key,
   });
+  final bool compact;
+
+  /// onSurface 10% / 38%, not tappable.
+  final bool disabled;
   final BorderRadius radius;
   final bool set;
   final IconData icon;
@@ -272,8 +321,42 @@ class _Segment extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final fg = set ? cs.onSecondaryContainer : cs.onSurface;
+    final fg = disabled
+        ? cs.onSurface.withValues(alpha: 0.38)
+        : set
+            ? cs.onSecondaryContainer
+            : cs.onSurface;
     final reduced = AhMotion.reduced(context);
+    if (compact) {
+      final text = value ?? label;
+      return _wrap(
+        reduced,
+        AhPill(
+          color: set ? cs.secondaryContainer : cs.surfaceContainer,
+          radius: radius,
+          height: 44,
+          onTap: onTap,
+          semanticLabel: value == null ? label : '$label, $value',
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.titleSmall!.copyWith(color: fg)),
+              ),
+              if (trailingIcon != null) ...[
+                const SizedBox(width: 2),
+                Icon(trailingIcon, size: 14, color: fg),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
     final content = AnimatedSwitcher(
       duration: AhMotion.dur(context, AhMotion.fast),
       child: Row(
@@ -281,7 +364,7 @@ class _Segment extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(set ? filledIcon : icon,
-              size: 20, color: set ? fg : cs.onSurfaceVariant),
+              size: 20, color: set || disabled ? fg : cs.onSurfaceVariant),
           const SizedBox(width: 8),
           Flexible(
             child: value == null
@@ -319,12 +402,20 @@ class _Segment extends StatelessWidget {
       ),
     );
     final pill = AhPill(
-      color: set ? cs.secondaryContainer : cs.surfaceContainer,
+      color: disabled
+          ? cs.onSurface.withValues(alpha: 0.10)
+          : set
+              ? cs.secondaryContainer
+              : cs.surfaceContainer,
       radius: radius,
-      onTap: onTap,
+      onTap: disabled ? null : onTap,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Align(alignment: Alignment.centerLeft, child: content),
     );
+    return _wrap(reduced, pill);
+  }
+
+  Widget _wrap(bool reduced, Widget pill) {
     if (expand) return pill;
     return AnimatedSize(
       duration: reduced ? AhMotion.instant : AhMotion.standardCurve.settle,

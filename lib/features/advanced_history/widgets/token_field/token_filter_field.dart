@@ -9,7 +9,14 @@ import '../../providers/ah_providers.dart';
 import '../../query/query_ast.dart';
 import '../../query/query_labels.dart';
 import '../../query/query_parser.dart';
+import '../../../../core/utils/icon_mapper.dart';
+import '../../../../shared/widgets/category_icon.dart';
+import '../../../../shared/widgets/kuber_list.dart';
+import '../../../categories/data/category.dart';
+import '../../../categories/providers/category_provider.dart';
 import '../common/ah_motion.dart';
+import '../filter/field_list.dart' show fieldHint;
+import '../filter/value_pickers.dart' show fieldIcon;
 import 'bracket_box.dart';
 import 'token_chips.dart';
 import 'token_filter_controller.dart';
@@ -18,6 +25,12 @@ import 'token_filter_controller.dart';
 /// nothing for backspace on an empty field; deleting the sentinel is the
 /// signal instead (see specs/advanced-history-v1/token-field-notes.md).
 const kTokenSentinel = '​';
+
+/// Zero-width end marker after the typed text. With text on both sides of
+/// the caret, the keyboard's own cursor controls (Gboard space swipe, arrow
+/// keys) can move the caret past either edge, and that moves the cursor
+/// between tokens.
+const kTokenEnd = '⁠';
 
 class _Box {
   const _Box(this.start, this.end, this.depth, this.explicit);
@@ -55,11 +68,12 @@ class TokenFilterField extends ConsumerStatefulWidget {
 }
 
 class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
-  final _input = TextEditingController(text: kTokenSentinel);
+  final _input = TextEditingController(text: kTokenSentinel + kTokenEnd);
   final _keys = <int, GlobalKey>{};
   // Global so the input (and its IME connection) survives moving in the tree.
   final _slotKey = GlobalKey(debugLabel: 'ahf-input-slot');
-  String _prevRaw = kTokenSentinel;
+  String _prevRaw = kTokenSentinel + kTokenEnd;
+  bool _adjusting = false;
   bool _ready = false;
   bool _hadFocus = false;
   int? _lastEditing;
@@ -67,13 +81,17 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
   AhSuggestionQuery? _query;
 
   TokenFilterController get c => widget.controller;
-  String get _typed => _input.text.replaceAll(kTokenSentinel, '');
+  String get _typed => _strip(_input.text);
+  static String _strip(String raw) =>
+      raw.replaceAll(kTokenSentinel, '').replaceAll(kTokenEnd, '');
 
   @override
   void initState() {
     super.initState();
     c.addListener(_onController);
     c.focusNode.addListener(_onFocus);
+    _input.addListener(_onSelection);
+    _reset();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() => _ready = true);
     });
@@ -94,16 +112,44 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
   void dispose() {
     c.removeListener(_onController);
     c.focusNode.removeListener(_onFocus);
+    _input.removeListener(_onSelection);
     _input.dispose();
     super.dispose();
   }
 
   void _reset([String t = '']) {
-    _prevRaw = kTokenSentinel + t;
+    _prevRaw = kTokenSentinel + t + kTokenEnd;
+    _adjusting = true;
     _input.value = TextEditingValue(
       text: _prevRaw,
-      selection: TextSelection.collapsed(offset: _prevRaw.length),
+      selection: TextSelection.collapsed(offset: _prevRaw.length - 1),
     );
+    _adjusting = false;
+  }
+
+  /// The caret went past the start marker (left) or the end marker (right):
+  /// seal what is typed and step the cursor one item that way.
+  void _onSelection() {
+    if (_adjusting) return;
+    final v = _input.value;
+    final sel = v.selection;
+    if (!sel.isValid || !sel.isCollapsed || v.composing.isValid) return;
+    final len = v.text.length;
+    final int step;
+    if (sel.baseOffset == 0 && v.text.startsWith(kTokenSentinel)) {
+      step = -1;
+    } else if (sel.baseOffset == len && v.text.endsWith(kTokenEnd)) {
+      step = 1;
+    } else {
+      return;
+    }
+    final had = _typed.trim().isNotEmpty || c.editing != null;
+    _commitPending();
+    // Sealing put the cursor after the new token: a left step from there
+    // lands before it, as the caret did.
+    c.moveCursor(c.cursor + (had && step > 0 ? 0 : step));
+    _reset();
+    if (mounted) setState(() {});
   }
 
   void _onController() {
@@ -157,13 +203,13 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
   bool _quotesBalanced(String s) => '"'.allMatches(s).length.isEven;
 
   void _onChanged(String raw) {
-    if (raw.isEmpty) {
+    final typed = _strip(raw);
+    if (!raw.startsWith(kTokenSentinel) && typed.isEmpty) {
       // Sentinel deleted with nothing else typed: backspace on empty.
       _reset();
       c.backspace();
       return;
     }
-    final typed = raw.replaceAll(kTokenSentinel, '');
     // A jump of several characters with a space in it is a paste (typing,
     // swipe and prediction commits end in a space or are single words).
     final pasted = raw.length - _prevRaw.length > 1 && _lastSpace(typed) >= 0;
@@ -193,8 +239,13 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
     } else if (seal != null) {
       _reset(rest);
     } else {
-      _prevRaw = raw.startsWith(kTokenSentinel) ? raw : kTokenSentinel + typed;
-      if (!raw.startsWith(kTokenSentinel)) _reset(typed);
+      if (raw.startsWith(kTokenSentinel) && raw.endsWith(kTokenEnd)) {
+        _prevRaw = raw;
+      } else {
+        // A marker went missing (forward delete, an IME commit): put both
+        // back, caret at the end of the typed text.
+        _reset(typed);
+      }
     }
     setState(() {});
   }
@@ -234,7 +285,7 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
       return;
     }
     final typed = _typed;
-    final cut = typed.lastIndexOf(RegExp('[:,]'));
+    final cut = typed.lastIndexOf(RegExp('[:=,]'));
     final head = cut >= 0 ? typed.substring(0, cut + 1) : '${q.field!.keyword}:';
     _reset();
     _sealText('$head${s.value}');
@@ -250,23 +301,48 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
   }
 
   void _onBoxTap(TapUpDetails d) {
-    // Cursor goes to the nearest gap before the first item after the tap.
-    var slot = c.items.length;
+    // The caret goes to the gap nearest the tap on the tapped line: before
+    // the first item to the right of it, or after the line's last item.
+    // Brackets are items too, so taps beside a box land outside it.
+    final p = d.globalPosition;
     final items = c.items;
     final ids = c.ids;
+    final rects = <(int, Rect)>[];
     for (var i = 0; i < items.length; i++) {
       final box = _keys[ids[i]]?.currentContext?.findRenderObject();
-      if (box is! RenderBox || !box.attached) continue;
-      final r = box.localToGlobal(Offset.zero) & box.size;
-      if (r.bottom > d.globalPosition.dy && r.center.dx > d.globalPosition.dx ||
-          r.top > d.globalPosition.dy) {
-        slot = i;
-        break;
+      if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      rects.add((i, box.localToGlobal(Offset.zero) & box.size));
+    }
+    int? slot;
+    final line = [
+      for (final r in rects)
+        if (r.$2.top - 4 <= p.dy && r.$2.bottom + 4 >= p.dy) r
+    ];
+    if (line.isNotEmpty) {
+      for (final r in line) {
+        if (r.$2.center.dx > p.dx) {
+          slot = r.$1;
+          break;
+        }
+      }
+      slot ??= line.last.$1 + 1;
+    } else {
+      // Between lines or below them: before the first item on a later line.
+      for (final r in rects) {
+        if (r.$2.top > p.dy) {
+          slot = r.$1;
+          break;
+        }
       }
     }
     _commitPending();
-    c.moveCursor(slot > c.items.length ? c.items.length : slot);
-    c.focusNode.requestFocus();
+    c.moveCursor((slot ?? items.length).clamp(0, c.items.length));
+    if (c.focusNode.hasFocus) {
+      // Focused with the keyboard closed (system back): open it again.
+      SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+    } else {
+      c.focusNode.requestFocus();
+    }
   }
 
   // --- layout ------------------------------------------------------------------
@@ -346,7 +422,10 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
       child: Stack(
         alignment: Alignment.centerLeft,
         children: [
-          TextField(
+          // Taps go to the box, which places the caret between tokens; the
+          // field's own tap would move the caret onto a marker instead.
+          IgnorePointer(
+            child: TextField(
             key: const ValueKey('ahf-input'),
             controller: _input,
             focusNode: c.focusNode,
@@ -362,10 +441,25 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
             inputFormatters: [
               FilteringTextInputFormatter.deny(RegExp('[\n\r]')),
             ],
-            decoration: const InputDecoration.collapsed(hintText: null),
+            // Every border spelled out: the app's InputDecorationTheme
+            // otherwise draws its focused outline around the inline input.
+            decoration: const InputDecoration(
+              isCollapsed: true,
+              filled: false,
+              contentPadding: EdgeInsets.zero,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
+            ),
             onChanged: _onChanged,
             onSubmitted: _onSubmitted,
-            onTapOutside: (_) {},
+            // The box, its suggestions and the operator bar are one tap
+            // region (TextFieldTapRegion); a tap anywhere else closes it.
+            onTapOutside: (_) => c.focusNode.unfocus(),
+          ),
           ),
           if (!focused)
             IgnorePointer(
@@ -489,7 +583,13 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
             implicit: !b.explicit,
             animate: _ready,
             filterCount: _tokensIn(b.start, b.end),
-            children: layout(a, z, sub, end: b.explicit),
+            // The ( and ) stay visible at the box edges: they can be
+            // selected and deleted, and the caret can sit outside them.
+            children: [
+              if (b.explicit) _leaf(b.start, errIdx, shownUnmatched, deep),
+              ...layout(a, z, sub, end: b.explicit),
+              if (b.explicit) _leaf(b.end, errIdx, shownUnmatched, deep),
+            ],
           ));
           i = b.end + 1;
           continue;
@@ -525,37 +625,46 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-        border: Border.all(
-          color: focused ? cs.primary : Colors.transparent,
-          width: 2,
-        ),
       ),
-      child: Stack(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showPlaceholder && hint != null)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: Text(
-                      hint,
-                      style: localeFont(
-                        fontSize: 16,
-                        color: cs.onSurfaceVariant,
+          Expanded(
+            child: Stack(
+              children: [
+                if (showPlaceholder && hint != null)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          // After the still caret.
+                          padding: const EdgeInsets.only(left: 4),
+                          child: Text(
+                            hint,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge!
+                                .copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 32),
+                  child: Wrap(
+                    key: const ValueKey('ahf-wrap'),
+                    spacing: 6,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: content,
+                  ),
                 ),
-              ),
+              ],
             ),
-          Wrap(
-            key: const ValueKey('ahf-wrap'),
-            spacing: 6,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: content,
           ),
         ],
       ),
@@ -564,26 +673,49 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
     // Suggestions: field names first, then the user's values.
     Widget suggestions = const SizedBox.shrink();
     _top = null;
-    if (widget.showSuggestions && focused) {
+    // Only once something is typed: the field list already sits below.
+    if (widget.showSuggestions && focused && _typed.isNotEmpty) {
       final typed = _typed;
-      final colon = typed.indexOf(':');
+      final colon = typed.indexOf(RegExp('[:=]'));
       final field =
           colon > 0 ? QueryField.fromKeyword(typed.substring(0, colon)) : null;
       final prefix = colon > 0
-          ? typed.substring(typed.lastIndexOf(RegExp('[:,]')) + 1)
+          ? typed.substring(typed.lastIndexOf(RegExp('[:=,]')) + 1)
           : typed;
       if (colon <= 0 || field != null) {
         _query = AhSuggestionQuery(field, prefix);
         final list = ref.watch(ahSuggestionsProvider(_query!)).valueOrNull ??
             const <AhSuggestion>[];
-        if (list.isNotEmpty) {
-          _top = list.first;
-          suggestions = _SuggestionList(list: list.take(6).toList(), onTap: _applySuggestion);
+        final words = field == null && typed.trim().isNotEmpty
+            ? typed.trim()
+            : null;
+        if (list.isNotEmpty) _top = list.first;
+        if (list.isNotEmpty || words != null) {
+          final cats = field == QueryField.category
+              ? {
+                  for (final c in ref.watch(categoryListProvider).valueOrNull ??
+                      const <Category>[])
+                    c.name.toLowerCase(): c,
+                }
+              : const <String, Category>{};
+          suggestions = _SuggestionList(
+            field: field,
+            categories: cats,
+            list: list.take(6).toList(),
+            onTap: _applySuggestion,
+            words: words,
+            onWords: () {
+              _reset();
+              _sealText('"${words!.replaceAll('"', '')}"');
+              c.focusNode.requestFocus();
+            },
+          );
         }
       }
     }
 
-    return Column(
+    return TextFieldTapRegion(
+        child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
@@ -613,7 +745,7 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
           child: suggestions,
         ),
       ],
-    );
+    ));
   }
 }
 
@@ -662,63 +794,159 @@ class _ErrorLine extends StatelessWidget {
   }
 }
 
+/// Inline suggestions while typing (no sheet): a caps header, then rows with
+/// a tile, the name, a hint and the kind on the right. The top row is
+/// preselected (the action key inserts it).
 class _SuggestionList extends StatelessWidget {
-  const _SuggestionList({required this.list, required this.onTap});
+  const _SuggestionList({
+    required this.field,
+    required this.list,
+    required this.onTap,
+    this.categories = const {},
+    this.words,
+    this.onWords,
+  });
+  final QueryField? field;
+
+  /// Lower-cased name to category, for the category's own icon and colour.
+  final Map<String, Category> categories;
   final List<AhSuggestion> list;
   final void Function(AhSuggestion) onTap;
+  final String? words;
+  final VoidCallback? onWords;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(KuberShape.large),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          for (var i = 0; i < list.length; i++)
-            InkWell(
-              key: ValueKey('ahf-suggestion-$i'),
-              onTap: () => onTap(list[i]),
+    final tt = Theme.of(context).textTheme;
+    final l = context.l10n;
+    final f = field;
+    final header = switch (f) {
+      null => l.ahfSugFields,
+      QueryField.category => l.ahfSugCategories,
+      QueryField.account => l.ahfSugAccounts,
+      QueryField.tag => l.ahfSugTags,
+      _ => l.ahfSugValues,
+    };
+    final kind = switch (f) {
+      null => l.ahfKindField,
+      QueryField.category => l.ahdCategory,
+      QueryField.account => l.ahdAccount,
+      QueryField.tag => l.ahdTag,
+      _ => l.ahfKindValue,
+    };
+
+    Widget row({
+      required Key key,
+      required IconData icon,
+      Category? category,
+      required Widget title,
+      String? hint,
+      required String kind,
+      required bool top,
+      required VoidCallback onTap,
+    }) =>
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Material(
+            color: top ? cs.secondaryContainer : Colors.transparent,
+            borderRadius: KuberShape.mediumR,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              key: key,
+              onTap: onTap,
               child: Container(
-                constraints: const BoxConstraints(minHeight: 44),
-                color: i == 0
-                    ? cs.secondaryContainer.withValues(alpha: 0.5)
-                    : null,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
+                constraints: const BoxConstraints(minHeight: 52),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Row(
                   children: [
+                    if (category != null)
+                      CategoryIcon.square(
+                        icon: IconMapper.fromString(category.icon),
+                        rawColor: Color(category.colorValue),
+                        size: 32,
+                      )
+                    else
+                      KuberIconTile(
+                        icon: icon,
+                        size: 32,
+                        glyph: 18,
+                        radius: KuberShape.small,
+                        color: cs.surfaceContainerHighest,
+                        iconColor: cs.onSurfaceVariant,
+                      ),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        list[i].label,
-                        style: localeFont(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: cs.onSurface),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          title,
+                          if (hint != null)
+                            Text(hint,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: tt.bodySmall!
+                                    .copyWith(color: cs.onSurfaceVariant)),
+                        ],
                       ),
                     ),
-                    if (list[i].hint != null)
-                      Text(list[i].hint!,
-                          style: localeFont(
-                              fontSize: 12, color: cs.onSurfaceVariant)),
-                    if (list[i].count != null)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text('${list[i].count}',
-                            style: localeFont(
-                                fontSize: 12,
-                                color: cs.onSurfaceVariant,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures()
-                                ])),
-                      ),
+                    const SizedBox(width: 8),
+                    Text(kind,
+                        style: tt.labelSmall!
+                            .copyWith(color: cs.onSurfaceVariant)),
                   ],
                 ),
               ),
+            ),
+          ),
+        );
+
+    Text name(String s, {Color? color, FontWeight? weight}) => Text(s,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: tt.titleSmall!.copyWith(
+            color: color ?? cs.onSurface, fontWeight: weight));
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (list.isNotEmpty)
+            KuberSectionHeader(
+              title: header,
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 2),
+            ),
+          for (var i = 0; i < list.length; i++)
+            () {
+              final s = list[i];
+              final asField = f == null ? QueryField.fromKeyword(s.label) : null;
+              return row(
+                key: ValueKey('ahf-suggestion-$i'),
+                icon: fieldIcon(asField ?? f ?? QueryField.words),
+                category: categories[s.label.toLowerCase()],
+                title: asField != null
+                    ? name('${s.label}:',
+                        color: cs.primary, weight: FontWeight.w600)
+                    : name(s.label),
+                hint: asField != null
+                    ? fieldHint(asField, l)
+                    : s.count == null
+                        ? null
+                        : l.ahdTxnN(s.count!),
+                kind: kind,
+                top: i == 0,
+                onTap: () => onTap(s),
+              );
+            }(),
+          if (words != null)
+            row(
+              key: const ValueKey('ahf-suggestion-words'),
+              icon: Icons.format_quote_rounded,
+              title: name(l.ahfSugWords(words!)),
+              kind: fieldLabel(QueryField.words, l),
+              top: list.isEmpty,
+              onTap: onWords!,
             ),
         ],
       ),

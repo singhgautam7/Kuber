@@ -9693,7 +9693,7 @@ class AppLocalizationsMl extends AppLocalizations {
       'CSV ബാക്കപ്പിൽ സേവ് ചെയ്ത വ്യൂകൾ ഉൾപ്പെടില്ല. അവ സൂക്ഷിക്കാൻ JSON ബാക്കപ്പ് ഉപയോഗിക്കൂ.';
 
   @override
-  String get historyMenuAdvanced => 'അഡ്വാൻസ്ഡ് ഹിസ്റ്ററി';
+  String get historyMenuAdvanced => 'കസ്റ്റം ഡാഷ്ബോർഡ്';
 
   @override
   String filterSelectedN(int n) {
@@ -9726,7 +9726,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get setSecPermissions => 'അനുമതികൾ';
 
   @override
-  String get menuAdvancedHistory => 'അഡ്വാൻസ്ഡ് ഹിസ്റ്ററി';
+  String get menuAdvancedHistory => 'കസ്റ്റം ഡാഷ്ബോർഡ്';
 
   @override
   String get menuAdvancedHistoryDesc =>
@@ -9781,14 +9781,15 @@ class AppLocalizationsMl extends AppLocalizations {
   String get ahdGateSample => 'സാമ്പിൾ ഡാറ്റ';
 
   @override
-  String get ahdGateSheetHeadline => 'Advanced History ഒരു Kuber Pro ഫീച്ചറാണ്';
+  String get ahdGateSheetHeadline =>
+      'കസ്റ്റം ഡാഷ്ബോർഡ് ഒരു Kuber Pro ഫീച്ചറാണ്';
 
   @override
   String get ahdGateSheetBody =>
       'Kuber Pro ഉപയോഗിച്ച് നിങ്ങളുടെ എല്ലാ ഇടപാടുകളിലും ഏത് ഫിൽട്ടറും ഉണ്ടാക്കാം, ഫലങ്ങൾ ഗ്രൂപ്പ് ചെയ്ത് ചാർട്ടിൽ കാണാം, വ്യൂകൾ സേവ് ചെയ്ത് CSV ആയി എക്സ്പോർട്ട് ചെയ്യാം.';
 
   @override
-  String get ahdTitle => 'Advanced History';
+  String get ahdTitle => 'കസ്റ്റം ഡാഷ്ബോർഡ്';
 
   @override
   String get ahdMenuSaved => 'സേവ് ചെയ്ത വ്യൂകൾ';
@@ -9986,7 +9987,7 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get ahdInfoChart2 =>
-      'വിഭാഗങ്ങൾ, അക്കൗണ്ടുകൾ, ടാഗുകൾ, തരങ്ങൾ, ഉറവിടങ്ങൾ എന്നിവ താരതമ്യം ചെയ്യാൻ ഡോണട്ട് അല്ലെങ്കിൽ ബാർ തിരഞ്ഞെടുക്കുക. മാസം അല്ലെങ്കിൽ വർഷം പ്രകാരമുള്ള പ്രവണതയ്ക്ക് ലൈൻ തിരഞ്ഞെടുക്കുക. ഒരു ഭാഗത്ത് തൊട്ട് തുറക്കുക.';
+      'വിഭാഗങ്ങൾ, അക്കൗണ്ടുകൾ, ടാഗുകൾ, തരങ്ങൾ അല്ലെങ്കിൽ ഉറവിടങ്ങൾ താരതമ്യം ചെയ്യാൻ ഡോനട്ടോ ബാറുകളോ തിരഞ്ഞെടുക്കുക. മാസത്തിലോ വർഷത്തിലോ ഉള്ള പ്രവണതയ്ക്ക് ലൈൻ തിരഞ്ഞെടുക്കുക. ഒരു ഭാഗത്ത് ടാപ്പ് ചെയ്താൽ അതിന്റെ മൂല്യം കാണാം, തുടർന്ന് ഇടപാടുകൾ കാണുക.';
 
   @override
   String get ahdInfoSaved1 =>
@@ -11087,4 +11088,144 @@ class AppLocalizationsMl extends AppLocalizations {
   String ahfCountSemantics(int n) {
     return '$n ഫിൽട്ടറുകൾ';
   }
+
+  @override
+  String get ahdViewTxns => 'ഇടപാടുകൾ കാണുക';
+
+  @override
+  String ahdOfTotal(String pct) {
+    return 'ആകെയുടെ $pct';
+  }
+
+  @override
+  String get ahfSugFields => 'ഫീൽഡുകൾ';
+
+  @override
+  String get ahfSugValues => 'മൂല്യങ്ങൾ';
+
+  @override
+  String get ahfSugCategories => 'നിങ്ങളുടെ വിഭാഗങ്ങൾ';
+
+  @override
+  String get ahfSugAccounts => 'നിങ്ങളുടെ അക്കൗണ്ടുകൾ';
+
+  @override
+  String get ahfSugTags => 'നിങ്ങളുടെ ടാഗുകൾ';
+
+  @override
+  String get ahfKindField => 'ഫീൽഡ്';
+
+  @override
+  String get ahfKindValue => 'മൂല്യം';
+
+  @override
+  String ahfSugWords(String q) {
+    return 'തലക്കെട്ടിലും കുറിപ്പിലും \"$q\" തിരയുക';
+  }
+
+  @override
+  String get ahfHowUse => 'എങ്ങനെ ഉപയോഗിക്കാം';
+
+  @override
+  String get ahfSynEq => ': ഉം = ഉം രണ്ടും പ്രവർത്തിക്കും';
+
+  @override
+  String get ahfHowCompare => 'തുകയും തീയതിയും താരതമ്യം ചെയ്യുക';
+
+  @override
+  String get ahfSynGt => '500-ൽ കൂടുതൽ';
+
+  @override
+  String get ahfSynLt => '500-ൽ കുറവ്';
+
+  @override
+  String get ahfSynGte => '500 അല്ലെങ്കിൽ കൂടുതൽ';
+
+  @override
+  String get ahfSynLte => '500 അല്ലെങ്കിൽ കുറവ്';
+
+  @override
+  String get ahfSynExact => 'കൃത്യം 500';
+
+  @override
+  String get ahfSynRange => '500 മുതൽ 2,000 വരെ';
+
+  @override
+  String get ahfSynDateAfter => 'മാർച്ച് 2026-ന് ശേഷം';
+
+  @override
+  String get ahfHowCombine => 'ഫിൽട്ടറുകൾ ചേർക്കുക';
+
+  @override
+  String get ahfSynAnd => 'രണ്ടും ചേരണം. സ്പേസിനും and എന്നാണ് അർത്ഥം';
+
+  @override
+  String get ahfSynOr => 'ഏതെങ്കിലും ഒന്ന് ചേർന്നാൽ മതി';
+
+  @override
+  String get ahfSynBrackets => 'ബ്രാക്കറ്റുകൾ ആദ്യം വായിക്കും';
+
+  @override
+  String get ahfSynOrder =>
+      '\"and\" ആണ് \"or\"-ന് മുമ്പ് വായിക്കുന്നത്: a and b or c എന്നാൽ (a and b) or c';
+
+  @override
+  String get ahfHowFields => 'ഉപയോഗിക്കാവുന്ന ഫീൽഡുകൾ';
+
+  @override
+  String get ahfHowBasics => 'അടിസ്ഥാനങ്ങൾ';
+
+  @override
+  String get ahdStartFresh => 'പുതുതായി തുടങ്ങുക';
+
+  @override
+  String get ahdStartedFresh => 'പുതിയ ഡാഷ്ബോർഡ് തുടങ്ങി';
+
+  @override
+  String ahExCatOver(String category, String amount) {
+    return 'ഈ വർഷം $amount-ൽ കൂടുതലുള്ള $category';
+  }
+
+  @override
+  String ahExCatByMonth(String category, String year) {
+    return '$year-ലെ $category, മാസം അനുസരിച്ച്';
+  }
+
+  @override
+  String get acctSecCards => 'ക്രെഡിറ്റ് കാർഡുകൾ';
+
+  @override
+  String get acctSecOther => 'മറ്റുള്ളവ';
+
+  @override
+  String get ahdDay => 'ദിവസം';
+
+  @override
+  String get ahdChartHeatmap => 'ഹീറ്റ്മാപ്പ്';
+
+  @override
+  String get ahdChartStacked => 'അടുക്കിയ ബാറുകൾ';
+
+  @override
+  String get ahdChartLines => 'വരകൾ';
+
+  @override
+  String get ahdCompare => 'താരതമ്യം ചെയ്യുക';
+
+  @override
+  String get ahdCompareNone => 'ഒന്നുമില്ല';
+
+  @override
+  String get ahdCompareHint =>
+      '3 വരെ തിരഞ്ഞെടുക്കുക. ബാറുകൾ അവയെ മാസം തോറും അടുക്കി കാണിക്കും, വര ഓരോന്നിനും ഓരോ വര വരയ്ക്കും.';
+
+  @override
+  String get ahdHeatmapNote =>
+      'ഓരോ ദിവസത്തിനും ഒരു കള്ളി. ഇരുണ്ടത് എന്നാൽ കൂടുതൽ.';
+
+  @override
+  String get ahdLess => 'കുറവ്';
+
+  @override
+  String get ahdMore => 'കൂടുതൽ';
 }

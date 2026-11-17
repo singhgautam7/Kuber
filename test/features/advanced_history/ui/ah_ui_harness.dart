@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kuber/features/categories/data/category.dart';
+import 'package:kuber/features/categories/providers/category_provider.dart';
 import 'package:kuber/core/theme/app_theme.dart';
 import 'package:kuber/core/utils/currency_data.dart';
 import 'package:kuber/core/utils/formatters.dart';
@@ -13,11 +15,28 @@ import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class _Cats extends CategoryListNotifier {
+  _Cats(this.names);
+  final List<String> names;
+  @override
+  Future<List<Category>> build() async => [
+        for (final n in names)
+          Category()
+            ..name = n
+            ..icon = 'category'
+            ..colorValue = 0xFF3B82F6
+            ..type = 'expense'
+      ];
+}
+
 class SeedView extends AhViewNotifier {
   SeedView(this.seed);
   final AhView seed;
   @override
-  AhView build() => seed;
+  AhView build() {
+    super.build(); // lifecycle hook
+    return seed;
+  }
 }
 
 class ProState extends KuberProStateNotifier {
@@ -54,8 +73,16 @@ class FakeRepo implements SavedFilterRepository {
       ..updatedAt = now;
   }
 
+  final changes = <AhView>[];
+
+  /// What the saved view held before the first write (Undo restores it).
+  AhView before = const AhView();
   @override
-  Future<void> saveChanges(int id, AhView view) async {}
+  Future<AhView?> saveChanges(int id, AhView view) async {
+    final was = changes.isEmpty ? before : changes.last;
+    changes.add(view);
+    return was;
+  }
   @override
   Future<void> rename(int id, String name) async {}
   @override
@@ -105,8 +132,10 @@ List<Override> ahOverrides({
   List<SavedFilter> saved = const [],
   Map<AhChartSplit, AhSplitBlock> blocks = const {},
   AhGroups? groups,
+  List<String> categories = const [],
 }) =>
     [
+      categoryListProvider.overrideWith(() => _Cats(categories)),
       kuberProStateProvider.overrideWith(() => ProState(pro ?? proOn)),
       ahViewProvider.overrideWith(() => SeedView(view)),
       formatterProvider.overrideWithValue(

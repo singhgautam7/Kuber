@@ -85,9 +85,24 @@ class AhChartPoint {
 /// In-card states (never a dialog).
 enum AhChartState { ok, loading, notEnoughData, nothingToSplit, wrongCombo, noResults }
 
+/// One compared value of a stacked-bar / multi-line chart: its value in
+/// each of the chart's points (months or years), in the same order.
+class AhChartSeries {
+  const AhChartSeries(this.key, this.label, this.values, {this.colorValue});
+  final String key;
+  final String label;
+  final List<double> values;
+  final int? colorValue;
+}
+
 class AhChartData {
-  const AhChartData(this.state, {this.points = const [], this.count = 0});
+  const AhChartData(this.state,
+      {this.points = const [], this.count = 0, this.series = const []});
   final AhChartState state;
+
+  /// Compared values (empty for a plain chart). Points then hold the months
+  /// or years and their summed value.
+  final List<AhChartSeries> series;
 
   /// Donut: at most 6, the rest merged into "Other" (key `__other`).
   final List<AhChartPoint> points;

@@ -6,10 +6,12 @@ import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../../shared/widgets/kuber_chips.dart';
 import '../../../../shared/widgets/kuber_segmented_control.dart';
 import '../../models/ah_view.dart';
 import '../../providers/ah_providers.dart';
 import '../../services/ah_results.dart';
+import '../../query/query_labels.dart';
 import '../common/ah_common.dart';
 import '../dashboard/ah_sheets.dart';
 
@@ -34,6 +36,10 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
   late AhChartSplit _split;
   late AhChartMeasure _measure;
 
+  /// Compare (bars and line): the dimension and up to 3 of its values.
+  AhChartSplit? _seriesBy;
+  List<String> _series = [];
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +50,8 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
       _type = c.type;
       _split = c.split;
       _measure = c.measure;
+      _seriesBy = c.seriesBy;
+      _series = List.of(c.series);
     } else {
       _type = AhChartType.donut;
       _split = ahDefaultSplit(_type, v.groupBy);
@@ -51,12 +59,47 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
     }
   }
 
+  bool get _compares =>
+      _seriesBy != null &&
+      (_type == AhChartType.bars || _type == AhChartType.line);
+
   void _setType(AhChartType t) {
     if (t == _type) return;
     final group = ref.read(ahViewProvider).groupBy;
     setState(() {
       _type = t;
-      if (!ahSplitAllowed(t, _split)) _split = ahDefaultSplit(t, group);
+      if (t == AhChartType.donut || t == AhChartType.heatmap) {
+        _seriesBy = null;
+        _series = [];
+      }
+      if (t != AhChartType.heatmap &&
+          !ahSplitAllowed(t, _split, compare: _compares)) {
+        _split = _compares ? AhChartSplit.month : ahDefaultSplit(t, group);
+      }
+    });
+  }
+
+  /// Picking what to compare: its top 3 values are picked for you, and bars
+  /// switch to months (stacked bars run over time).
+  void _setSeriesBy(AhChartSplit? by, List<String> top) {
+    setState(() {
+      _seriesBy = by;
+      _series = by == null ? [] : top.take(kAhMaxSeries).toList();
+      if (!ahSplitAllowed(_type, _split, compare: _compares)) {
+        _split = _compares
+            ? AhChartSplit.month
+            : ahDefaultSplit(_type, ref.read(ahViewProvider).groupBy);
+      }
+    });
+  }
+
+  void _toggleSeries(String key) {
+    setState(() {
+      if (_series.contains(key)) {
+        _series = [..._series]..remove(key);
+      } else if (_series.length < kAhMaxSeries) {
+        _series = [..._series, key];
+      }
     });
   }
 
@@ -73,7 +116,10 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
 
   void _submit() {
     final n = ref.read(ahViewProvider.notifier);
-    final spec = AhChartSpec(_type, _split, _measure);
+    final compare = _compares && _series.isNotEmpty;
+    final spec = AhChartSpec(_type, _split, _measure,
+        seriesBy: compare ? _seriesBy : null,
+        series: compare ? _series : const []);
     final i = widget.editIndex;
     if (i == null) {
       n.addChart(spec);
@@ -91,7 +137,10 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
         const <AhChartSplit, AhSplitBlock>{};
     final editing = widget.editIndex != null;
     final current = ahSplitOfGroup(group);
-    final splits = AhChartSplit.values.where((s) => ahSplitAllowed(_type, s));
+    final splits = AhChartSplit.values
+        .where((s) => ahSplitAllowed(_type, s, compare: _compares));
+    final canCompare =
+        _type == AhChartType.bars || _type == AhChartType.line;
 
     return KuberBottomSheet(
       headerAction: AhInfoButton(ahInfoConfig(
@@ -134,20 +183,40 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
                     onTap: () => _setType(t),
                   ),
                 ),
-                if (t != AhChartType.line) const SizedBox(width: KuberSpace.sm),
+                if (t != AhChartType.values.last)
+                  const SizedBox(width: KuberSpace.sm),
               ],
             ],
           ),
           const SizedBox(height: KuberSpace.xl),
-          _Caps(l.ahdSplitBy),
-          for (final s in splits)
-            _SplitRow(
-              label: ahSplitLabel(l, s),
-              tag: s == current ? l.ahdCurrentGroup : null,
-              reason: _reason(l, blocks[s]),
-              selected: s == _split,
-              onTap: () => setState(() => _split = s),
+          if (_type == AhChartType.heatmap)
+            Text(l.ahdHeatmapNote,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant))
+          else ...[
+            _Caps(l.ahdSplitBy),
+            for (final s in splits)
+              _SplitRow(
+                label: ahSplitLabel(l, s),
+                tag: s == current ? l.ahdCurrentGroup : null,
+                reason: _reason(l, blocks[s]),
+                selected: s == _split,
+                onTap: () => setState(() => _split = s),
+              ),
+          ],
+          if (canCompare) ...[
+            const SizedBox(height: KuberSpace.xl),
+            _Caps(l.ahdCompare),
+            _CompareSection(
+              by: _seriesBy,
+              picked: _series,
+              blocks: blocks,
+              onBy: _setSeriesBy,
+              onToggle: _toggleSeries,
             ),
+          ],
           const SizedBox(height: KuberSpace.xl),
           _Caps(l.ahdShow),
           KuberSegmentedControl<AhChartMeasure>(
@@ -159,6 +228,103 @@ class _AhChartBuilderState extends ConsumerState<AhChartBuilder> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// "Compare": None or a dimension, then its values (most first) as chips,
+/// at most [kAhMaxSeries] on.
+class _CompareSection extends ConsumerWidget {
+  const _CompareSection({
+    required this.by,
+    required this.picked,
+    required this.blocks,
+    required this.onBy,
+    required this.onToggle,
+  });
+  final AhChartSplit? by;
+  final List<String> picked;
+  final Map<AhChartSplit, AhSplitBlock> blocks;
+  final void Function(AhChartSplit?, List<String> top) onBy;
+  final ValueChanged<String> onToggle;
+
+  static const _dims = [
+    AhChartSplit.category,
+    AhChartSplit.account,
+    AhChartSplit.tag,
+    AhChartSplit.type,
+    AhChartSplit.source,
+  ];
+
+  /// The dimension's values in these results, biggest total first.
+  static AhChartSpec _valuesSpec(AhChartSplit d) =>
+      AhChartSpec(AhChartType.bars, d, AhChartMeasure.total);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final b = by;
+    final values = b == null
+        ? const <AhChartPoint>[]
+        : ref.watch(ahChartDataProvider(_valuesSpec(b))).valueOrNull?.points ??
+            const <AhChartPoint>[];
+    final full = picked.length >= kAhMaxSeries;
+
+    Future<void> pick(AhChartSplit? d) async {
+      if (d == null) return onBy(null, const []);
+      final pts =
+          (await ref.read(ahChartDataProvider(_valuesSpec(d)).future)).points;
+      onBy(d, [for (final p in pts) p.key]);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(children: [
+            for (final d in [null, ..._dims]) ...[
+              Opacity(
+                opacity: d != null && blocks[d] != null ? 0.38 : 1,
+                child: KuberChip(
+                  key: ValueKey('ahd-compare-${d?.name ?? 'none'}'),
+                  label: d == null ? l.ahdCompareNone : ahSplitLabel(l, d),
+                  selected: d == b,
+                  onTap: d != null && blocks[d] != null ? null : () => pick(d),
+                ),
+              ),
+              const SizedBox(width: KuberSpace.sm),
+            ],
+          ]),
+        ),
+        if (b != null) ...[
+          const SizedBox(height: KuberSpace.md),
+          Wrap(
+            spacing: KuberSpace.sm,
+            runSpacing: KuberSpace.sm,
+            children: [
+              for (final p in values.take(12))
+                Opacity(
+                  opacity: full && !picked.contains(p.key) ? 0.38 : 1,
+                  child: KuberChip(
+                    key: ValueKey('ahd-series-${p.key}'),
+                    label: ahGroupLabel(ahGroupOfSplit(b), p.key, p.label, l),
+                    selected: picked.contains(p.key),
+                    onTap: full && !picked.contains(p.key)
+                        ? null
+                        : () => onToggle(p.key),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: KuberSpace.sm),
+          Text(l.ahdCompareHint,
+              style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+        ],
+      ],
     );
   }
 }

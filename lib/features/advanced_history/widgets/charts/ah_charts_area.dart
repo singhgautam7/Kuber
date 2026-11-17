@@ -41,8 +41,8 @@ class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
     if (exp != null && _listEq(specs, exp) && n == specs.length) {
       // Done here (move, remove, undo, quick fix): ids already updated.
     } else if (specs.length == n + 1 &&
-        _listEq(specs.sublist(0, n), _last.take(n).toList())) {
-      _ids = [..._ids, _next++]; // the builder appended a chart
+        _listEq(specs.sublist(1), _last.take(n).toList())) {
+      _ids = [_next++, ..._ids]; // the builder added a chart (at the top)
     } else if (specs.length == n && n == _last.length && _oneDiff(specs)) {
       // The builder edited one chart: same card, content cross-fades.
     } else {
@@ -131,6 +131,31 @@ class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
       padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       sliver: SliverMainAxisGroup(
         slivers: [
+          // Right under the KPIs, so it's in the same place however many
+          // charts there are; a new chart grows in just below it.
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  bottom: specs.isEmpty ? 0 : KuberSpace.md),
+              child: AnimatedSwitcher(
+              duration: AhMotion.dur(context, AhMotion.fast),
+              child: specs.length >= kAhMaxCharts
+                  ? Padding(
+                      key: const ValueKey('full'),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(context.l10n.ahdChartsFull,
+                          textAlign: TextAlign.center,
+                          style: localeFont(
+                              fontSize: 13, color: cs.onSurfaceVariant)),
+                    )
+                  : _AddButton(
+                      key: ValueKey(specs.isEmpty),
+                      count: specs.length,
+                      onTap: _add,
+                    ),
+              ),
+            ),
+          ),
           SliverReorderableList(
             itemCount: specs.length,
             onReorderItem: _move,
@@ -179,25 +204,6 @@ class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
                 ),
               );
             },
-          ),
-          SliverToBoxAdapter(
-            child: AnimatedSwitcher(
-              duration: AhMotion.dur(context, AhMotion.fast),
-              child: specs.length >= kAhMaxCharts
-                  ? Padding(
-                      key: const ValueKey('full'),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(context.l10n.ahdChartsFull,
-                          textAlign: TextAlign.center,
-                          style: localeFont(
-                              fontSize: 13, color: cs.onSurfaceVariant)),
-                    )
-                  : _AddButton(
-                      key: ValueKey(specs.isEmpty),
-                      count: specs.length,
-                      onTap: _add,
-                    ),
-            ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: KuberSpace.md)),
         ],

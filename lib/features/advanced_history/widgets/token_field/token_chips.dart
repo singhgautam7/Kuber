@@ -291,28 +291,43 @@ class JoinerChip extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: AhMotion.fast,
-          constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          decoration: BoxDecoration(
-            color: selected ? cs.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(KuberShape.small),
-          ),
+        // 32 dp tap target around the 24 dp word pill (design `jn`).
+        child: SizedBox(
+          height: 32,
           child: Center(
             widthFactor: 1,
-            child: AnimatedSwitcher(
-            duration: AhMotion.instant,
-            child: Text(
-              word,
-              key: ValueKey(word),
-              style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: selected ? cs.onPrimary : cs.onSurfaceVariant,
+            child: AnimatedContainer(
+              duration: AhMotion.fast,
+              height: 24,
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              decoration: BoxDecoration(
+                color: selected
+                    ? cs.primary
+                    : isOr
+                        ? cs.onSecondaryContainer.withValues(alpha: 0.10)
+                        : cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Center(
+                widthFactor: 1,
+                child: AnimatedSwitcher(
+                  duration: AhMotion.instant,
+                  child: Text(
+                    word,
+                    key: ValueKey(word),
+                    style: localeFont(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: selected
+                          ? cs.onPrimary
+                          : isOr
+                              ? cs.onSecondaryContainer
+                              : cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
           ),
         ),
       ),

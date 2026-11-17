@@ -392,6 +392,9 @@ String ahGroupLabel(AhGroupBy by, String key, String raw, AppLocalizations l) {
         return _fmt('MMM y', DateTime(int.parse(p[0]), int.parse(p[1])), l);
       }
       return key;
+    case AhGroupBy.day:
+      final d = DateTime.tryParse(key);
+      return d == null ? key : _fmt('d MMM y', d, l);
     case AhGroupBy.year:
     case AhGroupBy.none:
       return key;

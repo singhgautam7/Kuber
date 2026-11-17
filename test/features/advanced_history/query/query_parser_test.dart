@@ -233,4 +233,27 @@ void main() {
       expect(flipJoiner(items, 1), same(items));
     });
   });
+
+  test('comparison forms: > < >= <= = and : all parse', () {
+    String canon(String t) => serializeNode(parseItems(tokenize(t)).node!);
+    expect(canon('amount>100'), 'amount:>100');
+    expect(canon('amount<100'), 'amount:<100');
+    expect(canon('amount>=100'), 'amount:>=100');
+    expect(canon('amount<=100'), 'amount:<=100');
+    expect(canon('amount=100'), 'amount:100');
+    expect(canon('amount:=100'), 'amount:100');
+    expect(canon('amount:>100'), 'amount:>100');
+    expect(canon('category=food'), 'category:food');
+    expect(canon('type=expense and amount>500'), 'type:expense and amount:>500');
+    // Not a field name: stays a words search.
+    expect(canon('a>b'), '"a>b"');
+  });
+
+  test('field names and fixed values ignore case', () {
+    String canon(String t) => serializeNode(parseItems(tokenize(t)).node!);
+    expect(canon('Category:FOOD'), 'category:FOOD'); // names match ignoring case in the engine
+    expect(canon('TYPE:Expense'), 'type:expense');
+    expect(canon('Amount>100'), 'amount:>100');
+    expect(canon('HAS:Attachment'), 'has:attachment');
+  });
 }

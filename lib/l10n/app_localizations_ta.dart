@@ -9721,7 +9721,7 @@ class AppLocalizationsTa extends AppLocalizations {
       'CSV காப்புப்பிரதியில் சேமித்த காட்சிகள் இருக்காது. அவற்றை வைத்திருக்க JSON காப்புப்பிரதியைப் பயன்படுத்தவும்.';
 
   @override
-  String get historyMenuAdvanced => 'மேம்பட்ட வரலாறு';
+  String get historyMenuAdvanced => 'தனிப்பயன் டாஷ்போர்டு';
 
   @override
   String filterSelectedN(int n) {
@@ -9754,7 +9754,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get setSecPermissions => 'அனுமதிகள்';
 
   @override
-  String get menuAdvancedHistory => 'மேம்பட்ட வரலாறு';
+  String get menuAdvancedHistory => 'தனிப்பயன் டாஷ்போர்டு';
 
   @override
   String get menuAdvancedHistoryDesc =>
@@ -9809,14 +9809,14 @@ class AppLocalizationsTa extends AppLocalizations {
   String get ahdGateSample => 'மாதிரி தரவு';
 
   @override
-  String get ahdGateSheetHeadline => 'Advanced History ஒரு Kuber Pro வசதி';
+  String get ahdGateSheetHeadline => 'தனிப்பயன் டாஷ்போர்டு ஒரு Kuber Pro வசதி';
 
   @override
   String get ahdGateSheetBody =>
       'Kuber Pro மூலம் உங்கள் எல்லா பரிவர்த்தனைகளிலும் எந்த வடிகட்டியையும் உருவாக்கலாம், முடிவுகளைக் குழுவாக்கி விளக்கப்படமாகப் பார்க்கலாம், காட்சிகளைச் சேமித்து CSV ஆக ஏற்றுமதி செய்யலாம்.';
 
   @override
-  String get ahdTitle => 'Advanced History';
+  String get ahdTitle => 'தனிப்பயன் டாஷ்போர்டு';
 
   @override
   String get ahdMenuSaved => 'சேமித்த காட்சிகள்';
@@ -10014,7 +10014,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get ahdInfoChart2 =>
-      'வகை, கணக்கு, டேக், வகைமை அல்லது மூலத்தை ஒப்பிட டோனட் அல்லது பார் தேர்வு செய்யவும். மாதம் அல்லது ஆண்டுப் போக்குக்கு கோடு தேர்வு செய்யவும். ஒரு பகுதியைத் தட்டித் திறக்கவும்.';
+      'வகைகள், கணக்குகள், குறிச்சொற்கள், வகை அல்லது மூலங்களை ஒப்பிட டோனட் அல்லது பார்களைத் தேர்வுசெய்யவும். மாதம் அல்லது ஆண்டு போக்கிற்கு லைனைத் தேர்வுசெய்யவும். ஒரு பகுதியைத் தட்டினால் அதன் மதிப்பு தெரியும், பிறகு பரிவர்த்தனைகளைக் காண்க.';
 
   @override
   String get ahdInfoSaved1 =>
@@ -11123,4 +11123,145 @@ class AppLocalizationsTa extends AppLocalizations {
   String ahfCountSemantics(int n) {
     return '$n வடிகட்டிகள்';
   }
+
+  @override
+  String get ahdViewTxns => 'பரிவர்த்தனைகளைக் காண்க';
+
+  @override
+  String ahdOfTotal(String pct) {
+    return 'மொத்தத்தில் $pct';
+  }
+
+  @override
+  String get ahfSugFields => 'புலங்கள்';
+
+  @override
+  String get ahfSugValues => 'மதிப்புகள்';
+
+  @override
+  String get ahfSugCategories => 'உங்கள் வகைகள்';
+
+  @override
+  String get ahfSugAccounts => 'உங்கள் கணக்குகள்';
+
+  @override
+  String get ahfSugTags => 'உங்கள் குறிச்சொற்கள்';
+
+  @override
+  String get ahfKindField => 'புலம்';
+
+  @override
+  String get ahfKindValue => 'மதிப்பு';
+
+  @override
+  String ahfSugWords(String q) {
+    return 'தலைப்பு மற்றும் குறிப்பில் \"$q\" தேடு';
+  }
+
+  @override
+  String get ahfHowUse => 'எப்படிப் பயன்படுத்துவது';
+
+  @override
+  String get ahfSynEq => ': மற்றும் = இரண்டும் வேலை செய்யும்';
+
+  @override
+  String get ahfHowCompare => 'தொகை மற்றும் தேதிகளை ஒப்பிடு';
+
+  @override
+  String get ahfSynGt => '500-க்கு மேல்';
+
+  @override
+  String get ahfSynLt => '500-க்குக் கீழ்';
+
+  @override
+  String get ahfSynGte => '500 அல்லது அதற்கு மேல்';
+
+  @override
+  String get ahfSynLte => '500 அல்லது அதற்குக் கீழ்';
+
+  @override
+  String get ahfSynExact => 'சரியாக 500';
+
+  @override
+  String get ahfSynRange => '500 முதல் 2,000 வரை';
+
+  @override
+  String get ahfSynDateAfter => 'மார்ச் 2026-க்குப் பிறகு';
+
+  @override
+  String get ahfHowCombine => 'வடிகட்டிகளை இணை';
+
+  @override
+  String get ahfSynAnd =>
+      'இரண்டும் பொருந்த வேண்டும். இடைவெளியும் and என்றே பொருள்';
+
+  @override
+  String get ahfSynOr => 'ஏதேனும் ஒன்று பொருந்தினால் போதும்';
+
+  @override
+  String get ahfSynBrackets => 'அடைப்புக்குறிகள் முதலில் படிக்கப்படும்';
+
+  @override
+  String get ahfSynOrder =>
+      '\"and\" என்பது \"or\"-க்கு முன் படிக்கப்படும்: a and b or c என்றால் (a and b) or c';
+
+  @override
+  String get ahfHowFields => 'பயன்படுத்தக்கூடிய புலங்கள்';
+
+  @override
+  String get ahfHowBasics => 'அடிப்படைகள்';
+
+  @override
+  String get ahdStartFresh => 'புதிதாகத் தொடங்கு';
+
+  @override
+  String get ahdStartedFresh => 'புதிய டாஷ்போர்டு தொடங்கியது';
+
+  @override
+  String ahExCatOver(String category, String amount) {
+    return 'இந்த ஆண்டு $amountக்கு மேல் $category';
+  }
+
+  @override
+  String ahExCatByMonth(String category, String year) {
+    return '$yearஇல் $category, மாதவாரியாக';
+  }
+
+  @override
+  String get acctSecCards => 'கிரெடிட் கார்டுகள்';
+
+  @override
+  String get acctSecOther => 'மற்றவை';
+
+  @override
+  String get ahdDay => 'நாள்';
+
+  @override
+  String get ahdChartHeatmap => 'ஹீட்மேப்';
+
+  @override
+  String get ahdChartStacked => 'அடுக்கு பார்கள்';
+
+  @override
+  String get ahdChartLines => 'கோடுகள்';
+
+  @override
+  String get ahdCompare => 'ஒப்பிடு';
+
+  @override
+  String get ahdCompareNone => 'எதுவுமில்லை';
+
+  @override
+  String get ahdCompareHint =>
+      '3 வரை தேர்வுசெய்யவும். பார்கள் அவற்றை மாதவாரியாக அடுக்கும், கோடு ஒவ்வொன்றுக்கும் ஒரு கோடு வரையும்.';
+
+  @override
+  String get ahdHeatmapNote =>
+      'ஒவ்வொரு நாளுக்கும் ஒரு கட்டம். அடர் நிறம் என்றால் அதிகம்.';
+
+  @override
+  String get ahdLess => 'குறைவு';
+
+  @override
+  String get ahdMore => 'அதிகம்';
 }

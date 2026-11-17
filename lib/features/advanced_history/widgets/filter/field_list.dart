@@ -33,7 +33,7 @@ String fieldHint(QueryField f, AppLocalizations l) => switch (f) {
       _ => l.ahfHintWords,
     };
 
-String _example(QueryField f) => switch (f) {
+String fieldExample(QueryField f) => switch (f) {
       QueryField.type => 'type:expense',
       QueryField.amount => 'amount:>500',
       QueryField.category => 'category:food',
@@ -54,7 +54,9 @@ class FieldList extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l = context.l10n;
-    return Column(
+    // Grouped list (Components 2g): neutral 36 dp tiles, name, one-line hint,
+    // "i" at the end.
+    return KuberGroup(
       children: [
         for (final f in kPickableFields)
           Semantics(
@@ -62,42 +64,29 @@ class FieldList extends StatelessWidget {
             label: '${fieldLabel(f, l)}, ${fieldHint(f, l)}',
             excludeSemantics: true,
             onTap: () => onPick(f),
-            child: InkWell(
+            child: KuberListRow(
               key: ValueKey('ahf-field-${f.name}'),
-              borderRadius: BorderRadius.circular(KuberShape.medium),
-              onTap: () => onPick(f),
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 52),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    KuberIconTile(icon: fieldIcon(f), size: 36, glyph: 20),
-                    const SizedBox(width: KuberSpace.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(fieldLabel(f, l),
-                              style: localeFont(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurface)),
-                          Text(fieldHint(f, l),
-                              style: localeFont(
-                                  fontSize: 13, color: cs.onSurfaceVariant)),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      key: ValueKey('ahf-field-info-${f.name}'),
-                      tooltip: fieldLabel(f, l),
-                      icon: Icon(Icons.info_outline_rounded,
-                          size: 20, color: cs.onSurfaceVariant),
-                      onPressed: () => showFieldInfo(context, f),
-                    ),
-                  ],
-                ),
+              dense: true,
+              minHeight: 56,
+              leading: KuberIconTile(
+                icon: fieldIcon(f),
+                size: 36,
+                glyph: 20,
+                radius: 10,
+                color: cs.surfaceContainerHigh,
+                iconColor: cs.onSurfaceVariant,
               ),
+              title: fieldLabel(f, l),
+              subtitle: fieldHint(f, l),
+              trailing: IconButton(
+                key: ValueKey('ahf-field-info-${f.name}'),
+                tooltip: fieldLabel(f, l),
+                visualDensity: VisualDensity.compact,
+                icon: Icon(Icons.info_outline_rounded,
+                    size: 20, color: cs.onSurfaceVariant),
+                onPressed: () => showFieldInfo(context, f),
+              ),
+              onTap: () => onPick(f),
             ),
           ),
       ],
@@ -125,7 +114,7 @@ void showFieldInfo(BuildContext context, QueryField f) {
           Text(l.ahfTypeItLike,
               style: localeFont(fontSize: 13, color: cs.onSurfaceVariant)),
           const SizedBox(height: KuberSpace.xs),
-          Text(_example(f),
+          Text(fieldExample(f),
               style: monoFont(fontSize: 14, color: cs.primary)),
         ],
       ),

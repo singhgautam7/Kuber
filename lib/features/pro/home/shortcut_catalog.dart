@@ -126,6 +126,15 @@ const List<ShortcutMeta> _kSignatureShortcuts = [
     route: '/advanced-analytics',
     section: ShortcutSection.kuberSpecific,
   ),
+  // Pro; free users land on its gate page (the screen checks access).
+  ShortcutMeta(
+    id: 'custom_dashboard',
+    label: 'Custom Dashboard',
+    shortLabel: 'Dashboard',
+    icon: Icons.dashboard_customize_rounded,
+    route: '/advanced-history',
+    section: ShortcutSection.kuberSpecific,
+  ),
   ShortcutMeta(
     id: 'ask_kuber',
     label: 'Ask Kuber',

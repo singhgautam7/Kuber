@@ -112,6 +112,7 @@ class AhGroupSheet extends ConsumerWidget {
                 l.ahdGroupBy, [l.ahdInfoGroup1, l.ahdInfoGroup2]),
           ),
           for (final g in AhGroupBy.values)
+            if (g != AhGroupBy.day)
             AhOptionRow(
               label: ahGroupName(l, g),
               icon: ahGroupIcon(g),

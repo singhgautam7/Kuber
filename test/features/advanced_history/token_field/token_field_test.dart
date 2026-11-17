@@ -47,7 +47,7 @@ void main() {
     await t.pump(const Duration(milliseconds: 200));
     expect(d(c.items), 'category:food');
     // The input got its sentinel back.
-    expect((t.widget(input) as TextField).controller!.text, s);
+    expect((t.widget(input) as TextField).controller!.text, '$s$e');
   });
 
   testWidgets('a second backspace removes a trailing joiner then highlights',
@@ -69,7 +69,7 @@ void main() {
     await t.tap(find.byType(TokenChip).first);
     await t.pump();
     expect(c.editing, 0);
-    expect((t.widget(input) as TextField).controller!.text, '${s}category:food');
+    expect((t.widget(input) as TextField).controller!.text, '${s}category:food$e');
     await t.enterText(input, '${s}category:travel ');
     await t.pump();
     expect(d(c.items), startsWith('category:travel and'));
@@ -146,7 +146,41 @@ void main() {
     expect(find.byType(BracketBox).evaluate().where((e) {
       return !(e.widget as BracketBox).implicit;
     }).length, 3);
-    expect(find.byType(BracketToken), findsNWidgets(2));
+    // Every bracket stays visible (4 pairs): 3 at box edges, the 4th level
+    // as bare tokens.
+    expect(find.byType(BracketToken), findsNWidgets(8));
+  });
+
+  testWidgets('keyboard cursor keys step between tokens', (t) async {
+    final c = ctl('type:expense and tag:trip');
+    await pumpField(t, c);
+    await t.showKeyboard(input);
+    await t.pumpAndSettle();
+    expect(c.cursor, 3);
+    TextEditingController ed() => (t.widget(input) as TextField).controller!;
+    // Caret past the start marker: one step left.
+    ed().selection = const TextSelection.collapsed(offset: 0);
+    await t.pump();
+    expect(c.cursor, 2);
+    expect(ed().selection.baseOffset, 1);
+    ed().selection = const TextSelection.collapsed(offset: 0);
+    await t.pump();
+    expect(c.cursor, 1);
+    // Past the end marker: one step right.
+    ed().selection = TextSelection.collapsed(offset: ed().text.length);
+    await t.pump();
+    expect(c.cursor, 2);
+  });
+
+  testWidgets('a tap outside the field closes it', (t) async {
+    final c = ctl('type:expense');
+    await pumpField(t, c);
+    await t.showKeyboard(input);
+    await t.pumpAndSettle();
+    expect(c.focusNode.hasFocus, isTrue);
+    await t.tapAt(const Offset(5, 590));
+    await t.pumpAndSettle();
+    expect(c.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('unmatched bracket: error line; ghost ")" while inside',

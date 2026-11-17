@@ -13,6 +13,7 @@ import 'package:kuber/l10n/app_localizations.dart';
 import '../../../helpers/golden_fonts.dart';
 
 const s = kTokenSentinel;
+const e = kTokenEnd;
 
 Future<void> pumpField(
   WidgetTester t,

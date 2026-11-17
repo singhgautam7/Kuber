@@ -162,9 +162,13 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
     final fmt = ref.watch(formatterProvider);
     final d = data.valueOrNull;
 
-    final title = l.ahdCardTitle(ahMeasureLabel(l, spec.measure),
-        ahSplitLabel(l, spec.split).toLowerCase());
-    final typeLabel = ahChartTypeLabel(l, spec.type);
+    final heat = spec.type == AhChartType.heatmap;
+    // The heatmap's points are days; everything else is split as set.
+    final pointGroup = heat ? AhGroupBy.day : ahGroupOfSplit(spec.split);
+    final title = l.ahdCardTitle(
+        ahMeasureLabel(l, spec.measure),
+        (heat ? l.ahdDay : ahSplitLabel(l, spec.split)).toLowerCase());
+    final typeLabel = ahSpecTypeLabel(l, spec);
     final sub = (d != null && d.state == AhChartState.ok)
         ? l.ahdCardSub(typeLabel, l.ahdTxnN(d.count))
         : typeLabel;
@@ -190,17 +194,30 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
             type: spec.type,
             points: [
               for (final p in d.points)
-                AhChartPoint(
-                    p.key,
-                    ahGroupLabel(ahGroupOfSplit(spec.split), p.key, p.label, l),
+                AhChartPoint(p.key, ahGroupLabel(pointGroup, p.key, p.label, l),
                     p.value,
                     colorValue: p.colorValue),
             ],
+            series: [
+              for (final x in d.series)
+                AhChartSeries(
+                    x.key,
+                    ahGroupLabel(
+                        ahGroupOfSplit(spec.seriesBy!), x.key, x.label, l),
+                    x.values,
+                    colorValue: x.colorValue),
+            ],
+            dayLabel: (k) => ahGroupLabel(AhGroupBy.day, k, k, l),
             fmt: money,
-            onTapPoint: (p) {
-              if (p.key == '__other') return;
+            fullFmt: spec.measure == AhChartMeasure.count
+                ? fmt.formatNumber
+                : fmt.formatCurrency,
+            axisFmt: spec.measure == AhChartMeasure.count
+                ? fmt.formatNumber
+                : (v) => fmt.formatCompactCurrency(v, symbol: '').trim(),
+            onView: (p) {
               showAhGroupDetail(context,
-                  groupKey: AhGroupKey(ahGroupOfSplit(spec.split), p.key),
+                  groupKey: AhGroupKey(pointGroup, p.key),
                   title: p.label);
             },
           ),

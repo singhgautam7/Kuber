@@ -261,10 +261,11 @@ class _FieldPickerSheetState extends ConsumerState<FieldPickerSheet> {
           l,
           cs,
           l.ahfSearchCategories,
+          // A to Z, case ignored.
           [
             for (final c in ref.watch(categoryListProvider).valueOrNull ?? const [])
               c.name as String
-          ],
+          ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase())),
         );
       case QueryField.account:
         return _namesBody(

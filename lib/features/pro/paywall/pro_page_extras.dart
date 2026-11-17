@@ -81,6 +81,12 @@ const kProComparisonRows = <ComparisonEntry>[
     pro: 'Full trends + filters',
   ),
   ComparisonRow(
+    icon: Icons.dashboard_customize_outlined,
+    feature: 'Custom Dashboard',
+    free: 'Not included',
+    pro: 'Filters, charts, saved',
+  ),
+  ComparisonRow(
     icon: Icons.sms_outlined,
     feature: 'SMS Import',
     free: '5 per week',

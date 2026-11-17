@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../../categories/data/category.dart';
 import '../../models/ah_view.dart';
 import '../../query/query_ast.dart';
 import 'ah_motion.dart';
@@ -23,6 +25,7 @@ String ahGroupName(AppLocalizations l, AhGroupBy g) => switch (g) {
       AhGroupBy.source => l.ahdSource,
       AhGroupBy.month => l.ahdMonth,
       AhGroupBy.year => l.ahdYear,
+      AhGroupBy.day => l.ahdDay,
     };
 
 String ahSplitLabel(AppLocalizations l, AhChartSplit s) => switch (s) {
@@ -45,7 +48,15 @@ String ahChartTypeLabel(AppLocalizations l, AhChartType t) => switch (t) {
       AhChartType.donut => l.ahdDonut,
       AhChartType.bars => l.ahdBars,
       AhChartType.line => l.ahdLine,
+      AhChartType.heatmap => l.ahdChartHeatmap,
     };
+
+/// The card's type label: "Stacked bars" / "Lines" when comparing values.
+String ahSpecTypeLabel(AppLocalizations l, AhChartSpec s) => !s.isSeries
+    ? ahChartTypeLabel(l, s.type)
+    : s.type == AhChartType.bars
+        ? l.ahdChartStacked
+        : l.ahdChartLines;
 
 String ahSortFieldLabel(AppLocalizations l, AhSortField f) => switch (f) {
       AhSortField.date => l.ahdDate,
@@ -76,18 +87,30 @@ IconData ahGroupIcon(AhGroupBy g) => switch (g) {
       AhGroupBy.source => Icons.input_rounded,
       AhGroupBy.month => Icons.calendar_month_rounded,
       AhGroupBy.year => Icons.event_rounded,
+      AhGroupBy.day => Icons.today_rounded,
     };
 
 IconData ahChartIcon(AhChartType t) => switch (t) {
       AhChartType.donut => Icons.donut_large_rounded,
       AhChartType.bars => Icons.bar_chart_rounded,
       AhChartType.line => Icons.show_chart_rounded,
+      AhChartType.heatmap => Icons.calendar_view_month_rounded,
     };
 
-/// Line charts split by month or year only; donut and bars by the rest.
-bool ahSplitAllowed(AhChartType t, AhChartSplit s) {
-  final time = s == AhChartSplit.month || s == AhChartSplit.year;
-  return t == AhChartType.line ? time : !time;
+bool ahIsTimeSplit(AhChartSplit s) =>
+    s == AhChartSplit.month || s == AhChartSplit.year;
+
+/// Line charts split by month or year only; donut and bars by the rest,
+/// except stacked bars ([compare]), which run over months or years too.
+/// The heatmap has no split (one square per day).
+bool ahSplitAllowed(AhChartType t, AhChartSplit s, {bool compare = false}) {
+  final time = ahIsTimeSplit(s);
+  return switch (t) {
+    AhChartType.line => time,
+    AhChartType.bars => compare ? time : !time,
+    AhChartType.donut => !time,
+    AhChartType.heatmap => false,
+  };
 }
 
 AhChartSplit? ahSplitOfGroup(AhGroupBy g) => switch (g) {
@@ -99,6 +122,7 @@ AhChartSplit? ahSplitOfGroup(AhGroupBy g) => switch (g) {
       AhGroupBy.source => AhChartSplit.source,
       AhGroupBy.month => AhChartSplit.month,
       AhGroupBy.year => AhChartSplit.year,
+      AhGroupBy.day => AhChartSplit.month,
     };
 
 AhGroupBy ahGroupOfSplit(AhChartSplit s) => switch (s) {
@@ -484,3 +508,20 @@ String ahOrderLabel(AppLocalizations l, AhSort s) {
       return s.descending ? l.ahdHighest : l.ahdLowest;
   }
 }
+
+/// Two of the user's expense categories for the example chips ("Fuel over
+/// ₹500 this year"), picked at random once per app run so the chips don't
+/// change while the user looks at them. Empty when there are none.
+List<String> ahExampleCategories(List<Category> all) {
+  final pool = [
+    for (final c in all)
+      if (c.effectiveType != 'income') c.name,
+  ]..sort();
+  if (pool.isEmpty) return const [];
+  final r = math.Random(_exampleSeed);
+  final a = pool[r.nextInt(pool.length)];
+  final rest = [...pool]..remove(a);
+  return [a, if (rest.isNotEmpty) rest[r.nextInt(rest.length)]];
+}
+
+final _exampleSeed = DateTime.now().microsecondsSinceEpoch;

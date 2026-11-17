@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/timed_snackbar.dart';
+import '../../../../shared/widgets/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -40,9 +42,32 @@ class AhSavedSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final list = ref.watch(savedFiltersProvider).valueOrNull ?? const [];
     final openId = ref.watch(ahViewProvider.select((v) => v.savedId));
+    final isStart = ref.watch(ahViewProvider.select((v) => v.isStart));
 
     return KuberBottomSheet(
       title: l.ahdSavedTitle,
+      // Low emphasis: an outlined 40 dp button, only when there is
+      // something on the dashboard to leave.
+      actions: isStart
+          ? null
+          : AppButton(
+              key: const ValueKey('ahd-start-fresh'),
+              label: l.ahdStartFresh,
+              icon: Icons.add_rounded,
+              type: AppButtonType.outline,
+              height: 40,
+              fullWidth: true,
+              onPressed: () {
+                final n = ref.read(ahViewProvider.notifier);
+                final prev = ref.read(ahViewProvider);
+                Navigator.of(context, rootNavigator: true).pop();
+                n.clearAll();
+                showKuberSnackBar(host, l.ahdStartedFresh,
+                    actionLabel: l.ahfUndo,
+                    onAction: () => n.applyView(prev),
+                    duration: const Duration(seconds: 7));
+              },
+            ),
       headerAction: AhInfoButton(ahInfoConfig(l.ahdSavedTitle,
                 [l.ahdInfoSaved1, l.ahdInfoSaved2])),
       subtitle: list.isEmpty ? null : l.ahdSavedN(list.length),

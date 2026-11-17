@@ -212,6 +212,51 @@ void main() {
     expect(d.points.fold<double>(0, (s, p) => s + p.value), closeTo(total, 1e-6));
   });
 
+  test('heatmap: one point per day, values add up', () async {
+    view().setFilter('amount:>=0');
+    const x = AhChartSpec(
+        AhChartType.heatmap, AhChartSplit.month, AhChartMeasure.count);
+    view().addChart(x);
+    final d = await c.read(ahChartDataProvider(x).future);
+    expect(d.state, AhChartState.ok);
+    final keys = d.points.map((p) => p.key).toList();
+    expect(keys, [...keys]..sort());
+    expect(keys.toSet().length, keys.length);
+    expect(keys.every((k) => RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(k)), isTrue);
+    expect(d.points.fold<double>(0, (s, p) => s + p.value), fx.txns.length);
+  });
+
+  test('series: stacked by category over months, 3 at most', () async {
+    view().setFilter('amount:>=0');
+    final ids = [for (final c in fx.cats.take(4)) '${c.id}'];
+    final x = AhChartSpec(
+        AhChartType.bars, AhChartSplit.month, AhChartMeasure.total,
+        seriesBy: AhChartSplit.category, series: ids);
+    view().addChart(x);
+    final d = await c.read(ahChartDataProvider(x).future);
+    expect(d.state, AhChartState.ok);
+    expect(d.series.length, 3);
+    expect(d.series.map((e) => e.label), catNames.take(3));
+    for (final e in d.series) {
+      expect(e.values.length, d.points.length);
+    }
+    // Each month's point is its stack; the stacks add up to those categories.
+    for (var i = 0; i < d.points.length; i++) {
+      expect(d.points[i].value,
+          closeTo(d.series.fold<double>(0, (s, e) => s + e.values[i]), 1e-6));
+    }
+    final want = fx.txns
+        .where((t) => ids.take(3).contains(t.categoryId))
+        .fold<double>(0, (s, t) => s + t.amount.abs());
+    expect(d.points.fold<double>(0, (s, p) => s + p.value), closeTo(want, 1e-6));
+    // Not over time: the wrong-combination state, never a crash.
+    final bad = AhChartSpec(
+        AhChartType.bars, AhChartSplit.account, AhChartMeasure.total,
+        seriesBy: AhChartSplit.category, series: ids);
+    expect((await c.read(ahChartDataProvider(bad).future)).state,
+        AhChartState.wrongCombo);
+  });
+
   test('count and data change refresh', () async {
     final node = parseItems(tokenize('type:expense')).node;
     final n = await c.read(ahCountProvider(node).future);
