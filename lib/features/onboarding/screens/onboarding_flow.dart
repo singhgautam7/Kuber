@@ -20,6 +20,7 @@ import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../kuber_cards/widgets/imported_cards_prompt.dart';
 import '../../pro/trial/trial_state.dart';
+import '../../pro/trial/trial_suggestions.dart' show TrialSession;
 import '../../settings/providers/data_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../settings/screens/settings_pages.dart' show requestNotifications;
@@ -276,17 +277,14 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       debugPrint('Kuber: trial start failed (non-fatal): $e');
     }
     if (!mounted) return;
-    // v7b: the trial sheet sits over the last setup step (board v7b.W);
-    // closing it goes Home, "See Kuber Pro" opens the Pro page on top.
-    // Otherwise no sheet over Home after onboarding (v3.1 V31-07).
-    var seePro = false;
-    if (trialOutcome != null) {
-      seePro = await showTrialSheet(context, trialOutcome, openPro: false);
-      if (!mounted) return;
+    // The trial sheet opens over Home once it has painted, never over the
+    // last setup step (owner, 19 Nov; was board v7b.W). Suggestions wait for
+    // it as if it were already shown.
+    if (trialOutcome != null && trialOutcome != TrialStartOutcome.notEligible) {
+      TrialSession.sheetShown = true;
+      ref.read(pendingTrialSheetProvider.notifier).state = trialOutcome;
     }
-    final router = GoRouter.of(context);
-    router.go('/');
-    if (seePro) router.push('/pro');
+    GoRouter.of(context).go('/');
   }
 
   /// Start fresh rises with the first page's cards; a replay has no first page.

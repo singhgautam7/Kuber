@@ -19,6 +19,7 @@ import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../../charts/widgets/income_expense_home_section.dart';
 import '../../pro/trial/widgets/pro_suggestion_slot.dart';
+import '../../pro/trial/widgets/trial_sheet.dart';
 import '../widgets/balance_hero_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_smart_insights.dart';
@@ -104,6 +105,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (ref.read(isHomeV2Provider)) ref.read(homeV2GatesProvider);
     // Rate sheet: decided after the on-open batch plus 600 ms (launches 2, 4, 8, 16).
     scheduleRatePrompt(ref, () => context);
+
+    // Trial sheet handed over by the end of setup: once Home has painted and
+    // settled, never over the last setup step.
+    final trial = ref.read(pendingTrialSheetProvider);
+    if (trial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        ref.read(pendingTrialSheetProvider.notifier).state = null;
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+        if (mounted) await showTrialSheet(context, trial);
+      });
+    }
 
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.

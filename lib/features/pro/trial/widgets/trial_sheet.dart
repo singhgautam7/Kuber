@@ -18,6 +18,10 @@ import '../trial_suggestions.dart';
 import 'trial_celebration.dart';
 import 'trial_common.dart';
 
+/// Set as setup ends; Home opens the sheet once it has painted (owner,
+/// 19 Nov: never over the last setup page).
+final pendingTrialSheetProvider = StateProvider<TrialStartOutcome?>((ref) => null);
+
 /// Opens the trial sheet for [outcome]: started (new user / after claim),
 /// continued (restored with days left), already used. No-op for notEligible.
 /// "See Kuber Pro" opens `/pro` after the sheet closes, unless [openPro] is
