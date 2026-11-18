@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
@@ -545,7 +546,10 @@ class _ExpressiveChartState extends State<ExpressiveChart>
       _edgeTick();
     } else if (n is ScrollEndNotification) {
       final px = pixels;
-      if ((px - _semPx).abs() > 0.5) setState(() => _semPx = px);
+      // Only TalkBack reads the per-column nodes; skip the rebuild otherwise.
+      if ((px - _semPx).abs() > 0.5 && SemanticsBinding.instance.semanticsEnabled) {
+        setState(() => _semPx = px);
+      }
     }
     return false;
   }
@@ -615,7 +619,11 @@ class _ExpressiveChartState extends State<ExpressiveChart>
         skeletonShimmer: _shimmerOn,
         textDirection: Directionality.of(context),
       );
-      final physics = ChartScrollPhysics(slot: slotT, level: _level);
+      // Everything fits (e.g. Home's exact 7D / 6M / 1Y): nothing to scroll,
+      // so no rubber band either. Long-press drag still selects.
+      final ScrollPhysics physics = sk + n <= widget.window
+          ? const NeverScrollableScrollPhysics()
+          : ChartScrollPhysics(slot: slotT, level: _level);
       final scrollArea = ScrollConfiguration(
         behavior: ScrollConfiguration.of(context)
             .copyWith(overscroll: false, scrollbars: false),
