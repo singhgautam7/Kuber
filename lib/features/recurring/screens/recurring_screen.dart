@@ -60,7 +60,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
     _focused = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _processedKey.currentContext;
-      if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
+      if (ctx != null) KuberHeaderPage.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
     });
   }
 

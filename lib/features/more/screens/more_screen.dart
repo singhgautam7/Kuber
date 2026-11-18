@@ -47,7 +47,7 @@ class MoreScreen extends ConsumerWidget {
         }
         final ctx = key.currentContext;
         if (ctx != null && ctx.mounted) {
-          await Scrollable.ensureVisible(
+          await KuberHeaderPage.ensureVisible(
             ctx,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutCubic,

@@ -1,6 +1,7 @@
 // November release on a device: fresh install through the welcome flow, then
 // loans, Settings, links, search, path sheet, themes and the Pro FAQ.
 //   adb shell pm clear com.grs.kuber
+//   adb shell pm grant com.grs.kuber android.permission.POST_NOTIFICATIONS   (R2 reads it as On)
 //   flutter test integration_test/nov_release_test.dart -d emulator-5554
 // A host script takes a screenshot on each KUBER_SHOT line
 // (specs/nov-release/perf-harness/shots.sh).

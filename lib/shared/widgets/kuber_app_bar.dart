@@ -672,6 +672,19 @@ class KuberHeaderPage extends ConsumerStatefulWidget {
   static double insetOf(BuildContext context) =>
       _FloatScope.maybeOf(context)?.inset ?? 0;
 
+  /// [Scrollable.ensureVisible] for a page under this header: the plain
+  /// call aligns [target] to the top edge, which is under the overlay
+  /// header. This lands it just below the header at rest.
+  static Future<void> ensureVisible(BuildContext target,
+      {Duration duration = Duration.zero, Curve curve = Curves.ease}) {
+    final inset = _FloatScope.maybeOf(target, listen: false)?.inset ?? 0;
+    final viewport = Scrollable.maybeOf(target)?.position.viewportDimension ?? 0;
+    final alignment =
+        viewport > 0 ? ((inset + KuberSpace.sm) / viewport).clamp(0.0, 0.6) : 0.0;
+    return Scrollable.ensureVisible(target,
+        alignment: alignment, duration: duration, curve: curve);
+  }
+
   /// A box the height of [insetOf]: the first child of a box scrollable.
   static Widget gap() => Builder(
         builder: (c) => SizedBox(height: insetOf(c)),
