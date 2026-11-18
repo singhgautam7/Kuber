@@ -28,6 +28,8 @@ class BlockStoreHandler(private val context: Context) {
     fun handle(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "keyPart" -> result.success(ByteArray(A.size) { (A[it] xor B[it]).toByte() })
+            // Boot clock for the trial clock guard: users can't set it.
+            "uptime" -> result.success(android.os.SystemClock.elapsedRealtime())
             "read" -> read(result)
             "write" -> write(call.argument<String>("data"), result)
             else -> result.notImplemented()

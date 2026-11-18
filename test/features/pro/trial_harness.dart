@@ -28,6 +28,11 @@ class FakeBlockStore implements TrialBlockStore {
 
   @override
   Future<List<int>?> keyPart() async => null;
+
+  /// Boot clock in ms; null = unavailable (non-Android).
+  int? uptime;
+  @override
+  Future<int?> uptimeMs() async => uptime;
 }
 
 class FakeReminders implements TrialReminderScheduler {

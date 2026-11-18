@@ -73,28 +73,33 @@ const UserEntitlementSchema = CollectionSchema(
       name: r'trialHighWaterAt',
       type: IsarType.dateTime,
     ),
-    r'trialInvalidSeen': PropertySchema(
+    r'trialHighWaterUptimeMs': PropertySchema(
       id: 12,
+      name: r'trialHighWaterUptimeMs',
+      type: IsarType.long,
+    ),
+    r'trialInvalidSeen': PropertySchema(
+      id: 13,
       name: r'trialInvalidSeen',
       type: IsarType.bool,
     ),
     r'trialRecordId': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'trialRecordId',
       type: IsarType.string,
     ),
     r'trialSig': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'trialSig',
       type: IsarType.string,
     ),
     r'trialStartAt': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'trialStartAt',
       type: IsarType.dateTime,
     ),
     r'trialVersion': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'trialVersion',
       type: IsarType.long,
     ),
@@ -167,11 +172,12 @@ void _userEntitlementSerialize(
   writer.writeBool(offsets[9], object.trialEndedNoticeShown);
   writer.writeDateTime(offsets[10], object.trialEndsAt);
   writer.writeDateTime(offsets[11], object.trialHighWaterAt);
-  writer.writeBool(offsets[12], object.trialInvalidSeen);
-  writer.writeString(offsets[13], object.trialRecordId);
-  writer.writeString(offsets[14], object.trialSig);
-  writer.writeDateTime(offsets[15], object.trialStartAt);
-  writer.writeLong(offsets[16], object.trialVersion);
+  writer.writeLong(offsets[12], object.trialHighWaterUptimeMs);
+  writer.writeBool(offsets[13], object.trialInvalidSeen);
+  writer.writeString(offsets[14], object.trialRecordId);
+  writer.writeString(offsets[15], object.trialSig);
+  writer.writeDateTime(offsets[16], object.trialStartAt);
+  writer.writeLong(offsets[17], object.trialVersion);
 }
 
 UserEntitlement _userEntitlementDeserialize(
@@ -194,11 +200,12 @@ UserEntitlement _userEntitlementDeserialize(
   object.trialEndedNoticeShown = reader.readBool(offsets[9]);
   object.trialEndsAt = reader.readDateTimeOrNull(offsets[10]);
   object.trialHighWaterAt = reader.readDateTimeOrNull(offsets[11]);
-  object.trialInvalidSeen = reader.readBool(offsets[12]);
-  object.trialRecordId = reader.readStringOrNull(offsets[13]);
-  object.trialSig = reader.readStringOrNull(offsets[14]);
-  object.trialStartAt = reader.readDateTimeOrNull(offsets[15]);
-  object.trialVersion = reader.readLongOrNull(offsets[16]);
+  object.trialHighWaterUptimeMs = reader.readLongOrNull(offsets[12]);
+  object.trialInvalidSeen = reader.readBool(offsets[13]);
+  object.trialRecordId = reader.readStringOrNull(offsets[14]);
+  object.trialSig = reader.readStringOrNull(offsets[15]);
+  object.trialStartAt = reader.readDateTimeOrNull(offsets[16]);
+  object.trialVersion = reader.readLongOrNull(offsets[17]);
   return object;
 }
 
@@ -234,14 +241,16 @@ P _userEntitlementDeserializeProp<P>(
     case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 12:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 13:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 14:
       return (reader.readStringOrNull(offset)) as P;
     case 15:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 16:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 17:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1336,6 +1345,82 @@ extension UserEntitlementQueryFilter
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterUptimeMsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'trialHighWaterUptimeMs'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterUptimeMsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'trialHighWaterUptimeMs'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterUptimeMsEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'trialHighWaterUptimeMs',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterUptimeMsGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'trialHighWaterUptimeMs',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterUptimeMsLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'trialHighWaterUptimeMs',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterUptimeMsBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'trialHighWaterUptimeMs',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
   trialInvalidSeenEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1985,6 +2070,20 @@ extension UserEntitlementQuerySortBy
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialHighWaterUptimeMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterUptimeMs', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialHighWaterUptimeMsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterUptimeMs', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
   sortByTrialInvalidSeen() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'trialInvalidSeen', Sort.asc);
@@ -2237,6 +2336,20 @@ extension UserEntitlementQuerySortThenBy
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialHighWaterUptimeMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterUptimeMs', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialHighWaterUptimeMsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterUptimeMs', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
   thenByTrialInvalidSeen() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'trialInvalidSeen', Sort.asc);
@@ -2401,6 +2514,13 @@ extension UserEntitlementQueryWhereDistinct
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByTrialHighWaterUptimeMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'trialHighWaterUptimeMs');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
   distinctByTrialInvalidSeen() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'trialInvalidSeen');
@@ -2528,6 +2648,13 @@ extension UserEntitlementQueryProperty
   trialHighWaterAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'trialHighWaterAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, int?, QQueryOperations>
+  trialHighWaterUptimeMsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialHighWaterUptimeMs');
     });
   }
 

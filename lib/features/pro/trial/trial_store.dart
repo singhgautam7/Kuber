@@ -137,19 +137,36 @@ class TrialStore {
 
   /// Raises the clock guard to [now] when later than what is stored.
   /// Returns the effective "now".
-  DateTime touchHighWater(DateTime now) {
+  /// Raises the clock guard and returns the time every count uses:
+  /// max(wall clock, last high-water mark + boot-clock time elapsed since it
+  /// was written). The boot clock keeps real time counting when the wall clock
+  /// is set back (set forward, claim, set back no longer freezes the trial);
+  /// after a reboot it restarts, so only the time the phone was off is lost.
+  DateTime touchHighWater(DateTime now, {int? uptimeMs}) {
     final row = _row(isar);
     final hwm = row?.trialHighWaterAt;
-    if (hwm != null && !now.isAfter(hwm)) return hwm;
+    final lastUp = row?.trialHighWaterUptimeMs;
+    var next = now;
+    if (hwm != null) {
+      var floor = hwm;
+      if (uptimeMs != null && lastUp != null && uptimeMs >= lastUp) {
+        floor = hwm.add(Duration(milliseconds: uptimeMs - lastUp));
+      }
+      if (floor.isAfter(next)) next = floor;
+    }
+    if (hwm != null && next.isAtSameMomentAs(hwm) && (uptimeMs == null || uptimeMs == lastUp)) {
+      return hwm;
+    }
     isar.writeTxnSync(() {
       final r = _row(isar) ??
           (UserEntitlement()
             ..firstInstallAt = DateTime.now()
             ..tier = EntitlementTier.free);
-      r.trialHighWaterAt = now;
+      r.trialHighWaterAt = next;
+      if (uptimeMs != null) r.trialHighWaterUptimeMs = uptimeMs;
       isar.collection<UserEntitlement>().putSync(r);
     });
-    return now;
+    return next;
   }
 
   Future<TrialRecord> create(DateTime now) async {

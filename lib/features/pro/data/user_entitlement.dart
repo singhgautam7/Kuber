@@ -81,6 +81,11 @@ class UserEntitlement {
   /// Latest time ever seen by a trial evaluation (clock guard).
   DateTime? trialHighWaterAt;
 
+  /// Android boot clock (`SystemClock.elapsedRealtime`) when
+  /// [trialHighWaterAt] was written. Lets the guard keep counting real time
+  /// while the wall clock is set back (the boot clock can't be changed).
+  int? trialHighWaterUptimeMs;
+
   /// The new "Pro trial ended" sheet was shown once.
   bool proTrialEndedNoticeShown = false;
 

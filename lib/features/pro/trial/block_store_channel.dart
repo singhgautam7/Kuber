@@ -16,6 +16,10 @@ abstract class TrialBlockStore {
 
   /// Native half of the signing key, or null where unavailable.
   Future<List<int>?> keyPart();
+
+  /// Milliseconds since boot (Android `SystemClock.elapsedRealtime`, which
+  /// the user can't change), or null where unavailable.
+  Future<int?> uptimeMs();
 }
 
 class ChannelTrialBlockStore implements TrialBlockStore {
@@ -42,6 +46,16 @@ class ChannelTrialBlockStore implements TrialBlockStore {
     } catch (e) {
       debugPrint('Kuber trial: Block Store write failed (local row only): $e');
       return false;
+    }
+  }
+
+  @override
+  Future<int?> uptimeMs() async {
+    if (!_supported) return null;
+    try {
+      return await _channel.invokeMethod<int>('uptime');
+    } catch (_) {
+      return null;
     }
   }
 

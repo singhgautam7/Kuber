@@ -166,7 +166,7 @@ class ProTrialNotifier extends Notifier<TrialInfo> {
   /// Raises the clock guard, flips the tier when the trial started / ended and
   /// republishes. Cheap and safe to call on open, on resume and from the timer.
   Future<void> evaluate() async {
-    final now = _store.touchHighWater(_clock());
+    final now = _store.touchHighWater(_clock(), uptimeMs: await _store.blockStore.uptimeMs());
     final row = _row();
     if (row != null) {
       final granting = stateFromEntitlementRow(row, now: now).isPro;
@@ -220,7 +220,7 @@ class ProTrialNotifier extends Notifier<TrialInfo> {
     final res = await reconcile(backupBlock: backup);
     if (res.record != null) return state.isActive ? TrialStartOutcome.continued : TrialStartOutcome.alreadyUsed;
     if (res.invalid) return TrialStartOutcome.alreadyUsed;
-    final now = _store.touchHighWater(_clock());
+    final now = _store.touchHighWater(_clock(), uptimeMs: await _store.blockStore.uptimeMs());
     await _store.persist(await _store.create(now));
     await evaluate();
     await _reschedule();

@@ -162,6 +162,62 @@ void main() {
     });
   });
 
+  group('clock guard with the boot clock', () {
+    test('set forward, claim, set back: days still count in real time', () async {
+      final h = await TrialHarness.create();
+      addTearDown(h.dispose);
+      final real = h.clock;
+      h.block.uptime = 1000;
+      h.clock = real.add(const Duration(days: 365)); // clock set a year ahead
+      await h.notifier.claim();
+      expect(h.info.daysLeft, 14);
+      // Back to the real date, 5 real days later (boot clock moved 5 days).
+      h.clock = real.add(const Duration(days: 5));
+      h.block.uptime = 1000 + const Duration(days: 5).inMilliseconds;
+      await h.notifier.evaluate();
+      expect(h.info.daysLeft, 9);
+      // 15 real days after the claim: over, although the wall clock is still
+      // eleven months before the claimed start.
+      h.clock = real.add(const Duration(days: 15));
+      h.block.uptime = 1000 + const Duration(days: 15).inMilliseconds;
+      await h.notifier.evaluate();
+      expect(h.info.isEnded, isTrue);
+      expect(h.pro.hasProAccess, isFalse);
+    });
+
+    test('clock set back 10 days: no days added, time keeps counting', () async {
+      final h = await TrialHarness.create();
+      addTearDown(h.dispose);
+      h.block.uptime = 0;
+      await h.notifier.claim();
+      final start = h.info.startAt!;
+      h.clock = start.subtract(const Duration(days: 10)); // set back at once
+      h.block.uptime = const Duration(hours: 1).inMilliseconds;
+      await h.notifier.evaluate();
+      expect(h.info.isActive, isTrue);
+      expect(h.info.daysLeft, 14); // nothing added, nothing lost
+      h.block.uptime = const Duration(days: 14, hours: 1).inMilliseconds;
+      await h.notifier.evaluate();
+      expect(h.info.isEnded, isTrue);
+    });
+
+    test('a reboot (boot clock restarts) never moves time backwards', () async {
+      final h = await TrialHarness.create();
+      addTearDown(h.dispose);
+      h.block.uptime = const Duration(days: 3).inMilliseconds;
+      await h.notifier.claim();
+      final start = h.info.startAt!;
+      h.clock = start.add(const Duration(days: 4));
+      h.block.uptime = const Duration(days: 4).inMilliseconds;
+      await h.notifier.evaluate();
+      expect(h.info.daysLeft, 10);
+      h.clock = start; // clock back and the phone rebooted
+      h.block.uptime = 5000;
+      await h.notifier.evaluate();
+      expect(h.info.daysLeft, 10);
+    });
+  });
+
   group('purchase and lapse', () {
     test('purchase during trial: paid wins, record kept, reminders cancelled, no second trial', () async {
       final h = await TrialHarness.create();
