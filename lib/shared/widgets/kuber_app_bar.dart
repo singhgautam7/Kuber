@@ -573,9 +573,6 @@ abstract final class _Fh {
   /// the first 60 %.
   static const double subtitleFadeEnd = 0.4;
   static const double titleDropEnd = 0.6;
-
-  /// Gap between the pill and a docked island.
-  static const double islandGap = 8;
 }
 
 /// What a [KuberHeaderPage] tells its header and islands. Animations are
@@ -590,7 +587,6 @@ class _FloatScope extends InheritedWidget {
     required this.away,
     required this.level,
     required this.floating,
-    required this.scrollsAway,
     required this.statusBar,
     required this.restHeight,
     required this.inset,
@@ -618,8 +614,6 @@ class _FloatScope extends InheritedWidget {
   /// The header morphs (setting on and the header wants to float).
   final bool floating;
 
-  /// Floating header off: the header scrolls away with the page.
-  final bool scrollsAway;
   final double statusBar;
   final double restHeight;
   final double inset;
@@ -634,7 +628,6 @@ class _FloatScope extends InheritedWidget {
   bool updateShouldNotify(_FloatScope old) =>
       level != old.level ||
       floating != old.floating ||
-      scrollsAway != old.scrollsAway ||
       statusBar != old.statusBar ||
       restHeight != old.restHeight ||
       inset != old.inset;
@@ -650,32 +643,19 @@ class _FloatScope extends InheritedWidget {
 ///
 /// The [body]'s scrollable starts with [gap] (box) or [sliverGap] (sliver)
 /// so its first item sits fully below the header at rest, exactly as when
-/// the header scrolled with the content. An optional [pinned] row (tabs,
-/// chips, a search bar) docks under the header and, as an island, under
-/// the pill (v7c.F8); give its [pinnedHeight].
+/// the header scrolled with the content. Only the header is sticky
+/// (owner, v7.0.0-c): rows like tabs and chips scroll with the body.
 class KuberHeaderPage extends ConsumerStatefulWidget {
   const KuberHeaderPage({
     super.key,
     required this.header,
     required this.body,
-    this.pinned,
-    this.pinnedHeight = 0,
-    this.pinnedPillShaped = false,
     this.mode,
     this.nested = false,
   });
 
   final KuberAppBar header;
   final Widget body;
-
-  /// Docked under the header. Must not bring its own horizontal screen
-  /// margin: the island supplies 20 dp at rest.
-  final Widget? pinned;
-  final double pinnedHeight;
-
-  /// The pinned control is a pill itself (pill tabs, the search pill), so it
-  /// is the island; otherwise (a chip row) it sits inside a 48 dp island.
-  final bool pinnedPillShaped;
 
   /// Overrides the setting (the settings previews).
   final FloatingHeaderMode? mode;
@@ -687,20 +667,10 @@ class KuberHeaderPage extends ConsumerStatefulWidget {
   /// When scrolling up / stops hide.
   final bool nested;
 
-  /// Top padding for the body's scrollable: status bar + header at rest +
-  /// pinned row. 0 outside a [KuberHeaderPage].
+  /// Top padding for the body's scrollable: status bar + header at rest.
+  /// 0 outside a [KuberHeaderPage].
   static double insetOf(BuildContext context) =>
       _FloatScope.maybeOf(context)?.inset ?? 0;
-
-  /// Status bar height above the header (0 outside a page).
-  static double statusBarOf(BuildContext context) =>
-      _FloatScope.maybeOf(context)?.statusBar ?? 0;
-
-  /// True when the header scrolls with the content (Floating header off,
-  /// or outside a page). An in-scroll pinned sliver uses it to collapse its
-  /// header spacer with the scroll instead of keeping it.
-  static bool scrollsAwayOf(BuildContext context) =>
-      _FloatScope.maybeOf(context)?.scrollsAway ?? true;
 
   /// A box the height of [insetOf]: the first child of a box scrollable.
   static Widget gap() => Builder(
@@ -944,8 +914,7 @@ class _KuberHeaderPageState extends ConsumerState<KuberHeaderPage>
       _level = level;
       _snap();
     }
-    final pinnedH = widget.pinned == null ? 0.0 : widget.pinnedHeight;
-    final inset = sb + restH + pinnedH;
+    final inset = sb + restH;
     final off = mode == FloatingHeaderMode.off;
     final scrollsAway = off && widget.header.floating;
     final bg = Theme.of(context).scaffoldBackgroundColor;
@@ -1007,7 +976,6 @@ class _KuberHeaderPageState extends ConsumerState<KuberHeaderPage>
       away: _away,
       level: level,
       floating: !off && widget.header.floating,
-      scrollsAway: scrollsAway,
       statusBar: sb,
       restHeight: restH,
       inset: inset,
@@ -1024,30 +992,6 @@ class _KuberHeaderPageState extends ConsumerState<KuberHeaderPage>
             ),
           ),
           if (!off) scrim,
-          if (widget.pinned != null)
-            Positioned(
-              key: const ValueKey('fh-pinned'),
-              top: sb + restH,
-              left: 0,
-              right: 0,
-              height: pinnedH,
-              child: RepaintBoundary(
-                child: _HideTransform(
-                  hide: const AlwaysStoppedAnimation(0),
-                  shift: const AlwaysStoppedAnimation(0),
-                  // Off: the row stays docked under the status bar, as
-                  // pinned rows do today.
-                  away: scrollsAway ? _away : null,
-                  awayMax: restH,
-                  level: MotionLevel.off,
-                  child: KuberHeaderIsland(
-                    height: pinnedH,
-                    pillShaped: widget.pinnedPillShaped,
-                    child: widget.pinned!,
-                  ),
-                ),
-              ),
-            ),
           Positioned(
             key: const ValueKey('fh-header'),
             top: 0,
@@ -1119,132 +1063,6 @@ class _HideTransform extends StatelessWidget {
       },
     );
   }
-}
-
-/// A row docked under the header (v7c.F8). At rest it is a full-width strip
-/// on the page colour; in the pill state it becomes an island 8 dp under
-/// the pill: 12 dp margins, surfaceContainer, 1 dp outlineVariant and
-/// shadow.float. A pill-shaped control is the island itself. Shares the
-/// header's progress and hide state, so both morph, hide and show together.
-/// Outside a [KuberHeaderPage] it is just [child] with 20 dp margins.
-///
-/// Also used inside an in-scroll pinned sliver (wrap the docked row in it).
-class KuberHeaderIsland extends StatelessWidget {
-  const KuberHeaderIsland({
-    super.key,
-    required this.child,
-    required this.height,
-    this.pillShaped = false,
-  });
-
-  final Widget child;
-  final double height;
-  final bool pillShaped;
-
-  @override
-  Widget build(BuildContext context) {
-    final scope = _FloatScope.maybeOf(context);
-    final pad = const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin);
-    if (scope == null) {
-      return SizedBox(height: height, child: Padding(padding: pad, child: child));
-    }
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final painter = _SurfacePainter(
-      progress: scope.progress,
-      restAlpha: scope.restAlpha,
-      pillAlpha: scope.pillAlpha,
-      subtle: scope.floating && scope.level == MotionLevel.subtle,
-      restTop: 0,
-      restBottom: height,
-      // Island 8 dp under the pill: pill bottom (status bar + 8 + 56) + 8,
-      // relative to the rest position (status bar + header).
-      pillTop: _Fh.top + _Fh.pillHeight + _Fh.islandGap - scope.restHeight,
-      pillBottom:
-          _Fh.top + _Fh.pillHeight + _Fh.islandGap - scope.restHeight + height,
-      pillRadius: height / 2,
-      rest: theme.scaffoldBackgroundColor,
-      pill: pillShaped ? Colors.transparent : cs.surfaceContainer,
-      border: cs.outlineVariant,
-      shadows: KuberElevation.float(cs),
-      floating: scope.floating,
-    );
-    Widget body = child;
-    if (scope.floating && pillShaped) {
-      // The control itself becomes the island: margin 20 → 12.
-      body = AnimatedBuilder(
-        animation: scope.progress,
-        child: child,
-        builder: (_, c) {
-          final cp = scope.progress.value.clamp(0.0, 1.0);
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: KuberSpace.screenMargin -
-                  (KuberSpace.screenMargin - _Fh.margin) * cp,
-            ),
-            child: c,
-          );
-        },
-      );
-    } else {
-      // Chip rows keep 20 dp: 12 margin + 8 inner padding in the island.
-      body = Padding(padding: pad, child: child);
-      if (scope.floating) {
-        body = ClipPath(clipper: _IslandClip(painter), child: body);
-      }
-    }
-    Widget out = CustomPaint(
-      painter: painter,
-      child: SizedBox(
-        height: height,
-        child: scope.floating
-            ? _PillDock(painter: painter, child: body)
-            : body,
-      ),
-    );
-    if (scope.scrollsAway) return out;
-    out = FadeTransition(opacity: scope.contentAlpha, child: out);
-    return _HideTransform(
-      hide: scope.hide,
-      shift: const AlwaysStoppedAnimation(0),
-      away: null,
-      awayMax: 0,
-      level: scope.level,
-      child: out,
-    );
-  }
-}
-
-/// Moves the docked row with the island's top edge (transform only).
-class _PillDock extends StatelessWidget {
-  const _PillDock({required this.painter, required this.child});
-  final _SurfacePainter painter;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-        animation: painter.progress,
-        child: child,
-        builder: (_, c) => Transform.translate(
-          offset: Offset(0, painter.topAt(painter.geometryP)),
-          child: c,
-        ),
-      );
-}
-
-class _IslandClip extends CustomClipper<Path> {
-  _IslandClip(this.painter) : super(reclip: painter.progress);
-  final _SurfacePainter painter;
-
-  @override
-  Path getClip(Size size) {
-    final r = painter.rrectAt(size, painter.geometryP);
-    // Relative to the row, which already moved with the island's top.
-    return Path()..addRRect(r.shift(Offset(0, -painter.topAt(painter.geometryP))));
-  }
-
-  @override
-  bool shouldReclip(_IslandClip old) => old.painter != painter;
 }
 
 /// The header's surface: the full-width rest header (opaque page colour,
