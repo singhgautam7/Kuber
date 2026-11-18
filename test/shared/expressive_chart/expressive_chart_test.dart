@@ -28,6 +28,7 @@ Widget chartHarness({
   double textScale = 1,
   String? emptyTitle,
   String? singleNote,
+  String Function(double)? formatAxis,
 }) {
   return MaterialApp(
     theme: theme ?? AppTheme.light(const Locale('en')),
@@ -54,7 +55,7 @@ Widget chartHarness({
                 mode: mode,
                 window: window,
                 formatAmount: (v) => '₹${v.round()}',
-                formatAxis: (v) => '${(v / 1000).round()}K',
+                formatAxis: formatAxis ?? (v) => '${(v / 1000).round()}K',
                 emptyTitle: emptyTitle,
                 singleNote: singleNote,
               );
@@ -134,6 +135,31 @@ void main() {
     expect(g.columnAt(xs.last), 5);
     expect(g.columnAt(xs.first), 0);
     expect(g.columnAt(340), isNull);
+  });
+
+  testWidgets('largest font: the axis fits its widest label (22.5K, not 2.5K)', (t) async {
+    await useSmallPhone(t);
+    String fmt(double v) => '${(v / 1000).toStringAsFixed(v % 1000 == 0 ? 0 : 1)}K';
+    final periods = [
+      for (var i = 0; i < 6; i++)
+        ExpressivePeriod(key: i, label: 'M$i', fullLabel: 'M$i', values: [11000, 44000.0 - i], isCurrent: i == 5),
+    ];
+    await t.pumpWidget(chartHarness(periods: periods, textScale: 2, formatAxis: fmt));
+    await t.pumpAndSettle();
+    final painter = t
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((c) => c.painter)
+        .whereType<ChartPainter>()
+        .first;
+    final tp = TextPainter(
+      text: TextSpan(text: '22.5K', style: Theme.of(t.element(find.byType(ExpressiveChart))).textTheme.labelSmall!
+          .copyWith(fontWeight: FontWeight.w500)),
+      textDirection: TextDirection.ltr,
+      textScaler: const TextScaler.linear(2),
+    )..layout();
+    expect(painter.frame.axisWidth, greaterThanOrEqualTo(tp.width));
+    // Month labels wider than their column: every other one, never touching.
+    expect(painter.frame.labelEvery, greaterThan(1));
   });
 
   testWidgets('tap selects, tooltip sits above the column, tap again closes', (t) async {

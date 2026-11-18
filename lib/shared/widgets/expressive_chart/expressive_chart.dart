@@ -574,6 +574,43 @@ class _ExpressiveChartState extends State<ExpressiveChart>
     return l10n.chartA11yOne(period.fullLabel, widget.series[0].name, f(period.values[0]));
   }
 
+  Object? _axisKey;
+  double _axisLabelW = 0;
+  double _periodLabelW = 0; // widest period label, bold (the current one)
+
+  /// Width of the widest y-axis label any scroll window can show (its max is
+  /// niceMax of one period's value, plus the half line). At the largest fonts
+  /// a fixed axis was too narrow and the bars painted over the first digit
+  /// ("2.5K" for 22.5K). Also measures [_periodLabelW]. Once per data / text
+  /// size, never in scroll.
+  double _widestAxisLabel(TextStyle style, TextScaler scaler) {
+    final key = (widget.periods, scaler.scale(14));
+    if (key == _axisKey) return _axisLabelW;
+    final maxes = <double>{
+      for (final p in widget.periods)
+        for (final v in p.values) ExpressiveChartMetrics.niceMax(v),
+    };
+    double widest(Iterable<String> texts, TextStyle style) {
+      var w = 0.0;
+      for (final text in texts.toSet()) {
+        final tp = TextPainter(
+          text: TextSpan(text: text, style: style),
+          textDirection: TextDirection.ltr,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        w = math.max(w, tp.width);
+        tp.dispose();
+      }
+      return w;
+    }
+
+    _periodLabelW = widest(widget.periods.map((p) => p.label), KuberMotion.weightStyle(style, 700));
+    _axisKey = key;
+    return _axisLabelW =
+        widest([for (final m in maxes) ...[widget.formatAxis(m), widget.formatAxis(m / 2)]], style);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -581,8 +618,10 @@ class _ExpressiveChartState extends State<ExpressiveChart>
     final scaler = MediaQuery.textScalerOf(context);
     final scale = scaler.scale(14) / 14;
     final big = scale >= ExpressiveChartMetrics.largeFontScale;
-    final axisW = big ? ExpressiveChartMetrics.axisWidthLarge : ExpressiveChartMetrics.axisWidth;
     final ls = theme.textTheme.labelSmall!;
+    final axisW = math.max(
+        big ? ExpressiveChartMetrics.axisWidthLarge : ExpressiveChartMetrics.axisWidth,
+        _widestAxisLabel(ls.copyWith(fontWeight: FontWeight.w500), scaler) + 6);
     final labelH = 16 + (ls.fontSize ?? 11) * scale * (ls.height ?? 1.3);
     final chartH = ExpressiveChartMetrics.topPad + ExpressiveChartMetrics.plotHeight + labelH;
     final sk = _skeletons;
@@ -611,7 +650,11 @@ class _ExpressiveChartState extends State<ExpressiveChart>
         texts: _texts,
         formatAxis: widget.formatAxis,
         firstLetters: widget.window > 7,
-        labelEvery: big && widget.window > 7 ? 2 : 1,
+        // 1Y: first letters, every second one at the largest font (design).
+        // Otherwise skip labels only when they don't fit their column.
+        labelEvery: widget.window > 7
+            ? (big ? 2 : 1)
+            : math.max(1, ((_periodLabelW + 4) / slotT).ceil()),
         semanticsLabel: _a11yLabel,
         onSemanticsTap: (p) => _selectColumn(p + sk, toggle: false),
         semanticsPixels: _semPx,

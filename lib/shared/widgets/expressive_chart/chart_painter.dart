@@ -460,7 +460,11 @@ class ChartPainter extends CustomPainter {
           text,
           KuberMotion.weightStyle(f.labelStyle, w.value.toDouble()).copyWith(color: color),
           f.textScaler);
-      tp.paint(canvas, Offset(geo.cx(t) - tp.width / 2, _h + 6));
+      var x = geo.cx(t) - tp.width / 2;
+      // The last label, wider than its column at the largest fonts, stays
+      // inside the plot instead of being clipped at the axis.
+      if (t == f.total - 1) x = math.min(x, plotW - tp.width);
+      tp.paint(canvas, Offset(x, _h + 6));
     }
     canvas.restore();
 
