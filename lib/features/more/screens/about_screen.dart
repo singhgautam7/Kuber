@@ -26,11 +26,11 @@ class AboutScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
+      body: KuberHeaderPage(
+ header: KuberAppBar(showBack: true, showBrand: false),
+ body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, showBrand: false),
-          ),
+          KuberHeaderPage.sliverGap(),
 
           SliverPadding(
             padding: const EdgeInsets.symmetric(
@@ -157,6 +157,7 @@ class AboutScreen extends ConsumerWidget {
           ),
         ],
       ),
+ ),
     );
   }
 }

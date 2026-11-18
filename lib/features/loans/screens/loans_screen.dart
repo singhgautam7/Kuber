@@ -81,10 +81,10 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
         onPressed: () => context.push('/loans/add'),
       ),
       floatingActionButtonLocation: kuberFabLocation,
-      body: CustomScrollView(slivers: [
-        SliverToBoxAdapter(
-          child: KuberAppBar(showBack: true, title: l.loansTitle, infoConfig: InfoConstants.loans),
-        ),
+      body: KuberHeaderPage(
+ header: KuberAppBar(showBack: true, title: l.loansTitle, infoConfig: InfoConstants.loans),
+ body: CustomScrollView(slivers: [
+        KuberHeaderPage.sliverGap(),
         if (loans == null)
           const SliverFillRemaining(child: Center(child: KuberShapeLoader(size: 40)))
         else if (items.isEmpty)
@@ -143,6 +143,7 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
             ),
           ),
       ]),
+ ),
     );
   }
 }

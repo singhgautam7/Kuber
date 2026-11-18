@@ -36,6 +36,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/color_palette.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
@@ -259,6 +260,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           label: context.l10n.accountNameLabel,
           children: [
             TextField(
+              scrollPadding: kuberFieldScrollPadding(context),
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               onTapOutside: (_) =>
@@ -306,6 +308,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               child: _isCash
                   ? const SizedBox.shrink()
                   : TextField(
+                      scrollPadding: kuberFieldScrollPadding(context),
                       controller: _last4Controller,
                       maxLength: 4,
                       keyboardType: TextInputType.number,
@@ -428,7 +431,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       children: [
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            padding: EdgeInsets.fromLTRB(
+                20, 8 + KuberHeaderPage.insetOf(context), 20, 24),
             child: fields,
           ),
         ),

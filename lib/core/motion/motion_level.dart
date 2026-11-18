@@ -15,6 +15,10 @@ enum MotionPreference { auto, expressive, subtle, off }
 /// check has run (Auto then behaves as Expressive).
 enum DeviceClass { unknown, normal, low }
 
+/// The Floating header setting (v7.0.0-c handoff, key `floatingHeader`):
+/// when the pill shows, or [off] (the header scrolls away with the page).
+enum FloatingHeaderMode { always, scrollUp, scrollStop, off }
+
 /// Total RAM under this (MB, as Android reports it) is a low-end phone
 /// ("under 4 GB"). Android reports less than the nominal size (a 4 GB phone
 /// shows about 3.6 to 3.8 GB, a 3 GB phone about 2.8 GB), so the cut is 3.5 GB.
@@ -48,16 +52,20 @@ class MotionBoot {
   final MotionPreference pref;
   final DeviceClass device;
   final bool haptics;
+  final FloatingHeaderMode floatingHeader;
   const MotionBoot({
     this.pref = MotionPreference.auto,
     this.device = DeviceClass.unknown,
     this.haptics = false,
+    this.floatingHeader = FloatingHeaderMode.always,
   });
 
   factory MotionBoot.fromPrefs(SharedPreferences p) => MotionBoot(
         pref: _at(MotionPreference.values, p.getInt(PrefsKeys.motionPreference)),
         device: _at(DeviceClass.values, p.getInt(PrefsKeys.motionDeviceClass)),
         haptics: p.getBool(PrefsKeys.hapticsEnabled) ?? false,
+        floatingHeader:
+            _at(FloatingHeaderMode.values, p.getInt(PrefsKeys.floatingHeader)),
       );
 }
 
@@ -183,3 +191,24 @@ class HapticsEnabledNotifier extends Notifier<bool> {
 
 final hapticsEnabledProvider =
     NotifierProvider<HapticsEnabledNotifier, bool>(HapticsEnabledNotifier.new);
+
+/// The Floating header setting, read once with the other boot prefs. Headers
+/// watch this one field, so they rebuild only when it changes.
+class FloatingHeaderNotifier extends Notifier<FloatingHeaderMode> {
+  @override
+  FloatingHeaderMode build() => ref.watch(bootMotionProvider).floatingHeader;
+
+  Future<void> set(FloatingHeaderMode m) async {
+    state = m;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(PrefsKeys.floatingHeader, m.index);
+    } catch (e) {
+      debugPrint('Kuber: floating header preference not saved: $e');
+    }
+  }
+}
+
+final floatingHeaderProvider =
+    NotifierProvider<FloatingHeaderNotifier, FloatingHeaderMode>(
+        FloatingHeaderNotifier.new);

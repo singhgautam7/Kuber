@@ -31,62 +31,61 @@ class UpcomingEventsFullScreen extends ConsumerWidget {
     final calendar = view.valueOrNull;
     if (calendar == null) return Scaffold(backgroundColor: cs.surface);
     final count = upcomingFilterCount(ref, calendar: calendar);
+    // The List / Calendar and Filter chips scroll with the page (owner, v7.0.0-c:
+    // the floating header is the only sticky part).
+    final filters = Padding(
+      padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, 4, KuberSpace.screenMargin, 12),
+      child: Wrap(
+        spacing: KuberSpace.sm,
+        runSpacing: KuberSpace.sm,
+        children: [
+          KuberDropdownChip<bool>(
+            value: calendar,
+            icon: calendar ? Icons.calendar_month_outlined : Icons.view_agenda_outlined,
+            options: [
+              KuberDropdownOption(false, l.ueViewList, icon: Icons.view_agenda_outlined),
+              KuberDropdownOption(true, l.ueViewCalendar, icon: Icons.calendar_month_outlined),
+            ],
+            onChanged: (v) => ref.read(upcomingCalendarViewProvider.notifier).setCalendar(v),
+          ),
+          Semantics(
+            label: count > 0 ? l.ueA11yFilter(count) : null,
+            child: KuberChip(
+              label: l.ueFilter,
+              icon: Icons.tune_rounded,
+              selected: count > 0,
+              showCheck: false,
+              badge: count > 0 ? '$count' : null,
+              onTap: () => showUpcomingFilterSheet(context, calendar: calendar),
+            ),
+          ),
+        ],
+      ),
+    );
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
-        header: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            KuberAppBar(
-              title: l.ueTitle,
-              showBack: true,
-              // "How it works" lives in the overflow (round 5): in Calendar
-              // it is the legend.
-              overflowConfig: calendar
-                  ? KuberOverflowConfig(items: [
-                      KuberOverflowItem(
-                        icon: Icons.help_outline_rounded,
-                        label: l.ueLegendTitle,
-                        onTap: () => showUpcomingLegendSheet(context),
-                      ),
-                    ])
-                  : null,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, 4, KuberSpace.screenMargin, 12),
-              child: Wrap(
-                spacing: KuberSpace.sm,
-                runSpacing: KuberSpace.sm,
-                children: [
-                  KuberDropdownChip<bool>(
-                    value: calendar,
-                    icon: calendar ? Icons.calendar_month_outlined : Icons.view_agenda_outlined,
-                    options: [
-                      KuberDropdownOption(false, l.ueViewList, icon: Icons.view_agenda_outlined),
-                      KuberDropdownOption(true, l.ueViewCalendar, icon: Icons.calendar_month_outlined),
-                    ],
-                    onChanged: (v) => ref.read(upcomingCalendarViewProvider.notifier).setCalendar(v),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          title: l.ueTitle,
+          showBack: true,
+          // "How it works" lives in the overflow (round 5): in Calendar
+          // it is the legend.
+          overflowConfig: calendar
+              ? KuberOverflowConfig(items: [
+                  KuberOverflowItem(
+                    icon: Icons.help_outline_rounded,
+                    label: l.ueLegendTitle,
+                    onTap: () => showUpcomingLegendSheet(context),
                   ),
-                  Semantics(
-                    label: count > 0 ? l.ueA11yFilter(count) : null,
-                    child: KuberChip(
-                      label: l.ueFilter,
-                      icon: Icons.tune_rounded,
-                      selected: count > 0,
-                      showCheck: false,
-                      badge: count > 0 ? '$count' : null,
-                      onTap: () => showUpcomingFilterSheet(context, calendar: calendar),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ])
+              : null,
         ),
         body: _FadeThrough(
           calendar: calendar,
-          child: calendar ? const UpcomingCalendarView(key: ValueKey('calendar')) : const _ListBody(key: ValueKey('list')),
+          child: calendar
+              ? UpcomingCalendarView(key: const ValueKey('calendar'), leading: filters)
+              : _ListBody(key: const ValueKey('list'), leading: filters),
         ),
       ),
     );
@@ -138,7 +137,10 @@ class _FadeThrough extends StatelessWidget {
 }
 
 class _ListBody extends ConsumerWidget {
-  const _ListBody({super.key});
+  const _ListBody({super.key, required this.leading});
+
+  /// The List / Calendar and Filter chips, first in the scroll.
+  final Widget leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -156,6 +158,8 @@ class _ListBody extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.only(bottom: navBarBottomPadding(context)),
       children: [
+        KuberHeaderPage.gap(),
+        leading,
         if (events.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 32),

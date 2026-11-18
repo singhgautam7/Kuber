@@ -114,8 +114,8 @@ Future<void> _bootstrap() async {
     isar = await IsarService.open();
     await SeedService().seedInitialData(isar);
     await MigrationService.runAll(isar);
-    // First-install: create the Kuber Pro entitlement row with the 14-day
-    // trial window. No-op on subsequent launches. Must run before the first
+    // First-install: create the free Kuber Pro entitlement row (the trial is
+    // reconciled later, in the on-open batch). No-op on subsequent launches. Must run before the first
     // frame so no widget flashes free UI while the row is being materialised.
     await ensureEntitlementBootstrap(isar);
   } catch (e, stack) {

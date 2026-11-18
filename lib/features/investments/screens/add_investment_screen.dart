@@ -297,20 +297,23 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         // Close always closes the screen (it used to step back to the type
         // picker once a type was chosen).
         closeIcon: true,
         title: _existing == null ? l.msInvAdd : l.msInvEdit,
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
+          padding: EdgeInsets.fromLTRB(
+              20, 4 + KuberHeaderPage.insetOf(context), 20, 140),
           child: _type == null ? _picker(context) : _form(context),
         ),
+      )),
       ),
       bottomNavigationBar: _type == null
           ? null

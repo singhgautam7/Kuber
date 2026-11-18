@@ -3414,5 +3414,16 @@
   "proManageKeep": "Pro ठेवा: प्लॅन पहा",
   "proManageGet": "Pro घ्या: प्लॅन पहा",
   "chartPeriod7d": "7D",
-  "chartPeriod7dSub": "मागील 7 दिवस"
+  "chartPeriod7dSub": "मागील 7 दिवस",
+  "floatingHeaderTitle": "फ्लोटिंग हेडर",
+  "floatingHeaderSubtitle": "स्क्रोल केल्यावर हेडर पिल बनतो",
+  "floatingHeaderSwitchOn": "सुरू",
+  "floatingHeaderSwitchOff": "बंद · हेडर पेजसोबत स्क्रोल होऊन निघून जातो",
+  "floatingHeaderSection": "पिल केव्हा दाखवायचा",
+  "floatingHeaderAlways": "नेहमी",
+  "floatingHeaderScrollUp": "वर स्क्रोल करताना",
+  "floatingHeaderScrollStop": "स्क्रोल थांबल्यावर",
+  "floatingHeaderOff": "बंद",
+  "floatingHeaderPreviewLabel": "{option}, हेडरचे पूर्वावलोकन",
+  "setKwFloatingHeader": "फ्लोटिंग हेडर पिल स्टिकी वरचा बार स्क्रोल लपवा floating header pill"
 }

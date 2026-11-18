@@ -78,11 +78,8 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
       ),
       floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          // App bar
-          SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(
+ header: KuberAppBar(
               showBack: true,
               title: context.l10n.budgetsTitle,
               infoConfig: InfoConstants.budgets,
@@ -94,7 +91,10 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                       onChanged: (v) => setState(() => _query = v),
                     ),
             ),
-          ),
+ body: CustomScrollView(
+        slivers: [
+          // App bar
+          KuberHeaderPage.sliverGap(),
 
           // Page header
           budgetsAsync.when(
@@ -182,6 +182,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
           ),
         ],
       ),
+ ),
     );
   }
 }

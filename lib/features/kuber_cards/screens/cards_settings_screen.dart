@@ -45,13 +45,14 @@ class _CardsSettingsScreenState extends ConsumerState<CardsSettingsScreen> {
     return CardsSecureScaffold(
       child: Scaffold(
         backgroundColor: cs.surface,
-        body: KuberScrollAwayHeader(
+        body: KuberHeaderPage(
           header: KuberAppBar(showBack: true, title: 'Kuber Cards settings'),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(KuberSpace.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                KuberHeaderPage.gap(),
                 const SettingsSectionLabel(label: 'SECURITY'),
                 const SettingsSectionDescription(
                   'Control how your cards stay locked.',

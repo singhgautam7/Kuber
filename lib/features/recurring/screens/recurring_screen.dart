@@ -99,9 +99,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
           final active = hub.active.where(match).toList();
           final paused = hub.paused.where(match).toList();
           final ended = hub.ended.where(match).toList();
-          return CustomScrollView(slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
+          return KuberHeaderPage(
+ header: KuberAppBar(
                 showBack: true,
                 title: l.recurringModule,
                 infoConfig: InfoConstants.recurring,
@@ -113,7 +112,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                         onChanged: (v) => setState(() => _query = v),
                       ),
               ),
-            ),
+ body: CustomScrollView(slivers: [
+            KuberHeaderPage.sliverGap(),
             if (hub.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -173,7 +173,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                   ]),
                 ),
               ),
-          ]);
+          ]),
+ );
         },
       ),
     );

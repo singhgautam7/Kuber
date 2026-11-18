@@ -234,7 +234,8 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         title: _isEditing ? 'Edit reminder' : 'New reminder',
         showBack: true,
         closeIcon: true,
@@ -248,18 +249,19 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
             ),
         ],
       ),
-      body: Column(
+        body: Builder(builder: (context) => Column(
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 KuberSpace.screenMargin,
-                0,
+                KuberHeaderPage.insetOf(context),
                 KuberSpace.screenMargin,
                 KuberSpace.lg,
               ),
               children: [
                 TextField(
+                  scrollPadding: kuberFieldScrollPadding(context),
                   controller: _titleController,
                   textCapitalization: TextCapitalization.sentences,
                   onTapOutside: (_) =>
@@ -272,6 +274,7 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
                 ),
                 const SizedBox(height: KuberSpace.md),
                 TextField(
+                  scrollPadding: kuberFieldScrollPadding(context),
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -357,6 +360,7 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
                 section(
                   'Notes',
                   TextField(
+                    scrollPadding: kuberFieldScrollPadding(context),
                     controller: _notesController,
                     minLines: 1,
                     maxLines: 4,
@@ -377,6 +381,7 @@ class _AddEditReminderScreenState extends ConsumerState<AddEditReminderScreen> {
           ),
           KuberSaveButton(label: 'Save reminder', onPressed: _save),
         ],
+      )),
       ),
     );
   }

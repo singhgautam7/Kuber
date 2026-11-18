@@ -129,10 +129,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
         // Nothing here is pinned: the app bar, page header, and the search +
         // count rows all scroll with the card list (parity with the
         // More -> Accounts landing).
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
+        body: KuberHeaderPage(
+ header: KuberAppBar(
                 title: 'Kuber Cards',
                 showBack: true,
                 appDrawerEntry: AppDrawerEntry.cards,
@@ -174,7 +172,9 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                   ],
                 ),
               ),
-            ),
+ body: CustomScrollView(
+          slivers: [
+            KuberHeaderPage.sliverGap(),
 
             if (unlocked)
               ...ref
@@ -208,6 +208,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
               const SliverToBoxAdapter(child: SizedBox.shrink()),
           ],
         ),
+ ),
       ),
     );
   }

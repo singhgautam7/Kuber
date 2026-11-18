@@ -125,17 +125,19 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: () => context.pop(),
         title: _isEditing ? context.l10n.editEntry : context.l10n.newEntry,
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+          padding: EdgeInsets.fromLTRB(
+              18, 4 + KuberHeaderPage.insetOf(context), 18, 140),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -201,6 +203,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     fieldViewBuilder:
                         (context, controller, focusNode, onFieldSubmitted) {
                           return TextField(
+                            scrollPadding: kuberFieldScrollPadding(context),
                             controller: controller,
                             focusNode: focusNode,
                             textCapitalization: TextCapitalization.words,
@@ -259,6 +262,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                 label: context.l10n.notesLabel,
                 children: [
                   TextField(
+                    scrollPadding: kuberFieldScrollPadding(context),
                     controller: _notesController,
                     maxLines: 3,
                     minLines: 1,
@@ -275,6 +279,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
             ],
           ),
         ),
+      )),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEditing ? context.l10n.saveChanges : context.l10n.addToLedger,

@@ -74,11 +74,14 @@ class AhGatePage extends StatelessWidget {
         );
 
     return Scaffold(
-      appBar: KuberAppBar(title: l.ahdTitle, showBack: true),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, KuberSpace.sm,
+      body: KuberHeaderPage(
+        header: KuberAppBar(title: l.ahdTitle, showBack: true),
+        body: ListView(
+        padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin, 0,
             KuberSpace.screenMargin, KuberSpace.xxl),
         children: [
+          KuberHeaderPage.gap(),
+          const SizedBox(height: KuberSpace.sm),
           ExcludeSemantics(
             child: Container(
               padding: const EdgeInsets.all(KuberSpace.lg),
@@ -170,6 +173,7 @@ class AhGatePage extends StatelessWidget {
             onPressed: () => context.push('/pro'),
           ),
         ],
+        ),
       ),
     );
   }
@@ -203,21 +207,19 @@ class _AhPageState extends ConsumerState<AhPage> {
     final l = context.l10n;
     final isStart = ref.watch(ahViewProvider.select((v) => v.isStart));
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          title: l.ahdTitle,
+          showBack: true,
+          actions: const [_Overflow()],
+        ),
+        body: CustomScrollView(
           primary: false,
           slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
-                title: l.ahdTitle,
-                showBack: true,
-                actions: const [_Overflow()],
-              ),
-            ),
-            if (isStart)
-              const AhStartScreen(key: ValueKey('start'))
-            else
+            if (isStart) ...[
+              KuberHeaderPage.sliverGap(),
+              const AhStartScreen(key: ValueKey('start')),
+            ] else
               ..._dashboard,
           ],
         ),
@@ -228,10 +230,11 @@ class _AhPageState extends ConsumerState<AhPage> {
 
 const _gutter = EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin);
 
-const _dashboard = <Widget>[
-  SliverPersistentHeader(
+final _dashboard = <Widget>[
+  KuberHeaderPage.sliverGap(),
+  // Scrolls with the page: the floating header is the only sticky part.
+  const SliverPersistentHeader(
     key: ValueKey('ah-action-header'),
-    pinned: true,
     delegate: _ActionHeader(),
   ),
   SliverToBoxAdapter(
@@ -258,9 +261,9 @@ const _dashboard = <Widget>[
   ),
 ];
 
-/// Action row 3a (two 56 dp rows) that folds into the compact 44 dp row when
-/// pinned. The full row rides up with the scroll and fades out; the compact
-/// row fades in over the second half; a hairline shows once pinned.
+/// Action row 3a (two 56 dp rows). Not pinned (v7.0.0-c: the floating header
+/// is the only sticky part): it folds into the compact 44 dp row as it scrolls
+/// away under the header, the full row fading out and the compact one in.
 class _ActionHeader extends SliverPersistentHeaderDelegate {
   const _ActionHeader();
 

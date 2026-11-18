@@ -11891,4 +11891,42 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'ಕಳೆದ 7 ದಿನಗಳು';
+
+  @override
+  String get floatingHeaderTitle => 'ಫ್ಲೋಟಿಂಗ್ ಹೆಡರ್';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'ಸ್ಕ್ರೋಲ್ ಮಾಡಿದಾಗ ಹೆಡರ್ ಪಿಲ್ ಆಗಿ ಬದಲಾಗುತ್ತದೆ';
+
+  @override
+  String get floatingHeaderSwitchOn => 'ಆನ್';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'ಆಫ್ · ಹೆಡರ್ ಪುಟದೊಂದಿಗೆ ಸ್ಕ್ರೋಲ್ ಆಗಿ ಹೋಗುತ್ತದೆ';
+
+  @override
+  String get floatingHeaderSection => 'ಪಿಲ್ ಅನ್ನು ಯಾವಾಗ ತೋರಿಸಬೇಕು';
+
+  @override
+  String get floatingHeaderAlways => 'ಯಾವಾಗಲೂ';
+
+  @override
+  String get floatingHeaderScrollUp => 'ಮೇಲೆ ಸ್ಕ್ರೋಲ್ ಮಾಡುವಾಗ';
+
+  @override
+  String get floatingHeaderScrollStop => 'ಸ್ಕ್ರೋಲ್ ನಿಂತಾಗ';
+
+  @override
+  String get floatingHeaderOff => 'ಆಫ್';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, ಹೆಡರ್‌ನ ಪ್ರಿವ್ಯೂ';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'ಫ್ಲೋಟಿಂಗ್ ಹೆಡರ್ ಪಿಲ್ ಮೇಲಿನ ಬಾರ್ ಸ್ಕ್ರೋಲ್ ಮರೆಮಾಡು floating header pill';
 }

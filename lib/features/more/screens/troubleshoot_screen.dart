@@ -33,14 +33,14 @@ class TroubleshootScreen extends ConsumerWidget {
       backgroundColor: cs.surface,
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
+          KuberHeaderPage(
+ header: KuberAppBar(
                   showBack: true,
                   title: context.l10n.troubleshootTitle,
                 ),
-              ),
+ body: CustomScrollView(
+            slivers: [
+              KuberHeaderPage.sliverGap(),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: KuberSpace.screenMargin,
@@ -71,6 +71,7 @@ class TroubleshootScreen extends ConsumerWidget {
               ),
             ],
           ),
+ ),
           if (state.status == DataOpStatus.loading)
             DataLoadingOverlay(message: state.loadingMessage ?? 'Processing…'),
         ],

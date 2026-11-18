@@ -3414,5 +3414,16 @@
   "proManageKeep": "Pro നിലനിർത്തൂ: പ്ലാനുകൾ കാണൂ",
   "proManageGet": "Pro നേടൂ: പ്ലാനുകൾ കാണൂ",
   "chartPeriod7d": "7D",
-  "chartPeriod7dSub": "കഴിഞ്ഞ 7 ദിവസം"
+  "chartPeriod7dSub": "കഴിഞ്ഞ 7 ദിവസം",
+  "floatingHeaderTitle": "ഫ്ലോട്ടിങ് ഹെഡർ",
+  "floatingHeaderSubtitle": "സ്ക്രോൾ ചെയ്യുമ്പോൾ ഹെഡർ ഒരു പിൽ ആയി മാറും",
+  "floatingHeaderSwitchOn": "ഓൺ",
+  "floatingHeaderSwitchOff": "ഓഫ് · ഹെഡർ പേജിനൊപ്പം സ്ക്രോൾ ചെയ്ത് മാറിപ്പോകും",
+  "floatingHeaderSection": "പിൽ എപ്പോൾ കാണിക്കണം",
+  "floatingHeaderAlways": "എപ്പോഴും",
+  "floatingHeaderScrollUp": "മുകളിലേക്ക് സ്ക്രോൾ ചെയ്യുമ്പോൾ",
+  "floatingHeaderScrollStop": "സ്ക്രോൾ നിൽക്കുമ്പോൾ",
+  "floatingHeaderOff": "ഓഫ്",
+  "floatingHeaderPreviewLabel": "{option}, ഹെഡറിന്റെ പ്രിവ്യൂ",
+  "setKwFloatingHeader": "ഫ്ലോട്ടിംഗ് ഹെഡർ പിൽ മുകളിലെ ബാർ സ്ക്രോൾ മറയ്ക്കുക floating header pill"
 }

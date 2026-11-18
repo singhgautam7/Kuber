@@ -105,33 +105,33 @@ class _SavedCalculationsScreenState
       },
       child: Scaffold(
         backgroundColor: cs.surface,
-        body: ScrollConfiguration(
+        body: KuberHeaderPage(
+          header: _selecting
+                ? KuberAppBar(
+                    title: '${_selected.length} selected',
+                    showBack: true,
+                    closeIcon: true,
+                    floating: false,
+                    background: cs.surfaceContainer,
+                    onBack: _clearSelection,
+                    actions: [
+                      AppIconButton(
+                        icon: Icons.delete_outline_rounded,
+                        kind: AppIconButtonKind.danger,
+                        semanticLabel: 'Delete',
+                        onPressed: _confirmDelete,
+                      ),
+                    ],
+                  )
+                : const KuberAppBar(
+                    title: 'Saved Calculations',
+                    showBack: true,
+                  ),
+          body: ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
           child: CustomScrollView(
             slivers: [
-              // Selecting swaps in the one-line contextual header.
-              SliverToBoxAdapter(
-                child: _selecting
-                    ? KuberAppBar(
-                        title: '${_selected.length} selected',
-                        showBack: true,
-                        closeIcon: true,
-                        background: cs.surfaceContainer,
-                        onBack: _clearSelection,
-                        actions: [
-                          AppIconButton(
-                            icon: Icons.delete_outline_rounded,
-                            kind: AppIconButtonKind.danger,
-                            semanticLabel: 'Delete',
-                            onPressed: _confirmDelete,
-                          ),
-                        ],
-                      )
-                    : const KuberAppBar(
-                        title: 'Saved Calculations',
-                        showBack: true,
-                      ),
-              ),
+              KuberHeaderPage.sliverGap(),
               ...async.when(
                 loading: () => [
                   const SliverFillRemaining(
@@ -219,6 +219,7 @@ class _SavedCalculationsScreenState
               ),
             ],
           ),
+        ),
         ),
       ),
     );

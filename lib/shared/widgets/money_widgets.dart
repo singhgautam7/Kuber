@@ -573,35 +573,38 @@ class MoneyFullScreen extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        showBack: true,
-        closeIcon: true,
-        title: title,
-        showBrand: false,
-        actions: [
-          if (overflow.isNotEmpty)
-            PopupMenuButton<VoidCallback>(
-              icon: const Icon(Icons.more_vert_rounded),
-              itemBuilder: (_) => overflow,
-              onSelected: (cb) => cb(),
-            ),
-        ],
-      ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-            20, 4, 20, 32 + MediaQuery.of(context).padding.bottom),
-        children: [
-          identity,
-          if (chart != null) ...[
-            const SizedBox(height: 24),
-            KuberCard(
-              padding: const EdgeInsets.all(16),
-              child: chart!,
-            ),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          showBack: true,
+          closeIcon: true,
+          title: title,
+          showBrand: false,
+          actions: [
+            if (overflow.isNotEmpty)
+              PopupMenuButton<VoidCallback>(
+                icon: const Icon(Icons.more_vert_rounded),
+                itemBuilder: (_) => overflow,
+                onSelected: (cb) => cb(),
+              ),
           ],
-          const SizedBox(height: 24),
-          ...list,
-        ],
+        ),
+        body: ListView(
+          padding: EdgeInsets.fromLTRB(
+              20, 4, 20, 32 + MediaQuery.of(context).padding.bottom),
+          children: [
+            KuberHeaderPage.gap(),
+            identity,
+            if (chart != null) ...[
+              const SizedBox(height: 24),
+              KuberCard(
+                padding: const EdgeInsets.all(16),
+                child: chart!,
+              ),
+            ],
+            const SizedBox(height: 24),
+            ...list,
+          ],
+        ),
       ),
     );
   }

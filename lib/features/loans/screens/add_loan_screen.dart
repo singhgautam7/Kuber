@@ -694,7 +694,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final indian = fmt.system == NumberSystem.indian;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: _leave,
@@ -714,11 +715,12 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                 ),
               ]),
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
+          padding: EdgeInsets.fromLTRB(
+              20, 4 + KuberHeaderPage.insetOf(context), 20, 140),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -817,6 +819,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             ],
           ),
         ),
+      )),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: _existing == null ? l.msLoansSave : l.msLoansSaveChanges,

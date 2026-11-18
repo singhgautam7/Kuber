@@ -36,16 +36,13 @@ class BillSplitterScreen extends ConsumerWidget {
       ),
       floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          // ── App Bar ────────────────────────────────────────────────────
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Split Calculator',
               showBack: true,
               infoConfig: InfoConstants.splitCalculator,
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
 
           // ── Page Header with action button ─────────────────────────────
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -102,7 +99,7 @@ class BillSplitterScreen extends ConsumerWidget {
 
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
-      ),
+      )),
     );
   }
 }

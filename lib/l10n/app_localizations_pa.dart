@@ -11816,4 +11816,41 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'ਪਿਛਲੇ 7 ਦਿਨ';
+
+  @override
+  String get floatingHeaderTitle => 'ਫਲੋਟਿੰਗ ਹੈਡਰ';
+
+  @override
+  String get floatingHeaderSubtitle => 'ਸਕ੍ਰੋਲ ਕਰਨ \'ਤੇ ਹੈਡਰ ਪਿਲ ਬਣ ਜਾਂਦਾ ਹੈ';
+
+  @override
+  String get floatingHeaderSwitchOn => 'ਚਾਲੂ';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'ਬੰਦ · ਹੈਡਰ ਪੇਜ ਨਾਲ ਸਕ੍ਰੋਲ ਹੋ ਕੇ ਹਟ ਜਾਂਦਾ ਹੈ';
+
+  @override
+  String get floatingHeaderSection => 'ਪਿਲ ਕਦੋਂ ਦਿਖਾਉਣੀ ਹੈ';
+
+  @override
+  String get floatingHeaderAlways => 'ਹਮੇਸ਼ਾ';
+
+  @override
+  String get floatingHeaderScrollUp => 'ਉੱਪਰ ਸਕ੍ਰੋਲ ਕਰਨ \'ਤੇ';
+
+  @override
+  String get floatingHeaderScrollStop => 'ਸਕ੍ਰੋਲ ਰੁਕਣ \'ਤੇ';
+
+  @override
+  String get floatingHeaderOff => 'ਬੰਦ';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, ਹੈਡਰ ਦੀ ਝਲਕ';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'ਫਲੋਟਿੰਗ ਹੈਡਰ ਪਿਲ ਸਟਿੱਕੀ ਉੱਪਰਲੀ ਬਾਰ ਸਕ੍ਰੋਲ ਲੁਕਾਓ floating header pill';
 }

@@ -34,15 +34,15 @@ class AutomaticBackupsScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: Text(context.l10n.errorWithDetails(error.toString())),
         ),
-        data: (s) => CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
+        data: (s) => KuberHeaderPage(
+ header: KuberAppBar(
                 showBack: true,
                 title: context.l10n.backupsTitle.replaceAll('\n', ' '),
                 infoConfig: InfoConstants.automaticBackups,
               ),
-            ),
+ body: CustomScrollView(
+          slivers: [
+            KuberHeaderPage.sliverGap(),
 
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
@@ -126,6 +126,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
             ),
           ],
         ),
+ ),
       ),
     );
   }

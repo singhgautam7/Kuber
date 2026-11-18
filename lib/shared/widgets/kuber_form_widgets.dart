@@ -17,6 +17,8 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'kuber_button_group.dart';
 import 'app_button.dart';
+import 'kuber_app_bar.dart';
+import 'dart:math' as math;
 import 'app_icon_button.dart';
 import '../../core/utils/color_harmonizer.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +26,11 @@ import '../../core/utils/formatters.dart' show CurrencyInputFormatter;
 
 import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
+
+/// Scroll padding for a text field: a focused field is revealed 8 dp below
+/// the floating header, never under it (0 inset outside a KuberHeaderPage).
+EdgeInsets kuberFieldScrollPadding(BuildContext context) => EdgeInsets.fromLTRB(
+    20, math.max(20, KuberHeaderPage.insetOf(context) + 8), 20, 20);
 
 /// One labelled section of a form. Renders an uppercase muted heading
 /// followed by its children, separated by a configurable inner gap.
@@ -301,6 +308,7 @@ class _KuberHeroAmountInputState extends State<KuberHeroAmountInput>
                         controller: widget.controller,
                         focusNode: widget.focusNode,
                         onChanged: widget.onChanged,
+                        scrollPadding: kuberFieldScrollPadding(context),
                         onTapOutside: (_) =>
                             FocusManager.instance.primaryFocus?.unfocus(),
                         inputFormatters: widget.inputFormatters,
@@ -1190,6 +1198,7 @@ class _KuberTextFieldState extends State<KuberTextField>
           textCapitalization: widget.textCapitalization,
           textInputAction: widget.textInputAction,
           onChanged: widget.onChanged,
+          scrollPadding: kuberFieldScrollPadding(context),
           onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           style: localeFont(color: cs.onSurface, fontSize: 16),
           decoration: InputDecoration(
@@ -1406,7 +1415,7 @@ extension FocusDismissibleFuture<T> on Future<T> {
 /// button rides on top of the keyboard. A short fade at the bottom of the
 /// viewport keeps the floating look; it ignores taps.
 class KuberFormScaffold extends StatelessWidget {
-  final PreferredSizeWidget? appBar;
+  final KuberAppBar? appBar;
   final Widget body;
   final Widget bottomAction;
   final EdgeInsets padding;
@@ -1446,7 +1455,10 @@ class KuberFormScaffold extends StatelessWidget {
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: padding + const EdgeInsets.only(bottom: _fade),
-                  child: body,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [KuberHeaderPage.gap(), body],
+                  ),
                 ),
               ),
               Positioned(
@@ -1489,9 +1501,10 @@ class KuberFormScaffold extends StatelessWidget {
     }
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: appBar,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(top: false, bottom: false, child: content),
+      body: appBar == null
+          ? content
+          : KuberHeaderPage(header: appBar!, body: content),
     );
   }
 }

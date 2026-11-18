@@ -31,17 +31,17 @@ class _FinancialHealthScoreScreenState
       });
     }
     if (!hasAccess) {
-      return const Scaffold(
-        body: KuberScrollAwayHeader(
+      return Scaffold(
+        body: KuberHeaderPage(
           header: KuberAppBar(title: 'Financial health score', showBack: true),
           body: SizedBox.shrink(),
         ),
       );
     }
 
-    return const Scaffold(
-      body: KuberScrollAwayHeader(
-        header: KuberAppBar(
+    return Scaffold(
+      body: KuberHeaderPage(
+        header: const KuberAppBar(
           title: 'Financial health score',
           showBack: true,
           infoConfig: kAboutAdvancedAnalyticsInfoConfig,
@@ -51,7 +51,8 @@ class _FinancialHealthScoreScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
+              KuberHeaderPage.gap(),
+              const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: FinancialHealthScoreSection(),
               ),

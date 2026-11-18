@@ -22,7 +22,7 @@ class HowToUseScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(showBack: true, title: l.faqTitle),
         body: ListView(
           padding: EdgeInsets.only(
@@ -32,6 +32,7 @@ class HowToUseScreen extends StatelessWidget {
             bottom: KuberSpace.lg + systemNavBarInset(context),
           ),
           children: [
+            KuberHeaderPage.gap(),
             for (final faq in faqs) ...[
               Container(
                 decoration: BoxDecoration(

@@ -91,10 +91,10 @@ class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
         onPressed: () => context.push('/investments/add'),
       ),
       floatingActionButtonLocation: kuberFabLocation,
-      body: CustomScrollView(slivers: [
-        SliverToBoxAdapter(
-          child: KuberAppBar(showBack: true, title: l.investmentsTitle, infoConfig: InfoConstants.investments),
-        ),
+      body: KuberHeaderPage(
+ header: KuberAppBar(showBack: true, title: l.investmentsTitle, infoConfig: InfoConstants.investments),
+ body: CustomScrollView(slivers: [
+        KuberHeaderPage.sliverGap(),
         if (invs == null)
           const SliverFillRemaining(child: Center(child: KuberShapeLoader(size: 40)))
         else if (invs.isEmpty)
@@ -153,6 +153,7 @@ class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
             ),
           ),
       ]),
+ ),
     );
   }
 }
@@ -422,15 +423,17 @@ class _UpdateValuesScreenState extends ConsumerState<UpdateValuesScreen> {
     };
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        showBack: true,
-        closeIcon: true,
-        title: l.msInvUpdateValues,
-        subtitle: l.msInvUpdSub('${list.length}'),
-      ),
-      body: ListView(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          showBack: true,
+          closeIcon: true,
+          title: l.msInvUpdateValues,
+          subtitle: l.msInvUpdSub('${list.length}'),
+        ),
+        body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 120),
         children: [
+          KuberHeaderPage.gap(),
           Text(l.msInvUpdHelp, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 12),
           KuberGroup(children: [
@@ -466,6 +469,7 @@ class _UpdateValuesScreenState extends ConsumerState<UpdateValuesScreen> {
               ),
           ]),
         ],
+      ),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: entered.isEmpty ? l.msInvSaveEmpty : l.msInvSaveN('${entered.length}'),

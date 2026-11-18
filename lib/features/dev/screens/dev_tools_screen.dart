@@ -65,7 +65,7 @@ class DevToolsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: const KuberAppBar(showBack: true, title: 'Developer Tools'),
         body: ListView(
           padding: EdgeInsets.fromLTRB(
@@ -75,6 +75,7 @@ class DevToolsScreen extends ConsumerWidget {
             KuberSpace.xl + MediaQuery.of(context).padding.bottom,
           ),
           children: [
+            KuberHeaderPage.gap(),
             Container(
               padding: const EdgeInsets.all(KuberSpace.lg),
               decoration: BoxDecoration(

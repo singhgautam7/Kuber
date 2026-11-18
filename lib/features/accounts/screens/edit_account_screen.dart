@@ -512,53 +512,58 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
     return Scaffold(
       // Board 3.15 edit: close + title + destructive delete in the header.
-      appBar: KuberAppBar(
-        showBack: true,
-        closeIcon: true,
-        title: context.l10n.editAccount,
-        actions: [
-          AppIconButton(
-            icon: Icons.delete_outline_rounded,
-            kind: AppIconButtonKind.danger,
-            semanticLabel: context.l10n.deleteAccount,
-            onPressed: _onDelete,
-          ),
-        ],
-      ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                child: balanceAsync.when(
-                  loading: () => const Padding(
-                    padding: EdgeInsets.only(top: 80),
-                    child: Center(child: KuberShapeLoader()),
-                  ),
-                  error: (e, _) => Padding(
-                    padding: const EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: Text(
-                        context.l10n.couldntLoadBalance,
-                        style: localeFont(color: context.kuberMoney.expense),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          showBack: true,
+          closeIcon: true,
+          title: context.l10n.editAccount,
+          actions: [
+            AppIconButton(
+              icon: Icons.delete_outline_rounded,
+              kind: AppIconButtonKind.danger,
+              semanticLabel: context.l10n.deleteAccount,
+              onPressed: _onDelete,
+            ),
+          ],
+        ),
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            children: [
+              Expanded(
+                child: Builder(
+                  builder: (c) => SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                        20, 4 + KuberHeaderPage.insetOf(c), 20, 24),
+                    child: balanceAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.only(top: 80),
+                        child: Center(child: KuberShapeLoader()),
                       ),
+                      error: (e, _) => Padding(
+                        padding: const EdgeInsets.only(top: 80),
+                        child: Center(
+                          child: Text(
+                            context.l10n.couldntLoadBalance,
+                            style: localeFont(color: context.kuberMoney.expense),
+                          ),
+                        ),
+                      ),
+                      data: (_) => _buildForm(kuberFieldScrollPadding(c)),
                     ),
                   ),
-                  data: (_) => _buildForm(),
                 ),
               ),
-            ),
-            _buildBottomBar(),
-          ],
+              _buildBottomBar(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(EdgeInsets scrollPadding) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final l10n = context.l10n;
@@ -643,6 +648,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
           label: l10n.accountNameLabel,
           children: [
             TextField(
+              scrollPadding: scrollPadding,
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               onTapOutside: (_) =>
@@ -686,6 +692,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
             ),
             if (_showIdentifier)
               TextField(
+                scrollPadding: scrollPadding,
                 controller: _last4Controller,
                 keyboardType: TextInputType.number,
                 onTapOutside: (_) =>

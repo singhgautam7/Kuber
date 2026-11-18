@@ -58,6 +58,7 @@ final List<SettingsEntry> kSettingsIndex = [
   SettingsEntry('textSize', SettingsArea.look, Icons.format_size_rounded, (l) => l.textSizeTitle, (l) => l.setKwTextSize),
   SettingsEntry('motion', SettingsArea.look, Icons.animation_rounded, (l) => l.motionTitle, (l) => l.setKwMotion),
   SettingsEntry('haptics', SettingsArea.look, Icons.vibration_rounded, (l) => l.hapticsTitle, (l) => l.setKwHaptics),
+  SettingsEntry('floatingHeader', SettingsArea.look, Icons.web_asset_rounded, (l) => l.floatingHeaderTitle, (l) => l.setKwFloatingHeader),
   SettingsEntry('bottomNav', SettingsArea.look, Icons.space_dashboard_outlined, (l) => l.setBottomNav, (l) => l.setKwBottomNav),
   SettingsEntry('moreLayout', SettingsArea.look, Icons.grid_view_outlined, (l) => l.setMoreLayout, (l) => l.setKwMoreLayout),
   SettingsEntry('homeWidgets', SettingsArea.look, Icons.home_outlined, (l) => l.setHomeWidgets, (l) => l.setKwHomeWidgets),

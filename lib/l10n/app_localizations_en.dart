@@ -11838,4 +11838,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'Last 7 days';
+
+  @override
+  String get floatingHeaderTitle => 'Floating header';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'The header turns into a pill when you scroll';
+
+  @override
+  String get floatingHeaderSwitchOn => 'On';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'Off · the header scrolls away with the page';
+
+  @override
+  String get floatingHeaderSection => 'Show the pill';
+
+  @override
+  String get floatingHeaderAlways => 'Always';
+
+  @override
+  String get floatingHeaderScrollUp => 'When scrolling up';
+
+  @override
+  String get floatingHeaderScrollStop => 'When scrolling stops';
+
+  @override
+  String get floatingHeaderOff => 'Off';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, preview of the header';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'floating header pill sticky top bar scroll hide app bar title bar';
 }

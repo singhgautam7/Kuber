@@ -23,6 +23,12 @@
 - **Motion:** buttons, cards, lists, sheets and charts move smoothly. Pick
   Auto, Expressive, Subtle or Off in Settings, Look and feel, Motion. Gentle
   vibration for toggles and long presses can be turned on there too.
+- **Floating header:** as you scroll, the header turns into a slim pill that
+  floats at the top, with the same buttons, and goes back to normal at the
+  top of the page. Forms work the same way, and Save stays at the bottom.
+  In Settings, Look and feel, Floating header, choose when the pill shows:
+  always, when scrolling up, or when scrolling stops. Turn it off to let the
+  header scroll away with the page.
 - **Quick navigation:** tap a page title, or long-press back, to see how you
   got here as a tree and jump to any earlier page.
 - Loans that grow in parts: add each part as the bank pays it out, and pick
@@ -82,6 +88,7 @@
 - Every row in More and Settings has the same tinted icon. Clearer selected
   options in every theme, including Pure black.
 - Calculators can fill in from your loans and investments.
+- The "Enjoying Kuber?" sheet shows the Kuber app icon.
 
 ### Fixed
 

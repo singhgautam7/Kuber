@@ -326,13 +326,14 @@ class PermissionsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(
           showBack: true,
           title: context.l10n.permissionsTitle,
         ),
         body: CustomScrollView(
           slivers: [
+            KuberHeaderPage.sliverGap(),
             SliverPadding(
               padding: const EdgeInsets.symmetric(
                 horizontal: KuberSpace.screenMargin,

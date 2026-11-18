@@ -97,16 +97,16 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (state) {
           final groups = _grouped(context, state.stories);
-          return CustomScrollView(
-            controller: _scroll,
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
+          return KuberHeaderPage(
+ header: KuberAppBar(
                   showBack: true,
                   title: context.l10n.storiesArchiveTitle,
                   infoConfig: InfoConstants.storiesArchive,
                 ),
-              ),
+ body: CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              KuberHeaderPage.sliverGap(),
               if (state.stories.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -166,7 +166,8 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                 ),
               ],
             ],
-          );
+          ),
+ );
         },
       ),
     );

@@ -31,22 +31,23 @@ class _AnomalyDetectionScreenState
     }
     if (!hasAccess) {
       return const Scaffold(
-        body: KuberScrollAwayHeader(
+        body: KuberHeaderPage(
           header: KuberAppBar(title: 'Anomaly detection', showBack: true),
           body: SizedBox.shrink(),
         ),
       );
     }
 
-    return const Scaffold(
-      body: KuberScrollAwayHeader(
+    return Scaffold(
+      body: KuberHeaderPage(
         header: KuberAppBar(title: 'Anomaly detection', showBack: true),
         body: SingleChildScrollView(
           padding: EdgeInsets.only(bottom: KuberSpace.xxl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
+              KuberHeaderPage.gap(),
+              const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: AnomalyDetectionSection(),
               ),

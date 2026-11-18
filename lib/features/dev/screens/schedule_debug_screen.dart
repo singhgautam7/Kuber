@@ -82,7 +82,8 @@ class _ScheduleDebugScreenState extends ConsumerState<ScheduleDebugScreen> {
         ].join('\n');
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         title: 'Schedule debug',
         actions: [
@@ -95,10 +96,11 @@ class _ScheduleDebugScreenState extends ConsumerState<ScheduleDebugScreen> {
           ),
         ],
       ),
-      body: ListView(
+        body: ListView(
         padding: const EdgeInsets.fromLTRB(
             KuberSpace.screenMargin, 0, KuberSpace.screenMargin, KuberSpace.xl),
         children: [
+          KuberHeaderPage.gap(),
           Wrap(spacing: 8, children: [
             KuberChip(
                 label: 'All · ${items.length}',
@@ -142,7 +144,7 @@ class _ScheduleDebugScreenState extends ConsumerState<ScheduleDebugScreen> {
               ),
           ]),
         ],
-      ),
+      )),
     );
   }
 }

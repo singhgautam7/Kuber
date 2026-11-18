@@ -11882,4 +11882,42 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'గత 7 రోజులు';
+
+  @override
+  String get floatingHeaderTitle => 'ఫ్లోటింగ్ హెడర్';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'స్క్రోల్ చేసినప్పుడు హెడర్ పిల్‌గా మారుతుంది';
+
+  @override
+  String get floatingHeaderSwitchOn => 'ఆన్';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'ఆఫ్ · హెడర్ పేజీతో పాటు స్క్రోల్ అయి వెళ్లిపోతుంది';
+
+  @override
+  String get floatingHeaderSection => 'పిల్‌ను ఎప్పుడు చూపాలి';
+
+  @override
+  String get floatingHeaderAlways => 'ఎల్లప్పుడూ';
+
+  @override
+  String get floatingHeaderScrollUp => 'పైకి స్క్రోల్ చేసినప్పుడు';
+
+  @override
+  String get floatingHeaderScrollStop => 'స్క్రోల్ ఆగినప్పుడు';
+
+  @override
+  String get floatingHeaderOff => 'ఆఫ్';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, హెడర్ ప్రివ్యూ';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'ఫ్లోటింగ్ హెడర్ పిల్ పై బార్ స్క్రోల్ దాచు floating header pill';
 }

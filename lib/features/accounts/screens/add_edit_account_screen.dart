@@ -13,20 +13,22 @@ class AddEditAccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: KuberAppBar(
-        showBack: true,
-        closeIcon: true,
-        title: account == null
-            ? context.l10n.addAccount
-            : context.l10n.editAccount,
-      ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.opaque,
-        child: AccountForm(
-          account: account,
-          pinnedSave: true,
-          onSave: () => Navigator.pop(context),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          showBack: true,
+          closeIcon: true,
+          title: account == null
+              ? context.l10n.addAccount
+              : context.l10n.editAccount,
+        ),
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: AccountForm(
+            account: account,
+            pinnedSave: true,
+            onSave: () => Navigator.pop(context),
+          ),
         ),
       ),
     );

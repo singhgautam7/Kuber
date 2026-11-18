@@ -165,10 +165,8 @@ class _AccountsBodyState extends ConsumerState<_AccountsBody> {
                 a,
           ];
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: KuberAppBar(
+    return KuberHeaderPage(
+ header: KuberAppBar(
             showBack: true,
             title: sentenceCase(context.l10n.accountsLabel),
             infoConfig: InfoConstants.accounts,
@@ -180,7 +178,9 @@ class _AccountsBodyState extends ConsumerState<_AccountsBody> {
                     onChanged: (v) => setState(() => _query = v),
                   ),
           ),
-        ),
+ body: CustomScrollView(
+      slivers: [
+        KuberHeaderPage.sliverGap(),
 
         // Hero — only when there's something to show
         if (accounts.isNotEmpty && q.isEmpty)
@@ -264,7 +264,8 @@ class _AccountsBodyState extends ConsumerState<_AccountsBody> {
           child: SizedBox(height: KuberExtendedFab.clearance),
         ),
       ],
-    );
+    ),
+ );
   }
 
   void _openDetailSheet(BuildContext context, Account account) {

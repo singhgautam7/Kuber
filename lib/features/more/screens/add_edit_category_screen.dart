@@ -103,7 +103,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: () => context.pop(),
@@ -111,11 +112,12 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ? context.l10n.editCategory
             : context.l10n.newCategory,
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+          padding: EdgeInsets.fromLTRB(
+              20, 8 + KuberHeaderPage.insetOf(context), 20, 40),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -130,6 +132,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 label: context.l10n.identity,
                 children: [
                   TextField(
+                    scrollPadding: kuberFieldScrollPadding(context),
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
                     onTapOutside: (_) =>
@@ -232,6 +235,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ],
           ),
         ),
+      )),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: widget.existingCategory != null

@@ -8128,5 +8128,23 @@
   "proManageKeep": "Keep Pro: see plans",
   "proManageGet": "Get Pro: see plans",
   "chartPeriod7d": "7D",
-  "chartPeriod7dSub": "Last 7 days"
+  "chartPeriod7dSub": "Last 7 days",
+  "floatingHeaderTitle": "Floating header",
+  "floatingHeaderSubtitle": "The header turns into a pill when you scroll",
+  "floatingHeaderSwitchOn": "On",
+  "floatingHeaderSwitchOff": "Off · the header scrolls away with the page",
+  "floatingHeaderSection": "Show the pill",
+  "floatingHeaderAlways": "Always",
+  "floatingHeaderScrollUp": "When scrolling up",
+  "floatingHeaderScrollStop": "When scrolling stops",
+  "floatingHeaderOff": "Off",
+  "floatingHeaderPreviewLabel": "{option}, preview of the header",
+  "@floatingHeaderPreviewLabel": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "setKwFloatingHeader": "floating header pill sticky top bar scroll hide app bar title bar"
 }

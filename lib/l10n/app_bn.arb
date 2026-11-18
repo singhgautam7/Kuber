@@ -3414,5 +3414,16 @@
   "proManageKeep": "Pro রাখুন: প্ল্যান দেখুন",
   "proManageGet": "Pro নিন: প্ল্যান দেখুন",
   "chartPeriod7d": "7D",
-  "chartPeriod7dSub": "গত 7 দিন"
+  "chartPeriod7dSub": "গত 7 দিন",
+  "floatingHeaderTitle": "ফ্লোটিং হেডার",
+  "floatingHeaderSubtitle": "স্ক্রল করলে হেডার একটি পিল হয়ে যায়",
+  "floatingHeaderSwitchOn": "চালু",
+  "floatingHeaderSwitchOff": "বন্ধ · হেডার পেজের সঙ্গে স্ক্রল হয়ে সরে যায়",
+  "floatingHeaderSection": "পিল কখন দেখাবে",
+  "floatingHeaderAlways": "সবসময়",
+  "floatingHeaderScrollUp": "উপরে স্ক্রল করার সময়",
+  "floatingHeaderScrollStop": "স্ক্রল থামলে",
+  "floatingHeaderOff": "বন্ধ",
+  "floatingHeaderPreviewLabel": "{option}, হেডারের প্রিভিউ",
+  "setKwFloatingHeader": "ফ্লোটিং হেডার পিল স্টিকি উপরের বার স্ক্রল লুকান floating header pill"
 }

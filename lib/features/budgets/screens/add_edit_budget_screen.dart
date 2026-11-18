@@ -124,15 +124,18 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        title: widget.existingBudget == null
-            ? context.l10n.createBudget
-            : context.l10n.editBudget,
-        showBack: true,
-        closeIcon: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          title: widget.existingBudget == null
+              ? context.l10n.createBudget
+              : context.l10n.editBudget,
+          showBack: true,
+          closeIcon: true,
+        ),
+        body: Builder(builder: (context) {
+          return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+            20, 8 + KuberHeaderPage.insetOf(context), 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -172,6 +175,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             _SectionHeader(title: context.l10n.budgetAmount),
             // Board 3.18: a large filled amount field.
             TextField(
+              scrollPadding: kuberFieldScrollPadding(context),
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
@@ -229,6 +233,8 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             ),
           ],
         ),
+      );
+        }),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

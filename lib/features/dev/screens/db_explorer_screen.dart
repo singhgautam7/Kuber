@@ -137,11 +137,11 @@ class DbExplorerScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
+      body: KuberHeaderPage(
+ header: KuberAppBar(showBack: true, title: 'DB Explorer'),
+ body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, title: 'DB Explorer'),
-          ),
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.screenMargin,
@@ -183,6 +183,7 @@ class DbExplorerScreen extends ConsumerWidget {
           ),
         ],
       ),
+ ),
     );
   }
 }

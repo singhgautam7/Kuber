@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/l10n_ext.dart';
+import '../../shared/widgets/brand_icon.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../shared/widgets/kuber_list.dart';
@@ -107,14 +108,8 @@ class _RateSheetState extends State<_RateSheet> {
               duration: const Duration(milliseconds: 300),
               curve: const Cubic(0.05, 0.7, 0.1, 1),
               builder: (_, v, child) => Transform.scale(scale: v, child: child),
-              child: KuberIconTile(
-                icon: Icons.currency_rupee_rounded,
-                size: 72,
-                glyph: 40,
-                radius: 21,
-                color: cs.primary,
-                iconColor: cs.onPrimary,
-              ),
+              // The real launcher mark, not a stock rupee glyph.
+              child: const BrandIcon(size: 72, radius: 21),
             ),
           ),
           const SizedBox(height: KuberSpace.lg),

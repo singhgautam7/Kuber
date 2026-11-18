@@ -39,7 +39,7 @@ class _AdvancedAnalyticsLandingState
     );
 
     return Scaffold(
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(
           title: 'Advanced Analytics',
           showBack: true,
@@ -62,7 +62,7 @@ class _AdvancedAnalyticsLandingState
                 // lazy items (drawn as segments of the group) so off-screen
                 // sections still build late.
                 itemBuilder: (context, index) {
-                  if (index == 0) return const SizedBox.shrink();
+                  if (index == 0) return KuberHeaderPage.gap();
                   final i = index - 1;
                   if (i == 0) {
                     return Padding(
@@ -819,6 +819,7 @@ class _LockedUpgradeView extends StatelessWidget {
         KuberSpace.xxl,
       ),
       children: [
+        KuberHeaderPage.gap(),
         const KuberProSettingsSection(),
         const SizedBox(height: KuberSpace.lg),
         Text(

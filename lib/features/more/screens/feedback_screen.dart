@@ -12,6 +12,7 @@ import '../../../core/constants/about_l10n.dart' show kKuberTelegramUrl;
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -188,9 +189,9 @@ Currency    : ${currency.name} (${currency.code})
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(showBack: true, title: context.l10n.feedbackTitle),
-        body: Column(
+        body: Builder(builder: (context) => Column(
           children: [
             Expanded(
               child: ListView(
@@ -201,6 +202,7 @@ Currency    : ${currency.name} (${currency.code})
                   KuberSpace.xl,
                 ),
                 children: [
+                  KuberHeaderPage.gap(),
                   KuberSectionHeader(title: context.l10n.feedbackType),
                   Wrap(
                     spacing: KuberSpace.sm,
@@ -217,6 +219,7 @@ Currency    : ${currency.name} (${currency.code})
                   const SizedBox(height: KuberSpace.sectionGap - 4),
                   KuberSectionHeader(title: context.l10n.feedbackMessage),
                   TextField(
+                    scrollPadding: kuberFieldScrollPadding(context),
                     controller: _feedbackCtrl,
                     minLines: 5,
                     maxLines: 8,
@@ -292,7 +295,7 @@ Currency    : ${currency.name} (${currency.code})
               ),
             ),
           ],
-        ),
+        )),
       ),
     );
   }

@@ -3414,5 +3414,16 @@
   "proManageKeep": "Pro ਰੱਖੋ: ਪਲਾਨ ਦੇਖੋ",
   "proManageGet": "Pro ਲਓ: ਪਲਾਨ ਦੇਖੋ",
   "chartPeriod7d": "7D",
-  "chartPeriod7dSub": "ਪਿਛਲੇ 7 ਦਿਨ"
+  "chartPeriod7dSub": "ਪਿਛਲੇ 7 ਦਿਨ",
+  "floatingHeaderTitle": "ਫਲੋਟਿੰਗ ਹੈਡਰ",
+  "floatingHeaderSubtitle": "ਸਕ੍ਰੋਲ ਕਰਨ 'ਤੇ ਹੈਡਰ ਪਿਲ ਬਣ ਜਾਂਦਾ ਹੈ",
+  "floatingHeaderSwitchOn": "ਚਾਲੂ",
+  "floatingHeaderSwitchOff": "ਬੰਦ · ਹੈਡਰ ਪੇਜ ਨਾਲ ਸਕ੍ਰੋਲ ਹੋ ਕੇ ਹਟ ਜਾਂਦਾ ਹੈ",
+  "floatingHeaderSection": "ਪਿਲ ਕਦੋਂ ਦਿਖਾਉਣੀ ਹੈ",
+  "floatingHeaderAlways": "ਹਮੇਸ਼ਾ",
+  "floatingHeaderScrollUp": "ਉੱਪਰ ਸਕ੍ਰੋਲ ਕਰਨ 'ਤੇ",
+  "floatingHeaderScrollStop": "ਸਕ੍ਰੋਲ ਰੁਕਣ 'ਤੇ",
+  "floatingHeaderOff": "ਬੰਦ",
+  "floatingHeaderPreviewLabel": "{option}, ਹੈਡਰ ਦੀ ਝਲਕ",
+  "setKwFloatingHeader": "ਫਲੋਟਿੰਗ ਹੈਡਰ ਪਿਲ ਸਟਿੱਕੀ ਉੱਪਰਲੀ ਬਾਰ ਸਕ੍ਰੋਲ ਲੁਕਾਓ floating header pill"
 }

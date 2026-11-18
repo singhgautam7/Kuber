@@ -134,10 +134,7 @@ class _CurrencyConverterScreenState
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Currency Converter',
               showBack: true,
               infoConfig: InfoConstants.currencyConverter,
@@ -150,8 +147,9 @@ class _CurrencyConverterScreenState
                       : _refresh,
                 ),
               ],
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.lg,
@@ -282,7 +280,7 @@ class _CurrencyConverterScreenState
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

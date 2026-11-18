@@ -3414,5 +3414,16 @@
   "proManageKeep": "Pro ఉంచుకోండి: ప్లాన్‌లు చూడండి",
   "proManageGet": "Pro పొందండి: ప్లాన్‌లు చూడండి",
   "chartPeriod7d": "7D",
-  "chartPeriod7dSub": "గత 7 రోజులు"
+  "chartPeriod7dSub": "గత 7 రోజులు",
+  "floatingHeaderTitle": "ఫ్లోటింగ్ హెడర్",
+  "floatingHeaderSubtitle": "స్క్రోల్ చేసినప్పుడు హెడర్ పిల్‌గా మారుతుంది",
+  "floatingHeaderSwitchOn": "ఆన్",
+  "floatingHeaderSwitchOff": "ఆఫ్ · హెడర్ పేజీతో పాటు స్క్రోల్ అయి వెళ్లిపోతుంది",
+  "floatingHeaderSection": "పిల్‌ను ఎప్పుడు చూపాలి",
+  "floatingHeaderAlways": "ఎల్లప్పుడూ",
+  "floatingHeaderScrollUp": "పైకి స్క్రోల్ చేసినప్పుడు",
+  "floatingHeaderScrollStop": "స్క్రోల్ ఆగినప్పుడు",
+  "floatingHeaderOff": "ఆఫ్",
+  "floatingHeaderPreviewLabel": "{option}, హెడర్ ప్రివ్యూ",
+  "setKwFloatingHeader": "ఫ్లోటింగ్ హెడర్ పిల్ పై బార్ స్క్రోల్ దాచు floating header pill"
 }

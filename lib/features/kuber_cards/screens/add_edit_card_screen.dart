@@ -193,6 +193,9 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
 
   void _onFormChanged() => setState(() {});
 
+  // Set from the page-aware Builder in build; used by the raw fields.
+  EdgeInsets _scrollPadding = const EdgeInsets.all(20);
+
   bool get _canSave =>
       _nickname.text.trim().isNotEmpty && _number.text.trim().isNotEmpty;
 
@@ -202,26 +205,31 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     return CardsSecureScaffold(
       child: Scaffold(
         backgroundColor: cs.surface,
-        appBar: KuberAppBar(
-          showBack: true,
-          closeIcon: true,
-          title: _isEditing ? 'Edit card' : 'Add card',
+        body: KuberHeaderPage(
+          header: KuberAppBar(
+            showBack: true,
+            closeIcon: true,
+            title: _isEditing ? 'Edit card' : 'Add card',
+          ),
+          body: _loading
+              ? const Center(child: KuberShapeLoader(size: 40))
+              : Builder(builder: (context) {
+                  _scrollPadding = kuberFieldScrollPadding(context);
+                  return GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    behavior: HitTestBehavior.opaque,
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin,
+                        KuberHeaderPage.insetOf(context),
+                        KuberSpace.screenMargin,
+                        KuberSpace.lg,
+                      ),
+                      child: _form(cs),
+                    ),
+                  );
+                }),
         ),
-        body: _loading
-            ? const Center(child: KuberShapeLoader(size: 40))
-            : GestureDetector(
-                onTap: () => FocusScope.of(context).unfocus(),
-                behavior: HitTestBehavior.opaque,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    KuberSpace.screenMargin,
-                    0,
-                    KuberSpace.screenMargin,
-                    KuberSpace.lg,
-                  ),
-                  child: _form(cs),
-                ),
-              ),
         bottomNavigationBar: KuberSaveButton(
           label: _isEditing ? 'Save changes' : 'Add card',
           onPressed: _canSave ? _onSave : null,
@@ -484,6 +492,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   }) {
     final cs = Theme.of(context).colorScheme;
     return TextField(
+      scrollPadding: _scrollPadding,
       controller: c,
       keyboardType: keyboardType,
       obscureText: obscure,

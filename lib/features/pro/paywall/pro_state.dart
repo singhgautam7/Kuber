@@ -382,9 +382,8 @@ final kuberProStateProvider =
 /// Ensures the [UserEntitlement] singleton exists. Call from bootstrap on
 /// every launch.
 ///
-/// A new install starts on the free tier. There is no trial: the old
-/// app-managed 14-day trial (resettable by reinstalling) was removed on
-/// 2026-07-11, and free months now come from Play promo codes.
+/// A new install starts on the free tier. The 14-day Pro trial (v7.0.0) is
+/// claimed later and reconciled in `app.dart:_runOnOpenBatch`, never here.
 ///
 /// Kept as a top-level function rather than a Notifier method so it can be
 /// awaited in `_bootstrap()` before the first frame — we want the row to exist

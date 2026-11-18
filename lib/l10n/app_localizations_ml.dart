@@ -11926,4 +11926,42 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'കഴിഞ്ഞ 7 ദിവസം';
+
+  @override
+  String get floatingHeaderTitle => 'ഫ്ലോട്ടിങ് ഹെഡർ';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'സ്ക്രോൾ ചെയ്യുമ്പോൾ ഹെഡർ ഒരു പിൽ ആയി മാറും';
+
+  @override
+  String get floatingHeaderSwitchOn => 'ഓൺ';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'ഓഫ് · ഹെഡർ പേജിനൊപ്പം സ്ക്രോൾ ചെയ്ത് മാറിപ്പോകും';
+
+  @override
+  String get floatingHeaderSection => 'പിൽ എപ്പോൾ കാണിക്കണം';
+
+  @override
+  String get floatingHeaderAlways => 'എപ്പോഴും';
+
+  @override
+  String get floatingHeaderScrollUp => 'മുകളിലേക്ക് സ്ക്രോൾ ചെയ്യുമ്പോൾ';
+
+  @override
+  String get floatingHeaderScrollStop => 'സ്ക്രോൾ നിൽക്കുമ്പോൾ';
+
+  @override
+  String get floatingHeaderOff => 'ഓഫ്';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, ഹെഡറിന്റെ പ്രിവ്യൂ';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'ഫ്ലോട്ടിംഗ് ഹെഡർ പിൽ മുകളിലെ ബാർ സ്ക്രോൾ മറയ്ക്കുക floating header pill';
 }

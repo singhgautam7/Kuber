@@ -20633,6 +20633,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last 7 days'**
   String get chartPeriod7dSub;
+
+  /// No description provided for @floatingHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating header'**
+  String get floatingHeaderTitle;
+
+  /// No description provided for @floatingHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The header turns into a pill when you scroll'**
+  String get floatingHeaderSubtitle;
+
+  /// No description provided for @floatingHeaderSwitchOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get floatingHeaderSwitchOn;
+
+  /// No description provided for @floatingHeaderSwitchOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off · the header scrolls away with the page'**
+  String get floatingHeaderSwitchOff;
+
+  /// No description provided for @floatingHeaderSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the pill'**
+  String get floatingHeaderSection;
+
+  /// No description provided for @floatingHeaderAlways.
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get floatingHeaderAlways;
+
+  /// No description provided for @floatingHeaderScrollUp.
+  ///
+  /// In en, this message translates to:
+  /// **'When scrolling up'**
+  String get floatingHeaderScrollUp;
+
+  /// No description provided for @floatingHeaderScrollStop.
+  ///
+  /// In en, this message translates to:
+  /// **'When scrolling stops'**
+  String get floatingHeaderScrollStop;
+
+  /// No description provided for @floatingHeaderOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get floatingHeaderOff;
+
+  /// No description provided for @floatingHeaderPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{option}, preview of the header'**
+  String floatingHeaderPreviewLabel(String option);
+
+  /// No description provided for @setKwFloatingHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'floating header pill sticky top bar scroll hide app bar title bar'**
+  String get setKwFloatingHeader;
 }
 
 class _AppLocalizationsDelegate

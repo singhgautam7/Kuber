@@ -111,7 +111,7 @@ class ThemeScreen extends ConsumerWidget {
     return Scaffold(
       body: SettingsHighlight(
         rowId: highlight,
-        child: KuberScrollAwayHeader(
+        child: KuberHeaderPage(
         header: KuberAppBar(showBack: true, title: context.l10n.themeLabel),
         body: Listener(
           behavior: HitTestBehavior.translucent,
@@ -124,6 +124,7 @@ class ThemeScreen extends ConsumerWidget {
             KuberSpace.xxxl,
           ),
           children: [
+            KuberHeaderPage.gap(),
             KuberButtonGroup<ThemeMode>(
               options: [
                 KuberButtonOption(

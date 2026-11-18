@@ -186,11 +186,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           data: (categories) {
             final groups = groupsAsync.valueOrNull ?? [];
 
-            return CustomScrollView(
-              slivers: [
-                // App bar
-                SliverToBoxAdapter(
-                  child: KuberAppBar(
+            return KuberHeaderPage(
+ header: KuberAppBar(
                     showBack: true,
                     title: context.l10n.menuCategories,
                     infoConfig: InfoConstants.categories,
@@ -200,7 +197,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       onChanged: (v) => setState(() => _query = v),
                     ),
                   ),
-                ),
+ body: CustomScrollView(
+              slivers: [
+                // App bar
+                KuberHeaderPage.sliverGap(),
 
                 // Page header
 
@@ -476,7 +476,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   child: SizedBox(height: KuberExtendedFab.clearance),
                 ),
               ],
-            );
+            ),
+ );
           },
         ),
       ),

@@ -94,17 +94,18 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       backgroundColor: cs.surface,
       body: Stack(
         children: [
-          SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: KuberAppBar(
+          KuberHeaderPage(
+ header: KuberAppBar(
                     title: 'Kuber Pro',
                     showBack: true,
                     infoConfig: kAboutProInfoConfig,
                     overflowConfig: KuberOverflowConfig(items: overflowItems),
                   ),
-                ),
+ body: SafeArea(
+ top: false,
+            child: CustomScrollView(
+              slivers: [
+                KuberHeaderPage.sliverGap(),
 
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
@@ -124,6 +125,7 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
               ],
             ),
           ),
+ ),
         ],
       ),
       bottomNavigationBar: (!isManage)

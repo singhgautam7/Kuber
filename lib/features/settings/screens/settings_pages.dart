@@ -35,6 +35,7 @@ import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../providers/settings_provider.dart';
 import '../../../core/motion/motion.dart';
 import '../widgets/currency_selector_sheet.dart';
+import '../widgets/floating_header_sheet.dart';
 import '../widgets/motion_sheet.dart';
 import '../widgets/settings_anchor.dart';
 import '../widgets/settings_choice_sheet.dart';
@@ -446,6 +447,13 @@ class LookAndFeelScreen extends ConsumerWidget {
                 },
                 activeTrackColor: Theme.of(context).colorScheme.primary,
               ),
+            )),
+            SettingsAnchor('floatingHeader', child: SettingsTile(
+              icon: Icons.web_asset_rounded,
+              label: l.floatingHeaderTitle,
+              subtitle: floatingHeaderName(l, ref.watch(floatingHeaderProvider)),
+              onTap: () => FloatingHeaderSheet.show(context),
+              trailing: _trailing(context),
             )),
             SettingsAnchor('bottomNav', child: SettingsTile(
               icon: Icons.space_dashboard_outlined,

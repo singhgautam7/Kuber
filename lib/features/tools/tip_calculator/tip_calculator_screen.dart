@@ -58,15 +58,13 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Tip Calculator',
               showBack: true,
               infoConfig: InfoConstants.tipCalculator,
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.lg,
@@ -152,7 +150,7 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

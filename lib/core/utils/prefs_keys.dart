@@ -187,4 +187,8 @@ class PrefsKeys {
   static const motionPreference = 'kuber_motion_preference';
   static const motionDeviceClass = 'kuber_motion_device_class';
   static const hapticsEnabled = 'kuber_haptics_enabled';
+
+  // v7.0.0-c: FloatingHeaderMode index (0 always, 1 scrollUp, 2 scrollStop,
+  // 3 off).
+  static const floatingHeader = 'kuber_floating_header';
 }

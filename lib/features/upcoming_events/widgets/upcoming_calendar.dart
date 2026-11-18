@@ -19,6 +19,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/l10n_ext.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../engine/occurrences.dart';
@@ -47,7 +48,11 @@ List<DateTime> _gridDays(int monthKey, int firstWeekday) {
 }
 
 class UpcomingCalendarView extends ConsumerStatefulWidget {
-  const UpcomingCalendarView({super.key});
+  const UpcomingCalendarView({super.key, this.leading = const SizedBox.shrink()});
+
+  /// Scrolls above the month header (the page's List / Calendar and Filter
+  /// chips).
+  final Widget leading;
 
   @override
   ConsumerState<UpcomingCalendarView> createState() => _UpcomingCalendarViewState();
@@ -61,6 +66,7 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
   late DateTime _today;
   final _keep = <int, ProviderSubscription<AsyncValue<List<CalendarOccurrence>>>>{};
   final _summaryKey = GlobalKey();
+  final _leadKey = GlobalKey();
   bool _collapsed = false;
   // Built day cells, reused while their inputs are unchanged: a tap rebuilds
   // only the two cells whose selection changed, and collapsing the grid
@@ -151,8 +157,14 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
     context.push('/reminders/add?date=${DateFormat('yyyy-MM-dd').format(d)}');
   }
 
-  double get _summaryHeight =>
-      (_summaryKey.currentContext?.findRenderObject() as RenderBox?)?.size.height ?? 0;
+  /// Scroll offset where the grid starts collapsing: everything that scrolls
+  /// away above it (the header gap when the header scrolls away, the chips,
+  /// the month summary).
+  double get _summaryHeight {
+    double h(GlobalKey k) => (k.currentContext?.findRenderObject() as RenderBox?)?.size.height ?? 0;
+    final gap = KuberHeaderPage.scrollsAwayOf(context) ? KuberHeaderPage.insetOf(context) : 0.0;
+    return gap + h(_leadKey) + h(_summaryKey);
+  }
 
   /// On release inside the collapse range, settle to expanded or collapsed.
   bool _onScrollEnd(ScrollEndNotification n, int rows) {
@@ -186,14 +198,23 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
     final selectedMonth = _month(selectedKey);
     final rows = _gridDays(selectedKey, weekStart).length ~/ 7;
 
-    return NotificationListener<ScrollEndNotification>(
+    // Floating header: the scroll starts below the header's rest position, so
+    // the month header pins under the header / pill as the first pinned
+    // sliver. Header scrolling away: the gap scrolls too and the month header
+    // pins under the status bar.
+    final away = KuberHeaderPage.scrollsAwayOf(context);
+    final inset = KuberHeaderPage.insetOf(context);
+    final scroll = NotificationListener<ScrollEndNotification>(
       onNotification: (n) => _onScrollEnd(n, rows),
       child: CustomScrollView(
         slivers: [
+          if (away) SliverToBoxAdapter(child: SizedBox(height: inset)),
+          SliverToBoxAdapter(child: KeyedSubtree(key: _leadKey, child: widget.leading)),
           SliverPersistentHeader(
             pinned: true,
             delegate: _FixedHeader(
               height: _kHeaderH,
+              top: away ? KuberHeaderPage.statusBarOf(context) : 0,
               child: _MonthHeader(
                 pages: _pages!,
                 keyAt: _keyAt,
@@ -266,22 +287,28 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
         ],
       ),
     );
+    if (away) return scroll;
+    return Column(children: [SizedBox(height: inset), Expanded(child: scroll)]);
   }
 }
 
 const Duration _kReflow = Duration(milliseconds: 230);
 
+/// The month header. Pinned; [top] is a transparent spacer for the status
+/// bar when the page header scrolls away.
 class _FixedHeader extends SliverPersistentHeaderDelegate {
-  final double height;
+  final double height, top;
   final Widget child;
-  const _FixedHeader({required this.height, required this.child});
+  const _FixedHeader({required this.height, required this.top, required this.child});
   @override
-  double get maxExtent => height;
+  double get maxExtent => top + height;
   @override
-  double get minExtent => height;
+  double get minExtent => top + height;
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      ColoredBox(color: Theme.of(context).colorScheme.surface, child: child);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Padding(
+        padding: EdgeInsets.only(top: top),
+        child: ColoredBox(color: Theme.of(context).colorScheme.surface, child: child),
+      );
   @override
   bool shouldRebuild(_FixedHeader old) => true;
 }

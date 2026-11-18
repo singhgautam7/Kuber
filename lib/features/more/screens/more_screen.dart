@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_loader.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -83,9 +84,11 @@ class MoreScreenSimple extends ConsumerWidget {
     final sections = buildMoreSections(context, ref);
 
     return Scaffold(
-      body: CustomScrollView(
+      body: KuberHeaderPage(
+        header: MoreHeader.appBar(context),
+        body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(child: MoreHeader()),
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(
               KuberSpace.screenMargin,
@@ -123,6 +126,7 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

@@ -109,10 +109,8 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
               .toSet()
               .length;
 
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
+          return KuberHeaderPage(
+ header: KuberAppBar(
                   showBack: true,
                   title: context.l10n.ledgerTitle,
                   infoConfig: InfoConstants.ledger,
@@ -124,7 +122,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                           onChanged: (v) => setState(() => _query = v),
                         ),
                 ),
-              ),
+ body: CustomScrollView(
+            slivers: [
+              KuberHeaderPage.sliverGap(),
 
               if (ledgers.isNotEmpty && q.isEmpty)
                 SliverPadding(
@@ -217,7 +217,8 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                 child: SizedBox(height: KuberExtendedFab.clearance),
               ),
             ],
-          );
+          ),
+ );
         },
       ),
     );

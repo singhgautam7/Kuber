@@ -11831,4 +11831,41 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'मागील 7 दिवस';
+
+  @override
+  String get floatingHeaderTitle => 'फ्लोटिंग हेडर';
+
+  @override
+  String get floatingHeaderSubtitle => 'स्क्रोल केल्यावर हेडर पिल बनतो';
+
+  @override
+  String get floatingHeaderSwitchOn => 'सुरू';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'बंद · हेडर पेजसोबत स्क्रोल होऊन निघून जातो';
+
+  @override
+  String get floatingHeaderSection => 'पिल केव्हा दाखवायचा';
+
+  @override
+  String get floatingHeaderAlways => 'नेहमी';
+
+  @override
+  String get floatingHeaderScrollUp => 'वर स्क्रोल करताना';
+
+  @override
+  String get floatingHeaderScrollStop => 'स्क्रोल थांबल्यावर';
+
+  @override
+  String get floatingHeaderOff => 'बंद';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, हेडरचे पूर्वावलोकन';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'फ्लोटिंग हेडर पिल स्टिकी वरचा बार स्क्रोल लपवा floating header pill';
 }

@@ -115,10 +115,8 @@ class _TagsBodyState extends State<_TagsBody> {
             for (final t in widget.allTags)
               if (t.name.toLowerCase().contains(q)) t,
           ];
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: KuberAppBar(
+    return KuberHeaderPage(
+ header: KuberAppBar(
             showBack: true,
             title: context.l10n.menuTags,
             infoConfig: InfoConstants.tags,
@@ -130,7 +128,9 @@ class _TagsBodyState extends State<_TagsBody> {
                     onChanged: (v) => setState(() => _query = v),
                   ),
           ),
-        ),
+ body: CustomScrollView(
+      slivers: [
+        KuberHeaderPage.sliverGap(),
 
         if (tags.isEmpty && q.isNotEmpty)
           SliverFillRemaining(
@@ -183,7 +183,8 @@ class _TagsBodyState extends State<_TagsBody> {
           child: SizedBox(height: KuberExtendedFab.clearance),
         ),
       ],
-    );
+    ),
+ );
   }
 }
 

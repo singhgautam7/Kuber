@@ -83,6 +83,31 @@ abstract final class KuberShape {
 
 /// Motion tokens (tokens.md §8, from Perch `Motion`). Only new components use
 /// these; existing animations keep their own timings.
+/// Elevation tokens. Kuber's depth is tonal (surface containers + borders);
+/// the one exception is `shadow.float` (v7.0.0-c handoff, "New tokens"): a
+/// surface that floats over content of the same colour (the floating header
+/// pill and its docked islands, the reorder lift layer). Painted as a layer
+/// whose opacity follows the morph, never animated as a shadow.
+abstract final class KuberElevation {
+  /// shadow.float: light 0 1 2 / 8 % + 0 4 12 / 10 %; dark 0 1 2 / 40 % +
+  /// 0 4 16 / 50 %.
+  static List<BoxShadow> float(ColorScheme cs) {
+    final dark = cs.brightness == Brightness.dark;
+    return [
+      BoxShadow(
+        color: cs.shadow.withValues(alpha: dark ? 0.40 : 0.08),
+        offset: const Offset(0, 1),
+        blurRadius: 2,
+      ),
+      BoxShadow(
+        color: cs.shadow.withValues(alpha: dark ? 0.50 : 0.10),
+        offset: const Offset(0, 4),
+        blurRadius: dark ? 16 : 12,
+      ),
+    ];
+  }
+}
+
 abstract final class KuberMotion {
   // ---- Effects (opacity, colour: never springs). v7.0.0 motion.md. ----
   static const Duration instant = Duration(milliseconds: 90);

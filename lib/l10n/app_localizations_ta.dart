@@ -11961,4 +11961,42 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get chartPeriod7dSub => 'கடந்த 7 நாட்கள்';
+
+  @override
+  String get floatingHeaderTitle => 'மிதக்கும் தலைப்புப் பட்டி';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'நீங்கள் ஸ்க்ரோல் செய்யும்போது தலைப்புப் பட்டி மாத்திரை வடிவமாக மாறும்';
+
+  @override
+  String get floatingHeaderSwitchOn => 'இயக்கத்தில்';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'அணைவு · தலைப்புப் பட்டி பக்கத்துடன் ஸ்க்ரோல் ஆகி மறையும்';
+
+  @override
+  String get floatingHeaderSection => 'மாத்திரையை எப்போது காட்டுவது';
+
+  @override
+  String get floatingHeaderAlways => 'எப்போதும்';
+
+  @override
+  String get floatingHeaderScrollUp => 'மேலே ஸ்க்ரோல் செய்யும்போது';
+
+  @override
+  String get floatingHeaderScrollStop => 'ஸ்க்ரோல் நிற்கும்போது';
+
+  @override
+  String get floatingHeaderOff => 'அணை';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, தலைப்புப் பட்டியின் முன்னோட்டம்';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'மிதக்கும் தலைப்பு பில் மேல் பட்டி உருட்டு மறை floating header pill';
 }
