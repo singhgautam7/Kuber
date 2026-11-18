@@ -70,6 +70,13 @@ Profiling recipe (trace-startup, jank logging) lives in `specs/performance.md` â
    they are measured, not theoretical.
 10. **Do not break existing functionality**: check affected providers and repositories
     when adding features. No unrelated refactors.
+11. **Common widgets only**: every screen, sheet, card, row, button and chip is built from
+    the shared components below (`lib/shared/widgets/`) and existing feature widgets. Never
+    write a one-off lookalike (a private sheet shell, a hand-made card or button). Every
+    bottom sheet is a `KuberBottomSheet`; every Home suggestion goes through the Home v2
+    suggestion system (`SuggestionCard`). If a shared widget lacks something the design
+    needs, extend it with a parameter; don't fork it. Match the design spec exactly within
+    those components.
 
 ## Shared components (`lib/shared/widgets/`) â€” reuse, don't re-layout
 
@@ -78,14 +85,16 @@ Profiling recipe (trace-startup, jank logging) lives in `specs/performance.md` â
 | `KuberAppBar` | Top bar on pushed screens. `showBack` / `showHome`, `infoConfig` (help sheet), `overflowConfig`, `pinShortcut`. Set `showBrand: false` when a `KuberPageHeader` follows. |
 | `KuberPageHeader` | Large landing-page title + optional description + optional circular action. **Supplies its own 20 px horizontal padding**: place it as a bare `SliverToBoxAdapter` / child, never inside a horizontal `SliverPadding` (see History `transaction_list_screen.dart`). Body content below uses `KuberSpacing.lg`. |
 | `AppButton` (`app_button.dart`) | Primary / secondary / destructive buttons (`AppButtonType`), `isLoading`, `fullWidth`. There is no `KuberButton` class. |
-| `KuberBottomSheet` | Shell for all bottom sheets: drag handle, title/subtitle, scrollable `child`, pinned `actions`. Open with `showModalBottomSheet(isScrollControlled: true, useSafeArea: true, ...)`; top radius `KuberRadius.lg`. |
+| `KuberBottomSheet` | Shell for **every** bottom sheet (no exceptions): drag handle, title/subtitle (or none for headerless sheets), scrollable `child`, pinned `actions`. Open with `showModalBottomSheet(isScrollControlled: true, useSafeArea: true, useRootNavigator: true, ...)` so it covers the bottom nav and FAB; top radius `KuberRadius.lg`. |
 | `InfoTable` + `InfoTableDataRow` / `HighlightRow` / `LabelOnlyRow`, `SheetAmountHero` | Key-value detail blocks inside sheets (transaction detail, calculator results). |
 | `SheetButtonSection` + `SheetAction` | Action row at the bottom of a sheet: one `primary`, extra `actions` (overflow when many), `destructive: true` for delete. |
 | `KuberInfoBottomSheet` + `KuberInfoConfig` / `KuberInfoItem` (`core/models/info_config.dart`) | The "what is this screen" help sheet, wired via `KuberAppBar(infoConfig:)`. |
 | `showKuberSnackBar(context, message, {isError, actionLabel, onAction, duration})` | All toasts. Never `ScaffoldMessenger` directly. |
 | Destructive confirm | `showDialog` + `AlertDialog` with `localeFont` styles, cancel `TextButton`, confirm colored `cs.error`. Follow `categories_screen.dart` delete dialogs. |
 | `KuberEmptyState`, `KuberSkeleton`, `KuberLoader` | Empty / loading states. Skeleton over spinner for list screens (History pattern). |
-| `KuberSegmentedControl`, `KuberDateRangeSelector`, `KuberBarChart`, `CategoryIcon`, `TransactionDetailSheet` | Reuse before building a lookalike. |
+| `SuggestionCard` (`features/home_v2/widgets/`) | Every Home suggestion / offer (add an `SgType`, never a separate Home card). |
+| `ExpressiveChart` (`shared/widgets/expressive_chart/`) | Bar / line charts over time (Income & expense, Custom dashboards). |
+| `KuberSegmentedControl`, `KuberDateRangeSelector`, `CategoryIcon`, `TransactionDetailSheet` | Reuse before building a lookalike. |
 
 Layout: GoRouter `ShellRoute` wraps tab screens in `AppScaffold` (`app_scaffold.dart`);
 the FAB and nav rail live there, not in individual screens.

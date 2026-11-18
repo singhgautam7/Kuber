@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/features/pro/trial/widgets/pro_suggestion_slot.dart';
 import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -153,6 +154,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                   child: HistoryFilterWidget(
                     key: TutorialStepKeys.historyQuickFilters,
                     onAdvancedTap: () => context.push('/history/filter'),
+                  ),
+                ),
+                // v7.0.0-b trial: SMS import suggestion (nothing for Pro users).
+                const SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
+                  sliver: SliverToBoxAdapter(
+                    child: ProSuggestionSlot(place: ProSuggestionPlace.history),
                   ),
                 ),
 

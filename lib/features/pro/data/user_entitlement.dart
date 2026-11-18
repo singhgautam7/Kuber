@@ -71,6 +71,22 @@ class UserEntitlement {
   /// Prevents nagging on every open after day 14.
   bool trialEndedNoticeShown = false;
 
+  // v7.0.0-b app-managed trial record (additive, nullable). The signed record
+  // is `{v, id, start, sig}`; see `features/pro/trial/trial_record.dart`.
+  String? trialRecordId;
+  DateTime? trialStartAt;
+  String? trialSig;
+  int? trialVersion;
+
+  /// Latest time ever seen by a trial evaluation (clock guard).
+  DateTime? trialHighWaterAt;
+
+  /// The new "Pro trial ended" sheet was shown once.
+  bool proTrialEndedNoticeShown = false;
+
+  /// A trial record with a bad signature was seen anywhere: counts as used.
+  bool trialInvalidSeen = false;
+
   /// Flat view for the Dev Tools DB Explorer (read-only inspection). Not used
   /// for backup — the entitlement is device-local and never exported.
   Map<String, dynamic> toMap() => {
@@ -85,6 +101,11 @@ class UserEntitlement {
         'activeProductId': activeProductId,
         'lastVerifiedAt': lastVerifiedAt?.toIso8601String(),
         'trialEndedNoticeShown': trialEndedNoticeShown,
+        'trialRecordId': trialRecordId,
+        'trialStartAt': trialStartAt?.toIso8601String(),
+        'trialHighWaterAt': trialHighWaterAt?.toIso8601String(),
+        'proTrialEndedNoticeShown': proTrialEndedNoticeShown,
+        'trialInvalidSeen': trialInvalidSeen,
       };
 }
 
@@ -95,6 +116,9 @@ class UserEntitlement {
 class EntitlementTier {
   static const free = 'free';
   static const trial = 'trial';
+
+  /// v7.0.0-b: an active app-managed trial and nothing paid.
+  static const proTrial = 'pro_trial';
   static const proMonthly = 'pro_monthly';
   static const proYearly = 'pro_yearly';
   static const proLifetime = 'pro_lifetime';
@@ -103,6 +127,7 @@ class EntitlementTier {
   static const all = <String>{
     free,
     trial,
+    proTrial,
     proMonthly,
     proYearly,
     proLifetime,

@@ -36,6 +36,7 @@ class MainActivity : FlutterFragmentActivity() {
     private val channelName = SafBackupHandler.CHANNEL
     private val backgroundChannelName = "com.grs.kuber/background_tasks"
     private val safHandler by lazy { SafBackupHandler(applicationContext) }
+    private val blockStoreHandler by lazy { BlockStoreHandler(applicationContext) }
     private val smsChannelName = "com.grs.kuber/sms"
     private val widgetsChannelName = "com.grs.kuber/widgets"
     private val shortcutsChannelName = "com.grs.kuber/shortcuts"
@@ -107,6 +108,8 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, BlockStoreHandler.CHANNEL)
+            .setMethodCallHandler { call, result -> blockStoreHandler.handle(call, result) }
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             smsChannelName

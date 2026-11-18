@@ -5,6 +5,7 @@
 // SheetButtonSection, KuberChip) so they look and move like the rest of Kuber.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/pressable.dart';
 import 'package:kuber/core/motion/route_styles.dart';
 import 'animated_amount.dart';
 
@@ -118,41 +119,54 @@ class EmiSplitBar extends StatelessWidget {
   }
 }
 
-/// Outlined assist chip "From Home loan ›" on the transaction sheet.
-class SourceChip extends StatelessWidget {
+/// Text button "link icon, From Home loan, chevron" under the transaction
+/// details. 40 dp high, 48 dp touch target; one line at the default font, up
+/// to two at the largest.
+class SourceLinkButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
-  const SourceChip({super.key, required this.label, this.onTap});
+  const SourceLinkButton({super.key, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-          borderRadius: KuberShape.mediumR, side: BorderSide(color: cs.outlineVariant)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height: 32,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.link_rounded, size: 18, color: cs.primary),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(label,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(color: cs.onSurface)),
-              ),
-              if (onTap != null) ...[
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, size: 18, color: cs.onSurfaceVariant),
-              ],
-            ]),
+    final large = MediaQuery.textScalerOf(context).scale(14) > 21;
+    return Pressable(
+      kind: PressKind.button,
+      restRadius: 20,
+      builder: (context, radius, pressed) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Material(
+        color: Color.lerp(Colors.transparent, cs.primary.withValues(alpha: 0.12), pressed.clamp(0, 1)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 40),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.link_rounded, size: 18, color: cs.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(label,
+                      maxLines: large ? 2 : 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge!
+                          .copyWith(color: cs.primary)),
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right_rounded, size: 18, color: cs.primary),
+                ],
+              ]),
+            ),
           ),
         ),
+      ),
       ),
     );
   }

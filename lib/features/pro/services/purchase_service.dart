@@ -14,6 +14,7 @@ import '../../../core/utils/prefs_keys.dart';
 import '../paywall/billing_ui_state.dart';
 import '../paywall/pro_state.dart';
 import '../paywall/subscription_offer.dart';
+import '../trial/trial_state.dart';
 import '../purchase_states/purchase_failure_snackbar.dart';
 import '../purchase_states/purchase_success_sheet.dart';
 import '../support/support_success_sheets.dart';
@@ -259,6 +260,7 @@ class PurchaseService {
       case LapseAction.revoke:
         await prefs.remove(PrefsKeys.proMissingSince);
         _ref.read(kuberProStateProvider.notifier).revoke();
+        _ref.read(proTrialProvider.notifier).onEntitlementChanged();
     }
   }
 
@@ -676,6 +678,8 @@ class PurchaseService {
               ? purchase.billingClientPurchase.isAutoRenewing
               : null,
         );
+    // Paid wins: the trial record stays (so it stays used), reminders stop.
+    _ref.read(proTrialProvider.notifier).onEntitlementChanged();
 
     // A fresh purchase gets the celebratory success sheet; a silent cold-start
     // restore does not (it would ambush the user with a sheet they didn't ask

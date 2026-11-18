@@ -144,3 +144,107 @@ extension _ScrollPlot on _AhChartViewState {
     });
   }
 }
+
+final _timeKey = RegExp(r'^\d{4}(-\d{2})?$');
+
+/// One measure over months or years, drawn by the shared [ExpressiveChart]
+/// (Home / Analytics chart). A tap selects a column: the chart shows its
+/// tooltip, and the detail row under it offers "View transactions".
+class _AhTimeChart extends StatefulWidget {
+  const _AhTimeChart({
+    required this.points,
+    required this.line,
+    required this.seriesName,
+    required this.fmt,
+    required this.axisFmt,
+    required this.onView,
+  });
+  final List<AhChartPoint> points;
+  final bool line;
+  final String seriesName;
+  final String Function(double) fmt, axisFmt;
+  final ValueChanged<AhChartPoint>? onView;
+
+  /// Months / years only; a line with negative values keeps its own painter
+  /// (the shared chart plots from zero).
+  static bool fits(List<AhChartPoint> pts, {required bool line}) =>
+      pts.isNotEmpty &&
+      pts.every((p) => _timeKey.hasMatch(p.key)) &&
+      !(line && pts.any((p) => p.value < 0));
+
+  @override
+  State<_AhTimeChart> createState() => _AhTimeChartState();
+}
+
+class _AhTimeChartState extends State<_AhTimeChart> {
+  int? _sel;
+  List<AhChartPoint>? _forPts;
+  List<ExpressivePeriod> _periods = const [];
+
+  @override
+  void didUpdateWidget(_AhTimeChart old) {
+    super.didUpdateWidget(old);
+    // The chart clears its own selection when the months change.
+    if ([for (final p in old.points) p.key].join('|') !=
+        [for (final p in widget.points) p.key].join('|')) {
+      _sel = null;
+    }
+  }
+
+  List<ExpressivePeriod> _build(List<AhChartPoint> pts) {
+    if (identical(_forPts, pts)) return _periods;
+    _forPts = pts;
+    return _periods = [
+      for (var i = 0; i < pts.length; i++)
+        ExpressivePeriod(
+          key: i,
+          label: pts[i].label.replaceAll(pts[i].key.substring(0, 4), '').trim(),
+          fullLabel: pts[i].label,
+          values: [pts[i].value.abs()],
+          noData: pts[i].value == 0,
+        ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final pts = widget.points;
+    final n = pts.length;
+    final periods = _build(pts);
+    final sel = _sel;
+    final p = sel != null && sel < n ? pts[sel] : null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ExpressiveChart(
+          series: [
+            ExpressiveSeries(
+                name: widget.seriesName,
+                color: cs.primary,
+                inverseColor: cs.inversePrimary),
+          ],
+          periods: periods,
+          mode: widget.line ? ExpressiveChartMode.line : ExpressiveChartMode.bar,
+          window: n >= 2 && n <= 6 ? n : 6,
+          formatAmount: widget.fmt,
+          formatAxis: widget.axisFmt,
+          selected: sel,
+          onSelectedChanged: (k) => setState(() => _sel = k),
+          resetKey: [for (final x in pts) x.key].join('|'),
+        ),
+        _DetailSlot(
+          child: p == null || widget.onView == null
+              ? null
+              : _ChartDetail(
+                  key: ValueKey('t$sel'),
+                  color: cs.primary,
+                  label: p.label,
+                  value: widget.fmt(p.value),
+                  onView: () => widget.onView!(p),
+                ),
+        ),
+      ],
+    );
+  }
+}

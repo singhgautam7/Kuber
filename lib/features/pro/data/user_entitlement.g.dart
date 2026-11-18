@@ -52,16 +52,51 @@ const UserEntitlementSchema = CollectionSchema(
       name: r'proExpiresAt',
       type: IsarType.dateTime,
     ),
-    r'tier': PropertySchema(id: 7, name: r'tier', type: IsarType.string),
+    r'proTrialEndedNoticeShown': PropertySchema(
+      id: 7,
+      name: r'proTrialEndedNoticeShown',
+      type: IsarType.bool,
+    ),
+    r'tier': PropertySchema(id: 8, name: r'tier', type: IsarType.string),
     r'trialEndedNoticeShown': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'trialEndedNoticeShown',
       type: IsarType.bool,
     ),
     r'trialEndsAt': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'trialEndsAt',
       type: IsarType.dateTime,
+    ),
+    r'trialHighWaterAt': PropertySchema(
+      id: 11,
+      name: r'trialHighWaterAt',
+      type: IsarType.dateTime,
+    ),
+    r'trialInvalidSeen': PropertySchema(
+      id: 12,
+      name: r'trialInvalidSeen',
+      type: IsarType.bool,
+    ),
+    r'trialRecordId': PropertySchema(
+      id: 13,
+      name: r'trialRecordId',
+      type: IsarType.string,
+    ),
+    r'trialSig': PropertySchema(
+      id: 14,
+      name: r'trialSig',
+      type: IsarType.string,
+    ),
+    r'trialStartAt': PropertySchema(
+      id: 15,
+      name: r'trialStartAt',
+      type: IsarType.dateTime,
+    ),
+    r'trialVersion': PropertySchema(
+      id: 16,
+      name: r'trialVersion',
+      type: IsarType.long,
     ),
   },
 
@@ -99,6 +134,18 @@ int _userEntitlementEstimateSize(
     }
   }
   bytesCount += 3 + object.tier.length * 3;
+  {
+    final value = object.trialRecordId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.trialSig;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -115,9 +162,16 @@ void _userEntitlementSerialize(
   writer.writeDateTime(offsets[4], object.firstInstallAt);
   writer.writeDateTime(offsets[5], object.lastVerifiedAt);
   writer.writeDateTime(offsets[6], object.proExpiresAt);
-  writer.writeString(offsets[7], object.tier);
-  writer.writeBool(offsets[8], object.trialEndedNoticeShown);
-  writer.writeDateTime(offsets[9], object.trialEndsAt);
+  writer.writeBool(offsets[7], object.proTrialEndedNoticeShown);
+  writer.writeString(offsets[8], object.tier);
+  writer.writeBool(offsets[9], object.trialEndedNoticeShown);
+  writer.writeDateTime(offsets[10], object.trialEndsAt);
+  writer.writeDateTime(offsets[11], object.trialHighWaterAt);
+  writer.writeBool(offsets[12], object.trialInvalidSeen);
+  writer.writeString(offsets[13], object.trialRecordId);
+  writer.writeString(offsets[14], object.trialSig);
+  writer.writeDateTime(offsets[15], object.trialStartAt);
+  writer.writeLong(offsets[16], object.trialVersion);
 }
 
 UserEntitlement _userEntitlementDeserialize(
@@ -135,9 +189,16 @@ UserEntitlement _userEntitlementDeserialize(
   object.id = id;
   object.lastVerifiedAt = reader.readDateTimeOrNull(offsets[5]);
   object.proExpiresAt = reader.readDateTimeOrNull(offsets[6]);
-  object.tier = reader.readString(offsets[7]);
-  object.trialEndedNoticeShown = reader.readBool(offsets[8]);
-  object.trialEndsAt = reader.readDateTimeOrNull(offsets[9]);
+  object.proTrialEndedNoticeShown = reader.readBool(offsets[7]);
+  object.tier = reader.readString(offsets[8]);
+  object.trialEndedNoticeShown = reader.readBool(offsets[9]);
+  object.trialEndsAt = reader.readDateTimeOrNull(offsets[10]);
+  object.trialHighWaterAt = reader.readDateTimeOrNull(offsets[11]);
+  object.trialInvalidSeen = reader.readBool(offsets[12]);
+  object.trialRecordId = reader.readStringOrNull(offsets[13]);
+  object.trialSig = reader.readStringOrNull(offsets[14]);
+  object.trialStartAt = reader.readDateTimeOrNull(offsets[15]);
+  object.trialVersion = reader.readLongOrNull(offsets[16]);
   return object;
 }
 
@@ -163,11 +224,25 @@ P _userEntitlementDeserializeProp<P>(
     case 6:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
-    case 8:
       return (reader.readBool(offset)) as P;
+    case 8:
+      return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readBool(offset)) as P;
+    case 10:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 11:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
+      return (reader.readBool(offset)) as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readStringOrNull(offset)) as P;
+    case 15:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 16:
+      return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -950,6 +1025,18 @@ extension UserEntitlementQueryFilter
   }
 
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  proTrialEndedNoticeShownEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'proTrialEndedNoticeShown',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
   tierEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1174,6 +1261,552 @@ extension UserEntitlementQueryFilter
       );
     });
   }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'trialHighWaterAt'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'trialHighWaterAt'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'trialHighWaterAt', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterAtGreaterThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'trialHighWaterAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterAtLessThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'trialHighWaterAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialHighWaterAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'trialHighWaterAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialInvalidSeenEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'trialInvalidSeen', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'trialRecordId'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'trialRecordId'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'trialRecordId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'trialRecordId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'trialRecordId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'trialRecordId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'trialRecordId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'trialRecordId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'trialRecordId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'trialRecordId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'trialRecordId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialRecordIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'trialRecordId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'trialSig'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'trialSig'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'trialSig',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'trialSig',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'trialSig',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'trialSig',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'trialSig',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'trialSig',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'trialSig',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'trialSig',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'trialSig', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialSigIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'trialSig', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialStartAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'trialStartAt'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialStartAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'trialStartAt'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialStartAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'trialStartAt', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialStartAtGreaterThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'trialStartAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialStartAtLessThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'trialStartAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialStartAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'trialStartAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialVersionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'trialVersion'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialVersionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'trialVersion'),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialVersionEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'trialVersion', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialVersionGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'trialVersion',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialVersionLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'trialVersion',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterFilterCondition>
+  trialVersionBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'trialVersion',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
 }
 
 extension UserEntitlementQueryObject
@@ -1282,6 +1915,20 @@ extension UserEntitlementQuerySortBy
     });
   }
 
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByProTrialEndedNoticeShown() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'proTrialEndedNoticeShown', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByProTrialEndedNoticeShownDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'proTrialEndedNoticeShown', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy> sortByTier() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tier', Sort.asc);
@@ -1320,6 +1967,90 @@ extension UserEntitlementQuerySortBy
   sortByTrialEndsAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'trialEndsAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialHighWaterAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialHighWaterAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialInvalidSeen() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialInvalidSeen', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialInvalidSeenDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialInvalidSeen', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialRecordId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialRecordId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialRecordIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialRecordId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialSig() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialSig', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialSigDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialSig', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialStartAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialStartAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialStartAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialStartAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  sortByTrialVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialVersion', Sort.desc);
     });
   }
 }
@@ -1436,6 +2167,20 @@ extension UserEntitlementQuerySortThenBy
     });
   }
 
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByProTrialEndedNoticeShown() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'proTrialEndedNoticeShown', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByProTrialEndedNoticeShownDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'proTrialEndedNoticeShown', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy> thenByTier() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tier', Sort.asc);
@@ -1474,6 +2219,90 @@ extension UserEntitlementQuerySortThenBy
   thenByTrialEndsAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'trialEndsAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialHighWaterAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialHighWaterAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialHighWaterAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialInvalidSeen() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialInvalidSeen', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialInvalidSeenDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialInvalidSeen', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialRecordId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialRecordId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialRecordIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialRecordId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialSig() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialSig', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialSigDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialSig', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialStartAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialStartAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialStartAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialStartAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QAfterSortBy>
+  thenByTrialVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'trialVersion', Sort.desc);
     });
   }
 }
@@ -1535,6 +2364,13 @@ extension UserEntitlementQueryWhereDistinct
     });
   }
 
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByProTrialEndedNoticeShown() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'proTrialEndedNoticeShown');
+    });
+  }
+
   QueryBuilder<UserEntitlement, UserEntitlement, QDistinct> distinctByTier({
     bool caseSensitive = true,
   }) {
@@ -1554,6 +2390,52 @@ extension UserEntitlementQueryWhereDistinct
   distinctByTrialEndsAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'trialEndsAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByTrialHighWaterAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'trialHighWaterAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByTrialInvalidSeen() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'trialInvalidSeen');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByTrialRecordId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'trialRecordId',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct> distinctByTrialSig({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'trialSig', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByTrialStartAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'trialStartAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, UserEntitlement, QDistinct>
+  distinctByTrialVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'trialVersion');
     });
   }
 }
@@ -1615,6 +2497,13 @@ extension UserEntitlementQueryProperty
     });
   }
 
+  QueryBuilder<UserEntitlement, bool, QQueryOperations>
+  proTrialEndedNoticeShownProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'proTrialEndedNoticeShown');
+    });
+  }
+
   QueryBuilder<UserEntitlement, String, QQueryOperations> tierProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'tier');
@@ -1632,6 +2521,46 @@ extension UserEntitlementQueryProperty
   trialEndsAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'trialEndsAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, DateTime?, QQueryOperations>
+  trialHighWaterAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialHighWaterAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, bool, QQueryOperations>
+  trialInvalidSeenProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialInvalidSeen');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, String?, QQueryOperations>
+  trialRecordIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialRecordId');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, String?, QQueryOperations> trialSigProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialSig');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, DateTime?, QQueryOperations>
+  trialStartAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialStartAt');
+    });
+  }
+
+  QueryBuilder<UserEntitlement, int?, QQueryOperations> trialVersionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'trialVersion');
     });
   }
 }

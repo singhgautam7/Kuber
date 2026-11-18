@@ -139,6 +139,8 @@ class _BillingDiagnosticSheetState
     b.writeln('isPro (resolver): ${pro.isPro}');
     b.writeln('source: ${pro.source.name}');
     b.writeln('plan: ${pro.plan?.name ?? '—'}');
+    b.writeln('trial active: ${pro.isTrialActive}'
+        '${pro.trialEndsAt == null ? '' : ' (ends ${pro.trialEndsAt!.toIso8601String()})'}');
     b.writeln(
       'triggering productId: '
       '${pro.plan == null ? '—' : productIdForPlan(pro.plan!)}',

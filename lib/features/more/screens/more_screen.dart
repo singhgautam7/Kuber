@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/features/pro/trial/widgets/pro_suggestion_slot.dart';
 import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,6 +97,8 @@ class MoreScreenSimple extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 const KuberProSettingsSection(),
                 const SizedBox(height: KuberSpace.sectionGap),
+                // v7.0.0-b trial: Kuber Cards suggestion.
+                const ProSuggestionSlot(place: ProSuggestionPlace.more),
                 for (final section in sections) ...[
                   if (section.id == MoreSectionId.helpUs)
                     MoreHelpUsStrip(section: section)

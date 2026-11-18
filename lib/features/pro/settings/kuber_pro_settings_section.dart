@@ -8,6 +8,7 @@ import '../../../../core/utils/l10n_ext.dart';
 import '../../../../shared/widgets/kuber_list.dart';
 import '../paywall/billing_ui_state.dart';
 import '../paywall/pro_state.dart';
+import '../trial/trial_state.dart';
 import 'kuber_pro_section_loading.dart';
 
 /// Top of Settings (Components 2m): primaryContainer, 48 tile, the plan as a
@@ -100,9 +101,19 @@ class KuberProSettingsSection extends ConsumerWidget {
         ? ''
         : DateFormat('d MMM y', l.localeName).format(s.activatedAt!);
     final renewal = purchased ? s.renewalLabel() : null;
+    final trial = s.isPro ? null : ref.watch(proTrialProvider);
+    String? trialSub;
+    if (trial != null && trial.endAt != null) {
+      final d = DateFormat('d MMM', l.localeName).format(trial.endAt!.toLocal());
+      if (trial.isActive) {
+        trialSub = l.setProTrialSub('${trial.daysLeft}', d);
+      } else if (trial.isEnded) {
+        trialSub = l.setProEndedSub(d);
+      }
+    }
     return KuberProCard(
       icon: purchased || promo ? Icons.verified_rounded : Icons.workspace_premium_rounded,
-      title: purchased || promo ? 'Kuber Pro' : l.proCardTry,
+      title: purchased || promo || trialSub != null ? 'Kuber Pro' : l.proCardTry,
       pill: purchased
           ? switch (s.plan) {
               ProPlan.monthly => l.proCardMonthly,
@@ -113,7 +124,7 @@ class KuberProSettingsSection extends ConsumerWidget {
           : promo
               ? l.proCardPromo
               : null,
-      subtitle: switch ((purchased, promo)) {
+      subtitle: trialSub ?? switch ((purchased, promo)) {
         (true, _) => renewal ?? l.proCardActive(since()),
         (_, true) => s.promoEndsAt == null
             ? l.proCardPromoForever

@@ -1,4 +1,4 @@
-/// X-axis bucketing options for [KuberBarChart]. The dropdown shown on the
+/// X-axis bucketing options for the Income & expense chart. The dropdown on the
 /// analytics chart lets the user override the auto-selected bucket.
 enum KuberChartBucket { day, week, month, quarter, year }
 
@@ -64,4 +64,31 @@ int _inclusiveDayDiff(DateTime from, DateTime to) {
   final a = DateTime(from.year, from.month, from.day);
   final b = DateTime(to.year, to.month, to.day);
   return b.difference(a).inDays + 1; // both endpoints inclusive
+}
+
+/// One period of the Analytics Income & expense chart (before it becomes an
+/// `ExpressivePeriod`).
+class KuberBarBucket {
+  final String dayLabel; // x label, e.g. "21"
+  final String monthLabel; // e.g. "OCT"
+  final double income;
+  final double expense;
+  final bool isHighlighted; // true for today / last item in period
+  final DateTime? date;
+  final DateTime? endDate;
+
+  /// 0..4 for the "Today" time-of-day buckets (the label is localized by the
+  /// widget); null otherwise.
+  final int? timeOfDaySlot;
+
+  const KuberBarBucket({
+    required this.dayLabel,
+    required this.monthLabel,
+    required this.income,
+    required this.expense,
+    this.isHighlighted = false,
+    this.date,
+    this.endDate,
+    this.timeOfDaySlot,
+  });
 }

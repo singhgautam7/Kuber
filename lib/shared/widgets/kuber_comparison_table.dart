@@ -18,7 +18,16 @@ class KuberComparisonTable extends StatelessWidget {
   /// widths. The caller can pass `dense: true` or leave it to full phrasing.
   final bool dense;
 
-  const KuberComparisonTable({required this.rows, this.dense = false, super.key});
+  /// Wraps each group / feature row (index over [rows], header excluded), e.g.
+  /// for a staggered entrance. Null leaves the rows as they are.
+  final Widget Function(int index, Widget row)? entryBuilder;
+
+  const KuberComparisonTable({
+    required this.rows,
+    this.dense = false,
+    this.entryBuilder,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +42,14 @@ class KuberComparisonTable extends StatelessWidget {
         final effectiveDense = dense || constraints.maxWidth < 400;
 
         final children = <Widget>[_HeaderRow(dense: effectiveDense)];
-        for (final entry in rows) {
+        for (var i = 0; i < rows.length; i++) {
+          final entry = rows[i];
           children.add(Divider(height: 1, thickness: 1, color: dividerColor));
-          children.add(switch (entry) {
+          final row = switch (entry) {
             ComparisonGroup() => _GroupRow(title: entry.title),
             ComparisonRow() => _FeatureRow(row: entry, dense: effectiveDense),
-          });
+          };
+          children.add(entryBuilder == null ? row : entryBuilder!(i, row));
         }
 
         // The border is a foreground decoration so the filled header row

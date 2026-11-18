@@ -9,6 +9,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../pro/paywall/pro_state.dart';
+import '../../pro/trial/trial_checklist.dart';
 import '../providers/advanced_analytics_provider.dart';
 import '../widgets/about_analytics_info_sheet.dart';
 import '../widgets/analytics_common.dart';
@@ -23,6 +24,14 @@ class AdvancedAnalyticsLanding extends ConsumerStatefulWidget {
 
 class _AdvancedAnalyticsLandingState
     extends ConsumerState<AdvancedAnalyticsLanding> {
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(kuberProStateProvider).hasProAccess) {
+      ProTrialChecklist.markTried(ProTrialFeature.advancedAnalytics);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasAccess = ref.watch(

@@ -196,6 +196,7 @@ class _AhChartCardState extends ConsumerState<AhChartCard>
         AhChartState.loading => const AhDelayed(child: _ChartSkeleton()),
         AhChartState.ok => AhChartView(
             type: spec.type,
+            seriesName: ahMeasureLabel(l, spec.measure),
             points: [
               for (final p in d.points)
                 AhChartPoint(p.key, ahGroupLabel(pointGroup, p.key, p.label, l),

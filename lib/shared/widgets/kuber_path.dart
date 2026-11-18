@@ -162,11 +162,23 @@ class KuberPath {
 class _PathObserver extends NavigatorObserver {
   final routes = <Route<dynamic>>[];
 
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => routes.add(route);
+  /// Bumps on every root-navigator push / pop, so a tab widget can tell a
+  /// sheet or dialog opened over the shell (its own ModalRoute lives in the
+  /// branch navigator and never stops being current). Used by the Home
+  /// balance card to go back to net.
+  final changes = ValueNotifier<int>(0);
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => routes.remove(route);
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    routes.add(route);
+    changes.value++;
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    routes.remove(route);
+    changes.value++;
+  }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => routes.remove(route);

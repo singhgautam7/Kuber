@@ -24,6 +24,8 @@ import 'paywall_loading_state.dart';
 import 'paywall_manage_state.dart';
 import 'pro_faq_section.dart';
 import 'pro_page_extras.dart';
+import '../trial/trial_state.dart';
+import 'paywall_trial_section.dart';
 import 'pro_state.dart';
 import 'subscription_offer.dart';
 
@@ -133,18 +135,28 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
   // ── Sell mode (free / lapsed) ───────────────────────────────────────────
   List<Widget> _sellBody(KuberProState proState, SubscriptionOfferInfo? offer) {
     final hadPrior = ref.watch(hadPriorProProvider);
+    final trial = ref.watch(proTrialProvider);
     return [
       if (hadPrior) ...[
         const _WelcomeBackCard(),
         const SizedBox(height: KuberSpace.lg),
       ],
-      const _SellHero(),
-      const SizedBox(height: KuberSpace.xl),
+      if (trial.isActive || trial.isEnded) ...[
+        const PaywallTrialSection(),
+        const SizedBox(height: KuberSpace.xl),
+      ] else ...[
+        const _SellHero(),
+        const SizedBox(height: KuberSpace.xl),
+        if (trial.eligible) ...[
+          const ProClaimEntry(),
+          const SizedBox(height: KuberSpace.xl),
+        ],
+      ],
       if (offer != null && offer.hasIntroBenefit) ...[
         _OfferBadge(offer: offer),
         const SizedBox(height: KuberSpace.xl),
       ],
-      _sectionLabel('CHOOSE A PLAN'),
+      _sectionLabel(trial.eligible ? context.l10n.proOrPlan : 'CHOOSE A PLAN'),
       const SizedBox(height: KuberSpace.sm),
       ..._planCards(offer),
       const SizedBox(height: KuberSpace.xl),
@@ -240,14 +252,34 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
             : 'Continue with Yearly · $price/yr',
       ProPlan.lifetime => 'Continue with Lifetime · $price',
     };
-    return AppButton(
-      label: label,
+    final inTrial = ref.watch(proTrialProvider.select((t) => t.isActive));
+    final l = context.l10n;
+    final button = AppButton(
+      label: inTrial
+          ? l.proKeepCta(switch (_selected) {
+              ProPlan.monthly => l.proCardMonthly,
+              ProPlan.yearly => l.proCardYearly,
+              ProPlan.lifetime => l.proCardLifetime,
+            }, price)
+          : label,
       type: AppButtonType.primary,
       fullWidth: true,
       height: 48,
       onPressed: () => ref
           .read(purchaseServiceProvider)
           .buyProduct(productIdForPlan(_selected)),
+    );
+    if (!inTrial) return button;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        button,
+        const SizedBox(height: KuberSpace.sm),
+        Text(l.proKeepNote,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      ],
     );
   }
 

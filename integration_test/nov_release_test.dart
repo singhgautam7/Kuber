@@ -46,7 +46,6 @@ import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/transactions/helpers/transaction_filters.dart';
 import 'package:kuber/features/transactions/providers/transaction_provider.dart';
 import 'package:kuber/main.dart' as app;
-import 'package:kuber/shared/widgets/app_scaffold.dart';
 import 'package:kuber/shared/widgets/kuber_path.dart';
 import 'package:kuber/shared/widgets/money_widgets.dart';
 
@@ -144,7 +143,7 @@ void main() {
     await tapText(t, en.obTermsCheck2);
     await shot(t, 'welcome/05-data-page-ready');
     await tapText(t, en.obTermsAgree);
-    await pumpUntil(t, find.byType(AppScaffold), timeout: const Duration(seconds: 30));
+    await finishWelcome(t);
     expectNoErrors(t);
   });
 

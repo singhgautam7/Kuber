@@ -10,6 +10,10 @@ import 'package:kuber/l10n/app_localizations.dart';
 import 'package:kuber/l10n/app_localizations_en.dart';
 import 'package:kuber/main.dart' as app;
 import 'package:kuber/shared/widgets/app_scaffold.dart';
+import 'package:kuber/features/accounts/data/account.dart';
+import 'package:kuber/features/categories/data/category.dart';
+import 'package:kuber/features/transactions/data/transaction.dart';
+import 'dart:math';
 
 final en = AppLocalizationsEn();
 
@@ -179,3 +183,65 @@ Future<void> dismissInfo(WidgetTester t) async {
 
 /// A context under the root navigator, for opening sheets directly.
 BuildContext rootContext(WidgetTester t) => rootNavigatorKey.currentContext!;
+
+const kTxns = 20000;
+const kYears = 7;
+
+/// Seeds the 20,000 transaction / 7 year perf ledger once (v7.0.0, v7.0.0-b).
+Future<void> seedLargeLedger() async {
+  final isar = db;
+  final count = await isar.transactions.count();
+  if (count >= kTxns) return;
+  final cats = await isar.categorys.where().findAll();
+  final accs = await isar.accounts.where().findAll();
+  final rnd = Random(7);
+  final now = DateTime.now();
+  final start = now.subtract(const Duration(days: 365 * kYears));
+  final spanMin = now.difference(start).inMinutes;
+  const names = ['Swiggy', 'Uber', 'Amazon', 'Rent', 'Salary', 'Groceries', 'Fuel',
+    'Netflix', 'Pharmacy', 'Coffee', 'Electricity', 'Zomato', 'Flipkart', 'Gym'];
+  final batch = <Transaction>[];
+  for (var i = 0; i < kTxns - count; i++) {
+    final at = start.add(Duration(minutes: rnd.nextInt(spanMin)));
+    final income = rnd.nextInt(10) == 0;
+    final name = income ? 'Salary' : names[rnd.nextInt(names.length)];
+    batch.add(Transaction()
+      ..name = name
+      ..nameLower = name.toLowerCase()
+      ..amount = income ? 40000 + rnd.nextInt(60000).toDouble() : 20 + rnd.nextInt(5000).toDouble()
+      ..type = income ? 'income' : 'expense'
+      ..categoryId = cats[rnd.nextInt(cats.length)].id.toString()
+      ..accountId = accs[rnd.nextInt(accs.length)].id.toString()
+      ..createdAt = at
+      ..updatedAt = at);
+  }
+  for (var i = 0; i < batch.length; i += 2000) {
+    await isar.writeTxn(() => isar.transactions.putAll(batch.sublist(i, min(i + 2000, batch.length))));
+  }
+}
+
+
+/// End of Welcome (v7.0.0-b): the trial sheet opens over the last setup step.
+/// Returns which variant showed ('started', 'continued', 'used' or 'none'),
+/// closes it and waits for Home.
+Future<String> finishWelcome(WidgetTester t, {void Function(String variant)? onSheet}) async {
+  final started = find.text(en.trialSheetTitle);
+  final continued = find.text(en.trialRestoredTitle);
+  final used = find.text(en.trialUsedTitle);
+  final end = DateTime.now().add(const Duration(seconds: 30));
+  var variant = 'none';
+  while (DateTime.now().isBefore(end)) {
+    await t.pump(const Duration(milliseconds: 100));
+    if (started.evaluate().isNotEmpty) { variant = 'started'; break; }
+    if (continued.evaluate().isNotEmpty) { variant = 'continued'; break; }
+    if (used.evaluate().isNotEmpty) { variant = 'used'; break; }
+    if (find.byType(AppScaffold).evaluate().isNotEmpty) break;
+  }
+  if (variant != 'none') {
+    await settle(t, const Duration(milliseconds: 1500));
+    onSheet?.call(variant);
+    await tapText(t, variant == 'used' ? en.commonNotNow : en.trialSheetCta);
+  }
+  await pumpUntil(t, find.byType(AppScaffold), timeout: const Duration(seconds: 30));
+  return variant;
+}

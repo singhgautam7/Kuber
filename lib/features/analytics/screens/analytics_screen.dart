@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/features/pro/trial/widgets/pro_suggestion_slot.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -10,20 +10,17 @@ import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
-import '../../../shared/utils/chart_bucket.dart';
 import '../../../shared/widgets/edit_widgets_button.dart';
-import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
-import '../../transactions/helpers/transaction_filters.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
 import '../providers/analytics_provider.dart';
 import '../../charts/widgets/category_donut_chart.dart';
-import '../../charts/widgets/income_expense_chart.dart';
+import '../../charts/widgets/analytics_income_expense_chart.dart';
 import '../../charts/widgets/income_expense_chart_controls.dart'
     show KuberSegmentedTabs;
 import '../widgets/avg_weekly_heatmap.dart';
@@ -37,16 +34,6 @@ import '../../advanced_analytics/widgets/deeper_insights_teaser.dart';
 // ---------------------------------------------------------------------------
 // Private data classes
 // ---------------------------------------------------------------------------
-
-class _MutableBucket {
-  final String day;
-  final String month;
-  final DateTime? date;
-  final DateTime? endDate;
-  double income = 0;
-  double expense = 0;
-  _MutableBucket(this.day, this.month, {this.date, this.endDate});
-}
 
 // ---------------------------------------------------------------------------
 // Analytics Screen
@@ -66,266 +53,6 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 final _biggestTabProvider = StateProvider<int>((_) => 0);
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  // ---- bucket helpers -----------------------------------------------------
-
-  List<KuberBarBucket> _buildPeriodBuckets(
-    List<Transaction> txns,
-    AnalyticsFilter filter,
-  ) {
-    txns = txns.validForCalculations.toList();
-
-    // "Today" remains a special case — its 5 time-of-day slots are more
-    // useful than a single day bar. Only Day is available in the dropdown
-    // for a 1-day range anyway, so the dropdown stays hidden here.
-    if (filter.type == FilterType.today) {
-      return _buildTimeOfDayBuckets(txns, filter);
-    }
-
-    switch (filter.effectiveBucket) {
-      case KuberChartBucket.day:
-        return _buildDayBuckets(txns, filter.from, filter.to);
-      case KuberChartBucket.week:
-        return _buildWeekBuckets(txns, filter.from, filter.to);
-      case KuberChartBucket.month:
-        return _buildMonthBuckets(txns, filter.from, filter.to);
-      case KuberChartBucket.quarter:
-        return _buildQuarterBuckets(txns, filter.from, filter.to);
-      case KuberChartBucket.year:
-        return _buildYearBuckets(txns, filter.from, filter.to);
-    }
-  }
-
-  List<KuberBarBucket> _buildTimeOfDayBuckets(
-    List<Transaction> txns,
-    AnalyticsFilter filter,
-  ) {
-    final buckets = [
-      _MutableBucket(
-        context.l10n.bucketDawn,
-        '',
-        date: filter.from,
-        endDate: filter.from.add(const Duration(hours: 5, minutes: 59)),
-      ),
-      _MutableBucket(
-        context.l10n.bucketMorning,
-        '',
-        date: filter.from.add(const Duration(hours: 6)),
-        endDate: filter.from.add(const Duration(hours: 10, minutes: 59)),
-      ),
-      _MutableBucket(
-        context.l10n.bucketNoon,
-        '',
-        date: filter.from.add(const Duration(hours: 11)),
-        endDate: filter.from.add(const Duration(hours: 13, minutes: 59)),
-      ),
-      _MutableBucket(
-        context.l10n.bucketEvening,
-        '',
-        date: filter.from.add(const Duration(hours: 14)),
-        endDate: filter.from.add(const Duration(hours: 18, minutes: 59)),
-      ),
-      _MutableBucket(
-        context.l10n.bucketNight,
-        '',
-        date: filter.from.add(const Duration(hours: 19)),
-        endDate: filter.to,
-      ),
-    ];
-    for (final t in txns) {
-      final h = t.createdAt.hour;
-      int idx;
-      if (h < 6) {
-        idx = 0;
-      } else if (h < 11) {
-        idx = 1;
-      } else if (h < 14) {
-        idx = 2;
-      } else if (h < 19) {
-        idx = 3;
-      } else {
-        idx = 4;
-      }
-      if (t.type == 'income') {
-        buckets[idx].income += t.spendAmount;
-      } else {
-        buckets[idx].expense += t.spendAmount;
-      }
-    }
-    return _toKuber(buckets);
-  }
-
-  List<KuberBarBucket> _buildDayBuckets(
-    List<Transaction> txns,
-    DateTime from,
-    DateTime to,
-  ) {
-    final fromDay = DateTime(from.year, from.month, from.day);
-    final daysCount =
-        DateTime(to.year, to.month, to.day).difference(fromDay).inDays + 1;
-    final buckets = List.generate(daysCount, (i) {
-      final d = fromDay.add(Duration(days: i));
-      return _MutableBucket(
-        DateFormat('d').format(d),
-        DateFormat('MMM').format(d).toUpperCase(),
-        date: d,
-      );
-    });
-    for (final t in txns) {
-      final txDay = DateTime(
-        t.createdAt.year,
-        t.createdAt.month,
-        t.createdAt.day,
-      );
-      final diff = txDay.difference(fromDay).inDays;
-      if (diff < 0 || diff >= daysCount) continue;
-      if (t.type == 'income') {
-        buckets[diff].income += t.spendAmount;
-      } else {
-        buckets[diff].expense += t.spendAmount;
-      }
-    }
-    return _toKuber(buckets);
-  }
-
-  List<KuberBarBucket> _buildWeekBuckets(
-    List<Transaction> txns,
-    DateTime from,
-    DateTime to,
-  ) {
-    final fromDay = DateTime(from.year, from.month, from.day);
-    final days =
-        DateTime(to.year, to.month, to.day).difference(fromDay).inDays + 1;
-    final weeks = (days / 7).ceil().clamp(1, 1000);
-    final buckets = List.generate(weeks, (i) {
-      final start = fromDay.add(Duration(days: i * 7));
-      final end = i == weeks - 1 ? to : start.add(const Duration(days: 6));
-      return _MutableBucket(
-        context.l10n.weekLabel,
-        '${i + 1}',
-        date: start,
-        endDate: end,
-      );
-    });
-    for (final t in txns) {
-      final dayDiff = t.createdAt.difference(fromDay).inDays;
-      final idx = (dayDiff / 7).floor().clamp(0, weeks - 1);
-      if (t.type == 'income') {
-        buckets[idx].income += t.spendAmount;
-      } else {
-        buckets[idx].expense += t.spendAmount;
-      }
-    }
-    return _toKuber(buckets);
-  }
-
-  List<KuberBarBucket> _buildMonthBuckets(
-    List<Transaction> txns,
-    DateTime from,
-    DateTime to,
-  ) {
-    final monthsDiff = (to.year - from.year) * 12 + to.month - from.month;
-    final count = (monthsDiff + 1).clamp(1, 240);
-    final buckets = List.generate(count, (i) {
-      final m = DateTime(from.year, from.month + i, 1);
-      final endM = DateTime(m.year, m.month + 1, 0);
-      return _MutableBucket(
-        DateFormat('MMM').format(m),
-        DateFormat('yy').format(m),
-        date: m,
-        endDate: endM.isAfter(to) ? to : endM,
-      );
-    });
-    for (final t in txns) {
-      final idx =
-          (t.createdAt.year - from.year) * 12 + t.createdAt.month - from.month;
-      if (idx < 0 || idx >= count) continue;
-      if (t.type == 'income') {
-        buckets[idx].income += t.spendAmount;
-      } else {
-        buckets[idx].expense += t.spendAmount;
-      }
-    }
-    return _toKuber(buckets);
-  }
-
-  List<KuberBarBucket> _buildQuarterBuckets(
-    List<Transaction> txns,
-    DateTime from,
-    DateTime to,
-  ) {
-    final fromQStartMonth = ((from.month - 1) ~/ 3) * 3 + 1;
-    final fromQ = DateTime(from.year, fromQStartMonth, 1);
-    final toQStartMonth = ((to.month - 1) ~/ 3) * 3 + 1;
-    final toQ = DateTime(to.year, toQStartMonth, 1);
-    final monthsDiff = (toQ.year - fromQ.year) * 12 + toQ.month - fromQ.month;
-    final count = (monthsDiff ~/ 3 + 1).clamp(1, 80);
-    final buckets = List.generate(count, (i) {
-      final qStart = DateTime(fromQ.year, fromQ.month + i * 3, 1);
-      final qEnd = DateTime(qStart.year, qStart.month + 3, 0);
-      final q = ((qStart.month - 1) ~/ 3) + 1;
-      return _MutableBucket(
-        'Q$q',
-        DateFormat('yy').format(qStart),
-        date: qStart,
-        endDate: qEnd.isAfter(to) ? to : qEnd,
-      );
-    });
-    for (final t in txns) {
-      final tQStartMonth = ((t.createdAt.month - 1) ~/ 3) * 3 + 1;
-      final tQ = DateTime(t.createdAt.year, tQStartMonth, 1);
-      final mDiff = (tQ.year - fromQ.year) * 12 + tQ.month - fromQ.month;
-      final idx = (mDiff ~/ 3).clamp(0, count - 1);
-      if (t.type == 'income') {
-        buckets[idx].income += t.spendAmount;
-      } else {
-        buckets[idx].expense += t.spendAmount;
-      }
-    }
-    return _toKuber(buckets);
-  }
-
-  List<KuberBarBucket> _buildYearBuckets(
-    List<Transaction> txns,
-    DateTime from,
-    DateTime to,
-  ) {
-    final years = (to.year - from.year + 1).clamp(1, 50);
-    final buckets = List.generate(years, (i) {
-      final yStart = DateTime(from.year + i, 1, 1);
-      final yEnd = DateTime(from.year + i, 12, 31);
-      return _MutableBucket(
-        '${from.year + i}',
-        '',
-        date: yStart,
-        endDate: yEnd.isAfter(to) ? to : yEnd,
-      );
-    });
-    for (final t in txns) {
-      final idx = (t.createdAt.year - from.year).clamp(0, years - 1);
-      if (t.type == 'income') {
-        buckets[idx].income += t.spendAmount;
-      } else {
-        buckets[idx].expense += t.spendAmount;
-      }
-    }
-    return _toKuber(buckets);
-  }
-
-  List<KuberBarBucket> _toKuber(List<_MutableBucket> buckets) {
-    return List.generate(buckets.length, (i) {
-      final b = buckets[i];
-      return KuberBarBucket(
-        dayLabel: b.day,
-        monthLabel: b.month,
-        income: b.income,
-        expense: b.expense,
-        isHighlighted: i == buckets.length - 1,
-        date: b.date,
-        endDate: b.endDate,
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final filter = ref.watch(analyticsFilterProvider);
@@ -342,9 +69,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final totalIncome = computed?.totalIncome ?? 0.0;
     final totalExpense = computed?.totalExpense ?? 0.0;
     final netAmount = computed?.netAmount ?? 0.0;
-
-    // Buckets — cached once per build
-    final buckets = _buildPeriodBuckets(periodTxns, filter);
 
     // Category map — only watched when needed for biggest transactions
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
@@ -367,6 +91,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             sliver: SliverToBoxAdapter(child: TopFilterRow()),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: KuberSpace.md)),
+          // v7.0.0-b trial: dashboards / Advanced analytics suggestion.
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
+            sliver: SliverToBoxAdapter(
+              child: ProSuggestionSlot(place: ProSuggestionPlace.analytics),
+            ),
+          ),
 
           // ── Analytics widgets (dynamic order + visibility from editor) ─
           if (isEmpty)
@@ -394,7 +125,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
               sliver: _AnalyticsWidgetList(
                 filter: filter,
-                buckets: buckets,
                 periodTxns: periodTxns,
                 computed: computed,
                 categoryMap: categoryMap,
@@ -593,7 +323,6 @@ class _SummaryTile extends StatelessWidget {
 /// underlying providers stay idle until re-enabled.
 class _AnalyticsWidgetList extends ConsumerStatefulWidget {
   final AnalyticsFilter filter;
-  final List<KuberBarBucket> buckets;
   final List<Transaction> periodTxns;
   final AnalyticsComputed computed;
   final Map<int, dynamic> categoryMap;
@@ -614,7 +343,6 @@ class _AnalyticsWidgetList extends ConsumerStatefulWidget {
 
   const _AnalyticsWidgetList({
     required this.filter,
-    required this.buckets,
     required this.periodTxns,
     required this.computed,
     required this.categoryMap,
@@ -673,28 +401,8 @@ class _AnalyticsWidgetListState extends ConsumerState<_AnalyticsWidgetList> {
         return Padding(
           padding: bottom,
           child: RepaintBoundary(
-            child: IncomeExpenseChart(
+            child: AnalyticsIncomeExpenseChart(
               key: TutorialStepKeys.spendingTrendsChart,
-              compact: false,
-              points: [
-                for (final b in widget.buckets)
-                  IncomeExpensePoint(
-                    label: b.dayLabel,
-                    income: b.income,
-                    expense: b.expense,
-                    date: b.date,
-                    endDate: b.endDate,
-                  ),
-              ],
-              bucket: widget.filter.type == FilterType.today
-                  ? null
-                  : widget.filter.effectiveBucket,
-              availableBuckets: availableBucketsForRange(
-                widget.filter.from,
-                widget.filter.to,
-              ),
-              onBucketChanged: (b) =>
-                  ref.read(analyticsFilterProvider.notifier).setBucket(b),
             ),
           ),
         );

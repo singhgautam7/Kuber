@@ -12,6 +12,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../ledger/data/ledger_prefill.dart';
+import '../../pro/trial/widgets/trial_common.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../engine/suggestion_engine.dart';
 import '../providers/home_suggestion_provider.dart';
@@ -37,6 +38,12 @@ _SgCopy _copyFor(BuildContext context, WidgetRef ref, SgCandidate c) {
       l.homeV33TourName,
       l.homeV33TourCardBody,
       l.homeV33TourCardAct,
+    ),
+    SgType.proTrialClaim => _SgCopy(
+      Icons.workspace_premium_rounded,
+      l.trialClaimTitle,
+      l.trialClaimBody,
+      l.trialClaimCta,
     ),
     SgType.quickAddIntro => _SgCopy(
       Icons.bolt_rounded,
@@ -162,6 +169,10 @@ class SuggestionCard extends ConsumerWidget {
     switch (c.type) {
       case SgType.whyKuber:
         await context.push('/tour');
+      case SgType.proTrialClaim:
+        await claimTrial(context, ref);
+        await notifier.afterMainAction(c);
+        return;
       case SgType.smsImportIntro:
         final pending = context.push('/more/sms-import');
         await notifier.afterMainAction(c);

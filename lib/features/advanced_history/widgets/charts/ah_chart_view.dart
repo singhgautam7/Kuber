@@ -9,6 +9,7 @@ import '../../../../core/utils/color_harmonizer.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/expressive_chart/expressive_chart.dart';
 import '../../../charts/widgets/income_expense_chart_controls.dart'
     show chartSelectionColumn, kChartSelectionRadius;
 import '../../models/ah_view.dart';
@@ -47,6 +48,7 @@ class AhChartView extends StatefulWidget {
     this.axisFmt,
     this.dayLabel,
     this.onView,
+    this.seriesName = '',
   });
   final AhChartType type;
   final List<AhChartPoint> points;
@@ -64,6 +66,9 @@ class AhChartView extends StatefulWidget {
   /// Heatmap: the detail row's name for a day key (`2026-11-03`).
   final String Function(String)? dayLabel;
   final ValueChanged<AhChartPoint>? onView;
+
+  /// Name on the tooltip row of the month / year charts (the measure).
+  final String seriesName;
 
   @override
   State<AhChartView> createState() => _AhChartViewState();
@@ -270,6 +275,17 @@ class _AhChartViewState extends State<AhChartView>
       case AhChartType.bars:
       case AhChartType.line:
         final bars = widget.type == AhChartType.bars;
+        // One measure over months / years: the shared chart.
+        if (widget.series.isEmpty && _AhTimeChart.fits(pts, line: !bars)) {
+          return _AhTimeChart(
+            points: pts,
+            line: !bars,
+            seriesName: widget.seriesName,
+            fmt: _full,
+            axisFmt: widget.axisFmt ?? widget.fmt,
+            onView: widget.onView,
+          );
+        }
         final colors = [for (var i = 0; i < pts.length; i++) _color(context, i)];
         final plot = _plot(
           context,

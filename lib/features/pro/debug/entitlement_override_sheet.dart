@@ -8,7 +8,9 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../paywall/pro_state.dart';
+import '../trial/trial_state.dart';
 import 'entitlement_override.dart';
+import 'trial_debug.dart';
 
 /// DEBUG-ONLY sheet to force an entitlement state for local gate testing.
 /// Reached from Dev Tools; the whole feature is compiled out of release builds
@@ -117,9 +119,44 @@ class _EntitlementOverrideSheetState
               selected: _selected == tier,
               onTap: () => setState(() => _selected = tier),
             ),
+          if (debugTrialToolsAllowed) ..._trialTools(cs),
         ],
       ),
     );
+  }
+
+  /// Debug builds only (never QA / release): grant or reset the app trial.
+  List<Widget> _trialTools(ColorScheme cs) {
+    final info = ref.watch(proTrialProvider);
+    final notifier = ref.read(proTrialProvider.notifier);
+    return [
+      const SizedBox(height: KuberSpace.lg),
+      Text(
+        'Trial: ${info.status.name}'
+        '${info.isActive ? ', ${info.daysLeft} days left' : ''}'
+        '${info.eligible ? ', eligible' : ''}',
+        style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+      ),
+      const SizedBox(height: KuberSpace.sm),
+      _OptionTile(
+        label: 'Start trial (0 days used)',
+        subtitle: 'Debug builds only',
+        selected: false,
+        onTap: () => notifier.debugGrant(),
+      ),
+      _OptionTile(
+        label: 'Start trial (11 days used)',
+        subtitle: '3 days left, debug builds only',
+        selected: false,
+        onTap: () => notifier.debugGrant(daysUsed: 11),
+      ),
+      _OptionTile(
+        label: 'Reset trial',
+        subtitle: 'Forget the record here and in Block Store',
+        selected: false,
+        onTap: () => notifier.debugReset(),
+      ),
+    ];
   }
 
   String _subtitleFor(DebugForcedTier tier) => switch (tier) {

@@ -11,6 +11,10 @@ enum SgType {
   /// by [SuggestionEngine]; the provider shows it before the rules run.
   whyKuber(0),
 
+  /// "Claim 14 days of Pro, free": shown while the new trial can still be
+  /// claimed (right after the tour, never in the session the trial sheet showed).
+  proTrialClaim(0),
+
   /// Quick Add intro (widget, voice and text) from 2 transactions.
   quickAddIntro(0),
 
@@ -41,6 +45,10 @@ enum SgType {
 }
 
 const kWhyKuberCard = SgCandidate(type: SgType.whyKuber, key: 'why_kuber');
+const kProTrialClaimCard = SgCandidate(
+  type: SgType.proTrialClaim,
+  key: 'pro_trial_claim',
+);
 const kQuickAddIntroCard = SgCandidate(
   type: SgType.quickAddIntro,
   key: 'quick_add_intro',

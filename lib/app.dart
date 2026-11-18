@@ -5,6 +5,8 @@ import 'features/settings/screens/settings_pages.dart' show notificationsAllowed
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'features/charts/providers/home_income_expense_provider.dart';
+import 'features/pro/trial/widgets/trial_ended_sheet.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -49,6 +51,7 @@ import 'features/pro/paywall/billing_ui_state.dart';
 import 'features/pro/paywall/pro_state.dart';
 import 'features/pro/services/promo_config_service.dart';
 import 'features/pro/services/purchase_service.dart';
+import 'features/pro/trial/trial_state.dart';
 import 'features/reminders/data/reminders_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/sms_import/providers/sms_import_provider.dart';
@@ -143,6 +146,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
     _runReminderMaintenance();
     _runCreditCardReminderMaintenance();
     _runWidgetSync();
+    _runTrialMaintenance();
     _initPurchases();
     _initPromoConfig();
     // Warm the non-Home tabs' providers ~1.5s later — late enough that Home's
@@ -174,6 +178,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(analyticsFilterProvider);
       ref.read(analyticsTransactionsProvider);
       ref.read(analyticsComputedProvider);
+      // Home's Income & expense months (one pass over the ledger), so the
+      // card's first build below the fold doesn't pay for it.
+      ref.read(monthlyChartPeriodsProvider);
       ref.read(historyViewProvider.future).ignore();
       ref.read(transferPairAccountIdsProvider.future).ignore();
       // Settings' subtitles, so opening it runs no reads of its own.
@@ -184,6 +191,26 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(notificationsAllowedProvider.future).ignore();
     } catch (e, stack) {
       debugPrint('Kuber: tab provider warm-up failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  /// v7.0.0-b trial: reconciles row, Block Store and clock guard, reschedules
+  /// the reminders. Best-effort; never affects launch.
+  Future<void> _runTrialMaintenance() async {
+    try {
+      await ref.read(proTrialProvider.notifier).reconcile();
+      final info = ref.read(proTrialProvider);
+      // Once, on the first open after the end, for users who are not Pro.
+      if (info.isEnded && info.startAt != null && !info.endedNoticeShown &&
+          !ref.read(kuberProStateProvider).isPro) {
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null && ctx.mounted) {
+          await ref.read(proTrialProvider.notifier).markEndedNoticeShown();
+          if (ctx.mounted) await showTrialEndedSheet(ctx);
+        }
+      }
+    } catch (e, stack) {
+      debugPrint('Kuber: trial maintenance failed (non-fatal): $e\n$stack');
     }
   }
 
@@ -381,6 +408,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // mirror any newly-due reminders into the in-app inbox and heal alarms.
     _runReminderMaintenance();
     _runCreditCardReminderMaintenance();
+    // The trial may have ended while backgrounded (or the clock moved).
+    ref.read(proTrialProvider.notifier).evaluate().ignore();
     // Refresh home-screen widgets so a change made this session (then a jump to
     // the launcher) reflects within seconds of returning.
     _runWidgetSync();

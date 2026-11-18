@@ -11,55 +11,17 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:isar_community/isar.dart';
 import 'package:kuber/core/utils/prefs_keys.dart';
-import 'package:kuber/features/accounts/data/account.dart';
 import 'package:kuber/features/advanced_history/models/ah_view.dart';
 import 'package:kuber/features/advanced_history/providers/ah_providers.dart';
 import 'package:kuber/features/advanced_history/query/query_ast.dart';
 import 'package:kuber/features/advanced_history/query/query_parser.dart';
-import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/transactions/providers/transaction_provider.dart';
 import 'package:kuber/features/transactions/widgets/transaction_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'smoke_helpers.dart';
-
-const kTxns = 20000;
-const kYears = 7;
-
-Future<void> _seed() async {
-  final isar = db;
-  final count = await isar.transactions.count();
-  if (count >= kTxns) return;
-  final cats = await isar.categorys.where().findAll();
-  final accs = await isar.accounts.where().findAll();
-  final rnd = Random(7);
-  final now = DateTime.now();
-  final start = now.subtract(const Duration(days: 365 * kYears));
-  final spanMin = now.difference(start).inMinutes;
-  const names = ['Swiggy', 'Uber', 'Amazon', 'Rent', 'Salary', 'Groceries', 'Fuel',
-    'Netflix', 'Pharmacy', 'Coffee', 'Electricity', 'Zomato', 'Flipkart', 'Gym'];
-  final batch = <Transaction>[];
-  for (var i = 0; i < kTxns - count; i++) {
-    final at = start.add(Duration(minutes: rnd.nextInt(spanMin)));
-    final income = rnd.nextInt(10) == 0;
-    final name = income ? 'Salary' : names[rnd.nextInt(names.length)];
-    batch.add(Transaction()
-      ..name = name
-      ..nameLower = name.toLowerCase()
-      ..amount = income ? 40000 + rnd.nextInt(60000).toDouble() : 20 + rnd.nextInt(5000).toDouble()
-      ..type = income ? 'income' : 'expense'
-      ..categoryId = cats[rnd.nextInt(cats.length)].id.toString()
-      ..accountId = accs[rnd.nextInt(accs.length)].id.toString()
-      ..createdAt = at
-      ..updatedAt = at);
-  }
-  for (var i = 0; i < batch.length; i += 2000) {
-    await isar.writeTxn(() => isar.transactions.putAll(batch.sublist(i, min(i + 2000, batch.length))));
-  }
-}
 
 QueryNode _q(String text) => parseItems(tokenize(text)).node!;
 
@@ -78,7 +40,7 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PrefsKeys.onboarded, true);
     await boot(t);
-    await _seed();
+    await seedLargeLedger();
     report['txns'] = await db.transactions.count();
     final c = container(t);
     c.invalidate(transactionListProvider);

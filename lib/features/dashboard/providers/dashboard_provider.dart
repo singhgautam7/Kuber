@@ -10,11 +10,20 @@ class MonthlySummary {
   final double net;
   final Map<String, double> categorySpending; // categoryId -> total
 
+  /// Previous calendar month's totals and whether anything happened before
+  /// this month (Home balance card comparison). Computed in the same pass.
+  final double prevIncome;
+  final double prevExpense;
+  final bool hasEarlier;
+
   const MonthlySummary({
     required this.totalIncome,
     required this.totalExpense,
     required this.net,
     required this.categorySpending,
+    this.prevIncome = 0,
+    this.prevExpense = 0,
+    this.hasEarlier = false,
   });
 }
 
@@ -34,13 +43,20 @@ final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
 
   // Delegates to the shared `aggregate(filter)` helper so this hero, the
   // Categories hero, and any future month-scoped totals stay in lockstep.
-  final agg = transactions.aggregate(TxnPeriodFilter(from: start, to: end));
+  final r = transactions.aggregateWithPrev(
+    TxnPeriodFilter(from: start, to: end),
+    prevFrom: DateTime(month.year, month.month - 1),
+  );
+  final agg = r.current;
 
   return MonthlySummary(
     totalIncome: agg.income,
     totalExpense: agg.expense,
     net: agg.net,
     categorySpending: agg.spendingByCategory,
+    prevIncome: r.prevIncome,
+    prevExpense: r.prevExpense,
+    hasEarlier: r.hasEarlier,
   );
 });
 

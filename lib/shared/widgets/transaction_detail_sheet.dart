@@ -158,23 +158,22 @@ class _TransactionDetailSheetState
       return (label: 'Ask Kuber', icon: Icons.auto_awesome_rounded);
     }
 
-    var type = t.linkedRuleType;
-    if (type == null && t.linkedRuleId != null) {
-      final rules = ref.read(recurringListProvider).valueOrNull ?? const [];
-      if (rules.any((r) => r.id.toString() == t.linkedRuleId)) {
-        type = 'recurring';
-      }
+    // Posted by a loan EMI, SIP or recurring rule: "Auto-recorded from ...".
+    final link = _resolveLink();
+    // (Manual loan / investment top-ups keep their plain Loan / Investment label.)
+    if (link != null && (t.isScheduled || link.type == 'recurring')) {
+      final l = context.l10n;
+      final label = switch ((link.type, link.deleted)) {
+        ('loan', false) => l.txnSourceLoans,
+        ('investment', false) => l.txnSourceInvestments,
+        ('recurring', false) => l.txnSourceRecurring,
+        ('loan', true) => l.txnSourceDeletedLoan,
+        ('investment', true) => l.txnSourceDeletedInvestment,
+        _ => l.txnSourceDeletedRecurring,
+      };
+      return (label: label, icon: Icons.event_repeat_rounded);
     }
-
-    // vNext: posted by a schedule (rule, EMI, SIP).
-    if (t.occurrenceDate != null) {
-      return (
-        label: t.sourceType == 'investment'
-            ? context.l10n.msTxnSourceSip
-            : context.l10n.msTxnSourceAuto,
-        icon: Icons.event_repeat_rounded,
-      );
-    }
+    final type = t.linkedRuleType;
     switch (type) {
       case 'recurring':
         return (label: context.l10n.sourceRecurring, icon: Icons.repeat_rounded);
@@ -189,45 +188,50 @@ class _TransactionDetailSheetState
     return (label: context.l10n.sourceManual, icon: Icons.edit_outlined);
   }
 
-  /// "From Home loan ›" under the amount (components/source-chip.md). A
-  /// deleted source hides the chip; the Source row then says so.
-  List<Widget> _sourceChip(BuildContext context) {
+  /// The loan / investment / recurring rule that posted this transaction, or
+  /// null for any other provenance. `deleted`: the source no longer exists
+  /// (no button, the Source row says so). Called from build (watches).
+  ({String type, bool deleted, String name, VoidCallback? onTap})? _resolveLink() {
     final t = transaction;
-    final l = context.l10n;
-    final type = t.sourceType ?? t.linkedRuleType;
+    var type = t.sourceType ?? t.linkedRuleType;
     final id = t.sourceId ?? t.linkedRuleId;
-    if (id == null) return const [];
-    Widget chip(String label, VoidCallback onTap) => Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: SourceChip(label: label, onTap: onTap),
-        );
-    Widget gone(String kind) => Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: Text(kind,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        );
+    final rules = ref.watch(recurringListProvider).valueOrNull ?? const [];
+    // Older rows carry a rule id but no type: resolve against the rules.
+    if (type == null && id != null && rules.any((r) => '${r.id}' == id)) {
+      type = 'recurring';
+    }
+    if (id == null) return null;
     switch (type) {
       case 'recurring':
-        final rule = (ref.watch(recurringListProvider).valueOrNull ?? const [])
-            .where((r) => '${r.id}' == id)
-            .firstOrNull;
-        if (rule == null) return [gone(l.msTxnDeletedRule)];
-        return [chip(l.msSourceRule(rule.name), () => showRuleSheet(context, ref, rule))];
+        final rule = rules.where((r) => '${r.id}' == id).firstOrNull;
+        return (
+          type: 'recurring',
+          deleted: rule == null,
+          name: rule?.name ?? '',
+          onTap: rule == null ? null : () => showRuleSheet(context, ref, rule),
+        );
       case 'loan':
         final loan = (ref.watch(loanListProvider).valueOrNull ?? const [])
             .where((x) => x.uid == id)
             .firstOrNull;
-        if (loan == null) return [gone(l.msTxnDeletedLoan)];
-        return [chip(l.msSource(loan.name), () => showLoanSheet(context, ref, loan))];
+        return (
+          type: 'loan',
+          deleted: loan == null,
+          name: loan?.name ?? '',
+          onTap: loan == null ? null : () => showLoanSheet(context, ref, loan),
+        );
       case 'investment':
         final inv = (ref.watch(investmentListProvider).valueOrNull ?? const [])
             .where((x) => x.uid == id)
             .firstOrNull;
-        if (inv == null) return [gone(l.msTxnDeletedInvestment)];
-        return [chip(l.msSource(inv.name), () => showHoldingSheet(context, ref, inv))];
+        return (
+          type: 'investment',
+          deleted: inv == null,
+          name: inv?.name ?? '',
+          onTap: inv == null ? null : () => showHoldingSheet(context, ref, inv),
+        );
     }
-    return const [];
+    return null;
   }
 
   /// Opens the source note in the editor, or falls back to a snackbar when
@@ -326,6 +330,7 @@ class _TransactionDetailSheetState
 
     final dateLabel = _formatDetailDatetime(transaction.createdAt);
     final source = _source(context);
+    final link = _resolveLink();
     final hasSms = transaction.importSource == 'sms' &&
         transaction.importedFromSms != null &&
         transaction.importedFromSms!.isNotEmpty;
@@ -418,9 +423,14 @@ class _TransactionDetailSheetState
             amount: amountText,
             amountColor: amountColor,
           ),
-          ..._sourceChip(context),
           const SizedBox(height: KuberSpace.xl - 4),
           InfoTable(rows: rows),
+          if (link != null && !link.deleted)
+            Align(
+              alignment: Alignment.centerRight,
+              child: SourceLinkButton(
+                  label: context.l10n.txnSourceLink(link.name), onTap: link.onTap),
+            ),
           if (transaction.principalPart != null && transaction.interestPart != null) ...[
             const SizedBox(height: KuberSpace.xl - 4),
             Row(children: [
