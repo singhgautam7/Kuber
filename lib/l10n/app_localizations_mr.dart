@@ -11285,6 +11285,12 @@ class AppLocalizationsMr extends AppLocalizations {
   String get balCmpFirst => 'Kuber मधील पहिला महिना';
 
   @override
+  String get balCmpNoEarnLast => 'मागील महिन्यात कोणतेही उत्पन्न नाही';
+
+  @override
+  String get balCmpNoSpendLast => 'मागील महिन्यात कोणताही खर्च नाही';
+
+  @override
   String balA11yShowExpense(String amount) {
     return 'खर्च दाखवा, $amount';
   }

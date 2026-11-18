@@ -3258,6 +3258,8 @@
   "balCmpEarnLess": "గత నెల కంటే {amount} తక్కువ ఆదాయం",
   "balCmpSame": "గత నెలతో సమానం",
   "balCmpFirst": "Kuberలో మొదటి నెల",
+  "balCmpNoEarnLast": "గత నెలలో ఆదాయం లేదు",
+  "balCmpNoSpendLast": "గత నెలలో ఖర్చు లేదు",
   "balA11yShowExpense": "ఖర్చును చూపు, {amount}",
   "balA11yShowIncome": "ఆదాయాన్ని చూపు, {amount}",
   "chartTitle": "ఆదాయం & ఖర్చు",

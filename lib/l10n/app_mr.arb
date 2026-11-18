@@ -3258,6 +3258,8 @@
   "balCmpEarnLess": "गेल्या महिन्यापेक्षा {amount} कमी कमाई",
   "balCmpSame": "गेल्या महिन्याइतकेच",
   "balCmpFirst": "Kuber मधील पहिला महिना",
+  "balCmpNoEarnLast": "मागील महिन्यात कोणतेही उत्पन्न नाही",
+  "balCmpNoSpendLast": "मागील महिन्यात कोणताही खर्च नाही",
   "balA11yShowExpense": "खर्च दाखवा, {amount}",
   "balA11yShowIncome": "उत्पन्न दाखवा, {amount}",
   "chartTitle": "उत्पन्न आणि खर्च",

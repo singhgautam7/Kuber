@@ -11294,6 +11294,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get balCmpFirst => 'First month in Kuber';
 
   @override
+  String get balCmpNoEarnLast => 'No earnings last month';
+
+  @override
+  String get balCmpNoSpendLast => 'No spending last month';
+
+  @override
   String balA11yShowExpense(String amount) {
     return 'Show expense, $amount';
   }

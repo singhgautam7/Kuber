@@ -74,6 +74,14 @@ void main() {
     await _tap(t, 'balBarIncome');
     expect(find.text('First month in Kuber'), findsOneWidget);
 
+    // Earlier data, but nothing of that kind last month: no "more than".
+    await pumpBalance(t, balanceApp(summary: balSummary(prevIncome: 0)));
+    await _tap(t, 'balBarIncome');
+    expect(find.text('No earnings last month'), findsOneWidget);
+    await pumpBalance(t, balanceApp(summary: balSummary(prevExpense: 0)));
+    await _tap(t, 'balBarExpense');
+    expect(find.text('No spending last month'), findsOneWidget);
+
     await pumpBalance(t, balanceApp(summary: balSummary(prevExpense: 50000)));
     await _tap(t, 'balBarExpense');
     expect(find.text('Spending ₹5,986 less than last month'), findsOneWidget);

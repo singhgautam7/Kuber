@@ -11377,6 +11377,12 @@ class AppLocalizationsMl extends AppLocalizations {
   String get balCmpFirst => 'Kuber-ലെ ആദ്യ മാസം';
 
   @override
+  String get balCmpNoEarnLast => 'കഴിഞ്ഞ മാസം വരുമാനമില്ല';
+
+  @override
+  String get balCmpNoSpendLast => 'കഴിഞ്ഞ മാസം ചെലവില്ല';
+
+  @override
   String balA11yShowExpense(String amount) {
     return 'ചെലവ് കാണിക്കുക, $amount';
   }

@@ -19686,6 +19686,18 @@ abstract class AppLocalizations {
   /// **'First month in Kuber'**
   String get balCmpFirst;
 
+  /// No description provided for @balCmpNoEarnLast.
+  ///
+  /// In en, this message translates to:
+  /// **'No earnings last month'**
+  String get balCmpNoEarnLast;
+
+  /// No description provided for @balCmpNoSpendLast.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending last month'**
+  String get balCmpNoSpendLast;
+
   /// No description provided for @balA11yShowExpense.
   ///
   /// In en, this message translates to:

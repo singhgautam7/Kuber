@@ -7748,6 +7748,8 @@
   },
   "balCmpSame": "Same as last month",
   "balCmpFirst": "First month in Kuber",
+  "balCmpNoEarnLast": "No earnings last month",
+  "balCmpNoSpendLast": "No spending last month",
   "balA11yShowExpense": "Show expense, {amount}",
   "@balA11yShowExpense": {
     "placeholders": {

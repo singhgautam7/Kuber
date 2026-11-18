@@ -633,6 +633,11 @@ class _Comparison extends StatelessWidget {
     if (!summary.hasEarlier) {
       icon = null;
       text = l10n.balCmpFirst;
+    } else if (prev.abs() < 0.005) {
+      // Earlier months exist but nothing of this kind last month: no
+      // comparison against zero (owner, 19 Nov).
+      icon = null;
+      text = isExpense ? l10n.balCmpNoSpendLast : l10n.balCmpNoEarnLast;
     } else if (d.abs() < 0.005) {
       icon = Icons.trending_flat_rounded;
       text = l10n.balCmpSame;
