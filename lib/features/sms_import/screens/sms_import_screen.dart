@@ -454,7 +454,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   /// selection and the header stays fixed; Dismiss all shows only on a
   /// non-empty Unreviewed tab) over [body]. [body] is built once per
   /// State build, so the tab and count listeners only rebuild the header.
-  Widget _host(Widget body, {Widget? pinned, double pinnedHeight = 0}) {
+  Widget _host(Widget body, {Widget? pinned, double pinnedHeight = 0, bool nested = false}) {
     return ValueListenableBuilder<int>(
       valueListenable: _tabIndex,
       child: body,
@@ -510,6 +510,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
             ),
             pinned: pinned,
             pinnedHeight: pinnedHeight,
+            nested: nested,
             body: child!,
           );
         },
@@ -517,36 +518,43 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     );
   }
 
-  /// The list view: the header with the tabs (or the selection row) docked
-  /// under it, then one scroll view per tab in a [TabBarView]. Only the
-  /// visible tab (and its neighbour mid-swipe) is built; each tab watches
-  /// only its own list.
+  /// The list view: the header over a [NestedScrollView] whose outer part
+  /// (the header gap and the tabs) scrolls away, so only the header stays
+  /// (owner, v7.0.0-c). Selection mode docks the selection row under the
+  /// fixed header instead of the tabs. One scroll view per tab in a
+  /// [TabBarView]: only the visible tab (and its neighbour mid-swipe) is
+  /// built; each tab watches only its own list.
   Widget _buildListView(ColorScheme cs) {
     return _host(
-      pinned: _selectionMode ? _selectionHeaderRow(cs) : _tabBar(cs),
-      pinnedHeight: _selectionMode ? 64 : 48,
+      pinned: _selectionMode ? _selectionHeaderRow(cs) : null,
+      pinnedHeight: _selectionMode ? 64 : 0,
+      nested: true,
       GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
-        child: Stack(
-          children: [
-            TabBarView(
-              controller: _tabs,
-              // Selection only lives on Unreviewed: no tab swipe then.
-              physics: _selectionMode
-                  ? const NeverScrollableScrollPhysics()
-                  : null,
-              children: [for (final tab in SmsImportTab.values) _page(tab)],
-            ),
-            Builder(
-              builder: (c) => Positioned(
+        child: NestedScrollView(
+          headerSliverBuilder: (context, _) => [
+            KuberHeaderPage.sliverGap(),
+            if (!_selectionMode) SliverToBoxAdapter(child: _tabBar(cs)),
+          ],
+          body: Stack(
+            children: [
+              TabBarView(
+                controller: _tabs,
+                // Selection only lives on Unreviewed: no tab swipe then.
+                physics: _selectionMode
+                    ? const NeverScrollableScrollPhysics()
+                    : null,
+                children: [for (final tab in SmsImportTab.values) _page(tab)],
+              ),
+              Positioned(
                 left: KuberSpace.screenMargin,
                 right: KuberSpace.screenMargin,
-                top: KuberHeaderPage.insetOf(c),
+                top: 0,
                 child: _AutoRefreshBar(pulling: _pulling),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -667,7 +675,6 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
         final visible = _filter(rows);
 
         return RefreshIndicator(
-          edgeOffset: KuberHeaderPage.insetOf(context),
           onRefresh: _pullRefresh,
           color: cs.primary,
           child: NotificationListener<ScrollNotification>(
@@ -677,7 +684,6 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
               physics: const AlwaysScrollableScrollPhysics(),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               slivers: [
-                KuberHeaderPage.sliverGap(),
                 // Untracked today (board 3.9d): Unreviewed only, hidden while
                 // searching.
                 if (unreviewed && _query.isEmpty)

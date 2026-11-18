@@ -662,6 +662,7 @@ class KuberHeaderPage extends ConsumerStatefulWidget {
     this.pinnedHeight = 0,
     this.pinnedPillShaped = false,
     this.mode,
+    this.nested = false,
   });
 
   final KuberAppBar header;
@@ -678,6 +679,13 @@ class KuberHeaderPage extends ConsumerStatefulWidget {
 
   /// Overrides the setting (the settings previews).
   final FloatingHeaderMode? mode;
+
+  /// The [body] is a [NestedScrollView] whose outer part (starting with
+  /// [sliverGap]) scrolls away before the inner lists move. Inner lists
+  /// (notification depth > 0) only scroll once the outer part is gone, so
+  /// they never take the pill back to the header; they still drive the
+  /// When scrolling up / stops hide.
+  final bool nested;
 
   /// Top padding for the body's scrollable: status bar + header at rest +
   /// pinned row. 0 outside a [KuberHeaderPage].
@@ -869,8 +877,10 @@ class _KuberHeaderPageState extends ConsumerState<KuberHeaderPage>
 
   bool _onScroll(ScrollNotification n) {
     if (n.metrics.axis != Axis.vertical) return false;
+    final inner = widget.nested && n.depth > 0;
+    if (inner && (!_pill || _mode == FloatingHeaderMode.off)) return false;
     final px = n.metrics.pixels - n.metrics.minScrollExtent;
-    _pixels = px;
+    if (!inner) _pixels = px;
     if (_mode == FloatingHeaderMode.off && widget.header.floating) {
       final a = px.clamp(0.0, _headerExtent);
       if (a != _away.value) _away.value = a;
@@ -878,7 +888,9 @@ class _KuberHeaderPageState extends ConsumerState<KuberHeaderPage>
       return false;
     }
     if (!_floats || _searching) return false;
-    if (!_pill && px >= _Fh.toPill) {
+    if (inner) {
+      // Past the outer part: thresholds belong to the outer offset.
+    } else if (!_pill && px >= _Fh.toPill) {
       _setPill(true);
     } else if (_pill && px <= _Fh.toHeader) {
       _setPill(false);
