@@ -36,6 +36,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/formatters.dart' show CurrencyInputFormatter;
 import '../../../core/utils/color_palette.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
@@ -259,6 +260,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           label: context.l10n.accountNameLabel,
           children: [
             TextField(
+              scrollPadding: kuberFieldScrollPadding(context),
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               onTapOutside: (_) =>
@@ -274,29 +276,23 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     : context.l10n.bankName,
               ),
             ),
-            // Type as filter chips (disabled while editing, existing rule).
-            Wrap(
-              spacing: KuberSpace.sm,
-              runSpacing: KuberSpace.sm,
-              children: [
-                for (final (value, label) in [
-                  ('bank', context.l10n.bankLabel),
-                  ('cash', context.l10n.cashLabel),
-                  ('credit', context.l10n.creditCardLabel),
-                  ('overdraft', context.l10n.accountTypeOverdraft),
-                ])
-                  Opacity(
-                    opacity: _isEditing && _selectedType != value ? 0.38 : 1,
-                    child: KuberChip(
-                      label: label,
-                      selected: _selectedType == value,
-                      onTap: _isEditing
-                          ? null
-                          : () => setState(() => _selectedType = value),
-                    ),
-                  ),
-              ],
-            ),
+            // Type selector (disabled while editing, existing rule).
+            // Wraps to more rows instead of truncating (same as the
+            // compounding / payout chips in Add investment).
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final (v, label) in [
+                ('bank', context.l10n.bankLabel),
+                ('cash', context.l10n.cashLabel),
+                ('credit', context.l10n.creditCardLabel),
+                ('overdraft', context.l10n.accountTypeOverdraft),
+              ])
+                KuberChip(
+                  label: label,
+                  selected: _selectedType == v,
+                  dimmed: _isEditing && _selectedType != v,
+                  onTap: _isEditing ? null : () => setState(() => _selectedType = v),
+                ),
+            ]),
             if (_isOverdraft)
               Row(children: [
                 Expanded(
@@ -312,6 +308,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               child: _isCash
                   ? const SizedBox.shrink()
                   : TextField(
+                      scrollPadding: kuberFieldScrollPadding(context),
                       controller: _last4Controller,
                       maxLength: 4,
                       keyboardType: TextInputType.number,
@@ -434,7 +431,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       children: [
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            padding: EdgeInsets.fromLTRB(
+                20, 8 + KuberHeaderPage.insetOf(context), 20, 24),
             child: fields,
           ),
         ),

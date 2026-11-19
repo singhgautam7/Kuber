@@ -3,6 +3,8 @@
 // (History rows), Ended (collapsed).
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/list_motion.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,6 +30,7 @@ import '../../settings/providers/settings_provider.dart';
 import '../../transactions/widgets/transaction_row.dart';
 import '../providers/recurring_hub_provider.dart';
 import '../widgets/hub_row_tile.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class RecurringScreen extends ConsumerStatefulWidget {
   /// 'processed' scrolls to Recently processed (background-task result).
@@ -39,6 +42,7 @@ class RecurringScreen extends ConsumerStatefulWidget {
 }
 
 class _RecurringScreenState extends ConsumerState<RecurringScreen> {
+  final _listMotion = ListMotion();
   final _search = TextEditingController();
   final _processedKey = GlobalKey();
   String _query = '';
@@ -56,7 +60,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
     _focused = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _processedKey.currentContext;
-      if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
+      if (ctx != null) KuberHeaderPage.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
     });
   }
 
@@ -86,7 +90,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
       ),
       floatingActionButtonLocation: kuberFabLocation,
       body: hubAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (e, _) => Center(child: Text(l.errorWithDetails('$e'))),
         data: (hub) {
           _maybeFocus();
@@ -95,9 +99,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
           final active = hub.active.where(match).toList();
           final paused = hub.paused.where(match).toList();
           final ended = hub.ended.where(match).toList();
-          return CustomScrollView(slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
+          return KuberHeaderPage(
+ header: KuberAppBar(
                 showBack: true,
                 title: l.recurringModule,
                 infoConfig: InfoConstants.recurring,
@@ -109,7 +112,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                         onChanged: (v) => setState(() => _query = v),
                       ),
               ),
-            ),
+ body: CustomScrollView(slivers: [
+            KuberHeaderPage.sliverGap(),
             if (hub.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -128,7 +132,10 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                     if (q.isEmpty) _MonthlySummary(hub: hub),
                     if (active.isNotEmpty) ...[
                       _header(l.msRecActive, active.length),
-                      KuberGroup(children: [for (final r in active) HubRowTile(row: r)]),
+                      KuberGroup(children: [
+                        for (final (i, r) in active.indexed)
+                          _listMotion.item(context, 'rec${r.kind}${r.name}', i, HubRowTile(row: r)),
+                      ]),
                     ],
                     if (paused.isNotEmpty) ...[
                       _header(l.msRecPaused, paused.length),
@@ -166,7 +173,8 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
                   ]),
                 ),
               ),
-          ]);
+          ]),
+ );
         },
       ),
     );
@@ -249,7 +257,10 @@ class _MonthlySummary extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(fmt.formatCurrency(amount.round()),
+                      AnimatedAmount(
+                          value: amount.roundToDouble(),
+                          animateIn: false,
+                          format: (v) => fmt.formatCurrency(v.round()),
                           style: tt.headlineMedium!.copyWith(
                               color: color, fontFeatures: const [FontFeature.tabularFigures()])),
                       const SizedBox(width: 6),

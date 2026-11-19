@@ -5,6 +5,7 @@
 // edited.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -151,6 +152,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   Future<bool?> _confirmFuture(RecurringRule r) {
     final l = context.l10n;
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l.msRecFutureTitle, style: localeFont(fontWeight: FontWeight.w600)),
@@ -173,7 +175,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     final next = r == null ? null : nextDate(r.schedule!);
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: () => context.pop(),
@@ -189,11 +192,12 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             ),
         ],
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
+          padding: EdgeInsets.fromLTRB(
+              20, 4 + KuberHeaderPage.insetOf(context), 20, 140),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -297,6 +301,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             ],
           ),
         ),
+      )),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEdit ? l.msRecSaveChanges : l.msRecSave,

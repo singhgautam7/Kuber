@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_skeleton.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Mounted in place of the three real `_PricingCard`s in `paywall_screen.dart`
 /// while `productsLoadingProvider` is true (before `queryProductDetails()`
@@ -62,12 +63,7 @@ class RestorePurchasesLinkLoading extends StatelessWidget {
         SizedBox(
           width: 13,
           height: 13,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              cs.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
-          ),
+          child: KuberShapeLoader(size: 13, color: cs.onSurfaceVariant.withValues(alpha: 0.5)),
         ),
         const SizedBox(width: KuberSpace.sm),
         Text(

@@ -7,7 +7,7 @@ import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/timed_snackbar.dart';
 import '../../providers/ah_providers.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/motion/motion.dart';
 import 'ah_save_sheet.dart';
 import 'ah_saved_state.dart';
 
@@ -32,16 +32,16 @@ class AhChangeBar extends ConsumerWidget {
     final saved = ref.watch(ahOpenSavedProvider);
     final changes = saved == null ? const <AhChange>[] : ref.watch(ahChangesProvider);
     final show = saved != null && changes.isNotEmpty;
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
 
     return AnimatedAlign(
       alignment: Alignment.topCenter,
       heightFactor: show ? 1 : 0,
-      duration: reduced ? AhMotion.instant : AhMotion.defaultCurve.settle,
-      curve: reduced ? Curves.linear : AhMotion.defaultSize,
+      duration: reduced ? KuberMotion.fxInstant : KuberMotion.defaultCurve.settle,
+      curve: reduced ? Curves.linear : KuberMotion.defaultCurve.clamped,
       child: AnimatedOpacity(
         opacity: show ? 1 : 0,
-        duration: AhMotion.dur(context, AhMotion.fast),
+        duration: KuberMotion.of(context, KuberMotion.fxFast),
         child: show
             ? _Bar(name: saved.name, id: saved.id, changes: changes)
             : const SizedBox(width: double.infinity),
@@ -119,6 +119,7 @@ class _Bar extends ConsumerWidget {
     final overlay = Overlay.of(context, rootOverlay: true);
     // Undo puts back exactly what the write replaced (read inside it).
     final previous = await repo.saveChanges(id, ref.read(ahViewProvider));
+    KuberHaptics.confirm();
     if (!overlay.mounted) return;
     showKuberSnackBar(
       overlay.context,

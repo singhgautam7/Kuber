@@ -18,7 +18,10 @@ import '../../kuber_cards/data/stored_card.dart';
 import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
 import '../../notes/data/kuber_note.dart';
+import '../../pro/paywall/pro_state.dart';
 import '../../pro/promo/home_promo_banner.dart';
+import '../../pro/trial/trial_state.dart';
+import '../../pro/trial/trial_suggestions.dart';
 import '../../recurring/providers/recurring_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../sms_import/data/sms_import_repository.dart';
@@ -127,7 +130,7 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
   }
 
   /// The intro card for this session, if any (plan §4), in this order: Why
-  /// Kuber; Quick Add intro (2+ transactions, Quick Add on Home); Import from
+  /// Kuber; Pro trial claim (free, eligible, trial sheet not shown this session); Quick Add intro (2+ transactions, Quick Add on Home); Import from
   /// SMS (3+ transactions, Android, SMS permission not given). Same gate as
   /// Why Kuber: Get started graduated, Suggestions on, no promo, no Not now
   /// this session.
@@ -149,6 +152,15 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
         !await WhyKuberStore.seen() &&
         !await WhyKuberStore.cardDismissed()) {
       return kWhyKuberCard;
+    }
+    final claim = ref.read(trialSuggestionsProvider);
+    if (!_introHiddenNow(SgType.proTrialClaim) &&
+        claim.loaded &&
+        !claim.claimDismissed &&
+        !TrialSession.sheetShown &&
+        ref.read(proTrialProvider).eligible &&
+        !ref.read(kuberProStateProvider).isPro) {
+      return kProTrialClaimCard;
     }
     final count = await ref.read(isarProvider).transactions.count();
     if (count < 2) return null;
@@ -176,6 +188,8 @@ class HomeSuggestionNotifier extends Notifier<SuggestionView> {
     switch (t) {
       case SgType.whyKuber:
         await WhyKuberStore.setCardDismissed(closed);
+      case SgType.proTrialClaim:
+        ref.read(trialSuggestionsProvider.notifier).setClaimDismissed(closed);
       case SgType.smsImportIntro:
         await p.setBool(PrefsKeys.introSmsDone, closed);
       default:

@@ -5,18 +5,22 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../pro/trial/widgets/trial_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/database/seed_service.dart';
 import '../../../core/services/data_service.dart' show ImportCancelled;
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../kuber_cards/widgets/imported_cards_prompt.dart';
+import '../../pro/trial/trial_state.dart';
+import '../../pro/trial/trial_suggestions.dart' show TrialSession;
 import '../../settings/providers/data_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../settings/screens/settings_pages.dart' show requestNotifications;
@@ -75,6 +79,9 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
   /// Restored from a backup: the details steps are done.
   bool _restored = false;
+
+  /// The trial block of a backup restored during setup (see _restore).
+  Map<String, dynamic>? _backupTrialBlock;
   bool _termsBackups = false, _termsResponsibility = false;
   String _version = '';
   String _selectedCurrencyCode = 'INR';
@@ -142,7 +149,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Future<void> _saveAndStart() async {
     if (_saving) return;
     final valid = _formKey.currentState?.validate() ?? false;
-    if (!valid) return;
+    if (!valid) {
+      KuberHaptics.reject();
+      return;
+    }
 
     setState(() => _saving = true);
     final notifier = ref.read(settingsProvider.notifier);
@@ -217,6 +227,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     if (!ok || !mounted) return;
     final data = await compute(jsonDecode, content!) as Map<String, dynamic>;
     if (!mounted) return;
+    // The backup's trial block goes to startAfterSetup. Present but not a map
+    // counts as an edited block: an empty map has no valid record, so "used".
+    final trial = data['trial'];
+    _backupTrialBlock = trial is Map ? Map<String, dynamic>.from(trial) : (trial == null ? null : <String, dynamic>{});
     final profile = data['profile'] as Map<String, dynamic>?;
     final name = profile?['userName'] as String?;
     final currency = profile?['currency'] as String?;
@@ -253,10 +267,24 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     await prefs.setString(PrefsKeys.dataTermsAcceptedAt, DateTime.now().toIso8601String());
     await prefs.setInt(PrefsKeys.dataTermsVersion, kDataTermsVersion);
     await prefs.setBool(PrefsKeys.onboarded, true);
+    // v7b: the trial starts (or continues / is already used) as setup ends.
+    TrialStartOutcome? trialOutcome;
+    try {
+      trialOutcome = await ref
+          .read(proTrialProvider.notifier)
+          .startAfterSetup(backupTrialBlock: _backupTrialBlock);
+    } catch (e) {
+      debugPrint('Kuber: trial start failed (non-fatal): $e');
+    }
     if (!mounted) return;
-    // No sheet over Home after onboarding (v3.1 V31-07): day 1 shows only
-    // the Get started card. App Tutorial stays in More.
-    context.go('/');
+    // The trial sheet opens over Home once it has painted, never over the
+    // last setup step (owner, 19 Nov; was board v7b.W). Suggestions wait for
+    // it as if it were already shown.
+    if (trialOutcome != null && trialOutcome != TrialStartOutcome.notEligible) {
+      TrialSession.sheetShown = true;
+      ref.read(pendingTrialSheetProvider.notifier).state = trialOutcome;
+    }
+    GoRouter.of(context).go('/');
   }
 
   /// Start fresh rises with the first page's cards; a replay has no first page.

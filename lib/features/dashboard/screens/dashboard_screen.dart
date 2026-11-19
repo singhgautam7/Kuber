@@ -3,12 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/formatters.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../shared/widgets/edit_widgets_button.dart';
@@ -20,8 +17,10 @@ import '../../stories/widgets/story_ring.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
-import '../../charts/providers/home_income_expense_provider.dart';
-import '../../charts/widgets/income_expense_chart.dart';
+import '../../charts/widgets/income_expense_home_section.dart';
+import '../../pro/trial/widgets/pro_suggestion_slot.dart';
+import '../../pro/trial/widgets/trial_sheet.dart';
+import '../widgets/balance_hero_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_smart_insights.dart';
 import '../widgets/spending_stats_card.dart';
@@ -41,7 +40,6 @@ import '../../home_v2/providers/home_v2_provider.dart';
 import '../../rate/rate_prompt.dart';
 import '../../home_v2/widgets/home_v2_top_slot.dart';
 import '../../sms_import/widgets/sms_import_home_widget.dart';
-import '../../../shared/widgets/kuber_home_widget_title.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/skeleton_loader.dart';
@@ -108,6 +106,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     // Rate sheet: decided after the on-open batch plus 600 ms (launches 2, 4, 8, 16).
     scheduleRatePrompt(ref, () => context);
 
+    // Trial sheet handed over by the end of setup: once Home has painted and
+    // settled, never over the last setup step.
+    final trial = ref.read(pendingTrialSheetProvider);
+    if (trial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        ref.read(pendingTrialSheetProvider.notifier).state = null;
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+        if (mounted) await showTrialSheet(context, trial);
+      });
+    }
+
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -146,11 +155,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   /// zero height when empty (so no orphan gap remains). The dashboard must NOT
   /// add spacing around these.
   static const _selfSpacedWidgets = {
+    'insight_stories',
     'spending_stats',
     'home_accounts',
     'budget_snapshot',
     'smart_insights',
     'sms_import_widget',
+    'balance_hero_slot',
   };
 
   /// Map a widget id from the catalog to its actual implementation. Hidden
@@ -163,12 +174,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         key: TutorialStepKeys.dashboardBalanceCard,
         child: const _BalanceHeroSection(),
       ),
+      // Trial claim / suggestion / reminder card under the balance card
+      // (v7.0.0-b). Collapses to nothing outside a trial and for Pro users.
+      'balance_hero_slot' => const ProSuggestionSlot(place: ProSuggestionPlace.home),
       'quick_add' => QuickAddWidget(key: TutorialStepKeys.quickAddFab),
       'spending_stats' => const RepaintBoundary(child: SpendingStatsCard()),
       'home_accounts' => const RepaintBoundary(child: HomeAccountsCard()),
-      'seven_day_chart' => const RepaintBoundary(
-        child: _SevenDayChartSection(),
-      ),
+      'seven_day_chart' => const IncomeExpenseHomeSection(),
       'insight_stories' => const RepaintBoundary(child: StoryRingSection()),
       'smart_insights' => const RepaintBoundary(child: HomeSmartInsights()),
       'budget_snapshot' => const RepaintBoundary(child: BudgetSnapshotCard()),
@@ -274,7 +286,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return <Widget>[
           // Each widget owns its own bottom spacing (see _buildHomeWidget) so a
           // widget that self-hides in an empty state leaves no gap.
-          for (final c in visible) _buildHomeWidget(c.id),
+          for (final c in visible) ...[
+            _buildHomeWidget(c.id),
+            if (c.id == 'balance_hero') _buildHomeWidget('balance_hero_slot'),
+          ],
           const EditWidgetsButton(scope: WidgetEditorScope.home),
           if (isV2) const _HomeV2WaitingLine(),
         ];
@@ -312,62 +327,17 @@ class _BalanceHeroSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final summaryAsync = ref.watch(monthlySummaryProvider);
-    return summaryAsync.when(
-      loading: () => const _BalanceHeroSkeleton(),
-      error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
-      data: (summary) => _BalanceHeroCard(summary: summary),
-    );
-  }
-}
-
-/// Wrapper that fetches the 7-day summary lazily — keeps the provider idle
-/// when the chart is hidden.
-class _SevenDayChartSection extends ConsumerWidget {
-  const _SevenDayChartSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final range = ref.watch(homeChartRangeProvider);
-    final points = ref.watch(homeIncomeExpenseProvider);
-    // Empty only when there's no data in ANY range (fresh install); otherwise
-    // keep the chart so the user can switch ranges.
-    final hasData = points.any((p) => p.income > 0 || p.expense > 0);
-    if (!hasData && range == HomeChartRange.months6) {
-      return const _SpendingAnalysisEmpty();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const KuberHomeWidgetTitle(title: 'Income & Expense'),
-        // RepaintBoundary isolates the chart's internal fl_chart animations
-        // (bar transitions, tooltip overlays) from the surrounding home-tab
-        // ListView, which scrolls independently.
-        RepaintBoundary(
-          child: IncomeExpenseChart(
-            compact: true,
-            showTitle: false,
-            points: points,
-            rangeTabs: const [
-              ChartRangeTab('days7', '7D', 'Last 7 days'),
-              ChartRangeTab('weeks4', '4W', 'Last 4 weeks'),
-              ChartRangeTab('months6', '6M', 'Last 6 months'),
-            ],
-            selectedRangeId: switch (range) {
-              HomeChartRange.days7 => 'days7',
-              HomeChartRange.weeks4 => 'weeks4',
-              HomeChartRange.months6 => 'months6',
-            },
-            onRangeSelected: (id) =>
-                ref.read(homeChartRangeProvider.notifier).state = switch (id) {
-                  'days7' => HomeChartRange.days7,
-                  'weeks4' => HomeChartRange.weeks4,
-                  _ => HomeChartRange.months6,
-                },
-          ),
-        ),
-      ],
-    );
+    // Keep the previous value while the summary reloads (every transaction
+    // write): the card must stay mounted so a focused part keeps its focus.
+    // Skeleton only on the very first load.
+    return ref
+        .watch(monthlySummaryProvider)
+        .when(
+          skipLoadingOnReload: true,
+          loading: () => const _BalanceHeroSkeleton(),
+          error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
+          data: (summary) => BalanceHeroCard(summary: summary),
+        );
   }
 }
 
@@ -387,7 +357,7 @@ class _BalanceHeroSkeleton extends StatelessWidget {
           SizedBox(height: 10),
           SkeletonBlock(width: 160, height: 28, borderRadius: 999),
           SizedBox(height: KuberSpace.lg),
-          SkeletonBlock(width: double.infinity, height: 8, borderRadius: 999),
+          SkeletonBlock(width: double.infinity, height: 24, borderRadius: 999),
           SizedBox(height: KuberSpace.md),
           Row(
             children: [
@@ -398,202 +368,6 @@ class _BalanceHeroSkeleton extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _BalanceHeroCard extends ConsumerWidget {
-  final MonthlySummary summary;
-
-  const _BalanceHeroCard({required this.summary});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final formatter = ref.watch(formatterProvider);
-    final isPrivate = ref.watch(privacyModeProvider);
-    final symbol = ref.watch(currencyProvider).symbol;
-    final isPositive = summary.net >= 0;
-    final prefix = isPositive ? '+' : '-';
-    final formattedNet = formatter
-        .formatCurrency(summary.net.abs(), symbol: symbol)
-        .trim();
-    final formattedIncome = isPrivate
-        ? maskAmount('', true)
-        : '+${formatter.formatCurrency(summary.totalIncome, symbol: symbol).trim()}';
-    final formattedExpense = isPrivate
-        ? maskAmount('', true)
-        : '-${formatter.formatCurrency(summary.totalExpense, symbol: symbol).trim()}';
-
-    final total = summary.totalIncome + summary.totalExpense;
-    final incPct = total > 0 ? summary.totalIncome / total : 0.5;
-
-    final monthLabel = DateFormat('MMMM').format(DateTime.now()).toUpperCase();
-
-    // Home v2 empty state (board HV2.6): no ₹0, no empty bar; one line and
-    // an Add transaction action unless Get started is on screen.
-    if (total == 0 && ref.watch(isHomeV2Provider)) {
-      final gsVisible = ref.watch(homeV2Provider.select((s) => s.gsEligible));
-      final tt = Theme.of(context).textTheme;
-      return KuberCard(
-        hero: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$monthLabel · ${context.l10n.netLabel}',
-              style: tt.labelMedium!.copyWith(
-                letterSpacing: 0.8,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: KuberSpace.xs),
-            Text(
-              context.l10n.homeV2WBalanceEmpty(
-                DateFormat.MMMM(
-                  Localizations.localeOf(context).toString(),
-                ).format(DateTime.now()),
-              ),
-              style: tt.bodyMedium!.copyWith(color: cs.onSurface),
-            ),
-            if (!gsVisible)
-              Padding(
-                padding: const EdgeInsets.only(top: KuberSpace.xs),
-                child: TextButton.icon(
-                  onPressed: () => context.push('/add-transaction'),
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                  icon: const Icon(Icons.add_rounded, size: 18),
-                  label: Text(context.l10n.homeV2WBalanceEmptyAct),
-                ),
-              ),
-          ],
-        ),
-      );
-    }
-
-    final theme = Theme.of(context);
-    // Income in primary, expense in a 40% primary tint (user review round 2);
-    // the signs on the legend carry the direction instead of green / red.
-    final incomeColor = cs.primary;
-    final expenseColor = Color.alphaBlend(
-      cs.primary.withValues(alpha: 0.4),
-      cs.surfaceContainer,
-    );
-    final legendStyle = theme.textTheme.titleSmall!.copyWith(
-      color: cs.onSurface,
-    );
-    Widget dot(Color c) => Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-    );
-
-    // Hero card (stat-cards 2l / board 3.2a): caps label, headlineMedium net,
-    // 8 split bar with a 4 gap, titleSmall legend.
-    return KuberCard(
-      hero: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$monthLabel · ${context.l10n.netLabel}',
-            style: theme.textTheme.labelMedium!.copyWith(
-              letterSpacing: 0.8,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: KuberSpace.xs),
-          Text(
-            isPrivate ? '****' : '$prefix$formattedNet',
-            style: theme.textTheme.headlineMedium!.copyWith(
-              color: isPrivate
-                  ? cs.onSurface
-                  : (total == 0 ? cs.onSurfaceVariant : cs.onSurface),
-            ),
-          ),
-          const SizedBox(height: KuberSpace.lg),
-
-          // Proportional income/expense ratio bar
-          if (total == 0)
-            Container(
-              height: 8,
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest,
-                borderRadius: KuberShape.fullR,
-              ),
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  flex: (incPct * 1000).round(),
-                  child: Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: incomeColor,
-                      borderRadius: KuberShape.fullR,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  flex: ((1 - incPct) * 1000).round().clamp(1, 1000),
-                  child: Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: expenseColor,
-                      borderRadius: KuberShape.fullR,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-          const SizedBox(height: KuberSpace.md),
-
-          // Income / Expense legend
-          Row(
-            children: [
-              dot(incomeColor),
-              const SizedBox(width: KuberSpace.sm),
-              Text(formattedIncome, style: legendStyle),
-              const Spacer(),
-              Text(formattedExpense, style: legendStyle),
-              const SizedBox(width: KuberSpace.sm),
-              dot(expenseColor),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SpendingAnalysisEmpty extends StatelessWidget {
-  const _SpendingAnalysisEmpty();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const KuberHomeWidgetTitle(title: 'Income & Expense'),
-        KuberCard(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: KuberSpace.lg),
-            child: Text(
-              context.l10n.spendingAnalysisEmpty,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

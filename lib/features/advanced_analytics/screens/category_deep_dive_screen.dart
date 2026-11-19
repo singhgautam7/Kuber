@@ -41,7 +41,7 @@ class _CategoryDeepDiveScreenState
     }
     if (!hasAccess) {
       return const Scaffold(
-        body: KuberScrollAwayHeader(
+        body: KuberHeaderPage(
           header: KuberAppBar(title: 'Category deep-dive', showBack: true),
           body: SizedBox.shrink(),
         ),
@@ -53,12 +53,12 @@ class _CategoryDeepDiveScreenState
     final async = ref.watch(categoryDeepDiveProvider);
 
     return Scaffold(
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(title: 'Category deep-dive', showBack: true),
         body: ListView(
           padding: const EdgeInsets.only(bottom: KuberSpace.xxl),
           children: [
-            const SizedBox.shrink(),
+            KuberHeaderPage.gap(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(

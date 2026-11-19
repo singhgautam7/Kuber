@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,8 +12,9 @@ import '../data/add_action_catalog.dart';
 /// shortcuts. The three core actions (expense/income/transfer) always lead;
 /// the customizable tail comes from [addMenuActionsProvider].
 Future<void> showAddNewSheet(BuildContext context) {
-  HapticFeedback.mediumImpact();
+  KuberHaptics.longPress();
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

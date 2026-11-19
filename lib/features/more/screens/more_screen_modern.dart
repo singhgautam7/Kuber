@@ -4,11 +4,13 @@
 // the About list, Help us (with Buy me a coffee) and the footer.
 // Routing and entries come from more_content.dart, same as the Classic layout.
 
+import 'package:kuber/features/pro/trial/widgets/pro_suggestion_slot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -84,9 +86,11 @@ class MoreScreenModern extends ConsumerWidget {
         );
 
     return Scaffold(
-      body: CustomScrollView(
+      body: KuberHeaderPage(
+        header: MoreHeader.appBar(context),
+        body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(child: MoreHeader()),
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(
               KuberSpace.screenMargin,
@@ -98,6 +102,8 @@ class MoreScreenModern extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 const KuberProSettingsSection(),
                 const SizedBox(height: KuberSpace.sectionGap),
+                // v7.0.0-b trial: Kuber Cards suggestion.
+                const ProSuggestionSlot(place: ProSuggestionPlace.more),
                 KuberSectionHeader(title: manage.title),
                 _Grid(
                   children: [
@@ -131,6 +137,7 @@ class MoreScreenModern extends ConsumerWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

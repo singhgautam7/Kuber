@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 
 /// Visual weight of an [AppIconButton] (components/header.md, board 2b).
@@ -43,6 +44,7 @@ class AppIconButton extends StatelessWidget {
     this.onLongPress,
     this.longPressHint,
     this.tooltip = true,
+    this.iconTurns,
     super.key,
   });
 
@@ -72,6 +74,11 @@ class AppIconButton extends StatelessWidget {
   /// Show [semanticLabel] as a plain tooltip on long-press.
   final bool tooltip;
 
+  /// Glyph rotation in turns (0.5 = upside down), animated like a chevron
+  /// (springFast; Subtle springSubtle; Off snaps). For expand / collapse
+  /// buttons; null keeps the plain glyph.
+  final double? iconTurns;
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -87,23 +94,55 @@ class AppIconButton extends StatelessWidget {
         size < KuberSpace.tapTarget ? KuberSpace.tapTarget : size;
     final hasBadge = badge != null && badge!.isNotEmpty;
 
+    final level = KuberMotion.levelOf(context);
+    final off = level == MotionLevel.off;
+    final glyph = tint ?? fg;
     Widget button = SizedBox(
       width: target,
       height: target,
       child: Center(
-        child: Opacity(
+        child: AnimatedOpacity(
           opacity: disabled ? 0.38 : 1,
-          child: Material(
-            color: bg,
-            shape: const CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onPressed,
-              onLongPress: onLongPress,
-              child: SizedBox(
-                width: size,
-                height: size,
-                child: Icon(icon, size: glyphSize, color: tint ?? fg),
+          duration: off ? KuberMotion.fxInstant : KuberMotion.fxFast,
+          curve: KuberMotion.curveEffects,
+          child: Pressable(
+            kind: PressKind.iconButton,
+            enabled: !disabled,
+            restRadius: size / 2,
+            builder: (context, radius, pressed) => Material(
+              color: kind == AppIconButtonKind.standard &&
+                      level == MotionLevel.expressive
+                  ? Color.lerp(
+                      bg, cs.surfaceContainerHighest, pressed.clamp(0.0, 1.0))
+                  : bg,
+              animationDuration: Duration.zero,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(radius)),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onPressed,
+                onLongPress: onLongPress == null
+                    ? null
+                    : () {
+                        KuberHaptics.longPress();
+                        onLongPress!();
+                      },
+                child: SizedBox(
+                  width: size,
+                  height: size,
+                  child: iconTurns == null
+                      ? _IconSwap(icon: icon, size: glyphSize, color: glyph)
+                      : Builder(builder: (context) {
+                          final level = KuberMotion.levelOf(context);
+                          final c = KuberMotion.spatialCurve(level, KuberMotion.fastCurve);
+                          return AnimatedRotation(
+                            turns: iconTurns!,
+                            duration: level == MotionLevel.off ? Duration.zero : c.settle,
+                            curve: c.clamped,
+                            child: _IconSwap(icon: icon, size: glyphSize, color: glyph),
+                          );
+                        }),
+                ),
               ),
             ),
           ),
@@ -245,6 +284,40 @@ class _HoldHintState extends State<_HoldHint> {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// Icon swap: old scales 1 to 0.6 and fades (fx.instant), new 0.6 to 1 on
+/// springFast. Subtle / Off: cross-fade.
+class _IconSwap extends StatelessWidget {
+  const _IconSwap(
+      {required this.icon, required this.size, required this.color});
+  final IconData icon;
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final level = KuberMotion.levelOf(context);
+    final expressive = level == MotionLevel.expressive;
+    return AnimatedSwitcher(
+      duration: expressive
+          ? KuberMotion.fastCurve.settle
+          : (level == MotionLevel.off
+              ? KuberMotion.fxInstant
+              : KuberMotion.fxFast),
+      reverseDuration: KuberMotion.fxInstant,
+      switchInCurve: expressive ? KuberMotion.fastCurve : Curves.linear,
+      switchOutCurve: Curves.linear,
+      transitionBuilder: (child, anim) {
+        final fade = FadeTransition(opacity: anim, child: child);
+        if (!expressive) return fade;
+        return ScaleTransition(
+            scale: anim.drive(Tween(begin: 0.6, end: 1.0)), child: fade);
+      },
+      child: Icon(icon, key: ValueKey(icon), size: size, color: color),
     );
   }
 }

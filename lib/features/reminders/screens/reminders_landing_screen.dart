@@ -83,7 +83,7 @@ class _RemindersLandingScreenState
       ),
       floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(
           title: 'Reminders',
           showBack: true,
@@ -106,6 +106,7 @@ class _RemindersLandingScreenState
                   KuberExtendedFab.clearance,
                 ),
                 children: [
+                  KuberHeaderPage.gap(),
                   _FilterChips(
                     selected: filter,
                     onSelected: (f) =>

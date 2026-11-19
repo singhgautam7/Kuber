@@ -9,6 +9,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../pro/paywall/pro_state.dart';
+import '../../pro/trial/trial_checklist.dart';
 import '../providers/advanced_analytics_provider.dart';
 import '../widgets/about_analytics_info_sheet.dart';
 import '../widgets/analytics_common.dart';
@@ -24,13 +25,21 @@ class AdvancedAnalyticsLanding extends ConsumerStatefulWidget {
 class _AdvancedAnalyticsLandingState
     extends ConsumerState<AdvancedAnalyticsLanding> {
   @override
+  void initState() {
+    super.initState();
+    if (ref.read(kuberProStateProvider).hasProAccess) {
+      ProTrialChecklist.markTried(ProTrialFeature.advancedAnalytics);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final hasAccess = ref.watch(
       kuberProStateProvider.select((s) => s.hasProAccess),
     );
 
     return Scaffold(
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(
           title: 'Advanced Analytics',
           showBack: true,
@@ -53,7 +62,7 @@ class _AdvancedAnalyticsLandingState
                 // lazy items (drawn as segments of the group) so off-screen
                 // sections still build late.
                 itemBuilder: (context, index) {
-                  if (index == 0) return const SizedBox.shrink();
+                  if (index == 0) return KuberHeaderPage.gap();
                   final i = index - 1;
                   if (i == 0) {
                     return Padding(
@@ -810,6 +819,7 @@ class _LockedUpgradeView extends StatelessWidget {
         KuberSpace.xxl,
       ),
       children: [
+        KuberHeaderPage.gap(),
         const KuberProSettingsSection(),
         const SizedBox(height: KuberSpace.lg),
         Text(

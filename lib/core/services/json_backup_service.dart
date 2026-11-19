@@ -37,6 +37,7 @@ import '../../features/kuber_cards/data/card_vault_meta.dart';
 import '../../features/advanced_history/data/saved_filter.dart';
 import '../../features/advanced_history/models/ah_view.dart';
 import 'data_service.dart';
+import '../../features/pro/trial/trial_store.dart';
 import '../schedule/processed_occurrence.dart';
 import '../schedule/schedule.dart';
 import '../../features/tools/engine/fd_rd_engine.dart' show CompoundingFrequency;
@@ -148,10 +149,15 @@ class JsonBackupService {
       };
     } catch (_) {}
 
+    // The signed trial record rides in every backup (the rest of the
+    // entitlement stays out), so a restore cannot give a second trial.
+    final trial = await exportTrialBlock(isar);
+
     return {
       'version': version,
       'exportedAt': DateTime.now().toIso8601String(),
       'profile': profile,
+      'trial': ?trial,
       'transactions': transactions.map(_txToMap).toList(),
       'categories': categories.map(_catToMap).toList(),
       'categoryGroups': categoryGroups.map(_groupToMap).toList(),
@@ -192,7 +198,7 @@ class JsonBackupService {
     try {
       final data = jsonDecode(jsonContent) as Map<String, dynamic>;
 
-      await isar.writeTxn(() => isar.clear());
+      await isar.writeTxn(() => clearKeepingEntitlement(isar));
 
       var count = 0;
 
@@ -282,6 +288,13 @@ class JsonBackupService {
         count += 1;
       }
 
+      // Settings restore: merge the backup's trial block into the local record
+      // (earliest valid start wins, a bad block marks "used", never starts one).
+      // Best-effort: a failure here must not fail the restore.
+      try {
+        await mergeBackupTrial(isar, data['trial']);
+      } catch (_) {}
+
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {
       // A chunk failed after the up-front clear(), so the database is now
@@ -289,7 +302,7 @@ class JsonBackupService {
       // left with half a backup (the previous single-transaction import rolled
       // back to empty on failure; this preserves that guarantee).
       try {
-        await isar.writeTxn(() => isar.clear());
+        await isar.writeTxn(() => clearKeepingEntitlement(isar));
       } catch (_) {
         // Best-effort cleanup; surface the original import error regardless.
       }

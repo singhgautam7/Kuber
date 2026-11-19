@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,6 +14,7 @@ import '../data/widget_catalog.dart';
 import '../providers/widget_editor_provider.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import '../../home_v2/widgets/home_v2_editor.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Full-screen modal for re-ordering and enabling/disabling widgets on
 /// either the home dashboard or the analytics screen. Reads the current
@@ -78,6 +80,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
     if (!_dirty) return true;
     final cs = Theme.of(context).colorScheme;
     final keepEditing = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
@@ -218,7 +221,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                     ),
                   ],
                 )
-              : const Center(child: CircularProgressIndicator()),
+              : const Center(child: KuberShapeLoader(size: 40)),
         ),
         bottomNavigationBar: loaded
             ? Container(

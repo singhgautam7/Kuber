@@ -2194,10 +2194,6 @@ class AppLocalizationsTa extends AppLocalizations {
   String get moneyStoriesTitle => 'பணக் கதைகள்';
 
   @override
-  String get moneyStoriesEmpty =>
-      'உங்கள் பணக் கதைகளை விரைவில் பார்க்க பரிவர்த்தனைகளைச் செய்து கொண்டே இருங்கள்.';
-
-  @override
   String get bubbleWelcome => 'வரவேற்பு';
 
   @override
@@ -8981,16 +8977,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get obTermsPrivacy => 'தனியுரிமைக் கொள்கை';
 
   @override
-  String get pathSheetTitle => 'நீங்கள் இங்கே வந்த வழி';
+  String get pathSheetTitle => 'விரைவு வழிசெலுத்தல்';
 
   @override
   String get pathSheetCurrent => 'நீங்கள் இங்கே';
 
   @override
-  String get pathSheetHint => 'இந்தப் பக்கத்திற்கான வழியைக் காட்டும்';
-
-  @override
-  String get pathSheetLongPress => 'பாதையைக் காட்டு';
+  String get pathSheetHint => 'விரைவு வழிசெலுத்தலைத் திறக்கும்';
 
   @override
   String get setPathTip =>
@@ -9155,7 +9148,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get obNotifSampleBody => 'SBI வீட்டுக் கடன் · ₹24,350';
 
   @override
-  String get pathSheetSub => 'எந்தப் பக்கத்திற்கும் திரும்ப தட்டவும்';
+  String get pathSheetSub => 'எந்தப் பக்கத்தையும் திறக்க தட்டவும்';
 
   @override
   String get pathSheetFromNotification => 'அறிவிப்பிலிருந்து திறக்கப்பட்டது';
@@ -9771,7 +9764,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get rateCta => 'Play Store-இல் மதிப்பிடுங்கள்';
 
   @override
-  String get rateRefer => 'நண்பருக்குப் பரிந்துரைக்கவும்';
+  String get rateRefer => 'பரிந்துரை';
 
   @override
   String get rateLater => 'பிறகு';
@@ -11264,4 +11257,752 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get ahdMore => 'அதிகம்';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'மீதமுள்ள $n பக்கங்களைக் காட்டு';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'குறைவான பக்கங்களைக் காட்டு';
+
+  @override
+  String get pathSheetExpand => 'விரிவாக்கு';
+
+  @override
+  String get pathSheetCollapse => 'சுருக்கு';
+
+  @override
+  String get motionTitle => 'அனிமேஷன்';
+
+  @override
+  String get motionSubtitle =>
+      'தட்டும்போது, ஸ்வைப் செய்யும்போது அல்லது திறக்கும்போது குபேர் எவ்வளவு அசைகிறது';
+
+  @override
+  String get motionPreviewHint => 'இந்த நிலையை உணர அட்டையைத் தட்டுங்கள்';
+
+  @override
+  String get motionAuto => 'தானியங்கி';
+
+  @override
+  String get motionExpressive => 'உயிரோட்டம்';
+
+  @override
+  String get motionSubtle => 'மென்மை';
+
+  @override
+  String get motionOff => 'முடக்கம்';
+
+  @override
+  String get motionAutoExpressive =>
+      'இந்த ஃபோனில் உயிரோட்ட நிலை பயன்படுத்தப்படுகிறது';
+
+  @override
+  String get motionAutoSubtle =>
+      'மென்மை நிலை பயன்படுத்தப்படுகிறது: இந்த ஃபோனில் 4 GB-க்கும் குறைவான RAM உள்ளது';
+
+  @override
+  String get motionAutoOff =>
+      'முடக்க நிலை பயன்படுத்தப்படுகிறது: அனிமேஷனை அகற்று இயக்கத்தில் உள்ளது';
+
+  @override
+  String get motionExpressiveDesc => 'துள்ளலும் மென்மையும். முழு அனுபவம்.';
+
+  @override
+  String get motionSubtleDesc =>
+      'சிறு மங்கல்களும் சிறிய அசைவுகளும். துள்ளல் இல்லை.';
+
+  @override
+  String get motionOffDesc => 'அசைவு இல்லை. விரைவான மங்கலுடன் மாறும்.';
+
+  @override
+  String get motionPhoneNote =>
+      'உங்கள் ஃபோன் அமைப்புகளில் அனிமேஷனை அகற்று இயக்கத்தில் உள்ளது, எனவே குபேர் முடக்க நிலையைப் பயன்படுத்துகிறது.';
+
+  @override
+  String get motionOpenPhoneSettings => 'ஃபோன் அமைப்புகளைத் திற';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'தானியங்கி ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'முடக்கம் (ஃபோன் அமைப்பு)';
+
+  @override
+  String get hapticsTitle => 'அதிர்வு';
+
+  @override
+  String get hapticsSub => 'ஸ்விட்சுகள் மற்றும் நீண்ட அழுத்தத்தில் அதிருங்கள்';
+
+  @override
+  String get setKwMotion => 'அனிமேஷன் அசைவு துள்ளல் மங்கல் animation motion';
+
+  @override
+  String get setKwHaptics =>
+      'அதிர்வு அதிருங்கள் பின்னூட்டம் தொடுதல் haptics vibration';
+
+  @override
+  String get txnSourceLoans => 'கடனிலிருந்து தானாகப் பதிவானது';
+
+  @override
+  String get txnSourceInvestments => 'முதலீட்டிலிருந்து தானாகப் பதிவானது';
+
+  @override
+  String get txnSourceRecurring => 'தொடர் கட்டணத்திலிருந்து தானாகப் பதிவானது';
+
+  @override
+  String get txnSourceDeletedLoan =>
+      'நீக்கப்பட்ட கடனிலிருந்து தானாகப் பதிவானது';
+
+  @override
+  String get txnSourceDeletedInvestment =>
+      'நீக்கப்பட்ட முதலீட்டிலிருந்து தானாகப் பதிவானது';
+
+  @override
+  String get txnSourceDeletedRecurring =>
+      'நீக்கப்பட்ட தொடர் கட்டணத்திலிருந்து தானாகப் பதிவானது';
+
+  @override
+  String txnSourceLink(String name) {
+    return '$name இலிருந்து';
+  }
+
+  @override
+  String balLabelNet(String month) {
+    return '$month · நிகரம்';
+  }
+
+  @override
+  String balLabelExpense(String month) {
+    return '$month · செலவு';
+  }
+
+  @override
+  String balLabelIncome(String month) {
+    return '$month · வருமானம்';
+  }
+
+  @override
+  String balCmpSpendMore(String amount) {
+    return 'கடந்த மாதத்தை விட $amount அதிக செலவு';
+  }
+
+  @override
+  String balCmpSpendLess(String amount) {
+    return 'கடந்த மாதத்தை விட $amount குறைந்த செலவு';
+  }
+
+  @override
+  String balCmpEarnMore(String amount) {
+    return 'கடந்த மாதத்தை விட $amount அதிக வருமானம்';
+  }
+
+  @override
+  String balCmpEarnLess(String amount) {
+    return 'கடந்த மாதத்தை விட $amount குறைந்த வருமானம்';
+  }
+
+  @override
+  String get balCmpSame => 'கடந்த மாதத்தைப் போலவே';
+
+  @override
+  String get balCmpFirst => 'Kuber-இல் முதல் மாதம்';
+
+  @override
+  String get balCmpNoEarnLast => 'கடந்த மாதம் வருமானம் இல்லை';
+
+  @override
+  String get balCmpNoSpendLast => 'கடந்த மாதம் செலவு இல்லை';
+
+  @override
+  String balA11yShowExpense(String amount) {
+    return 'செலவைக் காட்டு, $amount';
+  }
+
+  @override
+  String balA11yShowIncome(String amount) {
+    return 'வருமானத்தைக் காட்டு, $amount';
+  }
+
+  @override
+  String get chartTitle => 'வருமானம் & செலவு';
+
+  @override
+  String get chartPeriod6m => '6M';
+
+  @override
+  String get chartPeriod1y => '1Y';
+
+  @override
+  String get chartPeriod6mSub => 'கடந்த 6 மாதங்கள்';
+
+  @override
+  String get chartPeriod1ySub => 'கடந்த 12 மாதங்கள்';
+
+  @override
+  String get chartModeBar => 'பார்';
+
+  @override
+  String get chartModeLine => 'கோடு';
+
+  @override
+  String get chartLegendOrder => 'பெரிய தொகை மேலே';
+
+  @override
+  String chartTipSoFar(String monthYear) {
+    return '$monthYear · இதுவரை';
+  }
+
+  @override
+  String get chartTipSaved => 'சேமிப்பு';
+
+  @override
+  String get chartTipOverspent => 'அதிக செலவு';
+
+  @override
+  String chartTipPace(String amount) {
+    return 'இந்த வேகத்தில்: $amount செலவு';
+  }
+
+  @override
+  String get chartTipNoData => 'வருமானம் அல்லது செலவு இல்லை';
+
+  @override
+  String get chartEmptyTitle => 'இன்னும் வருமானம் அல்லது செலவு இல்லை';
+
+  @override
+  String get chartEmptyBody =>
+      'பரிவர்த்தனைகளைச் சேர்த்தால் மாதங்கள் இங்கே தோன்றும். பரிமாற்றங்கள் கணக்கில் வராது.';
+
+  @override
+  String get chartSingle =>
+      'இதுவரை ஒரு மாதம் மட்டுமே. பழைய மாதங்கள் இங்கே தோன்றும்.';
+
+  @override
+  String chartA11yColumn(
+    String month,
+    String income,
+    String expense,
+    String kind,
+    String amount,
+  ) {
+    return '$month: வருமானம் $income, செலவு $expense, $kind $amount';
+  }
+
+  @override
+  String chartA11yNoData(String month) {
+    return '$month: வருமானம் அல்லது செலவு இல்லை';
+  }
+
+  @override
+  String chartA11yOne(String month, String series, String amount) {
+    return '$month: $series $amount';
+  }
+
+  @override
+  String get chartBucketDay => 'நாள்';
+
+  @override
+  String get chartBucketWeek => 'வாரம்';
+
+  @override
+  String get chartBucketMonth => 'மாதம்';
+
+  @override
+  String get chartBucketQuarter => 'காலாண்டு';
+
+  @override
+  String get chartBucketYear => 'ஆண்டு';
+
+  @override
+  String get trialRem3Title => 'உங்கள் Pro சோதனையில் 3 நாட்கள் உள்ளன';
+
+  @override
+  String trialRem3NotifBody(String weekday, String date) {
+    return 'உங்கள் சோதனை $weekday, $date அன்று முடிகிறது. எதுவும் அழிக்கப்படாது. இன்னும் முயற்சிக்காததைப் பாருங்கள்.';
+  }
+
+  @override
+  String get trialLastTitle => 'உங்கள் Pro சோதனையின் கடைசி நாள்';
+
+  @override
+  String get trialLastBody =>
+      'Pro அம்சங்கள் நள்ளிரவில் இலவச வரம்புக்குத் திரும்பும். உங்கள் தரவு அப்படியே இருக்கும்.';
+
+  @override
+  String get trialSheetTitle => '14 நாட்களுக்கு Kuber Pro உங்களுடையது';
+
+  @override
+  String get trialSheetBody =>
+      'எல்லா Pro அம்சங்களும் திறந்துள்ளன. பணம் செலுத்த வேண்டாம்.';
+
+  @override
+  String trialSheetUntil(String date) {
+    return '$date வரை இலவசம்';
+  }
+
+  @override
+  String get trialSheetNote =>
+      'முடிந்ததும் உங்கள் தரவு அப்படியே இருக்கும். Pro அம்சங்கள் இலவச வரம்புக்குத் திரும்பும்.';
+
+  @override
+  String get trialSheetOffers => 'Kuber Pro என்ன தருகிறது';
+
+  @override
+  String get trialSheetOffersCollapsed =>
+      'Kuber Pro என்ன தருகிறது, மூடப்பட்டது';
+
+  @override
+  String get trialSheetOffersExpanded => 'Kuber Pro என்ன தருகிறது, விரிந்தது';
+
+  @override
+  String get trialSheetCta => 'ஆராயத் தொடங்குங்கள்';
+
+  @override
+  String get trialSheetSeePro => 'Kuber Pro பார்க்க';
+
+  @override
+  String get trialRestoredTitle => 'உங்கள் Kuber Pro சோதனை தொடர்கிறது';
+
+  @override
+  String trialRestoredUntil(String n, String date) {
+    return '$n நாட்கள் உள்ளன · $date வரை இலவசம்';
+  }
+
+  @override
+  String get trialUsedTitle =>
+      'உங்கள் இலவச சோதனை இந்த ஃபோனிலோ காப்புப்பிரதியிலோ ஏற்கனவே பயன்படுத்தப்பட்டது';
+
+  @override
+  String get trialUsedBody =>
+      'உங்கள் தரவு எல்லாம் இங்கே உள்ளது, Kuber இலவசமாகத் தொடர்ந்து வேலை செய்யும்.';
+
+  @override
+  String get commonNotNow => 'இப்போது வேண்டாம்';
+
+  @override
+  String get trialClaimTitle => '14 நாள் Pro இலவசமாகப் பெறுங்கள்';
+
+  @override
+  String get trialClaimBody =>
+      'Kuber 7.0-ல் புதியது. ஒவ்வொரு Pro அம்சத்தையும் முயலுங்கள். பணம் இல்லை, ரத்து செய்ய எதுவும் இல்லை.';
+
+  @override
+  String get trialClaimCta => 'பெறுங்கள்';
+
+  @override
+  String get proClaimTitle => '14 நாள் Pro இலவசமாக முயலுங்கள்';
+
+  @override
+  String get proClaimBody => 'ஒரே முறை, பணம் இல்லை, ரத்து செய்ய எதுவும் இல்லை.';
+
+  @override
+  String get proClaimCta => '14 நாள் Pro இலவசமாகப் பெறுங்கள்';
+
+  @override
+  String get proOrPlan => 'அல்லது ஒரு திட்டத்தைத் தேர்ந்தெடுங்கள்';
+
+  @override
+  String trialBadge(String n) {
+    return 'Pro சோதனை · $n நாட்கள்';
+  }
+
+  @override
+  String get trialBadgeLast => 'Pro சோதனை · கடைசி நாள்';
+
+  @override
+  String trialSuggOverline(String n) {
+    return 'Pro சோதனை · 10ல் $n முயன்றது';
+  }
+
+  @override
+  String get trialSuggSeeAll => 'அனைத்தும்';
+
+  @override
+  String get trialDismiss => 'மூடு';
+
+  @override
+  String get checklistTitle => 'Kuber Pro முயலுங்கள்';
+
+  @override
+  String checklistSub(String n, String d) {
+    return '10ல் $n முயன்றது · $d நாட்கள்';
+  }
+
+  @override
+  String get checklistHint =>
+      'பயன்படுத்தியதும் ஒவ்வொன்றும் தானாகவே டிக் ஆகும்.';
+
+  @override
+  String checklistTried(String what) {
+    return 'முயன்றது · $what';
+  }
+
+  @override
+  String checklistWhere(String place) {
+    return '$place பகுதியில்';
+  }
+
+  @override
+  String get checklistTry => 'முயல்';
+
+  @override
+  String proTrialStatus(String n) {
+    return 'Pro சோதனை · $n நாட்கள்';
+  }
+
+  @override
+  String proTrialEnds(String date, String time) {
+    return 'முடிவு $date, $time';
+  }
+
+  @override
+  String proTrialTried(String n) {
+    return '10 Pro அம்சங்களில் $n முயன்றுள்ளீர்கள்';
+  }
+
+  @override
+  String get proKeepTitle => 'சோதனைக்குப் பிறகும் Pro வைத்திருங்கள்';
+
+  @override
+  String proKeepBody(String date) {
+    return 'இப்போதே அல்லது $dateக்கு முன் எப்போது வேண்டுமானாலும் திட்டத்தைத் தேர்ந்தெடுங்கள். வாங்கியதும் Pro தொடங்கும், மீதமுள்ள சோதனை அப்போதே முடியும்.';
+  }
+
+  @override
+  String proKeepCta(String plan, String price) {
+    return 'Pro வைத்திருங்கள் · $plan $price';
+  }
+
+  @override
+  String get proKeepNote =>
+      'Google Play நிர்வகிக்கிறது. திட்டத்தைத் தேர்ந்தெடுக்காவிட்டால் எதுவும் வசூலிக்கப்படாது.';
+
+  @override
+  String get trialFeatAsk => 'Ask Kuber';
+
+  @override
+  String get trialFeatSms => 'SMS இலிருந்து இறக்குமதி';
+
+  @override
+  String get trialFeatDash => 'தனிப்பயன் டாஷ்போர்டுகள்';
+
+  @override
+  String get trialFeatRem => 'நினைவூட்டல்கள்';
+
+  @override
+  String get trialFeatTheme => 'எல்லா தீம்களும்';
+
+  @override
+  String get trialFeatNotes => 'Kuber குறிப்புகள்';
+
+  @override
+  String get trialFeatAdv => 'மேம்பட்ட பகுப்பாய்வு';
+
+  @override
+  String get trialFeatBackup => 'தானியங்கி காப்புப்பிரதிகள்';
+
+  @override
+  String get trialFeatCards => 'Kuber கார்டுகள்';
+
+  @override
+  String get trialFeatCurrency => 'பல நாணயங்கள்';
+
+  @override
+  String get trialPlaceHome => 'முகப்பு';
+
+  @override
+  String get trialPlaceHistory => 'வரலாறு';
+
+  @override
+  String get trialPlaceAnalytics => 'பகுப்பாய்வு';
+
+  @override
+  String get trialPlaceMore => 'மேலும்';
+
+  @override
+  String get trialPlaceSettings => 'அமைப்புகள்';
+
+  @override
+  String get trialPlaceAccounts => 'கணக்குகள்';
+
+  @override
+  String get trialPlaceLook => 'தோற்றம்';
+
+  @override
+  String get trialUsedAsk => 'கேள்வி கேட்கப்பட்டது';
+
+  @override
+  String get trialUsedSms => 'SMS இறக்குமதியானது';
+
+  @override
+  String get trialUsedDash => 'டாஷ்போர்டு உருவாக்கப்பட்டது';
+
+  @override
+  String get trialUsedRem => 'நினைவூட்டல் அமைக்கப்பட்டது';
+
+  @override
+  String get trialUsedTheme => 'தீம் பயன்படுத்தப்பட்டது';
+
+  @override
+  String get trialUsedNotes => 'குறிப்பு எழுதப்பட்டது';
+
+  @override
+  String get trialUsedAdv => 'திறக்கப்பட்டது';
+
+  @override
+  String get trialUsedBackup => 'காப்புப்பிரதி எடுக்கப்பட்டது';
+
+  @override
+  String get trialUsedCards => 'கார்டு சேர்க்கப்பட்டது';
+
+  @override
+  String get trialUsedCurrency => 'நாணயம் சேர்க்கப்பட்டது';
+
+  @override
+  String get trialSuggAskTitle => 'Ask Kuber-இடம் எதையும் கேளுங்கள்';
+
+  @override
+  String get trialSuggAskBody =>
+      'உங்கள் செலவு பற்றி எளிய சொற்களில், எத்தனை முறை வேண்டுமானாலும் கேளுங்கள்.';
+
+  @override
+  String get trialSuggAskCta => 'கேளுங்கள்';
+
+  @override
+  String get trialSuggSmsTitle => 'உங்கள் வங்கி SMS-ஐ இறக்குமதி செய்யுங்கள்';
+
+  @override
+  String get trialSuggSmsBody =>
+      'Pro இந்த ஃபோனின் ஒவ்வொரு வங்கி SMS-ஐயும் படிக்கும், வாராந்திர வரம்பு இல்லாமல்.';
+
+  @override
+  String get trialSuggSmsCta => 'இப்போது இறக்குமதி';
+
+  @override
+  String get trialSuggDashTitle => 'டாஷ்போர்டு உருவாக்குங்கள்';
+
+  @override
+  String get trialSuggDashBody =>
+      'உங்களுக்குப் பிடித்த வரைபடங்களைத் தேர்ந்தெடுத்து ஒரே பக்கத்தில் வையுங்கள்.';
+
+  @override
+  String get trialSuggDashCta => 'ஒன்றை உருவாக்கு';
+
+  @override
+  String get trialSuggRemTitle => 'பில் நினைவூட்டலை அமையுங்கள்';
+
+  @override
+  String get trialSuggRemBody =>
+      'வாடகை, EMI, பில்கள் வருவதற்கு முன் நினைவூட்டல் கிடைக்கும்.';
+
+  @override
+  String get trialSuggRemCta => 'ஒன்றை அமை';
+
+  @override
+  String get trialSuggThemeTitle => 'புதிய தீமை முயலுங்கள்';
+
+  @override
+  String get trialSuggThemeBody =>
+      '16 அக்சென்ட்கள் மற்றும் எல்லா தீம்களிலிருந்தும் தேர்ந்தெடுங்கள்.';
+
+  @override
+  String get trialSuggThemeCta => 'தீம்களைப் பார்';
+
+  @override
+  String get trialSuggNotesTitle => 'Kuber குறிப்பு எழுதுங்கள்';
+
+  @override
+  String get trialSuggNotesBody =>
+      'விரைவு கணக்குகள், பட்டியல்கள், குறிப்பு வரம்பு இல்லை.';
+
+  @override
+  String get trialSuggNotesCta => 'புதிய குறிப்பு';
+
+  @override
+  String get trialSuggAdvTitle => 'மேம்பட்ட பகுப்பாய்வைத் திறக்கவும்';
+
+  @override
+  String get trialSuggAdvBody =>
+      'போக்குகள், வடிகட்டிகள், உங்கள் பண ஆரோக்கிய மதிப்பெண்ணைப் பாருங்கள்.';
+
+  @override
+  String get trialSuggAdvCta => 'திற';
+
+  @override
+  String get trialSuggBackupTitle => 'தானியங்கி காப்புப்பிரதியை இயக்குங்கள்';
+
+  @override
+  String get trialSuggBackupBody =>
+      'Kuber தினமும் நீங்கள் தேர்ந்தெடுக்கும் கோப்புறையில் காப்புப்பிரதி சேமிக்கும்.';
+
+  @override
+  String get trialSuggBackupCta => 'இயக்கு';
+
+  @override
+  String get trialSuggCardsTitle => 'உங்கள் கார்டுகளைச் சேருங்கள்';
+
+  @override
+  String get trialSuggCardsBody =>
+      'கார்டு வரம்புகள், பில் தேதிகளை ஒரே இடத்தில் வையுங்கள். Pro-வில் 2 கார்டு வரம்பு இல்லை.';
+
+  @override
+  String get trialSuggCardsCta => 'கார்டு சேர்';
+
+  @override
+  String get trialSuggCurrencyTitle => 'மற்றொரு நாணயத்தைச் சேருங்கள்';
+
+  @override
+  String get trialSuggCurrencyBody =>
+      'உங்கள் ரூபாய் கணக்குகளுடன் USD அல்லது AED கணக்கையும் கண்காணியுங்கள்.';
+
+  @override
+  String get trialSuggCurrencyCta => 'ஒன்றைச் சேர்';
+
+  @override
+  String trialRem3CardBody(String date, String n) {
+    return 'உங்கள் சோதனை $date அன்று முடியும். $n Pro அம்சங்களை இன்னும் முயல வேண்டும்.';
+  }
+
+  @override
+  String get trialRem3Cta => 'மீதமுள்ளதைப் பார்';
+
+  @override
+  String get trialLastCta => 'என்ன மாறும்';
+
+  @override
+  String get trialKeepPro => 'Pro வைத்திரு';
+
+  @override
+  String get trialEndTitle => 'உங்கள் Pro சோதனை முடிந்தது';
+
+  @override
+  String get trialEndBody => '14 நாட்களில் Pro மூலம் நீங்கள் செய்தவை இவை.';
+
+  @override
+  String get trialEndStatSms => 'SMS இறக்குமதியானது';
+
+  @override
+  String get trialEndStatDash => 'டாஷ்போர்டுகள் உருவாக்கப்பட்டன';
+
+  @override
+  String get trialEndStatAsk => 'Ask Kuber-இடம் கேட்ட கேள்விகள்';
+
+  @override
+  String get trialEndStatNotes => 'குறிப்புகள் எழுதப்பட்டன';
+
+  @override
+  String get trialEndStatRem => 'நினைவூட்டல்கள் அமைக்கப்பட்டன';
+
+  @override
+  String get trialEndStatBackup => 'காப்புப்பிரதிகள் எடுக்கப்பட்டன';
+
+  @override
+  String get trialEndLimits => 'இலவச வரம்புகளுக்குத் திரும்புதல்';
+
+  @override
+  String get trialEndKept =>
+      'உங்கள் டாஷ்போர்டுகள், குறிப்புகள், இறக்குமதி செய்த பரிவர்த்தனைகள் எல்லாம் பாதுகாப்பாக உள்ளன. Pro வாங்கியதும் Pro அம்சங்கள் மீண்டும் வேலை செய்யும்.';
+
+  @override
+  String trialEndCta(String plan, String price) {
+    return 'Pro பெறுங்கள் · $plan $price';
+  }
+
+  @override
+  String setProTrialSub(String n, String date) {
+    return 'Pro சோதனை · $n நாட்கள், $date அன்று முடியும்';
+  }
+
+  @override
+  String setProEndedSub(String date) {
+    return 'இலவசம் · சோதனை $date அன்று முடிந்தது';
+  }
+
+  @override
+  String get proManagePlan => 'திட்டம்';
+
+  @override
+  String get proManagePlanFree => 'இலவசம்';
+
+  @override
+  String get proManageTrial => 'Pro சோதனை';
+
+  @override
+  String get proManageStarted => 'தொடக்கம்';
+
+  @override
+  String get proManageEnds => 'முடிவு';
+
+  @override
+  String get proManageEnded => 'முடிந்தது';
+
+  @override
+  String get proManageTried => 'முயன்ற அம்சங்கள்';
+
+  @override
+  String proManageTriedValue(String n) {
+    return '10ல் $n';
+  }
+
+  @override
+  String get proManageEndedTitle => 'இலவசம் · சோதனை முடிந்தது';
+
+  @override
+  String proManageEndedBody(String date) {
+    return 'உங்கள் Pro-வின் 14 நாட்கள் $date அன்று முடிந்தன.';
+  }
+
+  @override
+  String get proManageKeep => 'Pro வைத்திருங்கள்: திட்டங்கள்';
+
+  @override
+  String get proManageGet => 'Pro பெறுங்கள்: திட்டங்கள்';
+
+  @override
+  String get chartPeriod7d => '7D';
+
+  @override
+  String get chartPeriod7dSub => 'கடந்த 7 நாட்கள்';
+
+  @override
+  String get floatingHeaderTitle => 'மிதக்கும் தலைப்புப் பட்டி';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'நீங்கள் ஸ்க்ரோல் செய்யும்போது தலைப்புப் பட்டி மாத்திரை வடிவமாக மாறும்';
+
+  @override
+  String get floatingHeaderSwitchOn => 'இயக்கத்தில்';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'அணைவு · தலைப்புப் பட்டி பக்கத்துடன் ஸ்க்ரோல் ஆகி மறையும்';
+
+  @override
+  String get floatingHeaderSection => 'மாத்திரையை எப்போது காட்டுவது';
+
+  @override
+  String get floatingHeaderAlways => 'எப்போதும்';
+
+  @override
+  String get floatingHeaderScrollUp => 'மேலே ஸ்க்ரோல் செய்யும்போது';
+
+  @override
+  String get floatingHeaderScrollStop => 'ஸ்க்ரோல் நிற்கும்போது';
+
+  @override
+  String get floatingHeaderOff => 'அணை';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, தலைப்புப் பட்டியின் முன்னோட்டம்';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'மிதக்கும் தலைப்பு பில் மேல் பட்டி உருட்டு மறை floating header pill';
 }

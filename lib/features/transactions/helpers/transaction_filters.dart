@@ -139,6 +139,60 @@ extension TransactionAggregateX on Iterable<Transaction> {
     );
   }
 
+  /// [aggregate] over `filter`'s window plus, in the same pass, the totals of
+  /// the window `[prevFrom, filter.from)` (same exclusions) and whether any
+  /// transaction at all happened before `filter.from`. `filter.from` is
+  /// required. Home's balance card uses it for "than last month".
+  ({SummaryResult current, double prevIncome, double prevExpense, bool hasEarlier})
+      aggregateWithPrev(TxnPeriodFilter filter, {required DateTime prevFrom}) {
+    final start = filter.from!;
+    final end = filter.to ?? DateTime(9999);
+    final cats = filter.categoryIds ??
+        (filter.categoryId == null ? null : {filter.categoryId!});
+    double income = 0, expense = 0, prevIncome = 0, prevExpense = 0;
+    var hasEarlier = false;
+    final spendingByCategory = <String, double>{};
+    final txnCountByCategory = <String, int>{};
+    for (final t in this) {
+      if (filter.excludeTransfers && t.isTransfer) continue;
+      if (filter.excludeBalanceAdjustments && t.isBalanceAdjustment) continue;
+      if (filter.excludeLinkedRule && t.linkedRuleType != null) continue;
+      if (filter.accountIds != null && !filter.accountIds!.contains(t.accountId)) continue;
+      if (cats != null && !cats.contains(t.categoryId)) continue;
+      final date = t.createdAt;
+      if (date.isBefore(start)) {
+        hasEarlier = true;
+        if (!date.isBefore(prevFrom)) {
+          if (t.type == 'income') {
+            prevIncome += t.amount;
+          } else if (t.type == 'expense') {
+            prevExpense += t.amount;
+          }
+        }
+        continue;
+      }
+      if (!date.isBefore(end)) continue;
+      txnCountByCategory[t.categoryId] = (txnCountByCategory[t.categoryId] ?? 0) + 1;
+      if (t.type == 'income') {
+        income += t.amount;
+      } else if (t.type == 'expense') {
+        expense += t.amount;
+        spendingByCategory[t.categoryId] = (spendingByCategory[t.categoryId] ?? 0) + t.amount;
+      }
+    }
+    return (
+      current: SummaryResult(
+        income: income,
+        expense: expense,
+        spendingByCategory: spendingByCategory,
+        txnCountByCategory: txnCountByCategory,
+      ),
+      prevIncome: prevIncome,
+      prevExpense: prevExpense,
+      hasEarlier: hasEarlier,
+    );
+  }
+
   SummaryResult computeSummary({
     required DateTime start,
     required DateTime end,

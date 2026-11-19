@@ -61,12 +61,12 @@ void main() {
     expect(find.byType(TextField).evaluate().length, 3); // name + min + max
 
     await open(t, 'Categories');
-    expect(find.text('Food'), findsOneWidget);
+    expect(find.text('Food').first, findsOneWidget);
     expect(find.text('Search categories'), findsOneWidget);
 
     await open(t, 'Tags');
     expect(find.text('Food'), findsNothing);
-    expect(find.text('#trip'), findsOneWidget);
+    expect(find.text('#trip').first, findsOneWidget);
 
     await open(t, 'Tags');
     expect(find.text('#trip'), findsNothing);
@@ -75,13 +75,13 @@ void main() {
   testWidgets('selected count, chips, remove chip', (t) async {
     await pump(t);
     await open(t, 'Categories');
-    await t.tap(find.text('Food'));
+    await t.tap(find.text('Food').first);
     await t.pumpAndSettle();
     await open(t, 'Categories'); // collapse
     expect(find.textContaining('· 1 selected'), findsOneWidget);
     final chip = find.widgetWithIcon(KuberChip, Icons.close_rounded);
     expect(chip, findsOneWidget);
-    expect(find.descendant(of: chip, matching: find.text('Food')),
+    expect(find.descendant(of: chip, matching: find.text('Food').first),
         findsOneWidget);
     await t.tap(find.descendant(
         of: chip, matching: find.byIcon(Icons.close_rounded)));

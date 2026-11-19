@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 
 /// Progress colour state (tokens.md §7). Call sites map their existing status
@@ -18,13 +19,31 @@ enum KuberProgressState { normal, nearLimit, overLimit }
   };
 }
 
+/// Animates [value] changes on springStandard (springSubtle at Subtle, instant
+/// at Off). First build shows the value without animating; no ticker at rest.
+Widget _animatedValue(
+  BuildContext context,
+  double value,
+  Widget Function(double v) build,
+) {
+  final level = KuberMotion.levelOf(context);
+  final v = value.isNaN ? 0.0 : value.clamp(0.0, 1.0);
+  final curve = KuberMotion.spatialCurve(level, KuberMotion.standardCurve);
+  return TweenAnimationBuilder<double>(
+    tween: Tween(end: v),
+    duration: level == MotionLevel.off ? Duration.zero : curve.settle,
+    curve: curve.clamped,
+    builder: (context, v, _) => build(v),
+  );
+}
+
 /// M3 linear progress (components/progress.md): round ends, 4dp gap between
 /// indicator and track, 4dp stop dot at the track end; over limit fills the
 /// whole bar with no track. Thin bars (<= 4) draw the M3 Expressive wavy
 /// indicator (amplitude 3, wavelength 24) unless [flat].
 ///
-/// Painter structure adapted from Mull `shared/widgets/progress.dart`. Static
-/// paint only; it never animates on its own.
+/// Painter structure adapted from Mull `shared/widgets/progress.dart`. Value changes
+/// ease on springStandard.
 class KuberLinearProgress extends StatelessWidget {
   final double value;
   final KuberProgressState state;
@@ -51,13 +70,17 @@ class KuberLinearProgress extends StatelessWidget {
       child: SizedBox(
         height: wavy ? 12 : height,
         width: double.infinity,
-        child: CustomPaint(
-          painter: _LinearPainter(
-            value: value.isNaN ? 0 : value.clamp(0.0, 1.0),
-            stroke: height,
-            indicator: color ?? ind,
-            track: trackColor ?? trk,
-            wavy: wavy,
+        child: _animatedValue(
+          context,
+          value,
+          (v) => CustomPaint(
+            painter: _LinearPainter(
+              value: v,
+              stroke: height,
+              indicator: color ?? ind,
+              track: trackColor ?? trk,
+              wavy: wavy,
+            ),
           ),
         ),
       ),
@@ -158,14 +181,18 @@ class KuberRingProgress extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _RingPainter(
-          value: value.isNaN ? 0 : value.clamp(0.0, 1.0),
-          stroke: sw,
-          indicator: color ?? ind,
-          track: trackColor ?? trk,
+      child: _animatedValue(
+        context,
+        value,
+        (v) => CustomPaint(
+          painter: _RingPainter(
+            value: v,
+            stroke: sw,
+            indicator: color ?? ind,
+            track: trackColor ?? trk,
+          ),
+          child: child == null ? null : Center(child: child),
         ),
-        child: child == null ? null : Center(child: child),
       ),
     );
   }

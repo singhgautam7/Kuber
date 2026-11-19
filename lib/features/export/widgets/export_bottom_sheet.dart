@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,7 @@ import '../../analytics/providers/analytics_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import '../providers/export_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 // ---------------------------------------------------------------------------
 // Show helper
@@ -27,6 +29,7 @@ void showExportBottomSheet({
   required ExportType exportType,
 }) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
@@ -306,7 +309,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       padding: const EdgeInsets.symmetric(vertical: KuberSpace.xxl),
       child: Column(
         children: [
-          const CircularProgressIndicator(),
+          const KuberShapeLoader(size: 40),
           const SizedBox(height: KuberSpace.xl),
           Text(
             'Generating your report\u2026',

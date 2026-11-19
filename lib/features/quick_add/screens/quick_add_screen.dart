@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:kuber/shared/widgets/kuber_list.dart';
@@ -11,6 +12,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -119,6 +121,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   void _showMicDeniedDialog() {
     final cs = Theme.of(context).colorScheme;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -170,6 +173,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     final cs = Theme.of(context).colorScheme;
     _focusNode.unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -240,6 +244,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     context.pop();
   }
 
+  // Set from the page-aware Builder in build; used by the input field.
+  EdgeInsets _scrollPadding = const EdgeInsets.all(20);
+
   // ── Build ────────────────────────────────────────────────────────────────
 
   @override
@@ -252,25 +259,29 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          Column(
-            children: [
-              KuberAppBar(
-                title: 'Quick Add',
-                showBack: true,
-                pinShortcut: const PinShortcutSpec(
-                  shortcutId: 'quick_add',
-                  shortLabel: 'Quick Add',
-                  longLabel: 'Quick Add',
-                  iconDrawable: 'ic_shortcut_quickadd',
-                  deepLink: 'kuber://app/quick-add',
-                ),
-                infoConfig: _infoConfig(),
+          KuberHeaderPage(
+            header: KuberAppBar(
+              title: 'Quick Add',
+              showBack: true,
+              pinShortcut: const PinShortcutSpec(
+                shortcutId: 'quick_add',
+                shortLabel: 'Quick Add',
+                longLabel: 'Quick Add',
+                iconDrawable: 'ic_shortcut_quickadd',
+                deepLink: 'kuber://app/quick-add',
               ),
+              infoConfig: _infoConfig(),
+            ),
+            body: Builder(builder: (context) {
+              _scrollPadding = kuberFieldScrollPadding(context);
+              return Column(
+            children: [
               Expanded(
                 child: CustomScrollView(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   slivers: [
+                    KuberHeaderPage.sliverGap(),
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(
                         KuberSpace.screenMargin,
@@ -296,6 +307,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
               ),
               _actionBar(cs),
             ],
+              );
+            }),
           ),
           QuickAddVoiceOverlay(
             controller: _voice,
@@ -320,6 +333,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   Widget _inputSurface(ColorScheme cs) {
     return TextField(
+      scrollPadding: _scrollPadding,
       controller: _controller,
       focusNode: _focusNode,
       minLines: 3,

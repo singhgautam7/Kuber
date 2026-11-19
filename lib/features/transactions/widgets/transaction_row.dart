@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -16,6 +17,9 @@ import '../../history/providers/selection_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../sms_import/widgets/sms_badge.dart';
 import '../data/transaction.dart';
+
+/// State layer inset inside a row (concentric with the 20 dp day card).
+const double _kRowInset = 4;
 
 class DateGroupHeader extends ConsumerWidget {
   final String label;
@@ -71,11 +75,16 @@ class DateGroupHeader extends ConsumerWidget {
   }
 }
 
-class TransactionDayCard extends StatelessWidget {
+class TransactionDayCard extends StatefulWidget {
   final List<Transaction> transactions;
   final void Function(Transaction) onDelete;
   final void Function(Transaction) onTap;
   final void Function(Transaction) onEdit;
+
+  /// Rows that appear (new id) or disappear (id gone) while this card stays
+  /// mounted grow in / shrink out. Off for the first build, bulk changes
+  /// (more than [_maxChange] rows) and while a filter is being applied.
+  final bool animateChanges;
 
   final AppFormatter formatter;
   final Map<int, Category> categoryMap;
@@ -92,6 +101,7 @@ class TransactionDayCard extends StatelessWidget {
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
+    this.animateChanges = false,
     required this.formatter,
     required this.categoryMap,
     required this.accountMap,
@@ -100,24 +110,120 @@ class TransactionDayCard extends StatelessWidget {
   });
 
   @override
+  State<TransactionDayCard> createState() => _TransactionDayCardState();
+}
+
+class _Ghost {
+  _Ghost(this.transaction, this.index);
+  final Transaction transaction;
+  final int index;
+}
+
+class _TransactionDayCardState extends State<TransactionDayCard> {
+  /// More changed rows than this at once is a bulk change (import, filter,
+  /// bulk delete): no per-row motion.
+  static const _maxChange = 3;
+
+  late Set<int> _ids;
+
+  /// Ids whose row carries the insert wrapper. Only rows that were inserted
+  /// while the card was mounted; every other row is the bare row (nothing
+  /// extra per row at rest).
+  final _inserted = <int>{};
+
+  /// Rows removed from the data, kept until their exit motion ends.
+  final _ghosts = <int, _Ghost>{};
+
+  /// Swipe-deleted ids: the Dismissible already animates those out.
+  final _swiped = <int>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _ids = {for (final t in widget.transactions) t.id};
+  }
+
+  @override
+  void didUpdateWidget(TransactionDayCard old) {
+    super.didUpdateWidget(old);
+    if (identical(old.transactions, widget.transactions)) return;
+    final now = {for (final t in widget.transactions) t.id};
+    final added = now.difference(_ids);
+    final removed = _ids.difference(now);
+    for (final id in added) {
+      _ghosts.remove(id);
+    }
+    if (widget.animateChanges &&
+        added.length <= _maxChange &&
+        removed.length <= _maxChange) {
+      _inserted.addAll(added);
+      for (var i = 0; i < old.transactions.length; i++) {
+        final t = old.transactions[i];
+        if (removed.contains(t.id) && !_swiped.contains(t.id)) {
+          _ghosts[t.id] = _Ghost(t, i);
+        }
+      }
+    }
+    _swiped.removeAll(removed);
+    _ids = now;
+  }
+
+  Widget _row(Transaction t, {bool ghost = false}) {
+    final w = widget;
+    return TransactionRow(
+      key: ghost ? null : ValueKey(t.id),
+      ghost: ghost,
+      transaction: t,
+      onDelete: () {
+        _swiped.add(t.id);
+        w.onDelete(t);
+      },
+      onTap: () => w.onTap(t),
+      onEdit: () => w.onEdit(t),
+      formatter: w.formatter,
+      category: w.categoryMap[int.tryParse(t.categoryId)],
+      account: w.accountMap[int.tryParse(t.accountId)],
+      accountMap: w.accountMap,
+      transferPairAccountId: w.transferPairAccountId,
+      tagNames: w.tagNamesMap[t.id] ?? const [],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final items = [
+      for (final t in widget.transactions) (t, false),
+    ];
+    final ghosts = _ghosts.values.toList()
+      ..sort((a, b) => a.index.compareTo(b.index));
+    for (final g in ghosts) {
+      items.insert(
+        g.index.clamp(0, items.length),
+        (g.transaction, true),
+      );
+    }
     // One grouped list per day, rows divided by 1dp outlineVariant (grouping
     // over boxing, density-audit #1).
     return KuberGroup(
       children: [
-        for (int i = 0; i < transactions.length; i++)
-          TransactionRow(
-            transaction: transactions[i],
-            onDelete: () => onDelete(transactions[i]),
-            onTap: () => onTap(transactions[i]),
-            onEdit: () => onEdit(transactions[i]),
-            formatter: formatter,
-            category: categoryMap[int.tryParse(transactions[i].categoryId)],
-            account: accountMap[int.tryParse(transactions[i].accountId)],
-            accountMap: accountMap,
-            transferPairAccountId: transferPairAccountId,
-            tagNames: tagNamesMap[transactions[i].id] ?? const [],
-          ),
+        for (final (t, isGhost) in items)
+          if (isGhost)
+            KuberAnimatedListItem(
+              key: ValueKey('exit${t.id}'),
+              present: false,
+              onRemoved: () {
+                if (mounted) setState(() => _ghosts.remove(t.id));
+              },
+              child: IgnorePointer(child: _row(t, ghost: true)),
+            )
+          else if (_inserted.contains(t.id))
+            KuberAnimatedListItem(
+              key: ValueKey(t.id),
+              animateIn: true,
+              child: _row(t),
+            )
+          else
+            _row(t),
       ],
     );
   }
@@ -128,6 +234,9 @@ class TransactionRow extends ConsumerWidget {
   final VoidCallback onDelete;
   final VoidCallback onTap;
   final VoidCallback onEdit;
+
+  /// A row that is leaving (kept for its exit motion): no swipe actions.
+  final bool ghost;
   final AppFormatter formatter;
   final Category? category;
   final Account? account;
@@ -143,6 +252,7 @@ class TransactionRow extends ConsumerWidget {
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
+    this.ghost = false,
     required this.formatter,
     this.category,
     this.account,
@@ -338,38 +448,72 @@ class TransactionRow extends ConsumerWidget {
             rawColor: iconColor,
           );
 
-    final content = AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      color: isSelected ? cs.secondaryContainer : Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          if (isSelectionMode) {
-            ref
-                .read(transactionSelectionProvider.notifier)
-                .toggle(transaction.id);
-          } else {
-            onTap();
-          }
-        },
-        onLongPress: () {
-          ref
-              .read(transactionSelectionProvider.notifier)
-              .toggle(transaction.id);
-        },
-        child: Container(
-          constraints: BoxConstraints(
-            minHeight: hasIndicator
-                ? KuberSpace.listItem3
-                : KuberSpace.listItem2,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpace.listRowPadH,
-            vertical: KuberSpace.listRowPadV,
-          ),
-          child: Row(
+    final level = KuberMotion.levelOf(context);
+    final expressive = level == MotionLevel.expressive;
+    final fill = level == MotionLevel.off
+        ? KuberMotion.fxInstant
+        : KuberMotion.fxFast;
+    final minH = (hasIndicator ? KuberSpace.listItem3 : KuberSpace.listItem2);
+
+    // Press (P1): scale .98 on the whole row, state layer inset 4 dp with 16 dp
+    // corners (concentric with the 20 dp day card). Pressable has no
+    // controller until the first press.
+    final content = Pressable(
+      kind: PressKind.row,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minH),
+        child: Padding(
+          padding: const EdgeInsets.all(_kRowInset),
+          child: AnimatedContainer(
+            duration: fill,
+            decoration: BoxDecoration(
+              color: isSelected ? cs.secondaryContainer : Colors.transparent,
+              borderRadius: KuberShape.largeR,
+            ),
+            child: InkWell(
+              borderRadius: KuberShape.largeR,
+              overlayColor: kuberPressedLayer(cs),
+              onTap: () {
+                if (isSelectionMode) {
+                  KuberHaptics.tick();
+                  ref
+                      .read(transactionSelectionProvider.notifier)
+                      .toggle(transaction.id);
+                } else {
+                  onTap();
+                }
+              },
+              onLongPress: () {
+                KuberHaptics.longPress();
+                ref
+                    .read(transactionSelectionProvider.notifier)
+                    .toggle(transaction.id);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.listRowPadH - _kRowInset,
+                  vertical: KuberSpace.listRowPadV - _kRowInset,
+                ),
+                child: Row(
             children: [
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+                duration: fill,
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  // Square tile <-> circle check swap (Expressive): the new
+                  // one springs in from .7.
+                  child: expressive
+                      ? ScaleTransition(
+                          scale: Tween(begin: .7, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: animation,
+                              curve: KuberMotion.fastCurve.clamped,
+                            ),
+                          ),
+                          child: child,
+                        )
+                      : child,
+                ),
                 child: lead,
               ),
               const SizedBox(width: KuberSpace.lg),
@@ -470,11 +614,14 @@ class TransactionRow extends ConsumerWidget {
               ),
             ],
           ),
+              ),
+            ),
+          ),
         ),
       ),
     );
 
-    if (swipeMode == SwipeMode.performActions) {
+    if (swipeMode == SwipeMode.performActions && !ghost) {
       return Dismissible(
         key: ValueKey(transaction.id),
         direction: DismissDirection.horizontal,

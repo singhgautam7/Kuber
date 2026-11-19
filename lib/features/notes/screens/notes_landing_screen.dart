@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -118,7 +119,9 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
     final selection = ref.read(notesSelectionProvider);
     if (selection.isEmpty) return;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => CategoryPickerSheet(
@@ -194,11 +197,11 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
               ),
         floatingActionButtonLocation: kuberFabLocation,
         backgroundColor: cs.surface,
-        // The header scrolls away with the list (no sticky headers); while
-        // multi-selecting, the contextual header overlays the top instead.
+        // The header floats over the list; while multi-selecting, the
+        // contextual header overlays the top instead.
         body: Stack(
           children: [
-            KuberScrollAwayHeader(
+            KuberHeaderPage(
               header: KuberAppBar(
                 title: 'Kuber Notes',
                 showBack: true,
@@ -241,15 +244,22 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
               body: allNotes == null
                   ? const SizedBox.shrink()
                   : allNotes.isEmpty
-                  ? KuberEmptyState(
-                      icon: Icons.sticky_note_2_outlined,
-                      title: 'No notes yet',
-                      description:
-                          'Tap + to create your first note, or create a '
-                          'tutorial note to see how quick math and '
-                          'tap-to-convert work.',
-                      actionLabel: 'Create tutorial note',
-                      onAction: _openDemoNote,
+                  ? Builder(
+                      builder: (c) => Padding(
+                        padding: EdgeInsets.only(
+                          top: KuberHeaderPage.insetOf(c),
+                        ),
+                        child: KuberEmptyState(
+                          icon: Icons.sticky_note_2_outlined,
+                          title: 'No notes yet',
+                          description:
+                              'Tap + to create your first note, or create a '
+                              'tutorial note to see how quick math and '
+                              'tap-to-convert work.',
+                          actionLabel: 'Create tutorial note',
+                          onAction: _openDemoNote,
+                        ),
+                      ),
                     )
                   : _buildBody(
                       cs,
@@ -295,6 +305,7 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
         KuberExtendedFab.clearance,
       ),
       children: [
+        KuberHeaderPage.gap(),
         // Same top as Kuber Cards: the summary line with filter and change
         // view buttons; search is in the header (round 4).
         Padding(

@@ -24,12 +24,13 @@ import '../database/seed_service.dart';
 import '../schedule/schedule.dart';
 import '../schedule/schedule_engine.dart';
 import '../utils/formatters.dart';
+import '../../features/pro/trial/trial_store.dart' show clearKeepingEntitlement;
 
 class MockDataService {
   static Future<void> generate(Isar isar) async {
     await isar.writeTxn(() async {
-      // 1. Wipe database
-      await isar.clear();
+      // 1. Wipe database (keeps the entitlement / trial row)
+      await clearKeepingEntitlement(isar);
     });
 
     // 2. Re-seed defaults

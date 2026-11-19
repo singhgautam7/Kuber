@@ -65,26 +65,29 @@ class _MerchantAnalysisScreenState
     }
     if (!hasAccess) {
       return const Scaffold(
-        appBar: KuberAppBar(title: 'Merchant analysis', showBack: true),
-        body: SizedBox.shrink(),
+        body: KuberHeaderPage(
+          header: KuberAppBar(title: 'Merchant analysis', showBack: true),
+          body: SizedBox.shrink(),
+        ),
       );
     }
 
-    // Header scrolls with the content (no sticky headers); it lives inside
-    // this scroll view because the paging needs its own controller.
     return Scaffold(
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.only(bottom: KuberSpace.xxl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const KuberAppBar(title: 'Merchant analysis', showBack: true),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: MerchantAnalysisSection(displayedCount: _displayedCount),
-            ),
-          ],
+      body: KuberHeaderPage(
+        header: const KuberAppBar(title: 'Merchant analysis', showBack: true),
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.only(bottom: KuberSpace.xxl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              KuberHeaderPage.gap(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: MerchantAnalysisSection(displayedCount: _displayedCount),
+              ),
+            ],
+          ),
         ),
       ),
     );

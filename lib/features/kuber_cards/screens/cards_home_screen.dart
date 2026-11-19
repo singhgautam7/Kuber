@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,7 @@ import '../widgets/card_icon.dart';
 import '../widgets/card_list_row.dart';
 import '../widgets/stored_card_visual.dart';
 import 'setup_flow_screen.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// PRO-GATE: free-tier Kuber Cards limit. Free users see and manage the first
 /// [kFreeCardLimit] cards fully; the rest are blurred behind the paywall, and
@@ -53,7 +55,7 @@ class _KuberCardsEntryState extends ConsumerState<KuberCardsEntry> {
   Widget build(BuildContext context) {
     final metaAsync = ref.watch(cardVaultMetaProvider);
     return metaAsync.when(
-      loading: () => Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => Scaffold(body: Center(child: KuberShapeLoader(size: 40))),
       error: (e, _) => Scaffold(
         body: Center(
           child: Text('Could not open Kuber Cards', style: localeFont()),
@@ -127,10 +129,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
         // Nothing here is pinned: the app bar, page header, and the search +
         // count rows all scroll with the card list (parity with the
         // More -> Accounts landing).
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
+        body: KuberHeaderPage(
+ header: KuberAppBar(
                 title: 'Kuber Cards',
                 showBack: true,
                 appDrawerEntry: AppDrawerEntry.cards,
@@ -172,7 +172,9 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                   ],
                 ),
               ),
-            ),
+ body: CustomScrollView(
+          slivers: [
+            KuberHeaderPage.sliverGap(),
 
             if (unlocked)
               ...ref
@@ -181,7 +183,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                     loading: () => const [
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(child: KuberShapeLoader(size: 40)),
                       ),
                     ],
                     error: (e, _) => [
@@ -206,6 +208,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
               const SliverToBoxAdapter(child: SizedBox.shrink()),
           ],
         ),
+ ),
       ),
     );
   }
@@ -416,6 +419,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     // provider is the source of truth and survives app close.
     var sort = ref.read(cardsSortProvider);
     showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

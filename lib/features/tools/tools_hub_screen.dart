@@ -53,16 +53,8 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.translucent,
-        child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
-          child: CustomScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
                   title: context.l10n.menuCalculators,
                   showBack: true,
                   pinShortcut: PinShortcutSpec(
@@ -78,7 +70,15 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
                     onChanged: (v) => setState(() => _query = v),
                   ),
                 ),
-              ),
+        body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+          child: CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              KuberHeaderPage.sliverGap(),
 
               if (isSearching)
                 ..._buildSearchResults(cs, lang)
@@ -100,6 +100,7 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
               ],
             ],
           ),
+        ),
         ),
       ),
     );

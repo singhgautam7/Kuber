@@ -297,25 +297,23 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
+        // Close always closes the screen (it used to step back to the type
+        // picker once a type was chosen).
         closeIcon: true,
-        onBack: () {
-          if (_type != null && _existing == null && widget.query['type'] == null) {
-            setState(() => _type = null);
-          } else {
-            context.pop();
-          }
-        },
         title: _existing == null ? l.msInvAdd : l.msInvEdit,
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
+          padding: EdgeInsets.fromLTRB(
+              20, 4 + KuberHeaderPage.insetOf(context), 20, 140),
           child: _type == null ? _picker(context) : _form(context),
         ),
+      )),
       ),
       bottomNavigationBar: _type == null
           ? null
@@ -386,15 +384,18 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             onDeleted: () => setState(() => _fromCalc = null),
           ),
         ),
-      KuberListRow(
-        leading: KuberIconTile(icon: investmentIcon(_type!)),
-        title: investmentTypeLabel(context, _type!),
-        subtitle: switch (_behaviour) {
-          InvestmentBehaviour.market => l.msInvPickMarketSub,
-          InvestmentBehaviour.fixedReturn => l.msInvPickFixedSub,
-          InvestmentBehaviour.other => l.msInvPickOtherSub,
-        },
-      ),
+      // In a group card so its edge lines up with the field boxes below.
+      KuberGroup(children: [
+        KuberListRow(
+          leading: KuberIconTile(icon: investmentIcon(_type!)),
+          title: investmentTypeLabel(context, _type!),
+          subtitle: switch (_behaviour) {
+            InvestmentBehaviour.market => l.msInvPickMarketSub,
+            InvestmentBehaviour.fixedReturn => l.msInvPickFixedSub,
+            InvestmentBehaviour.other => l.msInvPickOtherSub,
+          },
+        ),
+      ]),
       KuberTextField(
         label: l.msInvName,
         controller: _name,

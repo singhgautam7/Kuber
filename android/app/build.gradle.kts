@@ -114,4 +114,8 @@ dependencies {
     // vNext: launch task queue as expedited background work
     // (BackgroundTasksWorker.kt).
     implementation("androidx.work:work-runtime-ktx:2.10.5")
+
+    // v7.0.0-b: the trial record in Block Store (TrialBlockStore channel), so a
+    // reinstall or restore cannot reset the 14-day trial.
+    implementation("com.google.android.gms:play-services-auth-blockstore:16.4.0")
 }

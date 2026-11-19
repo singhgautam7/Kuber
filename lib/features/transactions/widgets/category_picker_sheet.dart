@@ -13,6 +13,7 @@ import '../../../shared/widgets/kuber_list.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../more/screens/add_edit_category_screen.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class CategoryPickerSheet extends ConsumerStatefulWidget {
   final int? selectedCategoryId;
@@ -148,7 +149,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
 
           Flexible(
             child: categories.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: KuberShapeLoader(size: 40)),
               error: (e, _) =>
                   Center(child: Text('${context.l10n.errorLabel}: $e')),
               data: (cats) {

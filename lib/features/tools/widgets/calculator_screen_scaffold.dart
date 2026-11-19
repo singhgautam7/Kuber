@@ -84,7 +84,14 @@ class ToolScreenScaffold extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: GestureDetector(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          title: title,
+          showBack: true,
+          infoConfig: infoConfig,
+          overflowConfig: mergedOverflow,
+        ),
+        body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.translucent,
         // Disable the Android stretch-overscroll indicator: its shader can
@@ -94,14 +101,7 @@ class ToolScreenScaffold extends ConsumerWidget {
           child: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
-                  title: title,
-                  showBack: true,
-                  infoConfig: infoConfig,
-                  overflowConfig: mergedOverflow,
-                ),
-              ),
+              KuberHeaderPage.sliverGap(),
 
               if (banner != null)
                 SliverToBoxAdapter(
@@ -204,6 +204,7 @@ class ToolScreenScaffold extends ConsumerWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

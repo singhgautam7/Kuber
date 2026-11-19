@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kuber/shared/widgets/kuber_shape_loader.dart';
 import 'package:kuber/features/advanced_history/widgets/charts/ah_charts_area.dart';
+import 'package:kuber/features/advanced_history/widgets/dashboard/ah_action_row.dart';
 import 'package:kuber/features/advanced_history/models/ah_view.dart';
 import 'package:kuber/features/advanced_history/providers/ah_providers.dart';
 import 'package:kuber/features/advanced_history/query/query_ast.dart';
@@ -419,25 +421,20 @@ void main() {
     expect(find.text('40%'), findsOneWidget);
   });
 
-  testWidgets('scrolling pins the compact action row; the app bar scrolls away',
+  testWidgets('the action row scrolls away; only the header stays, as the pill',
       (t) async {
     await pumpAh(t, const AdvancedHistoryScreen(),
         ahOverrides(view: _filtered(charts: [_donut, _bars, _donut, _bars])));
-    double compactOpacity() => t
-        .widget<Opacity>(find
-            .ancestor(
-                of: find.byKey(const ValueKey('ah-action-compact')),
-                matching: find.byType(Opacity))
-            .first)
-        .opacity;
-    expect(compactOpacity(), 0);
+    await settleAh(t);
+    final row = find.descendant(
+        of: find.byWidgetPredicate((w) => w is AhActionRow && !w.compact),
+        matching: find.byType(Text));
+    expect(row.hitTestable(), findsWidgets);
     await t.drag(find.byType(CustomScrollView), const Offset(0, -500));
     await settleAh(t);
-    expect(compactOpacity(), 1);
-    expect(find.text('Custom Dashboard').hitTestable(), findsNothing);
-    // The pinned row still opens the Filter sheets: Sort is tappable.
-    expect(find.byKey(const ValueKey('ah-action-compact')).hitTestable(),
-        findsOneWidget);
+    // v7.0.0-c (owner): the floating header is the only sticky part.
+    expect(row.hitTestable(), findsNothing);
+    expect(find.text('Custom Dashboard').hitTestable(), findsOneWidget);
   });
 
   testWidgets('leaving the app with the page closed resets the dashboard',
@@ -491,7 +488,7 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     // Short page, more to come: it asks for the next one without a button.
     expect(pages.calls, 1);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(KuberShapeLoader), findsOneWidget);
     expect(find.text('Load more'), findsNothing);
   });
 

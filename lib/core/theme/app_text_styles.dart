@@ -1,20 +1,12 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Centralized typography definitions for the Kuber app.
 ///
-/// Instead of calling [GoogleFonts.inter] in every build method,
-/// we define the styles here as pre-resolved configurations. The Inter font
-/// is resolved by GoogleFonts exactly once (per weight) and the resulting
-/// [TextStyle] is cached, so build methods can `.copyWith(...)` off these
-/// without paying the GoogleFonts lookup cost on every frame. This is what
-/// keeps lists and heavy screens (the story ring, the story viewer, the
-/// archive grid) from re-resolving Inter on every rebuild.
+/// Pre-built Inter styles cached as `final`s so build methods can
+/// `.copyWith(...)` off them without constructing a style on every frame.
 class AppTextStyles {
-  // Base Inter styles — resolved once and cached (note: `final`, not `get`,
-  // so the GoogleFonts lookup does not run on every access).
-  static final TextStyle inter = localeFont();
+    static final TextStyle inter = localeFont();
 
   static final TextStyle regular = localeFont(
     fontWeight: FontWeight.w400,
@@ -35,6 +27,24 @@ class AppTextStyles {
   /// Returns the default TextTheme for the app based on Inter.
   /// Used in [AppTheme] to ensure consistency.
   static TextTheme getTextTheme(TextTheme base) {
-    return GoogleFonts.interTextTheme(base);
+    TextStyle? f(TextStyle? t) =>
+        t?.merge(localeFont(fontWeight: t.fontWeight ?? FontWeight.w400));
+    return base.copyWith(
+      displayLarge: f(base.displayLarge),
+      displayMedium: f(base.displayMedium),
+      displaySmall: f(base.displaySmall),
+      headlineLarge: f(base.headlineLarge),
+      headlineMedium: f(base.headlineMedium),
+      headlineSmall: f(base.headlineSmall),
+      titleLarge: f(base.titleLarge),
+      titleMedium: f(base.titleMedium),
+      titleSmall: f(base.titleSmall),
+      bodyLarge: f(base.bodyLarge),
+      bodyMedium: f(base.bodyMedium),
+      bodySmall: f(base.bodySmall),
+      labelLarge: f(base.labelLarge),
+      labelMedium: f(base.labelMedium),
+      labelSmall: f(base.labelSmall),
+    );
   }
 }

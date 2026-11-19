@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_families.dart' show kSelectableVariants;
 import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_button_group.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../pro/feature_gates/gate_sheet_themes.dart';
 import '../../pro/feature_gates/pro_gate.dart';
@@ -49,6 +51,12 @@ class ThemeScreen extends ConsumerWidget {
     final seed = ref.watch(wallpaperSeedProvider).valueOrNull;
     final dynamicOn = options.dynamicColor && hasPro;
     final l = context.l10n;
+
+    // Every theme change reveals from where the finger last went down (the
+    // ripple); the closures below read it when the tap completes.
+    var down = Offset.zero;
+    void change(FutureOr<void> Function() apply) =>
+        ThemeRipple.of(context).run(down, apply);
 
     Widget optionRow({
       required Widget leading,
@@ -103,9 +111,12 @@ class ThemeScreen extends ConsumerWidget {
     return Scaffold(
       body: SettingsHighlight(
         rowId: highlight,
-        child: KuberScrollAwayHeader(
+        child: KuberHeaderPage(
         header: KuberAppBar(showBack: true, title: context.l10n.themeLabel),
-        body: ListView(
+        body: Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (e) => down = e.position,
+          child: ListView(
           padding: const EdgeInsets.fromLTRB(
             KuberSpace.screenMargin,
             KuberSpace.xs,
@@ -113,17 +124,20 @@ class ThemeScreen extends ConsumerWidget {
             KuberSpace.xxxl,
           ),
           children: [
-            _SegmentedToggle<ThemeMode>(
+            KuberHeaderPage.gap(),
+            KuberButtonGroup<ThemeMode>(
               options: [
-                (ThemeMode.light, context.l10n.themeLightChoice),
-                (ThemeMode.dark, context.l10n.themeDarkChoice),
-                (ThemeMode.system, context.l10n.themeSystemChoice),
+                KuberButtonOption(
+                    value: ThemeMode.light, label: context.l10n.themeLightChoice),
+                KuberButtonOption(
+                    value: ThemeMode.dark, label: context.l10n.themeDarkChoice),
+                KuberButtonOption(
+                    value: ThemeMode.system, label: context.l10n.themeSystemChoice),
               ],
               selected: mode,
-              onChanged: (m) {
-                HapticFeedback.selectionClick();
-                settings.setThemeMode(m);
-              },
+              showCheck: false,
+              // The group plays the tick haptic itself.
+              onChanged: (m) => change(() => settings.setThemeMode(m)),
             ),
             // Expressive colours and Pure black (theme-surfaces-v1): always
             // shown, free on every family. Pure black only acts in dark.
@@ -152,8 +166,8 @@ class ThemeScreen extends ConsumerWidget {
               subtitle: l.themeExpressiveSubtitle,
               value: options.expressive,
               onChanged: (v) {
-                HapticFeedback.selectionClick();
-                optionsCtl.setExpressive(v);
+                KuberHaptics.tick();
+                change(() => optionsCtl.setExpressive(v));
               },
             )),
             const SizedBox(height: KuberSpace.md),
@@ -175,8 +189,8 @@ class ThemeScreen extends ConsumerWidget {
                 subtitle: l.themePureBlackSubtitle,
                 value: options.pureBlack && mode != ThemeMode.light,
                 onChanged: (v) {
-                  HapticFeedback.selectionClick();
-                  optionsCtl.setPureBlack(v);
+                  KuberHaptics.tick();
+                  change(() => optionsCtl.setPureBlack(v));
                 },
               ),
             )),
@@ -218,9 +232,11 @@ class ThemeScreen extends ConsumerWidget {
                       if (v != ThemeVariant.signature && !_gate(context, ref)) {
                         return;
                       }
-                      HapticFeedback.selectionClick();
-                      await optionsCtl.setDynamicColor(false);
-                      await settings.setThemeVariant(v);
+                      KuberHaptics.tick();
+                      change(() async {
+                        optionsCtl.setDynamicColor(false);
+                        await settings.setThemeVariant(v);
+                      });
                     },
                   ),
               ],
@@ -258,7 +274,7 @@ class ThemeScreen extends ConsumerWidget {
                   ? null
                   : (v) {
                       if (v && !_gate(context, ref)) return;
-                      optionsCtl.setDynamicColor(v);
+                      change(() => optionsCtl.setDynamicColor(v));
                     },
             ),
             const SizedBox(height: KuberSpace.sectionGap),
@@ -312,82 +328,8 @@ class ThemeScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-      ),
-    );
-  }
-}
-
-/// Mull `chips.dart` SegmentedToggle: surfaceContainerHigh track, 4dp padding,
-/// the selected thumb is the page surface with a 1dp outline.
-class _SegmentedToggle<T> extends StatelessWidget {
-  const _SegmentedToggle({
-    required this.options,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final List<(T, String)> options;
-  final T selected;
-  final ValueChanged<T> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 40),
-      padding: const EdgeInsets.all(KuberSpace.xs),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: KuberShape.fullR,
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final (value, label) in options)
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: value == selected,
-                  child: InkWell(
-                    onTap: () => onChanged(value),
-                    borderRadius: KuberShape.fullR,
-                    child: AnimatedContainer(
-                      duration: KuberMotion.of(context, KuberMotion.fast),
-                      curve: KuberMotion.curveOf(
-                        context,
-                        KuberMotion.decelerate,
-                      ),
-                      decoration: BoxDecoration(
-                        color: value == selected
-                            ? cs.surface
-                            : Colors.transparent,
-                        borderRadius: KuberShape.fullR,
-                        border: Border.all(
-                          color: value == selected
-                              ? cs.outlineVariant
-                              : Colors.transparent,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall!.copyWith(
-                          color: value == selected
-                              ? cs.onSurface
-                              : cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
         ),
+      ),
       ),
     );
   }

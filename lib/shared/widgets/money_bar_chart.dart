@@ -9,7 +9,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/motion/motion.dart';
 import '../../features/settings/providers/settings_provider.dart';
+import 'chart_motion.dart';
 
 class MoneyBar {
   final String label;
@@ -42,11 +44,13 @@ class MoneyBarChart extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final fmt = ref.watch(formatterProvider);
     final maxY = max(1.0, bars.fold(0.0, (m, b) => max(m, b.total))) * 1.1;
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final width = bars.length > 14 ? 8.0 : 14.0;
     return SizedBox(
       height: height + 24,
-      child: BarChart(
+      child: ChartDrawIn(
+        kind: ChartKind.bars,
+        count: bars.length,
+        builder: (context, p) => BarChart(
         BarChartData(
           maxY: maxY,
           alignment: BarChartAlignment.spaceAround,
@@ -96,7 +100,7 @@ class MoneyBarChart extends ConsumerWidget {
               ),
             ),
           ),
-          barGroups: [
+          barGroups: riseBars([
             for (var i = 0; i < bars.length; i++)
               BarChartGroupData(x: i, barRods: [
                 () {
@@ -120,9 +124,11 @@ class MoneyBarChart extends ConsumerWidget {
                   );
                 }(),
               ]),
-          ],
+          ], p),
         ),
-        duration: reduce ? Duration.zero : const Duration(milliseconds: 300),
+        duration: chartSwapDuration(context, drawing: isDrawing(p)),
+        curve: chartSwapCurve(context),
+      ),
       ),
     );
   }

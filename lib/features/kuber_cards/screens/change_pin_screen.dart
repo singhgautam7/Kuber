@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -11,6 +11,7 @@ import '../data/card_vault_service.dart';
 import '../providers/kuber_cards_provider.dart';
 import '../widgets/cards_secure_scaffold.dart';
 import '../widgets/kuber_pin_pad.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Three-step PIN change: verify current -> enter new (with length toggle) ->
 /// confirm new. Reused from feature settings and global Settings. On success the
@@ -79,7 +80,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
               _step = _Step.newPin;
             });
           case UnlockStatus.wrongPin:
-            HapticFeedback.mediumImpact();
+            KuberHaptics.reject();
             setState(() {
               _error = true;
               _attemptsLeft = outcome.attemptsLeft;
@@ -87,7 +88,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
             });
           case UnlockStatus.cooldown:
           case UnlockStatus.dayLocked:
-            HapticFeedback.mediumImpact();
+            KuberHaptics.reject();
             setState(() => _entry.value = '');
             showKuberSnackBar(
               context,
@@ -106,7 +107,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
         });
       case _Step.confirm:
         if (pin != _newPin) {
-          HapticFeedback.mediumImpact();
+          KuberHaptics.reject();
           setState(() {
             _error = true;
             _entry.value = '';
@@ -146,6 +147,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     }
     if (!mounted) return;
     Navigator.pop(context);
+    KuberHaptics.confirm();
     showKuberSnackBar(context, 'PIN updated.');
   }
 
@@ -218,7 +220,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                 ],
                 const SizedBox(height: KuberSpace.xl),
                 if (_busy)
-                  const CircularProgressIndicator()
+                  const KuberShapeLoader(size: 40)
                 else
                   KuberPinPad(
                     length: _length,

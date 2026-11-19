@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
@@ -99,6 +100,7 @@ void showFieldInfo(BuildContext context, QueryField f) {
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

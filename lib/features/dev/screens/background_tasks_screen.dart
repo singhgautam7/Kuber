@@ -44,11 +44,13 @@ class BackgroundTasksScreen extends ConsumerWidget {
     final isar = ref.read(isarProvider);
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'Background tasks'),
-      body: ListView(
+      body: KuberHeaderPage(
+        header: const KuberAppBar(showBack: true, title: 'Background tasks'),
+        body: ListView(
         padding: const EdgeInsets.fromLTRB(
             KuberSpace.screenMargin, 0, KuberSpace.screenMargin, KuberSpace.xl),
         children: [
+          KuberHeaderPage.gap(),
           AppButton(
             label: 'Run now',
             type: AppButtonType.primary,
@@ -99,7 +101,7 @@ class BackgroundTasksScreen extends ConsumerWidget {
               ),
           ]),
         ],
-      ),
+      )),
     );
   }
 }

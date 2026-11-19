@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,14 +33,14 @@ class TroubleshootScreen extends ConsumerWidget {
       backgroundColor: cs.surface,
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: KuberAppBar(
+          KuberHeaderPage(
+ header: KuberAppBar(
                   showBack: true,
                   title: context.l10n.troubleshootTitle,
                 ),
-              ),
+ body: CustomScrollView(
+            slivers: [
+              KuberHeaderPage.sliverGap(),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: KuberSpace.screenMargin,
@@ -70,6 +71,7 @@ class TroubleshootScreen extends ConsumerWidget {
               ),
             ],
           ),
+ ),
           if (state.status == DataOpStatus.loading)
             DataLoadingOverlay(message: state.loadingMessage ?? 'Processing…'),
         ],
@@ -79,6 +81,7 @@ class TroubleshootScreen extends ConsumerWidget {
 
   void _confirmRebuild(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -96,6 +99,7 @@ class TroubleshootScreen extends ConsumerWidget {
 
   void _confirmResetSms(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

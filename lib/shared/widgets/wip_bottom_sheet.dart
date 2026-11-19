@@ -1,5 +1,6 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
+import '../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 
 class WIPBottomSheet extends StatelessWidget {
@@ -168,6 +169,7 @@ void showWIPBottomSheet({
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
+    sheetAnimationStyle: kuberSheetStyle(context),
     backgroundColor: Colors.transparent,
     builder: (context) => WIPBottomSheet(
       icon: icon,

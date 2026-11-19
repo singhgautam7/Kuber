@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/chart_motion.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/locale_font.dart';
 
@@ -86,7 +88,13 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
                   child: SizedBox(
                     width: double.infinity,
                     height: widget.height,
-                    child: CustomPaint(painter: widget.painter),
+                    child: ChartDrawIn(
+                      kind: ChartKind.line,
+                      builder: (context, p) => RevealX(
+                        progress: p,
+                        child: CustomPaint(painter: widget.painter),
+                      ),
+                    ),
                   ),
                 ),
                 if (_touched >= 0 && _touched < n) ...[

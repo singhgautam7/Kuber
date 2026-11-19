@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../transactions/data/transaction.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -182,7 +183,13 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
               ],
             ),
 
-            if (_isExpanded) ...[
+            // The day list expands and collapses on the motion kit's spring
+            // (was a jump); the selected row's fill fades between days.
+            ExpandCollapse(
+              expanded: _isExpanded,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
               const SizedBox(height: KuberSpace.sm),
               // Daily averages as a grouped list, selected day in
               // secondaryContainer (board 3.6b).
@@ -191,9 +198,13 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                   final dayName = _getDayName(index);
                   final avg = dailyAverages[dayName] ?? 0;
                   final isSelected = _selectedDayIndex == index;
-                  return Container(
+                  return AnimatedContainer(
+                    duration: KuberMotion.levelOf(context) == MotionLevel.off
+                        ? KuberMotion.fxInstant
+                        : KuberMotion.fxFast,
+                    curve: KuberMotion.curveEffects,
                     height: 44,
-                    color: isSelected ? cs.secondaryContainer : null,
+                    color: isSelected ? cs.secondaryContainer : cs.secondaryContainer.withValues(alpha: 0),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
@@ -222,7 +233,9 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                   );
                 }),
               ),
-            ],
+                ],
+              ),
+            ),
           ],
         ),
       ),

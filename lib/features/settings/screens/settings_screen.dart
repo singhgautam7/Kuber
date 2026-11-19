@@ -5,6 +5,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:kuber/core/utils/locale_font.dart';
 
 import '../../../core/services/shortcut_pin_service.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/supported_locales.dart';
@@ -230,6 +231,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final formKey = GlobalKey<FormState>();
 
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -340,6 +342,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         });
                         _updateName(newName);
                         Navigator.pop(ctx);
+                      } else {
+                        KuberHaptics.reject();
                       }
                     },
                     style: FilledButton.styleFrom(

@@ -1342,8 +1342,6 @@
   "@speedDialLendBorrow": {},
   "moneyStoriesTitle": "MONEY STORIES",
   "@moneyStoriesTitle": {},
-  "moneyStoriesEmpty": "Keep spending to see your money stories soon.",
-  "@moneyStoriesEmpty": {},
   "bubbleWelcome": "Welcome",
   "@bubbleWelcome": {},
   "bubbleDaily": "Daily",
@@ -6259,10 +6257,9 @@
   "obTermsCheck2": "I understand the developer can't recover lost data, and that backups and restores are my responsibility.",
   "obTermsAgree": "Agree and continue",
   "obTermsPrivacy": "Privacy policy",
-  "pathSheetTitle": "How you got here",
+  "pathSheetTitle": "Quick navigation",
   "pathSheetCurrent": "You are here",
-  "pathSheetHint": "Shows the path to this page",
-  "pathSheetLongPress": "Show path",
+  "pathSheetHint": "Opens quick navigation",
   "setPathTip": "Tap a page title, or long-press back, to jump to any earlier page.",
   "proFaqTitle": "Frequently asked questions",
   "proFaqLifetimeQ": "Is Lifetime a one-time payment?",
@@ -6339,7 +6336,7 @@
   "obNotifBackupRow": "Backup problems",
   "obNotifSampleTitle": "EMI due tomorrow",
   "obNotifSampleBody": "SBI Home Loan · ₹24,350",
-  "pathSheetSub": "Tap any page to go back to it",
+  "pathSheetSub": "Tap any page to open it",
   "pathSheetFromNotification": "Opened from a notification",
   "setSecYours": "Make it yours",
   "setSecSafe": "Keep it safe",
@@ -6710,7 +6707,7 @@
   "rateTitle": "Enjoying Kuber?",
   "rateBody": "Kuber is built and run by one person. A quick rating on the Play Store helps other people find it, and it lets me keep building features you asked for. It takes less than a minute.",
   "rateCta": "Rate on Play Store",
-  "rateRefer": "Refer a friend",
+  "rateRefer": "Refer",
   "rateLater": "Maybe later",
   "rateNever": "Don't show this again",
   "ahdGateHeadline": "Filter, group and chart every transaction",
@@ -7639,5 +7636,517 @@
   "ahdCompareHint": "Pick up to 3. Bars stack them by month, the line draws one line each.",
   "ahdHeatmapNote": "One square per day. Darker means more.",
   "ahdLess": "Less",
-  "ahdMore": "More"
+  "ahdMore": "More",
+  "pathSheetShowRemaining": "Show remaining {n} pages",
+  "@pathSheetShowRemaining": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "pathSheetShowFewer": "Show fewer pages",
+  "pathSheetExpand": "Expand",
+  "pathSheetCollapse": "Collapse",
+  "motionTitle": "Motion",
+  "motionSubtitle": "How much Kuber moves when you tap, swipe or open things",
+  "motionPreviewHint": "Tap the card to feel this level",
+  "motionAuto": "Auto",
+  "motionExpressive": "Expressive",
+  "motionSubtle": "Subtle",
+  "motionOff": "Off",
+  "motionAutoExpressive": "Using Expressive on this phone",
+  "motionAutoSubtle": "Using Subtle: this phone has under 4 GB of RAM",
+  "motionAutoOff": "Using Off: Remove animations is on",
+  "motionExpressiveDesc": "Springy and fluid. The full experience.",
+  "motionSubtleDesc": "Short fades and small moves. No bounce.",
+  "motionOffDesc": "No movement. Things change with a quick fade.",
+  "motionPhoneNote": "Remove animations is on in your phone settings, so Kuber uses Off.",
+  "motionOpenPhoneSettings": "Open phone settings",
+  "motionValueAuto": "Auto ({level})",
+  "@motionValueAuto": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "motionValuePhone": "Off (phone setting)",
+  "hapticsTitle": "Haptics",
+  "hapticsSub": "Vibrate on toggles and long presses",
+  "setKwMotion": "animation animations motion movement bounce fade reduce animations",
+  "setKwHaptics": "haptics vibration vibrate feedback touch",
+  "txnSourceLoans": "Auto-recorded from loans",
+  "txnSourceInvestments": "Auto-recorded from investments",
+  "txnSourceRecurring": "Auto-recorded from recurring",
+  "txnSourceDeletedLoan": "Auto-recorded from a deleted loan",
+  "txnSourceDeletedInvestment": "Auto-recorded from a deleted investment",
+  "txnSourceDeletedRecurring": "Auto-recorded from a deleted recurring payment",
+  "txnSourceLink": "From {name}",
+  "@txnSourceLink": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "balLabelNet": "{month} · Net",
+  "@balLabelNet": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "balLabelExpense": "{month} · Expense",
+  "@balLabelExpense": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "balLabelIncome": "{month} · Income",
+  "@balLabelIncome": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "balCmpSpendMore": "Spending {amount} more than last month",
+  "@balCmpSpendMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balCmpSpendLess": "Spending {amount} less than last month",
+  "@balCmpSpendLess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balCmpEarnMore": "Earnings {amount} more than last month",
+  "@balCmpEarnMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balCmpEarnLess": "Earnings {amount} less than last month",
+  "@balCmpEarnLess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balCmpSame": "Same as last month",
+  "balCmpFirst": "First month in Kuber",
+  "balCmpNoEarnLast": "No earnings last month",
+  "balCmpNoSpendLast": "No spending last month",
+  "balA11yShowExpense": "Show expense, {amount}",
+  "@balA11yShowExpense": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balA11yShowIncome": "Show income, {amount}",
+  "@balA11yShowIncome": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chartTitle": "Income & expense",
+  "chartPeriod6m": "6M",
+  "chartPeriod1y": "1Y",
+  "chartPeriod6mSub": "Last 6 months",
+  "chartPeriod1ySub": "Last 12 months",
+  "chartModeBar": "Bar",
+  "chartModeLine": "Line",
+  "chartLegendOrder": "Higher one on top",
+  "chartTipSoFar": "{monthYear} · so far",
+  "@chartTipSoFar": {
+    "placeholders": {
+      "monthYear": {
+        "type": "String"
+      }
+    }
+  },
+  "chartTipSaved": "Saved",
+  "chartTipOverspent": "Overspent",
+  "chartTipPace": "On pace: {amount} spent",
+  "@chartTipPace": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chartTipNoData": "No income or expense",
+  "chartEmptyTitle": "No income or expense yet",
+  "chartEmptyBody": "Months appear here as you add transactions. Transfers are not counted.",
+  "chartSingle": "Only one month so far. Older months show up here.",
+  "chartA11yColumn": "{month}: income {income}, expense {expense}, {kind} {amount}",
+  "@chartA11yColumn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "expense": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chartA11yNoData": "{month}: no income or expense",
+  "@chartA11yNoData": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "chartA11yOne": "{month}: {series} {amount}",
+  "@chartA11yOne": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "series": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chartBucketDay": "Day",
+  "chartBucketWeek": "Week",
+  "chartBucketMonth": "Month",
+  "chartBucketQuarter": "Quarter",
+  "chartBucketYear": "Year",
+  "trialRem3Title": "3 days left in your Pro trial",
+  "trialRem3NotifBody": "Your trial ends on {weekday}, {date}. Nothing is deleted. See what you haven't tried yet.",
+  "@trialRem3NotifBody": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trialLastTitle": "Last day of your Pro trial",
+  "trialLastBody": "Pro features go back to free limits at midnight. Your data stays as it is.",
+  "trialSheetTitle": "Kuber Pro is yours for 14 days",
+  "trialSheetBody": "Every Pro feature is unlocked. No payment needed.",
+  "trialSheetUntil": "Free until {date}",
+  "@trialSheetUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trialSheetNote": "When it ends, your data stays. Pro features go back to their free limits.",
+  "trialSheetOffers": "What Kuber Pro offers",
+  "trialSheetOffersCollapsed": "What Kuber Pro offers, collapsed",
+  "trialSheetOffersExpanded": "What Kuber Pro offers, expanded",
+  "trialSheetCta": "Start exploring",
+  "trialSheetSeePro": "See Kuber Pro",
+  "trialRestoredTitle": "Your Kuber Pro trial continues",
+  "trialRestoredUntil": "{n} days left · Free until {date}",
+  "@trialRestoredUntil": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trialUsedTitle": "Your free trial was already used on this phone or backup",
+  "trialUsedBody": "Your data is all here, and Kuber keeps working free.",
+  "commonNotNow": "Not now",
+  "trialClaimTitle": "Claim 14 days of Pro, free",
+  "trialClaimBody": "New in Kuber 7.0. Try every Pro feature. No payment, nothing to cancel.",
+  "trialClaimCta": "Claim",
+  "proClaimTitle": "Try Pro free for 14 days",
+  "proClaimBody": "One time, no payment, nothing to cancel.",
+  "proClaimCta": "Claim 14 days of Pro, free",
+  "proOrPlan": "Or choose a plan",
+  "trialBadge": "Pro trial · {n} days left",
+  "@trialBadge": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "trialBadgeLast": "Pro trial · last day",
+  "trialSuggOverline": "Pro trial · {n} of 10 tried",
+  "@trialSuggOverline": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "trialSuggSeeAll": "See all",
+  "trialDismiss": "Dismiss",
+  "checklistTitle": "Try Kuber Pro",
+  "checklistSub": "{n} of 10 tried · {d} days left",
+  "@checklistSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "checklistHint": "Each one ticks itself when you use it.",
+  "checklistTried": "Tried · {what}",
+  "@checklistTried": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "checklistWhere": "In {place}",
+  "@checklistWhere": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "checklistTry": "Try",
+  "proTrialStatus": "Pro trial · {n} days left",
+  "@proTrialStatus": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "proTrialEnds": "Ends {date}, {time}",
+  "@proTrialEnds": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "proTrialTried": "You've tried {n} of 10 Pro features",
+  "@proTrialTried": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "proKeepTitle": "Keep Pro after your trial",
+  "proKeepBody": "Pick a plan now or any time before {date}. Pro starts when you buy, and the rest of the trial ends then.",
+  "@proKeepBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proKeepCta": "Keep Pro · {plan} {price}",
+  "@proKeepCta": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "proKeepNote": "Managed by Google Play. Nothing is charged unless you pick a plan.",
+  "trialFeatAsk": "Ask Kuber",
+  "trialFeatSms": "Import from SMS",
+  "trialFeatDash": "Custom dashboards",
+  "trialFeatRem": "Reminders",
+  "trialFeatTheme": "Every theme",
+  "trialFeatNotes": "Kuber Notes",
+  "trialFeatAdv": "Advanced analytics",
+  "trialFeatBackup": "Automatic backups",
+  "trialFeatCards": "Kuber Cards",
+  "trialFeatCurrency": "Multi-currency",
+  "trialPlaceHome": "Home",
+  "trialPlaceHistory": "History",
+  "trialPlaceAnalytics": "Analytics",
+  "trialPlaceMore": "More",
+  "trialPlaceSettings": "Settings",
+  "trialPlaceAccounts": "Accounts",
+  "trialPlaceLook": "Look and feel",
+  "trialUsedAsk": "question asked",
+  "trialUsedSms": "SMS imported",
+  "trialUsedDash": "dashboard built",
+  "trialUsedRem": "reminder set",
+  "trialUsedTheme": "theme applied",
+  "trialUsedNotes": "note written",
+  "trialUsedAdv": "opened",
+  "trialUsedBackup": "backup made",
+  "trialUsedCards": "card added",
+  "trialUsedCurrency": "currency added",
+  "trialSuggAskTitle": "Ask Kuber anything",
+  "trialSuggAskBody": "Ask about your spending in plain words, as often as you like.",
+  "trialSuggAskCta": "Ask",
+  "trialSuggSmsTitle": "Import your bank SMS",
+  "trialSuggSmsBody": "Pro reads every bank SMS on this phone, with no weekly limit.",
+  "trialSuggSmsCta": "Import now",
+  "trialSuggDashTitle": "Build a dashboard",
+  "trialSuggDashBody": "Pick the charts you care about and keep them on one page.",
+  "trialSuggDashCta": "Build one",
+  "trialSuggRemTitle": "Set a bill reminder",
+  "trialSuggRemBody": "Get a nudge before rent, EMIs and bills are due.",
+  "trialSuggRemCta": "Set one",
+  "trialSuggThemeTitle": "Try a new theme",
+  "trialSuggThemeBody": "Pick from all 16 accents and every theme.",
+  "trialSuggThemeCta": "See themes",
+  "trialSuggNotesTitle": "Write a Kuber Note",
+  "trialSuggNotesBody": "Quick sums and lists, with no note limit.",
+  "trialSuggNotesCta": "New note",
+  "trialSuggAdvTitle": "Open Advanced analytics",
+  "trialSuggAdvBody": "See trends, filters and your money health score.",
+  "trialSuggAdvCta": "Open",
+  "trialSuggBackupTitle": "Turn on automatic backups",
+  "trialSuggBackupBody": "Kuber saves a backup every day to a folder you choose.",
+  "trialSuggBackupCta": "Turn on",
+  "trialSuggCardsTitle": "Add your cards",
+  "trialSuggCardsBody": "Keep card limits and bill dates in one place. Pro has no 2-card limit.",
+  "trialSuggCardsCta": "Add a card",
+  "trialSuggCurrencyTitle": "Add another currency",
+  "trialSuggCurrencyBody": "Track a USD or AED account next to your rupee ones.",
+  "trialSuggCurrencyCta": "Add one",
+  "trialRem3CardBody": "Your trial ends on {date}. {n} Pro features are still to try.",
+  "@trialRem3CardBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "trialRem3Cta": "See what's left",
+  "trialLastCta": "What changes",
+  "trialKeepPro": "Keep Pro",
+  "trialEndTitle": "Your Pro trial has ended",
+  "trialEndBody": "Here's what you did with Pro in 14 days.",
+  "trialEndStatSms": "SMS imported",
+  "trialEndStatDash": "dashboards built",
+  "trialEndStatAsk": "questions to Ask Kuber",
+  "trialEndStatNotes": "notes written",
+  "trialEndStatRem": "reminders set",
+  "trialEndStatBackup": "backups made",
+  "trialEndLimits": "Back to free limits",
+  "trialEndKept": "Your dashboards, notes and imported transactions are all kept. Pro features work again the moment you get Pro.",
+  "trialEndCta": "Get Pro · {plan} {price}",
+  "@trialEndCta": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "setProTrialSub": "Pro trial · {n} days left, ends {date}",
+  "@setProTrialSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "setProEndedSub": "Free · trial ended {date}",
+  "@setProEndedSub": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proManagePlan": "Plan",
+  "proManagePlanFree": "Free",
+  "proManageTrial": "Pro trial",
+  "proManageStarted": "Started",
+  "proManageEnds": "Ends",
+  "proManageEnded": "Ended",
+  "proManageTried": "Features tried",
+  "proManageTriedValue": "{n} of 10",
+  "@proManageTriedValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "proManageEndedTitle": "Free · trial ended",
+  "proManageEndedBody": "Your 14 days of Pro ended on {date}.",
+  "@proManageEndedBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proManageKeep": "Keep Pro: see plans",
+  "proManageGet": "Get Pro: see plans",
+  "chartPeriod7d": "7D",
+  "chartPeriod7dSub": "Last 7 days",
+  "floatingHeaderTitle": "Floating header",
+  "floatingHeaderSubtitle": "The header turns into a pill when you scroll",
+  "floatingHeaderSwitchOn": "On",
+  "floatingHeaderSwitchOff": "Off · the header scrolls away with the page",
+  "floatingHeaderSection": "Show the pill",
+  "floatingHeaderAlways": "Always",
+  "floatingHeaderScrollUp": "When scrolling up",
+  "floatingHeaderScrollStop": "When scrolling stops",
+  "floatingHeaderOff": "Off",
+  "floatingHeaderPreviewLabel": "{option}, preview of the header",
+  "@floatingHeaderPreviewLabel": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "setKwFloatingHeader": "floating header pill sticky top bar scroll hide app bar title bar"
 }

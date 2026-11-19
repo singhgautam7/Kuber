@@ -7,8 +7,8 @@ Design language is **Vault** (see below). App size target: under 17 MB APK.
 ## Stack
 
 Flutter · Riverpod 2 (`Notifier` / `AsyncNotifier`; a few legacy `StateNotifier`s remain) ·
-Isar (`isar_community`) · GoRouter · fl_chart · google_fonts (Inter, bundled in
-`assets/google_fonts/`) · in_app_purchase (Play Billing) · flutter_quill ·
+Isar (`isar_community`) · GoRouter · fl_chart · Inter (one variable file,
+`assets/fonts/InterVariable.ttf`, pubspec `fonts:`) · in_app_purchase (Play Billing) · flutter_quill ·
 flutter_local_notifications · shared_preferences.
 
 ## Specs (read before starting a feature)
@@ -29,7 +29,8 @@ flutter_local_notifications · shared_preferences.
 flutter run                          # Android device / emulator
 flutter run -d chrome                # web
 flutter run --dart-define=KUBER_UNLOCK_PRO=true   # QA build with Pro unlocked
-flutter build apk --split-debug-info=build/symbols   # release APK (symbols kept out of the APK: -1.4 MB; keep build/symbols per release for `flutter symbolize`)
+flutter build apk --obfuscate --split-debug-info=build/symbols   # release APK (obfuscated, symbols kept out of the APK; keep build/symbols per release for `flutter symbolize`)
+flutter build appbundle --obfuscate --split-debug-info=build/symbols   # Play AAB, same flags
 flutter test                         # all tests
 flutter analyze                      # must be clean before committing
 dart run build_runner build          # regenerate Isar schemas after model changes
@@ -48,7 +49,7 @@ Profiling recipe (trace-startup, jank logging) lives in `specs/performance.md` �
 3. **No drop shadows**. Depth comes from borders (`colorScheme.outlineVariant`).
 4. **Typography**: `localeFont()` (Inter / regional Noto) for all UI text, `monoFont()`
    for raw SMS text, sender ids and hashes. No other families; see Performance rules
-   for why runtime `GoogleFonts.<family>()` calls are banned.
+   for why runtime font loads are banned.
 5. **Both themes**: every screen must be verified in Obsidian (dark) and Alabaster (light).
    Theming is a fixed Vault palette (7 families × light/dark), not M3 dynamic color.
    `dynamic_color` is used only by `harmonizeCategory(context, rawColor)`, which must be
@@ -69,6 +70,13 @@ Profiling recipe (trace-startup, jank logging) lives in `specs/performance.md` �
    they are measured, not theoretical.
 10. **Do not break existing functionality**: check affected providers and repositories
     when adding features. No unrelated refactors.
+11. **Common widgets only**: every screen, sheet, card, row, button and chip is built from
+    the shared components below (`lib/shared/widgets/`) and existing feature widgets. Never
+    write a one-off lookalike (a private sheet shell, a hand-made card or button). Every
+    bottom sheet is a `KuberBottomSheet`; every Home suggestion goes through the Home v2
+    suggestion system (`SuggestionCard`). If a shared widget lacks something the design
+    needs, extend it with a parameter; don't fork it. Match the design spec exactly within
+    those components.
 
 ## Shared components (`lib/shared/widgets/`) — reuse, don't re-layout
 
@@ -77,14 +85,16 @@ Profiling recipe (trace-startup, jank logging) lives in `specs/performance.md` �
 | `KuberAppBar` | Top bar on pushed screens. `showBack` / `showHome`, `infoConfig` (help sheet), `overflowConfig`, `pinShortcut`. Set `showBrand: false` when a `KuberPageHeader` follows. |
 | `KuberPageHeader` | Large landing-page title + optional description + optional circular action. **Supplies its own 20 px horizontal padding**: place it as a bare `SliverToBoxAdapter` / child, never inside a horizontal `SliverPadding` (see History `transaction_list_screen.dart`). Body content below uses `KuberSpacing.lg`. |
 | `AppButton` (`app_button.dart`) | Primary / secondary / destructive buttons (`AppButtonType`), `isLoading`, `fullWidth`. There is no `KuberButton` class. |
-| `KuberBottomSheet` | Shell for all bottom sheets: drag handle, title/subtitle, scrollable `child`, pinned `actions`. Open with `showModalBottomSheet(isScrollControlled: true, useSafeArea: true, ...)`; top radius `KuberRadius.lg`. |
+| `KuberBottomSheet` | Shell for **every** bottom sheet (no exceptions): drag handle, title/subtitle (or none for headerless sheets), scrollable `child`, pinned `actions`. Open with `showModalBottomSheet(isScrollControlled: true, useSafeArea: true, useRootNavigator: true, ...)` so it covers the bottom nav and FAB; top radius `KuberRadius.lg`. |
 | `InfoTable` + `InfoTableDataRow` / `HighlightRow` / `LabelOnlyRow`, `SheetAmountHero` | Key-value detail blocks inside sheets (transaction detail, calculator results). |
 | `SheetButtonSection` + `SheetAction` | Action row at the bottom of a sheet: one `primary`, extra `actions` (overflow when many), `destructive: true` for delete. |
 | `KuberInfoBottomSheet` + `KuberInfoConfig` / `KuberInfoItem` (`core/models/info_config.dart`) | The "what is this screen" help sheet, wired via `KuberAppBar(infoConfig:)`. |
 | `showKuberSnackBar(context, message, {isError, actionLabel, onAction, duration})` | All toasts. Never `ScaffoldMessenger` directly. |
 | Destructive confirm | `showDialog` + `AlertDialog` with `localeFont` styles, cancel `TextButton`, confirm colored `cs.error`. Follow `categories_screen.dart` delete dialogs. |
 | `KuberEmptyState`, `KuberSkeleton`, `KuberLoader` | Empty / loading states. Skeleton over spinner for list screens (History pattern). |
-| `KuberSegmentedControl`, `KuberDateRangeSelector`, `KuberBarChart`, `CategoryIcon`, `TransactionDetailSheet` | Reuse before building a lookalike. |
+| `SuggestionCard` (`features/home_v2/widgets/`) | Every Home suggestion / offer (add an `SgType`, never a separate Home card). |
+| `ExpressiveChart` (`shared/widgets/expressive_chart/`) | Bar / line charts over time (Income & expense, Custom dashboards). |
+| `KuberSegmentedControl`, `KuberDateRangeSelector`, `CategoryIcon`, `TransactionDetailSheet` | Reuse before building a lookalike. |
 
 Layout: GoRouter `ShellRoute` wraps tab screens in `AppScaffold` (`app_scaffold.dart`);
 the FAB and nav rail live there, not in individual screens.
@@ -151,11 +161,12 @@ they are kept cheap:
   UI isolate per call. Load once per operation and pass the list down (§7 of
   `specs/performance.md`); never re-query per item.
 
-Fonts: only Inter (google_fonts, bundled in `assets/google_fonts/`) and JetBrains Mono
-(pubspec `fonts:`, use `monoFont()` from `core/utils/locale_font.dart`). A runtime
-`GoogleFonts.<family>()` for any other family parses the font on the UI thread on first
-use and then relayouts every route (`fontsChange`), which is a 25 ms stall + a 24 ms
-frame. Add new families to pubspec `fonts:`, never as runtime loads.
+Fonts: only Inter (one variable file, pubspec `fonts:` family `Inter`; `localeFont()` sets the
+`wght` axis from `fontWeight`) and JetBrains Mono (pubspec `fonts:`, use `monoFont()` from
+`core/utils/locale_font.dart`). Regional scripts use the system Noto fonts through
+`fontFamilyFallback`; nothing is downloaded at runtime. A runtime font load parses the font on
+the UI thread on first use and then relayouts every route (`fontsChange`), which is a 25 ms
+stall + a 24 ms frame. Add new families to pubspec `fonts:`, never as runtime loads.
 
 Platform channels (`MainActivity.kt`): handlers run on the Android main thread, which is
 where Flutter's vsync arrives. Any I/O (ContentResolver, files, network) goes on a

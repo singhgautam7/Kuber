@@ -7,6 +7,7 @@
 // in, released in parts and interest before EMIs start.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/models/overflow_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -625,6 +626,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       if (!mounted) return;
       if (r.removable.isNotEmpty) {
         remove = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
           context: context,
           builder: (ctx) => AlertDialog(
             title: Text(l10n.msLoansPastEmisRemoveTitle(r.removable.length),
@@ -692,7 +694,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final indian = fmt.system == NumberSystem.indian;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: _leave,
@@ -712,11 +715,12 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                 ),
               ]),
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
+          padding: EdgeInsets.fromLTRB(
+              20, 4 + KuberHeaderPage.insetOf(context), 20, 140),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -815,6 +819,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             ],
           ),
         ),
+      )),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: _existing == null ? l.msLoansSave : l.msLoansSaveChanges,
@@ -1092,6 +1097,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     }
     if (_parts.length > 1) {
       final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l.msLoansPartsOffTitle, style: localeFont(fontWeight: FontWeight.w600)),

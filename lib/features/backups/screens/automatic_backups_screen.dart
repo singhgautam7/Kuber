@@ -1,6 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_segmented_control.dart';
 import '../../../core/background/background_reporter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +15,7 @@ import '../../pro/feature_gates/gate_sheet_backups.dart';
 import '../../pro/feature_gates/pro_gate.dart';
 import '../providers/backup_provider.dart';
 import '../utils/backup_uri_formatter.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class AutomaticBackupsScreen extends ConsumerWidget {
   const AutomaticBackupsScreen({super.key});
@@ -28,19 +30,19 @@ class AutomaticBackupsScreen extends ConsumerWidget {
         // Keep the current content on reload (e.g. after toggling a setting)
         // instead of flashing a full-screen spinner.
         skipLoadingOnReload: true,
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KuberShapeLoader(size: 40)),
         error: (error, _) => Center(
           child: Text(context.l10n.errorWithDetails(error.toString())),
         ),
-        data: (s) => CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: KuberAppBar(
+        data: (s) => KuberHeaderPage(
+ header: KuberAppBar(
                 showBack: true,
                 title: context.l10n.backupsTitle.replaceAll('\n', ' '),
                 infoConfig: InfoConstants.automaticBackups,
               ),
-            ),
+ body: CustomScrollView(
+          slivers: [
+            KuberHeaderPage.sliverGap(),
 
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
@@ -124,6 +126,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
             ),
           ],
         ),
+ ),
       ),
     );
   }
@@ -412,42 +415,20 @@ class _ConfigGroup extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _label(cs, context.l10n.frequencyLabel),
-        SegmentedButton<BackupFrequency>(
-          segments: [
-            ButtonSegment(
-              value: BackupFrequency.daily,
-              label: Text(context.l10n.freqDaily),
-            ),
-            ButtonSegment(
-              value: BackupFrequency.weekly,
-              label: Text(context.l10n.freqWeekly),
-            ),
-            ButtonSegment(
-              value: BackupFrequency.monthly,
-              label: Text(context.l10n.freqMonthly),
-            ),
-          ],
-          selected: {settings.frequency},
-          showSelectedIcon: false,
-          onSelectionChanged: (value) => ref
-              .read(backupSettingsProvider.notifier)
-              .setFrequency(value.first),
+        KuberSegmentedControl<BackupFrequency>(
+          values: const [BackupFrequency.daily, BackupFrequency.weekly, BackupFrequency.monthly],
+          labels: [context.l10n.freqDaily, context.l10n.freqWeekly, context.l10n.freqMonthly],
+          selected: settings.frequency,
+          showCheck: false,
+          onSelected: (v) => ref.read(backupSettingsProvider.notifier).setFrequency(v),
         ),
         _label(cs, context.l10n.keepLast),
-        Row(
-          children: [
-            for (final n in const [1, 5, 10]) ...[
-              Expanded(
-                child: _RetentionPill(
-                  count: n,
-                  selected: settings.retention == n,
-                  onTap: () =>
-                      ref.read(backupSettingsProvider.notifier).setRetention(n),
-                ),
-              ),
-              if (n != 10) const SizedBox(width: KuberSpace.sm),
-            ],
-          ],
+        KuberSegmentedControl<int>(
+          values: const [1, 5, 10],
+          labels: [for (final n in const [1, 5, 10]) '$n backup${n == 1 ? '' : 's'}'],
+          selected: settings.retention,
+          showCheck: false,
+          onSelected: (n) => ref.read(backupSettingsProvider.notifier).setRetention(n),
         ),
         _label(cs, context.l10n.backupFolder),
         GestureDetector(
@@ -506,43 +487,3 @@ class _ConfigGroup extends ConsumerWidget {
   );
 }
 
-class _RetentionPill extends StatelessWidget {
-  final int count;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _RetentionPill({
-    required this.count,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? cs.secondaryContainer : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
-          border: Border.all(
-            color: selected
-                ? cs.primary.withValues(alpha: 0.45)
-                : cs.outlineVariant,
-          ),
-        ),
-        child: Text(
-          '$count backup${count == 1 ? '' : 's'}',
-          style: localeFont(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: selected ? cs.primary : cs.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}

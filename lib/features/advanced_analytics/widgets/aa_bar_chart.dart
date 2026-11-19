@@ -4,7 +4,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/chart_motion.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -380,7 +382,10 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
     required bool showLeftTitles,
   }) {
     return RepaintBoundary(
-      child: BarChart(
+      child: ChartDrawIn(
+        kind: ChartKind.bars,
+        count: widget.data.length,
+        builder: (context, p) => BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
           maxY: _maxY,
@@ -408,8 +413,11 @@ class _AaBarChartState extends ConsumerState<AaBarChart> {
           ),
           borderData: FlBorderData(show: false),
           titlesData: _titles(cs, formatter, isPrivate, showLeftTitles),
-          barGroups: _groups(cs, currentColor, previousColor),
+          barGroups: riseBars(_groups(cs, currentColor, previousColor), p),
         ),
+        duration: chartSwapDuration(context, drawing: isDrawing(p)),
+        curve: chartSwapCurve(context),
+      ),
       ),
     );
   }

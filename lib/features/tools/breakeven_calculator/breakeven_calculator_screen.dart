@@ -71,15 +71,13 @@ class _BreakevenCalculatorScreenState
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Break-even Calculator',
               showBack: true,
               infoConfig: InfoConstants.breakevenCalculator,
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.lg,
@@ -161,7 +159,7 @@ class _BreakevenCalculatorScreenState
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

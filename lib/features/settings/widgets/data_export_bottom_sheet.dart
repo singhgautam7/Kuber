@@ -11,12 +11,14 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/save_file_service.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
 import 'settings_widgets.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 // ---------------------------------------------------------------------------
 // Show helper
@@ -24,6 +26,7 @@ import 'settings_widgets.dart';
 
 void showDataExportBottomSheet(BuildContext context) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
@@ -254,7 +257,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
       padding: const EdgeInsets.symmetric(vertical: KuberSpace.xxl),
       child: Column(
         children: [
-          CircularProgressIndicator(color: cs.primary),
+          KuberShapeLoader(size: 40, color: cs.primary),
           const SizedBox(height: KuberSpace.xl),
           Text(
             'Preparing your export…',
@@ -291,15 +294,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
 
     return Column(
       children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.check_circle_rounded, size: 32, color: cs.primary),
-        ),
+        _SuccessCheck(color: cs.primary),
         const SizedBox(height: KuberSpace.lg),
         Text(
           context.l10n.exportSuccessful,
@@ -547,4 +542,111 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
       }
     }
   }
+}
+
+/// Success mark: circle 0.6 to 1 on springFast, then the check draws over
+/// 250 ms after an 80 ms delay (motion.md "Empty states, errors, success").
+/// Subtle fades, Off shows it drawn. Fires the confirm haptic once.
+class _SuccessCheck extends StatefulWidget {
+  const _SuccessCheck({required this.color});
+  final Color color;
+
+  @override
+  State<_SuccessCheck> createState() => _SuccessCheckState();
+}
+
+class _SuccessCheckState extends State<_SuccessCheck>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 330));
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    KuberHaptics.confirm();
+    final level = KuberMotion.levelOf(context);
+    if (level == MotionLevel.off) {
+      _c.value = 1;
+    } else {
+      _c.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final level = KuberMotion.levelOf(context);
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (context, _) {
+          final t = _c.value;
+          final expressive = level == MotionLevel.expressive;
+          final circleT = (t * 330 / KuberMotion.fastCurve.settle.inMilliseconds)
+              .clamp(0.0, 1.0);
+          final scale = expressive
+              ? 0.6 + 0.4 * KuberMotion.fastCurve.transform(circleT)
+              : 1.0;
+          final fade = expressive ? 1.0 : Curves.easeOut.transform(t);
+          final draw = level == MotionLevel.expressive
+              ? KuberMotion.curveEffects
+                  .transform(((t * 330 - 80) / 250).clamp(0.0, 1.0))
+              : 1.0;
+          return Opacity(
+            opacity: fade,
+            child: Transform.scale(
+              scale: scale,
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: CustomPaint(
+                  painter: _CheckPainter(widget.color, draw),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CheckPainter extends CustomPainter {
+  _CheckPainter(this.color, this.progress);
+  final Color color;
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final path = Path()
+      ..moveTo(w * 0.31, w * 0.52)
+      ..lineTo(w * 0.45, w * 0.66)
+      ..lineTo(w * 0.70, w * 0.38);
+    final m = path.computeMetrics().first;
+    canvas.drawPath(
+      m.extractPath(0, m.length * progress),
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CheckPainter o) => o.progress != progress || o.color != color;
 }

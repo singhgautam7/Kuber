@@ -21,6 +21,7 @@ import '../../stories/services/welcome_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../home_v2/services/home_v2_restore.dart';
+import '../../pro/trial/trial_state.dart';
 import '../../../core/utils/prefs_keys.dart';
 
 enum DataOpStatus { initial, loading, success, error }
@@ -340,6 +341,8 @@ class DataController extends StateNotifier<DataState> {
     _ref.invalidate(allAccountsProvider);
     _ref.invalidate(categoryListProvider);
     _ref.invalidate(recurringListProvider);
+    // A restore may have merged a backup's trial record into the row: re-read.
+    unawaited(_ref.read(proTrialProvider.notifier).reconcile().then((_) {}, onError: (_) {}));
     // These derived providers will automatically update because they watch transactionListProvider
 
     // Refresh stories now so the ring reflects the new data without an app

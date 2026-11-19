@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -36,7 +37,9 @@ Future<bool?> showSmsReviewSheet(
   bool countsTowardLimit = true,
 }) {
   return showModalBottomSheet<bool>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
@@ -122,6 +125,7 @@ class _TransactionReviewSheetState
   void _openCalculator() {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -372,7 +376,9 @@ class _TransactionReviewSheetState
 
   void _pickAccount() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -392,7 +398,9 @@ class _TransactionReviewSheetState
 
   void _pickCategory() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
@@ -473,6 +481,7 @@ class _TransactionReviewSheetState
   Future<void> _dismiss() async {
     final cs = Theme.of(context).colorScheme;
     final proceed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Dismiss message?'),
@@ -507,6 +516,7 @@ class _TransactionReviewSheetState
     final symbol = ref.read(currencyProvider).symbol;
     final formatter = ref.read(formatterProvider);
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => Dialog(
         child: Padding(
@@ -813,6 +823,7 @@ Future<String?> _editTextDialog(
 }) {
   final controller = TextEditingController(text: initial);
   return showDialog<String>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(title),

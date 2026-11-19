@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,7 @@ import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/calculator_widgets.dart';
 import 'providers/exchange_rates_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class CurrencyConverterScreen extends ConsumerStatefulWidget {
   const CurrencyConverterScreen({super.key});
@@ -68,6 +70,7 @@ class _CurrencyConverterScreenState
 
   void _pickCurrency(bool isFrom) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -131,10 +134,7 @@ class _CurrencyConverterScreenState
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Currency Converter',
               showBack: true,
               infoConfig: InfoConstants.currencyConverter,
@@ -147,8 +147,9 @@ class _CurrencyConverterScreenState
                       : _refresh,
                 ),
               ],
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.lg,
@@ -243,7 +244,7 @@ class _CurrencyConverterScreenState
                       loading: () => const Center(
                         child: Padding(
                           padding: EdgeInsets.all(KuberSpace.xl),
-                          child: CircularProgressIndicator(),
+                          child: KuberShapeLoader(size: 40),
                         ),
                       ),
                       error: (e, _) => _ErrorState(onRetry: _refresh),
@@ -279,7 +280,7 @@ class _CurrencyConverterScreenState
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

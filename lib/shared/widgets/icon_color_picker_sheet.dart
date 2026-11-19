@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/color_palette.dart';
@@ -58,6 +59,7 @@ Future<void> showIconColorPicker({
   IconColorTab initialTab = IconColorTab.icon,
 }) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

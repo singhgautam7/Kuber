@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -436,6 +437,7 @@ class ViewBillSheet extends ConsumerWidget {
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
     showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Bill?'),

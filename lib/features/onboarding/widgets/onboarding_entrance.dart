@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 
 /// One-shot fade with a slide ([beginOffset], a fraction of the child), a rise
@@ -32,7 +33,8 @@ class _OnboardingEntranceState extends State<OnboardingEntrance>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _value;
-  var _reduced = false;
+  var _reduced = false; // Off
+  var _subtle = false;
   var _started = false;
 
   @override
@@ -47,9 +49,13 @@ class _OnboardingEntranceState extends State<OnboardingEntrance>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    _reduced = KuberMotion.reduced(context);
+    final level = KuberMotion.levelOf(context);
+    _reduced = level == MotionLevel.off;
+    _subtle = level == MotionLevel.subtle;
     if (_reduced) _controller.duration = KuberMotion.reducedFade;
-    Future<void>.delayed(_reduced ? Duration.zero : widget.delay, () {
+    // Subtle: no stagger, half the distance, short fade.
+    if (_subtle) _controller.duration = KuberMotion.fxDefault;
+    Future<void>.delayed(_reduced || _subtle ? Duration.zero : widget.delay, () {
       if (mounted) _controller.forward();
     });
   }
@@ -62,9 +68,10 @@ class _OnboardingEntranceState extends State<OnboardingEntrance>
 
   @override
   Widget build(BuildContext context) {
-    final begin = _reduced ? Offset.zero : widget.beginOffset;
-    final rise = _reduced ? 0.0 : widget.rise;
-    final scale = _reduced ? 1.0 : widget.scale;
+    final k = _subtle ? 0.5 : 1.0;
+    final begin = _reduced ? Offset.zero : widget.beginOffset * k;
+    final rise = _reduced ? 0.0 : widget.rise * k;
+    final scale = _reduced ? 1.0 : 1 - (1 - widget.scale) * k;
     return FadeTransition(
       opacity: _value,
       child: AnimatedBuilder(

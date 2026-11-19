@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -123,15 +124,18 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        title: widget.existingBudget == null
-            ? context.l10n.createBudget
-            : context.l10n.editBudget,
-        showBack: true,
-        closeIcon: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          title: widget.existingBudget == null
+              ? context.l10n.createBudget
+              : context.l10n.editBudget,
+          showBack: true,
+          closeIcon: true,
+        ),
+        body: Builder(builder: (context) {
+          return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+            20, 8 + KuberHeaderPage.insetOf(context), 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,6 +175,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             _SectionHeader(title: context.l10n.budgetAmount),
             // Board 3.18: a large filled amount field.
             TextField(
+              scrollPadding: kuberFieldScrollPadding(context),
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
@@ -228,6 +233,8 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             ),
           ],
         ),
+      );
+        }),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -278,6 +285,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
 
     FocusScope.of(context).unfocus();
     final result = await showModalBottomSheet<int>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -315,6 +323,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
 
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

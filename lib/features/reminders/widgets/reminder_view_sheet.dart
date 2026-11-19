@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,7 @@ import 'snooze_sheet.dart';
 /// Opens the reminder view bottom sheet (screen 2d).
 void showReminderViewSheet(BuildContext context, Reminder reminder) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     useRootNavigator: true,
     backgroundColor: Colors.transparent,
@@ -44,6 +46,7 @@ class ReminderViewSheet extends ConsumerWidget {
   ) async {
     final cs = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete reminder?'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -17,6 +18,7 @@ class SnoozeSheet extends ConsumerWidget {
 
   static void show(BuildContext context, Reminder reminder) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,

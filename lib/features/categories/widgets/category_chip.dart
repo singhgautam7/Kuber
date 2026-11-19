@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import '../data/category.dart';
 
 class CategoryChip extends StatelessWidget {
@@ -20,15 +21,12 @@ class CategoryChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final harmonized = harmonizeCategory(context, Color(category.colorValue));
 
-    return ChoiceChip(
+    return KuberChip(
+      label: category.name,
       selected: selected,
-      label: Text(category.name),
-      avatar: Icon(
-        IconMapper.fromString(category.icon),
-        size: 18,
-        color: harmonized,
-      ),
-      onSelected: (_) => onTap?.call(),
+      icon: IconMapper.fromString(category.icon),
+      iconColor: harmonized,
+      onTap: onTap,
     );
   }
 }

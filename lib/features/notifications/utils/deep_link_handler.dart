@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
@@ -60,6 +61,7 @@ Future<void> handleNotificationTap(
   }
   if (sheet == null) return;
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(ctx),
     context: ctx,
     useRootNavigator: true,
     isScrollControlled: true,

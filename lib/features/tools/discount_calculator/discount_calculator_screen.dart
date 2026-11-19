@@ -59,15 +59,13 @@ class _DiscountCalculatorScreenState
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Discount Calculator',
               showBack: true,
               infoConfig: InfoConstants.discountCalculator,
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.lg,
@@ -151,7 +149,7 @@ class _DiscountCalculatorScreenState
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

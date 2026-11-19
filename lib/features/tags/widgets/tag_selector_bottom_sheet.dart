@@ -1,11 +1,14 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_chips.dart';
+import 'package:kuber/shared/widgets/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/tag.dart';
 import '../providers/tag_providers.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class TagSelectorBottomSheet extends ConsumerStatefulWidget {
   final List<Tag> initialSelectedTags;
@@ -102,18 +105,13 @@ class _TagSelectorBottomSheetState
                       color: cs.onSurface,
                     ),
                   ),
-                  FilledButton.tonal(
+                  AppButton(
+                    label: context.l10n.doneLabel,
+                    height: 40,
                     onPressed: () {
                       widget.onDone(_selectedTags);
                       Navigator.pop(context);
                     },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(KuberShape.small),
-                      ),
-                    ),
-                    child: Text(context.l10n.doneLabel),
                   ),
                 ],
               ),
@@ -142,7 +140,7 @@ class _TagSelectorBottomSheetState
             // Tag list
             Expanded(
               child: tagsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: KuberShapeLoader(size: 40)),
                 error: (e, _) => Center(
                   child: Text(context.l10n.errorWithDetails(e.toString())),
                 ),
@@ -225,36 +223,13 @@ class _TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final isEnabled = tag.isEnabled;
 
-    return FilterChip(
-      label: Text("#${tag.name}"),
+    return KuberChip(
+      label: '#${tag.name}',
       selected: isSelected,
-      onSelected: isEnabled ? (_) => onTap() : null,
-      backgroundColor: Colors.transparent,
-      selectedColor: cs.primary,
-      checkmarkColor: cs.onPrimary,
-      showCheckmark: true,
-      labelStyle: localeFont(
-        fontSize: 14,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-        color: !isEnabled
-            ? cs.onSurfaceVariant.withValues(alpha: 0.3)
-            : isSelected
-            ? cs.onPrimary
-            : cs.onSurface,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(KuberShape.small),
-        side: BorderSide(
-          color: !isEnabled
-              ? cs.outlineVariant.withValues(alpha: 0.2)
-              : isSelected
-              ? cs.primary
-              : cs.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
+      emphasis: true,
+      dimmed: !tag.isEnabled,
+      onTap: onTap,
     );
   }
 }

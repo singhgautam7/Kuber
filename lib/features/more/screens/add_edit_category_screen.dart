@@ -5,6 +5,7 @@
 // =============================================================================
 
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -23,6 +24,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 // From the pickers-and-setup pass:
 
@@ -101,7 +103,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
+      body: KuberHeaderPage(
+        header: KuberAppBar(
         showBack: true,
         closeIcon: true,
         onBack: () => context.pop(),
@@ -109,11 +112,12 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ? context.l10n.editCategory
             : context.l10n.newCategory,
       ),
-      body: GestureDetector(
+        body: Builder(builder: (context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+          padding: EdgeInsets.fromLTRB(
+              20, 8 + KuberHeaderPage.insetOf(context), 20, 40),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -128,6 +132,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 label: context.l10n.identity,
                 children: [
                   TextField(
+                    scrollPadding: kuberFieldScrollPadding(context),
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
                     onTapOutside: (_) =>
@@ -230,6 +235,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ],
           ),
         ),
+      )),
       ),
       bottomNavigationBar: KuberSaveButton(
         label: widget.existingCategory != null
@@ -242,6 +248,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
   void _openGroupPicker() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -472,7 +479,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
             child: groupsAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
+                child: KuberShapeLoader(size: 40),
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(32),

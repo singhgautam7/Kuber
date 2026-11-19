@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +24,7 @@ import '../widgets/card_icon.dart';
 import '../widgets/cards_secure_scaffold.dart';
 import '../widgets/stored_card_visual.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 const _cardTypeChoices = <SettingsChoice<String>>[
   SettingsChoice(
@@ -191,6 +193,9 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
 
   void _onFormChanged() => setState(() {});
 
+  // Set from the page-aware Builder in build; used by the raw fields.
+  EdgeInsets _scrollPadding = const EdgeInsets.all(20);
+
   bool get _canSave =>
       _nickname.text.trim().isNotEmpty && _number.text.trim().isNotEmpty;
 
@@ -200,26 +205,31 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     return CardsSecureScaffold(
       child: Scaffold(
         backgroundColor: cs.surface,
-        appBar: KuberAppBar(
-          showBack: true,
-          closeIcon: true,
-          title: _isEditing ? 'Edit card' : 'Add card',
+        body: KuberHeaderPage(
+          header: KuberAppBar(
+            showBack: true,
+            closeIcon: true,
+            title: _isEditing ? 'Edit card' : 'Add card',
+          ),
+          body: _loading
+              ? const Center(child: KuberShapeLoader(size: 40))
+              : Builder(builder: (context) {
+                  _scrollPadding = kuberFieldScrollPadding(context);
+                  return GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    behavior: HitTestBehavior.opaque,
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin,
+                        KuberHeaderPage.insetOf(context),
+                        KuberSpace.screenMargin,
+                        KuberSpace.lg,
+                      ),
+                      child: _form(cs),
+                    ),
+                  );
+                }),
         ),
-        body: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : GestureDetector(
-                onTap: () => FocusScope.of(context).unfocus(),
-                behavior: HitTestBehavior.opaque,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    KuberSpace.screenMargin,
-                    0,
-                    KuberSpace.screenMargin,
-                    KuberSpace.lg,
-                  ),
-                  child: _form(cs),
-                ),
-              ),
         bottomNavigationBar: KuberSaveButton(
           label: _isEditing ? 'Save changes' : 'Add card',
           onPressed: _canSave ? _onSave : null,
@@ -482,6 +492,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   }) {
     final cs = Theme.of(context).colorScheme;
     return TextField(
+      scrollPadding: _scrollPadding,
       controller: c,
       keyboardType: keyboardType,
       obscureText: obscure,
@@ -583,6 +594,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   Future<bool?> _showRiskyDialog() {
     final cs = Theme.of(context).colorScheme;
     return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(

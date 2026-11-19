@@ -16,6 +16,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 
@@ -49,6 +50,7 @@ Future<bool?> showAdjustmentConfirmation(
       : l10n.adjustmentDecreasedBy;
 
   return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       shape: RoundedRectangleBorder(

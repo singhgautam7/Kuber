@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +9,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/info_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/models/overflow_config.dart';
+import '../../core/motion/motion_level.dart';
+import '../../core/motion/spring_curve.dart';
 import '../../core/services/shortcut_pin_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/icon_mapper.dart';
@@ -83,7 +89,13 @@ class KuberAppBar extends ConsumerStatefulWidget
     this.appDrawerEntry,
     this.background,
     this.search,
+    this.floating = true,
   });
+
+  /// Inside a [KuberHeaderPage]: false keeps this header fixed at rest (no
+  /// pill, no hiding, never scrolls away), for contextual (selection)
+  /// headers and edit modes (v7c.F8 "Left out"). No effect elsewhere.
+  final bool floating;
 
   /// Adds the search button; see [KuberHeaderSearch].
   final KuberHeaderSearch? search;
@@ -104,6 +116,23 @@ class KuberAppBar extends ConsumerStatefulWidget
   @override
   Size get preferredSize =>
       Size.fromHeight(subtitle == null ? _height : _height + 12);
+
+  /// Exact height of the header at rest below the status bar: 14 + 48 + 12,
+  /// or with a subtitle 14 + 48 + its one line + 8 (measured, so it holds at
+  /// every text size and script).
+  double restHeight(BuildContext context) {
+    final sub = subtitle;
+    if (sub == null) return _height;
+    final tp = TextPainter(
+      text: TextSpan(text: sub, style: Theme.of(context).textTheme.bodyMedium),
+      maxLines: 1,
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+    )..layout();
+    final h = tp.height;
+    tp.dispose();
+    return 14 + 48 + h + KuberSpace.sm;
+  }
 
   @override
   ConsumerState<KuberAppBar> createState() => _KuberAppBarState();
@@ -134,6 +163,7 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
       s.onChanged('');
     }
     setState(() => _searching = false);
+    _FloatScope.maybeOf(context, listen: false)?.onSearch(false);
   }
 
   @override
@@ -185,7 +215,10 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
         AppIconButton(
           icon: Icons.search_rounded,
           semanticLabel: w.search!.hint,
-          onPressed: () => setState(() => _searching = true),
+          onPressed: () {
+            setState(() => _searching = true);
+            _FloatScope.maybeOf(context, listen: false)?.onSearch(true);
+          },
         ),
       ...?w.actions,
       if (infoConfig != null && !infoInOverflow)
@@ -267,11 +300,26 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
 
     final reduced = KuberMotion.reduced(context);
     final searchOpen = _searching && w.search != null;
-    return ColoredBox(
-      color: w.background ?? Colors.transparent,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
+    final scope = _FloatScope.maybeOf(context);
+    final floating = scope != null && scope.floating;
+    Widget titleSlot = Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: titleWidget ?? const SizedBox.shrink(),
+    );
+    if (floating) {
+      titleSlot = _PillTitle(
+        progress: scope.progress,
+        leadShift: hasLeading ? 0 : _Fh.noButtonShift,
+        trailShift: trailing.isEmpty ? _Fh.noButtonShift : 0,
+        // Largest font (v7c.F4): text scale >= 1.5 or under 96 dp for the
+        // title in the pill drops the title; its semantics stay.
+        dropBelow: MediaQuery.textScalerOf(context).scale(1) >= 1.5
+            ? double.infinity
+            : _Fh.minTitle,
+        child: titleSlot,
+      );
+    }
+    final content = Padding(
           padding: EdgeInsets.fromLTRB(
             left,
             14,
@@ -341,19 +389,33 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
                           key: const ValueKey('bar'),
                           children: [
                             if (showBack)
-                              AppIconButton(
-                                icon: w.closeIcon
-                                    ? Icons.close_rounded
-                                    : Icons.arrow_back_rounded,
-                                semanticLabel: w.closeIcon ? 'Close' : 'Back',
-                                onPressed:
-                                    w.onBack ?? () => Navigator.pop(context),
-                                onLongPress: hasPath
-                                    ? () => KuberPath.open(context)
+                              // No tooltip on long press (Quick navigation opens
+                              // at once); TalkBack still hears what it does.
+                              Semantics(
+                                onLongPressHint: hasPath
+                                    ? AppLocalizations.of(context)!.pathSheetTitle
                                     : null,
-                                longPressHint: hasPath
-                                    ? AppLocalizations.of(context)!.pathSheetLongPress
-                                    : null,
+                                child: AppIconButton(
+                                  icon: w.closeIcon
+                                      ? Icons.close_rounded
+                                      : Icons.arrow_back_rounded,
+                                  semanticLabel: w.closeIcon ? 'Close' : 'Back',
+                                  onPressed:
+                                      w.onBack ?? () {
+                                        // Opened straight from a link or
+                                        // shortcut: nothing below, go Home
+                                        // instead of a blank screen.
+                                        final nav = Navigator.of(context);
+                                        if (nav.canPop()) {
+                                          nav.pop();
+                                        } else {
+                                          context.go('/');
+                                        }
+                                      },
+                                  onLongPress: hasPath
+                                      ? () => KuberPath.openFromLongPress(context)
+                                      : null,
+                                ),
                               ),
                             if (showHome)
                               AppIconButton(
@@ -362,37 +424,61 @@ class _KuberAppBarState extends ConsumerState<KuberAppBar> {
                                 onPressed: () => context.go('/'),
                               ),
                             if (hasLeading) const SizedBox(width: 6),
-                            Expanded(
-                              child: Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: titleWidget ?? const SizedBox.shrink(),
-                              ),
-                            ),
+                            Expanded(child: titleSlot),
                             ...trailing,
                           ],
                         ),
                 ),
               ),
               if (subtitle != null)
-                Padding(
-                  padding: EdgeInsets.only(left: hasLeading ? 4 : 0),
-                  child: Transform.translate(
-                    offset: const Offset(0, -4),
-                    child: Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium!.copyWith(
-                        color: cs.onSurfaceVariant,
+                _maybeFade(
+                  floating ? scope.progress : null,
+                  _Fh.subtitleFadeEnd,
+                  Padding(
+                    padding: EdgeInsets.only(left: hasLeading ? 4 : 0),
+                    child: Transform.translate(
+                      offset: const Offset(0, -4),
+                      child: Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),
                 ),
             ],
           ),
+        );
+    if (floating) {
+      return _FloatingHeaderSurface(
+        scope: scope,
+        background: w.background,
+        child: content,
+      );
+    }
+    if (scope != null) {
+      // Fixed inside a floating page (contextual header, edit mode): it is
+      // an overlay there, so it needs its own opaque fill.
+      return ColoredBox(
+        color: w.background ?? theme.scaffoldBackgroundColor,
+        child: Padding(
+          padding: EdgeInsets.only(top: scope.statusBar),
+          child: SizedBox(height: scope.restHeight, child: content),
         ),
-      ),
+      );
+    }
+    return ColoredBox(
+      color: w.background ?? Colors.transparent,
+      child: SafeArea(bottom: false, child: content),
     );
+  }
+
+  static Widget _maybeFade(Animation<double>? p, double end, Widget child) {
+    if (p == null) return child;
+    return _ProgressFade(progress: p, end: end, child: child);
   }
 }
 
@@ -448,11 +534,809 @@ class _OverflowButtonState extends State<_OverflowButton> {
   }
 }
 
-/// A page whose [header] scrolls away with its content (review round 3: no
-/// sticky headers). Put it in `Scaffold.body` instead of passing the header
-/// as `appBar`. The [body]'s scrollable must use the primary scroll
-/// controller (no explicit `controller`) so the header and content scroll
-/// together.
+// ---------------------------------------------------------------------------
+// Floating header (v7.0.0-c, handoff v7c.F1 to F8, motion.md).
+// ---------------------------------------------------------------------------
+
+/// Geometry and scroll positions from the handoff (dp).
+abstract final class _Fh {
+  /// Header becomes the pill at this scroll offset...
+  static const double toPill = 32;
+
+  /// ...and the header again at or below this one. Between them it keeps
+  /// its state (the gap), so stopping on a line never flickers.
+  static const double toHeader = 8;
+  static const double margin = 12;
+  static const double top = 8;
+  static const double pillHeight = 56;
+  static const double radius = 28;
+  static const double hideDistance = 72;
+
+  /// When scrolling up: hide after this much continuous downward scroll,
+  /// show after [showAfter] upward. When scrolling stops: hide after this
+  /// much movement, show [stopDelay] after the page stops.
+  static const double hideAfter = 16;
+  static const double showAfter = 8;
+  static const Duration stopDelay = Duration(milliseconds: 300);
+
+  /// After search closes, wait this long before turning back into the pill.
+  static const Duration searchFoldDelay = Duration(milliseconds: 160);
+
+  /// titleLarge 22 → 16 dp in the pill.
+  static const double titleScale = 16 / 22;
+  static const double minTitle = 96;
+
+  /// Title x 20 → 28 (and the right edge 20 → 28) when there is no button.
+  static const double noButtonShift = 8;
+
+  /// Subtitle fades over the first 40 % of the morph, a dropped title over
+  /// the first 60 %.
+  static const double subtitleFadeEnd = 0.4;
+  static const double titleDropEnd = 0.6;
+}
+
+/// What a [KuberHeaderPage] tells its header and islands. Animations are
+/// stable objects; the scope only notifies when a flag changes.
+class _FloatScope extends InheritedWidget {
+  const _FloatScope({
+    required this.progress,
+    required this.restAlpha,
+    required this.pillAlpha,
+    required this.contentAlpha,
+    required this.hide,
+    required this.away,
+    required this.level,
+    required this.floating,
+    required this.statusBar,
+    required this.restHeight,
+    required this.inset,
+    required this.onSearch,
+    required super.child,
+  });
+
+  /// p: 0 header, 1 pill (may overshoot at Expressive).
+  final Animation<double> progress;
+
+  /// Subtle only: opacity of the header layer and of the pill layer.
+  final Animation<double> restAlpha;
+  final Animation<double> pillAlpha;
+
+  /// Opacity of the buttons and title (1 except during a Subtle swap).
+  final Animation<double> contentAlpha;
+
+  /// 0 shown, 1 hidden (show modes 2 and 3).
+  final Animation<double> hide;
+
+  /// Floating header off: how far the page has scrolled (0 .. header).
+  final ValueListenable<double> away;
+  final MotionLevel level;
+
+  /// The header morphs (setting on and the header wants to float).
+  final bool floating;
+
+  final double statusBar;
+  final double restHeight;
+  final double inset;
+  final ValueChanged<bool> onSearch;
+
+  static _FloatScope? maybeOf(BuildContext context, {bool listen = true}) =>
+      listen
+          ? context.dependOnInheritedWidgetOfExactType<_FloatScope>()
+          : context.getInheritedWidgetOfExactType<_FloatScope>();
+
+  @override
+  bool updateShouldNotify(_FloatScope old) =>
+      level != old.level ||
+      floating != old.floating ||
+      statusBar != old.statusBar ||
+      restHeight != old.restHeight ||
+      inset != old.inset;
+}
+
+/// A page with the common header (handoff v7c "Component"). The [header]
+/// is pinned over the [body] as an overlay; past 32 dp of scroll it morphs
+/// into the floating pill and back within 8 dp of the top, following the
+/// Floating header setting and the Motion level. With the setting off it
+/// scrolls away with the content. One scroll listener for the page lives
+/// here; it updates the header only when a threshold is crossed or the
+/// direction changes, and the body never rebuilds because of it.
+///
+/// The [body]'s scrollable starts with [gap] (box) or [sliverGap] (sliver)
+/// so its first item sits fully below the header at rest, exactly as when
+/// the header scrolled with the content. Only the header is sticky
+/// (owner, v7.0.0-c): rows like tabs and chips scroll with the body.
+class KuberHeaderPage extends ConsumerStatefulWidget {
+  const KuberHeaderPage({
+    super.key,
+    required this.header,
+    required this.body,
+    this.mode,
+    this.nested = false,
+  });
+
+  final KuberAppBar header;
+  final Widget body;
+
+  /// Overrides the setting (the settings previews).
+  final FloatingHeaderMode? mode;
+
+  /// The [body] is a [NestedScrollView] whose outer part (starting with
+  /// [sliverGap]) scrolls away before the inner lists move. Inner lists
+  /// (notification depth > 0) only scroll once the outer part is gone, so
+  /// they never take the pill back to the header; they still drive the
+  /// When scrolling up / stops hide.
+  final bool nested;
+
+  /// Top padding for the body's scrollable: status bar + header at rest.
+  /// 0 outside a [KuberHeaderPage].
+  static double insetOf(BuildContext context) =>
+      _FloatScope.maybeOf(context)?.inset ?? 0;
+
+  /// [Scrollable.ensureVisible] for a page under this header: the plain
+  /// call aligns [target] to the top edge, which is under the overlay
+  /// header. This lands it just below the header at rest.
+  static Future<void> ensureVisible(BuildContext target,
+      {Duration duration = Duration.zero, Curve curve = Curves.ease}) {
+    final inset = _FloatScope.maybeOf(target, listen: false)?.inset ?? 0;
+    final viewport = Scrollable.maybeOf(target)?.position.viewportDimension ?? 0;
+    final alignment =
+        viewport > 0 ? ((inset + KuberSpace.sm) / viewport).clamp(0.0, 0.6) : 0.0;
+    return Scrollable.ensureVisible(target,
+        alignment: alignment, duration: duration, curve: curve);
+  }
+
+  /// A box the height of [insetOf]: the first child of a box scrollable.
+  static Widget gap() => Builder(
+        builder: (c) => SizedBox(height: insetOf(c)),
+      );
+
+  /// A sliver the height of [insetOf]: the first sliver of a
+  /// CustomScrollView.
+  static Widget sliverGap() => Builder(
+        builder: (c) => SliverToBoxAdapter(child: SizedBox(height: insetOf(c))),
+      );
+
+  @override
+  ConsumerState<KuberHeaderPage> createState() => _KuberHeaderPageState();
+}
+
+class _KuberHeaderPageState extends ConsumerState<KuberHeaderPage>
+    with TickerProviderStateMixin {
+  late final AnimationController _p = AnimationController.unbounded(vsync: this);
+  late final AnimationController _a0 = AnimationController(vsync: this, value: 1);
+  late final AnimationController _a1 = AnimationController(vsync: this);
+  late final AnimationController _shift =
+      AnimationController.unbounded(vsync: this);
+  late final AnimationController _h = AnimationController.unbounded(vsync: this);
+  late final AnimationController _scrim = AnimationController(vsync: this);
+  final ProxyAnimation _contentAlpha = ProxyAnimation(kAlwaysCompleteAnimation);
+  final ValueNotifier<double> _away = ValueNotifier(0);
+  final ValueNotifier<bool> _hiddenN = ValueNotifier(false);
+
+  bool _pill = false;
+  bool _scrolled = false;
+  bool _searching = false;
+  double _pixels = 0;
+  double _down = 0, _up = 0, _moved = 0;
+  Timer? _showTimer, _foldTimer;
+  MotionLevel _level = MotionLevel.expressive;
+  FloatingHeaderMode _mode = FloatingHeaderMode.always;
+  double _headerExtent = 0;
+
+  bool get _floats =>
+      _mode != FloatingHeaderMode.off && widget.header.floating;
+
+  @override
+  void didUpdateWidget(KuberHeaderPage old) {
+    super.didUpdateWidget(old);
+    if (old.header.floating != widget.header.floating) {
+      // Selection / edit mode started or ended: back to rest, or to the pill
+      // if the page is still scrolled.
+      _setHidden(false);
+      _setPill(_floats && _pixels >= _Fh.toPill);
+    }
+  }
+
+  @override
+  void dispose() {
+    _showTimer?.cancel();
+    _foldTimer?.cancel();
+    for (final c in [_p, _a0, _a1, _shift, _h, _scrim]) {
+      c.dispose();
+    }
+    _away.dispose();
+    _hiddenN.dispose();
+    super.dispose();
+  }
+
+  // ---- State changes (only on thresholds / direction) ----
+
+  void _setPill(bool pill, {bool slow = false}) {
+    if (pill == _pill) return;
+    _pill = pill;
+    final t = pill ? 1.0 : 0.0;
+    switch (_level) {
+      case MotionLevel.expressive:
+        _p.springTo(
+          t,
+          pill
+              ? KuberMotion.springDefault
+              : (slow ? KuberMotion.springSlow : KuberMotion.springStandard),
+        );
+      case MotionLevel.subtle:
+        // Two layers at their exact bounds: the outgoing one fades out
+        // quickly, the incoming one fades in (and settles 4 dp down into
+        // the pill). No bounds morph.
+        _p.value = t;
+        _a0.animateTo(1 - t,
+            duration: pill ? KuberMotion.fxInstant : KuberMotion.fxFast,
+            curve: KuberMotion.curveEffects);
+        _a1.animateTo(t,
+            duration: pill ? KuberMotion.fxFast : KuberMotion.fxInstant,
+            curve: KuberMotion.curveEffects);
+        _contentAlpha.parent = pill ? _a1 : _a0;
+        if (pill) {
+          _shift.value = 4;
+          _shift.springTo(0, KuberMotion.springSubtle);
+        } else {
+          _shift.value = 0;
+        }
+        _scrim.animateTo(t,
+            duration: pill ? KuberMotion.fxDefault : KuberMotion.fxFast,
+            curve: KuberMotion.curveEffects);
+      case MotionLevel.off:
+        _p.value = t;
+        _scrim.value = t;
+    }
+  }
+
+  void _setHidden(bool hidden) {
+    if (hidden == _hiddenN.value) return;
+    _hiddenN.value = hidden;
+    final t = hidden ? 1.0 : 0.0;
+    switch (_level) {
+      case MotionLevel.expressive:
+        _h.springTo(
+            t, hidden ? KuberMotion.springStandard : KuberMotion.springDefault);
+      case MotionLevel.subtle:
+        _h.animateTo(t,
+            duration: KuberMotion.fxFast, curve: KuberMotion.curveEffects);
+      case MotionLevel.off:
+        _h.animateTo(t, duration: KuberMotion.fxInstant);
+    }
+  }
+
+  void _setScrolled(bool scrolled) {
+    if (scrolled == _scrolled) return;
+    _scrolled = scrolled;
+    if (_level == MotionLevel.off) {
+      _scrim.value = scrolled ? 1 : 0;
+    } else {
+      _scrim.animateTo(scrolled ? 1 : 0,
+          duration: KuberMotion.fxDefault, curve: KuberMotion.curveEffects);
+    }
+  }
+
+  /// Snap every value to the current state (level or setting changed).
+  void _snap() {
+    _showTimer?.cancel();
+    _down = _up = _moved = 0;
+    final off = _mode == FloatingHeaderMode.off;
+    _pill = _floats && !_searching && _pixels >= _Fh.toPill;
+    final t = _pill ? 1.0 : 0.0;
+    _p.value = t;
+    _a0.value = 1 - t;
+    _a1.value = t;
+    _shift.value = 0;
+    _contentAlpha.parent =
+        _level == MotionLevel.subtle ? (_pill ? _a1 : _a0) : kAlwaysCompleteAnimation;
+    _hiddenN.value = false;
+    _h.value = 0;
+    _scrolled = _pixels > 0;
+    _scrim.value = off ? (_scrolled ? 1 : 0) : t;
+    _away.value = off ? _pixels.clamp(0, _headerExtent) : 0;
+  }
+
+  void _onSearch(bool open) {
+    _foldTimer?.cancel();
+    _searching = open;
+    if (open) {
+      _showTimer?.cancel();
+      _setHidden(false);
+      _setPill(false, slow: true);
+      return;
+    }
+    _foldTimer = Timer(
+      _level == MotionLevel.off ? Duration.zero : _Fh.searchFoldDelay,
+      () {
+        if (mounted && !_searching && _floats && _pixels >= _Fh.toPill) {
+          _setPill(true);
+        }
+      },
+    );
+  }
+
+  bool _keyboardOpen() => View.of(context).viewInsets.bottom > 0;
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.metrics.axis != Axis.vertical) return false;
+    final inner = widget.nested && n.depth > 0;
+    if (inner && (!_pill || _mode == FloatingHeaderMode.off)) return false;
+    final px = n.metrics.pixels - n.metrics.minScrollExtent;
+    if (!inner) _pixels = px;
+    if (_mode == FloatingHeaderMode.off && widget.header.floating) {
+      final a = px.clamp(0.0, _headerExtent);
+      if (a != _away.value) _away.value = a;
+      _setScrolled(px > 0);
+      return false;
+    }
+    if (!_floats || _searching) return false;
+    if (inner) {
+      // Past the outer part: thresholds belong to the outer offset.
+    } else if (!_pill && px >= _Fh.toPill) {
+      _setPill(true);
+    } else if (_pill && px <= _Fh.toHeader) {
+      _setPill(false);
+      _setHidden(false);
+      _showTimer?.cancel();
+      _down = _up = _moved = 0;
+    }
+    if (!_pill) return false;
+    final delta = n is ScrollUpdateNotification ? (n.scrollDelta ?? 0) : 0.0;
+    switch (_mode) {
+      case FloatingHeaderMode.scrollUp:
+        if (delta > 0) {
+          _down += delta;
+          _up = 0;
+          if (_down > _Fh.hideAfter && !_keyboardOpen()) _setHidden(true);
+        } else if (delta < 0) {
+          _up -= delta;
+          _down = 0;
+          if (_up > _Fh.showAfter) _setHidden(false);
+        }
+      case FloatingHeaderMode.scrollStop:
+        if (delta != 0) {
+          _showTimer?.cancel();
+          _moved += delta.abs();
+          if (_moved > _Fh.hideAfter && !_keyboardOpen()) _setHidden(true);
+        } else if (n is ScrollEndNotification) {
+          _moved = 0;
+          _showTimer?.cancel();
+          _showTimer = Timer(_Fh.stopDelay, () {
+            if (mounted) _setHidden(false);
+          });
+        }
+      case FloatingHeaderMode.always:
+      case FloatingHeaderMode.off:
+        break;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final FloatingHeaderMode setting = ref.watch(floatingHeaderProvider);
+    final mode = widget.mode ?? setting;
+    final level = KuberMotion.levelOf(context);
+    final sb = MediaQuery.paddingOf(context).top;
+    final restH = widget.header.restHeight(context);
+    final first = _headerExtent == 0;
+    _headerExtent = sb + restH;
+    if (first || mode != _mode || level != _level) {
+      _mode = mode;
+      _level = level;
+      _snap();
+    }
+    final inset = sb + restH;
+    final off = mode == FloatingHeaderMode.off;
+    final scrollsAway = off && widget.header.floating;
+    final bg = Theme.of(context).scaffoldBackgroundColor;
+
+    final scrim = Positioned(
+      key: const ValueKey('fh-scrim'),
+      top: 0,
+      left: 0,
+      right: 0,
+      height: sb + 16,
+      child: IgnorePointer(
+        child: FadeTransition(
+          opacity: !off && level == MotionLevel.expressive
+              ? _ClampedAnimation(_p)
+              : _scrim,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0, sb * 0.5 / (sb + 16), 1],
+                colors: [
+                  bg.withValues(alpha: 0.94),
+                  bg.withValues(alpha: 0.94),
+                  bg.withValues(alpha: 0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Widget header = SizedBox(height: sb + restH, child: widget.header);
+    header = ValueListenableBuilder<bool>(
+      valueListenable: _hiddenN,
+      child: header,
+      // A hidden pill is not focusable and takes no taps.
+      builder: (_, hidden, child) => IgnorePointer(
+        ignoring: hidden,
+        child: ExcludeSemantics(excluding: hidden, child: child),
+      ),
+    );
+    header = _HideTransform(
+      hide: _h,
+      shift: _shift,
+      away: scrollsAway ? _away : null,
+      awayMax: sb + restH,
+      level: level,
+      child: header,
+    );
+
+    return _FloatScope(
+      progress: _p,
+      restAlpha: _a0,
+      pillAlpha: _a1,
+      contentAlpha: _contentAlpha,
+      hide: _h,
+      away: _away,
+      level: level,
+      floating: !off && widget.header.floating,
+      statusBar: sb,
+      restHeight: restH,
+      inset: inset,
+      onSearch: _onSearch,
+      child: Stack(
+        children: [
+          NotificationListener<ScrollNotification>(
+            key: const ValueKey('fh-body'),
+            onNotification: _onScroll,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: widget.body,
+            ),
+          ),
+          if (!off) scrim,
+          Positioned(
+            key: const ValueKey('fh-header'),
+            top: 0,
+            left: 0,
+            right: 0,
+            child: RepaintBoundary(
+              child: Semantics(
+                container: true,
+                explicitChildNodes: true,
+                child: header,
+              ),
+            ),
+          ),
+          if (off) scrim,
+        ],
+      ),
+    );
+  }
+}
+
+/// Hidden (modes 2 and 3) and the Subtle settle, or Floating header off's
+/// scroll-away: transform and opacity only.
+class _HideTransform extends StatelessWidget {
+  const _HideTransform({
+    required this.hide,
+    required this.shift,
+    required this.away,
+    required this.awayMax,
+    required this.level,
+    required this.child,
+  });
+
+  final Animation<double> hide;
+  final Animation<double> shift;
+  final ValueListenable<double>? away;
+  final double awayMax;
+  final MotionLevel level;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final a = away;
+    if (a != null) {
+      return ValueListenableBuilder<double>(
+        valueListenable: a,
+        child: child,
+        builder: (_, v, c) => Transform.translate(
+          offset: Offset(0, -math.min(v, awayMax)),
+          child: c,
+        ),
+      );
+    }
+    final dist = switch (level) {
+      MotionLevel.expressive => _Fh.hideDistance,
+      MotionLevel.subtle => 4.0,
+      MotionLevel.off => 0.0,
+    };
+    final fade = level == MotionLevel.expressive ? 1.25 : 1.0;
+    return AnimatedBuilder(
+      animation: Listenable.merge([hide, shift]),
+      child: child,
+      builder: (_, c) {
+        final h = hide.value;
+        final o = (1 - h * fade).clamp(0.0, 1.0);
+        return Transform.translate(
+          offset: Offset(0, shift.value - h * dist),
+          child: Opacity(opacity: o, alwaysIncludeSemantics: true, child: c),
+        );
+      },
+    );
+  }
+}
+
+/// The header's surface: the full-width rest header (opaque page colour,
+/// over the status bar) lerped into the pill (12 dp margins, 8 dp under the
+/// status bar, 56 dp, r28, surfaceContainer + 1 dp outlineVariant +
+/// shadow.float). Paint only; margins and radius clamp at 0 so an overshoot
+/// can never leave a gap at the edges. Hit-tests only inside the surface, so
+/// the page around the pill stays tappable.
+class _SurfacePainter extends CustomPainter {
+  _SurfacePainter({
+    required this.progress,
+    required this.restAlpha,
+    required this.pillAlpha,
+    required this.subtle,
+    required this.restTop,
+    required this.restBottom,
+    required this.pillTop,
+    required this.pillBottom,
+    required this.pillRadius,
+    required this.rest,
+    required this.pill,
+    required this.border,
+    required this.shadows,
+    required this.floating,
+  }) : super(repaint: Listenable.merge([progress, restAlpha, pillAlpha]));
+
+  final Animation<double> progress;
+  final Animation<double> restAlpha;
+  final Animation<double> pillAlpha;
+  final bool subtle;
+  final double restTop, restBottom, pillTop, pillBottom, pillRadius;
+  final Color rest, pill, border;
+  final List<BoxShadow> shadows;
+  final bool floating;
+
+  double get geometryP => floating ? progress.value : 0;
+
+  double topAt(double p) => restTop + (pillTop - restTop) * math.max(0, p);
+
+  RRect rrectAt(Size size, double p) {
+    final pp = math.max(0.0, p);
+    final cq = p.clamp(0.0, 1.0);
+    final m = _Fh.margin * pp;
+    final top = topAt(p);
+    final bottom = restBottom + (pillBottom - restBottom) * p;
+    return RRect.fromLTRBR(
+        m, top, size.width - m, math.max(top, bottom), Radius.circular(pillRadius * cq));
+  }
+
+  void _paintAt(Canvas canvas, Size size, double p, double alpha) {
+    if (alpha <= 0) return;
+    final cq = p.clamp(0.0, 1.0);
+    final r = rrectAt(size, p);
+    final a = cq * alpha;
+    if (a > 0) {
+      for (final s in shadows) {
+        canvas.drawRRect(
+          r.shift(s.offset).inflate(s.spreadRadius),
+          Paint()
+            ..color = s.color.withValues(alpha: s.color.a * a)
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, s.blurSigma),
+        );
+      }
+    }
+    final fill = Color.lerp(rest, pill, cq)!;
+    canvas.drawRRect(r, Paint()..color = fill.withValues(alpha: fill.a * alpha));
+    if (a > 0) {
+      canvas.drawRRect(
+        r.deflate(0.5),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..color = border.withValues(alpha: border.a * a),
+      );
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _lastSize = size;
+    if (!floating) {
+      _paintAt(canvas, size, 0, 1);
+    } else if (subtle) {
+      _paintAt(canvas, size, 0, restAlpha.value);
+      _paintAt(canvas, size, 1, pillAlpha.value);
+    } else {
+      _paintAt(canvas, size, progress.value, 1);
+    }
+  }
+
+  @override
+  bool? hitTest(Offset position) =>
+      rrectAt(_lastSize, geometryP).contains(position);
+
+  Size _lastSize = Size.zero;
+
+  @override
+  bool shouldRepaint(_SurfacePainter old) =>
+      old.rest != rest ||
+      old.pill != pill ||
+      old.border != border ||
+      old.subtle != subtle ||
+      old.floating != floating ||
+      old.restBottom != restBottom ||
+      old.pillTop != pillTop ||
+      old.pillBottom != pillBottom ||
+      old.progress != progress;
+}
+
+/// The header's surface and content inside a [KuberHeaderPage].
+class _FloatingHeaderSurface extends StatelessWidget {
+  const _FloatingHeaderSurface({
+    required this.scope,
+    required this.background,
+    required this.child,
+  });
+
+  final _FloatScope scope;
+  final Color? background;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final sb = scope.statusBar;
+    final painter = _SurfacePainter(
+      progress: scope.progress,
+      restAlpha: scope.restAlpha,
+      pillAlpha: scope.pillAlpha,
+      subtle: scope.level == MotionLevel.subtle,
+      restTop: 0,
+      restBottom: sb + scope.restHeight,
+      pillTop: sb + _Fh.top,
+      pillBottom: sb + _Fh.top + _Fh.pillHeight,
+      pillRadius: _Fh.radius,
+      rest: background ?? theme.scaffoldBackgroundColor,
+      pill: cs.surfaceContainer,
+      border: cs.outlineVariant,
+      shadows: KuberElevation.float(cs),
+      floating: true,
+    );
+    return CustomPaint(
+      painter: painter,
+      child: Padding(
+        padding: EdgeInsets.only(top: sb),
+        child: SizedBox(
+          height: scope.restHeight,
+          child: FadeTransition(
+            opacity: scope.contentAlpha,
+            child: AnimatedBuilder(
+              animation: scope.progress,
+              child: child,
+              // Buttons keep x and their design; they move 2 dp up (y 14 → 12).
+              builder: (_, c) => Transform.translate(
+                offset: Offset(0, -2 * scope.progress.value.clamp(0.0, 1.0)),
+                child: c,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The title in the pill: titleLarge scaled to 16 dp from its left edge,
+/// x 20 → 28 with no leading button, and the clip width growing as it scales
+/// so more of a long title fits. Fades out when the pill has no room for it
+/// (largest font), keeping its semantics.
+class _PillTitle extends StatelessWidget {
+  const _PillTitle({
+    required this.progress,
+    required this.leadShift,
+    required this.trailShift,
+    required this.dropBelow,
+    required this.child,
+  });
+
+  final Animation<double> progress;
+  final double leadShift;
+  final double trailShift;
+  final double dropBelow;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (_, box) => AnimatedBuilder(
+          animation: progress,
+          child: child,
+          builder: (_, c) {
+            final cq = progress.value.clamp(0.0, 1.0);
+            final s = 1 - (1 - _Fh.titleScale) * cq;
+            final lead = leadShift * cq;
+            final visual =
+                math.max(0.0, box.maxWidth - lead - trailShift * cq);
+            final drop = visual < dropBelow;
+            Widget t = OverflowBox(
+              alignment: AlignmentDirectional.centerStart,
+              minWidth: 0,
+              maxWidth: visual / s,
+              child: c,
+            );
+            t = Transform(
+              alignment: AlignmentDirectional.centerStart,
+              transform: Matrix4.translationValues(lead, 0, 0)
+                ..scaleByDouble(s, s, 1, 1),
+              child: t,
+            );
+            // Always present (opacity 1 costs nothing), so the title's
+            // element never remounts mid-morph.
+            return Opacity(
+              opacity: drop ? (1 - cq / _Fh.titleDropEnd).clamp(0.0, 1.0) : 1,
+              alwaysIncludeSemantics: true,
+              child: t,
+            );
+          },
+        ),
+      );
+}
+
+/// Opacity 1 → 0 over p 0 → [end], semantics kept.
+class _ProgressFade extends StatelessWidget {
+  const _ProgressFade({
+    required this.progress,
+    required this.end,
+    required this.child,
+  });
+
+  final Animation<double> progress;
+  final double end;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: progress,
+        child: child,
+        builder: (_, c) => Opacity(
+          opacity: (1 - progress.value.clamp(0.0, 1.0) / end).clamp(0.0, 1.0),
+          alwaysIncludeSemantics: true,
+          child: c,
+        ),
+      );
+}
+
+/// [parent] clamped to 0..1 (opacity of the status scrim follows p).
+class _ClampedAnimation extends Animation<double>
+    with AnimationWithParentMixin<double> {
+  _ClampedAnimation(this.parent);
+
+  @override
+  final Animation<double> parent;
+
+  @override
+  double get value => parent.value.clamp(0.0, 1.0);
+}
+
+/// A page whose [header] scrolls away with its content. Only for the reorder
+/// editors the floating header leaves out (v7c.F8: reorder auto-scrolls at
+/// the top edge); every other page uses [KuberHeaderPage]. The [body]'s
+/// scrollable must use the primary scroll controller.
 class KuberScrollAwayHeader extends StatelessWidget {
   final Widget header;
   final Widget body;
@@ -467,7 +1351,6 @@ class KuberScrollAwayHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return NestedScrollView(
       headerSliverBuilder: (_, __) => [SliverToBoxAdapter(child: header)],
-      // The header already consumed the status-bar inset.
       body: MediaQuery.removePadding(
         context: context,
         removeTop: true,

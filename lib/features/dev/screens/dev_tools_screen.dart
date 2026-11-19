@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import '../../home_v2/services/home_v2_dev_tools.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,7 @@ class DevToolsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: const KuberAppBar(showBack: true, title: 'Developer Tools'),
         body: ListView(
           padding: EdgeInsets.fromLTRB(
@@ -74,6 +75,7 @@ class DevToolsScreen extends ConsumerWidget {
             KuberSpace.xl + MediaQuery.of(context).padding.bottom,
           ),
           children: [
+            KuberHeaderPage.gap(),
             Container(
               padding: const EdgeInsets.all(KuberSpace.lg),
               decoration: BoxDecoration(
@@ -254,6 +256,7 @@ class DevToolsScreen extends ConsumerWidget {
   ) async {
     final cs = Theme.of(context).colorScheme;
     final result = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Disable Dev Tools?'),

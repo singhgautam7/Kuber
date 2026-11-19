@@ -13,6 +13,7 @@ import 'csv_service.dart';
 import 'json_backup_service.dart';
 import '../database/vnext_migration.dart';
 import 'mock_data_service.dart';
+import '../../features/pro/trial/trial_store.dart' show clearKeepingEntitlement;
 import '../utils/color_palette.dart';
 
 
@@ -178,7 +179,7 @@ class DataService {
     // partially imported data.
     await isar.writeTxn(() async {
       if (clearFirst) {
-        await isar.clear();
+        await clearKeepingEntitlement(isar);
       }
 
       // Preload categories/accounts/groups for name-to-id mapping. Read after
@@ -449,7 +450,7 @@ class DataService {
 
   /// Clears all data.
   Future<void> clearAllData() async {
-    await isar.writeTxn(() => isar.clear());
+    await isar.writeTxn(() => clearKeepingEntitlement(isar));
   }
 
 

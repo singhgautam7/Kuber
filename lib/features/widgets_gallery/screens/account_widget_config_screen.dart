@@ -9,6 +9,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 const _configChannel = MethodChannel('com.grs.kuber/widget_config');
 
@@ -64,7 +65,7 @@ class _AccountWidgetConfigScreenState
               Expanded(
                 child: accountsAsync.when(
                   loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                      const Center(child: KuberShapeLoader(size: 40)),
                   error: (e, _) => Center(
                     child: Text(
                       'Could not load accounts',

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_path.dart';
 import '../../../shared/widgets/info_table.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/sheet_button_section.dart';
@@ -21,6 +23,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../kuber_cards/providers/kuber_cards_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -29,6 +32,11 @@ class AccountDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    KuberPath.pushVirtual(
+      context,
+      title: account.name,
+      icon: account.icon != null ? IconMapper.fromString(account.icon!) : Icons.account_balance,
+    );
     final cs = Theme.of(context).colorScheme;
     final balanceAsync = ref.watch(accountBalanceProvider(account.id));
     final latestTxnAsync = ref.watch(
@@ -167,7 +175,7 @@ class AccountDetailSheet extends ConsumerWidget {
               padding: EdgeInsets.symmetric(vertical: 8),
               child: SizedBox(
                 height: 32,
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(child: KuberShapeLoader(size: 40)),
               ),
             ),
             error: (e, _) => Text(
@@ -296,6 +304,7 @@ class AccountDetailSheet extends ConsumerWidget {
     }
 
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
@@ -445,6 +454,7 @@ class AccountDetailSheet extends ConsumerWidget {
 
     if (hasTxns) {
       showDialog(
+      animationStyle: kuberDialogStyle(context),
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(
@@ -466,6 +476,7 @@ class AccountDetailSheet extends ConsumerWidget {
       );
     } else {
       showDialog(
+      animationStyle: kuberDialogStyle(context),
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(

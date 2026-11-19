@@ -1,10 +1,9 @@
-import 'dart:math' as math;
 import 'package:kuber/core/theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import 'app_icon_button.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/settings/providers/settings_provider.dart'
@@ -46,7 +45,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
       _operators.contains(_rawExpression[_rawExpression.length - 1]);
 
   void _onDigit(String digit) {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     setState(() {
       if (digit == '.' && _rawExpression.endsWith('.')) return;
       if (digit == '.' && _endsWithOperator()) {
@@ -60,7 +59,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   void _onOperator(String op) {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     setState(() {
       if (_endsWithOperator()) {
         _rawExpression =
@@ -74,7 +73,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   void _onBackspace() {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     setState(() {
       if (_rawExpression.isEmpty) return;
       _rawExpression = _rawExpression.substring(0, _rawExpression.length - 1);
@@ -84,7 +83,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   void _onClear() {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     setState(() {
       _expression = '';
       _rawExpression = '';
@@ -93,7 +92,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   void _onEquals() {
-    HapticFeedback.mediumImpact();
+    KuberHaptics.confirm();
     final result = _evaluate(_rawExpression);
     if (result == null) return;
     setState(() {
@@ -104,7 +103,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   void _onPercent() {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     final expr = _rawExpression;
     if (expr.isEmpty) return;
     setState(() {
@@ -131,7 +130,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   void _onConfirm() {
-    HapticFeedback.mediumImpact();
+    KuberHaptics.confirm();
     final result =
         _evaluate(_rawExpression) ?? double.tryParse(_rawExpression) ?? 0;
     Navigator.of(context).pop();
@@ -593,40 +592,9 @@ class _CalcKey extends StatefulWidget {
   State<_CalcKey> createState() => _CalcKeyState();
 }
 
-/// Per-kind accent overlay + subtle scale-down.
-///
-/// The visual shape is `0 → peak → 0` over one press. We deliberately do
-/// NOT use `CurvedAnimation` here — its `.value` getter asserts that any
-/// attached curve maps `1.0` to near `1.0`, which is a contract for
-/// monotonic curves. A bell shape violates that. Instead we listen to
-/// `_ctrl` directly and apply `sin(t·π)` inline in the AnimatedBuilder.
-class _CalcKeyState extends State<_CalcKey>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-
-  static const _flashDuration = Duration(milliseconds: 260);
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(vsync: this, duration: _flashDuration);
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  /// Single flash — controller runs 0 → 1 once. The builder maps that
-  /// linear ramp through `sin(t·π)` so the visible value rises to 1 at
-  /// the midpoint and falls back to ~0 at the end. Rapid taps restart
-  /// from 0 (any in-flight animation is cancelled), so successive
-  /// presses read as distinct pulses.
-  void _flash() {
-    _ctrl.forward(from: 0);
-  }
-
+/// Key: a [Pressable] button (pill to 12 dp on press, springFast) with the
+/// per-kind accent tint following the press.
+class _CalcKeyState extends State<_CalcKey> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -669,65 +637,40 @@ class _CalcKeyState extends State<_CalcKey>
       flex: widget.flex,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        // RepaintBoundary keeps the 60 Hz tap animation isolated from the
-        // sibling keys and the receipt/hero panel above.
-        child: RepaintBoundary(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            // Fire the flash and the action together — the accent pulse
-            // lands at the same instant the digit/operator appears in the
-            // expression, so the two events read as one.
-            onTap: () {
-              _flash();
-              widget.onTap();
-            },
-            child: AnimatedBuilder(
-              animation: _ctrl,
-              builder: (context, _) {
-                // Bell shape: 0 → 1 → 0 over the single forward run.
-                // sin(π) is 1.22e-16 in doubles, i.e. visually 0.
-                final v = math.sin(_ctrl.value * math.pi);
-
-                // Blend the translucent active overlays over the solid resting colors.
-                // Since both inputs are opaque/pre-blended, the target colors are solid,
-                // and Color.lerp will compute intermediate values with a constant 1.0 alpha.
-                final targetBg = Color.alphaBlend(
-                  accent.withValues(alpha: 0.28),
-                  solidBg,
-                );
-                final targetBorder = Color.alphaBlend(
-                  accent.withValues(alpha: 0.55),
-                  solidBorder,
-                );
-
-                final bg = Color.lerp(solidBg, targetBg, v)!;
-                final border = Color.lerp(solidBorder, targetBorder, v)!;
-
-                // 0.97 scale — enough to feel, not enough to jitter neighbours.
-                final scale = 1.0 - (v * 0.03);
-                return Transform.scale(
-                  scale: scale,
-                  child: Container(
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: bg,
-                      border: Border.all(color: border),
-                      borderRadius: KuberShape.fullR,
+        child: Pressable(
+          kind: PressKind.button,
+          restRadius: 28,
+          pressedRadius: 12,
+          onTap: widget.onTap,
+          builder: (context, radius, pressed) {
+            final v = pressed.clamp(0.0, 1.0);
+            final bg = Color.lerp(
+                solidBg,
+                Color.alphaBlend(accent.withValues(alpha: 0.28), solidBg),
+                v)!;
+            final border = Color.lerp(
+                solidBorder,
+                Color.alphaBlend(accent.withValues(alpha: 0.55), solidBorder),
+                v)!;
+            return Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color: bg,
+                border: Border.all(color: border),
+                borderRadius: BorderRadius.circular(radius),
+              ),
+              alignment: Alignment.center,
+              child: widget.icon != null
+                  ? Icon(widget.icon, size: 22, color: restFg)
+                  : Text(
+                      widget.label,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(color: restFg),
                     ),
-                    alignment: Alignment.center,
-                    child: widget.icon != null
-                        ? Icon(widget.icon, size: 22, color: restFg)
-                        : Text(
-                            widget.label,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineSmall?.copyWith(color: restFg),
-                          ),
-                  ),
-                );
-              },
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

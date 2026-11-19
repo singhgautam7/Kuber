@@ -5,8 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_skeleton.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../paywall/billing_ui_state.dart';
 import '../paywall/pro_state.dart';
+import '../trial/trial_reconcile.dart';
+import '../trial/trial_state.dart';
+import '../trial/widgets/trial_checklist_sheet.dart';
 
 /// Replaces the "Ask Kuber" pill in [HomeHeader] (Home tab only — every other
 /// screen keeps `KuberAppBar` unchanged). Ask Kuber gets its own dedicated
@@ -56,7 +60,17 @@ class PremiumHomeButton extends ConsumerWidget {
     final proState = ref.watch(kuberProStateProvider);
 
     // "Pro User", not a bare "PRO": reads as a status, not another upsell.
-    final label = proState.isPro ? 'Pro User' : 'Kuber Pro';
+    final trial = proState.isPro ? null : ref.watch(proTrialProvider);
+    final inTrial = trial != null && trial.isActive;
+    // Ticks features from existing data once per session (after on-open).
+    if (inTrial) ref.watch(trialReconcileProvider);
+    final label = proState.isPro
+        ? 'Pro User'
+        : inTrial
+            ? (trial.isLastDay
+                ? context.l10n.trialBadgeLast
+                : context.l10n.trialBadge('${trial.daysLeft}'))
+            : 'Kuber Pro';
 
     // Board 3.2d: 32 pill, primaryContainer, workspace_premium + labelLarge.
     final bg = cs.primaryContainer;
@@ -71,7 +85,8 @@ class PremiumHomeButton extends ConsumerWidget {
         shape: const StadiumBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => context.push('/pro'),
+          onTap: () =>
+              inTrial ? showTrialChecklistSheet(context) : context.push('/pro'),
           child: Container(
             height: 32,
             padding: const EdgeInsets.only(left: 8, right: 12),

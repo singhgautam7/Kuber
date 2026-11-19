@@ -24,7 +24,6 @@ import 'package:kuber/features/transactions/helpers/transaction_filters.dart';
 import 'package:kuber/features/transactions/providers/transaction_provider.dart';
 import 'package:kuber/l10n/app_localizations_en.dart';
 import 'package:kuber/main.dart' as app;
-import 'package:kuber/shared/widgets/app_scaffold.dart';
 import 'package:kuber/shared/widgets/money_widgets.dart';
 
 import 'loan_e2e_expected.dart';
@@ -124,7 +123,7 @@ Future<void> main() async {
     await tapText(t, en.obTermsCheck1);
     await tapText(t, en.obTermsCheck2);
     await tapText(t, en.obTermsAgree);
-    await pumpUntil(t, find.byType(AppScaffold), timeout: const Duration(seconds: 30));
+    await finishWelcome(t);
   });
 
   smokeTest('Loan flow end to end', (t) async {

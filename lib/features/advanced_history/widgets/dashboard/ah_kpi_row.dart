@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/motion.dart';
+import 'package:kuber/shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -29,18 +31,22 @@ class AhKpiRow extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final l = context.l10n;
 
-    String value(AhKpi k, AhKpis d) {
-      String m(double v) => fmt.formatCurrency(v);
-      return switch (k) {
-        AhKpi.transactions => fmt.formatNumber(d.transactions),
-        AhKpi.income => m(d.income),
-        AhKpi.expense => m(d.expense),
-        AhKpi.net => (d.net < 0 ? '−' : '+') + m(d.net.abs()),
-        AhKpi.average => m(d.average),
-        AhKpi.attachments => fmt.formatNumber(d.attachments),
-        AhKpi.largest => m(d.largest),
-      };
-    }
+    String m(double v) => fmt.formatCurrency(v);
+    double raw(AhKpi k, AhKpis d) => switch (k) {
+          AhKpi.transactions => d.transactions.toDouble(),
+          AhKpi.income => d.income,
+          AhKpi.expense => d.expense,
+          AhKpi.net => d.net,
+          AhKpi.average => d.average,
+          AhKpi.attachments => d.attachments.toDouble(),
+          AhKpi.largest => d.largest,
+        };
+    String Function(double) format(AhKpi k) => switch (k) {
+          AhKpi.transactions || AhKpi.attachments => (v) =>
+              fmt.formatNumber(v.round()),
+          AhKpi.net => (v) => (v < 0 ? '−' : '+') + m(v.abs()),
+          _ => m,
+        };
 
     Color? tint(AhKpi k, AhKpis d) => switch (k) {
           AhKpi.income => money.income,
@@ -58,14 +64,18 @@ class AhKpiRow extends ConsumerWidget {
               horizontal: KuberSpace.screenMargin),
           children: [
             for (final k in kpis) ...[
-              if (data == null)
-                const AhDelayed(child: _KpiSkeleton())
-              else
-                _KpiCard(
-                  label: ahKpiLabel(l, k),
-                  value: value(k, data),
-                  color: tint(k, data) ?? cs.onSurface,
-                ),
+              SkeletonCrossFade(
+                loading: data == null,
+                placeholder: const AhDelayed(child: _KpiSkeleton()),
+                child: data == null
+                    ? const SizedBox(width: _kCardW, height: _kCardH)
+                    : _KpiCard(
+                        label: ahKpiLabel(l, k),
+                        value: raw(k, data),
+                        format: format(k),
+                        color: tint(k, data) ?? cs.onSurface,
+                      ),
+              ),
               const SizedBox(width: KuberSpace.sm),
             ],
             _EditTile(
@@ -82,9 +92,13 @@ class AhKpiRow extends ConsumerWidget {
 
 class _KpiCard extends StatelessWidget {
   const _KpiCard(
-      {required this.label, required this.value, required this.color});
+      {required this.label,
+      required this.value,
+      required this.format,
+      required this.color});
   final String label;
-  final String value;
+  final double value;
+  final String Function(double) format;
   final Color color;
 
   @override
@@ -111,7 +125,9 @@ class _KpiCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: AhRollingText(value,
+            child: AnimatedAmount(
+                value: value,
+                format: format,
                 style: tt.titleMedium!.copyWith(color: color)),
           ),
         ],

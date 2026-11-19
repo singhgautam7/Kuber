@@ -141,6 +141,7 @@ extension _NoteEditorActions on _NoteEditorScreenState {
     final note = _note;
     if (note == null || note.isReadOnly) return;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -164,6 +165,7 @@ extension _NoteEditorActions on _NoteEditorScreenState {
         .where((t) => note.tagIds.contains(t.id.toString()))
         .toList();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

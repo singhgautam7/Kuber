@@ -14,6 +14,7 @@
 //     the result is not replayed on reopen).
 
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -255,6 +256,7 @@ class BackgroundReporter {
     if (ctx == null) return;
     final l = _l;
     showDialog<void>(
+      animationStyle: kuberDialogStyle(ctx),
       context: ctx,
       builder: (c) => AlertDialog(
         title: Text(l.bgDetailsTitle, style: localeFont(fontWeight: FontWeight.w600)),

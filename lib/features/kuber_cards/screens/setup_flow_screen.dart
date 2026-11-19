@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/biometric_service.dart';
@@ -12,6 +12,7 @@ import '../data/card_keystore.dart';
 import '../providers/kuber_cards_provider.dart';
 import '../widgets/cards_secure_scaffold.dart';
 import '../widgets/kuber_pin_pad.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// First-time setup (see `onboarding-setup.md`). The one sanctioned exception to
 /// the landing-page pattern: centered layout, back-only app bar, an animated
@@ -118,13 +119,14 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
 
   void _finish() {
     // Refresh hasVault so the entry swaps setup -> home (replace, not push).
+    KuberHaptics.confirm();
     ref.invalidate(cardVaultMetaProvider);
     widget.onDone();
   }
 
   void _onConfirm() {
     if (_confirm.value != _pin.value) {
-      HapticFeedback.mediumImpact();
+      KuberHaptics.reject();
       _confirm.value = '';
       setState(() => _confirmError = true);
       return;
@@ -269,10 +271,7 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
             ? SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.onPrimary,
-                ),
+                child: KuberShapeLoader(size: 22, color: cs.onPrimary),
               )
             : AnimatedSwitcher(
                 duration: const Duration(milliseconds: 180),

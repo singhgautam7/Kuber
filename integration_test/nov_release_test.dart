@@ -1,6 +1,7 @@
 // November release on a device: fresh install through the welcome flow, then
 // loans, Settings, links, search, path sheet, themes and the Pro FAQ.
 //   adb shell pm clear com.grs.kuber
+//   adb shell pm grant com.grs.kuber android.permission.POST_NOTIFICATIONS   (R2 reads it as On)
 //   flutter test integration_test/nov_release_test.dart -d emulator-5554
 // A host script takes a screenshot on each KUBER_SHOT line
 // (specs/nov-release/perf-harness/shots.sh).
@@ -46,7 +47,6 @@ import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/transactions/helpers/transaction_filters.dart';
 import 'package:kuber/features/transactions/providers/transaction_provider.dart';
 import 'package:kuber/main.dart' as app;
-import 'package:kuber/shared/widgets/app_scaffold.dart';
 import 'package:kuber/shared/widgets/kuber_path.dart';
 import 'package:kuber/shared/widgets/money_widgets.dart';
 
@@ -144,7 +144,7 @@ void main() {
     await tapText(t, en.obTermsCheck2);
     await shot(t, 'welcome/05-data-page-ready');
     await tapText(t, en.obTermsAgree);
-    await pumpUntil(t, find.byType(AppScaffold), timeout: const Duration(seconds: 30));
+    await finishWelcome(t);
     expectNoErrors(t);
   });
 

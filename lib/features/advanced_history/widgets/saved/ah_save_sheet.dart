@@ -1,3 +1,5 @@
+import 'package:kuber/core/motion/kuber_haptics.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +25,7 @@ Future<void> showAhNameSheet(
   SavedFilter? renaming,
 }) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -118,6 +121,7 @@ class _AhNameSheetState extends ConsumerState<AhNameSheet> {
       }
       return;
     }
+    KuberHaptics.confirm();
     nav.pop();
   }
 

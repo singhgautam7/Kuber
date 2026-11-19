@@ -14,7 +14,6 @@ import '../../../../shared/widgets/category_icon.dart';
 import '../../../../shared/widgets/kuber_list.dart';
 import '../../../categories/data/category.dart';
 import '../../../categories/providers/category_provider.dart';
-import '../common/ah_motion.dart';
 import '../filter/field_list.dart' show fieldHint;
 import '../filter/value_pickers.dart' show fieldIcon;
 import 'bracket_box.dart';
@@ -618,8 +617,8 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
     final hasImplicit = parsed.boxes.any((b) => b.implicit) && errors.isEmpty;
 
     final box = AnimatedContainer(
-      duration: AhMotion.fast,
-      curve: AhMotion.decelerate,
+      duration: KuberMotion.fxFast,
+      curve: KuberMotion.curveEffects,
       constraints: const BoxConstraints(minHeight: 56),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -740,7 +739,7 @@ class _TokenFilterFieldState extends ConsumerState<TokenFilterField> {
             ),
           ),
         AnimatedSize(
-          duration: AhMotion.fast,
+          duration: KuberMotion.fxFast,
           alignment: Alignment.topCenter,
           child: suggestions,
         ),
@@ -756,10 +755,10 @@ class _ErrorLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
     return AnimatedSwitcher(
-      duration: reduced ? AhMotion.instant : AhMotion.fast,
-      switchInCurve: AhMotion.decelerate,
+      duration: reduced ? KuberMotion.fxInstant : KuberMotion.fxFast,
+      switchInCurve: KuberMotion.curveEffects,
       transitionBuilder: (child, a) => FadeTransition(
         opacity: a,
         child: SlideTransition(

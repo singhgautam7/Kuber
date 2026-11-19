@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
@@ -11,6 +12,7 @@ Future<bool?> showNoteDeleteConfirmDialog(
 }) {
   final cs = Theme.of(context).colorScheme;
   return showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       shape: RoundedRectangleBorder(

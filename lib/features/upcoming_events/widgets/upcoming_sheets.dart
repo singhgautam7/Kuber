@@ -2,6 +2,7 @@
 // List, type in both views) and the calendar legend.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -36,6 +37,7 @@ String upcomingTypeLabel(BuildContext context, String type) {
 
 Future<void> showUpcomingFilterSheet(BuildContext context, {required bool calendar}) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -121,6 +123,7 @@ class _FilterSheet extends ConsumerWidget {
 /// "About the calendar": dot colours, day states, how totals add up.
 Future<void> showUpcomingLegendSheet(BuildContext context) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

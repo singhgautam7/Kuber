@@ -8,6 +8,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../shared/widgets/date_separator.dart';
 
 import '../../../core/constants/info_constants.dart';
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/overflow_config.dart';
 import '../../../core/utils/l10n_ext.dart';
@@ -32,6 +33,7 @@ import '../widgets/transaction_review_sheet.dart';
 import 'sms_first_load_screen.dart';
 import 'sms_import_widgets.dart';
 import 'sms_permission_screen.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Which tab the import list shows. The home widget can deep-link to a tab.
 enum SmsImportTab { unreviewed, imported, dismissed }
@@ -304,19 +306,19 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
       child: Scaffold(
         backgroundColor: cs.surface,
         body: _resolvingPermission
-            ? Column(
-                children: [
-                  _topAppBar(cs),
-                  const Expanded(
-                    child: Center(child: CircularProgressIndicator()),
+            ? _host(
+                Builder(
+                  builder: (c) => Padding(
+                    padding: EdgeInsets.only(top: KuberHeaderPage.insetOf(c)),
+                    child: const Center(child: KuberShapeLoader(size: 40)),
                   ),
-                ],
+                ),
               )
             : _permMode != null
-            ? Column(
-                children: [
-                  _topAppBar(cs),
-                  Expanded(
+            ? _host(
+                Builder(
+                  builder: (c) => Padding(
+                    padding: EdgeInsets.only(top: KuberHeaderPage.insetOf(c)),
                     child: SmsPermissionView(
                       mode: _permMode!,
                       onRequest: _requestPermission,
@@ -324,7 +326,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
                       onPaste: () => showPasteSmsSheet(context),
                     ),
                   ),
-                ],
+                ),
               )
             : _buildListView(cs),
         // Paste is the screen's create action: a centred extended FAB, like
@@ -346,6 +348,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   Future<void> _confirmReset() async {
     final cs = Theme.of(context).colorScheme;
     final proceed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Reset SMS imports?'),
@@ -402,6 +405,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     final theme = Theme.of(context);
     final n = ids.length;
     final ok = await showModalBottomSheet<bool>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -446,113 +450,120 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
     );
   }
 
-  /// App bar, fixed above the tabs. In selection mode the back arrow clears
-  /// the selection. Dismiss all shows only on a non-empty Unreviewed tab.
-  Widget _topAppBar(ColorScheme cs) {
+  /// The page host: the header (in selection mode the back arrow clears the
+  /// selection and the header stays fixed; Dismiss all shows only on a
+  /// non-empty Unreviewed tab) over [body]. [body] is built once per
+  /// State build, so the tab and count listeners only rebuild the header.
+  Widget _host(Widget body, {bool nested = false}) {
     return ValueListenableBuilder<int>(
       valueListenable: _tabIndex,
-      builder: (context, tabIndex, _) => Consumer(
-        builder: (context, ref, _) {
+      child: body,
+      builder: (context, tabIndex, child) => Consumer(
+        child: child,
+        builder: (context, ref, child) {
           final canDismissAll =
               !_resolvingPermission &&
               _permMode == null &&
               tabIndex == SmsImportTab.unreviewed.index &&
               ref.watch(smsUnreviewedCountProvider) > 0;
-          return KuberAppBar(
-            showBack: true,
-            title: 'SMS',
-            pinShortcut: const PinShortcutSpec(
-              shortcutId: 'sms_import',
-              shortLabel: 'SMS Import',
-              longLabel: 'Import from SMS',
-              iconDrawable: 'ic_shortcut_sms',
-              deepLink: 'kuber://app/sms-import',
-            ),
-            infoConfig: InfoConstants.smsImport,
-            onBack: _selectionMode ? _exitSelection : null,
-            search: _selectionMode || _permMode != null || _resolvingPermission
-                ? null
-                : KuberHeaderSearch(
-                    controller: _searchController,
-                    hint: 'Search merchant, sender, or message',
-                    onChanged: _setQuery,
-                  ),
-            overflowConfig: _selectionMode
-                ? null
-                : KuberOverflowConfig(
-                    items: [
-                      if (canDismissAll)
+          return KuberHeaderPage(
+            header: KuberAppBar(
+              floating: !_selectionMode,
+              showBack: true,
+              title: 'SMS',
+              pinShortcut: const PinShortcutSpec(
+                shortcutId: 'sms_import',
+                shortLabel: 'SMS Import',
+                longLabel: 'Import from SMS',
+                iconDrawable: 'ic_shortcut_sms',
+                deepLink: 'kuber://app/sms-import',
+              ),
+              infoConfig: InfoConstants.smsImport,
+              onBack: _selectionMode ? _exitSelection : null,
+              search:
+                  _selectionMode || _permMode != null || _resolvingPermission
+                  ? null
+                  : KuberHeaderSearch(
+                      controller: _searchController,
+                      hint: 'Search merchant, sender, or message',
+                      onChanged: _setQuery,
+                    ),
+              overflowConfig: _selectionMode
+                  ? null
+                  : KuberOverflowConfig(
+                      items: [
+                        if (canDismissAll)
+                          KuberOverflowItem(
+                            icon: Icons.do_not_disturb_on_outlined,
+                            label: context.l10n.smsMenuDismissAll,
+                            isDestructive: true,
+                            onTap: _confirmDismissAll,
+                          ),
                         KuberOverflowItem(
-                          icon: Icons.do_not_disturb_on_outlined,
-                          label: context.l10n.smsMenuDismissAll,
+                          icon: Icons.delete_outline_rounded,
+                          label: 'Reset SMS Imports',
                           isDestructive: true,
-                          onTap: _confirmDismissAll,
+                          onTap: _confirmReset,
                         ),
-                      KuberOverflowItem(
-                        icon: Icons.delete_outline_rounded,
-                        label: 'Reset SMS Imports',
-                        isDestructive: true,
-                        onTap: _confirmReset,
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+            ),
+            nested: nested,
+            body: child!,
           );
         },
       ),
     );
   }
 
-  /// The list view: fixed app bar and tabs (or the selection bar), then one
-  /// scroll view per tab in a [TabBarView]. Only the visible tab (and its
-  /// neighbour mid-swipe) is built; each tab watches only its own list.
+  /// The list view: the header over a [NestedScrollView] whose outer part
+  /// (the header gap and the tabs) scrolls away, so only the header stays
+  /// (owner, v7.0.0-c). Selection mode shows the selection row there instead
+  /// of the tabs; it scrolls away too. One scroll view per tab in a
+  /// [TabBarView]: only the visible tab (and its neighbour mid-swipe) is
+  /// built; each tab watches only its own list.
   Widget _buildListView(ColorScheme cs) {
-    return SafeArea(
-      top: true,
-      bottom: false,
-      child: Column(
-        children: [
-          // removeTop avoids double safe-area padding (the outer SafeArea
-          // already handles the status bar).
-          MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: _topAppBar(cs),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpace.screenMargin,
+    return _host(
+      nested: true,
+      GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: NestedScrollView(
+          headerSliverBuilder: (context, _) => [
+            KuberHeaderPage.sliverGap(),
+            SliverToBoxAdapter(
+              child: _selectionMode
+                  ? SizedBox(
+                      height: 64,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpace.screenMargin,
+                        ),
+                        child: _selectionHeaderRow(cs),
+                      ),
+                    )
+                  : _tabBar(cs),
             ),
-            child: _selectionMode
-                ? SizedBox(height: 64, child: _selectionHeaderRow(cs))
-                : _tabBar(cs),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              behavior: HitTestBehavior.opaque,
-              child: Stack(
-                children: [
-                  TabBarView(
-                    controller: _tabs,
-                    // Selection only lives on Unreviewed: no tab swipe then.
-                    physics: _selectionMode
-                        ? const NeverScrollableScrollPhysics()
-                        : null,
-                    children: [
-                      for (final tab in SmsImportTab.values) _page(tab),
-                    ],
-                  ),
-                  Positioned(
-                    left: KuberSpace.screenMargin,
-                    right: KuberSpace.screenMargin,
-                    top: 0,
-                    child: _AutoRefreshBar(pulling: _pulling),
-                  ),
-                ],
+          ],
+          body: Stack(
+            children: [
+              TabBarView(
+                controller: _tabs,
+                // Selection only lives on Unreviewed: no tab swipe then.
+                physics: _selectionMode
+                    ? const NeverScrollableScrollPhysics()
+                    : null,
+                children: [for (final tab in SmsImportTab.values) _page(tab)],
               ),
-            ),
+              Positioned(
+                left: KuberSpace.screenMargin,
+                right: KuberSpace.screenMargin,
+                top: 0,
+                child: _AutoRefreshBar(pulling: _pulling),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -952,6 +963,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen>
   Future<void> _dismissBatch() async {
     final cs = Theme.of(context).colorScheme;
     final proceed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Dismiss messages?'),
@@ -1080,7 +1092,8 @@ class _FreshRowState extends State<_FreshRow>
 
   @override
   Widget build(BuildContext context) {
-    if (KuberMotion.reduced(context)) return widget.child;
+    // Off: no highlight. Subtle keeps the short height + fade (no overshoot).
+    if (KuberMotion.levelOf(context) == MotionLevel.off) return widget.child;
     final tint = Theme.of(context).colorScheme.primary;
     const enter = 230 / 1430;
     return RepaintBoundary(

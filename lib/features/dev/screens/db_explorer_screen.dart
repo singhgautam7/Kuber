@@ -38,6 +38,7 @@ import '../../kuber_cards/data/stored_card.dart';
 import '../../kuber_cards/data/card_vault_meta.dart';
 import '../../pro/data/user_entitlement.dart';
 import '../../search/data/recent_search.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class CollectionMeta {
   final String name;
@@ -136,11 +137,11 @@ class DbExplorerScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
+      body: KuberHeaderPage(
+ header: KuberAppBar(showBack: true, title: 'DB Explorer'),
+ body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, title: 'DB Explorer'),
-          ),
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.screenMargin,
@@ -182,6 +183,7 @@ class DbExplorerScreen extends ConsumerWidget {
           ),
         ],
       ),
+ ),
     );
   }
 }
@@ -253,10 +255,7 @@ class _CollectionCardState extends State<_CollectionCard> {
               SizedBox(
                 height: 14,
                 width: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.onSurfaceVariant,
-                ),
+                child: KuberShapeLoader(size: 14, color: cs.onSurfaceVariant),
               )
             else
               Text(

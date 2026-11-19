@@ -11,11 +11,9 @@ import '../screens/more_search_screen.dart';
 /// More tab header (board 3.7): "More", no description; search and an
 /// overflow that switches the layout (the same setting as Settings → More Tab
 /// Layout).
-class MoreHeader extends ConsumerWidget {
-  const MoreHeader({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+abstract final class MoreHeader {
+  /// The More tab's [KuberAppBar], for `KuberHeaderPage.header`.
+  static KuberAppBar appBar(BuildContext context) {
     return KuberAppBar(
       title: context.l10n.navMore,
       actions: [

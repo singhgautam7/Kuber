@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -25,7 +26,9 @@ void showBatchSummarySheet(
   required VoidCallback onImported,
 }) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
@@ -192,7 +195,9 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
 
   void _pickCommonAccount() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -209,7 +214,9 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
 
   void _pickCommonCategory() {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
@@ -248,6 +255,7 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
         .importBatchGated(drafts);
     if (!mounted) return;
     nav.pop();
+    KuberHaptics.confirm();
     widget.onImported();
     if (!outcome.hasBlocked || !hostContext.mounted) return;
 

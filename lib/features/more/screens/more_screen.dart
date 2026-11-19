@@ -1,9 +1,12 @@
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/features/pro/trial/widgets/pro_suggestion_slot.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_loader.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -44,7 +47,7 @@ class MoreScreen extends ConsumerWidget {
         }
         final ctx = key.currentContext;
         if (ctx != null && ctx.mounted) {
-          await Scrollable.ensureVisible(
+          await KuberHeaderPage.ensureVisible(
             ctx,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutCubic,
@@ -81,9 +84,11 @@ class MoreScreenSimple extends ConsumerWidget {
     final sections = buildMoreSections(context, ref);
 
     return Scaffold(
-      body: CustomScrollView(
+      body: KuberHeaderPage(
+        header: MoreHeader.appBar(context),
+        body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(child: MoreHeader()),
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(
               KuberSpace.screenMargin,
@@ -95,6 +100,8 @@ class MoreScreenSimple extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 const KuberProSettingsSection(),
                 const SizedBox(height: KuberSpace.sectionGap),
+                // v7.0.0-b trial: Kuber Cards suggestion.
+                const ProSuggestionSlot(place: ProSuggestionPlace.more),
                 for (final section in sections) ...[
                   if (section.id == MoreSectionId.helpUs)
                     MoreHelpUsStrip(section: section)
@@ -119,6 +126,7 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -264,6 +272,7 @@ class MoreFooter extends StatelessWidget {
 
 Future<void> launchTutorialFromMore(BuildContext context, WidgetRef ref) async {
   showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     barrierDismissible: false,
     builder: (_) => const KuberLoader(label: 'Preparing tutorial...'),

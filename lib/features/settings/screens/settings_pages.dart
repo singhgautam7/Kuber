@@ -33,7 +33,10 @@ import '../../notes/providers/notes_provider.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../../core/motion/motion.dart';
 import '../widgets/currency_selector_sheet.dart';
+import '../widgets/floating_header_sheet.dart';
+import '../widgets/motion_sheet.dart';
 import '../widgets/settings_anchor.dart';
 import '../widgets/settings_choice_sheet.dart';
 import '../widgets/settings_language_row.dart';
@@ -69,6 +72,7 @@ Widget _trailing(BuildContext context, {String? text, IconData icon = Icons.chev
 
 void _showBottomNavSheet(BuildContext context, WidgetRef ref, NavBarStyle current) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -102,6 +106,7 @@ void _showBottomNavSheet(BuildContext context, WidgetRef ref, NavBarStyle curren
 
 void _showMoreTabLayoutSheet(BuildContext context, WidgetRef ref, MoreTabLayout current) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -122,6 +127,7 @@ void _showMoreTabLayoutSheet(BuildContext context, WidgetRef ref, MoreTabLayout 
 
 void _showNumberFormatSheet(BuildContext context, WidgetRef ref, NumberSystem current) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -166,6 +172,7 @@ void _showDefaultAccountPicker(
   String? currentId,
 ) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -415,6 +422,39 @@ class LookAndFeelScreen extends ConsumerWidget {
               onTap: () => TextSizeSheet.show(context),
               trailing: _trailing(context, text: textSizeLabel(context, ref.watch(textSizeLevelProvider))),
             )),
+            SettingsAnchor('motion', child: SettingsTile(
+              icon: Icons.animation_rounded,
+              label: l.motionTitle,
+              subtitle: motionRowValue(
+                l,
+                ref.watch(motionPreferenceProvider),
+                ref.watch(motionDeviceProvider),
+                MediaQuery.maybeDisableAnimationsOf(context) ?? false,
+              ),
+              onTap: () => MotionSheet.show(context),
+              trailing: _trailing(context),
+            )),
+            SettingsAnchor('haptics', child: SettingsTile(
+              icon: Icons.vibration_rounded,
+              label: l.hapticsTitle,
+              subtitle: l.hapticsSub,
+              trailing: Switch(
+                value: ref.watch(hapticsEnabledProvider),
+                onChanged: (v) {
+                  ref.read(hapticsEnabledProvider.notifier).set(v);
+                  // The tick confirms the new state (only when turned on).
+                  KuberHaptics.tick();
+                },
+                activeTrackColor: Theme.of(context).colorScheme.primary,
+              ),
+            )),
+            SettingsAnchor('floatingHeader', child: SettingsTile(
+              icon: Icons.web_asset_rounded,
+              label: l.floatingHeaderTitle,
+              subtitle: floatingHeaderName(l, ref.watch(floatingHeaderProvider)),
+              onTap: () => FloatingHeaderSheet.show(context),
+              trailing: _trailing(context),
+            )),
             SettingsAnchor('bottomNav', child: SettingsTile(
               icon: Icons.space_dashboard_outlined,
               label: l.setBottomNav,
@@ -623,6 +663,7 @@ class _PrivacySecurityScreenState extends ConsumerState<PrivacySecurityScreen> {
 
   void _showLocksSheet() {
     showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

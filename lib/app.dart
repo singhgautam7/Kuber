@@ -5,6 +5,8 @@ import 'features/settings/screens/settings_pages.dart' show notificationsAllowed
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'features/charts/providers/home_income_expense_provider.dart';
+import 'features/pro/trial/widgets/trial_ended_sheet.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,6 +23,9 @@ import 'package:go_router/go_router.dart';
 import 'core/background/background_reporter.dart';
 import 'core/background/background_run_controller.dart';
 import 'core/background/background_tasks.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'core/motion/motion.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'core/utils/ui_idle.dart';
 import 'core/utils/locale_font.dart' show AppLocale;
 import 'core/router/app_router.dart';
@@ -46,6 +51,7 @@ import 'features/pro/paywall/billing_ui_state.dart';
 import 'features/pro/paywall/pro_state.dart';
 import 'features/pro/services/promo_config_service.dart';
 import 'features/pro/services/purchase_service.dart';
+import 'features/pro/trial/trial_state.dart';
 import 'features/reminders/data/reminders_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/sms_import/providers/sms_import_provider.dart';
@@ -133,12 +139,14 @@ class _KuberAppState extends ConsumerState<KuberApp>
   /// _maybeRunOnOpenBatch).
   void _runOnOpenBatch() {
     _runBudgetMaintenance();
+    _checkMotionDevice();
     _runOnOpenLedgerReminders();
     _startBackgroundTasks('coldStart');
     _runSmsCleanup();
     _runReminderMaintenance();
     _runCreditCardReminderMaintenance();
     _runWidgetSync();
+    _runTrialMaintenance();
     _initPurchases();
     _initPromoConfig();
     // Warm the non-Home tabs' providers ~1.5s later — late enough that Home's
@@ -146,6 +154,17 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // Analytics or History hits cached data. Must never overlap the splash
     // fade-out: the warm-up blocks the UI isolate ~25 ms on a 6k-row ledger.
     Future.delayed(const Duration(milliseconds: 1500), _warmTabProviders);
+  }
+
+  /// Motion level, Auto: classifies the phone once (RAM, low-RAM flag) and
+  /// caches it, so later cold starts read it with the other prefs. Off the
+  /// startup path: runs from the on-open batch only.
+  void _checkMotionDevice() {
+    ref.read(motionDeviceProvider.notifier).check(() async {
+      if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return null;
+      final info = await DeviceInfoPlugin().androidInfo;
+      return (info.physicalRamSize, info.isLowRamDevice);
+    });
   }
 
   /// Warms the providers that the Analytics and History tabs consume on first
@@ -159,6 +178,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(analyticsFilterProvider);
       ref.read(analyticsTransactionsProvider);
       ref.read(analyticsComputedProvider);
+      // Home's Income & expense months (one pass over the ledger), so the
+      // card's first build below the fold doesn't pay for it.
+      ref.read(monthlyChartPeriodsProvider);
       ref.read(historyViewProvider.future).ignore();
       ref.read(transferPairAccountIdsProvider.future).ignore();
       // Settings' subtitles, so opening it runs no reads of its own.
@@ -169,6 +191,26 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(notificationsAllowedProvider.future).ignore();
     } catch (e, stack) {
       debugPrint('Kuber: tab provider warm-up failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  /// v7.0.0-b trial: reconciles row, Block Store and clock guard, reschedules
+  /// the reminders. Best-effort; never affects launch.
+  Future<void> _runTrialMaintenance() async {
+    try {
+      await ref.read(proTrialProvider.notifier).reconcile();
+      final info = ref.read(proTrialProvider);
+      // Once, on the first open after the end, for users who are not Pro.
+      if (info.isEnded && info.startAt != null && !info.endedNoticeShown &&
+          !ref.read(kuberProStateProvider).isPro) {
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null && ctx.mounted) {
+          await ref.read(proTrialProvider.notifier).markEndedNoticeShown();
+          if (ctx.mounted) await showTrialEndedSheet(ctx);
+        }
+      }
+    } catch (e, stack) {
+      debugPrint('Kuber: trial maintenance failed (non-fatal): $e\n$stack');
     }
   }
 
@@ -366,6 +408,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // mirror any newly-due reminders into the in-app inbox and heal alarms.
     _runReminderMaintenance();
     _runCreditCardReminderMaintenance();
+    // The trial may have ended while backgrounded (or the clock moved).
+    ref.read(proTrialProvider.notifier).evaluate().ignore();
     // Refresh home-screen widgets so a change made this session (then a jump to
     // the launcher) reflects within seconds of returning.
     _runWidgetSync();
@@ -595,16 +639,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: themeMode,
-      // Recolour in place (theme-surfaces-v1 motion.md): every role tweens,
-      // nothing moves. Reduced motion: 90 ms linear.
-      themeAnimationDuration: WidgetsBinding
-              .instance.platformDispatcher.accessibilityFeatures.disableAnimations
-          ? KuberMotion.instant
-          : const Duration(milliseconds: 240),
-      themeAnimationCurve: WidgetsBinding
-              .instance.platformDispatcher.accessibilityFeatures.disableAnimations
-          ? Curves.linear
-          : Curves.easeOutCubic,
+      // The theme-change ripple (ThemeRipple, below) reveals the new theme;
+      // no cross-fade underneath it.
+      themeAnimationDuration: Duration.zero,
       routerConfig: router,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -623,7 +660,12 @@ class _KuberAppState extends ConsumerState<KuberApp>
         // Router (child) and calls setFrameworkHandlesBack() directly.
         // This sits between the Router and _WidgetsAppState, ensuring
         // we control when the platform registers Flutter's back callback.
-        return NotificationListener<NavigationNotification>(
+        return MotionScopeHost(
+          child: ThemeRipple(
+          // Haptics stay quiet while any list scrolls or flings.
+          child: NotificationListener<ScrollNotification>(
+          onNotification: _trackScrollForHaptics,
+          child: NotificationListener<NavigationNotification>(
           onNotification: _handleNavigationNotification,
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             // Edge-to-edge: set only icon brightness (applied via the modern
@@ -656,9 +698,21 @@ class _KuberAppState extends ConsumerState<KuberApp>
               ),
             ),
           ),
+        ),
+        ),
+        ),
         );
       },
     );
+  }
+
+  static bool _trackScrollForHaptics(ScrollNotification n) {
+    if (n is ScrollStartNotification || n is ScrollUpdateNotification) {
+      KuberHaptics.scrolling = true;
+    } else if (n is ScrollEndNotification) {
+      KuberHaptics.scrolling = false;
+    }
+    return false;
   }
 }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_list.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,8 +14,9 @@ import '../../settings/providers/settings_provider.dart';
 /// Opens the Quick Actions sheet (nav-bar long-press). Uses the shared
 /// [KuberBottomSheet] shell so it matches every other Kuber sheet.
 Future<void> showQuickActionsSheet(BuildContext context) {
-  HapticFeedback.mediumImpact();
+  KuberHaptics.longPress();
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

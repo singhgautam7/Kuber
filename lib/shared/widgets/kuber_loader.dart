@@ -2,6 +2,7 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import 'kuber_shape_loader.dart';
 
 class KuberLoader extends StatelessWidget {
   final String label;
@@ -24,14 +25,7 @@ class KuberLoader extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: CircularProgressIndicator(
-                color: cs.primary,
-                strokeWidth: 3,
-              ),
-            ),
+            const KuberShapeLoader(size: 48),
             const SizedBox(height: KuberSpace.lg),
             Text(
               label,

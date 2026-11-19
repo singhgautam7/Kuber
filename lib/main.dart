@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'core/motion/motion.dart';
 import 'package:flutter/material.dart';
 import 'features/settings/providers/theme_options_provider.dart';
 import 'package:flutter/services.dart';
@@ -113,8 +114,8 @@ Future<void> _bootstrap() async {
     isar = await IsarService.open();
     await SeedService().seedInitialData(isar);
     await MigrationService.runAll(isar);
-    // First-install: create the Kuber Pro entitlement row with the 14-day
-    // trial window. No-op on subsequent launches. Must run before the first
+    // First-install: create the free Kuber Pro entitlement row (the trial is
+    // reconciled later, in the on-open batch). No-op on subsequent launches. Must run before the first
     // frame so no widget flashes free UI while the row is being materialised.
     await ensureEntitlementBootstrap(isar);
   } catch (e, stack) {
@@ -133,6 +134,7 @@ Future<void> _bootstrap() async {
   var bootNumberFormat = ('INR', NumberSystem.automatic);
   var bootShowCurrencyCode = false;
   var rateLaunch = 0;
+  var bootMotion = const MotionBoot();
   try {
     final prefs = await SharedPreferences.getInstance();
     // Once, before the first frame: Expressive colours / Pure black defaults
@@ -157,6 +159,9 @@ Future<void> _bootstrap() async {
           .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)]),
     );
     bootTextSizeLevel = prefs.getInt(PrefsKeys.textSizeLevel) ?? 3;
+    // Motion level + Haptics: three more keys from the prefs already open.
+    bootMotion = MotionBoot.fromPrefs(prefs);
+    KuberHaptics.enabled = bootMotion.haptics;
     // This cold start's number; written after the first frame (rate sheet).
     rateLaunch = (prefs.getInt(PrefsKeys.ratePromptLaunchCount) ?? 0) + 1;
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
@@ -267,6 +272,7 @@ Future<void> _bootstrap() async {
           bootThemeProvider.overrideWithValue(bootTheme),
           bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
           bootTextSizeLevelProvider.overrideWithValue(bootTextSizeLevel),
+          bootMotionProvider.overrideWithValue(bootMotion),
           bootNumberFormatProvider.overrideWithValue(bootNumberFormat),
           bootShowCurrencyCodeProvider.overrideWithValue(bootShowCurrencyCode),
           homeV2BootProvider.overrideWithValue(homeV2),

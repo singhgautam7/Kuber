@@ -5,6 +5,9 @@
 // SheetButtonSection, KuberChip) so they look and move like the rest of Kuber.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/pressable.dart';
+import 'package:kuber/core/motion/route_styles.dart';
+import 'animated_amount.dart';
 
 import 'kuber_skeleton.dart';
 
@@ -116,41 +119,54 @@ class EmiSplitBar extends StatelessWidget {
   }
 }
 
-/// Outlined assist chip "From Home loan ›" on the transaction sheet.
-class SourceChip extends StatelessWidget {
+/// Text button "link icon, From Home loan, chevron" under the transaction
+/// details. 40 dp high, 48 dp touch target; one line at the default font, up
+/// to two at the largest.
+class SourceLinkButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
-  const SourceChip({super.key, required this.label, this.onTap});
+  const SourceLinkButton({super.key, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-          borderRadius: KuberShape.mediumR, side: BorderSide(color: cs.outlineVariant)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height: 32,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.link_rounded, size: 18, color: cs.primary),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(label,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(color: cs.onSurface)),
-              ),
-              if (onTap != null) ...[
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, size: 18, color: cs.onSurfaceVariant),
-              ],
-            ]),
+    final large = MediaQuery.textScalerOf(context).scale(14) > 21;
+    return Pressable(
+      kind: PressKind.button,
+      restRadius: 20,
+      builder: (context, radius, pressed) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Material(
+        color: Color.lerp(Colors.transparent, cs.primary.withValues(alpha: 0.12), pressed.clamp(0, 1)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 40),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.link_rounded, size: 18, color: cs.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(label,
+                      maxLines: large ? 2 : 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge!
+                          .copyWith(color: cs.primary)),
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right_rounded, size: 18, color: cs.primary),
+                ],
+              ]),
+            ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -276,8 +292,19 @@ class MoneyHeadline extends StatelessWidget {
   final String value;
   final Widget? labelTrailing;
   final Color? color;
+
+  /// Optional numeric form: when given, [value] is ignored and the amount rolls
+  /// when it changes (see AnimatedAmount).
+  final double? amount;
+  final String Function(double)? format;
   const MoneyHeadline(
-      {super.key, required this.label, required this.value, this.labelTrailing, this.color});
+      {super.key,
+      required this.label,
+      required this.value,
+      this.labelTrailing,
+      this.color,
+      this.amount,
+      this.format});
 
   @override
   Widget build(BuildContext context) {
@@ -291,9 +318,17 @@ class MoneyHeadline extends StatelessWidget {
           Text(label, style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
           ?labelTrailing,
         ]),
-        Text(value,
-            style: tt.headlineMedium!
-                .copyWith(color: color ?? cs.onSurface, fontFeatures: _tabular)),
+        if (amount != null && format != null)
+          AnimatedAmount(
+              value: amount!,
+              animateIn: false,
+              format: format!,
+              style: tt.headlineMedium!
+                  .copyWith(color: color ?? cs.onSurface, fontFeatures: _tabular))
+        else
+          Text(value,
+              style: tt.headlineMedium!
+                  .copyWith(color: color ?? cs.onSurface, fontFeatures: _tabular)),
       ],
     );
   }
@@ -329,6 +364,7 @@ class MoneyNextBlock extends StatelessWidget {
 /// Opens [sheet] (a [MoneySummarySheet]) the standard way.
 Future<T?> showMoneySheet<T>(BuildContext context, Widget sheet) =>
     showModalBottomSheet<T>(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -537,35 +573,38 @@ class MoneyFullScreen extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        showBack: true,
-        closeIcon: true,
-        title: title,
-        showBrand: false,
-        actions: [
-          if (overflow.isNotEmpty)
-            PopupMenuButton<VoidCallback>(
-              icon: const Icon(Icons.more_vert_rounded),
-              itemBuilder: (_) => overflow,
-              onSelected: (cb) => cb(),
-            ),
-        ],
-      ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-            20, 4, 20, 32 + MediaQuery.of(context).padding.bottom),
-        children: [
-          identity,
-          if (chart != null) ...[
-            const SizedBox(height: 24),
-            KuberCard(
-              padding: const EdgeInsets.all(16),
-              child: chart!,
-            ),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          showBack: true,
+          closeIcon: true,
+          title: title,
+          showBrand: false,
+          actions: [
+            if (overflow.isNotEmpty)
+              PopupMenuButton<VoidCallback>(
+                icon: const Icon(Icons.more_vert_rounded),
+                itemBuilder: (_) => overflow,
+                onSelected: (cb) => cb(),
+              ),
           ],
-          const SizedBox(height: 24),
-          ...list,
-        ],
+        ),
+        body: ListView(
+          padding: EdgeInsets.fromLTRB(
+              20, 4, 20, 32 + MediaQuery.of(context).padding.bottom),
+          children: [
+            KuberHeaderPage.gap(),
+            identity,
+            if (chart != null) ...[
+              const SizedBox(height: 24),
+              KuberCard(
+                padding: const EdgeInsets.all(16),
+                child: chart!,
+              ),
+            ],
+            const SizedBox(height: 24),
+            ...list,
+          ],
+        ),
       ),
     );
   }

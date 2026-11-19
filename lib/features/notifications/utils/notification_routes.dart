@@ -37,10 +37,11 @@ const kNotificationKindPages = <String, String>{
   'reminder': '/more/reminders',
   'account': '/more/accounts', // credit-card bill / payment-due reminders
   'backup': '/more/data/automatic-backups', // id is a failure reason
+  'trial': '/pro', // v7.0.0-b trial reminders ("trial:pro")
 };
 
 /// Kinds whose id is not an item (no sheet to open).
-const _pageOnlyKinds = {'backup'};
+const _pageOnlyKinds = {'backup', 'trial'};
 
 /// Page for notifications without a usable payload (older rows), by type.
 const kNotificationTypePages = <NotificationType, String>{

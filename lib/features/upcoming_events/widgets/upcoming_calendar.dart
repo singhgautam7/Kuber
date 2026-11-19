@@ -1,15 +1,11 @@
 // Upcoming events Calendar view (upcoming-calendar-v1 §1 to §8).
 //
-// Inner scroll of the screen's NestedScrollView:
-//   month header (pinned 48) → month summary (scrolls away) →
-//   weekday row + grid + handle (pinned, collapses to the selected week) →
-//   day list.
-// Months page horizontally (PageView); collapsed, the strip pages by week.
-
-import 'dart:math' as math;
+// One scroll under the page header, nothing pinned (only the header is
+// sticky): chips → month header → month summary → weekday row + grid →
+// day list. Months page horizontally (PageView).
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +15,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/l10n_ext.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../engine/occurrences.dart';
@@ -29,7 +26,6 @@ import 'upcoming_events_widget.dart' show UpcomingEventRow;
 
 const double _kHeaderH = 48;
 const double _kWeekdayH = 32;
-const double _kHandleH = 16;
 const double _kGridPad = 12;
 
 /// Occurrences of [items] that pass the shared type filter.
@@ -47,7 +43,11 @@ List<DateTime> _gridDays(int monthKey, int firstWeekday) {
 }
 
 class UpcomingCalendarView extends ConsumerStatefulWidget {
-  const UpcomingCalendarView({super.key});
+  const UpcomingCalendarView({super.key, this.leading = const SizedBox.shrink()});
+
+  /// Scrolls above the month header (the page's List / Calendar and Filter
+  /// chips).
+  final Widget leading;
 
   @override
   ConsumerState<UpcomingCalendarView> createState() => _UpcomingCalendarViewState();
@@ -60,11 +60,8 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
   late DateTime _selected;
   late DateTime _today;
   final _keep = <int, ProviderSubscription<AsyncValue<List<CalendarOccurrence>>>>{};
-  final _summaryKey = GlobalKey();
-  bool _collapsed = false;
   // Built day cells, reused while their inputs are unchanged: a tap rebuilds
-  // only the two cells whose selection changed, and collapsing the grid
-  // (a rebuild per scroll frame) rebuilds none.
+  // only the two cells whose selection changed.
   final _cellCache = <String, Widget>{};
 
   int get _monthIndex => (_pages?.hasClients ?? false) ? (_pages!.page ?? 0).round() : _indexOf(monthKeyOf(_selected));
@@ -114,7 +111,7 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
   }
 
   void _select(DateTime d) {
-    HapticFeedback.selectionClick();
+    KuberHaptics.tick();
     final key = monthKeyOf(d);
     if (key != _keyAt(_monthIndex)) {
       final i = _indexOf(key);
@@ -130,48 +127,9 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
     _pages?.animateToPage(i, duration: KuberMotion.of(context, _kReflow), curve: Curves.easeOutCubic);
   }
 
-  /// Collapsed: a swipe moves the selection by a week.
-  void _goWeek(int delta) {
-    final d = _selected.add(Duration(days: 7 * delta));
-    final i = _indexOf(monthKeyOf(d));
-    if (i < 0 || i >= _count) return;
-    if (i != _monthIndex) _pages?.jumpToPage(i);
-    setState(() => _selected = DateTime(d.year, d.month, d.day));
-    // The new week's month may lay out differently: stay collapsed.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final c = PrimaryScrollController.maybeOf(context);
-      if (!mounted || c == null || !c.hasClients) return;
-      final rows = _gridDays(monthKeyOf(_selected), MaterialLocalizations.of(context).firstDayOfWeekIndex).length ~/ 7;
-      c.jumpTo(math.min(c.position.maxScrollExtent, _summaryHeight + (rows - 1) * kDayCellHeight));
-    });
-  }
-
   void _quickAdd(DateTime d) {
-    HapticFeedback.mediumImpact();
+    KuberHaptics.longPress();
     context.push('/reminders/add?date=${DateFormat('yyyy-MM-dd').format(d)}');
-  }
-
-  double get _summaryHeight =>
-      (_summaryKey.currentContext?.findRenderObject() as RenderBox?)?.size.height ?? 0;
-
-  /// On release inside the collapse range, settle to expanded or collapsed.
-  bool _onScrollEnd(ScrollEndNotification n, int rows) {
-    final pos = Scrollable.maybeOf(n.context!)?.position;
-    if (pos == null || n.depth != 0) return false;
-    final start = _summaryHeight, range = (rows - 1) * kDayCellHeight;
-    final off = pos.pixels;
-    if (off <= start || off >= start + range) return false;
-    final target = off < start + range / 2 ? start : start + range;
-    final duration = KuberMotion.of(context, _kReflow);
-    Future.microtask(() => pos.animateTo(target, duration: duration, curve: Curves.easeOutCubic));
-    return false;
-  }
-
-  void _expand() {
-    final c = PrimaryScrollController.maybeOf(context);
-    if (c == null || !c.hasClients) return;
-    c.animateTo(math.min(c.offset, _summaryHeight),
-        duration: KuberMotion.of(context, _kReflow), curve: Curves.easeOutCubic);
   }
 
   @override
@@ -186,127 +144,53 @@ class _UpcomingCalendarViewState extends ConsumerState<UpcomingCalendarView> {
     final selectedMonth = _month(selectedKey);
     final rows = _gridDays(selectedKey, weekStart).length ~/ 7;
 
-    return NotificationListener<ScrollEndNotification>(
-      onNotification: (n) => _onScrollEnd(n, rows),
-      child: CustomScrollView(
-        slivers: [
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _FixedHeader(
-              height: _kHeaderH,
-              child: _MonthHeader(
-                pages: _pages!,
-                keyAt: _keyAt,
-                count: _count,
-                today: _today,
-                onPrev: () => _goMonth(-1),
-                onNext: () => _goMonth(1),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: KeyedSubtree(
-              key: _summaryKey,
-              child: _MonthSummary(
-                pages: _pages!,
-                keyAt: _keyAt,
-                monthData: _month,
-                filter: filter,
-              ),
-            ),
-          ),
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _GridHeader(
-              rows: rows,
-              builder: (context, p) {
-                final collapsed = p >= 0.999;
-                if (collapsed != _collapsed) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) setState(() => _collapsed = collapsed);
-                  });
-                }
-                return _GridArea(
-                  p: p,
-                  rows: rows,
-                  pages: _pages!,
-                  count: _count,
-                  keyAt: _keyAt,
-                  monthData: _month,
-                  filter: filter,
-                  weekStart: weekStart,
-                  today: _today,
-                  selected: _selected,
-                  cellCache: _cellCache,
-                  onPage: _onPage,
-                  onTap: _select,
-                  onLongPress: _quickAdd,
-                  onWeek: _goWeek,
-                  onExpand: _expand,
-                );
-              },
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _DayList(
-              day: _selected,
+    return CustomScrollView(
+      slivers: [
+        KuberHeaderPage.sliverGap(),
+        SliverToBoxAdapter(child: widget.leading),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: _kHeaderH,
+            child: _MonthHeader(
+              pages: _pages!,
+              keyAt: _keyAt,
+              count: _count,
               today: _today,
-              month: selectedMonth,
-              filter: filter,
+              onPrev: () => _goMonth(-1),
+              onNext: () => _goMonth(1),
             ),
           ),
-          // Slack so a short day list can still collapse the grid fully.
-          SliverLayoutBuilder(
-            builder: (context, c) {
-              final need = c.viewportMainAxisExtent + _summaryHeight + (rows - 1) * kDayCellHeight;
-              final slack = math.max(navBarBottomPadding(context), need - c.precedingScrollExtent);
-              return SliverToBoxAdapter(child: SizedBox(height: slack));
-            },
+        ),
+        SliverToBoxAdapter(
+          child: _MonthSummary(pages: _pages!, keyAt: _keyAt, monthData: _month, filter: filter),
+        ),
+        SliverToBoxAdapter(
+          child: _GridArea(
+            rows: rows,
+            pages: _pages!,
+            count: _count,
+            keyAt: _keyAt,
+            monthData: _month,
+            filter: filter,
+            weekStart: weekStart,
+            today: _today,
+            selected: _selected,
+            cellCache: _cellCache,
+            onPage: _onPage,
+            onTap: _select,
+            onLongPress: _quickAdd,
           ),
-        ],
-      ),
+        ),
+        SliverToBoxAdapter(
+          child: _DayList(day: _selected, today: _today, month: selectedMonth, filter: filter),
+        ),
+        SliverToBoxAdapter(child: SizedBox(height: navBarBottomPadding(context))),
+      ],
     );
   }
 }
 
 const Duration _kReflow = Duration(milliseconds: 230);
-
-class _FixedHeader extends SliverPersistentHeaderDelegate {
-  final double height;
-  final Widget child;
-  const _FixedHeader({required this.height, required this.child});
-  @override
-  double get maxExtent => height;
-  @override
-  double get minExtent => height;
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      ColoredBox(color: Theme.of(context).colorScheme.surface, child: child);
-  @override
-  bool shouldRebuild(_FixedHeader old) => true;
-}
-
-/// Weekday row + grid + handle. p = scrolled ÷ (grid height − one row).
-class _GridHeader extends SliverPersistentHeaderDelegate {
-  final int rows;
-  final Widget Function(BuildContext context, double p) builder;
-  const _GridHeader({required this.rows, required this.builder});
-
-  @override
-  double get maxExtent => _kWeekdayH + rows * kDayCellHeight + _kHandleH;
-  @override
-  double get minExtent => _kWeekdayH + kDayCellHeight + _kHandleH;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final range = (rows - 1) * kDayCellHeight;
-    final p = range <= 0 ? 1.0 : (shrinkOffset / range).clamp(0.0, 1.0);
-    return ColoredBox(color: Theme.of(context).colorScheme.surface, child: builder(context, p));
-  }
-
-  @override
-  bool shouldRebuild(_GridHeader old) => true;
-}
 
 class _MonthHeader extends StatelessWidget {
   final PageController pages;
@@ -454,7 +338,6 @@ class _MonthSummary extends ConsumerWidget {
 
 
 class _GridArea extends ConsumerWidget {
-  final double p;
   final int rows;
   final PageController pages;
   final int count;
@@ -466,11 +349,8 @@ class _GridArea extends ConsumerWidget {
   final Map<String, Widget> cellCache;
   final ValueChanged<int> onPage;
   final ValueChanged<DateTime> onTap, onLongPress;
-  final ValueChanged<int> onWeek;
-  final VoidCallback onExpand;
 
   const _GridArea({
-    required this.p,
     required this.rows,
     required this.pages,
     required this.count,
@@ -484,8 +364,6 @@ class _GridArea extends ConsumerWidget {
     required this.onPage,
     required this.onTap,
     required this.onLongPress,
-    required this.onWeek,
-    required this.onExpand,
   });
 
   @override
@@ -496,8 +374,6 @@ class _GridArea extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final width = MediaQuery.sizeOf(context).width;
     final cellW = (width - 2 * _kGridPad) / 7;
-    final collapsed = p >= 0.999;
-    final reduced = KuberMotion.reduced(context);
 
     // Weekday row: short names, narrow where a short one is wider than a cell.
     final names = [
@@ -505,8 +381,7 @@ class _GridArea extends ConsumerWidget {
     ];
     final style = theme.textTheme.labelSmall!.copyWith(color: cs.onSurfaceVariant);
     final scaler = MediaQuery.textScalerOf(context);
-    // This build runs on every frame while the grid collapses: measure the
-    // weekday names once per locale, width and text size.
+    // Measure the weekday names once per locale, width and text size.
     final fmt = _weekdayFormats.putIfAbsent('$locale|$cellW|${scaler.scale(100)}|${style.fontSize}', () {
       final short = DateFormat.E(locale);
       final tooWide = names.any((d) {
@@ -530,10 +405,6 @@ class _GridArea extends ConsumerWidget {
       money: ref.watch(formatterProvider).formatCurrency,
       private: ref.watch(privacyModeProvider),
     );
-    final gridH = rows * kDayCellHeight * (1 - p) + kDayCellHeight * p;
-    final selectedKey = monthKeyOf(selected);
-    final selectedRow = _gridDays(selectedKey, weekStart).indexWhere((d) => dayKey(d) == dayKey(selected)) ~/ 7;
-
     Widget monthGrid(int index) {
       final key = keyAt(index);
       final days = _gridDays(key, weekStart);
@@ -542,40 +413,25 @@ class _GridArea extends ConsumerWidget {
       for (final o in _filtered(items ?? const [], filter)) {
         byDay.putIfAbsent(o.day, () => []).add(o);
       }
-      final rowCount = days.length ~/ 7;
-      final selRow = key == selectedKey ? selectedRow : 0;
+      // A month with fewer weeks than the selected one sits at the top.
       return ClipRect(
         child: OverflowBox(
           alignment: Alignment.topCenter,
-          maxHeight: rowCount * kDayCellHeight,
-          child: Transform.translate(
-            offset: Offset(0, reduced ? 0 : -selRow * kDayCellHeight * p),
-            child: Column(
-              children: [
-                for (var r = 0; r < rowCount; r++)
-                  Opacity(
-                    opacity: r == selRow || reduced ? 1 : (1 - p),
-                    child: Row(
-                      children: [
-                        for (final d in days.sublist(r * 7, r * 7 + 7))
-                          _cell(labels, d, key, items, byDay[dayKey(d)] ?? const [], cellW),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
+          maxHeight: days.length ~/ 7 * kDayCellHeight,
+          child: Column(
+            children: [
+              for (var r = 0; r < days.length ~/ 7; r++)
+                Row(
+                  children: [
+                    for (final d in days.sublist(r * 7, r * 7 + 7))
+                      _cell(labels, d, key, items, byDay[dayKey(d)] ?? const [], cellW),
+                  ],
+                ),
+            ],
           ),
         ),
       );
     }
-
-    final grid = PageView.builder(
-      controller: pages,
-      itemCount: count,
-      physics: collapsed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
-      onPageChanged: onPage,
-      itemBuilder: (_, i) => monthGrid(i),
-    );
 
     return Column(
       children: [
@@ -594,44 +450,14 @@ class _GridArea extends ConsumerWidget {
           ),
         ),
         SizedBox(
-          height: gridH,
+          height: rows * kDayCellHeight,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: _kGridPad),
-            child: collapsed
-                ? Semantics(
-                    label: l.ueA11yWeekCollapsed(DateFormat('d MMMM', locale).format(
-                        _gridDays(selectedKey, weekStart)[selectedRow * 7])),
-                    onTap: onExpand,
-                    child: GestureDetector(
-                      onHorizontalDragEnd: (e) {
-                        final v = e.primaryVelocity ?? 0;
-                        if (v.abs() > 200) onWeek(v < 0 ? 1 : -1);
-                      },
-                      child: grid,
-                    ),
-                  )
-                : grid,
-          ),
-        ),
-        Semantics(
-          button: true,
-          label: l.ueA11yHandle,
-          onTap: onExpand,
-          child: GestureDetector(
-            onTap: onExpand,
-            behavior: HitTestBehavior.opaque,
-            child: SizedBox(
-              height: _kHandleH,
-              child: Center(
-                child: Container(
-                  width: 32,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: KuberShape.fullR,
-                  ),
-                ),
-              ),
+            child: PageView.builder(
+              controller: pages,
+              itemCount: count,
+              onPageChanged: onPage,
+              itemBuilder: (_, i) => monthGrid(i),
             ),
           ),
         ),

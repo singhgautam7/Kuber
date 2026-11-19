@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -27,6 +28,7 @@ import '../widgets/note_dialogs.dart';
 import '../widgets/note_editor_chrome.dart';
 import '../widgets/number_highlight_style.dart';
 import '../widgets/quick_actions_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 part 'note_editor_actions.dart';
 
@@ -250,7 +252,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (note == null || controller == null) {
       return Scaffold(
         backgroundColor: cs.surface,
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: KuberShapeLoader(size: 40)),
       );
     }
 

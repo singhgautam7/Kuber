@@ -2,8 +2,11 @@
 // add money, past value, withdraw / close (I.5), FD early withdrawal.
 
 import '../../categories/providers/category_provider.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_path.dart';
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_chips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -110,6 +113,7 @@ Future<bool> confirmDeleteInvestment(BuildContext context, WidgetRef ref, Invest
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.deleteInvestmentConfirm, style: localeFont(fontWeight: FontWeight.w600)),
@@ -174,6 +178,7 @@ class HoldingSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    KuberPath.pushVirtual(context, title: investment.name, icon: investmentIcon(investment.investmentType));
     final l = context.l10n;
     final fmt = ref.watch(formatterProvider);
     final money = context.kuberMoney;
@@ -379,14 +384,14 @@ class _HoldingFullScreenState extends ConsumerState<HoldingFullScreen> {
       if (!fixed)
         Wrap(spacing: 8, children: [
           for (final r in _Range.values)
-            ChoiceChip(
-              label: Text(switch (r) {
+            KuberChip(
+              label: switch (r) {
                 _Range.year1 => '1 ${l.msLoansYear.toLowerCase()}',
                 _Range.year2 => '2 ${l.msLoansYears.toLowerCase()}',
                 _Range.all => l.msRecRangeAll,
-              }),
+              },
               selected: _range == r,
-              onSelected: (_) => setState(() => _range = r),
+              onTap: () => setState(() => _range = r),
             ),
         ]),
       const SizedBox(height: 12),

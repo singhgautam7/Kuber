@@ -131,7 +131,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                         triggerMode: TooltipTriggerMode.longPress,
                         child: KuberChip(
                           label: context.l10n.filterExp,
-                          pill: true,
+                          compact: true,
+                          showCheck: false,
                           selected: filter.types.contains('expense'),
                           onTap: () => notifier.setType('expense'),
                         ),
@@ -142,7 +143,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                         triggerMode: TooltipTriggerMode.longPress,
                         child: KuberChip(
                           label: context.l10n.filterInc,
-                          pill: true,
+                          compact: true,
+                          showCheck: false,
                           selected: filter.types.contains('income'),
                           onTap: () => notifier.setType('income'),
                         ),

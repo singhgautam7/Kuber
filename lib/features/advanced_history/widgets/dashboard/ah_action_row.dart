@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,7 +11,6 @@ import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../models/ah_view.dart';
 import '../../providers/ah_providers.dart';
 import '../common/ah_common.dart';
-import '../common/ah_motion.dart';
 import '../saved/ah_saved_sheet.dart';
 import '../saved/ah_saved_state.dart';
 import 'ah_sheets.dart';
@@ -221,7 +221,7 @@ class _FilterButtonState extends State<_FilterButton> {
     final l = context.l10n;
     final set = widget.count > 0;
     if (set) _last = widget.count;
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
     final fg = set ? cs.onSecondaryContainer : cs.onSurface;
     final compact = widget.compact;
     return AhPill(
@@ -251,16 +251,16 @@ class _FilterButtonState extends State<_FilterButton> {
               alignment: Alignment.centerLeft,
               widthFactor: set ? 1 : 0,
               duration:
-                  reduced ? AhMotion.instant : AhMotion.standardCurve.settle,
-              curve: reduced ? Curves.linear : AhMotion.standardSize,
+                  reduced ? KuberMotion.fxInstant : KuberMotion.standardCurve.settle,
+              curve: reduced ? Curves.linear : KuberMotion.standardCurve.clamped,
               child: AnimatedScale(
                 scale: set ? 1 : 0.6,
-                curve: reduced ? Curves.linear : AhMotion.fastCurve,
+                curve: reduced ? Curves.linear : KuberMotion.fastCurve,
                 duration:
-                    reduced ? AhMotion.instant : AhMotion.fastCurve.settle,
+                    reduced ? KuberMotion.fxInstant : KuberMotion.fastCurve.settle,
                 child: AnimatedOpacity(
                   opacity: set ? 1 : 0,
-                  duration: AhMotion.dur(context, AhMotion.fast),
+                  duration: KuberMotion.of(context, KuberMotion.fxFast),
                   child: Padding(
                     padding: EdgeInsets.only(left: compact ? 6 : 10),
                     child: Container(
@@ -271,7 +271,10 @@ class _FilterButtonState extends State<_FilterButton> {
                       decoration: BoxDecoration(
                           color: cs.onSecondaryContainer,
                           borderRadius: KuberShape.fullR),
-                      child: AhRollingText('$_last',
+                      child: AnimatedAmount(
+                          value: _last.toDouble(),
+                          format: (v) => '${v.round()}',
+                          animateIn: false,
                           style: localeFont(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -326,7 +329,7 @@ class _Segment extends StatelessWidget {
         : set
             ? cs.onSecondaryContainer
             : cs.onSurface;
-    final reduced = AhMotion.reduced(context);
+    final reduced = KuberMotion.reduced(context);
     if (compact) {
       final text = value ?? label;
       return _wrap(
@@ -358,7 +361,7 @@ class _Segment extends StatelessWidget {
       );
     }
     final content = AnimatedSwitcher(
-      duration: AhMotion.dur(context, AhMotion.fast),
+      duration: KuberMotion.of(context, KuberMotion.fxFast),
       child: Row(
         key: ValueKey('$label|$value|$set'),
         mainAxisSize: MainAxisSize.min,
@@ -418,8 +421,8 @@ class _Segment extends StatelessWidget {
   Widget _wrap(bool reduced, Widget pill) {
     if (expand) return pill;
     return AnimatedSize(
-      duration: reduced ? AhMotion.instant : AhMotion.standardCurve.settle,
-      curve: reduced ? Curves.linear : AhMotion.standardSize,
+      duration: reduced ? KuberMotion.fxInstant : KuberMotion.standardCurve.settle,
+      curve: reduced ? Curves.linear : KuberMotion.standardCurve.clamped,
       child: pill,
     );
   }

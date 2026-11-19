@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../tool_catalog.dart';
 import 'data/saved_calculation.dart';
 import 'providers/saved_calculations_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class SavedCalculationsScreen extends ConsumerStatefulWidget {
   final String? initialTool;
@@ -43,6 +45,7 @@ class _SavedCalculationsScreenState
   Future<void> _confirmDelete() async {
     final count = _selected.length;
     final confirmed = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) {
         final cs = Theme.of(ctx).colorScheme;
@@ -102,37 +105,37 @@ class _SavedCalculationsScreenState
       },
       child: Scaffold(
         backgroundColor: cs.surface,
-        body: ScrollConfiguration(
+        body: KuberHeaderPage(
+          header: _selecting
+                ? KuberAppBar(
+                    title: '${_selected.length} selected',
+                    showBack: true,
+                    closeIcon: true,
+                    floating: false,
+                    background: cs.surfaceContainer,
+                    onBack: _clearSelection,
+                    actions: [
+                      AppIconButton(
+                        icon: Icons.delete_outline_rounded,
+                        kind: AppIconButtonKind.danger,
+                        semanticLabel: 'Delete',
+                        onPressed: _confirmDelete,
+                      ),
+                    ],
+                  )
+                : const KuberAppBar(
+                    title: 'Saved Calculations',
+                    showBack: true,
+                  ),
+          body: ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
           child: CustomScrollView(
             slivers: [
-              // Selecting swaps in the one-line contextual header.
-              SliverToBoxAdapter(
-                child: _selecting
-                    ? KuberAppBar(
-                        title: '${_selected.length} selected',
-                        showBack: true,
-                        closeIcon: true,
-                        background: cs.surfaceContainer,
-                        onBack: _clearSelection,
-                        actions: [
-                          AppIconButton(
-                            icon: Icons.delete_outline_rounded,
-                            kind: AppIconButtonKind.danger,
-                            semanticLabel: 'Delete',
-                            onPressed: _confirmDelete,
-                          ),
-                        ],
-                      )
-                    : const KuberAppBar(
-                        title: 'Saved Calculations',
-                        showBack: true,
-                      ),
-              ),
+              KuberHeaderPage.sliverGap(),
               ...async.when(
                 loading: () => [
                   const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: KuberShapeLoader(size: 40)),
                   ),
                 ],
                 error: (e, _) => [
@@ -216,6 +219,7 @@ class _SavedCalculationsScreenState
               ),
             ],
           ),
+        ),
         ),
       ),
     );

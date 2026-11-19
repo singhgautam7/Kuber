@@ -11,6 +11,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../providers/permission_provider.dart';
 import '../../backups/providers/backup_provider.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 String _getNotificationsTitle(String lang) {
   switch (lang) {
@@ -325,13 +326,14 @@ class PermissionsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: KuberScrollAwayHeader(
+      body: KuberHeaderPage(
         header: KuberAppBar(
           showBack: true,
           title: context.l10n.permissionsTitle,
         ),
         body: CustomScrollView(
           slivers: [
+            KuberHeaderPage.sliverGap(),
             SliverPadding(
               padding: const EdgeInsets.symmetric(
                 horizontal: KuberSpace.screenMargin,
@@ -432,7 +434,7 @@ class PermissionsScreen extends ConsumerWidget {
                   ]),
                 ),
                 loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: KuberShapeLoader(size: 40)),
                 ),
                 error: (err, stack) => SliverFillRemaining(
                   child: Center(child: Text('Error: $err')),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,9 +11,11 @@ import '../../features/settings/providers/settings_provider.dart'
 import '../../features/history/providers/selection_provider.dart';
 import '../../features/quick_actions/widgets/add_new_sheet.dart';
 import '../../features/quick_actions/widgets/quick_actions_sheet.dart';
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
+import 'kuber_shape_loader.dart';
 
 final currentShellTabIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -38,6 +42,10 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     super.initState();
     _pageController = PageController(
       initialPage: widget.navigationShell?.currentIndex ?? 0,
+      // Never restore an old page from PageStorage on a remount: the shell
+      // branch decides the page (a stale restore showed Home under a
+      // selected More tab).
+      keepPage: false,
     );
     // Pre-warm keepAlive providers so form sheets find data in cache
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,8 +56,52 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
 
   @override
   void dispose() {
+    _staleFlagTimer?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  bool _reconcileQueued = false;
+  Timer? _staleFlagTimer;
+
+  /// The shell branch is the source of truth for the page. Once the pager is
+  /// at rest, a page that differs from the selected tab snaps to it, and a
+  /// programmatic-animation flag left over from an interrupted animation is
+  /// cleared. Cheap: one comparison after a frame, nothing while scrolling.
+  void _queueReconcile() {
+    if (_reconcileQueued) return;
+    _reconcileQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _reconcileQueued = false;
+      if (!mounted || !_pageController.hasClients) return;
+      final pos = _pageController.position;
+      if (pos.isScrollingNotifier.value) {
+        // Check again once this scroll ends.
+        void onEnd() {
+          if (pos.isScrollingNotifier.value) return;
+          pos.isScrollingNotifier.removeListener(onEnd);
+          if (mounted) _queueReconcile();
+        }
+        pos.isScrollingNotifier.addListener(onEnd);
+        return;
+      }
+      if (_isAnimatingProgrammatically) {
+        // A far-tab slide jumps next door, then animates a frame later; give
+        // it time before treating the flag as stale.
+        _staleFlagTimer ??= Timer(const Duration(milliseconds: 600), () {
+          _staleFlagTimer = null;
+          if (!mounted) return;
+          _isAnimatingProgrammatically = false;
+          _queueReconcile();
+        });
+        return;
+      }
+      final idx = widget.navigationShell?.currentIndex;
+      final page = _pageController.page?.round();
+      if (idx != null && page != null && page != idx) {
+        _pageController.jumpToPage(idx);
+      }
+    });
   }
 
   @override
@@ -212,9 +264,10 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     if (widget.navigationShell == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: KuberShapeLoader()));
     }
     final currentIndex = widget.navigationShell!.currentIndex;
+    _queueReconcile();
     if (ref.read(currentShellTabIndexProvider) != currentIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -282,10 +335,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
         backgroundColor: cs.surface,
         body: animatedContent,
         floatingActionButton: currentIndex != 3
-            ? AnimatedScale(
-                scale: (isSelectionMode || isKeyboardOpen) ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
+            ? _FabVisibility(
+                hidden: isSelectionMode || isKeyboardOpen,
                 child: KuberNavFab(
                   onTap: _onAddTapped,
                   onLongPress: _openAddMenu,
@@ -319,6 +370,33 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
         }
       },
       child: content,
+    );
+  }
+}
+
+/// Shows / hides the classic-layout FAB: scale 0.6 <-> 1 on springDefault plus
+/// a fx.fast fade (springSubtle at Subtle; Off only fades).
+class _FabVisibility extends StatelessWidget {
+  const _FabVisibility({required this.hidden, required this.child});
+  final bool hidden;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final level = KuberMotion.levelOf(context);
+    final curve = KuberMotion.spatialCurve(level, KuberMotion.defaultCurve);
+    return AnimatedOpacity(
+      opacity: hidden ? 0 : 1,
+      duration: KuberMotion.fxFast,
+      child: IgnorePointer(
+        ignoring: hidden,
+        child: AnimatedScale(
+          scale: hidden && level != MotionLevel.off ? 0.6 : 1,
+          duration: level == MotionLevel.off ? Duration.zero : curve.settle,
+          curve: curve,
+          child: child,
+        ),
+      ),
     );
   }
 }
@@ -557,7 +635,10 @@ class _NavBarItemState extends State<_NavBarItem>
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: widget.onTap,
+      onTap: () {
+        if (!widget.isSelected) KuberHaptics.tick();
+        widget.onTap();
+      },
       onLongPress: widget.onLongPress,
       child: AnimatedBuilder(
         animation: _controller,

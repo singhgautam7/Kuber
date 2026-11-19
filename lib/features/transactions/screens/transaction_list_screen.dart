@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/features/pro/trial/widgets/pro_suggestion_slot.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../advanced_history/advanced_history_entry.dart';
@@ -6,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/app_icon_button.dart';
@@ -95,6 +98,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
       if (!_filtering) setState(() => _filtering = true);
     });
     ref.listen(historyViewProvider, (prev, next) {
+      // First load: the skeleton gives way to rows that fade in (fx ~200 ms).
+      if (prev != null && prev.isLoading && !prev.hasValue && next.hasValue) {
+        _listFade.forward(from: 0);
+      }
       if (_filtering && !next.isLoading && (next.hasValue || next.hasError)) {
         setState(() => _filtering = false);
         _listFade.forward(from: 0);
@@ -147,6 +154,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                   child: HistoryFilterWidget(
                     key: TutorialStepKeys.historyQuickFilters,
                     onAdvancedTap: () => context.push('/history/filter'),
+                  ),
+                ),
+                // v7.0.0-b trial: SMS import suggestion (nothing for Pro users).
+                const SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
+                  sliver: SliverToBoxAdapter(
+                    child: ProSuggestionSlot(place: ProSuggestionPlace.history),
                   ),
                 ),
 
@@ -355,13 +369,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                                       dayTotal: group.dayTotal,
                                     );
                                   } else {
-                                    return TransactionDayCard(
+                                    // Keyed by day so rows inserted or removed
+                                    // inside one day animate, while a day
+                                    // appearing / vanishing never does.
+                                    return KeyedSubtree(
+                                      key: ValueKey(
+                                        group.date.year * 10000 +
+                                            group.date.month * 100 +
+                                            group.date.day,
+                                      ),
+                                      child: TransactionDayCard(
                                       key: groupIndex == 0
                                           ? TutorialStepKeys.historyFirstItem
                                           : null,
+                                      animateChanges: !_filtering,
                                       transactions: group.transactions,
                                       onDelete: _deleteWithUndo,
-                                      onTap: (t) => _showTransactionDetail(t),
+                                      onTap: _showTransactionDetail,
                                       onEdit: (t) => context.push(
                                         '/add-transaction',
                                         extra: t,
@@ -379,6 +403,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                                           {},
                                       transferPairAccountId: transferPairs,
                                       tagNamesMap: tagNamesMap,
+                                    ),
                                     );
                                   }
                                 },
@@ -394,13 +419,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                                 bottom: navBarBottomPadding(context),
                               ),
                               child: const Center(
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
+                                child: KuberShapeLoader(size: 24),
                               ),
                             ),
                           ),
@@ -569,6 +588,7 @@ void _confirmDeleteSelection(
 ) {
   {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(

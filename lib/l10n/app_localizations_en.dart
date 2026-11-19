@@ -2162,10 +2162,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyStoriesTitle => 'MONEY STORIES';
 
   @override
-  String get moneyStoriesEmpty =>
-      'Keep spending to see your money stories soon.';
-
-  @override
   String get bubbleWelcome => 'Welcome';
 
   @override
@@ -8882,16 +8878,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obTermsPrivacy => 'Privacy policy';
 
   @override
-  String get pathSheetTitle => 'How you got here';
+  String get pathSheetTitle => 'Quick navigation';
 
   @override
   String get pathSheetCurrent => 'You are here';
 
   @override
-  String get pathSheetHint => 'Shows the path to this page';
-
-  @override
-  String get pathSheetLongPress => 'Show path';
+  String get pathSheetHint => 'Opens quick navigation';
 
   @override
   String get setPathTip =>
@@ -9051,7 +9044,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obNotifSampleBody => 'SBI Home Loan · ₹24,350';
 
   @override
-  String get pathSheetSub => 'Tap any page to go back to it';
+  String get pathSheetSub => 'Tap any page to open it';
 
   @override
   String get pathSheetFromNotification => 'Opened from a notification';
@@ -9660,7 +9653,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateCta => 'Rate on Play Store';
 
   @override
-  String get rateRefer => 'Refer a friend';
+  String get rateRefer => 'Refer';
 
   @override
   String get rateLater => 'Maybe later';
@@ -11150,4 +11143,743 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ahdMore => 'More';
+
+  @override
+  String pathSheetShowRemaining(String n) {
+    return 'Show remaining $n pages';
+  }
+
+  @override
+  String get pathSheetShowFewer => 'Show fewer pages';
+
+  @override
+  String get pathSheetExpand => 'Expand';
+
+  @override
+  String get pathSheetCollapse => 'Collapse';
+
+  @override
+  String get motionTitle => 'Motion';
+
+  @override
+  String get motionSubtitle =>
+      'How much Kuber moves when you tap, swipe or open things';
+
+  @override
+  String get motionPreviewHint => 'Tap the card to feel this level';
+
+  @override
+  String get motionAuto => 'Auto';
+
+  @override
+  String get motionExpressive => 'Expressive';
+
+  @override
+  String get motionSubtle => 'Subtle';
+
+  @override
+  String get motionOff => 'Off';
+
+  @override
+  String get motionAutoExpressive => 'Using Expressive on this phone';
+
+  @override
+  String get motionAutoSubtle =>
+      'Using Subtle: this phone has under 4 GB of RAM';
+
+  @override
+  String get motionAutoOff => 'Using Off: Remove animations is on';
+
+  @override
+  String get motionExpressiveDesc => 'Springy and fluid. The full experience.';
+
+  @override
+  String get motionSubtleDesc => 'Short fades and small moves. No bounce.';
+
+  @override
+  String get motionOffDesc => 'No movement. Things change with a quick fade.';
+
+  @override
+  String get motionPhoneNote =>
+      'Remove animations is on in your phone settings, so Kuber uses Off.';
+
+  @override
+  String get motionOpenPhoneSettings => 'Open phone settings';
+
+  @override
+  String motionValueAuto(String level) {
+    return 'Auto ($level)';
+  }
+
+  @override
+  String get motionValuePhone => 'Off (phone setting)';
+
+  @override
+  String get hapticsTitle => 'Haptics';
+
+  @override
+  String get hapticsSub => 'Vibrate on toggles and long presses';
+
+  @override
+  String get setKwMotion =>
+      'animation animations motion movement bounce fade reduce animations';
+
+  @override
+  String get setKwHaptics => 'haptics vibration vibrate feedback touch';
+
+  @override
+  String get txnSourceLoans => 'Auto-recorded from loans';
+
+  @override
+  String get txnSourceInvestments => 'Auto-recorded from investments';
+
+  @override
+  String get txnSourceRecurring => 'Auto-recorded from recurring';
+
+  @override
+  String get txnSourceDeletedLoan => 'Auto-recorded from a deleted loan';
+
+  @override
+  String get txnSourceDeletedInvestment =>
+      'Auto-recorded from a deleted investment';
+
+  @override
+  String get txnSourceDeletedRecurring =>
+      'Auto-recorded from a deleted recurring payment';
+
+  @override
+  String txnSourceLink(String name) {
+    return 'From $name';
+  }
+
+  @override
+  String balLabelNet(String month) {
+    return '$month · Net';
+  }
+
+  @override
+  String balLabelExpense(String month) {
+    return '$month · Expense';
+  }
+
+  @override
+  String balLabelIncome(String month) {
+    return '$month · Income';
+  }
+
+  @override
+  String balCmpSpendMore(String amount) {
+    return 'Spending $amount more than last month';
+  }
+
+  @override
+  String balCmpSpendLess(String amount) {
+    return 'Spending $amount less than last month';
+  }
+
+  @override
+  String balCmpEarnMore(String amount) {
+    return 'Earnings $amount more than last month';
+  }
+
+  @override
+  String balCmpEarnLess(String amount) {
+    return 'Earnings $amount less than last month';
+  }
+
+  @override
+  String get balCmpSame => 'Same as last month';
+
+  @override
+  String get balCmpFirst => 'First month in Kuber';
+
+  @override
+  String get balCmpNoEarnLast => 'No earnings last month';
+
+  @override
+  String get balCmpNoSpendLast => 'No spending last month';
+
+  @override
+  String balA11yShowExpense(String amount) {
+    return 'Show expense, $amount';
+  }
+
+  @override
+  String balA11yShowIncome(String amount) {
+    return 'Show income, $amount';
+  }
+
+  @override
+  String get chartTitle => 'Income & expense';
+
+  @override
+  String get chartPeriod6m => '6M';
+
+  @override
+  String get chartPeriod1y => '1Y';
+
+  @override
+  String get chartPeriod6mSub => 'Last 6 months';
+
+  @override
+  String get chartPeriod1ySub => 'Last 12 months';
+
+  @override
+  String get chartModeBar => 'Bar';
+
+  @override
+  String get chartModeLine => 'Line';
+
+  @override
+  String get chartLegendOrder => 'Higher one on top';
+
+  @override
+  String chartTipSoFar(String monthYear) {
+    return '$monthYear · so far';
+  }
+
+  @override
+  String get chartTipSaved => 'Saved';
+
+  @override
+  String get chartTipOverspent => 'Overspent';
+
+  @override
+  String chartTipPace(String amount) {
+    return 'On pace: $amount spent';
+  }
+
+  @override
+  String get chartTipNoData => 'No income or expense';
+
+  @override
+  String get chartEmptyTitle => 'No income or expense yet';
+
+  @override
+  String get chartEmptyBody =>
+      'Months appear here as you add transactions. Transfers are not counted.';
+
+  @override
+  String get chartSingle => 'Only one month so far. Older months show up here.';
+
+  @override
+  String chartA11yColumn(
+    String month,
+    String income,
+    String expense,
+    String kind,
+    String amount,
+  ) {
+    return '$month: income $income, expense $expense, $kind $amount';
+  }
+
+  @override
+  String chartA11yNoData(String month) {
+    return '$month: no income or expense';
+  }
+
+  @override
+  String chartA11yOne(String month, String series, String amount) {
+    return '$month: $series $amount';
+  }
+
+  @override
+  String get chartBucketDay => 'Day';
+
+  @override
+  String get chartBucketWeek => 'Week';
+
+  @override
+  String get chartBucketMonth => 'Month';
+
+  @override
+  String get chartBucketQuarter => 'Quarter';
+
+  @override
+  String get chartBucketYear => 'Year';
+
+  @override
+  String get trialRem3Title => '3 days left in your Pro trial';
+
+  @override
+  String trialRem3NotifBody(String weekday, String date) {
+    return 'Your trial ends on $weekday, $date. Nothing is deleted. See what you haven\'t tried yet.';
+  }
+
+  @override
+  String get trialLastTitle => 'Last day of your Pro trial';
+
+  @override
+  String get trialLastBody =>
+      'Pro features go back to free limits at midnight. Your data stays as it is.';
+
+  @override
+  String get trialSheetTitle => 'Kuber Pro is yours for 14 days';
+
+  @override
+  String get trialSheetBody =>
+      'Every Pro feature is unlocked. No payment needed.';
+
+  @override
+  String trialSheetUntil(String date) {
+    return 'Free until $date';
+  }
+
+  @override
+  String get trialSheetNote =>
+      'When it ends, your data stays. Pro features go back to their free limits.';
+
+  @override
+  String get trialSheetOffers => 'What Kuber Pro offers';
+
+  @override
+  String get trialSheetOffersCollapsed => 'What Kuber Pro offers, collapsed';
+
+  @override
+  String get trialSheetOffersExpanded => 'What Kuber Pro offers, expanded';
+
+  @override
+  String get trialSheetCta => 'Start exploring';
+
+  @override
+  String get trialSheetSeePro => 'See Kuber Pro';
+
+  @override
+  String get trialRestoredTitle => 'Your Kuber Pro trial continues';
+
+  @override
+  String trialRestoredUntil(String n, String date) {
+    return '$n days left · Free until $date';
+  }
+
+  @override
+  String get trialUsedTitle =>
+      'Your free trial was already used on this phone or backup';
+
+  @override
+  String get trialUsedBody =>
+      'Your data is all here, and Kuber keeps working free.';
+
+  @override
+  String get commonNotNow => 'Not now';
+
+  @override
+  String get trialClaimTitle => 'Claim 14 days of Pro, free';
+
+  @override
+  String get trialClaimBody =>
+      'New in Kuber 7.0. Try every Pro feature. No payment, nothing to cancel.';
+
+  @override
+  String get trialClaimCta => 'Claim';
+
+  @override
+  String get proClaimTitle => 'Try Pro free for 14 days';
+
+  @override
+  String get proClaimBody => 'One time, no payment, nothing to cancel.';
+
+  @override
+  String get proClaimCta => 'Claim 14 days of Pro, free';
+
+  @override
+  String get proOrPlan => 'Or choose a plan';
+
+  @override
+  String trialBadge(String n) {
+    return 'Pro trial · $n days left';
+  }
+
+  @override
+  String get trialBadgeLast => 'Pro trial · last day';
+
+  @override
+  String trialSuggOverline(String n) {
+    return 'Pro trial · $n of 10 tried';
+  }
+
+  @override
+  String get trialSuggSeeAll => 'See all';
+
+  @override
+  String get trialDismiss => 'Dismiss';
+
+  @override
+  String get checklistTitle => 'Try Kuber Pro';
+
+  @override
+  String checklistSub(String n, String d) {
+    return '$n of 10 tried · $d days left';
+  }
+
+  @override
+  String get checklistHint => 'Each one ticks itself when you use it.';
+
+  @override
+  String checklistTried(String what) {
+    return 'Tried · $what';
+  }
+
+  @override
+  String checklistWhere(String place) {
+    return 'In $place';
+  }
+
+  @override
+  String get checklistTry => 'Try';
+
+  @override
+  String proTrialStatus(String n) {
+    return 'Pro trial · $n days left';
+  }
+
+  @override
+  String proTrialEnds(String date, String time) {
+    return 'Ends $date, $time';
+  }
+
+  @override
+  String proTrialTried(String n) {
+    return 'You\'ve tried $n of 10 Pro features';
+  }
+
+  @override
+  String get proKeepTitle => 'Keep Pro after your trial';
+
+  @override
+  String proKeepBody(String date) {
+    return 'Pick a plan now or any time before $date. Pro starts when you buy, and the rest of the trial ends then.';
+  }
+
+  @override
+  String proKeepCta(String plan, String price) {
+    return 'Keep Pro · $plan $price';
+  }
+
+  @override
+  String get proKeepNote =>
+      'Managed by Google Play. Nothing is charged unless you pick a plan.';
+
+  @override
+  String get trialFeatAsk => 'Ask Kuber';
+
+  @override
+  String get trialFeatSms => 'Import from SMS';
+
+  @override
+  String get trialFeatDash => 'Custom dashboards';
+
+  @override
+  String get trialFeatRem => 'Reminders';
+
+  @override
+  String get trialFeatTheme => 'Every theme';
+
+  @override
+  String get trialFeatNotes => 'Kuber Notes';
+
+  @override
+  String get trialFeatAdv => 'Advanced analytics';
+
+  @override
+  String get trialFeatBackup => 'Automatic backups';
+
+  @override
+  String get trialFeatCards => 'Kuber Cards';
+
+  @override
+  String get trialFeatCurrency => 'Multi-currency';
+
+  @override
+  String get trialPlaceHome => 'Home';
+
+  @override
+  String get trialPlaceHistory => 'History';
+
+  @override
+  String get trialPlaceAnalytics => 'Analytics';
+
+  @override
+  String get trialPlaceMore => 'More';
+
+  @override
+  String get trialPlaceSettings => 'Settings';
+
+  @override
+  String get trialPlaceAccounts => 'Accounts';
+
+  @override
+  String get trialPlaceLook => 'Look and feel';
+
+  @override
+  String get trialUsedAsk => 'question asked';
+
+  @override
+  String get trialUsedSms => 'SMS imported';
+
+  @override
+  String get trialUsedDash => 'dashboard built';
+
+  @override
+  String get trialUsedRem => 'reminder set';
+
+  @override
+  String get trialUsedTheme => 'theme applied';
+
+  @override
+  String get trialUsedNotes => 'note written';
+
+  @override
+  String get trialUsedAdv => 'opened';
+
+  @override
+  String get trialUsedBackup => 'backup made';
+
+  @override
+  String get trialUsedCards => 'card added';
+
+  @override
+  String get trialUsedCurrency => 'currency added';
+
+  @override
+  String get trialSuggAskTitle => 'Ask Kuber anything';
+
+  @override
+  String get trialSuggAskBody =>
+      'Ask about your spending in plain words, as often as you like.';
+
+  @override
+  String get trialSuggAskCta => 'Ask';
+
+  @override
+  String get trialSuggSmsTitle => 'Import your bank SMS';
+
+  @override
+  String get trialSuggSmsBody =>
+      'Pro reads every bank SMS on this phone, with no weekly limit.';
+
+  @override
+  String get trialSuggSmsCta => 'Import now';
+
+  @override
+  String get trialSuggDashTitle => 'Build a dashboard';
+
+  @override
+  String get trialSuggDashBody =>
+      'Pick the charts you care about and keep them on one page.';
+
+  @override
+  String get trialSuggDashCta => 'Build one';
+
+  @override
+  String get trialSuggRemTitle => 'Set a bill reminder';
+
+  @override
+  String get trialSuggRemBody =>
+      'Get a nudge before rent, EMIs and bills are due.';
+
+  @override
+  String get trialSuggRemCta => 'Set one';
+
+  @override
+  String get trialSuggThemeTitle => 'Try a new theme';
+
+  @override
+  String get trialSuggThemeBody => 'Pick from all 16 accents and every theme.';
+
+  @override
+  String get trialSuggThemeCta => 'See themes';
+
+  @override
+  String get trialSuggNotesTitle => 'Write a Kuber Note';
+
+  @override
+  String get trialSuggNotesBody => 'Quick sums and lists, with no note limit.';
+
+  @override
+  String get trialSuggNotesCta => 'New note';
+
+  @override
+  String get trialSuggAdvTitle => 'Open Advanced analytics';
+
+  @override
+  String get trialSuggAdvBody =>
+      'See trends, filters and your money health score.';
+
+  @override
+  String get trialSuggAdvCta => 'Open';
+
+  @override
+  String get trialSuggBackupTitle => 'Turn on automatic backups';
+
+  @override
+  String get trialSuggBackupBody =>
+      'Kuber saves a backup every day to a folder you choose.';
+
+  @override
+  String get trialSuggBackupCta => 'Turn on';
+
+  @override
+  String get trialSuggCardsTitle => 'Add your cards';
+
+  @override
+  String get trialSuggCardsBody =>
+      'Keep card limits and bill dates in one place. Pro has no 2-card limit.';
+
+  @override
+  String get trialSuggCardsCta => 'Add a card';
+
+  @override
+  String get trialSuggCurrencyTitle => 'Add another currency';
+
+  @override
+  String get trialSuggCurrencyBody =>
+      'Track a USD or AED account next to your rupee ones.';
+
+  @override
+  String get trialSuggCurrencyCta => 'Add one';
+
+  @override
+  String trialRem3CardBody(String date, String n) {
+    return 'Your trial ends on $date. $n Pro features are still to try.';
+  }
+
+  @override
+  String get trialRem3Cta => 'See what\'s left';
+
+  @override
+  String get trialLastCta => 'What changes';
+
+  @override
+  String get trialKeepPro => 'Keep Pro';
+
+  @override
+  String get trialEndTitle => 'Your Pro trial has ended';
+
+  @override
+  String get trialEndBody => 'Here\'s what you did with Pro in 14 days.';
+
+  @override
+  String get trialEndStatSms => 'SMS imported';
+
+  @override
+  String get trialEndStatDash => 'dashboards built';
+
+  @override
+  String get trialEndStatAsk => 'questions to Ask Kuber';
+
+  @override
+  String get trialEndStatNotes => 'notes written';
+
+  @override
+  String get trialEndStatRem => 'reminders set';
+
+  @override
+  String get trialEndStatBackup => 'backups made';
+
+  @override
+  String get trialEndLimits => 'Back to free limits';
+
+  @override
+  String get trialEndKept =>
+      'Your dashboards, notes and imported transactions are all kept. Pro features work again the moment you get Pro.';
+
+  @override
+  String trialEndCta(String plan, String price) {
+    return 'Get Pro · $plan $price';
+  }
+
+  @override
+  String setProTrialSub(String n, String date) {
+    return 'Pro trial · $n days left, ends $date';
+  }
+
+  @override
+  String setProEndedSub(String date) {
+    return 'Free · trial ended $date';
+  }
+
+  @override
+  String get proManagePlan => 'Plan';
+
+  @override
+  String get proManagePlanFree => 'Free';
+
+  @override
+  String get proManageTrial => 'Pro trial';
+
+  @override
+  String get proManageStarted => 'Started';
+
+  @override
+  String get proManageEnds => 'Ends';
+
+  @override
+  String get proManageEnded => 'Ended';
+
+  @override
+  String get proManageTried => 'Features tried';
+
+  @override
+  String proManageTriedValue(String n) {
+    return '$n of 10';
+  }
+
+  @override
+  String get proManageEndedTitle => 'Free · trial ended';
+
+  @override
+  String proManageEndedBody(String date) {
+    return 'Your 14 days of Pro ended on $date.';
+  }
+
+  @override
+  String get proManageKeep => 'Keep Pro: see plans';
+
+  @override
+  String get proManageGet => 'Get Pro: see plans';
+
+  @override
+  String get chartPeriod7d => '7D';
+
+  @override
+  String get chartPeriod7dSub => 'Last 7 days';
+
+  @override
+  String get floatingHeaderTitle => 'Floating header';
+
+  @override
+  String get floatingHeaderSubtitle =>
+      'The header turns into a pill when you scroll';
+
+  @override
+  String get floatingHeaderSwitchOn => 'On';
+
+  @override
+  String get floatingHeaderSwitchOff =>
+      'Off · the header scrolls away with the page';
+
+  @override
+  String get floatingHeaderSection => 'Show the pill';
+
+  @override
+  String get floatingHeaderAlways => 'Always';
+
+  @override
+  String get floatingHeaderScrollUp => 'When scrolling up';
+
+  @override
+  String get floatingHeaderScrollStop => 'When scrolling stops';
+
+  @override
+  String get floatingHeaderOff => 'Off';
+
+  @override
+  String floatingHeaderPreviewLabel(String option) {
+    return '$option, preview of the header';
+  }
+
+  @override
+  String get setKwFloatingHeader =>
+      'floating header pill sticky top bar scroll hide app bar title bar';
 }

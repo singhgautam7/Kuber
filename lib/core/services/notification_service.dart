@@ -508,8 +508,9 @@ class NotificationService {
     required String body,
     required DateTime when,
     String? payload,
+    bool askPermission = true,
   }) async {
-    await maybeRequestPermissionOnce();
+    if (askPermission) await maybeRequestPermissionOnce();
     _ensureTimezones();
 
     final delay = when.difference(DateTime.now());

@@ -1,6 +1,8 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import '../../../shared/widgets/info_table.dart';
 import '../../../shared/widgets/kuber_progress.dart';
 import '../../../shared/widgets/kuber_list.dart';
@@ -18,6 +20,7 @@ import '../../../shared/widgets/sheet_button_section.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import 'budget_history_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final int budgetId;
@@ -81,6 +84,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                 icon: Icons.history_rounded,
                 onPressed: () {
                   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
                     context: context,
                     isScrollControlled: true,
                     useSafeArea: true,
@@ -139,8 +143,10 @@ class BudgetDetailsSheet extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(
-                              fmt.formatCurrency(p.spent),
+                            AnimatedAmount(
+                              value: p.spent.toDouble(),
+                              animateIn: false,
+                              format: (v) => fmt.formatCurrency(v),
                               style: tt.headlineMedium!.copyWith(
                                 color: cs.onSurface,
                               ),
@@ -231,7 +237,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: KuberShapeLoader(size: 40)),
       error: (err, _) =>
           Center(child: Text('Error loading budget details: $err')),
     );
@@ -240,6 +246,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
   void _confirmDeleteBudget(BuildContext context, WidgetRef ref, int id) {
     final cs = Theme.of(context).colorScheme;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(

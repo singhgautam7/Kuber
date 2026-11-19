@@ -119,7 +119,11 @@ class UpcomingDayCell extends StatelessWidget {
                     const SizedBox(height: 4),
                     SizedBox(
                       height: 10,
-                      child: Row(
+                      // scaleDown: three dots + "+N" can exceed a narrow cell
+                      // by a pixel at some text sizes.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           for (final (i, d) in dots.take(3).indexed) ...[
@@ -140,7 +144,7 @@ class UpcomingDayCell extends StatelessWidget {
                             ),
                           ],
                         ],
-                      ),
+                      )),
                     ),
                   ],
                 ),

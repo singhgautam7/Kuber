@@ -1,8 +1,8 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/kuber_progress.dart';
-import '../../../core/models/overflow_config.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +36,7 @@ import '../../history/providers/history_filter_provider.dart';
 import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../categories/widgets/category_widgets.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 final categorySpendBreakdownProvider =
     FutureProvider<
@@ -156,10 +157,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
 
     return Scaffold(
-      // Board 3.16: Add Category is the FAB; Add Group is in the overflow.
+      // Add Category is the main FAB; Add Group is the secondary FAB on its
+      // left (user review, v7.0.0; it was in the overflow).
       floatingActionButton: KuberExtendedFab(
         icon: Icons.add_rounded,
         label: context.l10n.addCategory,
+        secondaryIcon: Icons.create_new_folder_outlined,
+        secondaryLabel: context.l10n.addGroup,
+        onSecondary: () => _showAddGroupDialog(context),
         onPressed: () => context.push(
           '/category/add',
           extra: const CategoryRouteArgs(returnToCategoryPicker: false),
@@ -175,17 +180,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         behavior: HitTestBehavior.opaque,
         onTap: () => FocusScope.of(context).unfocus(),
         child: categoriesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: KuberShapeLoader(size: 40)),
           error: (e, _) =>
               Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
           data: (categories) {
             final groups = groupsAsync.valueOrNull ?? [];
 
-            return CustomScrollView(
-              slivers: [
-                // App bar
-                SliverToBoxAdapter(
-                  child: KuberAppBar(
+            return KuberHeaderPage(
+ header: KuberAppBar(
                     showBack: true,
                     title: context.l10n.menuCategories,
                     infoConfig: InfoConstants.categories,
@@ -194,17 +196,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       hint: context.l10n.searchCategoriesHint,
                       onChanged: (v) => setState(() => _query = v),
                     ),
-                    overflowConfig: KuberOverflowConfig(
-                      items: [
-                        KuberOverflowItem(
-                          icon: Icons.create_new_folder_outlined,
-                          label: context.l10n.addGroup,
-                          onTap: () => _showAddGroupDialog(context),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
+ body: CustomScrollView(
+              slivers: [
+                // App bar
+                KuberHeaderPage.sliverGap(),
 
                 // Page header
 
@@ -244,7 +240,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                           ),
                           child: SizedBox(
                             height: 180,
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: KuberShapeLoader(size: 40)),
                           ),
                         ),
                         error: (_, __) => const SizedBox.shrink(),
@@ -480,7 +476,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   child: SizedBox(height: KuberExtendedFab.clearance),
                 ),
               ],
-            );
+            ),
+ );
           },
         ),
       ),
@@ -517,6 +514,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     CategoryGroup group,
   ) {
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -564,6 +562,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     int? editingGroupId,
   ) {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
@@ -651,6 +650,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     CategoryGroup group,
   ) {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
@@ -771,7 +771,7 @@ class _CategoryKpisGrid extends ConsumerWidget {
         ),
         loading: () => const SizedBox(
           height: 150,
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: KuberShapeLoader(size: 40)),
         ),
         error: (e, st) => const Text('Error loading KPIs'),
       ),
@@ -1135,7 +1135,9 @@ class _BudgetStatusSection extends ConsumerWidget {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
                     context: context,
+                    useRootNavigator: true,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                     builder: (context) => BudgetDetailsSheet(
@@ -1226,6 +1228,7 @@ void showCategoryDetails(
       : context.l10n.expenseLabel;
 
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -1321,6 +1324,7 @@ void _confirmDelete(BuildContext context, WidgetRef ref, Category cat) async {
 
   if (hasTxns) {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -1346,6 +1350,7 @@ void _confirmDelete(BuildContext context, WidgetRef ref, Category cat) async {
     );
   } else {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(

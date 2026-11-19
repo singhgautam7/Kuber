@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -9,7 +8,7 @@ import '../../../../shared/widgets/timed_snackbar.dart';
 import '../../models/ah_view.dart';
 import '../../providers/ah_providers.dart';
 import '../common/ah_common.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/motion/motion.dart';
 import 'ah_chart_builder.dart';
 import 'ah_chart_card.dart';
 
@@ -74,6 +73,7 @@ class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
     if (from == to) return;
     final specs = List.of(ref.read(ahViewProvider).charts);
     final exp = List.of(specs)..insert(to, specs.removeAt(from));
+    KuberHaptics.tick();
     setState(() {
       _ids.insert(to, _ids.removeAt(from));
       _expected = exp;
@@ -138,7 +138,7 @@ class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
               padding: EdgeInsets.only(
                   bottom: specs.isEmpty ? 0 : KuberSpace.md),
               child: AnimatedSwitcher(
-              duration: AhMotion.dur(context, AhMotion.fast),
+              duration: KuberMotion.of(context, KuberMotion.fxFast),
               child: specs.length >= kAhMaxCharts
                   ? Padding(
                       key: const ValueKey('full'),
@@ -158,6 +158,7 @@ class _AhChartsAreaState extends ConsumerState<AhChartsArea> {
           ),
           SliverReorderableList(
             itemCount: specs.length,
+            onReorderStart: (_) => KuberHaptics.longPress(),
             onReorderItem: _move,
             proxyDecorator: (child, index, anim) => AnimatedBuilder(
               animation: anim,
@@ -222,7 +223,7 @@ class _Handle extends StatelessWidget {
     return Semantics(
       label: context.l10n.ahdMoveUp,
       child: AnimatedContainer(
-        duration: AhMotion.dur(context, AhMotion.fast),
+        duration: KuberMotion.of(context, KuberMotion.fxFast),
         width: 32,
         height: 40,
         decoration: BoxDecoration(
@@ -284,10 +285,7 @@ class _AddButton extends StatelessWidget {
               color: cs.surfaceContainer,
               radius: BorderRadius.circular(26),
               height: h,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                onTap();
-              },
+              onTap: onTap,
               child: content,
             ),
     );

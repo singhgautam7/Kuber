@@ -40,7 +40,7 @@ class QuickFilterChipsRow extends StatelessWidget {
   String _typeLabel(BuildContext context, FilterType t) {
     switch (t) {
       case FilterType.all:
-        return context.l10n.filterAll;
+        return context.l10n.msRecRangeAll;
       case FilterType.today:
         return context.l10n.filterToday;
       case FilterType.thisWeek:

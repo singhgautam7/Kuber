@@ -161,15 +161,13 @@ class _SplitCalculatorScreenState extends ConsumerState<SplitCalculatorScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(header: KuberAppBar(
               title: 'Split Calculator',
               showBack: true,
               infoConfig: InfoConstants.splitCalculator,
-            ),
-          ),
+            ), body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               KuberSpace.lg,
@@ -417,7 +415,7 @@ class _SplitCalculatorScreenState extends ConsumerState<SplitCalculatorScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

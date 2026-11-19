@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,7 @@ import '../../../core/utils/fuzzy_category_matcher.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class QuickAddWidget extends ConsumerStatefulWidget {
   const QuickAddWidget({super.key});
@@ -165,6 +167,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
   void _showNoAccountDialog(String? hint) {
     final l10n = context.l10n;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
@@ -324,10 +327,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                                 key: const ValueKey('spinner'),
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: cs.onPrimary,
-                                ),
+                                child: KuberShapeLoader(size: 20, color: cs.onPrimary),
                               )
                             : Icon(
                                 key: const ValueKey('icon'),

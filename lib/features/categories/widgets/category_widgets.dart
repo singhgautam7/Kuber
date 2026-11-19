@@ -25,6 +25,7 @@
 
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -111,8 +112,11 @@ class CategorySpendHero extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            maskAmount(fmt.formatCurrency(total), masked),
+          AnimatedAmount(
+            value: total.toDouble(),
+            animateIn: false,
+            isPrivate: masked,
+            format: (v) => fmt.formatCurrency(v),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: tt.headlineMedium!.copyWith(color: cs.onSurface),

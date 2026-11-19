@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:kuber/features/advanced_history/models/ah_view.dart';
 import 'package:kuber/features/advanced_history/query/query_parser.dart';
 import 'package:kuber/features/advanced_history/services/ah_engine.dart';
+import 'package:kuber/features/advanced_history/services/ah_jobs.dart';
 
 import '../../../helpers/isar_test_helper.dart';
 import '../data/ah_fixture.dart';

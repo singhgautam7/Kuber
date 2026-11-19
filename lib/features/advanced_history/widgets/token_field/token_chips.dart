@@ -8,7 +8,7 @@ import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../query/query_ast.dart';
 import '../../query/query_labels.dart';
-import '../common/ah_motion.dart';
+import 'package:kuber/core/motion/motion.dart';
 
 /// Dashed rounded-rect border (implied group, ghost bracket).
 class DashedBorderPainter extends CustomPainter {
@@ -64,7 +64,6 @@ class _TokenEntranceState extends State<TokenEntrance>
     vsync: this,
     duration: const Duration(milliseconds: 600),
   );
-  late final AhSpringCurve _curve = AhSpringCurve(AhMotion.expressiveFastSpatial);
   bool _started = false;
 
   @override
@@ -78,11 +77,12 @@ class _TokenEntranceState extends State<TokenEntrance>
     super.didChangeDependencies();
     if (!_started && widget.animate) {
       _started = true;
-      if (AhMotion.reduced(context)) {
+      if (KuberMotion.levelOf(context) == MotionLevel.off) {
         _c.value = 1;
       } else {
         _c.duration = Duration(
-            milliseconds: math.max(600, _curve.settle.inMilliseconds));
+            milliseconds:
+                math.max(600, KuberMotion.fastCurve.settle.inMilliseconds));
         _c.forward();
       }
     }
@@ -96,21 +96,23 @@ class _TokenEntranceState extends State<TokenEntrance>
 
   @override
   Widget build(BuildContext context) {
-    final reduced = AhMotion.reduced(context);
+    final level = KuberMotion.levelOf(context);
+    final reduced = level == MotionLevel.off;
+    final curve = KuberMotion.spatialCurve(level, KuberMotion.fastCurve);
     return AnimatedScale(
-      scale: widget.removing && !reduced ? 0.85 : 1,
-      duration: AhMotion.fast,
-      curve: AhMotion.decelerate,
+      scale: widget.removing && !reduced ? 0.8 : 1,
+      duration: KuberMotion.fxInstant,
+      curve: KuberMotion.curveEffects,
       child: AnimatedOpacity(
         opacity: widget.removing ? 0 : 1,
-        duration: reduced ? AhMotion.instant : AhMotion.fast,
-        curve: AhMotion.decelerate,
+        duration: KuberMotion.fxInstant,
+        curve: KuberMotion.curveEffects,
         child: AnimatedBuilder(
           animation: _c,
           child: widget.child,
           builder: (context, child) {
             final t = _c.value;
-            final s = reduced ? 1.0 : 0.85 + 0.15 * _curve.transform(t);
+            final s = reduced ? 1.0 : 0.85 + 0.15 * curve.transform(t);
             return Transform.scale(scale: s, child: child);
           },
         ),
@@ -183,8 +185,8 @@ class TokenChip extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: AnimatedContainer(
-          duration: AhMotion.fast,
-          curve: AhMotion.decelerate,
+          duration: KuberMotion.fxFast,
+          curve: KuberMotion.curveEffects,
           constraints: const BoxConstraints(minHeight: 32),
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
@@ -246,7 +248,7 @@ class NotLabel extends StatelessWidget {
       label: 'not',
       excludeSemantics: true,
       child: AnimatedContainer(
-        duration: AhMotion.fast,
+        duration: KuberMotion.fxFast,
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         decoration: BoxDecoration(
           color: highlight ? cs.primary : cs.errorContainer,
@@ -297,7 +299,7 @@ class JoinerChip extends StatelessWidget {
           child: Center(
             widthFactor: 1,
             child: AnimatedContainer(
-              duration: AhMotion.fast,
+              duration: KuberMotion.fxFast,
               height: 24,
               padding: const EdgeInsets.symmetric(horizontal: 7),
               decoration: BoxDecoration(
@@ -311,7 +313,7 @@ class JoinerChip extends StatelessWidget {
               child: Center(
                 widthFactor: 1,
                 child: AnimatedSwitcher(
-                  duration: AhMotion.instant,
+                  duration: KuberMotion.fxInstant,
                   child: Text(
                     word,
                     key: ValueKey(word),
@@ -359,7 +361,7 @@ class BracketToken extends StatelessWidget {
       style: monoFont(fontSize: 14, fontWeight: FontWeight.w600, color: fg),
     );
     final box = AnimatedContainer(
-      duration: AhMotion.fast,
+      duration: KuberMotion.fxFast,
       height: 24,
       constraints: const BoxConstraints(minWidth: 18),
       padding: const EdgeInsets.symmetric(horizontal: 5),

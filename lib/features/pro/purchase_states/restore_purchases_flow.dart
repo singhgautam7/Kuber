@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import '../paywall/pro_state.dart';
 import 'purchase_failure_snackbar.dart';
 import '../services/billing_diagnostics.dart';
 import '../services/purchase_service.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Tracks whether a restore operation has failed (timed out, errored, or returned
 /// "No purchase found") in the current app session. Used by the paywall screen
@@ -39,13 +41,14 @@ Future<void> restorePurchases(
   if (!context.mounted) return;
 
   showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     barrierDismissible: false,
     builder: (_) => const Center(
       child: SizedBox(
         width: 32,
         height: 32,
-        child: CircularProgressIndicator(strokeWidth: 3),
+        child: KuberShapeLoader(size: 32),
       ),
     ),
   );
@@ -199,6 +202,7 @@ void showPlayStoreCacheHelpDialog(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
 
   showDialog<void>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       shape: RoundedRectangleBorder(

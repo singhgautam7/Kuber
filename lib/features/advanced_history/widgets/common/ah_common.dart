@@ -2,17 +2,17 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/models/info_config.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/l10n_ext.dart';
 import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../../../shared/widgets/kuber_shape_loader.dart';
 import '../../../categories/data/category.dart';
 import '../../models/ah_view.dart';
 import '../../query/query_ast.dart';
-import 'ah_motion.dart';
+import 'package:kuber/core/motion/motion.dart';
 
 // Labels, icons and small widgets shared by the Advanced History dashboard.
 
@@ -239,71 +239,10 @@ class AhSheetIntro extends StatelessWidget {
 KuberInfoConfig ahInfoConfig(String title, List<String> paragraphs) =>
     KuberInfoConfig(title: title, description: paragraphs.join('\n\n'));
 
-/// A digit-roll text (old digit up and out, new up and in, 300 ms
-/// easeOutCubic, tabular). Position is counted from the end so a new leading
-/// digit appears without rolling the others. Reduced motion: plain text.
-class AhRollingText extends StatelessWidget {
-  const AhRollingText(this.text, {super.key, required this.style});
-  final String text;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = style.copyWith(fontFeatures: kAhTabular);
-    if (AhMotion.reduced(context)) {
-      return Text(text, style: s, maxLines: 1);
-    }
-    final chars = text.runes.map(String.fromCharCode).toList();
-    return Semantics(
-      label: text,
-      excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < chars.length; i++)
-            _RollChar(
-                key: ValueKey('r${chars.length - i}'),
-                char: chars[i],
-                style: s),
-        ],
-      ),
-    );
-  }
-}
-
-class _RollChar extends StatelessWidget {
-  const _RollChar({super.key, required this.char, required this.style});
-  final String char;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRect(
-      child: AnimatedSwitcher(
-        duration: AhMotion.digitRoll,
-        switchInCurve: AhMotion.decelerate,
-        switchOutCurve: AhMotion.decelerate,
-        transitionBuilder: (child, anim) {
-          final incoming = child.key == ValueKey(char);
-          final slide = Tween<Offset>(
-            begin: incoming ? const Offset(0, 0.7) : const Offset(0, -0.7),
-            end: Offset.zero,
-          ).animate(anim);
-          return FadeTransition(
-            opacity: anim,
-            child: SlideTransition(position: slide, child: child),
-          );
-        },
-        child: Text(char, key: ValueKey(char), style: style, maxLines: 1),
-      ),
-    );
-  }
-}
-
 /// Shows nothing until [delay] has passed (skeletons only appear after
 /// 150 ms), then fades in.
 class AhDelayed extends StatefulWidget {
-  const AhDelayed({super.key, required this.child, this.delay = AhMotion.fast});
+  const AhDelayed({super.key, required this.child, this.delay = KuberMotion.fxFast});
   final Widget child;
   final Duration delay;
 
@@ -332,19 +271,19 @@ class _AhDelayedState extends State<AhDelayed> {
   @override
   Widget build(BuildContext context) => AnimatedOpacity(
         opacity: _show ? 1 : 0,
-        duration: AhMotion.dur(context, AhMotion.fast),
+        duration: KuberMotion.of(context, KuberMotion.fxFast),
         child: _show ? widget.child : const SizedBox.shrink(),
       );
 }
 
-/// Fades (and rises 8 dp) its child in once, after [delay]. Reduced motion:
-/// a 90 ms fade only. [sliver] wraps the child in a sliver fade.
+/// Fades (and rises 8 dp) its child in once, after [delay]. Subtle: no delay,
+/// rises 4 dp. Off: a 90 ms fade only.
 class AhFadeIn extends StatefulWidget {
   const AhFadeIn({
     super.key,
     required this.child,
     this.delay = Duration.zero,
-    this.duration = AhMotion.fast,
+    this.duration = KuberMotion.fxFast,
     this.shift = 8,
   });
   final Widget child;
@@ -372,10 +311,12 @@ class _AhFadeInState extends State<AhFadeIn>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    final reduced = AhMotion.reduced(context);
-    final total = reduced
-        ? AhMotion.instant
-        : widget.delay + widget.duration;
+    final level = KuberMotion.levelOf(context);
+    final total = switch (level) {
+      MotionLevel.off => KuberMotion.fxInstant,
+      MotionLevel.subtle => widget.duration,
+      MotionLevel.expressive => widget.delay + widget.duration,
+    };
     _c.duration = total;
     if (total.inMilliseconds == 0) {
       _c.value = 1;
@@ -392,20 +333,29 @@ class _AhFadeInState extends State<AhFadeIn>
 
   @override
   Widget build(BuildContext context) {
-    final reduced = AhMotion.reduced(context);
-    final total = reduced ? AhMotion.instant : widget.delay + widget.duration;
-    final start = reduced || total.inMilliseconds == 0
+    final level = KuberMotion.levelOf(context);
+    final expressive = level == MotionLevel.expressive;
+    final total = switch (level) {
+      MotionLevel.off => KuberMotion.fxInstant,
+      MotionLevel.subtle => widget.duration,
+      MotionLevel.expressive => widget.delay + widget.duration,
+    };
+    final start = !expressive || total.inMilliseconds == 0
         ? 0.0
         : widget.delay.inMilliseconds / total.inMilliseconds;
     final curve = CurvedAnimation(
-        parent: _c, curve: Interval(start, 1, curve: AhMotion.decelerate));
+        parent: _c, curve: Interval(start, 1, curve: KuberMotion.curveEffects));
     return AnimatedBuilder(
       animation: curve,
       child: widget.child,
       builder: (context, child) => Opacity(
         opacity: curve.value,
         child: Transform.translate(
-          offset: Offset(0, reduced ? 0 : (1 - curve.value) * widget.shift),
+          offset: Offset(
+              0,
+              level == MotionLevel.off
+                  ? 0
+                  : (1 - curve.value) * widget.shift * (expressive ? 1 : .5)),
           child: child,
         ),
       ),
@@ -441,8 +391,8 @@ class AhPill extends StatelessWidget {
       button: onTap != null,
       label: semanticLabel,
       child: AnimatedContainer(
-        duration: AhMotion.dur(context, AhMotion.fast),
-        curve: AhMotion.decelerate,
+        duration: KuberMotion.of(context, KuberMotion.fxFast),
+        curve: KuberMotion.curveEffects,
         height: height,
         decoration:
             BoxDecoration(color: color, borderRadius: radius, border: border),
@@ -453,7 +403,7 @@ class AhPill extends StatelessWidget {
             onTap: onTap == null
                 ? null
                 : () {
-                    HapticFeedback.selectionClick();
+                    KuberHaptics.tick();
                     onTap!();
                   },
             child: Padding(padding: padding, child: child),
@@ -525,3 +475,14 @@ List<String> ahExampleCategories(List<Category> all) {
 }
 
 final _exampleSeed = DateTime.now().microsecondsSinceEpoch;
+
+/// The small loader under a paginated list while the next page loads.
+class AhLoadMoreFooter extends StatelessWidget {
+  const AhLoadMoreFooter({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.all(KuberSpace.lg),
+        child: Center(child: KuberShapeLoader(size: 24)),
+      );
+}

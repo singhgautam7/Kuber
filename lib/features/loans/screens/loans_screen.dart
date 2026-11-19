@@ -2,6 +2,9 @@
 // EMI; Active rows with progress; Closed collapsed; Add loan.
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/list_motion.dart';
+import '../../../core/motion/motion.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,6 +29,7 @@ import '../data/loan.dart';
 import '../domain/loan_engine.dart';
 import '../providers/loan_provider.dart';
 import '../widgets/loan_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class LoansScreen extends ConsumerStatefulWidget {
   const LoansScreen({super.key});
@@ -35,6 +39,7 @@ class LoansScreen extends ConsumerStatefulWidget {
 }
 
 class _LoansScreenState extends ConsumerState<LoansScreen> {
+  final _listMotion = ListMotion();
   bool _closedOpen = false;
 
   @override
@@ -76,12 +81,12 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
         onPressed: () => context.push('/loans/add'),
       ),
       floatingActionButtonLocation: kuberFabLocation,
-      body: CustomScrollView(slivers: [
-        SliverToBoxAdapter(
-          child: KuberAppBar(showBack: true, title: l.loansTitle, infoConfig: InfoConstants.loans),
-        ),
+      body: KuberHeaderPage(
+ header: KuberAppBar(showBack: true, title: l.loansTitle, infoConfig: InfoConstants.loans),
+ body: CustomScrollView(slivers: [
+        KuberHeaderPage.sliverGap(),
         if (loans == null)
-          const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+          const SliverFillRemaining(child: Center(child: KuberShapeLoader(size: 40)))
         else if (items.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
@@ -107,7 +112,10 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
                           style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant)),
                     ),
                   ),
-                  KuberGroup(children: [for (final e in active) _LoanRow(loan: e.$1, st: e.$2)]),
+                  KuberGroup(children: [
+                    for (final (i, e) in active.indexed)
+                      _listMotion.item(context, 'loan${e.$1.uid}', i, _LoanRow(loan: e.$1, st: e.$2)),
+                  ]),
                 ],
                 if (closed.isNotEmpty) ...[
                   const SizedBox(height: KuberSpace.sectionGap),
@@ -135,6 +143,7 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
             ),
           ),
       ]),
+ ),
     );
   }
 }
@@ -154,7 +163,7 @@ class _Hero extends ConsumerWidget {
     final next = active.where((e) => e.$2.nextDay != null).firstOrNull;
     // First KPI left, second right, a gap between; big values shrink to
     // fit instead of touching.
-    Widget col(String label, String value, {bool end = false}) => Expanded(
+    Widget col(String label, double value, {bool end = false}) => Expanded(
           child: Column(
               crossAxisAlignment: end ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
@@ -164,7 +173,10 @@ class _Hero extends ConsumerWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: end ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Text(value,
+                  child: AnimatedAmount(
+                      value: value,
+                      animateIn: false,
+                      format: (v) => fmt.formatCurrency(v.round()),
                       style: tt.headlineMedium!
                           .copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
                 ),
@@ -174,9 +186,9 @@ class _Hero extends ConsumerWidget {
       hero: true,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          col(l.msLoansTotalOutstanding, fmt.formatCurrency(outstanding.round())),
+          col(l.msLoansTotalOutstanding, outstanding),
           const SizedBox(width: KuberSpace.lg),
-          col(l.msLoansMonthlyEmis, fmt.formatCurrency(monthly.round()), end: true),
+          col(l.msLoansMonthlyEmis, monthly, end: true),
         ]),
         if (next != null) ...[
           const SizedBox(height: 12),
@@ -213,7 +225,7 @@ class _LoanRow extends ConsumerWidget {
                 ? '${fmt.formatCurrency((st.nextAmount ?? loan.emiAmount).round())} ${l.msLoansEmi} · ${l.msWhenFlagToday}'
                 : l.msLoansRowSub(fmt.formatCurrency((st.nextAmount ?? loan.emiAmount).round()),
                     fmtDayShort(dayOf(st.nextDay!)));
-    return InkWell(
+    return Pressable(kind: PressKind.card, child: InkWell(
       onTap: () => showLoanSheet(context, ref, loan),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -251,6 +263,6 @@ class _LoanRow extends ConsumerWidget {
           ],
         ]),
       ),
-    );
+    ));
   }
 }

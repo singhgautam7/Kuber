@@ -2,6 +2,8 @@
 // transaction it created, plus Edit / Pause / Skip next / Delete.
 
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_chips.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +43,7 @@ Future<void> confirmDeleteRule(BuildContext context, WidgetRef ref, RecurringRul
   final l = context.l10n;
   final cs = Theme.of(context).colorScheme;
   final ok = await showDialog<bool>(
+      animationStyle: kuberDialogStyle(context),
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l.msRecDeleteTitle(rule.name), style: localeFont(fontWeight: FontWeight.w600)),
@@ -244,10 +247,10 @@ class _RuleFullScreenState extends ConsumerState<RuleFullScreen> {
       chart: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(children: [
           Expanded(child: Text(l.msRecMonthlyTotal, style: tt.titleSmall)),
-          ChoiceChip(
-            label: Text(_all ? l.msRecRangeAll : l.msRecRange12),
-            selected: true,
-            onSelected: (_) => setState(() => _all = !_all),
+          KuberChip(
+            label: _all ? l.msRecRangeAll : l.msRecRange12,
+            dropdown: true,
+            onTap: () => setState(() => _all = !_all),
           ),
         ]),
         const SizedBox(height: 16),

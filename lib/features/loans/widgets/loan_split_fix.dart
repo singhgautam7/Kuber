@@ -1,6 +1,7 @@
 // Fix EMI splits (advanced history v1.2, board AH.L): the notice at the top
 // of the loan sheet, the fix sheet, and "Recheck EMI splits".
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
@@ -73,6 +74,7 @@ class LoanSplitNotice extends ConsumerWidget {
 Future<void> showLoanSplitFixSheet(
     BuildContext context, ProviderContainer container, Loan loan, SplitCheck check) {
   return showModalBottomSheet<void>(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

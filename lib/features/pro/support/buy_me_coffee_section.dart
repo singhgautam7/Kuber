@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import '../../../shared/widgets/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,6 +36,7 @@ class BuyMeCoffeeButton extends ConsumerWidget {
 /// thank-you sheet is shown by [PurchaseService] once the purchase completes.
 void showBuyMeCoffeeSheet(BuildContext context) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

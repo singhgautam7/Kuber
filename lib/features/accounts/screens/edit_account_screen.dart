@@ -25,6 +25,8 @@
 // account.creditLimit). Editing Total Limit never creates an adjustment.
 // =============================================================================
 
+import '../../../shared/widgets/kuber_shape_loader.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:flutter/material.dart';
 import '../../home_v2/providers/home_v2_provider.dart';
 import 'package:flutter/services.dart';
@@ -285,6 +287,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -336,6 +339,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
     if (hasTxns) {
       showDialog(
+      animationStyle: kuberDialogStyle(context),
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(
@@ -377,6 +381,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
     if (!mounted) return;
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -414,6 +419,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     return showDialog<Account>(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -506,53 +512,58 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
     return Scaffold(
       // Board 3.15 edit: close + title + destructive delete in the header.
-      appBar: KuberAppBar(
-        showBack: true,
-        closeIcon: true,
-        title: context.l10n.editAccount,
-        actions: [
-          AppIconButton(
-            icon: Icons.delete_outline_rounded,
-            kind: AppIconButtonKind.danger,
-            semanticLabel: context.l10n.deleteAccount,
-            onPressed: _onDelete,
-          ),
-        ],
-      ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                child: balanceAsync.when(
-                  loading: () => const Padding(
-                    padding: EdgeInsets.only(top: 80),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => Padding(
-                    padding: const EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: Text(
-                        context.l10n.couldntLoadBalance,
-                        style: localeFont(color: context.kuberMoney.expense),
+      body: KuberHeaderPage(
+        header: KuberAppBar(
+          showBack: true,
+          closeIcon: true,
+          title: context.l10n.editAccount,
+          actions: [
+            AppIconButton(
+              icon: Icons.delete_outline_rounded,
+              kind: AppIconButtonKind.danger,
+              semanticLabel: context.l10n.deleteAccount,
+              onPressed: _onDelete,
+            ),
+          ],
+        ),
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            children: [
+              Expanded(
+                child: Builder(
+                  builder: (c) => SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                        20, 4 + KuberHeaderPage.insetOf(c), 20, 24),
+                    child: balanceAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.only(top: 80),
+                        child: Center(child: KuberShapeLoader()),
                       ),
+                      error: (e, _) => Padding(
+                        padding: const EdgeInsets.only(top: 80),
+                        child: Center(
+                          child: Text(
+                            context.l10n.couldntLoadBalance,
+                            style: localeFont(color: context.kuberMoney.expense),
+                          ),
+                        ),
+                      ),
+                      data: (_) => _buildForm(kuberFieldScrollPadding(c)),
                     ),
                   ),
-                  data: (_) => _buildForm(),
                 ),
               ),
-            ),
-            _buildBottomBar(),
-          ],
+              _buildBottomBar(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(EdgeInsets scrollPadding) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final l10n = context.l10n;
@@ -637,6 +648,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
           label: l10n.accountNameLabel,
           children: [
             TextField(
+              scrollPadding: scrollPadding,
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               onTapOutside: (_) =>
@@ -680,6 +692,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
             ),
             if (_showIdentifier)
               TextField(
+                scrollPadding: scrollPadding,
                 controller: _last4Controller,
                 keyboardType: TextInputType.number,
                 onTapOutside: (_) =>

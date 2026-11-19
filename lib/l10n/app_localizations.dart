@@ -4034,12 +4034,6 @@ abstract class AppLocalizations {
   /// **'MONEY STORIES'**
   String get moneyStoriesTitle;
 
-  /// No description provided for @moneyStoriesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep spending to see your money stories soon.'**
-  String get moneyStoriesEmpty;
-
   /// No description provided for @bubbleWelcome.
   ///
   /// In en, this message translates to:
@@ -15531,7 +15525,7 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetTitle.
   ///
   /// In en, this message translates to:
-  /// **'How you got here'**
+  /// **'Quick navigation'**
   String get pathSheetTitle;
 
   /// No description provided for @pathSheetCurrent.
@@ -15543,14 +15537,8 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetHint.
   ///
   /// In en, this message translates to:
-  /// **'Shows the path to this page'**
+  /// **'Opens quick navigation'**
   String get pathSheetHint;
-
-  /// No description provided for @pathSheetLongPress.
-  ///
-  /// In en, this message translates to:
-  /// **'Show path'**
-  String get pathSheetLongPress;
 
   /// No description provided for @setPathTip.
   ///
@@ -15831,7 +15819,7 @@ abstract class AppLocalizations {
   /// No description provided for @pathSheetSub.
   ///
   /// In en, this message translates to:
-  /// **'Tap any page to go back to it'**
+  /// **'Tap any page to open it'**
   String get pathSheetSub;
 
   /// No description provided for @pathSheetFromNotification.
@@ -16905,7 +16893,7 @@ abstract class AppLocalizations {
   /// No description provided for @rateRefer.
   ///
   /// In en, this message translates to:
-  /// **'Refer a friend'**
+  /// **'Refer'**
   String get rateRefer;
 
   /// No description provided for @rateLater.
@@ -19451,6 +19439,1278 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get ahdMore;
+
+  /// No description provided for @pathSheetShowRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Show remaining {n} pages'**
+  String pathSheetShowRemaining(String n);
+
+  /// No description provided for @pathSheetShowFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer pages'**
+  String get pathSheetShowFewer;
+
+  /// No description provided for @pathSheetExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get pathSheetExpand;
+
+  /// No description provided for @pathSheetCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get pathSheetCollapse;
+
+  /// No description provided for @motionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion'**
+  String get motionTitle;
+
+  /// No description provided for @motionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much Kuber moves when you tap, swipe or open things'**
+  String get motionSubtitle;
+
+  /// No description provided for @motionPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the card to feel this level'**
+  String get motionPreviewHint;
+
+  /// No description provided for @motionAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get motionAuto;
+
+  /// No description provided for @motionExpressive.
+  ///
+  /// In en, this message translates to:
+  /// **'Expressive'**
+  String get motionExpressive;
+
+  /// No description provided for @motionSubtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtle'**
+  String get motionSubtle;
+
+  /// No description provided for @motionOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get motionOff;
+
+  /// No description provided for @motionAutoExpressive.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Expressive on this phone'**
+  String get motionAutoExpressive;
+
+  /// No description provided for @motionAutoSubtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Subtle: this phone has under 4 GB of RAM'**
+  String get motionAutoSubtle;
+
+  /// No description provided for @motionAutoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Off: Remove animations is on'**
+  String get motionAutoOff;
+
+  /// No description provided for @motionExpressiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Springy and fluid. The full experience.'**
+  String get motionExpressiveDesc;
+
+  /// No description provided for @motionSubtleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Short fades and small moves. No bounce.'**
+  String get motionSubtleDesc;
+
+  /// No description provided for @motionOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement. Things change with a quick fade.'**
+  String get motionOffDesc;
+
+  /// No description provided for @motionPhoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove animations is on in your phone settings, so Kuber uses Off.'**
+  String get motionPhoneNote;
+
+  /// No description provided for @motionOpenPhoneSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings'**
+  String get motionOpenPhoneSettings;
+
+  /// No description provided for @motionValueAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto ({level})'**
+  String motionValueAuto(String level);
+
+  /// No description provided for @motionValuePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Off (phone setting)'**
+  String get motionValuePhone;
+
+  /// No description provided for @hapticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptics'**
+  String get hapticsTitle;
+
+  /// No description provided for @hapticsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate on toggles and long presses'**
+  String get hapticsSub;
+
+  /// No description provided for @setKwMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'animation animations motion movement bounce fade reduce animations'**
+  String get setKwMotion;
+
+  /// No description provided for @setKwHaptics.
+  ///
+  /// In en, this message translates to:
+  /// **'haptics vibration vibrate feedback touch'**
+  String get setKwHaptics;
+
+  /// No description provided for @txnSourceLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recorded from loans'**
+  String get txnSourceLoans;
+
+  /// No description provided for @txnSourceInvestments.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recorded from investments'**
+  String get txnSourceInvestments;
+
+  /// No description provided for @txnSourceRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recorded from recurring'**
+  String get txnSourceRecurring;
+
+  /// No description provided for @txnSourceDeletedLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recorded from a deleted loan'**
+  String get txnSourceDeletedLoan;
+
+  /// No description provided for @txnSourceDeletedInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recorded from a deleted investment'**
+  String get txnSourceDeletedInvestment;
+
+  /// No description provided for @txnSourceDeletedRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recorded from a deleted recurring payment'**
+  String get txnSourceDeletedRecurring;
+
+  /// No description provided for @txnSourceLink.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}'**
+  String txnSourceLink(String name);
+
+  /// No description provided for @balLabelNet.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · Net'**
+  String balLabelNet(String month);
+
+  /// No description provided for @balLabelExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · Expense'**
+  String balLabelExpense(String month);
+
+  /// No description provided for @balLabelIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · Income'**
+  String balLabelIncome(String month);
+
+  /// No description provided for @balCmpSpendMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending {amount} more than last month'**
+  String balCmpSpendMore(String amount);
+
+  /// No description provided for @balCmpSpendLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending {amount} less than last month'**
+  String balCmpSpendLess(String amount);
+
+  /// No description provided for @balCmpEarnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings {amount} more than last month'**
+  String balCmpEarnMore(String amount);
+
+  /// No description provided for @balCmpEarnLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings {amount} less than last month'**
+  String balCmpEarnLess(String amount);
+
+  /// No description provided for @balCmpSame.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as last month'**
+  String get balCmpSame;
+
+  /// No description provided for @balCmpFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First month in Kuber'**
+  String get balCmpFirst;
+
+  /// No description provided for @balCmpNoEarnLast.
+  ///
+  /// In en, this message translates to:
+  /// **'No earnings last month'**
+  String get balCmpNoEarnLast;
+
+  /// No description provided for @balCmpNoSpendLast.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending last month'**
+  String get balCmpNoSpendLast;
+
+  /// No description provided for @balA11yShowExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Show expense, {amount}'**
+  String balA11yShowExpense(String amount);
+
+  /// No description provided for @balA11yShowIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Show income, {amount}'**
+  String balA11yShowIncome(String amount);
+
+  /// No description provided for @chartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income & expense'**
+  String get chartTitle;
+
+  /// No description provided for @chartPeriod6m.
+  ///
+  /// In en, this message translates to:
+  /// **'6M'**
+  String get chartPeriod6m;
+
+  /// No description provided for @chartPeriod1y.
+  ///
+  /// In en, this message translates to:
+  /// **'1Y'**
+  String get chartPeriod1y;
+
+  /// No description provided for @chartPeriod6mSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 months'**
+  String get chartPeriod6mSub;
+
+  /// No description provided for @chartPeriod1ySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get chartPeriod1ySub;
+
+  /// No description provided for @chartModeBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar'**
+  String get chartModeBar;
+
+  /// No description provided for @chartModeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get chartModeLine;
+
+  /// No description provided for @chartLegendOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher one on top'**
+  String get chartLegendOrder;
+
+  /// No description provided for @chartTipSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'{monthYear} · so far'**
+  String chartTipSoFar(String monthYear);
+
+  /// No description provided for @chartTipSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get chartTipSaved;
+
+  /// No description provided for @chartTipOverspent.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent'**
+  String get chartTipOverspent;
+
+  /// No description provided for @chartTipPace.
+  ///
+  /// In en, this message translates to:
+  /// **'On pace: {amount} spent'**
+  String chartTipPace(String amount);
+
+  /// No description provided for @chartTipNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No income or expense'**
+  String get chartTipNoData;
+
+  /// No description provided for @chartEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No income or expense yet'**
+  String get chartEmptyTitle;
+
+  /// No description provided for @chartEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Months appear here as you add transactions. Transfers are not counted.'**
+  String get chartEmptyBody;
+
+  /// No description provided for @chartSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one month so far. Older months show up here.'**
+  String get chartSingle;
+
+  /// No description provided for @chartA11yColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}: income {income}, expense {expense}, {kind} {amount}'**
+  String chartA11yColumn(
+    String month,
+    String income,
+    String expense,
+    String kind,
+    String amount,
+  );
+
+  /// No description provided for @chartA11yNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}: no income or expense'**
+  String chartA11yNoData(String month);
+
+  /// No description provided for @chartA11yOne.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}: {series} {amount}'**
+  String chartA11yOne(String month, String series, String amount);
+
+  /// No description provided for @chartBucketDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get chartBucketDay;
+
+  /// No description provided for @chartBucketWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get chartBucketWeek;
+
+  /// No description provided for @chartBucketMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get chartBucketMonth;
+
+  /// No description provided for @chartBucketQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter'**
+  String get chartBucketQuarter;
+
+  /// No description provided for @chartBucketYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get chartBucketYear;
+
+  /// No description provided for @trialRem3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3 days left in your Pro trial'**
+  String get trialRem3Title;
+
+  /// No description provided for @trialRem3NotifBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trial ends on {weekday}, {date}. Nothing is deleted. See what you haven\'t tried yet.'**
+  String trialRem3NotifBody(String weekday, String date);
+
+  /// No description provided for @trialLastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last day of your Pro trial'**
+  String get trialLastTitle;
+
+  /// No description provided for @trialLastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro features go back to free limits at midnight. Your data stays as it is.'**
+  String get trialLastBody;
+
+  /// No description provided for @trialSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Pro is yours for 14 days'**
+  String get trialSheetTitle;
+
+  /// No description provided for @trialSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Pro feature is unlocked. No payment needed.'**
+  String get trialSheetBody;
+
+  /// No description provided for @trialSheetUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Free until {date}'**
+  String trialSheetUntil(String date);
+
+  /// No description provided for @trialSheetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When it ends, your data stays. Pro features go back to their free limits.'**
+  String get trialSheetNote;
+
+  /// No description provided for @trialSheetOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kuber Pro offers'**
+  String get trialSheetOffers;
+
+  /// No description provided for @trialSheetOffersCollapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kuber Pro offers, collapsed'**
+  String get trialSheetOffersCollapsed;
+
+  /// No description provided for @trialSheetOffersExpanded.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kuber Pro offers, expanded'**
+  String get trialSheetOffersExpanded;
+
+  /// No description provided for @trialSheetCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start exploring'**
+  String get trialSheetCta;
+
+  /// No description provided for @trialSheetSeePro.
+  ///
+  /// In en, this message translates to:
+  /// **'See Kuber Pro'**
+  String get trialSheetSeePro;
+
+  /// No description provided for @trialRestoredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Kuber Pro trial continues'**
+  String get trialRestoredTitle;
+
+  /// No description provided for @trialRestoredUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days left · Free until {date}'**
+  String trialRestoredUntil(String n, String date);
+
+  /// No description provided for @trialUsedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial was already used on this phone or backup'**
+  String get trialUsedTitle;
+
+  /// No description provided for @trialUsedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is all here, and Kuber keeps working free.'**
+  String get trialUsedBody;
+
+  /// No description provided for @commonNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get commonNotNow;
+
+  /// No description provided for @trialClaimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim 14 days of Pro, free'**
+  String get trialClaimTitle;
+
+  /// No description provided for @trialClaimBody.
+  ///
+  /// In en, this message translates to:
+  /// **'New in Kuber 7.0. Try every Pro feature. No payment, nothing to cancel.'**
+  String get trialClaimBody;
+
+  /// No description provided for @trialClaimCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get trialClaimCta;
+
+  /// No description provided for @proClaimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Pro free for 14 days'**
+  String get proClaimTitle;
+
+  /// No description provided for @proClaimBody.
+  ///
+  /// In en, this message translates to:
+  /// **'One time, no payment, nothing to cancel.'**
+  String get proClaimBody;
+
+  /// No description provided for @proClaimCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim 14 days of Pro, free'**
+  String get proClaimCta;
+
+  /// No description provided for @proOrPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Or choose a plan'**
+  String get proOrPlan;
+
+  /// No description provided for @trialBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro trial · {n} days left'**
+  String trialBadge(String n);
+
+  /// No description provided for @trialBadgeLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro trial · last day'**
+  String get trialBadgeLast;
+
+  /// No description provided for @trialSuggOverline.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro trial · {n} of 10 tried'**
+  String trialSuggOverline(String n);
+
+  /// No description provided for @trialSuggSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get trialSuggSeeAll;
+
+  /// No description provided for @trialDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get trialDismiss;
+
+  /// No description provided for @checklistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Kuber Pro'**
+  String get checklistTitle;
+
+  /// No description provided for @checklistSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of 10 tried · {d} days left'**
+  String checklistSub(String n, String d);
+
+  /// No description provided for @checklistHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one ticks itself when you use it.'**
+  String get checklistHint;
+
+  /// No description provided for @checklistTried.
+  ///
+  /// In en, this message translates to:
+  /// **'Tried · {what}'**
+  String checklistTried(String what);
+
+  /// No description provided for @checklistWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'In {place}'**
+  String checklistWhere(String place);
+
+  /// No description provided for @checklistTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try'**
+  String get checklistTry;
+
+  /// No description provided for @proTrialStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro trial · {n} days left'**
+  String proTrialStatus(String n);
+
+  /// No description provided for @proTrialEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {date}, {time}'**
+  String proTrialEnds(String date, String time);
+
+  /// No description provided for @proTrialTried.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve tried {n} of 10 Pro features'**
+  String proTrialTried(String n);
+
+  /// No description provided for @proKeepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Pro after your trial'**
+  String get proKeepTitle;
+
+  /// No description provided for @proKeepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a plan now or any time before {date}. Pro starts when you buy, and the rest of the trial ends then.'**
+  String proKeepBody(String date);
+
+  /// No description provided for @proKeepCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Pro · {plan} {price}'**
+  String proKeepCta(String plan, String price);
+
+  /// No description provided for @proKeepNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by Google Play. Nothing is charged unless you pick a plan.'**
+  String get proKeepNote;
+
+  /// No description provided for @trialFeatAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber'**
+  String get trialFeatAsk;
+
+  /// No description provided for @trialFeatSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from SMS'**
+  String get trialFeatSms;
+
+  /// No description provided for @trialFeatDash.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom dashboards'**
+  String get trialFeatDash;
+
+  /// No description provided for @trialFeatRem.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get trialFeatRem;
+
+  /// No description provided for @trialFeatTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Every theme'**
+  String get trialFeatTheme;
+
+  /// No description provided for @trialFeatNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Notes'**
+  String get trialFeatNotes;
+
+  /// No description provided for @trialFeatAdv.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced analytics'**
+  String get trialFeatAdv;
+
+  /// No description provided for @trialFeatBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups'**
+  String get trialFeatBackup;
+
+  /// No description provided for @trialFeatCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber Cards'**
+  String get trialFeatCards;
+
+  /// No description provided for @trialFeatCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-currency'**
+  String get trialFeatCurrency;
+
+  /// No description provided for @trialPlaceHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get trialPlaceHome;
+
+  /// No description provided for @trialPlaceHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get trialPlaceHistory;
+
+  /// No description provided for @trialPlaceAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get trialPlaceAnalytics;
+
+  /// No description provided for @trialPlaceMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get trialPlaceMore;
+
+  /// No description provided for @trialPlaceSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get trialPlaceSettings;
+
+  /// No description provided for @trialPlaceAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get trialPlaceAccounts;
+
+  /// No description provided for @trialPlaceLook.
+  ///
+  /// In en, this message translates to:
+  /// **'Look and feel'**
+  String get trialPlaceLook;
+
+  /// No description provided for @trialUsedAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'question asked'**
+  String get trialUsedAsk;
+
+  /// No description provided for @trialUsedSms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS imported'**
+  String get trialUsedSms;
+
+  /// No description provided for @trialUsedDash.
+  ///
+  /// In en, this message translates to:
+  /// **'dashboard built'**
+  String get trialUsedDash;
+
+  /// No description provided for @trialUsedRem.
+  ///
+  /// In en, this message translates to:
+  /// **'reminder set'**
+  String get trialUsedRem;
+
+  /// No description provided for @trialUsedTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'theme applied'**
+  String get trialUsedTheme;
+
+  /// No description provided for @trialUsedNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'note written'**
+  String get trialUsedNotes;
+
+  /// No description provided for @trialUsedAdv.
+  ///
+  /// In en, this message translates to:
+  /// **'opened'**
+  String get trialUsedAdv;
+
+  /// No description provided for @trialUsedBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'backup made'**
+  String get trialUsedBackup;
+
+  /// No description provided for @trialUsedCards.
+  ///
+  /// In en, this message translates to:
+  /// **'card added'**
+  String get trialUsedCards;
+
+  /// No description provided for @trialUsedCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'currency added'**
+  String get trialUsedCurrency;
+
+  /// No description provided for @trialSuggAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber anything'**
+  String get trialSuggAskTitle;
+
+  /// No description provided for @trialSuggAskBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about your spending in plain words, as often as you like.'**
+  String get trialSuggAskBody;
+
+  /// No description provided for @trialSuggAskCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get trialSuggAskCta;
+
+  /// No description provided for @trialSuggSmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your bank SMS'**
+  String get trialSuggSmsTitle;
+
+  /// No description provided for @trialSuggSmsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro reads every bank SMS on this phone, with no weekly limit.'**
+  String get trialSuggSmsBody;
+
+  /// No description provided for @trialSuggSmsCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Import now'**
+  String get trialSuggSmsCta;
+
+  /// No description provided for @trialSuggDashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a dashboard'**
+  String get trialSuggDashTitle;
+
+  /// No description provided for @trialSuggDashBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the charts you care about and keep them on one page.'**
+  String get trialSuggDashBody;
+
+  /// No description provided for @trialSuggDashCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Build one'**
+  String get trialSuggDashCta;
+
+  /// No description provided for @trialSuggRemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a bill reminder'**
+  String get trialSuggRemTitle;
+
+  /// No description provided for @trialSuggRemBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a nudge before rent, EMIs and bills are due.'**
+  String get trialSuggRemBody;
+
+  /// No description provided for @trialSuggRemCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Set one'**
+  String get trialSuggRemCta;
+
+  /// No description provided for @trialSuggThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a new theme'**
+  String get trialSuggThemeTitle;
+
+  /// No description provided for @trialSuggThemeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from all 16 accents and every theme.'**
+  String get trialSuggThemeBody;
+
+  /// No description provided for @trialSuggThemeCta.
+  ///
+  /// In en, this message translates to:
+  /// **'See themes'**
+  String get trialSuggThemeCta;
+
+  /// No description provided for @trialSuggNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a Kuber Note'**
+  String get trialSuggNotesTitle;
+
+  /// No description provided for @trialSuggNotesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick sums and lists, with no note limit.'**
+  String get trialSuggNotesBody;
+
+  /// No description provided for @trialSuggNotesCta.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get trialSuggNotesCta;
+
+  /// No description provided for @trialSuggAdvTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Advanced analytics'**
+  String get trialSuggAdvTitle;
+
+  /// No description provided for @trialSuggAdvBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See trends, filters and your money health score.'**
+  String get trialSuggAdvBody;
+
+  /// No description provided for @trialSuggAdvCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get trialSuggAdvCta;
+
+  /// No description provided for @trialSuggBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on automatic backups'**
+  String get trialSuggBackupTitle;
+
+  /// No description provided for @trialSuggBackupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuber saves a backup every day to a folder you choose.'**
+  String get trialSuggBackupBody;
+
+  /// No description provided for @trialSuggBackupCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get trialSuggBackupCta;
+
+  /// No description provided for @trialSuggCardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your cards'**
+  String get trialSuggCardsTitle;
+
+  /// No description provided for @trialSuggCardsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep card limits and bill dates in one place. Pro has no 2-card limit.'**
+  String get trialSuggCardsBody;
+
+  /// No description provided for @trialSuggCardsCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a card'**
+  String get trialSuggCardsCta;
+
+  /// No description provided for @trialSuggCurrencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another currency'**
+  String get trialSuggCurrencyTitle;
+
+  /// No description provided for @trialSuggCurrencyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track a USD or AED account next to your rupee ones.'**
+  String get trialSuggCurrencyBody;
+
+  /// No description provided for @trialSuggCurrencyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one'**
+  String get trialSuggCurrencyCta;
+
+  /// No description provided for @trialRem3CardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trial ends on {date}. {n} Pro features are still to try.'**
+  String trialRem3CardBody(String date, String n);
+
+  /// No description provided for @trialRem3Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'See what\'s left'**
+  String get trialRem3Cta;
+
+  /// No description provided for @trialLastCta.
+  ///
+  /// In en, this message translates to:
+  /// **'What changes'**
+  String get trialLastCta;
+
+  /// No description provided for @trialKeepPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Pro'**
+  String get trialKeepPro;
+
+  /// No description provided for @trialEndTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Pro trial has ended'**
+  String get trialEndTitle;
+
+  /// No description provided for @trialEndBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s what you did with Pro in 14 days.'**
+  String get trialEndBody;
+
+  /// No description provided for @trialEndStatSms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS imported'**
+  String get trialEndStatSms;
+
+  /// No description provided for @trialEndStatDash.
+  ///
+  /// In en, this message translates to:
+  /// **'dashboards built'**
+  String get trialEndStatDash;
+
+  /// No description provided for @trialEndStatAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'questions to Ask Kuber'**
+  String get trialEndStatAsk;
+
+  /// No description provided for @trialEndStatNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'notes written'**
+  String get trialEndStatNotes;
+
+  /// No description provided for @trialEndStatRem.
+  ///
+  /// In en, this message translates to:
+  /// **'reminders set'**
+  String get trialEndStatRem;
+
+  /// No description provided for @trialEndStatBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'backups made'**
+  String get trialEndStatBackup;
+
+  /// No description provided for @trialEndLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to free limits'**
+  String get trialEndLimits;
+
+  /// No description provided for @trialEndKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Your dashboards, notes and imported transactions are all kept. Pro features work again the moment you get Pro.'**
+  String get trialEndKept;
+
+  /// No description provided for @trialEndCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Pro · {plan} {price}'**
+  String trialEndCta(String plan, String price);
+
+  /// No description provided for @setProTrialSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro trial · {n} days left, ends {date}'**
+  String setProTrialSub(String n, String date);
+
+  /// No description provided for @setProEndedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Free · trial ended {date}'**
+  String setProEndedSub(String date);
+
+  /// No description provided for @proManagePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get proManagePlan;
+
+  /// No description provided for @proManagePlanFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get proManagePlanFree;
+
+  /// No description provided for @proManageTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro trial'**
+  String get proManageTrial;
+
+  /// No description provided for @proManageStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get proManageStarted;
+
+  /// No description provided for @proManageEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get proManageEnds;
+
+  /// No description provided for @proManageEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get proManageEnded;
+
+  /// No description provided for @proManageTried.
+  ///
+  /// In en, this message translates to:
+  /// **'Features tried'**
+  String get proManageTried;
+
+  /// No description provided for @proManageTriedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of 10'**
+  String proManageTriedValue(String n);
+
+  /// No description provided for @proManageEndedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Free · trial ended'**
+  String get proManageEndedTitle;
+
+  /// No description provided for @proManageEndedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your 14 days of Pro ended on {date}.'**
+  String proManageEndedBody(String date);
+
+  /// No description provided for @proManageKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Pro: see plans'**
+  String get proManageKeep;
+
+  /// No description provided for @proManageGet.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Pro: see plans'**
+  String get proManageGet;
+
+  /// No description provided for @chartPeriod7d.
+  ///
+  /// In en, this message translates to:
+  /// **'7D'**
+  String get chartPeriod7d;
+
+  /// No description provided for @chartPeriod7dSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get chartPeriod7dSub;
+
+  /// No description provided for @floatingHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating header'**
+  String get floatingHeaderTitle;
+
+  /// No description provided for @floatingHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The header turns into a pill when you scroll'**
+  String get floatingHeaderSubtitle;
+
+  /// No description provided for @floatingHeaderSwitchOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get floatingHeaderSwitchOn;
+
+  /// No description provided for @floatingHeaderSwitchOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off · the header scrolls away with the page'**
+  String get floatingHeaderSwitchOff;
+
+  /// No description provided for @floatingHeaderSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the pill'**
+  String get floatingHeaderSection;
+
+  /// No description provided for @floatingHeaderAlways.
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get floatingHeaderAlways;
+
+  /// No description provided for @floatingHeaderScrollUp.
+  ///
+  /// In en, this message translates to:
+  /// **'When scrolling up'**
+  String get floatingHeaderScrollUp;
+
+  /// No description provided for @floatingHeaderScrollStop.
+  ///
+  /// In en, this message translates to:
+  /// **'When scrolling stops'**
+  String get floatingHeaderScrollStop;
+
+  /// No description provided for @floatingHeaderOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get floatingHeaderOff;
+
+  /// No description provided for @floatingHeaderPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{option}, preview of the header'**
+  String floatingHeaderPreviewLabel(String option);
+
+  /// No description provided for @setKwFloatingHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'floating header pill sticky top bar scroll hide app bar title bar'**
+  String get setKwFloatingHeader;
 }
 
 class _AppLocalizationsDelegate

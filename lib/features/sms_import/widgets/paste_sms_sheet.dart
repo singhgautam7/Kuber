@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kuber/core/motion/route_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,11 +14,14 @@ import '../engine/sms_parser.dart';
 import '../providers/sms_import_provider.dart';
 import '../screens/sms_import_widgets.dart';
 import 'transaction_review_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 /// Opens the paste-an-SMS fallback sheet (Section 07).
 void showPasteSmsSheet(BuildContext context) {
   showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
@@ -218,7 +222,7 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
             const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: KuberShapeLoader(size: 16),
             ),
             const SizedBox(width: KuberSpace.sm),
             Text('Parsing…', style: small),

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -228,6 +229,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
   void _openCalculator(BuildContext context) {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -256,6 +258,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
   void _pickAccount(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

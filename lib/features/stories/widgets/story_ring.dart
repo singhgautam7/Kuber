@@ -37,20 +37,24 @@ class _StoryRingSectionState extends ConsumerState<StoryRingSection> {
   Widget build(BuildContext context) {
     final bubblesAsync = ref.watch(storyBubblesProvider);
     final isGenerating = ref.watch(storyGenerationProvider);
+    // Self-spaced on Home: the section gap is added here, so with no
+    // stories (and none being generated) the whole widget, title included,
+    // collapses to nothing instead of showing an empty prompt.
+    Widget gap(Widget child) => Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
+          child: child,
+        );
     return bubblesAsync.when(
-      loading: () => const _StoryRingSkeleton(),
+      loading: () => gap(const _StoryRingSkeleton()),
       error: (_, __) => const SizedBox.shrink(),
       data: (bubbles) {
         if (bubbles.isEmpty) {
-          // Skeleton while generation is in progress; gentle prompt otherwise.
-          return isGenerating
-              ? const _StoryRingSkeleton()
-              : const _StoryRingEmpty();
+          return isGenerating ? gap(const _StoryRingSkeleton()) : const SizedBox.shrink();
         }
-        return StoryRing(
+        return gap(StoryRing(
           bubbles: bubbles,
           onOpen: (index) => _open(context, bubbles, index),
-        );
+        ));
       },
     );
   }
@@ -297,43 +301,6 @@ class _SegmentedRingPainter extends CustomPainter {
       if (oldDelegate.seenSegments[i] != seenSegments[i]) return true;
     }
     return false;
-  }
-}
-
-class _StoryRingEmpty extends StatelessWidget {
-  const _StoryRingEmpty();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        KuberHomeWidgetTitle(
-          title: context.l10n.moneyStoriesTitle.toUpperCase(),
-          infoConfig: InfoConstants.moneyStories,
-        ),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(KuberSpace.cardPadding),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: KuberShape.cardR,
-            border: Border.all(color: cs.outlineVariant),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            context.l10n.moneyStoriesEmpty,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.inter.copyWith(
-              fontSize: 14,
-              height: 20 / 14,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

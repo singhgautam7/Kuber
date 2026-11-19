@@ -35,9 +35,11 @@ class SettingsPageFrame extends StatelessWidget {
       // over a nested scroll view cost three times as much on first open.
       body: SettingsHighlight(
         rowId: highlight,
-        child: CustomScrollView(
+        child: KuberHeaderPage(
+          header: KuberAppBar(showBack: true, title: title),
+          body: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: KuberAppBar(showBack: true, title: title)),
+            KuberHeaderPage.sliverGap(),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
                 KuberSpace.screenMargin,
@@ -53,6 +55,7 @@ class SettingsPageFrame extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -89,9 +92,15 @@ class _SettingsAnchorState extends State<SettingsAnchor>
     final view = View.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      // The row must land below the header: at least 0.3 of the viewport,
+      // more on a short one.
+      final inset = KuberHeaderPage.insetOf(context);
+      final viewport = Scrollable.maybeOf(context)?.context.size?.height ?? 0;
+      final alignment =
+          viewport > 0 ? (inset / viewport + 0.05).clamp(0.3, 0.6) : 0.3;
       await Scrollable.ensureVisible(
         context,
-        alignment: 0.3,
+        alignment: alignment,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
       );

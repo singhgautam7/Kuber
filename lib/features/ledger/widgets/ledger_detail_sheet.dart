@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/motion/route_styles.dart';
 import 'package:kuber/core/theme/app_theme.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import '../data/ledger.dart';
 import '../providers/ledger_provider.dart';
 import '../utils/ledger_calculations.dart' as calc;
 import 'add_payment_sheet.dart';
+import '../../../shared/widgets/kuber_shape_loader.dart';
 
 class LedgerDetailSheet extends ConsumerWidget {
   final Ledger ledger;
@@ -250,7 +252,7 @@ class LedgerDetailSheet extends ConsumerWidget {
           const SizedBox(height: 12),
 
           paymentsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: KuberShapeLoader(size: 40)),
             error: (_, __) => const SizedBox.shrink(),
             data: (payments) {
               if (payments.isEmpty) {
@@ -294,6 +296,7 @@ class LedgerDetailSheet extends ConsumerWidget {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (!context.mounted) return;
       showModalBottomSheet(
+      sheetAnimationStyle: kuberSheetStyle(context),
         context: context,
         useRootNavigator: true,
         isScrollControlled: true,
@@ -306,6 +309,7 @@ class LedgerDetailSheet extends ConsumerWidget {
 
   void _confirmSettle(BuildContext context, WidgetRef ref) {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
@@ -336,6 +340,7 @@ class LedgerDetailSheet extends ConsumerWidget {
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
     showDialog(
+      animationStyle: kuberDialogStyle(context),
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(

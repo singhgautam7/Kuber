@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import 'kuber_list.dart';
 import 'kuber_skeleton.dart';
@@ -78,7 +79,10 @@ class KuberSearchResultRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    return InkWell(
+    return Pressable(
+      kind: PressKind.row,
+      enabled: onTap != null,
+      child: InkWell(
       onTap: onTap,
       overlayColor: kuberPressedLayer(cs),
       child: Container(
@@ -128,7 +132,7 @@ class KuberSearchResultRow extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

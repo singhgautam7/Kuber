@@ -15,13 +15,22 @@
 
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
+import 'kuber_button_group.dart';
 import 'app_button.dart';
+import 'kuber_app_bar.dart';
+import 'dart:math' as math;
 import 'app_icon_button.dart';
 import '../../core/utils/color_harmonizer.dart';
 import 'package:flutter/services.dart';
 import '../../core/utils/formatters.dart' show CurrencyInputFormatter;
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
+
+/// Scroll padding for a text field: a focused field is revealed 8 dp below
+/// the floating header, never under it (0 inset outside a KuberHeaderPage).
+EdgeInsets kuberFieldScrollPadding(BuildContext context) => EdgeInsets.fromLTRB(
+    20, math.max(20, KuberHeaderPage.insetOf(context) + 8), 20, 20);
 
 /// One labelled section of a form. Renders an uppercase muted heading
 /// followed by its children, separated by a configurable inner gap.
@@ -299,6 +308,7 @@ class _KuberHeroAmountInputState extends State<KuberHeroAmountInput>
                         controller: widget.controller,
                         focusNode: widget.focusNode,
                         onChanged: widget.onChanged,
+                        scrollPadding: kuberFieldScrollPadding(context),
                         onTapOutside: (_) =>
                             FocusManager.instance.primaryFocus?.unfocus(),
                         inputFormatters: widget.inputFormatters,
@@ -376,7 +386,9 @@ class KuberPickerRow extends StatelessWidget {
     // Navigation row (screens/add-transaction.md "grouped navigation rows"):
     // a 72 row on a surfaceContainer card, 40 leading, value as titleMedium
     // with the label under it.
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: cs.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: KuberShape.cardR,
@@ -434,7 +446,7 @@ class KuberPickerRow extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -470,6 +482,11 @@ class KuberSwitchRow extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     // Board 3.15: a card row with title + supporting text and the switch;
     // no leading icon. [icon] is kept for API compatibility.
+    void toggle(bool v) {
+      KuberHaptics.tick();
+      onChanged(v);
+    }
+
     final rowBody = Ink(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       decoration: BoxDecoration(
@@ -502,17 +519,22 @@ class KuberSwitchRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: KuberSpace.md),
-          Switch(value: value, onChanged: enabled ? onChanged : null),
+          Switch(value: value, onChanged: enabled ? toggle : null),
         ],
       ),
     );
 
-    return Opacity(
+    return AnimatedOpacity(
       opacity: enabled ? 1.0 : 0.38,
-      child: InkWell(
-        onTap: enabled ? () => onChanged(!value) : null,
-        borderRadius: KuberShape.cardR,
-        child: rowBody,
+      duration: KuberMotion.fxFast,
+      child: Pressable(
+        kind: PressKind.card,
+        enabled: enabled,
+        child: InkWell(
+          onTap: enabled ? () => toggle(!value) : null,
+          borderRadius: KuberShape.cardR,
+          child: rowBody,
+        ),
       ),
     );
   }
@@ -538,40 +560,35 @@ class KuberSegmented<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Opacity(
-      opacity: enabled ? 1 : 0.5,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          height: 40,
-          decoration: const BoxDecoration(borderRadius: KuberShape.fullR),
-          foregroundDecoration: BoxDecoration(
-            borderRadius: KuberShape.fullR,
-            border: Border.all(color: cs.outline),
+    // The shared button group (selected squircle, others pills, press motion,
+    // tick). Income / expense tones keep their own containers.
+    final money = context.kuberMoney;
+    return KuberButtonGroup<T>(
+      height: 40,
+      // No check: these sit in tight slots (Years | Months next to a field)
+      // and the check truncated the label; fill + shape show the choice.
+      showCheck: false,
+      enabled: enabled,
+      selected: groupValue,
+      onChanged: onChanged,
+      options: [
+        for (final sgm in segments)
+          KuberButtonOption(
+            value: sgm.value,
+            label: sgm.label,
+            icon: sgm.icon,
+            selectedFill: switch (sgm.tone) {
+              SegmentTone.income => money.incomeContainer,
+              SegmentTone.expense => money.expenseContainer,
+              SegmentTone.neutral => null,
+            },
+            onSelectedFill: switch (sgm.tone) {
+              SegmentTone.income => money.onIncomeContainer,
+              SegmentTone.expense => money.onExpenseContainer,
+              SegmentTone.neutral => null,
+            },
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Row(
-            children: [
-              for (var i = 0; i < segments.length; i++)
-                Expanded(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: i == 0
-                          ? null
-                          : Border(left: BorderSide(color: cs.outline)),
-                    ),
-                    child: _SegmentButton(
-                      segment: segments[i],
-                      selected: segments[i].value == groupValue,
-                      onTap: () => onChanged(segments[i].value),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 }
@@ -590,72 +607,6 @@ class KuberSegment<T> {
 }
 
 enum SegmentTone { neutral, income, expense }
-
-class _SegmentButton extends StatelessWidget {
-  final KuberSegment segment;
-  final bool selected;
-  final VoidCallback onTap;
-  const _SegmentButton({
-    required this.segment,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final (Color bg, Color fg) = switch (segment.tone) {
-      SegmentTone.income => (
-          context.kuberMoney.incomeContainer,
-          context.kuberMoney.onIncomeContainer
-        ),
-      SegmentTone.expense => (
-          context.kuberMoney.expenseContainer,
-          context.kuberMoney.onExpenseContainer
-        ),
-      SegmentTone.neutral => (cs.secondaryContainer, cs.onSecondaryContainer),
-    };
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          color: selected ? bg : Colors.transparent,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (selected || segment.icon != null) ...[
-                Icon(
-                  selected ? Icons.check_rounded : segment.icon,
-                  size: 18,
-                  color: selected ? fg : cs.onSurface,
-                ),
-                const SizedBox(width: 6),
-              ],
-              Flexible(
-                child: Text(
-                  segment.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.1,
-                    color: selected ? fg : cs.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// 2-3 column grid of icon+label chips. Used by Loan type, Investment
 /// type, Recurring frequency.
@@ -689,10 +640,15 @@ class KuberChipGrid<T> extends StatelessWidget {
       itemBuilder: (_, i) {
         final opt = options[i];
         final isSelected = opt.value == selected;
-        return Material(
+        return Pressable(
+          kind: PressKind.card,
+          child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => onChanged(opt.value),
+            onTap: () {
+              if (!isSelected) KuberHaptics.tick();
+              onChanged(opt.value);
+            },
             borderRadius: BorderRadius.circular(KuberShape.medium),
             child: Ink(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
@@ -729,7 +685,7 @@ class KuberChipGrid<T> extends StatelessWidget {
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -769,10 +725,15 @@ class KuberDayGrid extends StatelessWidget {
       itemBuilder: (_, i) {
         final day = i + 1;
         final isSelected = selected == day;
-        return Material(
+        return Pressable(
+          kind: PressKind.card,
+          child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => onChanged(day),
+            onTap: () {
+              if (!isSelected) KuberHaptics.tick();
+              onChanged(day);
+            },
             customBorder: const CircleBorder(),
             child: Ink(
               decoration: BoxDecoration(
@@ -789,7 +750,7 @@ class KuberDayGrid extends StatelessWidget {
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -1237,6 +1198,7 @@ class _KuberTextFieldState extends State<KuberTextField>
           textCapitalization: widget.textCapitalization,
           textInputAction: widget.textInputAction,
           onChanged: widget.onChanged,
+          scrollPadding: kuberFieldScrollPadding(context),
           onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           style: localeFont(color: cs.onSurface, fontSize: 16),
           decoration: InputDecoration(
@@ -1375,7 +1337,9 @@ class KuberSelectCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final fg = selected ? cs.onSecondaryContainer : cs.onSurface;
-    return Material(
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
       color: selected ? cs.secondaryContainer : cs.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: KuberShape.largeR,
@@ -1385,7 +1349,10 @@ class KuberSelectCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          if (!selected) KuberHaptics.tick();
+          onTap();
+        },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
           child: Row(
@@ -1424,7 +1391,7 @@ class KuberSelectCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -1448,7 +1415,7 @@ extension FocusDismissibleFuture<T> on Future<T> {
 /// button rides on top of the keyboard. A short fade at the bottom of the
 /// viewport keeps the floating look; it ignores taps.
 class KuberFormScaffold extends StatelessWidget {
-  final PreferredSizeWidget? appBar;
+  final KuberAppBar? appBar;
   final Widget body;
   final Widget bottomAction;
   final EdgeInsets padding;
@@ -1488,7 +1455,10 @@ class KuberFormScaffold extends StatelessWidget {
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: padding + const EdgeInsets.only(bottom: _fade),
-                  child: body,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [KuberHeaderPage.gap(), body],
+                  ),
                 ),
               ),
               Positioned(
@@ -1531,9 +1501,10 @@ class KuberFormScaffold extends StatelessWidget {
     }
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: appBar,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(top: false, bottom: false, child: content),
+      body: appBar == null
+          ? content
+          : KuberHeaderPage(header: appBar!, body: content),
     );
   }
 }

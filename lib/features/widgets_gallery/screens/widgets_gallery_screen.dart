@@ -14,21 +14,22 @@ class WidgetsGalleryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: KuberAppBar(
+      body: KuberHeaderPage(
+ header: KuberAppBar(
               title: 'Widgets',
               showBack: true,
               infoConfig: _aboutWidgetsInfo,
             ),
-          ),
+ body: CustomScrollView(
+        slivers: [
+          KuberHeaderPage.sliverGap(),
           _group(context, 'SMALL WIDGETS', WidgetSizeGroup.small),
           _group(context, 'MEDIUM WIDGETS', WidgetSizeGroup.medium),
           _group(context, 'LARGE WIDGETS', WidgetSizeGroup.large),
           const SliverToBoxAdapter(child: SizedBox(height: KuberSpace.xxl)),
         ],
       ),
+ ),
     );
   }
 

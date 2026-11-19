@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/motion/motion.dart';
 import '../../core/theme/app_theme.dart';
 import 'app_button.dart';
 
@@ -138,13 +139,16 @@ class KuberCard extends StatelessWidget {
         child: Padding(padding: pad, child: child),
       );
     }
-    return Material(
-      color: color ?? cs.surfaceContainer,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: pad, child: child),
+    return Pressable(
+      kind: PressKind.card,
+      child: Material(
+        color: color ?? cs.surfaceContainer,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(padding: pad, child: child),
+        ),
       ),
     );
   }
@@ -169,6 +173,10 @@ class KuberGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    // First show of a page or sheet: the route is still animating in. Read
+    // once by StaggeredEntrance; rebuilds and late-built groups never replay.
+    final firstShow = ModalRoute.of(context)?.animation?.status ==
+        AnimationStatus.forward;
     return Material(
       color: color ?? cs.surfaceContainer,
       shape: RoundedRectangleBorder(
@@ -188,7 +196,15 @@ class KuberGroup extends StatelessWidget {
                 indent: dividerInset,
                 color: cs.outlineVariant,
               ),
-            children[i],
+            if (i < 6)
+              StaggeredEntrance(
+                key: children[i].key is GlobalKey ? null : children[i].key,
+                index: i,
+                animate: firstShow,
+                child: children[i],
+              )
+            else
+              children[i],
           ],
         ],
       ),
@@ -250,12 +266,14 @@ class KuberListRow extends StatelessWidget {
             ? KuberSpace.listItem1
             : (below == null ? KuberSpace.listItem2 : KuberSpace.listItem3));
 
-    final content = Container(
-      constraints: BoxConstraints(minHeight: h),
-      color: selected ? cs.secondaryContainer : null,
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpace.listRowPadH,
-        vertical: KuberSpace.listRowPadV,
+    final tappable = onTap != null || onLongPress != null;
+    // Tappable rows: the state layer is inset 4 dp with 16 dp corners, so it
+    // follows the group's 20 dp edge; layout at rest is unchanged.
+    final inset = tappable ? _kRowInset : 0.0;
+    final body = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: KuberSpace.listRowPadH - inset,
+        vertical: KuberSpace.listRowPadV - inset,
       ),
       child: Row(
         children: [
@@ -311,10 +329,30 @@ class KuberListRow extends StatelessWidget {
         ],
       ),
     );
-    if (onTap == null && onLongPress == null) return content;
-    return InkWell(onTap: onTap, onLongPress: onLongPress, child: content);
+    final content = Container(
+      constraints: BoxConstraints(minHeight: h),
+      color: selected ? cs.secondaryContainer : null,
+      padding: EdgeInsets.all(inset),
+      child: tappable
+          ? InkWell(
+              borderRadius: BorderRadius.circular(KuberShape.large),
+              onTap: onTap,
+              onLongPress: onLongPress == null
+                  ? null
+                  : () {
+                      KuberHaptics.longPress();
+                      onLongPress!();
+                    },
+              child: body,
+            )
+          : body,
+    );
+    if (!tappable) return content;
+    return Pressable(kind: PressKind.row, child: content);
   }
 }
+
+const double _kRowInset = 4;
 
 /// Trailing chevron (20, onSurfaceVariant).
 class KuberChevron extends StatelessWidget {
@@ -354,16 +392,19 @@ class KuberGroupRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    return InkWell(
-      onTap: onTap,
-      overlayColor: kuberPressedLayer(cs),
-      child: Container(
-        constraints: const BoxConstraints(minHeight: KuberSpace.listItem2),
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpace.lg,
-          vertical: KuberSpace.md,
-        ),
-        child: Row(
+    final row = Container(
+      constraints: const BoxConstraints(minHeight: KuberSpace.listItem2),
+      padding: const EdgeInsets.all(_kRowInset),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(KuberShape.large),
+        onTap: onTap,
+        overlayColor: kuberPressedLayer(cs),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpace.lg - _kRowInset,
+            vertical: KuberSpace.md - _kRowInset,
+          ),
+          child: Row(
           children: [
             KuberIconTile(icon: icon, glyph: 22),
             const SizedBox(width: KuberSpace.lg),
@@ -383,9 +424,11 @@ class KuberGroupRow extends StatelessWidget {
             const SizedBox(width: KuberSpace.lg),
             const KuberChevron(),
           ],
+          ),
         ),
       ),
     );
+    return onTap == null ? row : Pressable(kind: PressKind.row, child: row);
   }
 }
 

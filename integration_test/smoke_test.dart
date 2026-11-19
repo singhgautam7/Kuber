@@ -22,7 +22,6 @@ import 'package:kuber/features/recurring/data/recurring_rule.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/transactions/widgets/transfer_account_tile.dart';
 import 'package:kuber/main.dart' as app;
-import 'package:kuber/shared/widgets/app_scaffold.dart';
 
 import 'smoke_helpers.dart';
 
@@ -44,7 +43,7 @@ void main() {
     await tapText(t, en.obTermsCheck1);
     await tapText(t, en.obTermsCheck2);
     await tapText(t, en.obTermsAgree);
-    await pumpUntil(t, find.byType(AppScaffold), timeout: const Duration(seconds: 30));
+    await finishWelcome(t);
     expect(await db.accounts.count(), greaterThanOrEqualTo(3));
     expectNoErrors(t);
   });

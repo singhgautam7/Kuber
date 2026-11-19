@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:kuber/core/motion/kuber_haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -47,14 +48,9 @@ class _AhExportSheetState extends ConsumerState<AhExportSheet> {
   }
 
   Future<Uint8List> _csv() async {
-    // Every matching row: page through the same provider the page shows.
-    final notifier = ref.read(ahTxnPagesProvider(null).notifier);
-    var page = await ref.read(ahTxnPagesProvider(null).future);
-    for (var guard = 0; page.hasMore && guard < 2000; guard++) {
-      await notifier.loadMore();
-      page = ref.read(ahTxnPagesProvider(null)).requireValue;
-    }
-    final txns = List<Transaction>.of(page.items);
+    // Every matching row: fetched by id, in chunks, from the id list the
+    // page's query already produced (no second query).
+    final txns = await ref.read(ahTxnPagesProvider(null).notifier).allMatching();
     final accounts = await ref.read(accountMapProvider.future);
     final cats = await ref.read(categoryMapProvider.future);
     final all = await ref.read(transactionListProvider.future);
@@ -108,12 +104,14 @@ class _AhExportSheetState extends ConsumerState<AhExportSheet> {
         ], fileNameOverrides: [
           name
         ]));
+        KuberHaptics.confirm();
         if (mounted) nav.pop();
       } else {
         if (!host.mounted) return;
         final r = await saveUserFile(host,
             bytes: bytes, fileName: name, extensions: const ['csv']);
         if (r == SaveFileResult.saved) {
+          KuberHaptics.confirm();
           if (mounted) nav.pop();
           if (host.mounted) showKuberSnackBar(host, l.ahdExportSaved);
         }
